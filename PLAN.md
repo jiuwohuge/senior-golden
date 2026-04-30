@@ -23,9 +23,11 @@
 - [ ] A10. 国际化（英文/中文）
 
 ## [改动预测]
-- 当前阶段：需求澄清与技术方案，不改业务代码。
+- 当前阶段：需求澄清与技术方案，补充项目工程化资产（Skill + Rule）。
 - 本阶段预计改动文件：
   - `PLAN.md`
+  - `.cursor/skills/backend-foundation-capabilities/SKILL.md`
+  - `.cursor/rules/senior-post-fullstack-task-routing.mdc`
 - 开发阶段执行约束：
   - 每次需求实现单元控制在不超过 3 个核心文件
   - 每个实现单元独立验证后再合并到下一单元
@@ -113,4 +115,6 @@
 - [x] S1. 已收敛基础技术栈
 - [x] S2. 完成关键技术决策确认
 - [x] S3. 输出第一版可开发任务排期
-- [ ] S4. 开始编码实现
+- [x] S4. 已创建后端底层能力技能（project skill）
+- [x] S5. 已创建全栈任务路由规则（project rule）
+- [ ] S6. 开始编码实现

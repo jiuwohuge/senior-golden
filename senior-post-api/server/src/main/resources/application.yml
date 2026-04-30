@@ -1,0 +1,81 @@
+info:
+  build:
+    artifact: "@project.artifactId@"
+    name: "@project.name@"
+    description: "@project.description@"
+    version: "@project.version@"
+    java-version: "@java.version@"
+    encoding: "@project.build.sourceEncoding@"
+    environment: ${spring.profiles.active}
+    server-port: ${server.port}
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
+  profiles:
+    active: local
+  application:
+    name: ${info.build.name}-${spring.profiles.active}
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+    locale: zh_CN
+    time-zone: "GMT+8"
+  mvc:
+    converters:
+      preferred-json-mapper: jackson
+
+server:
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+  forward-headers-strategy: framework
+
+jh:
+  config:
+    exclude-interceptor-pattern: [
+    ]
+    interceptor-pattern: [ "/api/**" ]
+    converter-json-pattern: [ "/api/**" ,"/error" ]
+    exception-level: DEBUG
+    converter-json: true
+    auth: true
+    error-throwable: false
+  security:
+    debug: false
+    key: 8e32de3646dc4c02ae2507511202c7ca
+    # 需要对返回值加密的接口路径
+    resEncryptUris:
+      - /api/**
+    # 需要对请求参数解密的接口
+    reqDecryptUris:
+      - /api/**
+    # 忽略返回值加密的接口
+    resIgnoreEncryptUris:
+      - /webapp/**
+    # 忽略参数解密的接口
+    reqIgnoreDecryptUris:
+      - /webapp/**
+
+knife4j:
+  enable: true  # 启用 Knife4j 增强（必须，否则仅启用 springdoc 默认 UI）
+  production: false  # 非生产模式（生产模式可禁用文档访问）
+  # 可选：Basic Auth 配置（如果需要安全访问）
+  basic:
+    enable: false
+    username: admin
+    password: 123456
+  # 可选：自定义设置（如语言、UI 定制）
+  setting:
+    language: zh-CN  # 中文界面
+
+springdoc:
+  webjars:
+    prefix: /webjars  # 明确 webjars 前缀（默认即可）
+  swagger-ui:
+    doc-expansion: none
+  group-configs:
+    - group: 测试分组  # 分组名称（在 UI 中显示的下拉选项）
+      packages-to-scan: cn.nine.pros.post.biz.controller  # 扫描的包路径（只扫描此包下的 Controller）
+      paths-to-match: /**  # 路径匹配（e.g., /api/** 只匹配特定路径）

@@ -1,0 +1,33 @@
+---
+description: Route mixed feature requests across frontend/backend and enforce senior-post backend foundation conventions by default.
+alwaysApply: true
+---
+
+# Senior Post Fullstack Task Routing
+
+## Purpose
+
+When a user gives feature-level instructions (not explicit API-level instructions), the agent must still complete backend and frontend changes end-to-end with clear contract alignment.
+
+## Mandatory Workflow
+
+1. For mixed feature requests, split work into backend contract/data flow and frontend interaction flow before coding.
+2. If frontend depends on a missing/unclear backend interface, define or implement backend contract first, then continue frontend integration.
+3. Backend code under `senior-post` must follow `backend-foundation-capabilities` conventions by default.
+
+## Backend Enforcement (senior-post)
+
+- Use request context from `MyRequestContextHolder`; do not parse request manually.
+- Follow unified response behavior; do not manually wrap controller returns.
+- Use framework exception conventions and align auth/token issues with `85xx`.
+- Use `PageQuery` + `PageData` for pagination endpoints.
+- Ensure audit fields are handled via auditable domain methods.
+- Prefer framework bridge/template components (Feign, Redis template, codegen patterns) over ad-hoc implementations.
+
+## Delivery Requirements
+
+- In implementation responses, explicitly include:
+  - backend files changed and why
+  - frontend files changed and why
+  - API/DTO contract impact
+- If only one side is changed, explain why the other side is not required.

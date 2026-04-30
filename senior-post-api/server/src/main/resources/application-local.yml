@@ -1,0 +1,36 @@
+server:
+  port: 9011
+  forward-headers-strategy: framework
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/senior_post?useunicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: postgres
+    password: postgres
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      timeout: 30000
+      database: 0
+      lettuce:
+        pool:
+          max-active: 200
+          max-wait: 3000
+          max-idle: 30
+          min-idle: 10
+
+
+logging:
+  level:
+    org.springframework.cloud.context.named.NamedContextFactory: WARN   # 或 ERROR
+    org.springframework.context.support.AbstractApplicationContext: WARN
+    org.springframework.beans.factory.support.DefaultSingletonBeanRegistry: WARN
+jh:
+  config:
+    auth: false
+    token-auth: false
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
