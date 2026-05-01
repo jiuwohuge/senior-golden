@@ -3,8 +3,10 @@ package cn.nine.pros.post.biz.controller.admin;
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
+import cn.nine.pros.post.biz.model.domain.UserBlacklistDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
+import cn.nine.pros.post.biz.service.base.UserBlacklistService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.api.admin.AdminUserApi;
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
@@ -20,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -30,14 +33,15 @@ public class AdminUserController implements AdminUserApi {
 
     private final UserService userService;
     private final UserMapstruct userMapstruct;
+    private final UserBlacklistService userBlacklistService;
 
     @Override
     @Operation(summary = "用户列表")
     @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/list")
     public PageData<UserDTO> listUsers(@RequestBody UserQueryInDto query) {
-        PageQuery pageQuery = query.getPage();
-        long pageNum = pageQuery.getPage();
-        long pageSize = pageQuery.getSize();
+        PageQuery pageQuery = query.getPage() != null ? query.getPage() : new PageQuery();
+        int pageNum = pageQuery.getPage() != null ? pageQuery.getPage() : 1;
+        int pageSize = pageQuery.getSize() != null ? pageQuery.getSize() : 10;
 
         LambdaQueryWrapper<UserDomain> wrapper = new LambdaQueryWrapper<>();
         if (query.getEmail() != null && !query.getEmail().isEmpty()) {
@@ -49,10 +53,10 @@ public class AdminUserController implements AdminUserApi {
         if (query.getStatus() != null) {
             wrapper.eq(UserDomain::getStatus, query.getStatus());
         }
-        wrapper.eq(UserDomain::isDelFlag, false);
+        wrapper.eq(UserDomain::getDelFlag, false);
         wrapper.orderByDesc(UserDomain::getCreatedAt);
 
-        Page<UserDomain> page = userService.page(new Page<>((int) pageNum, (int) pageSize), wrapper);
+        Page<UserDomain> page = userService.page(new Page<>(pageNum, pageSize), wrapper);
         List<UserDTO> records = page.getRecords().stream().map(userMapstruct::toDTO).toList();
 
         PageData<UserDTO> result = new PageData<>();
@@ -95,6 +99,12 @@ public class AdminUserController implements AdminUserApi {
     @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/device/block")
     @Transactional
     public void blockDevice(@RequestBody DeviceBlockInDto req) {
-        throw new cn.nine.commons.basic.exception.BadRequestException("设备拉黑功能待实现");
+        UserBlacklistDomain blacklist = new UserBlacklistDomain();
+        blacklist.setDeviceUuid(req.getDeviceUuid());
+        blacklist.setReason(req.getReason());
+        blacklist.setAdminId(MyRequestContextHolder.userId());
+        blacklist.setExpiredAt(null);
+        blacklist.setDelFlag(false);
+        userBlacklistService.save(blacklist);
     }
 }

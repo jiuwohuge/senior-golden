@@ -35,9 +35,9 @@ public class AdminSensitiveWordController implements AdminSensitiveWordApi {
     @Operation(summary = "敏感词列表")
     @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/sensitive-word/list")
     public PageData<SensitiveWordDTO> listSensitiveWords(@RequestBody SensitiveWordQueryInDto query) {
-        PageQuery pageQuery = query.getPage();
-        long pageNum = pageQuery.getPage();
-        long pageSize = pageQuery.getSize();
+        PageQuery pageQuery = query.getPage() != null ? query.getPage() : new PageQuery();
+        int pageNum = pageQuery.getPage() != null ? pageQuery.getPage() : 1;
+        int pageSize = pageQuery.getSize() != null ? pageQuery.getSize() : 10;
 
         LambdaQueryWrapper<SensitiveWordDomain> wrapper = new LambdaQueryWrapper<>();
         if (query.getWord() != null && !query.getWord().isEmpty()) {
@@ -46,10 +46,10 @@ public class AdminSensitiveWordController implements AdminSensitiveWordApi {
         if (query.getLangCode() != null && !query.getLangCode().isEmpty()) {
             wrapper.eq(SensitiveWordDomain::getLangCode, query.getLangCode());
         }
-        wrapper.eq(SensitiveWordDomain::isDelFlag, false);
+        wrapper.eq(SensitiveWordDomain::getDelFlag, false);
         wrapper.orderByDesc(SensitiveWordDomain::getCreatedAt);
 
-        Page<SensitiveWordDomain> page = sensitiveWordService.page(new Page<>((int) pageNum, (int) pageSize), wrapper);
+        Page<SensitiveWordDomain> page = sensitiveWordService.page(new Page<>(pageNum, pageSize), wrapper);
         List<SensitiveWordDTO> records = page.getRecords().stream().map(sensitiveWordMapstruct::toDTO).toList();
 
         PageData<SensitiveWordDTO> result = new PageData<>();
@@ -70,7 +70,7 @@ public class AdminSensitiveWordController implements AdminSensitiveWordApi {
         domain.setWord(word.getWord());
         domain.setLangCode(word.getLangCode());
         domain.setType(word.getType());
-        domain.setTypeText(word.getTypeText());
+        domain.setDescription(word.getDescription());
         domain.initAudit(MyRequestContextHolder.userId());
         sensitiveWordService.save(domain);
     }
@@ -87,7 +87,7 @@ public class AdminSensitiveWordController implements AdminSensitiveWordApi {
         domain.setWord(word.getWord());
         domain.setLangCode(word.getLangCode());
         domain.setType(word.getType());
-        domain.setTypeText(word.getTypeText());
+        domain.setDescription(word.getDescription());
         domain.updateAudit(MyRequestContextHolder.userId());
         sensitiveWordService.updateById(domain);
     }

@@ -1,4 +1,4 @@
-package cn.nine.pros.post.client.api;
+package cn.nine.pros.post.client.api.app;
 
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;

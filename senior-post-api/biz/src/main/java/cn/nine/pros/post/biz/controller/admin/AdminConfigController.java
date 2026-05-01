@@ -35,7 +35,7 @@ public class AdminConfigController implements AdminConfigApi {
         if (group != null && !group.isEmpty()) {
             wrapper.eq(ConfigDomain::getConfigGroup, group);
         }
-        wrapper.eq(ConfigDomain::isDelFlag, false);
+        wrapper.eq(ConfigDomain::getDelFlag, false);
         wrapper.orderByAsc(ConfigDomain::getConfigGroup);
         return configService.list(wrapper).stream().map(configMapstruct::toDTO).toList();
     }
@@ -90,7 +90,7 @@ public class AdminConfigController implements AdminConfigApi {
     public List<ConfigDTO> listVipConfigs() {
         LambdaQueryWrapper<ConfigDomain> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ConfigDomain::getConfigGroup, "vip");
-        wrapper.eq(ConfigDomain::isDelFlag, false);
+        wrapper.eq(ConfigDomain::getDelFlag, false);
         return configService.list(wrapper).stream().map(configMapstruct::toDTO).toList();
     }
 
@@ -102,7 +102,7 @@ public class AdminConfigController implements AdminConfigApi {
         ConfigDomain domain = configService.getOne(
                 new LambdaQueryWrapper<ConfigDomain>()
                         .eq(ConfigDomain::getConfigKey, config.getConfigKey())
-                        .eq(ConfigDomain::isDelFlag, false)
+                        .eq(ConfigDomain::getDelFlag, false)
         );
         if (domain == null) {
             throw new cn.nine.commons.basic.exception.BadRequestException("配置不存在");

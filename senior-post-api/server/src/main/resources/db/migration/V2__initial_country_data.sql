@@ -114,7 +114,7 @@ INSERT INTO sys_country (country_code, country_name_en, country_name_zh, created
 ('KM', 'Comoros', '科摩罗', NOW(), 'system'),
 ('CG', 'Congo', '刚果（布）', NOW(), 'system'),
 ('CD', 'DR Congo', '刚果（金）', NOW(), 'system'),
-('CI', "Cote d'Ivoire", '科特迪瓦', NOW(), 'system'),
+('CI', 'Cote dIvoire', '科特迪瓦', NOW(), 'system'),
 ('DJ', 'Djibouti', '吉布提', NOW(), 'system'),
 ('EG', 'Egypt', '埃及', NOW(), 'system'),
 ('GQ', 'Equatorial Guinea', '赤道几内亚', NOW(), 'system'),

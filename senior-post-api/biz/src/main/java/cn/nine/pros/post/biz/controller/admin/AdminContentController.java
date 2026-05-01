@@ -41,9 +41,9 @@ public class AdminContentController implements AdminContentApi {
     @Operation(summary = "明信片列表")
     @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/postcard/list")
     public PageData<PostcardDTO> listPostcards(@RequestBody PostcardQueryInDto query) {
-        PageQuery pageQuery = query.getPage();
-        long pageNum = pageQuery.getPage();
-        long pageSize = pageQuery.getSize();
+        PageQuery pageQuery = query.getPage() != null ? query.getPage() : new PageQuery();
+        int pageNum = pageQuery.getPage() != null ? pageQuery.getPage() : 1;
+        int pageSize = pageQuery.getSize() != null ? pageQuery.getSize() : 10;
 
         LambdaQueryWrapper<PostcardDomain> wrapper = new LambdaQueryWrapper<>();
         if (query.getReviewStatus() != null) {
@@ -52,7 +52,7 @@ public class AdminContentController implements AdminContentApi {
         wrapper.eq(PostcardDomain::isDelFlag, false);
         wrapper.orderByDesc(PostcardDomain::getCreatedAt);
 
-        Page<PostcardDomain> page = postcardService.page(new Page<>((int) pageNum, (int) pageSize), wrapper);
+        Page<PostcardDomain> page = postcardService.page(new Page<>(pageNum, pageSize), wrapper);
         List<PostcardDTO> records = page.getRecords().stream().map(postcardMapstruct::toDTO).toList();
 
         PageData<PostcardDTO> result = new PageData<>();
@@ -107,9 +107,9 @@ public class AdminContentController implements AdminContentApi {
     @Operation(summary = "评论列表")
     @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/comment/list")
     public PageData<PostcardCommentDTO> listComments(@RequestBody CommentQueryInDto query) {
-        PageQuery pageQuery = query.getPage();
-        long pageNum = pageQuery.getPage();
-        long pageSize = pageQuery.getSize();
+        PageQuery pageQuery = query.getPage() != null ? query.getPage() : new PageQuery();
+        int pageNum = pageQuery.getPage() != null ? pageQuery.getPage() : 1;
+        int pageSize = pageQuery.getSize() != null ? pageQuery.getSize() : 10;
 
         LambdaQueryWrapper<PostcardCommentDomain> wrapper = new LambdaQueryWrapper<>();
         if (query.getReviewStatus() != null) {
@@ -118,7 +118,7 @@ public class AdminContentController implements AdminContentApi {
         wrapper.eq(PostcardCommentDomain::isDelFlag, false);
         wrapper.orderByDesc(PostcardCommentDomain::getCreatedAt);
 
-        Page<PostcardCommentDomain> page = commentService.page(new Page<>((int) pageNum, (int) pageSize), wrapper);
+        Page<PostcardCommentDomain> page = commentService.page(new Page<>(pageNum, pageSize), wrapper);
         List<PostcardCommentDTO> records = page.getRecords().stream().map(commentMapstruct::toDTO).toList();
 
         PageData<PostcardCommentDTO> result = new PageData<>();

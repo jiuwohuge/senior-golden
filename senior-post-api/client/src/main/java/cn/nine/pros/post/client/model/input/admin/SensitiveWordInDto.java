@@ -22,10 +22,9 @@ public class SensitiveWordInDto extends AbstractDTO {
     @Schema(description = "语言代码")
     private String langCode;
 
-    @NotBlank(message = "类型不能为空")
-    @Schema(description = "类型：porn/politics/ad等")
-    private String type;
+    @Schema(description = "类型：1屏蔽 2审核 3警告")
+    private Integer type;
 
-    @Schema(description = "类型描述（多语言）")
-    private String typeText;
+    @Schema(description = "描述")
+    private String description;
 }

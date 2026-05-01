@@ -1,7 +1,7 @@
-package cn.nine.pros.post.biz.controller;
+package cn.nine.pros.post.biz.controller.app;
 
 import cn.nine.pros.post.biz.service.app.AppAuthService;
-import cn.nine.pros.post.client.api.AppAuthApi;
+import cn.nine.pros.post.client.api.app.AppAuthApi;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
 import cn.nine.pros.post.client.model.out.AppAuthResultVO;

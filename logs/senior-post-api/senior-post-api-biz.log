@@ -1,0 +1,271 @@
+[2026-05-01 13:19:48.081] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 31932 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 13:19:48.084] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 13:19:48.085] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 13:19:50.466] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 13:19:50.467] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 13:19:50.467] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 13:21:12.969] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 27052 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 13:21:12.971] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 13:21:12.971] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 13:21:15.096] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 13:21:15.096] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 13:21:15.096] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 13:21:16.932] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 13:21:16.935] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 13:21:17.060] [INFO ] [] []: ===>> Load HttpMessageConverters: 3 : [org.springframework.http.converter.ByteArrayHttpMessageConverter@5a95aaae, cn.nine.commons.web.model.converter.MyJackson2HttpMessageConverter@24bdd996, org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@519e67e]
+[2026-05-01 13:21:17.105] [DEBUG] [] []: this converter not supports the request, use next.
+[2026-05-01 13:21:17.556] [INFO ] [] []: Started SeniorPostApplication in 5.095 seconds (process running for 5.785)
+[2026-05-01 13:21:17.565] [INFO ] [] []: 
+----------------------------------------------------------
+	Application Senior Post API is running! Access URLs:
+	Local: 		http://localhost:9011
+	External: 	http://192.168.0.136:9011
+	swagger-ui: http://192.168.0.136:9011/doc.html
+----------------------------------------------------------
+[2026-05-01 13:21:24.351] [DEBUG] [] []: ==》/doc.html -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.407] [DEBUG] [] [c108fffb92194656a048531e7a4f653c]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.425] [DEBUG] [] []: ==》/webjars/css/app.1824bac3.css -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.426] [DEBUG] [] []: ==》/webjars/js/chunk-vendors.d51cf6f8.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.426] [DEBUG] [] []: ==》/webjars/css/chunk-vendors.f24a310a.css -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.426] [DEBUG] [] []: ==》/webjars/js/app.c31badf5.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.433] [DEBUG] [] [f80bf807fc9249e2ab9e24c4450e5657]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.433] [DEBUG] [] [bdc730f7d3084166ab6c09e2e37acab6]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.433] [DEBUG] [] [cb577961ca55482696eed08edf03af23]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.433] [DEBUG] [] [f97b602b22e64c808c42f96771eaa5cc]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.446] [DEBUG] [] []: ==》/webjars/css/chunk-cdc6d52e.9612b987.css -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.446] [DEBUG] [] []: ==》/webjars/css/chunk-41ae0dec.999bc9fd.css -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.447] [DEBUG] [] []: ==》/webjars/js/chunk-0fd67716.d57e2c41.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.447] [DEBUG] [] []: ==》/webjars/js/chunk-0d102d5a.b2bddffc.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.448] [DEBUG] [] []: ==》/webjars/js/chunk-069eb437.355c4fb0.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.450] [DEBUG] [] [4f3adb87fb9146a8a093d729b8bdf191]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.450] [DEBUG] [] [7b0f69c95c0b47e7b0c47f4d660b0761]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.450] [DEBUG] [] [fa3851fb53b84aa5b7019d6dbefcd44b]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.452] [DEBUG] [] [b732496b7bf04e179bf4c24791d9d03c]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.453] [DEBUG] [] [abe465c25b3c4e8784b9b417bd01e406]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.457] [DEBUG] [] []: ==》/webjars/js/chunk-2d0af44e.392afcd6.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.457] [DEBUG] [] []: ==》/webjars/js/chunk-260d712a.390177fe.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.457] [DEBUG] [] []: ==》/webjars/js/chunk-2d0bd799.eb48b7f1.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.459] [DEBUG] [] []: ==》/webjars/js/chunk-2d0da532.591ad7fc.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.459] [DEBUG] [] []: ==》/webjars/js/chunk-3b888a65.8737ce4f.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.460] [DEBUG] [] [944c42c6de384b4fae9325333e95d86a]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.462] [DEBUG] [] [6fe4efc4ed30480d95160d72b0bef9cd]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.462] [DEBUG] [] [e67ee0aa9da548f1be55ad0f0d26ce64]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.462] [DEBUG] [] [823d2cc3f7c14d429c7c8d574da45567]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.462] [DEBUG] [] [34673e4fab1c46b283edfdec91229c5a]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.467] [DEBUG] [] []: ==》/webjars/js/chunk-41ae0dec.7cdc472b.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.467] [DEBUG] [] []: ==》/webjars/js/chunk-3ec4aaa8.a79d19f8.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.469] [DEBUG] [] []: ==》/webjars/js/chunk-589faee0.5bfd1708.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.469] [DEBUG] [] [50214318e64c4870b2e120a7cf4b75d1]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.469] [DEBUG] [] [d5e0c22089a84908a3f398251c71718a]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.469] [DEBUG] [] []: ==》/webjars/js/chunk-735c675c.5b409314.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.471] [DEBUG] [] []: ==》/webjars/js/chunk-adb9e944.2c7f24fe.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.472] [DEBUG] [] [0c19a23bb67340fcb6f29c38788ac06a]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.472] [DEBUG] [] [8c22a3a804304dca97978e702e158a24]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.474] [DEBUG] [] [fc105487611e45018ea357d2873ae65b]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:24.488] [DEBUG] [] []: ==》/webjars/js/chunk-cdc6d52e.5c46a8aa.js -> into PreRequestContextFilter.
+[2026-05-01 13:21:24.490] [DEBUG] [] [184c24e64c6846d69718df9a46b38d9d]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:25.017] [DEBUG] [] []: ==》/v3/api-docs/swagger-config -> into PreRequestContextFilter.
+[2026-05-01 13:21:25.074] [DEBUG] [] []: ==》/favicon.ico -> into PreRequestContextFilter.
+[2026-05-01 13:21:25.082] [DEBUG] [] [40612598c4b94593a5b65b9f21dbb7ae]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:192.168.0.136
+[2026-05-01 13:21:25.082] [DEBUG] [] [40612598c4b94593a5b65b9f21dbb7ae]: 请求错误-返回：No static resource favicon.ico.  ,地址：http://192.168.0.136:9011/favicon.ico
+[2026-05-01 13:21:25.083] [DEBUG] [] [0ef2b9eca7d541429369bad4a4a30334]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json]
+[2026-05-01 13:21:25.085] [DEBUG] [] [0ef2b9eca7d541429369bad4a4a30334]: ===> Supports JSON Message Converter : false
+[2026-05-01 13:21:25.086] [DEBUG] [] [0ef2b9eca7d541429369bad4a4a30334]: Writing [{configUrl=/v3/api-docs/swagger-config, docExpansion=none, oauth2RedirectUrl=http://192.168.0.136:90 (truncated)...]
+[2026-05-01 13:21:25.083] [ERROR] [] [40612598c4b94593a5b65b9f21dbb7ae]: 请求异常 - 客户端: 版本:null 地址:http://192.168.0.136:9011/favicon.ico 异常:No static resource favicon.ico.
+org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.
+	at org.springframework.web.servlet.resource.ResourceHttpRequestHandler.handleRequest(ResourceHttpRequestHandler.java:586)
+	at org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:52)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+[2026-05-01 13:21:25.094] [DEBUG] [] [40612598c4b94593a5b65b9f21dbb7ae]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:25.096] [DEBUG] [] [0ef2b9eca7d541429369bad4a4a30334]: ==> leave RequestContextHolder.
+[2026-05-01 13:21:25.106] [DEBUG] [] []: ==》/v3/api-docs/测试分组 -> into PreRequestContextFilter.
+[2026-05-01 13:21:25.858] [DEBUG] [] [eb8afa7fed3f49a09eb76828e753ea96]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json]
+[2026-05-01 13:21:25.861] [DEBUG] [] [eb8afa7fed3f49a09eb76828e753ea96]: Writing [{123, 34, 111, 112, 101, 110, 97, 112, 105, 34, 58, 34, 51, 46, 48, 46, 49, 34, 44, 34, 105, 110, 10 (truncated)...]
+[2026-05-01 13:21:25.862] [DEBUG] [] [eb8afa7fed3f49a09eb76828e753ea96]: ==> leave RequestContextHolder.
+[2026-05-01 13:22:36.772] [INFO ] [] []: 开始优雅停机...
+[2026-05-01 13:22:37.009] [INFO ] [] []: 已停止接收新请求
+[2026-05-01 13:22:37.009] [INFO ] [] []: 优雅停机完成
+[2026-05-01 13:22:42.118] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 32328 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 13:22:42.119] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 13:22:42.120] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 13:22:43.986] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 13:22:43.986] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 13:22:43.987] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 13:22:45.357] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 13:22:45.359] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 13:22:45.488] [INFO ] [] []: ===>> Load HttpMessageConverters: 3 : [org.springframework.http.converter.ByteArrayHttpMessageConverter@5f7bd970, cn.nine.commons.web.model.converter.MyJackson2HttpMessageConverter@513bec8c, org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@6406b84d]
+[2026-05-01 13:22:45.532] [DEBUG] [] []: this converter not supports the request, use next.
+[2026-05-01 13:22:45.962] [INFO ] [] []: Started SeniorPostApplication in 4.324 seconds (process running for 5.084)
+[2026-05-01 13:22:45.968] [INFO ] [] []: 
+----------------------------------------------------------
+	Application Senior Post API is running! Access URLs:
+	Local: 		http://localhost:9011
+	External: 	http://192.168.0.136:9011
+	swagger-ui: http://192.168.0.136:9011/doc.html
+----------------------------------------------------------
+[2026-05-01 13:23:45.032] [INFO ] [] []: 开始优雅停机...
+[2026-05-01 13:23:45.273] [INFO ] [] []: 已停止接收新请求
+[2026-05-01 13:23:45.274] [INFO ] [] []: 优雅停机完成
+[2026-05-01 13:23:48.303] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 29928 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 13:23:48.305] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 13:23:48.305] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 13:23:50.131] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 13:23:50.131] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 13:23:50.132] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 13:23:51.463] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 13:23:51.467] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 13:23:51.601] [INFO ] [] []: ===>> Load HttpMessageConverters: 3 : [org.springframework.http.converter.ByteArrayHttpMessageConverter@1f6d3a81, cn.nine.commons.web.model.converter.MyJackson2HttpMessageConverter@28befd62, org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@641c8ba4]
+[2026-05-01 13:23:51.645] [DEBUG] [] []: this converter not supports the request, use next.
+[2026-05-01 13:23:52.131] [INFO ] [] []: Started SeniorPostApplication in 4.33 seconds (process running for 4.97)
+[2026-05-01 13:23:52.138] [INFO ] [] []: 
+----------------------------------------------------------
+	Application Senior Post API is running! Access URLs:
+	Local: 		http://localhost:9011
+	External: 	http://192.168.0.136:9011
+	swagger-ui: http://192.168.0.136:9011/doc.html
+----------------------------------------------------------
+[2026-05-01 13:23:54.470] [DEBUG] [] []: ==》/doc.html -> into PreRequestContextFilter.
+[2026-05-01 13:23:54.521] [DEBUG] [] [f888171333574c49a33f9b41b4e14fb8]: ==> leave RequestContextHolder.
+[2026-05-01 13:23:55.116] [DEBUG] [] []: ==》/v3/api-docs/swagger-config -> into PreRequestContextFilter.
+[2026-05-01 13:23:55.152] [DEBUG] [] [e1fffbcaa6974236920fbbd5946b50a4]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json]
+[2026-05-01 13:23:55.153] [DEBUG] [] [e1fffbcaa6974236920fbbd5946b50a4]: ===> Supports JSON Message Converter : false
+[2026-05-01 13:23:55.153] [DEBUG] [] [e1fffbcaa6974236920fbbd5946b50a4]: Writing [{configUrl=/v3/api-docs/swagger-config, docExpansion=none, oauth2RedirectUrl=http://192.168.0.136:90 (truncated)...]
+[2026-05-01 13:23:55.161] [DEBUG] [] []: ==》/favicon.ico -> into PreRequestContextFilter.
+[2026-05-01 13:23:55.166] [DEBUG] [] [e1fffbcaa6974236920fbbd5946b50a4]: ==> leave RequestContextHolder.
+[2026-05-01 13:23:55.167] [DEBUG] [] [ca0efe331bd54d68b507174b6c0368eb]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:192.168.0.136
+[2026-05-01 13:23:55.167] [DEBUG] [] [ca0efe331bd54d68b507174b6c0368eb]: 请求错误-返回：No static resource favicon.ico.  ,地址：http://192.168.0.136:9011/favicon.ico
+[2026-05-01 13:23:55.167] [ERROR] [] [ca0efe331bd54d68b507174b6c0368eb]: 请求异常 - 客户端: 版本:null 地址:http://192.168.0.136:9011/favicon.ico 异常:No static resource favicon.ico.
+org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.
+	at org.springframework.web.servlet.resource.ResourceHttpRequestHandler.handleRequest(ResourceHttpRequestHandler.java:586)
+	at org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:52)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+[2026-05-01 13:23:55.175] [DEBUG] [] [ca0efe331bd54d68b507174b6c0368eb]: ==> leave RequestContextHolder.
+[2026-05-01 13:23:55.177] [DEBUG] [] []: ==》/v3/api-docs/ADMIN-API -> into PreRequestContextFilter.
+[2026-05-01 13:23:55.838] [DEBUG] [] [2afd36efb5684580b4c74a7acbfaa113]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json]
+[2026-05-01 13:23:55.841] [DEBUG] [] [2afd36efb5684580b4c74a7acbfaa113]: Writing [{123, 34, 111, 112, 101, 110, 97, 112, 105, 34, 58, 34, 51, 46, 48, 46, 49, 34, 44, 34, 105, 110, 10 (truncated)...]
+[2026-05-01 13:23:55.841] [DEBUG] [] [2afd36efb5684580b4c74a7acbfaa113]: ==> leave RequestContextHolder.
+[2026-05-01 13:23:57.578] [DEBUG] [] []: ==》/v3/api-docs/APP-API -> into PreRequestContextFilter.
+[2026-05-01 13:23:57.613] [DEBUG] [] [ff50942e91a744cf9d38ec1b136f820a]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json]
+[2026-05-01 13:23:57.613] [DEBUG] [] [ff50942e91a744cf9d38ec1b136f820a]: Writing [{123, 34, 111, 112, 101, 110, 97, 112, 105, 34, 58, 34, 51, 46, 48, 46, 49, 34, 44, 34, 105, 110, 10 (truncated)...]
+[2026-05-01 13:23:57.614] [DEBUG] [] [ff50942e91a744cf9d38ec1b136f820a]: ==> leave RequestContextHolder.
+[2026-05-01 14:10:34.165] [INFO ] [] []: 开始优雅停机...

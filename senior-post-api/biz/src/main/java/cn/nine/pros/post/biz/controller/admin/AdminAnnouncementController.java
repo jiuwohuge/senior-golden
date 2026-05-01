@@ -35,15 +35,15 @@ public class AdminAnnouncementController implements AdminAnnouncementApi {
     @Operation(summary = "公告列表")
     @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/announcement/list")
     public PageData<AnnouncementDTO> listAnnouncements(@RequestBody AnnouncementQueryInDto query) {
-        PageQuery pageQuery = query.getPage();
-        long pageNum = pageQuery.getPage();
-        long pageSize = pageQuery.getSize();
+        PageQuery pageQuery = query.getPage() != null ? query.getPage() : new PageQuery();
+        int pageNum = pageQuery.getPage() != null ? pageQuery.getPage() : 1;
+        int pageSize = pageQuery.getSize() != null ? pageQuery.getSize() : 10;
 
         LambdaQueryWrapper<AnnouncementDomain> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AnnouncementDomain::isDelFlag, false);
+        wrapper.eq(AnnouncementDomain::getDelFlag, false);
         wrapper.orderByDesc(AnnouncementDomain::getCreatedAt);
 
-        Page<AnnouncementDomain> page = announcementService.page(new Page<>((int) pageNum, (int) pageSize), wrapper);
+        Page<AnnouncementDomain> page = announcementService.page(new Page<>(pageNum, pageSize), wrapper);
         List<AnnouncementDTO> records = page.getRecords().stream().map(announcementMapstruct::toDTO).toList();
 
         PageData<AnnouncementDTO> result = new PageData<>();

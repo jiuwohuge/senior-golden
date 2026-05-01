@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ public class AdminAuthController implements AdminAuthApi {
 
     private final AdminUserService adminUserService;
     private final AdminUserMapstruct adminUserMapstruct;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Operation(summary = "管理员登录")
@@ -34,10 +36,10 @@ public class AdminAuthController implements AdminAuthApi {
         AdminUserDomain admin = adminUserService.getOne(
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<AdminUserDomain>()
                         .eq(AdminUserDomain::getUsername, loginReq.getUsername())
-                        .eq(AdminUserDomain::isDelFlag, false)
+                        .eq(AdminUserDomain::getDelFlag, false)
         );
 
-        if (admin == null) {
+        if (admin == null || !passwordEncoder.matches(loginReq.getPassword(), admin.getPasswordHash())) {
             throw new cn.nine.commons.basic.exception.BadRequestException("用户名或密码错误");
         }
 

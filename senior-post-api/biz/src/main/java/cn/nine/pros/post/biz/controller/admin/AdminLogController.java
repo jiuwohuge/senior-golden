@@ -39,9 +39,9 @@ public class AdminLogController implements AdminLogApi {
     @Operation(summary = "登录日志列表")
     @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/log/login/list")
     public PageData<LoginDTO> listLoginLogs(@RequestBody LoginLogQueryInDto query) {
-        PageQuery pageQuery = query.getPage();
-        long pageNum = pageQuery.getPage();
-        long pageSize = pageQuery.getSize();
+        PageQuery pageQuery = query.getPage() != null ? query.getPage() : new PageQuery();
+        int pageNum = pageQuery.getPage() != null ? pageQuery.getPage() : 1;
+        int pageSize = pageQuery.getSize() != null ? pageQuery.getSize() : 10;
 
         LambdaQueryWrapper<LoginDomain> wrapper = new LambdaQueryWrapper<>();
         if (query.getUserId() != null) {
@@ -50,10 +50,10 @@ public class AdminLogController implements AdminLogApi {
         if (query.getLoginResult() != null) {
             wrapper.eq(LoginDomain::getLoginResult, query.getLoginResult());
         }
-        wrapper.eq(LoginDomain::isDelFlag, false);
+        wrapper.eq(LoginDomain::getDelFlag, false);
         wrapper.orderByDesc(LoginDomain::getCreatedAt);
 
-        Page<LoginDomain> page = loginService.page(new Page<>((int) pageNum, (int) pageSize), wrapper);
+        Page<LoginDomain> page = loginService.page(new Page<>(pageNum, pageSize), wrapper);
         List<LoginDTO> records = page.getRecords().stream().map(loginMapstruct::toDTO).toList();
 
         PageData<LoginDTO> result = new PageData<>();
@@ -69,9 +69,9 @@ public class AdminLogController implements AdminLogApi {
     @Operation(summary = "行为日志列表")
     @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/log/action/list")
     public PageData<ActionDTO> listActionLogs(@RequestBody ActionLogQueryInDto query) {
-        PageQuery pageQuery = query.getPage();
-        long pageNum = pageQuery.getPage();
-        long pageSize = pageQuery.getSize();
+        PageQuery pageQuery = query.getPage() != null ? query.getPage() : new PageQuery();
+        int pageNum = pageQuery.getPage() != null ? pageQuery.getPage() : 1;
+        int pageSize = pageQuery.getSize() != null ? pageQuery.getSize() : 10;
 
         LambdaQueryWrapper<ActionDomain> wrapper = new LambdaQueryWrapper<>();
         if (query.getUserId() != null) {
@@ -80,10 +80,10 @@ public class AdminLogController implements AdminLogApi {
         if (query.getActionType() != null && !query.getActionType().isEmpty()) {
             wrapper.eq(ActionDomain::getActionType, query.getActionType());
         }
-        wrapper.eq(ActionDomain::isDelFlag, false);
+        wrapper.eq(ActionDomain::getDelFlag, false);
         wrapper.orderByDesc(ActionDomain::getCreatedAt);
 
-        Page<ActionDomain> page = actionService.page(new Page<>((int) pageNum, (int) pageSize), wrapper);
+        Page<ActionDomain> page = actionService.page(new Page<>(pageNum, pageSize), wrapper);
         List<ActionDTO> records = page.getRecords().stream().map(actionMapstruct::toDTO).toList();
 
         PageData<ActionDTO> result = new PageData<>();

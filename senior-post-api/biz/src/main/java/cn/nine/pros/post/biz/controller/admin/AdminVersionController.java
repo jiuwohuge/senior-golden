@@ -32,7 +32,7 @@ public class AdminVersionController implements AdminVersionApi {
     @GetMapping(AppServiceDefine.WEBAPI_PREFIX + "/version/list")
     public List<AppVersionDTO> listVersions() {
         LambdaQueryWrapper<AppVersionDomain> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AppVersionDomain::isDelFlag, false);
+        wrapper.eq(AppVersionDomain::getDelFlag, false);
         wrapper.orderByDesc(AppVersionDomain::getCreatedAt);
         return appVersionService.list(wrapper).stream().map(appVersionMapstruct::toDTO).toList();
     }
@@ -44,7 +44,7 @@ public class AdminVersionController implements AdminVersionApi {
     public void createVersion(@RequestBody AppVersionInDto version) {
         AppVersionDomain domain = new AppVersionDomain();
         domain.setVersionCode(version.getVersion());
-        domain.setAppPlatform(version.getPlatform() == 1 ? "ios" : "android");
+        domain.setAppPlatform(version.getPlatform());
         domain.setUpdateUrl(version.getDownloadUrl());
         domain.setReleaseNote(version.getUpdateContent());
         domain.setForceUpdate(version.getIsForceUpdate());
@@ -63,7 +63,7 @@ public class AdminVersionController implements AdminVersionApi {
             throw new cn.nine.commons.basic.exception.BadRequestException("版本不存在");
         }
         domain.setVersionCode(version.getVersion());
-        domain.setAppPlatform(version.getPlatform() == 1 ? "ios" : "android");
+        domain.setAppPlatform(version.getPlatform());
         domain.setUpdateUrl(version.getDownloadUrl());
         domain.setReleaseNote(version.getUpdateContent());
         domain.setForceUpdate(version.getIsForceUpdate());
