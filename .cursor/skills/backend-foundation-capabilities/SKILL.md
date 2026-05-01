@@ -5,6 +5,12 @@ description: Enforces senior-post backend base-framework conventions for Spring 
 
 # Backend Foundation Capabilities
 
+## API prefixes
+
+- **App**: `AppServiceDefine.SERVER_PREFIX` → `/api`（可加解密由环境与 `jh.security` 决定，收尾阶段统一客户端封装）。
+- **Admin**: `AppServiceDefine.WEBAPI_PREFIX` → `/webapi`（对内明文 JSON，不走 AES；拦截器/统一响应与 `/api` 一致，`85xx` 约定相同）。
+- DB schema changes: **Flyway** scripts under `senior-post-api/server/src/main/resources/db/migration`.
+
 ## Scope
 
 Use this skill for `senior-post` backend development that relies on framework modules:

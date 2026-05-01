@@ -10,6 +10,10 @@ info:
     server-port: ${server.port}
 
 spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
   main:
     allow-bean-definition-overriding: true
     allow-circular-references: true
@@ -36,8 +40,8 @@ jh:
   config:
     exclude-interceptor-pattern: [
     ]
-    interceptor-pattern: [ "/api/**" ]
-    converter-json-pattern: [ "/api/**" ,"/error" ]
+    interceptor-pattern: [ "/api/**", "/webapi/**" ]
+    converter-json-pattern: [ "/api/**", "/webapi/**", "/error" ]
     exception-level: DEBUG
     converter-json: true
     auth: true
@@ -51,12 +55,14 @@ jh:
     # 需要对请求参数解密的接口
     reqDecryptUris:
       - /api/**
-    # 忽略返回值加密的接口
+    # 忽略返回值加密的接口（管理端 /webapi 与遗留 /webapp 均明文 JSON）
     resIgnoreEncryptUris:
       - /webapp/**
+      - /webapi/**
     # 忽略参数解密的接口
     reqIgnoreDecryptUris:
       - /webapp/**
+      - /webapi/**
 
 knife4j:
   enable: true  # 启用 Knife4j 增强（必须，否则仅启用 springdoc 默认 UI）
