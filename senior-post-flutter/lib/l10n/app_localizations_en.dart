@@ -83,7 +83,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authBirthYearLabel => 'Year of birth';
 
   @override
-  String get authCountryCodeLabel => 'Country code (optional)';
+  String get authCountryCodeLabel => 'Country (optional)';
 
   @override
   String get authAgreeTerms => 'I agree to the Terms and Privacy Policy';
@@ -105,4 +105,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authBusy => 'Please wait…';
+
+  @override
+  String get authCountrySkip => 'Skip';
+
+  @override
+  String get authBootstrapLoadFailed =>
+      'Could not load signup options. Check your network and try again.';
+
+  @override
+  String get authRetry => 'Retry';
+
+  @override
+  String get authBirthYearRangeError =>
+      'Birth year list is empty. Check server config for minimum age.';
 }

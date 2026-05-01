@@ -78,7 +78,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authBirthYearLabel => '出生年份';
 
   @override
-  String get authCountryCodeLabel => '国家代码（选填）';
+  String get authCountryCodeLabel => '国家（选填）';
 
   @override
   String get authAgreeTerms => '我已阅读并同意用户协议与隐私政策';
@@ -100,4 +100,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get authBusy => '请稍候…';
+
+  @override
+  String get authCountrySkip => '暂不选择';
+
+  @override
+  String get authBootstrapLoadFailed => '无法加载注册选项，请检查网络后重试。';
+
+  @override
+  String get authRetry => '重试';
+
+  @override
+  String get authBirthYearRangeError => '出生年份列表为空，请检查服务端注册最小年龄配置。';
 }

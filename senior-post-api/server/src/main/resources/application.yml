@@ -47,6 +47,8 @@ jh:
     exclude-interceptor-pattern: [
       "/api/auth/register",
       "/api/auth/login",
+      "/api/bootstrap/init",
+      "/webapi/auth/login",
     ]
     interceptor-pattern: [ "/api/**", "/webapi/**" ]
     converter-json-pattern: [ "/api/**", "/webapi/**", "/error" ]

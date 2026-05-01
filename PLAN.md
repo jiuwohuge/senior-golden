@@ -20,10 +20,10 @@
 | 对象存储 | 阿里云 OSS | 全球化媒体（B8）；**`get_sign` 签发上传参数 + 客户端 HTTP PUT 直传**（接口由你实现） |
 | 即时通讯 | 腾讯云 Chat（IM） | **IM userId 与业务用户 ID 统一**；会话与 UI 走腾讯方案；UserSig 等由后端签发 |
 | 移动端 | Flutter | **3.x**；状态管理已拍板 **Riverpod**（见 B11） |
-| 管理后台 | React | 已拍板 **React**（见 B12）；工程目录规划为 `senior-post-manage`（当前仓库内**未初始化**） |
+| 管理后台 | React + Vite + Ant Design 5 | 工程目录 `senior-post-manage`（**已初始化**）；对接 **`/webapi/**`** |
 | 架构形态 | 单体优先 | 当前 `senior-post-api` 为单进程部署型单体；跨服务场景预留 **Feign Bridge** 调用形态 |
 
-**目录现状**：`senior-post-api` 已存在；**`senior-post-flutter` 已在仓库内创建**（Riverpod + go_router + dio + secure_storage + l10n 骨架）；`senior-post-manage` 仍待初始化。Flutter **团队基线**：`tool/flutter_sdk_version.txt` 推荐 **3.41.x stable**；`pubspec` 中 Dart **`>=3.9.0 <4.0.0`** 兼容本机 3.35.x 与升级后 3.41.x。
+**目录现状**：`senior-post-api` 已存在；**`senior-post-flutter` 已在仓库内创建**（Riverpod + go_router + dio + secure_storage + l10n 骨架）；**`senior-post-manage` 已创建**（Vite + React + Ant Design，看板/用户/内容审核/举报/配置/VIP/日志等页面持续迭代）。Flutter **团队基线**：`tool/flutter_sdk_version.txt` 推荐 **3.41.x stable**；`pubspec` 中 Dart **`>=3.9.0 <4.0.0`** 兼容本机 3.35.x 与升级后 3.41.x。
 
 ---
 
@@ -163,7 +163,7 @@
 
 ---
 
-## [管理后台前端技术栈规划]（`senior-post-manage`，待初始化）
+## [管理后台前端技术栈规划]（`senior-post-manage`，**已初始化**）
 
 已选 **React**，与 **React 生态 + OpenAPI/Knife4j 文档** 配合成本最低：
 
@@ -272,7 +272,10 @@ flowchart LR
 ## [改动预测]
 
 - **已完成（2026-05-01）**：接入 **Flyway**（`server` 依赖 + `db/migration` 基线脚本）；**`/webapi`** 与 **`AppServiceDefine.WEBAPI_PREFIX`**；`application.yml` 拦截器/加解密忽略列表；**PLAN / 底层框架能力 / backend skill** 与本次决策对齐。
-- **后续**：按「库表规划」追加 `V2__...sql` 与 M1 业务代码；**`get_sign`**、邮件 SPI、腾讯 UserSig 等按模块逐项实现。
+- **后续**：按「库表规划」追加 `V3__...sql` 与 M2 业务代码；**`get_sign`**、邮件 SPI、腾讯 UserSig 等按模块逐项实现。
+- **本次新增（2026-05-01）**：新增 App 启动配置接口 **`GET /api/bootstrap/init`**（返回注册最小年龄 + 国家列表），Flutter Profile Tab 已改为真实数据页，联调 **`/api/auth/me` + `/api/bootstrap/init`** 并支持退出登录。
+- **管理后台迭代（2026-05-01）**：配置分页入参 **`ConfigQueryInDto`**（`page` + 可选 `configGroup`）；新增 **`/webapi/country/*`** 国家/地区维护；`application.yml` 放行 **`/webapi/auth/login`**（与 `jh.config.auth` 开启时一致）；前端补齐 **VIP 配置页**、**国家/地区页**、看板 Loading、侧栏选中态与当前管理员展示。
+- **本次新增（2026-05-01，App 同步）**：`application.yml` 将 **`/api/bootstrap/init`** 纳入 **`exclude-interceptor-pattern`**，未登录注册页可拉取配置；Flutter 抽取 **`appBootstrapProvider`**（`AppBootstrapData` / `CountryItem` 含 `nameZh`），**注册页**用服务端 **`minRegisterAge`** 生成出生年范围（上限 110 岁）、国家下拉与后端列表一致；**个人中心**复用同一 Provider，并 **`watch(authTokenProvider)`** 在登录后刷新资料。
 
 ---
 
@@ -394,4 +397,5 @@ flowchart LR
 - [x] S5. 已创建全栈任务路由规则（project rule）
 - [x] S6. 已输出技术栈全景与模块交互说明（本文档 2026-05-01）
 - [x] S7. Flyway + `/webapi` 基线与文档对齐（2026-05-01）
-- [ ] S8. M1 表结构与认证/配置接口落地
+- [x] S8. M1 表结构与认证/配置接口落地
+- [ ] S9. M2 帖子/目录/写信主链路落地

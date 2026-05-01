@@ -239,7 +239,7 @@ abstract class AppLocalizations {
   /// No description provided for @authCountryCodeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Country code (optional)'**
+  /// **'Country (optional)'**
   String get authCountryCodeLabel;
 
   /// No description provided for @authAgreeTerms.
@@ -283,6 +283,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please wait…'**
   String get authBusy;
+
+  /// No description provided for @authCountrySkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get authCountrySkip;
+
+  /// No description provided for @authBootstrapLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load signup options. Check your network and try again.'**
+  String get authBootstrapLoadFailed;
+
+  /// No description provided for @authRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get authRetry;
+
+  /// No description provided for @authBirthYearRangeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth year list is empty. Check server config for minimum age.'**
+  String get authBirthYearRangeError;
 }
 
 class _AppLocalizationsDelegate

@@ -29,12 +29,16 @@
   "authRegisterTitle": "注册账号",
   "authNicknameLabel": "昵称",
   "authBirthYearLabel": "出生年份",
-  "authCountryCodeLabel": "国家代码（选填）",
+  "authCountryCodeLabel": "国家（选填）",
+  "authCountrySkip": "暂不选择",
   "authAgreeTerms": "我已阅读并同意用户协议与隐私政策",
   "authRegisterSubmit": "注册",
   "authGoLogin": "已有账号？去登录",
   "authFieldRequired": "请填写此项",
   "authPasswordTooShort": "密码至少 8 位",
   "authAgreeRequired": "请勾选同意条款后继续",
-  "authBusy": "请稍候…"
+  "authBusy": "请稍候…",
+  "authBootstrapLoadFailed": "无法加载注册选项，请检查网络后重试。",
+  "authRetry": "重试",
+  "authBirthYearRangeError": "出生年份列表为空，请检查服务端注册最小年龄配置。"
 }

@@ -41,12 +41,16 @@
   "authRegisterTitle": "Create account",
   "authNicknameLabel": "Nickname",
   "authBirthYearLabel": "Year of birth",
-  "authCountryCodeLabel": "Country code (optional)",
+  "authCountryCodeLabel": "Country (optional)",
   "authAgreeTerms": "I agree to the Terms and Privacy Policy",
   "authRegisterSubmit": "Register",
   "authGoLogin": "Already have an account? Sign in",
   "authFieldRequired": "Please fill in this field",
   "authPasswordTooShort": "Password must be at least 8 characters",
   "authAgreeRequired": "Please accept the terms to continue",
-  "authBusy": "Please wait…"
+  "authBusy": "Please wait…",
+  "authCountrySkip": "Skip",
+  "authBootstrapLoadFailed": "Could not load signup options. Check your network and try again.",
+  "authRetry": "Retry",
+  "authBirthYearRangeError": "Birth year list is empty. Check server config for minimum age."
 }

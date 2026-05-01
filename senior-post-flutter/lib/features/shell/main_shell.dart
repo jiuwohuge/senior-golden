@@ -4,6 +4,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import 'package:senior_post_flutter/widgets/postal_decorations.dart';
 
 import '../../app/theme/postal_tokens.dart';
+import '../profile/profile_page.dart';
 
 /// 底部四 Tab 与路由路径（与需求文档 Tab 结构一致）。
 abstract final class MainShellRoute {
@@ -104,11 +105,7 @@ class _MainShellState extends State<MainShell> {
                   sectionTitle: l10n.tabMailbox,
                   semanticLabel: l10n.a11yTabMailbox,
                 ),
-                _PostalPlaceholderTab(
-                  key: const ValueKey('profile'),
-                  sectionTitle: l10n.tabProfile,
-                  semanticLabel: l10n.a11yTabProfile,
-                ),
+                const ProfilePage(key: ValueKey('profile')),
               ],
             ),
           ),
