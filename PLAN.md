@@ -23,7 +23,7 @@
 | 管理后台 | React | 已拍板 **React**（见 B12）；工程目录规划为 `senior-post-manage`（当前仓库内**未初始化**） |
 | 架构形态 | 单体优先 | 当前 `senior-post-api` 为单进程部署型单体；跨服务场景预留 **Feign Bridge** 调用形态 |
 
-**目录现状**：`senior-post-api` 已存在；`senior-post-flutter`、`senior-post-manage` 为用户规划路径，**本仓库快照中尚未包含**，以下移动端与后台栈为**与后端契约对齐的推荐基线**。
+**目录现状**：`senior-post-api` 已存在；**`senior-post-flutter` 已在仓库内创建**（Riverpod + go_router + dio + secure_storage + l10n 骨架）；`senior-post-manage` 仍待初始化。Flutter **团队基线**：`tool/flutter_sdk_version.txt` 推荐 **3.41.x stable**；`pubspec` 中 Dart **`>=3.9.0 <4.0.0`** 兼容本机 3.35.x 与升级后 3.41.x。
 
 ---
 
@@ -68,7 +68,7 @@
 
 ---
 
-## [移动端 Flutter 技术栈规划]（`senior-post-flutter`，待初始化）
+## [移动端 Flutter 技术栈规划]（`senior-post-flutter`，**已初始化**）
 
 与后端 **`/api` + 统一响应 + `85xx` + 可选加解密** 对齐的推荐组合：
 
@@ -85,6 +85,81 @@
 | IM / Chat UI | **腾讯云 TUIKit（Flutter）** | 与决策 B2 一致；业务用户体系与后端映射 |
 
 **与后端交互方式**：HTTPS → 业务 REST **`/api/...`**；IM **userId = 业务用户 ID**，走腾讯 SDK；媒体上传：调用后端 **`get_sign`**（命名以最终实现为准）→ 客户端 **PUT** 至 OSS。
+
+---
+
+## [Flutter App 功能实现规划]（`senior-post-flutter`，**已初始化**）
+
+**现状**：工程已创建，含四 Tab 主壳、国际化 ARB、`dioProvider` 占位；按下列模块与里程碑继续落地业务页与联调。
+
+### 工程与分层（建议目录）
+
+| 分层 | 职责 |
+|------|------|
+| `app/` | `MaterialApp`、主题、本地化委托、`ProviderScope` |
+| `core/` | `dio` 客户端与拦截器（BaseURL、Token、`85xx` 清登录）、环境配置、日志 |
+| `features/auth/` | 注册、登录、资料完善、协议与年龄门槛 UI |
+| `features/post_wall/` | Tab1 列表/详情、发布、评论、举报 |
+| `features/directory/` | Tab2 信件架网格、筛选、用户卡、Send Letter 入口 |
+| `features/mailbox/` | Tab3 列表、邮票展示、平邮状态、加速 |
+| `features/profile/` | Tab4 个人中心、编辑资料、设置、注销/GDPR 入口（M4） |
+| `features/im/` | 腾讯 TUIKit 初始化、会话列表与聊天页与业务路由衔接 |
+| `shared/` | 通用 Widget、分页组件、图片/OSS 上传封装、国家与标签选择器 |
+
+### 与需求文档的页面对照
+
+| 需求区块 | Flutter 交付物 |
+|----------|----------------|
+| 注册与资料（§四） | 邮箱注册、密码、协议勾选、出生年/年龄（读配置门槛）、昵称/国家/标签(≥3)/简介/头像；完成后进 Tab1 |
+| Tab1 Post Wall（§五） | 信息流、发帖（文+图）、评论（纯文本）、无 Like、Send Letter、举报 |
+| Tab2 Directory（§六） | 邮局架 UI、国家/年龄/兴趣筛选、同龄/同兴趣排序由后端；用户卡 + Send Letter |
+| Tab3 Post Box（§七~九） | 邮票 `x/3` 或 VIP Unlimited、运输中横幅、会话/信件列表状态（✅ 即时 / ✉️ 运输 / 已送达）、平邮加速 |
+| 邮票与 VIP（§十~十一） | 余额与上限展示、挂号消耗提示、VIP 权益由配置驱动展示（开关） |
+| 设备 ID（§十二） | 启动/登录链路采集合规设备标识并随请求或专用接口上报（契约以后端为准） |
+| 国际化（§十六） | `intl` + ARB：英文默认 + 中文 |
+| IM（§十七） | TUIKit：userId 与业务用户一致，UserSig 等走后端 |
+
+### 按 M1~M4 的 App 侧任务（与本文「开发计划」对齐）
+
+**M1 — 骨架与账号**
+
+- 初始化工程：Riverpod、`go_router`、主题、中英 ARB 占位。
+- 网络层：`dio` + Token（`flutter_secure_storage`）+ **全局 `85xx` → 清凭证并跳转登录**。
+- 页面：登录、注册、分步或单页资料完善；国家/标签数据源对接 `/api`（以后端 OpenAPI 为准）。
+- 设备信息：封装平台侧 IDFA/IDFV/Android ID 等采集与降级，在登录/注册请求中携带。
+- 可选：IM SDK 初始化占位（UserSig 接口就绪后接通）。
+
+**M2 — 社交主路径**
+
+- **Shell**：底部四 Tab（Post Wall / Directory / Post Box / My Post）。
+- Tab1：明信片列表分页、详情、发布页（OSS 直传：`get_sign` → PUT）、审核中/仅己可见等状态展示。
+- Tab2：名录网格、筛选表单、用户详情底部表或全屏卡、**Send Letter** 弹层（挂号/平邮二选一 UI）。
+- Tab3（最小）：信箱列表拉取、与 IM/信件接口的初版列表（若后端拆信与 IM，按契约二选一或组合展示）。
+- 评论、举报入口与错误提示（敏感词等由后端返回）。
+
+**M3 — 信箱与资产闭环**
+
+- 信件状态机 UI：On the way、预计到达、Delivered；**Speed Up** 扣邮票确认流。
+- 顶部「A post is on the way」与列表角标逻辑。
+- 邮票：每日赠送、发帖奖励提示；余额不足时禁用挂号信并引导平邮。
+- VIP：读配置展示「无限邮票 / 免费加速」等，与后端权益字段一致。
+
+**M4 — 合规与发布**
+
+- 举报流程完善、注销与冷静期、隐私政策/用户协议版本展示。
+- 图片与内容失败态、空态、弱网与 Loading 统一规范；`flutter analyze` / 核心 `widget_test`。
+- 应用内版本强更或升级提示（若后端提供配置接口）。
+
+### 契约与依赖（开发顺序建议）
+
+1. 先锁定 **OpenAPI**（Knife4j）中：登录注册、用户资料、配置拉取（年龄阈值、邮票参数、平邮延迟区间）。
+2. 再对接 **帖子/评论/名录**；最后 **信件状态 + 邮票扣减 + 加速** 与 **IM UserSig**。
+3. **AES**：收尾阶段在 `dio` 封装层接入，避免早期阻塞联调。
+
+### 验证（App 侧）
+
+- `flutter analyze` 无报错；核心注册→首页、`85xx` 回登录、分页刷新、草稿/图片上传失败重试。
+- 真机：双端设备 ID、推送/角标（若 M3+）、IM 收发与离线（与腾讯 SDK 能力一致）。
 
 ---
 
@@ -266,10 +341,10 @@ flowchart LR
 
 - M1（基础可运行骨架）
   - 目标：跑通注册登录、用户基础资料、基础配置中心、前后端与 IM 初始化链路
-  - 后端：认证接口、用户表与设备表、系统配置表、统一响应码（含 85xx 协议）
-  - Flutter：登录/注册页、资料完善页、全局鉴权拦截器（只识别 85xx）
+  - 后端：**App `/api/auth/register|login|me` + JWT 签发**（`senior-post.app.jwt.*`）；用户/设备写入；`application-local` 对 **`/api/**` 明文** 便于 Flutter 联调；**`exclude-interceptor-pattern`** 放行注册/登录
+  - Flutter：**登录/注册页**、**`dio`：`Token` / `versionCode` / `deviceId` / `equipmentId`**、**`85xx` 清 Token + 刷新路由**、安装级 **deviceUuid**；资料完善页与 IM 初始化仍待下一迭代
   - 管理后台：配置中心第一版（年龄阈值、邮票基础参数、平邮延迟区间）
-  - 验收：新用户从注册到进入首页全链路可用；85xx 触发后前端正确回登录态
+  - 验收：新用户从注册到进入首页全链路可用；85xx 触发后前端正确回登录态（生产开启 `jh.config.auth` 时需将 **JWT 与框架验签密钥策略对齐**）
 - M2（核心社交闭环）
   - 目标：Post Wall + Post Directory + Send Letter 主流程可用
   - 后端：明信片发布（先审后发）、评论（先审后发）、目录筛选排序、写信入口

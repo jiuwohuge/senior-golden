@@ -1,0 +1,10 @@
+# Senior Post — Flutter 工具链基线（与 PLAN 对齐）
+#
+# 推荐稳定版（2026 主流 App / 文档与 CI 目标）：
+#   Flutter 3.41.x stable（Dart 3.10.x）
+# 安装后执行：flutter --version 应显示 3.41.x
+#
+# 本机若暂为 3.35.x：可继续开发；升级至 3.41 后与本文件一致即可。
+# 可选：使用 FVM 锁定 — fvm use 3.41.0
+
+FLUTTER_RECOMMENDED=3.41.0

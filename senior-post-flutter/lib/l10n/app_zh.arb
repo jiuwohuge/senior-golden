@@ -1,0 +1,40 @@
+{
+  "@@locale": "zh",
+  "appTitle": "邮政社交",
+  "@appTitle": {
+    "description": "应用名称"
+  },
+  "appTagline": "慢慢写信，温柔相连。",
+  "@appTagline": {
+    "description": "品牌短句，邮政笔友气质"
+  },
+  "tabPostWall": "明信片墙",
+  "tabDirectory": "通信名录",
+  "tabMailbox": "邮政信箱",
+  "tabProfile": "我的邮政",
+  "a11yTabPostWall": "明信片墙：浏览全球会员公开的明信片",
+  "a11yTabDirectory": "通信名录：按国家与兴趣寻找笔友",
+  "a11yTabMailbox": "邮政信箱：您的信件与对话",
+  "a11yTabProfile": "我的邮政：个人资料与账户",
+  "a11yNavBar": "应用主要分区导航",
+  "placeholderWelcomeTitle": "此区域正在准备中",
+  "placeholderWelcomeBody": "我们正在完善这一页面。明信片、信件与好友将很快在此呈现。感谢您的耐心。",
+  "placeholderHint": "提示：使用下方导航在明信片墙、通信名录、邮政信箱与我的邮政之间切换。",
+  "postalMotifContentDescription": "顶部的装饰性邮戳图案",
+  "authLoginTitle": "登录",
+  "authEmailLabel": "邮箱",
+  "authPasswordLabel": "密码",
+  "authLoginSubmit": "登录",
+  "authGoRegister": "注册新账号",
+  "authRegisterTitle": "注册账号",
+  "authNicknameLabel": "昵称",
+  "authBirthYearLabel": "出生年份",
+  "authCountryCodeLabel": "国家代码（选填）",
+  "authAgreeTerms": "我已阅读并同意用户协议与隐私政策",
+  "authRegisterSubmit": "注册",
+  "authGoLogin": "已有账号？去登录",
+  "authFieldRequired": "请填写此项",
+  "authPasswordTooShort": "密码至少 8 位",
+  "authAgreeRequired": "请勾选同意条款后继续",
+  "authBusy": "请稍候…"
+}

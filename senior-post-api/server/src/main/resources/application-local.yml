@@ -31,6 +31,21 @@ jh:
   config:
     auth: false
     token-auth: false
+  security:
+    debug: false
+    key: 8e32de3646dc4c02ae2507511202c7ca
+    resEncryptUris:
+      - /api/**
+    reqDecryptUris:
+      - /api/**
+    resIgnoreEncryptUris:
+      - /webapp/**
+      - /webapi/**
+      - /api/**
+    reqIgnoreDecryptUris:
+      - /webapp/**
+      - /webapi/**
+      - /api/**
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

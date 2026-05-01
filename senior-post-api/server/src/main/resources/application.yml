@@ -36,9 +36,17 @@ server:
       min-spare: 10
   forward-headers-strategy: framework
 
+senior-post:
+  app:
+    jwt:
+      secret: ${APP_JWT_SECRET:dev-senior-post-jwt-secret-change-me-in-prod!!}
+      expire-days: 7
+
 jh:
   config:
     exclude-interceptor-pattern: [
+      "/api/auth/register",
+      "/api/auth/login",
     ]
     interceptor-pattern: [ "/api/**", "/webapi/**" ]
     converter-json-pattern: [ "/api/**", "/webapi/**", "/error" ]

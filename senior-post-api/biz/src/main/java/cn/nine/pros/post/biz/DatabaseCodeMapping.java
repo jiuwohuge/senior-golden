@@ -54,7 +54,7 @@ public class DatabaseCodeMapping {
                 )
         );
         codeConfig.setProjectPackageName("cn.nine.pros.post");
-        codeConfig.setPathDir("D:\\04_idea_workplace\\02_gitee\\commons-frameworkv2\\senior-post-api");
+        codeConfig.setPathDir("D:\\04_idea_workplace\\05_cursor\\senior-golden\\senior-post-api");
         codeConfig.setTemplateList(Arrays.asList(
                 TemplatePackageConstant.domain,
                 TemplatePackageConstant.dtoDb,

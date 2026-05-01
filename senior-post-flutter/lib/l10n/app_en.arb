@@ -1,0 +1,52 @@
+{
+  "@@locale": "en",
+  "appTitle": "Senior Post",
+  "@appTitle": {
+    "description": "Application name shown in task switcher and about screens."
+  },
+  "appTagline": "Slow, kind letters — across the world.",
+  "@appTagline": {
+    "description": "Short brand line under the app name; postal / pen-pal tone."
+  },
+  "tabPostWall": "Post Wall",
+  "@tabPostWall": {
+    "description": "Bottom navigation: global postcard feed."
+  },
+  "tabDirectory": "Directory",
+  "@tabDirectory": {
+    "description": "Bottom navigation: directory of members."
+  },
+  "tabMailbox": "Post Box",
+  "@tabMailbox": {
+    "description": "Bottom navigation: messages and letters."
+  },
+  "tabProfile": "My Post",
+  "@tabProfile": {
+    "description": "Bottom navigation: profile and settings."
+  },
+  "a11yTabPostWall": "Post Wall: browse postcards from members worldwide",
+  "a11yTabDirectory": "Directory: find members by country and interests",
+  "a11yTabMailbox": "Post Box: your letters and conversations",
+  "a11yTabProfile": "My Post: your profile and account",
+  "a11yNavBar": "Main sections of the app",
+  "placeholderWelcomeTitle": "This area is being prepared",
+  "placeholderWelcomeBody": "We are finishing this screen. Your postcards, letters, and friends will appear here soon. Thank you for your patience.",
+  "placeholderHint": "Tip: use the bar below to switch between Post Wall, Directory, Post Box, and My Post.",
+  "postalMotifContentDescription": "Decorative postmark in the header",
+  "authLoginTitle": "Sign in",
+  "authEmailLabel": "Email",
+  "authPasswordLabel": "Password",
+  "authLoginSubmit": "Sign in",
+  "authGoRegister": "Create an account",
+  "authRegisterTitle": "Create account",
+  "authNicknameLabel": "Nickname",
+  "authBirthYearLabel": "Year of birth",
+  "authCountryCodeLabel": "Country code (optional)",
+  "authAgreeTerms": "I agree to the Terms and Privacy Policy",
+  "authRegisterSubmit": "Register",
+  "authGoLogin": "Already have an account? Sign in",
+  "authFieldRequired": "Please fill in this field",
+  "authPasswordTooShort": "Password must be at least 8 characters",
+  "authAgreeRequired": "Please accept the terms to continue",
+  "authBusy": "Please wait…"
+}
