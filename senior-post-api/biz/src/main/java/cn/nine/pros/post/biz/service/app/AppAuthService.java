@@ -63,12 +63,7 @@ public class AppAuthService {
         user.setCreatedBy("0");
         user.setUpdatedBy("0");
         user.setLastLoginAt(now);
-        try {
-            user.setRegisterIp(MyRequestContextHolder.ipAddress());
-        } catch (Exception ignored) {
-            user.setRegisterIp(null);
-        }
-
+        user.setRegisterIp(MyRequestContextHolder.ipAddress());
         userService.save(user);
         touchDevice(user.getId(), body.getDeviceUuid(), body.getDeviceType());
 

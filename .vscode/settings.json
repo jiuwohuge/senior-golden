@@ -1,5 +1,6 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.compile.nullAnalysis.mode": "automatic",
-    "gradle.nestedProjects": false
+    "gradle.nestedProjects": false,
+    "java.debug.settings.onBuildFailureProceed": true
 }
