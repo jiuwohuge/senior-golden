@@ -1,7 +1,7 @@
 package cn.nine.pros.post.client.api.admin;
 
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
-import cn.nine.pros.post.client.model.db.AdminUserDTO;
+import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.admin.LoginInDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,5 +23,5 @@ public interface AdminAuthApi {
 
     @Operation(summary = "获取当前管理员信息")
     @GetMapping(AppServiceDefine.WEBAPI_PREFIX + "/auth/current")
-    AdminUserDTO getCurrentAdmin();
+    UserDTO getCurrentAdmin();
 }

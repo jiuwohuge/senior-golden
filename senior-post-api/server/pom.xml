@@ -36,12 +36,6 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
-        <!-- commons-web -->
-        <dependency>
-            <groupId>cn.nine.commons</groupId>
-            <artifactId>commons-web</artifactId>
-        </dependency>
-
         <!-- commons-security -->
         <dependency>
             <groupId>cn.nine.commons</groupId>

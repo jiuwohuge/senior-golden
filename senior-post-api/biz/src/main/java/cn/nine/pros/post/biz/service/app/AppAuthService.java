@@ -25,7 +25,9 @@ import java.time.Year;
 @RequiredArgsConstructor
 public class AppAuthService {
 
-    /** M1 默认最低年龄；后续改为读取 sys_config。 */
+    /**
+     * M1 默认最低年龄；后续改为读取 sys_config。
+     */
     private static final int MIN_AGE = 45;
 
     private final UserService userService;
@@ -56,12 +58,13 @@ public class AppAuthService {
         user.setStampsBalance(0);
         user.setIsVip(false);
         user.setStatus(1);
+        user.setStaffRole(0);
         user.setDelFlag(false);
         LocalDateTime now = LocalDateTime.now();
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
-        user.setCreatedBy("0");
-        user.setUpdatedBy("0");
+        user.setCreatedBy(0L);
+        user.setUpdatedBy(0L);
         user.setLastLoginAt(now);
         user.setRegisterIp(MyRequestContextHolder.ipAddress());
         userService.save(user);
@@ -103,7 +106,7 @@ public class AppAuthService {
     }
 
     public AppPublicUserVO me() {
-        Long uid = MyRequestContextHolder.userIdNum();
+        Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
             return null;
         }
@@ -136,21 +139,17 @@ public class AppAuthService {
             existing.setLastLoginAt(now);
             existing.setDeviceType(deviceType);
             existing.setUpdatedAt(now);
-            existing.setUpdatedBy(String.valueOf(userId));
+            existing.setUpdatedBy(userId);
             userDeviceService.updateById(existing);
             return;
         }
         UserDeviceDomain d = new UserDeviceDomain();
+        d.initAudit(userId);
         d.setUserId(userId);
         d.setDeviceUuid(uuid);
         d.setDeviceType(deviceType);
         d.setLastLoginAt(now);
         d.setStatus(1);
-        d.setDelFlag(false);
-        d.setCreatedAt(now);
-        d.setUpdatedAt(now);
-        d.setCreatedBy(String.valueOf(userId));
-        d.setUpdatedBy(String.valueOf(userId));
         userDeviceService.save(d);
     }
 

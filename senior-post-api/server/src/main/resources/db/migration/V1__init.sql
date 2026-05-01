@@ -5,10 +5,10 @@ CREATE TABLE sys_tag (
     tag_name        VARCHAR(50) NOT NULL,
     lang_code       VARCHAR(10) NOT NULL DEFAULT 'en',
     sort_order      INT DEFAULT 0,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE(tag_name, lang_code)
 );
@@ -27,10 +27,10 @@ CREATE TABLE sys_sensitive_word (
     type            VARCHAR(20),
     type_text       VARCHAR(50),
     lang_code       VARCHAR(10) NOT NULL DEFAULT 'en',
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE(word, lang_code)
 );
@@ -50,10 +50,10 @@ CREATE TABLE sys_config (
     config_value    TEXT,
     config_group    VARCHAR(50) NOT NULL,
     description     VARCHAR(255),
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_sys_config_group ON sys_config(config_group) WHERE del_flag = FALSE;
@@ -71,13 +71,13 @@ CREATE TABLE sys_announcement (
     title_json      JSONB,
     content         TEXT,
     content_json    JSONB,
-    start_at        TIMESTAMPTZ,
-    end_at          TIMESTAMPTZ,
+    start_at        TIMESTAMP,
+    end_at          TIMESTAMP,
     is_active       BOOLEAN DEFAULT TRUE,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_sys_announcement_active ON sys_announcement(is_active, start_at, end_at) WHERE del_flag = FALSE;
@@ -100,10 +100,10 @@ CREATE TABLE sys_app_version (
     force_update                BOOLEAN DEFAULT FALSE,
     update_url                  TEXT,
     release_note                TEXT,
-    created_at                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by                  VARCHAR(64),
-    updated_at                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by                  VARCHAR(64),
+    created_at                  TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by                  bigint,
+    updated_at                  TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by                  bigint,
     del_flag                    BOOLEAN NOT NULL DEFAULT FALSE
 );
 COMMENT ON TABLE sys_app_version IS 'App版本控制表';
@@ -122,10 +122,10 @@ CREATE TABLE sys_country (
     country_name_en VARCHAR(100),
     country_name_zh VARCHAR(100),
     sort_order      INT DEFAULT 0,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_sys_country_sort_order ON sys_country(sort_order) WHERE del_flag = FALSE;
@@ -149,14 +149,15 @@ CREATE TABLE bu_user (
     avatar_url      TEXT,
     stamps_balance  INT NOT NULL DEFAULT 0,
     is_vip          BOOLEAN DEFAULT FALSE,
-    vip_expire_at   TIMESTAMPTZ,
+    vip_expire_at   TIMESTAMP,
     status          SMALLINT DEFAULT 1,
-    register_ip     INET,
-    last_login_at   TIMESTAMPTZ,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    staff_role      SMALLINT NOT NULL DEFAULT 0,
+    register_ip     VARCHAR(64),
+    last_login_at   TIMESTAMP,
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_bu_user_email ON bu_user(email) WHERE del_flag = FALSE;
@@ -176,6 +177,7 @@ COMMENT ON COLUMN bu_user.stamps_balance IS '邮票余额';
 COMMENT ON COLUMN bu_user.is_vip IS '是否VIP会员（冗余）';
 COMMENT ON COLUMN bu_user.vip_expire_at IS 'VIP过期时间（冗余）';
 COMMENT ON COLUMN bu_user.status IS '状态：1正常 2封禁 3注销';
+COMMENT ON COLUMN bu_user.staff_role IS '0 不可登录后台；非 0 可登录管理端（暂均为超管）';
 COMMENT ON COLUMN bu_user.register_ip IS '注册IP';
 COMMENT ON COLUMN bu_user.last_login_at IS '最后登录时间';
 
@@ -185,12 +187,12 @@ CREATE TABLE bu_user_device (
     user_id         BIGINT NOT NULL,
     device_uuid     VARCHAR(255) NOT NULL,
     device_type     VARCHAR(20),
-    last_login_at   TIMESTAMPTZ,
+    last_login_at   TIMESTAMP,
     status          SMALLINT DEFAULT 1,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_bu_user_device_user_id ON bu_user_device(user_id) WHERE del_flag = FALSE;
@@ -208,10 +210,10 @@ CREATE TABLE bu_user_tag (
     id              BIGSERIAL PRIMARY KEY,
     user_id         BIGINT NOT NULL,
     tag_id          INT NOT NULL,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE(user_id, tag_id)
 );
@@ -230,11 +232,11 @@ CREATE TABLE bu_postcard (
     images          TEXT[],
     status          SMALLINT DEFAULT 1,
     review_status   SMALLINT DEFAULT 0,
-    published_at    TIMESTAMPTZ DEFAULT NOW(),
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    published_at    TIMESTAMP DEFAULT NOW(),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_bu_postcard_user_id ON bu_postcard(user_id) WHERE del_flag = FALSE;
@@ -257,10 +259,10 @@ CREATE TABLE bu_postcard_comment (
     content         TEXT NOT NULL,
     status          SMALLINT DEFAULT 1,
     review_status   SMALLINT DEFAULT 0,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_bu_postcard_comment_postcard_id ON bu_postcard_comment(postcard_id) WHERE del_flag = FALSE;
@@ -282,14 +284,14 @@ CREATE TABLE bu_letter (
     status                  SMALLINT NOT NULL,
     content                 TEXT NOT NULL,
     is_accelerated          BOOLEAN DEFAULT FALSE,
-    accelerated_at          TIMESTAMPTZ,
-    expected_arrival_time   TIMESTAMPTZ,
-    actual_arrival_time     TIMESTAMPTZ,
+    accelerated_at          TIMESTAMP,
+    expected_arrival_time   TIMESTAMP,
+    actual_arrival_time     TIMESTAMP,
     parent_letter_id        BIGINT,
-    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by              VARCHAR(64),
-    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by              VARCHAR(64),
+    created_at              TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by              bigint,
+    updated_at              TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by              bigint,
     del_flag                BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_bu_letter_from_user ON bu_letter(from_user_id) WHERE del_flag = FALSE;
@@ -314,13 +316,13 @@ CREATE TABLE bu_vip_subscription (
     id              BIGSERIAL PRIMARY KEY,
     user_id         BIGINT NOT NULL,
     plan_id         VARCHAR(50),
-    start_at        TIMESTAMPTZ NOT NULL,
-    end_at          TIMESTAMPTZ NOT NULL,
+    start_at        TIMESTAMP NOT NULL,
+    end_at          TIMESTAMP NOT NULL,
     status          SMALLINT DEFAULT 1,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_bu_vip_subscription_user_id ON bu_vip_subscription(user_id) WHERE del_flag = FALSE;
@@ -343,10 +345,10 @@ CREATE TABLE bu_report (
     status          SMALLINT DEFAULT 0,
     handler_user_id BIGINT,
     handle_note     TEXT,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_bu_report_reporter ON bu_report(reporter_user_id) WHERE del_flag = FALSE;
@@ -371,10 +373,10 @@ CREATE TABLE log_stamp_transaction (
     balance_after   INT NOT NULL,
     reason          VARCHAR(50),
     ref_id          BIGINT,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_log_stamp_user_id ON log_stamp_transaction(user_id) WHERE del_flag = FALSE;
@@ -391,14 +393,14 @@ COMMENT ON COLUMN log_stamp_transaction.ref_id IS '关联业务ID（明信片ID/
 CREATE TABLE log_login (
     id              BIGSERIAL PRIMARY KEY,
     user_id         BIGINT,
-    login_ip        INET,
+    login_ip        VARCHAR(64),
     device_uuid     VARCHAR(255),
     login_result    SMALLINT,
     fail_reason     VARCHAR(100),
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_log_login_user_id ON log_login(user_id) WHERE del_flag = FALSE;
@@ -419,10 +421,10 @@ CREATE TABLE log_action (
     target_type     VARCHAR(50),
     target_id       BIGINT,
     details         JSONB,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_log_action_user_id ON log_action(user_id) WHERE del_flag = FALSE;
@@ -442,10 +444,10 @@ CREATE TABLE log_exception (
     exception_type  VARCHAR(100),
     message         TEXT,
     stack_trace     TEXT,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by      bigint,
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_by      bigint,
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_log_exception_created_at ON log_exception(created_at) WHERE del_flag = FALSE;
@@ -463,11 +465,11 @@ CREATE TABLE bu_im_conversation (
     user_id         BIGINT NOT NULL,
     target_user_id  BIGINT NOT NULL,
     im_conversation_id VARCHAR(128),
-    last_message_at TIMESTAMPTZ,
+    last_message_at TIMESTAMP,
     last_message_preview TEXT,
     unread_count    INT DEFAULT 0,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE(user_id, target_user_id)
 );
@@ -491,7 +493,7 @@ CREATE TABLE bu_im_message (
     content         TEXT NOT NULL,
     im_msg_id       VARCHAR(128),
     status          SMALLINT DEFAULT 1,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_bu_im_message_conversation_id ON bu_im_message(conversation_id) WHERE del_flag = FALSE;
@@ -513,7 +515,7 @@ CREATE TABLE bu_visitor_record (
     visitor_id      BIGINT NOT NULL,
     visited_id      BIGINT NOT NULL,
     visit_type      SMALLINT DEFAULT 1,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_bu_visitor_record_visited_id ON bu_visitor_record(visited_id) WHERE del_flag = FALSE;
@@ -532,7 +534,7 @@ CREATE TABLE bu_user_blacklist (
     user_id         BIGINT NOT NULL,
     blocked_user_id BIGINT NOT NULL,
     reason          VARCHAR(255),
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE(user_id, blocked_user_id)
 );
@@ -551,8 +553,8 @@ CREATE TABLE bu_daily_publish_record (
     user_id         BIGINT NOT NULL,
     publish_date    DATE NOT NULL,
     publish_count   INT DEFAULT 0,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE(user_id, publish_date)
 );
@@ -564,36 +566,7 @@ COMMENT ON COLUMN bu_daily_publish_record.user_id IS '用户ID';
 COMMENT ON COLUMN bu_daily_publish_record.publish_date IS '发布日期';
 COMMENT ON COLUMN bu_daily_publish_record.publish_count IS '当日发布次数';
 
--- 24. 管理员表
-CREATE TABLE bu_admin_user (
-    id              BIGSERIAL PRIMARY KEY,
-    username        VARCHAR(100) NOT NULL UNIQUE,
-    password_hash   VARCHAR(255) NOT NULL,
-    nickname        VARCHAR(100),
-    role            SMALLINT DEFAULT 1,
-    status          SMALLINT DEFAULT 1,
-    last_login_at   TIMESTAMPTZ,
-    last_login_ip   INET,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by      VARCHAR(64),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_by      VARCHAR(64),
-    del_flag        BOOLEAN NOT NULL DEFAULT FALSE
-);
-CREATE INDEX idx_bu_admin_user_username ON bu_admin_user(username) WHERE del_flag = FALSE;
-CREATE INDEX idx_bu_admin_user_role ON bu_admin_user(role) WHERE del_flag = FALSE;
-CREATE INDEX idx_bu_admin_user_status ON bu_admin_user(status) WHERE del_flag = FALSE;
-COMMENT ON TABLE bu_admin_user IS '管理员表';
-COMMENT ON COLUMN bu_admin_user.id IS '管理员ID';
-COMMENT ON COLUMN bu_admin_user.username IS '管理员用户名';
-COMMENT ON COLUMN bu_admin_user.password_hash IS '密码哈希';
-COMMENT ON COLUMN bu_admin_user.nickname IS '管理员昵称';
-COMMENT ON COLUMN bu_admin_user.role IS '角色：1超级管理员 2普通管理员';
-COMMENT ON COLUMN bu_admin_user.status IS '状态：1正常 2禁用';
-COMMENT ON COLUMN bu_admin_user.last_login_at IS '最后登录时间';
-COMMENT ON COLUMN bu_admin_user.last_login_ip IS '最后登录IP';
-
--- 25. 管理员操作日志表
+-- 24. 管理员操作日志表（admin_id 指向 bu_user.id，且该行 staff_role>0）
 CREATE TABLE log_admin_operation (
     id              BIGSERIAL PRIMARY KEY,
     admin_id        BIGINT NOT NULL,
@@ -601,15 +574,15 @@ CREATE TABLE log_admin_operation (
     target_type     VARCHAR(50),
     target_id       BIGINT,
     details         JSONB,
-    ip_address      INET,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    ip_address      VARCHAR(64),
+    created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
     del_flag        BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX idx_log_admin_operation_admin_id ON log_admin_operation(admin_id) WHERE del_flag = FALSE;
 CREATE INDEX idx_log_admin_operation_created_at ON log_admin_operation(created_at) WHERE del_flag = FALSE;
 COMMENT ON TABLE log_admin_operation IS '管理员操作日志表';
 COMMENT ON COLUMN log_admin_operation.id IS '日志ID';
-COMMENT ON COLUMN log_admin_operation.admin_id IS '管理员ID';
+COMMENT ON COLUMN log_admin_operation.admin_id IS '操作人用户ID（bu_user.id，staff_role>0）';
 COMMENT ON COLUMN log_admin_operation.action_type IS '操作类型';
 COMMENT ON COLUMN log_admin_operation.target_type IS '目标类型';
 COMMENT ON COLUMN log_admin_operation.target_id IS '目标ID';

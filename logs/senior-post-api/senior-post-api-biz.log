@@ -269,3 +269,1914 @@ org.springframework.web.servlet.resource.NoResourceFoundException: No static res
 [2026-05-01 13:23:57.613] [DEBUG] [] [ff50942e91a744cf9d38ec1b136f820a]: Writing [{123, 34, 111, 112, 101, 110, 97, 112, 105, 34, 58, 34, 51, 46, 48, 46, 49, 34, 44, 34, 105, 110, 10 (truncated)...]
 [2026-05-01 13:23:57.614] [DEBUG] [] [ff50942e91a744cf9d38ec1b136f820a]: ==> leave RequestContextHolder.
 [2026-05-01 14:10:34.165] [INFO ] [] []: 开始优雅停机...
+[2026-05-01 19:42:24.376] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 17116 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 19:42:24.378] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 19:42:24.380] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 19:42:26.310] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 19:42:26.310] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 19:42:26.310] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 19:44:31.242] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 14908 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 19:44:31.243] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 19:44:31.244] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 19:44:33.032] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 19:44:33.033] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 19:44:33.033] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 19:44:34.416] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 19:44:34.420] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 19:44:34.569] [INFO ] [] []: ===>> Load HttpMessageConverters: 3 : [org.springframework.http.converter.ByteArrayHttpMessageConverter@b859355, cn.nine.commons.web.model.converter.MyJackson2HttpMessageConverter@52a0bc48, org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@1f24e33d]
+[2026-05-01 19:44:34.618] [DEBUG] [] []: this converter not supports the request, use next.
+[2026-05-01 19:44:35.099] [INFO ] [] []: Started SeniorPostApplication in 4.375 seconds (process running for 5.022)
+[2026-05-01 19:44:35.105] [INFO ] [] []: 
+----------------------------------------------------------
+	Application Senior Post API is running! Access URLs:
+	Local: 		http://localhost:9011
+	External: 	http://192.168.0.136:9011
+	swagger-ui: http://192.168.0.136:9011/doc.html
+----------------------------------------------------------
+[2026-05-01 19:44:45.600] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 19:44:45.656] [DEBUG] [] [4d967ddddfce4201bb563dc5d38205ef]: ==> leave RequestContextHolder.
+[2026-05-01 19:44:45.659] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 19:44:45.777] [DEBUG] [] [ef364a91ad9941848e1ad2f32f225c89]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 19:44:45.784] [DEBUG] [] [ef364a91ad9941848e1ad2f32f225c89]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 19:44:45.867] [DEBUG] [] [ef364a91ad9941848e1ad2f32f225c89]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:127.0.0.1
+[2026-05-01 19:44:45.867] [DEBUG] [] [ef364a91ad9941848e1ad2f32f225c89]: 请求错误-返回：Error attempting to get column 'created_at' from result set.  Cause: org.postgresql.util.PSQLException: Cannot convert the column of type TIMESTAMPTZ to requested type java.time.LocalDateTime.
+; bad SQL grammar []  ,地址：http://127.0.0.1:9011/webapi/auth/login
+[2026-05-01 19:44:45.867] [ERROR] [] [ef364a91ad9941848e1ad2f32f225c89]: 请求异常 - 客户端: 版本:null 地址:http://127.0.0.1:9011/webapi/auth/login 异常:Error attempting to get column 'created_at' from result set.  Cause: org.postgresql.util.PSQLException: Cannot convert the column of type TIMESTAMPTZ to requested type java.time.LocalDateTime.
+; bad SQL grammar []
+org.springframework.jdbc.BadSqlGrammarException: Error attempting to get column 'created_at' from result set.  Cause: org.postgresql.util.PSQLException: Cannot convert the column of type TIMESTAMPTZ to requested type java.time.LocalDateTime.
+; bad SQL grammar []
+	at org.springframework.jdbc.support.SQLStateSQLExceptionTranslator.doTranslate(SQLStateSQLExceptionTranslator.java:112)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:116)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:116)
+	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:95)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:347)
+	at jdk.proxy2/jdk.proxy2.$Proxy103.selectList(Unknown Source)
+	at org.mybatis.spring.SqlSessionTemplate.selectList(SqlSessionTemplate.java:194)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.executeForMany(MybatisMapperMethod.java:164)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.execute(MybatisMapperMethod.java:77)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$PlainMethodInvoker.invoke(MybatisMapperProxy.java:156)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:93)
+	at jdk.proxy2/jdk.proxy2.$Proxy110.selectList(Unknown Source)
+	at com.baomidou.mybatisplus.core.mapper.BaseMapper.selectOne(BaseMapper.java:337)
+	at java.base/java.lang.invoke.MethodHandle.invokeWithArguments(MethodHandle.java:732)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$DefaultMethodInvoker.invoke(MybatisMapperProxy.java:182)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:93)
+	at jdk.proxy2/jdk.proxy2.$Proxy110.selectOne(Unknown Source)
+	at com.baomidou.mybatisplus.extension.repository.AbstractRepository.getOne(AbstractRepository.java:78)
+	at com.baomidou.mybatisplus.extension.repository.IRepository.getOne(IRepository.java:221)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:355)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:716)
+	at cn.nine.pros.post.biz.service.base.impl.AdminUserServiceImpl$$SpringCGLIB$$0.getOne(<generated>)
+	at cn.nine.pros.post.biz.controller.admin.AdminAuthController.login(AdminAuthController.java:31)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: org.postgresql.util.PSQLException: Cannot convert the column of type TIMESTAMPTZ to requested type java.time.LocalDateTime.
+	at org.postgresql.jdbc.PgResultSet.getLocalDateTime(PgResultSet.java:727)
+	at org.postgresql.jdbc.PgResultSet.getObject(PgResultSet.java:3859)
+	at org.postgresql.jdbc.PgResultSet.getObject(PgResultSet.java:3879)
+	at com.zaxxer.hikari.pool.HikariProxyResultSet.getObject(HikariProxyResultSet.java)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.apache.ibatis.logging.jdbc.ResultSetLogger.invoke(ResultSetLogger.java:68)
+	at jdk.proxy3/jdk.proxy3.$Proxy184.getObject(Unknown Source)
+	at org.apache.ibatis.type.LocalDateTimeTypeHandler.getNullableResult(LocalDateTimeTypeHandler.java:39)
+	at org.apache.ibatis.type.LocalDateTimeTypeHandler.getNullableResult(LocalDateTimeTypeHandler.java:29)
+	at org.apache.ibatis.type.BaseTypeHandler.getResult(BaseTypeHandler.java:85)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.applyAutomaticMappings(DefaultResultSetHandler.java:586)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.getRowValue(DefaultResultSetHandler.java:416)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.handleRowValuesForSimpleResultMap(DefaultResultSetHandler.java:366)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.handleRowValues(DefaultResultSetHandler.java:337)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.handleResultSet(DefaultResultSetHandler.java:310)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.handleResultSets(DefaultResultSetHandler.java:202)
+	at org.apache.ibatis.executor.statement.PreparedStatementHandler.query(PreparedStatementHandler.java:66)
+	at org.apache.ibatis.executor.statement.RoutingStatementHandler.query(RoutingStatementHandler.java:80)
+	at org.apache.ibatis.executor.SimpleExecutor.doQuery(SimpleExecutor.java:65)
+	at org.apache.ibatis.executor.BaseExecutor.queryFromDatabase(BaseExecutor.java:336)
+	at org.apache.ibatis.executor.BaseExecutor.query(BaseExecutor.java:158)
+	at org.apache.ibatis.executor.CachingExecutor.query(CachingExecutor.java:110)
+	at org.apache.ibatis.executor.CachingExecutor.query(CachingExecutor.java:90)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:154)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:147)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:142)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:333)
+	... 93 common frames omitted
+[2026-05-01 19:44:45.874] [DEBUG] [] [ef364a91ad9941848e1ad2f32f225c89]: ==> leave RequestContextHolder.
+[2026-05-01 19:45:02.923] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 19:45:48.049] [DEBUG] [] [8e922b317fc44417b9d857db8da70263]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:127.0.0.1
+[2026-05-01 19:45:48.049] [DEBUG] [] [8e922b317fc44417b9d857db8da70263]: 请求错误-返回：
+### Error querying database.  Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection
+### The error may exist in cn/nine/pros/post/biz/mapper/AdminUserMapper.java (best guess)
+### The error may involve cn.nine.pros.post.biz.mapper.AdminUserMapper.selectList
+### The error occurred while executing a query
+### Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection  ,地址：http://127.0.0.1:9011/webapi/auth/login
+[2026-05-01 19:45:48.049] [ERROR] [] [8e922b317fc44417b9d857db8da70263]: 请求异常 - 客户端: 版本:null 地址:http://127.0.0.1:9011/webapi/auth/login 异常:
+### Error querying database.  Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection
+### The error may exist in cn/nine/pros/post/biz/mapper/AdminUserMapper.java (best guess)
+### The error may involve cn.nine.pros.post.biz.mapper.AdminUserMapper.selectList
+### The error occurred while executing a query
+### Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection
+org.mybatis.spring.MyBatisSystemException: 
+### Error querying database.  Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection
+### The error may exist in cn/nine/pros/post/biz/mapper/AdminUserMapper.java (best guess)
+### The error may involve cn.nine.pros.post.biz.mapper.AdminUserMapper.selectList
+### The error occurred while executing a query
+### Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection
+	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:101)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:347)
+	at jdk.proxy2/jdk.proxy2.$Proxy103.selectList(Unknown Source)
+	at org.mybatis.spring.SqlSessionTemplate.selectList(SqlSessionTemplate.java:194)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.executeForMany(MybatisMapperMethod.java:164)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.execute(MybatisMapperMethod.java:77)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$PlainMethodInvoker.invoke(MybatisMapperProxy.java:156)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:93)
+	at jdk.proxy2/jdk.proxy2.$Proxy110.selectList(Unknown Source)
+	at com.baomidou.mybatisplus.core.mapper.BaseMapper.selectOne(BaseMapper.java:337)
+	at java.base/java.lang.invoke.MethodHandle.invokeWithArguments(MethodHandle.java:732)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$DefaultMethodInvoker.invoke(MybatisMapperProxy.java:182)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:93)
+	at jdk.proxy2/jdk.proxy2.$Proxy110.selectOne(Unknown Source)
+	at com.baomidou.mybatisplus.extension.repository.AbstractRepository.getOne(AbstractRepository.java:78)
+	at com.baomidou.mybatisplus.extension.repository.IRepository.getOne(IRepository.java:221)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:355)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:716)
+	at cn.nine.pros.post.biz.service.base.impl.AdminUserServiceImpl$$SpringCGLIB$$0.getOne(<generated>)
+	at cn.nine.pros.post.biz.controller.admin.AdminAuthController.login(AdminAuthController.java:31)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: org.apache.ibatis.exceptions.PersistenceException: 
+### Error querying database.  Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection
+### The error may exist in cn/nine/pros/post/biz/mapper/AdminUserMapper.java (best guess)
+### The error may involve cn.nine.pros.post.biz.mapper.AdminUserMapper.selectList
+### The error occurred while executing a query
+### Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection
+	at org.apache.ibatis.exceptions.ExceptionFactory.wrapException(ExceptionFactory.java:30)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:156)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:147)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:142)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:333)
+	... 93 common frames omitted
+Caused by: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection
+	at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:84)
+	at org.mybatis.spring.transaction.SpringManagedTransaction.openConnection(SpringManagedTransaction.java:77)
+	at org.mybatis.spring.transaction.SpringManagedTransaction.getConnection(SpringManagedTransaction.java:64)
+	at org.apache.ibatis.executor.BaseExecutor.getConnection(BaseExecutor.java:348)
+	at org.apache.ibatis.executor.SimpleExecutor.prepareStatement(SimpleExecutor.java:89)
+	at org.apache.ibatis.executor.SimpleExecutor.doQuery(SimpleExecutor.java:64)
+	at org.apache.ibatis.executor.BaseExecutor.queryFromDatabase(BaseExecutor.java:336)
+	at org.apache.ibatis.executor.BaseExecutor.query(BaseExecutor.java:158)
+	at org.apache.ibatis.executor.CachingExecutor.query(CachingExecutor.java:110)
+	at org.apache.ibatis.executor.CachingExecutor.query(CachingExecutor.java:90)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:154)
+	... 100 common frames omitted
+Caused by: java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30011ms.
+	at com.zaxxer.hikari.pool.HikariPool.createTimeoutException(HikariPool.java:696)
+	at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:181)
+	at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:146)
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:128)
+	at org.springframework.jdbc.datasource.DataSourceUtils.fetchConnection(DataSourceUtils.java:160)
+	at org.springframework.jdbc.datasource.DataSourceUtils.doGetConnection(DataSourceUtils.java:118)
+	at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:81)
+	... 110 common frames omitted
+Caused by: org.postgresql.util.PSQLException: Connection to localhost:5432 refused. Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections.
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:342)
+	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:54)
+	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:263)
+	at org.postgresql.Driver.makeConnection(Driver.java:443)
+	at org.postgresql.Driver.connect(Driver.java:297)
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359)
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201)
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470)
+	at com.zaxxer.hikari.pool.HikariPool$PoolEntryCreator.call(HikariPool.java:733)
+	at com.zaxxer.hikari.pool.HikariPool$PoolEntryCreator.call(HikariPool.java:712)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	... 1 common frames omitted
+Caused by: java.net.ConnectException: Connection refused: no further information
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:672)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:547)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:602)
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+	at java.base/java.net.Socket.connect(Socket.java:633)
+	at org.postgresql.core.PGStream.createSocket(PGStream.java:243)
+	at org.postgresql.core.PGStream.<init>(PGStream.java:98)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:132)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:258)
+	... 15 common frames omitted
+[2026-05-01 19:45:48.050] [DEBUG] [] [8e922b317fc44417b9d857db8da70263]: ==> leave RequestContextHolder.
+[2026-05-01 19:47:19.826] [INFO ] [] []: 开始优雅停机...
+[2026-05-01 19:47:20.080] [INFO ] [] []: 已停止接收新请求
+[2026-05-01 19:47:20.080] [INFO ] [] []: 优雅停机完成
+[2026-05-01 19:47:23.039] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 19028 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 19:47:23.041] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 19:47:23.041] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 19:47:24.869] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 19:47:24.870] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 19:47:24.870] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 19:47:47.369] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 26280 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 19:47:47.371] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 19:47:47.372] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 19:47:49.294] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 19:47:49.295] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 19:47:49.295] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 19:47:51.151] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 19:47:51.154] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 19:47:51.282] [INFO ] [] []: ===>> Load HttpMessageConverters: 3 : [org.springframework.http.converter.ByteArrayHttpMessageConverter@5dc7881d, cn.nine.commons.web.model.converter.MyJackson2HttpMessageConverter@67730dab, org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@590336ed]
+[2026-05-01 19:47:51.331] [DEBUG] [] []: this converter not supports the request, use next.
+[2026-05-01 19:47:51.775] [INFO ] [] []: Started SeniorPostApplication in 4.959 seconds (process running for 5.696)
+[2026-05-01 19:47:51.781] [INFO ] [] []: 
+----------------------------------------------------------
+	Application Senior Post API is running! Access URLs:
+	Local: 		http://localhost:9011
+	External: 	http://192.168.0.136:9011
+	swagger-ui: http://192.168.0.136:9011/doc.html
+----------------------------------------------------------
+[2026-05-01 19:48:03.623] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 19:48:05.344] [DEBUG] [] [6375aa8e350e4404a11fd8d45388006e]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 19:48:05.352] [DEBUG] [] [6375aa8e350e4404a11fd8d45388006e]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 19:48:05.366] [DEBUG] [] [6375aa8e350e4404a11fd8d45388006e]: <==      Total: 1
+[2026-05-01 19:48:05.441] [DEBUG] [] [6375aa8e350e4404a11fd8d45388006e]: ==>  Preparing: UPDATE bu_admin_user SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=? WHERE id=?
+[2026-05-01 19:48:05.442] [DEBUG] [] [6375aa8e350e4404a11fd8d45388006e]: ==> Parameters: admin(String), $2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS(String), 超级管理员(String), 1(Integer), 1(Integer), 2026-05-01T19:48:05.437731900(LocalDateTime), 127.0.0.1(String), 2026-05-01T19:47:50.437997(LocalDateTime), system(String), 2026-05-01T19:47:50.437997(LocalDateTime), system(String), false(Boolean), 1(Long)
+[2026-05-01 19:48:05.528] [DEBUG] [] [6375aa8e350e4404a11fd8d45388006e]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:127.0.0.1
+[2026-05-01 19:48:05.528] [DEBUG] [] [6375aa8e350e4404a11fd8d45388006e]: 请求错误-返回：
+### Error updating database.  Cause: org.postgresql.util.PSQLException: 错误: 字段 "last_login_ip" 的类型为 inet, 但表达式的类型为 character varying
+  建议：你需要重写或转换表达式
+  位置：123
+### The error may exist in cn/nine/pros/post/biz/mapper/AdminUserMapper.java (best guess)
+### The error may involve cn.nine.pros.post.biz.mapper.AdminUserMapper.updateById-Inline
+### The error occurred while setting parameters
+### SQL: UPDATE bu_admin_user  SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=?  WHERE id=?
+### Cause: org.postgresql.util.PSQLException: 错误: 字段 "last_login_ip" 的类型为 inet, 但表达式的类型为 character varying
+  建议：你需要重写或转换表达式
+  位置：123
+; bad SQL grammar []  ,地址：http://127.0.0.1:9011/webapi/auth/login
+[2026-05-01 19:48:05.528] [ERROR] [] [6375aa8e350e4404a11fd8d45388006e]: 请求异常 - 客户端: 版本:null 地址:http://127.0.0.1:9011/webapi/auth/login 异常:
+### Error updating database.  Cause: org.postgresql.util.PSQLException: 错误: 字段 "last_login_ip" 的类型为 inet, 但表达式的类型为 character varying
+  建议：你需要重写或转换表达式
+  位置：123
+### The error may exist in cn/nine/pros/post/biz/mapper/AdminUserMapper.java (best guess)
+### The error may involve cn.nine.pros.post.biz.mapper.AdminUserMapper.updateById-Inline
+### The error occurred while setting parameters
+### SQL: UPDATE bu_admin_user  SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=?  WHERE id=?
+### Cause: org.postgresql.util.PSQLException: 错误: 字段 "last_login_ip" 的类型为 inet, 但表达式的类型为 character varying
+  建议：你需要重写或转换表达式
+  位置：123
+; bad SQL grammar []
+org.springframework.jdbc.BadSqlGrammarException: 
+### Error updating database.  Cause: org.postgresql.util.PSQLException: 错误: 字段 "last_login_ip" 的类型为 inet, 但表达式的类型为 character varying
+  建议：你需要重写或转换表达式
+  位置：123
+### The error may exist in cn/nine/pros/post/biz/mapper/AdminUserMapper.java (best guess)
+### The error may involve cn.nine.pros.post.biz.mapper.AdminUserMapper.updateById-Inline
+### The error occurred while setting parameters
+### SQL: UPDATE bu_admin_user  SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=?  WHERE id=?
+### Cause: org.postgresql.util.PSQLException: 错误: 字段 "last_login_ip" 的类型为 inet, 但表达式的类型为 character varying
+  建议：你需要重写或转换表达式
+  位置：123
+; bad SQL grammar []
+	at org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator.doTranslate(SQLErrorCodeSQLExceptionTranslator.java:246)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
+	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:95)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:347)
+	at jdk.proxy2/jdk.proxy2.$Proxy103.update(Unknown Source)
+	at org.mybatis.spring.SqlSessionTemplate.update(SqlSessionTemplate.java:234)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.execute(MybatisMapperMethod.java:64)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$PlainMethodInvoker.invoke(MybatisMapperProxy.java:156)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:93)
+	at jdk.proxy2/jdk.proxy2.$Proxy110.updateById(Unknown Source)
+	at com.baomidou.mybatisplus.extension.repository.IRepository.updateById(IRepository.java:139)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:355)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:716)
+	at cn.nine.pros.post.biz.service.base.impl.AdminUserServiceImpl$$SpringCGLIB$$0.updateById(<generated>)
+	at cn.nine.pros.post.biz.controller.admin.AdminAuthController.login(AdminAuthController.java:49)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: org.postgresql.util.PSQLException: 错误: 字段 "last_login_ip" 的类型为 inet, 但表达式的类型为 character varying
+  建议：你需要重写或转换表达式
+  位置：123
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2713)
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2401)
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:368)
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:498)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:415)
+	at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:190)
+	at org.postgresql.jdbc.PgPreparedStatement.execute(PgPreparedStatement.java:177)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.execute(ProxyPreparedStatement.java:44)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.execute(HikariProxyPreparedStatement.java)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.apache.ibatis.logging.jdbc.PreparedStatementLogger.invoke(PreparedStatementLogger.java:58)
+	at jdk.proxy3/jdk.proxy3.$Proxy183.execute(Unknown Source)
+	at org.apache.ibatis.executor.statement.PreparedStatementHandler.update(PreparedStatementHandler.java:48)
+	at org.apache.ibatis.executor.statement.RoutingStatementHandler.update(RoutingStatementHandler.java:75)
+	at org.apache.ibatis.executor.SimpleExecutor.doUpdate(SimpleExecutor.java:50)
+	at org.apache.ibatis.executor.BaseExecutor.update(BaseExecutor.java:117)
+	at org.apache.ibatis.executor.CachingExecutor.update(CachingExecutor.java:76)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.update(DefaultSqlSession.java:197)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:333)
+	... 86 common frames omitted
+[2026-05-01 19:48:05.535] [DEBUG] [] [6375aa8e350e4404a11fd8d45388006e]: ==> leave RequestContextHolder.
+[2026-05-01 19:56:28.754] [INFO ] [] []: 开始优雅停机...
+[2026-05-01 19:56:29.004] [INFO ] [] []: 已停止接收新请求
+[2026-05-01 19:56:29.004] [INFO ] [] []: 优雅停机完成
+[2026-05-01 19:56:33.783] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 8908 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 19:56:33.785] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 19:56:33.785] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 19:56:35.669] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 19:56:35.669] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 19:56:35.669] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 19:56:37.357] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 19:56:37.360] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 19:56:37.482] [INFO ] [] []: ===>> Load HttpMessageConverters: 3 : [org.springframework.http.converter.ByteArrayHttpMessageConverter@37aea657, cn.nine.commons.web.model.converter.MyJackson2HttpMessageConverter@3f5e64c9, org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@3ca9d3b2]
+[2026-05-01 19:56:37.524] [DEBUG] [] []: this converter not supports the request, use next.
+[2026-05-01 19:56:37.960] [INFO ] [] []: Started SeniorPostApplication in 4.689 seconds (process running for 5.451)
+[2026-05-01 19:56:37.966] [INFO ] [] []: 
+----------------------------------------------------------
+	Application Senior Post API is running! Access URLs:
+	Local: 		http://localhost:9011
+	External: 	http://192.168.0.136:9011
+	swagger-ui: http://192.168.0.136:9011/doc.html
+----------------------------------------------------------
+[2026-05-01 19:57:27.382] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.560] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 19:57:27.570] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 19:57:27.579] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: <==      Total: 1
+[2026-05-01 19:57:27.648] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: ==>  Preparing: UPDATE bu_admin_user SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=? WHERE id=?
+[2026-05-01 19:57:27.649] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: ==> Parameters: admin(String), $2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS(String), 超级管理员(String), 1(Integer), 1(Integer), 2026-05-01T19:57:27.645544200(LocalDateTime), 127.0.0.1(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), false(Boolean), 1(Long)
+[2026-05-01 19:57:27.659] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: <==    Updates: 1
+[2026-05-01 19:57:27.716] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: ===> Supports JSON Message Converter : true
+[2026-05-01 19:57:27.716] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-01 19:57:27.716] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: ===> Supports JSON Message Converter : true
+[2026-05-01 19:57:27.723] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: Writing [{admin=AdminUserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T19:56:36.675542, createdBy=syste (truncated)...]
+[2026-05-01 19:57:27.724] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: =========================================
+[2026-05-01 19:57:27.847] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"admin":{
+			"createdAt":"2026-05-01 19:56:36",
+			"createdBy":"system",
+			"delFlag":false,
+			"id":1,
+			"lastLoginAt":"2026-05-01 19:57:27.645544200",
+			"lastLoginIp":"127.0.0.1",
+			"nickname":"超级管理员",
+			"role":1,
+			"status":1,
+			"updatedAt":"2026-05-01 19:56:36",
+			"updatedBy":"system",
+			"username":"admin"
+		},
+		"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5MDAwMDAwMDAxIiwiaWF0IjoxNzc3NjM2NjQ3LCJleHAiOjE3NzgyNDE0NDd9.XONFcxl3q2nfsXUKWjm0M3gcR1JHDtkACaFeSbQr8Jc"
+	},
+	"message":"OK",
+	"success":true
+} 
+java.util.Map<java.lang.String, java.lang.Object>
+
+[2026-05-01 19:57:27.847] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: =========================================
+[2026-05-01 19:57:27.852] [DEBUG] [] [defbb84f43b443698015e6718a287ae3]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.929] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.931] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.931] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.931] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.934] [DEBUG] [] [cf8776be0ea34b43909c5a807a9bffbc]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.934] [DEBUG] [] [a6f797afeda947b5881a20cf07e2c8f6]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.934] [DEBUG] [] [16f8c9cf738c422ea078e5e235d81bf1]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.934] [DEBUG] [] [e5e8db8a759f412797848bf3ad8f944a]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.939] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.939] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.939] [DEBUG] [] [b739b59a6f664295a91190a1811e9ebf]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 19:57:27.939] [DEBUG] [] [dc477c73a2124b25a41cf567b80616b6]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 19:57:27.960] [ERROR] [] [dc477c73a2124b25a41cf567b80616b6]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:27.960] [ERROR] [] [b739b59a6f664295a91190a1811e9ebf]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:27.963] [DEBUG] [] [b739b59a6f664295a91190a1811e9ebf]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.963] [DEBUG] [] [dc477c73a2124b25a41cf567b80616b6]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.963] [DEBUG] [] [b739b59a6f664295a91190a1811e9ebf]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.963] [DEBUG] [] [dc477c73a2124b25a41cf567b80616b6]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.964] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.964] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.965] [DEBUG] [] [17c1c145a7d0400f848c2dfdd5c8db1e]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 19:57:27.965] [DEBUG] [] [a7a7cb7a7f7a4933b9a235141a84e6ea]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 19:57:27.965] [ERROR] [] [a7a7cb7a7f7a4933b9a235141a84e6ea]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:27.965] [ERROR] [] [17c1c145a7d0400f848c2dfdd5c8db1e]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:27.965] [DEBUG] [] [a7a7cb7a7f7a4933b9a235141a84e6ea]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.965] [DEBUG] [] [17c1c145a7d0400f848c2dfdd5c8db1e]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.965] [DEBUG] [] [a7a7cb7a7f7a4933b9a235141a84e6ea]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.965] [DEBUG] [] [17c1c145a7d0400f848c2dfdd5c8db1e]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.969] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.969] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 19:57:27.970] [DEBUG] [] [612fb44629ec4b0494c02bc4f32f703e]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 19:57:27.970] [DEBUG] [] [1d781239cd464bc19b4b6e176b3be258]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 19:57:27.971] [ERROR] [] [612fb44629ec4b0494c02bc4f32f703e]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:27.971] [ERROR] [] [1d781239cd464bc19b4b6e176b3be258]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:27.971] [DEBUG] [] [612fb44629ec4b0494c02bc4f32f703e]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.971] [DEBUG] [] [1d781239cd464bc19b4b6e176b3be258]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.971] [DEBUG] [] [612fb44629ec4b0494c02bc4f32f703e]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:27.971] [DEBUG] [] [1d781239cd464bc19b4b6e176b3be258]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:31.646] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 19:57:31.646] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 19:57:31.647] [DEBUG] [] [c29b3b79bc924972bf463b388894b67e]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 19:57:31.647] [DEBUG] [] [447464d5b93b40b1866c37c74fc4bcb7]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 19:57:31.648] [ERROR] [] [c29b3b79bc924972bf463b388894b67e]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:31.648] [DEBUG] [] [c29b3b79bc924972bf463b388894b67e]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:31.649] [DEBUG] [] [c29b3b79bc924972bf463b388894b67e]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:31.651] [ERROR] [] [447464d5b93b40b1866c37c74fc4bcb7]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:31.651] [DEBUG] [] [447464d5b93b40b1866c37c74fc4bcb7]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:31.651] [DEBUG] [] [447464d5b93b40b1866c37c74fc4bcb7]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:31.652] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 19:57:31.652] [DEBUG] [] [f1c1f86c07034da6b025edf736032ac6]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 19:57:31.655] [ERROR] [] [f1c1f86c07034da6b025edf736032ac6]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:31.655] [DEBUG] [] [f1c1f86c07034da6b025edf736032ac6]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:31.655] [DEBUG] [] [f1c1f86c07034da6b025edf736032ac6]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:31.656] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 19:57:31.657] [DEBUG] [] [4276a3bd25b149bb8e911461860d0032]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 19:57:31.658] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 19:57:31.658] [DEBUG] [] [8c60d60077b44f32a3f51d94d0715e19]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 19:57:31.658] [ERROR] [] [4276a3bd25b149bb8e911461860d0032]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:31.658] [DEBUG] [] [4276a3bd25b149bb8e911461860d0032]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:31.658] [DEBUG] [] [4276a3bd25b149bb8e911461860d0032]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:31.658] [ERROR] [] [8c60d60077b44f32a3f51d94d0715e19]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:31.659] [DEBUG] [] [8c60d60077b44f32a3f51d94d0715e19]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:31.659] [DEBUG] [] [8c60d60077b44f32a3f51d94d0715e19]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:40.814] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-01 19:57:40.814] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-01 19:57:40.815] [DEBUG] [] [0c6161e0d871442ab05b6e5daa62b582]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:40.815] [DEBUG] [] [ce6bae3756354ae9bfcd6883db195784]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:40.819] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-01 19:57:40.819] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-01 19:57:40.820] [DEBUG] [] [1e700f85fbf3409a80b75c75e1eb25c3]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-01 19:57:40.820] [DEBUG] [] [ec84ee4ea5554ab88e2cde8625c75214]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-01 19:57:40.820] [ERROR] [] [1e700f85fbf3409a80b75c75e1eb25c3]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:40.820] [ERROR] [] [ec84ee4ea5554ab88e2cde8625c75214]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:40.821] [DEBUG] [] [ec84ee4ea5554ab88e2cde8625c75214]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:40.821] [DEBUG] [] [1e700f85fbf3409a80b75c75e1eb25c3]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:40.821] [DEBUG] [] [ec84ee4ea5554ab88e2cde8625c75214]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:40.821] [DEBUG] [] [1e700f85fbf3409a80b75c75e1eb25c3]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:41.387] [DEBUG] [] []: ==》/webapi/content/postcard/paging -> into PreRequestContextFilter.
+[2026-05-01 19:57:41.387] [DEBUG] [] []: ==》/webapi/content/postcard/paging -> into PreRequestContextFilter.
+[2026-05-01 19:57:41.388] [DEBUG] [] [97e309d2b03347399cfe0ed3f9377615]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:41.388] [DEBUG] [] [a20149fe590844698079046a5207c130]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:41.390] [DEBUG] [] []: ==》/webapi/content/postcard/paging -> into PreRequestContextFilter.
+[2026-05-01 19:57:41.390] [DEBUG] [] []: ==》/webapi/content/postcard/paging -> into PreRequestContextFilter.
+[2026-05-01 19:57:41.390] [DEBUG] [] [18e11ef1f11047d5932cf81e24fa6567]: 地址 /webapi/content/postcard/paging 进入过滤器
+[2026-05-01 19:57:41.390] [DEBUG] [] [57503a3fed024b63913806b0c7e85497]: 地址 /webapi/content/postcard/paging 进入过滤器
+[2026-05-01 19:57:41.392] [ERROR] [] [57503a3fed024b63913806b0c7e85497]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:41.392] [ERROR] [] [18e11ef1f11047d5932cf81e24fa6567]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:41.392] [DEBUG] [] [18e11ef1f11047d5932cf81e24fa6567]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:41.392] [DEBUG] [] [18e11ef1f11047d5932cf81e24fa6567]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:41.393] [DEBUG] [] [57503a3fed024b63913806b0c7e85497]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:41.393] [DEBUG] [] [57503a3fed024b63913806b0c7e85497]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:42.010] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 19:57:42.010] [DEBUG] [] [6840477cb8de498b97fb688a20a39ae0]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 19:57:42.011] [ERROR] [] [6840477cb8de498b97fb688a20a39ae0]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:42.011] [DEBUG] [] [6840477cb8de498b97fb688a20a39ae0]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:42.011] [DEBUG] [] [6840477cb8de498b97fb688a20a39ae0]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:42.015] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 19:57:42.016] [DEBUG] [] [ed55fc78628f4618ad06daa3c9068539]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 19:57:42.018] [ERROR] [] [ed55fc78628f4618ad06daa3c9068539]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:42.018] [DEBUG] [] [ed55fc78628f4618ad06daa3c9068539]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:42.019] [DEBUG] [] [ed55fc78628f4618ad06daa3c9068539]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:42.022] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 19:57:42.022] [DEBUG] [] [6b208d240a5440c6a1aa1c1ae005e820]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 19:57:42.023] [ERROR] [] [6b208d240a5440c6a1aa1c1ae005e820]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 19:57:42.023] [DEBUG] [] [6b208d240a5440c6a1aa1c1ae005e820]: ==> leave RequestContextHolder.
+[2026-05-01 19:57:42.023] [DEBUG] [] [6b208d240a5440c6a1aa1c1ae005e820]: ==> leave RequestContextHolder.
+[2026-05-01 20:02:39.791] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:02:39.797] [DEBUG] [] [171865801e88463691688a69d1ed843c]: ==> leave RequestContextHolder.
+[2026-05-01 20:02:39.800] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:02:39.803] [DEBUG] [] [d859b1615af242f98df2f0556652e5cc]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 20:02:39.803] [DEBUG] [] [d859b1615af242f98df2f0556652e5cc]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 20:02:39.804] [DEBUG] [] [d859b1615af242f98df2f0556652e5cc]: <==      Total: 1
+[2026-05-01 20:02:39.877] [DEBUG] [] [d859b1615af242f98df2f0556652e5cc]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:127.0.0.1
+[2026-05-01 20:02:39.877] [DEBUG] [] [d859b1615af242f98df2f0556652e5cc]: 请求错误-返回：用户名或密码错误  ,地址：http://127.0.0.1:9011/webapi/auth/login
+[2026-05-01 20:02:39.877] [ERROR] [] [d859b1615af242f98df2f0556652e5cc]: 请求异常 - 客户端: 版本:null 地址:http://127.0.0.1:9011/webapi/auth/login 异常:用户名或密码错误
+cn.nine.commons.basic.exception.BadRequestException: 用户名或密码错误
+	at cn.nine.pros.post.biz.controller.admin.AdminAuthController.login(AdminAuthController.java:46)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+[2026-05-01 20:02:39.879] [DEBUG] [] [d859b1615af242f98df2f0556652e5cc]: ==> leave RequestContextHolder.
+[2026-05-01 20:03:14.401] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:03:14.414] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 20:03:14.415] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 20:03:14.416] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: <==      Total: 1
+[2026-05-01 20:03:14.487] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: ==>  Preparing: UPDATE bu_admin_user SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=? WHERE id=?
+[2026-05-01 20:03:14.487] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: ==> Parameters: admin(String), $2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS(String), 超级管理员(String), 1(Integer), 1(Integer), 2026-05-01T20:03:14.486422800(LocalDateTime), 127.0.0.1(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), false(Boolean), 1(Long)
+[2026-05-01 20:03:14.497] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: <==    Updates: 1
+[2026-05-01 20:03:14.497] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:03:14.497] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-01 20:03:14.497] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:03:14.497] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: Writing [{admin=AdminUserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T19:56:36.675542, createdBy=syste (truncated)...]
+[2026-05-01 20:03:14.498] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: =========================================
+[2026-05-01 20:03:14.498] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"admin":{
+			"createdAt":"2026-05-01 19:56:36",
+			"createdBy":"system",
+			"delFlag":false,
+			"id":1,
+			"lastLoginAt":"2026-05-01 20:03:14.486422800",
+			"lastLoginIp":"127.0.0.1",
+			"nickname":"超级管理员",
+			"role":1,
+			"status":1,
+			"updatedAt":"2026-05-01 19:56:36",
+			"updatedBy":"system",
+			"username":"admin"
+		},
+		"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5MDAwMDAwMDAxIiwiaWF0IjoxNzc3NjM2OTk0LCJleHAiOjE3NzgyNDE3OTR9.Kx3sakR-jJUnFMDQHNMOXBEZynLHlXEpaDlftnpRM9E"
+	},
+	"message":"OK",
+	"success":true
+} 
+java.util.Map<java.lang.String, java.lang.Object>
+
+[2026-05-01 20:03:14.498] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: =========================================
+[2026-05-01 20:03:14.499] [DEBUG] [] [e1df145391644f6db930b28475d7c09d]: ==> leave RequestContextHolder.
+[2026-05-01 20:03:14.597] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:03:14.597] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:03:14.597] [DEBUG] [] [d94fc729cb684ae98c5c175f8a70d70c]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:03:14.597] [DEBUG] [] [ea823dcd6e24400580497833d18c8338]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:03:14.598] [ERROR] [] [ea823dcd6e24400580497833d18c8338]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:03:14.598] [ERROR] [] [d94fc729cb684ae98c5c175f8a70d70c]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:03:14.598] [DEBUG] [] [ea823dcd6e24400580497833d18c8338]: ==> leave RequestContextHolder.
+[2026-05-01 20:03:14.598] [DEBUG] [] [d94fc729cb684ae98c5c175f8a70d70c]: ==> leave RequestContextHolder.
+[2026-05-01 20:03:14.598] [DEBUG] [] [ea823dcd6e24400580497833d18c8338]: ==> leave RequestContextHolder.
+[2026-05-01 20:03:14.598] [DEBUG] [] [d94fc729cb684ae98c5c175f8a70d70c]: ==> leave RequestContextHolder.
+[2026-05-01 20:03:14.600] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:03:14.600] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:03:14.601] [DEBUG] [] [cc699c9379db46baadc466fc3a96360b]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:03:14.601] [DEBUG] [] [40f159c484a24d97a40c1ca40fcdaffd]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:03:14.602] [ERROR] [] [cc699c9379db46baadc466fc3a96360b]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:03:14.602] [ERROR] [] [40f159c484a24d97a40c1ca40fcdaffd]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:03:14.602] [DEBUG] [] [cc699c9379db46baadc466fc3a96360b]: ==> leave RequestContextHolder.
+[2026-05-01 20:03:14.602] [DEBUG] [] [40f159c484a24d97a40c1ca40fcdaffd]: ==> leave RequestContextHolder.
+[2026-05-01 20:03:14.602] [DEBUG] [] [cc699c9379db46baadc466fc3a96360b]: ==> leave RequestContextHolder.
+[2026-05-01 20:03:14.602] [DEBUG] [] [40f159c484a24d97a40c1ca40fcdaffd]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:29.353] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:06:29.357] [DEBUG] [] [df6bfb11365846a79c88d2a2c57c0dd9]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 20:06:29.358] [DEBUG] [] [df6bfb11365846a79c88d2a2c57c0dd9]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 20:06:29.359] [DEBUG] [] [df6bfb11365846a79c88d2a2c57c0dd9]: <==      Total: 1
+[2026-05-01 20:06:29.421] [DEBUG] [] [df6bfb11365846a79c88d2a2c57c0dd9]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:127.0.0.1
+[2026-05-01 20:06:29.421] [DEBUG] [] [df6bfb11365846a79c88d2a2c57c0dd9]: 请求错误-返回：用户名或密码错误  ,地址：http://localhost/webapi/auth/login
+[2026-05-01 20:06:29.421] [ERROR] [] [df6bfb11365846a79c88d2a2c57c0dd9]: 请求异常 - 客户端: 版本:null 地址:http://localhost/webapi/auth/login 异常:用户名或密码错误
+cn.nine.commons.basic.exception.BadRequestException: 用户名或密码错误
+	at cn.nine.pros.post.biz.controller.admin.AdminAuthController.login(AdminAuthController.java:46)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ForwardedHeaderFilter.doFilterInternal(ForwardedHeaderFilter.java:173)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+[2026-05-01 20:06:29.422] [DEBUG] [] [df6bfb11365846a79c88d2a2c57c0dd9]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:40.237] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:06:40.240] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 20:06:40.240] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 20:06:40.241] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: <==      Total: 1
+[2026-05-01 20:06:40.303] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: ==>  Preparing: UPDATE bu_admin_user SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=? WHERE id=?
+[2026-05-01 20:06:40.304] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: ==> Parameters: admin(String), $2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS(String), 超级管理员(String), 1(Integer), 1(Integer), 2026-05-01T20:06:40.303656600(LocalDateTime), 127.0.0.1(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), false(Boolean), 1(Long)
+[2026-05-01 20:06:40.314] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: <==    Updates: 1
+[2026-05-01 20:06:40.315] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:06:40.315] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-01 20:06:40.316] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:06:40.316] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: Writing [{admin=AdminUserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T19:56:36.675542, createdBy=syste (truncated)...]
+[2026-05-01 20:06:40.316] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: =========================================
+[2026-05-01 20:06:40.316] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"admin":{
+			"createdAt":"2026-05-01 19:56:36",
+			"createdBy":"system",
+			"delFlag":false,
+			"id":1,
+			"lastLoginAt":"2026-05-01 20:06:40.303656600",
+			"lastLoginIp":"127.0.0.1",
+			"nickname":"超级管理员",
+			"role":1,
+			"status":1,
+			"updatedAt":"2026-05-01 19:56:36",
+			"updatedBy":"system",
+			"username":"admin"
+		},
+		"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5MDAwMDAwMDAxIiwiaWF0IjoxNzc3NjM3MjAwLCJleHAiOjE3NzgyNDIwMDB9.dYy50FENBZx-WMiMC54jtavXVz1QT95iU-8dwsnmPo8"
+	},
+	"message":"OK",
+	"success":true
+} 
+java.util.Map<java.lang.String, java.lang.Object>
+
+[2026-05-01 20:06:40.316] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: =========================================
+[2026-05-01 20:06:40.316] [DEBUG] [] [26e515d756664cc0971ac063c9b4c4c0]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:40.422] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:06:40.422] [DEBUG] [] [7792ecc39144440980800a1d9286c571]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:06:40.423] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:06:40.423] [ERROR] [] [7792ecc39144440980800a1d9286c571]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:06:40.423] [DEBUG] [] [15aedec553534561810b346276ab7329]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:06:40.423] [DEBUG] [] [7792ecc39144440980800a1d9286c571]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:40.423] [DEBUG] [] [7792ecc39144440980800a1d9286c571]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:40.423] [ERROR] [] [15aedec553534561810b346276ab7329]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:06:40.424] [DEBUG] [] [15aedec553534561810b346276ab7329]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:40.424] [DEBUG] [] [15aedec553534561810b346276ab7329]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:40.426] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:06:40.426] [DEBUG] [] [36adf00b5e8b43a08a8fb244cfdddbbe]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:06:40.427] [ERROR] [] [36adf00b5e8b43a08a8fb244cfdddbbe]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:06:40.427] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:06:40.427] [DEBUG] [] [36adf00b5e8b43a08a8fb244cfdddbbe]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:40.427] [DEBUG] [] [36adf00b5e8b43a08a8fb244cfdddbbe]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:40.427] [DEBUG] [] [0cf9b17d8966426faf6ff022deb53463]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:06:40.428] [ERROR] [] [0cf9b17d8966426faf6ff022deb53463]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:06:40.429] [DEBUG] [] [0cf9b17d8966426faf6ff022deb53463]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:40.429] [DEBUG] [] [0cf9b17d8966426faf6ff022deb53463]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:49.554] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:06:49.558] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 20:06:49.559] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 20:06:49.559] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: <==      Total: 1
+[2026-05-01 20:06:49.622] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: ==>  Preparing: UPDATE bu_admin_user SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=? WHERE id=?
+[2026-05-01 20:06:49.622] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: ==> Parameters: admin(String), $2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS(String), 超级管理员(String), 1(Integer), 1(Integer), 2026-05-01T20:06:49.622463800(LocalDateTime), 127.0.0.1(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), false(Boolean), 1(Long)
+[2026-05-01 20:06:49.633] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: <==    Updates: 1
+[2026-05-01 20:06:49.633] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:06:49.634] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-01 20:06:49.634] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:06:49.634] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: Writing [{admin=AdminUserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T19:56:36.675542, createdBy=syste (truncated)...]
+[2026-05-01 20:06:49.634] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: =========================================
+[2026-05-01 20:06:49.634] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"admin":{
+			"createdAt":"2026-05-01 19:56:36",
+			"createdBy":"system",
+			"delFlag":false,
+			"id":1,
+			"lastLoginAt":"2026-05-01 20:06:49.622463800",
+			"lastLoginIp":"127.0.0.1",
+			"nickname":"超级管理员",
+			"role":1,
+			"status":1,
+			"updatedAt":"2026-05-01 19:56:36",
+			"updatedBy":"system",
+			"username":"admin"
+		},
+		"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5MDAwMDAwMDAxIiwiaWF0IjoxNzc3NjM3MjA5LCJleHAiOjE3NzgyNDIwMDl9.L_89YYCMqOJqaBF-c7_ZRDEKZmztaMMfm90c8SfFZR4"
+	},
+	"message":"OK",
+	"success":true
+} 
+java.util.Map<java.lang.String, java.lang.Object>
+
+[2026-05-01 20:06:49.634] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: =========================================
+[2026-05-01 20:06:49.635] [DEBUG] [] [23761c2ee4404524ac26bf85933a0f26]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:49.738] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:06:49.738] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:06:49.738] [DEBUG] [] [59180f60529f41c884fe474dc4f33e46]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:06:49.738] [DEBUG] [] [1657dae0dc2744f1ac051195783e1c21]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:06:49.739] [ERROR] [] [59180f60529f41c884fe474dc4f33e46]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:06:49.739] [ERROR] [] [1657dae0dc2744f1ac051195783e1c21]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:06:49.739] [DEBUG] [] [59180f60529f41c884fe474dc4f33e46]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:49.739] [DEBUG] [] [1657dae0dc2744f1ac051195783e1c21]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:49.739] [DEBUG] [] [59180f60529f41c884fe474dc4f33e46]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:49.739] [DEBUG] [] [1657dae0dc2744f1ac051195783e1c21]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:49.742] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:06:49.742] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:06:49.742] [DEBUG] [] [066b790129a048d6b52a629e6583a480]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:06:49.742] [DEBUG] [] [4eefe672bc604e34bc55522bf8870e83]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:06:49.743] [ERROR] [] [066b790129a048d6b52a629e6583a480]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:06:49.743] [ERROR] [] [4eefe672bc604e34bc55522bf8870e83]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:06:49.743] [DEBUG] [] [066b790129a048d6b52a629e6583a480]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:49.743] [DEBUG] [] [4eefe672bc604e34bc55522bf8870e83]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:49.743] [DEBUG] [] [066b790129a048d6b52a629e6583a480]: ==> leave RequestContextHolder.
+[2026-05-01 20:06:49.743] [DEBUG] [] [4eefe672bc604e34bc55522bf8870e83]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:14.091] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:08:14.093] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 20:08:14.093] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 20:08:14.094] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: <==      Total: 1
+[2026-05-01 20:08:14.159] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: ==>  Preparing: UPDATE bu_admin_user SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=? WHERE id=?
+[2026-05-01 20:08:14.159] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: ==> Parameters: admin(String), $2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS(String), 超级管理员(String), 1(Integer), 1(Integer), 2026-05-01T20:08:14.159091900(LocalDateTime), 127.0.0.1(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), false(Boolean), 1(Long)
+[2026-05-01 20:08:14.160] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: <==    Updates: 1
+[2026-05-01 20:08:14.161] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:08:14.161] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-01 20:08:14.161] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:08:14.161] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: Writing [{admin=AdminUserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T19:56:36.675542, createdBy=syste (truncated)...]
+[2026-05-01 20:08:14.161] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: =========================================
+[2026-05-01 20:08:14.161] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"admin":{
+			"createdAt":"2026-05-01 19:56:36",
+			"createdBy":"system",
+			"delFlag":false,
+			"id":1,
+			"lastLoginAt":"2026-05-01 20:08:14.159091900",
+			"lastLoginIp":"127.0.0.1",
+			"nickname":"超级管理员",
+			"role":1,
+			"status":1,
+			"updatedAt":"2026-05-01 19:56:36",
+			"updatedBy":"system",
+			"username":"admin"
+		},
+		"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5MDAwMDAwMDAxIiwiaWF0IjoxNzc3NjM3Mjk0LCJleHAiOjE3NzgyNDIwOTR9.sksxe_ZVPKbB84BX6oj_iSoj3EoVUhmB1uOqW3Jve_I"
+	},
+	"message":"OK",
+	"success":true
+} 
+java.util.Map<java.lang.String, java.lang.Object>
+
+[2026-05-01 20:08:14.161] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: =========================================
+[2026-05-01 20:08:14.162] [DEBUG] [] [dd1cd6a5cecd49f48b71b59d82dc0245]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:14.273] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:08:14.273] [DEBUG] [] [6df5681035584f5a9a16b9f5ae12ccda]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:08:14.274] [ERROR] [] [6df5681035584f5a9a16b9f5ae12ccda]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:08:14.274] [DEBUG] [] [6df5681035584f5a9a16b9f5ae12ccda]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:14.274] [DEBUG] [] [6df5681035584f5a9a16b9f5ae12ccda]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:14.278] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:08:14.278] [DEBUG] [] [27465d325ab042f8ba986185e4c9adc9]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:08:14.279] [ERROR] [] [27465d325ab042f8ba986185e4c9adc9]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:08:14.279] [DEBUG] [] [27465d325ab042f8ba986185e4c9adc9]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:14.279] [DEBUG] [] [27465d325ab042f8ba986185e4c9adc9]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:14.281] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:08:14.282] [DEBUG] [] [0d971bc83b7440109db4ce5cbea1d66d]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:08:14.282] [ERROR] [] [0d971bc83b7440109db4ce5cbea1d66d]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:08:14.282] [DEBUG] [] [0d971bc83b7440109db4ce5cbea1d66d]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:14.282] [DEBUG] [] [0d971bc83b7440109db4ce5cbea1d66d]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:14.285] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:08:14.286] [DEBUG] [] [c858ddb5bed348569ac72083e85a65ff]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:08:14.286] [ERROR] [] [c858ddb5bed348569ac72083e85a65ff]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:08:14.286] [DEBUG] [] [c858ddb5bed348569ac72083e85a65ff]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:14.286] [DEBUG] [] [c858ddb5bed348569ac72083e85a65ff]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:26.188] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:08:26.196] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 20:08:26.197] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 20:08:26.199] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: <==      Total: 1
+[2026-05-01 20:08:26.288] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: ==>  Preparing: UPDATE bu_admin_user SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=? WHERE id=?
+[2026-05-01 20:08:26.288] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: ==> Parameters: admin(String), $2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS(String), 超级管理员(String), 1(Integer), 1(Integer), 2026-05-01T20:08:26.287426100(LocalDateTime), 127.0.0.1(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), false(Boolean), 1(Long)
+[2026-05-01 20:08:26.289] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: <==    Updates: 1
+[2026-05-01 20:08:26.290] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:08:26.290] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-01 20:08:26.290] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:08:26.290] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: Writing [{admin=AdminUserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T19:56:36.675542, createdBy=syste (truncated)...]
+[2026-05-01 20:08:26.290] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: =========================================
+[2026-05-01 20:08:26.290] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"admin":{
+			"createdAt":"2026-05-01 19:56:36",
+			"createdBy":"system",
+			"delFlag":false,
+			"id":1,
+			"lastLoginAt":"2026-05-01 20:08:26.287426100",
+			"lastLoginIp":"127.0.0.1",
+			"nickname":"超级管理员",
+			"role":1,
+			"status":1,
+			"updatedAt":"2026-05-01 19:56:36",
+			"updatedBy":"system",
+			"username":"admin"
+		},
+		"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5MDAwMDAwMDAxIiwiaWF0IjoxNzc3NjM3MzA2LCJleHAiOjE3NzgyNDIxMDZ9.PdtmfmsQlQ1pTrJ4SNn02_OHQgdK6xrWXgcXsRamupE"
+	},
+	"message":"OK",
+	"success":true
+} 
+java.util.Map<java.lang.String, java.lang.Object>
+
+[2026-05-01 20:08:26.290] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: =========================================
+[2026-05-01 20:08:26.290] [DEBUG] [] [63a4e4b835b14d1195ae4838055304c9]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:26.371] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:08:26.371] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:08:26.371] [DEBUG] [] [6d2168a67dc04fdb86928c1ef1f3cac2]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:08:26.371] [DEBUG] [] [3c213e8102964975bfa0d8720749ed75]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:08:26.371] [ERROR] [] [6d2168a67dc04fdb86928c1ef1f3cac2]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:08:26.371] [ERROR] [] [3c213e8102964975bfa0d8720749ed75]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:08:26.371] [DEBUG] [] [6d2168a67dc04fdb86928c1ef1f3cac2]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:26.371] [DEBUG] [] [3c213e8102964975bfa0d8720749ed75]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:26.371] [DEBUG] [] [6d2168a67dc04fdb86928c1ef1f3cac2]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:26.371] [DEBUG] [] [3c213e8102964975bfa0d8720749ed75]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:26.375] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:08:26.375] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:08:26.375] [DEBUG] [] [3ff879ca2f394a3baed51ce940a85648]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:08:26.375] [DEBUG] [] [870354b99584451ba5f18894b7cb1bc6]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:08:26.375] [ERROR] [] [870354b99584451ba5f18894b7cb1bc6]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:08:26.375] [ERROR] [] [3ff879ca2f394a3baed51ce940a85648]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:08:26.375] [DEBUG] [] [3ff879ca2f394a3baed51ce940a85648]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:26.375] [DEBUG] [] [870354b99584451ba5f18894b7cb1bc6]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:26.375] [DEBUG] [] [3ff879ca2f394a3baed51ce940a85648]: ==> leave RequestContextHolder.
+[2026-05-01 20:08:26.375] [DEBUG] [] [870354b99584451ba5f18894b7cb1bc6]: ==> leave RequestContextHolder.
+[2026-05-01 20:09:15.979] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:09:15.982] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 20:09:15.982] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 20:09:15.984] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: <==      Total: 1
+[2026-05-01 20:09:16.049] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: ==>  Preparing: UPDATE bu_admin_user SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=? WHERE id=?
+[2026-05-01 20:09:16.050] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: ==> Parameters: admin(String), $2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS(String), 超级管理员(String), 1(Integer), 1(Integer), 2026-05-01T20:09:16.048009300(LocalDateTime), 127.0.0.1(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), false(Boolean), 1(Long)
+[2026-05-01 20:09:16.051] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: <==    Updates: 1
+[2026-05-01 20:09:16.052] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:09:16.052] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-01 20:09:16.052] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:09:16.052] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: Writing [{admin=AdminUserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T19:56:36.675542, createdBy=syste (truncated)...]
+[2026-05-01 20:09:16.052] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: =========================================
+[2026-05-01 20:09:16.052] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"admin":{
+			"createdAt":"2026-05-01 19:56:36",
+			"createdBy":"system",
+			"delFlag":false,
+			"id":1,
+			"lastLoginAt":"2026-05-01 20:09:16.048009300",
+			"lastLoginIp":"127.0.0.1",
+			"nickname":"超级管理员",
+			"role":1,
+			"status":1,
+			"updatedAt":"2026-05-01 19:56:36",
+			"updatedBy":"system",
+			"username":"admin"
+		},
+		"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5MDAwMDAwMDAxIiwiaWF0IjoxNzc3NjM3MzU2LCJleHAiOjE3NzgyNDIxNTZ9.KC38U5UlzeK2_UmgUSNrcYorH2dteGiVZUs7iMVJhN4"
+	},
+	"message":"OK",
+	"success":true
+} 
+java.util.Map<java.lang.String, java.lang.Object>
+
+[2026-05-01 20:09:16.052] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: =========================================
+[2026-05-01 20:09:16.052] [DEBUG] [] [31c5da5f2fd24a62bed2a19e52250e5e]: ==> leave RequestContextHolder.
+[2026-05-01 20:09:16.171] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:09:16.171] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:09:16.171] [DEBUG] [] [2bf3513208a44562b216208e653120b4]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:09:16.171] [DEBUG] [] [e06a24a568ce41efb13cd5bac8e1d34f]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:09:18.807] [ERROR] [] [2bf3513208a44562b216208e653120b4]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:09:18.808] [DEBUG] [] [2bf3513208a44562b216208e653120b4]: ==> leave RequestContextHolder.
+[2026-05-01 20:09:18.808] [DEBUG] [] [2bf3513208a44562b216208e653120b4]: ==> leave RequestContextHolder.
+[2026-05-01 20:09:18.810] [ERROR] [] [e06a24a568ce41efb13cd5bac8e1d34f]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:09:26.668] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:09:26.669] [DEBUG] [] [1d97d57244bb4dd3981eb23d31177462]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:09:26.671] [DEBUG] [] [e06a24a568ce41efb13cd5bac8e1d34f]: ==> leave RequestContextHolder.
+[2026-05-01 20:09:26.672] [DEBUG] [] [e06a24a568ce41efb13cd5bac8e1d34f]: ==> leave RequestContextHolder.
+[2026-05-01 20:09:28.684] [ERROR] [] [1d97d57244bb4dd3981eb23d31177462]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:09:28.684] [DEBUG] [] [1d97d57244bb4dd3981eb23d31177462]: ==> leave RequestContextHolder.
+[2026-05-01 20:09:28.684] [DEBUG] [] [1d97d57244bb4dd3981eb23d31177462]: ==> leave RequestContextHolder.
+[2026-05-01 20:10:39.373] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:10:39.375] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 20:10:39.376] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 20:10:39.376] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: <==      Total: 1
+[2026-05-01 20:10:39.441] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: ==>  Preparing: UPDATE bu_admin_user SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=? WHERE id=?
+[2026-05-01 20:10:39.443] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: ==> Parameters: admin(String), $2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS(String), 超级管理员(String), 1(Integer), 1(Integer), 2026-05-01T20:10:39.441718600(LocalDateTime), 127.0.0.1(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), false(Boolean), 1(Long)
+[2026-05-01 20:10:39.453] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: <==    Updates: 1
+[2026-05-01 20:10:39.453] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:10:39.453] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-01 20:10:39.453] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:10:39.454] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: Writing [{admin=AdminUserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T19:56:36.675542, createdBy=syste (truncated)...]
+[2026-05-01 20:10:39.454] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: =========================================
+[2026-05-01 20:10:39.454] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"admin":{
+			"createdAt":"2026-05-01 19:56:36",
+			"createdBy":"system",
+			"delFlag":false,
+			"id":1,
+			"lastLoginAt":"2026-05-01 20:10:39.441718600",
+			"lastLoginIp":"127.0.0.1",
+			"nickname":"超级管理员",
+			"role":1,
+			"status":1,
+			"updatedAt":"2026-05-01 19:56:36",
+			"updatedBy":"system",
+			"username":"admin"
+		},
+		"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5MDAwMDAwMDAxIiwiaWF0IjoxNzc3NjM3NDM5LCJleHAiOjE3NzgyNDIyMzl9.zjgbYsccZjcZOFlSRRJ09pGqjlg_RJBUuYeTwkzT-PM"
+	},
+	"message":"OK",
+	"success":true
+} 
+java.util.Map<java.lang.String, java.lang.Object>
+
+[2026-05-01 20:10:39.454] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: =========================================
+[2026-05-01 20:10:39.454] [DEBUG] [] [32f11160d68d4ee68312e5b069cce7d7]: ==> leave RequestContextHolder.
+[2026-05-01 20:10:39.565] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:10:39.565] [DEBUG] [] [93e571a3e27f40c781a08994df2ed2c8]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:10:44.214] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:10:44.215] [DEBUG] [] [78e126470ada4eaeba34b145a893b4ed]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:10:50.233] [ERROR] [] [78e126470ada4eaeba34b145a893b4ed]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:10:54.435] [DEBUG] [] [78e126470ada4eaeba34b145a893b4ed]: ==> leave RequestContextHolder.
+[2026-05-01 20:10:54.435] [DEBUG] [] [78e126470ada4eaeba34b145a893b4ed]: ==> leave RequestContextHolder.
+[2026-05-01 20:10:59.677] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:10:59.678] [DEBUG] [] [f5133b1dc71a47c6a5be2b0befa93f44]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:11:05.608] [ERROR] [] [f5133b1dc71a47c6a5be2b0befa93f44]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:11:05.611] [DEBUG] [] [f5133b1dc71a47c6a5be2b0befa93f44]: ==> leave RequestContextHolder.
+[2026-05-01 20:11:05.611] [DEBUG] [] [f5133b1dc71a47c6a5be2b0befa93f44]: ==> leave RequestContextHolder.
+[2026-05-01 20:11:11.432] [ERROR] [] [93e571a3e27f40c781a08994df2ed2c8]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:11:13.544] [DEBUG] [] [93e571a3e27f40c781a08994df2ed2c8]: ==> leave RequestContextHolder.
+[2026-05-01 20:11:13.544] [DEBUG] [] [93e571a3e27f40c781a08994df2ed2c8]: ==> leave RequestContextHolder.
+[2026-05-01 20:15:10.361] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:15:10.364] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: ==>  Preparing: SELECT id,username,password_hash,nickname,role,status,last_login_at,last_login_ip,created_at,created_by,updated_at,updated_by,del_flag FROM bu_admin_user WHERE (username = ? AND del_flag = ?)
+[2026-05-01 20:15:10.364] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: ==> Parameters: admin(String), false(Boolean)
+[2026-05-01 20:15:10.366] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: <==      Total: 1
+[2026-05-01 20:15:10.436] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: ==>  Preparing: UPDATE bu_admin_user SET username=?, password_hash=?, nickname=?, role=?, status=?, last_login_at=?, last_login_ip=?, created_at=?, created_by=?, updated_at=?, updated_by=?, del_flag=? WHERE id=?
+[2026-05-01 20:15:10.436] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: ==> Parameters: admin(String), $2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS(String), 超级管理员(String), 1(Integer), 1(Integer), 2026-05-01T20:15:10.435617600(LocalDateTime), 127.0.0.1(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), 2026-05-01T19:56:36.675542(LocalDateTime), system(String), false(Boolean), 1(Long)
+[2026-05-01 20:15:10.447] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: <==    Updates: 1
+[2026-05-01 20:15:10.447] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:15:10.447] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-01 20:15:10.447] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:15:10.448] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: Writing [{admin=AdminUserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T19:56:36.675542, createdBy=syste (truncated)...]
+[2026-05-01 20:15:10.448] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: =========================================
+[2026-05-01 20:15:10.448] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"admin":{
+			"createdAt":"2026-05-01 19:56:36",
+			"createdBy":"system",
+			"delFlag":false,
+			"id":1,
+			"lastLoginAt":"2026-05-01 20:15:10.435617600",
+			"lastLoginIp":"127.0.0.1",
+			"nickname":"超级管理员",
+			"role":1,
+			"status":1,
+			"updatedAt":"2026-05-01 19:56:36",
+			"updatedBy":"system",
+			"username":"admin"
+		},
+		"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5MDAwMDAwMDAxIiwiaWF0IjoxNzc3NjM3NzEwLCJleHAiOjE3NzgyNDI1MTB9.As5jg1-49xxydvT9uNl_PBbiPSQgC4BQHv-nB4cO5DY"
+	},
+	"message":"OK",
+	"success":true
+} 
+java.util.Map<java.lang.String, java.lang.Object>
+
+[2026-05-01 20:15:10.448] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: =========================================
+[2026-05-01 20:15:10.449] [DEBUG] [] [ba1e042a18024af7b11866858ccfead2]: ==> leave RequestContextHolder.
+[2026-05-01 20:15:10.575] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:15:10.576] [DEBUG] [] [482d5da6f6d04473bf06ed5c15378a46]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:15:20.944] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:15:20.944] [DEBUG] [] [8f0447eb93e0478795d797c628376891]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:15:20.946] [ERROR] [] [8f0447eb93e0478795d797c628376891]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:15:20.946] [DEBUG] [] [8f0447eb93e0478795d797c628376891]: ==> leave RequestContextHolder.
+[2026-05-01 20:15:20.946] [DEBUG] [] [8f0447eb93e0478795d797c628376891]: ==> leave RequestContextHolder.
+[2026-05-01 20:15:20.950] [ERROR] [] [482d5da6f6d04473bf06ed5c15378a46]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:15:20.950] [DEBUG] [] [482d5da6f6d04473bf06ed5c15378a46]: ==> leave RequestContextHolder.
+[2026-05-01 20:15:20.950] [DEBUG] [] [482d5da6f6d04473bf06ed5c15378a46]: ==> leave RequestContextHolder.
+[2026-05-01 20:15:20.952] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:15:20.954] [DEBUG] [] [e07ffabfa7ac432e941bee6d65cab696]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:15:20.955] [ERROR] [] [e07ffabfa7ac432e941bee6d65cab696]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:15:20.955] [DEBUG] [] [e07ffabfa7ac432e941bee6d65cab696]: ==> leave RequestContextHolder.
+[2026-05-01 20:15:20.955] [DEBUG] [] [e07ffabfa7ac432e941bee6d65cab696]: ==> leave RequestContextHolder.
+[2026-05-01 20:15:20.966] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:15:20.966] [DEBUG] [] [5f0320a70d8647ce812d6ff4bf9e8f3d]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:15:20.967] [ERROR] [] [5f0320a70d8647ce812d6ff4bf9e8f3d]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:15:20.967] [DEBUG] [] [5f0320a70d8647ce812d6ff4bf9e8f3d]: ==> leave RequestContextHolder.
+[2026-05-01 20:15:20.967] [DEBUG] [] [5f0320a70d8647ce812d6ff4bf9e8f3d]: ==> leave RequestContextHolder.
+[2026-05-01 20:21:04.990] [INFO ] [] []: 开始优雅停机...
+[2026-05-01 20:21:05.255] [INFO ] [] []: 已停止接收新请求
+[2026-05-01 20:21:05.255] [INFO ] [] []: 优雅停机完成
+[2026-05-01 20:21:46.163] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 20096 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 20:21:46.166] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 20:21:46.167] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 20:21:48.551] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 20:21:48.551] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 20:21:48.552] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 20:22:17.781] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 9700 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 20:22:17.782] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 20:22:17.783] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 20:22:19.638] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 20:22:19.640] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 20:22:19.640] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 20:22:21.346] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 20:22:21.349] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 20:22:21.475] [INFO ] [] []: ===>> Load HttpMessageConverters: 3 : [org.springframework.http.converter.ByteArrayHttpMessageConverter@576a8b00, cn.nine.commons.web.model.converter.MyJackson2HttpMessageConverter@40ebb56, org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@1d988297]
+[2026-05-01 20:22:21.520] [DEBUG] [] []: this converter not supports the request, use next.
+[2026-05-01 20:22:21.951] [INFO ] [] []: Started SeniorPostApplication in 4.699 seconds (process running for 5.319)
+[2026-05-01 20:22:21.956] [INFO ] [] []: 
+----------------------------------------------------------
+	Application Senior Post API is running! Access URLs:
+	Local: 		http://localhost:9011
+	External: 	http://192.168.0.136:9011
+	swagger-ui: http://192.168.0.136:9011/doc.html
+----------------------------------------------------------
+[2026-05-01 20:22:26.392] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:22:26.548] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (email = ? AND del_flag = ?)
+[2026-05-01 20:22:26.555] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: ==> Parameters: admin@staff.local(String), false(Boolean)
+[2026-05-01 20:22:26.565] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: <==      Total: 1
+[2026-05-01 20:22:26.635] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: ==>  Preparing: UPDATE bu_user SET last_login_at=?,updated_at=? WHERE (id = ?)
+[2026-05-01 20:22:26.635] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: ==> Parameters: 2026-05-01T20:22:26.631848300(LocalDateTime), 2026-05-01T20:22:26.632353100(LocalDateTime), 1(Long)
+[2026-05-01 20:22:26.645] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: <==    Updates: 1
+[2026-05-01 20:22:26.700] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-01 20:22:26.700] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: ==> Parameters: 1(Long)
+[2026-05-01 20:22:26.701] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: <==      Total: 1
+[2026-05-01 20:22:26.705] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:22:26.706] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-01 20:22:26.706] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: ===> Supports JSON Message Converter : true
+[2026-05-01 20:22:26.713] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: Writing [{admin=UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T20:22:20.651190, createdBy=system, up (truncated)...]
+[2026-05-01 20:22:26.715] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: =========================================
+[2026-05-01 20:22:26.817] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"admin":{
+			"birthYear":1990,
+			"createdAt":"2026-05-01 20:22:20",
+			"createdBy":"system",
+			"delFlag":false,
+			"email":"admin@staff.local",
+			"id":1,
+			"isVip":false,
+			"lastLoginAt":"2026-05-01 20:22:26.631848",
+			"nickname":"超级管理员",
+			"staffRole":1,
+			"stampsBalance":0,
+			"status":1,
+			"updatedAt":"2026-05-01 20:22:26",
+			"updatedBy":"system"
+		},
+		"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzc3NjM4MTQ2LCJleHAiOjE3NzgyNDI5NDZ9.JMOotz_zdOm9GKnCS8mnKWtQwhEU35uWQt6FXGWqUXk"
+	},
+	"message":"OK",
+	"success":true
+} 
+java.util.Map<java.lang.String, java.lang.Object>
+
+[2026-05-01 20:22:26.817] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: =========================================
+[2026-05-01 20:22:26.824] [DEBUG] [] [e8a0fef0f25542b1b3b542aa96b05981]: ==> leave RequestContextHolder.
+[2026-05-01 20:22:26.948] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:22:26.948] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:22:26.949] [DEBUG] [] [fe4963e9a8e2446fad282fd8cfd1a6b8]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:22:26.949] [DEBUG] [] [8b9716fa533b41d38fae51dd248bdef4]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:22:26.978] [ERROR] [] [8b9716fa533b41d38fae51dd248bdef4]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:22:26.978] [ERROR] [] [fe4963e9a8e2446fad282fd8cfd1a6b8]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:22:26.980] [DEBUG] [] [fe4963e9a8e2446fad282fd8cfd1a6b8]: ==> leave RequestContextHolder.
+[2026-05-01 20:22:26.980] [DEBUG] [] [8b9716fa533b41d38fae51dd248bdef4]: ==> leave RequestContextHolder.
+[2026-05-01 20:22:26.981] [DEBUG] [] [fe4963e9a8e2446fad282fd8cfd1a6b8]: ==> leave RequestContextHolder.
+[2026-05-01 20:22:26.981] [DEBUG] [] [8b9716fa533b41d38fae51dd248bdef4]: ==> leave RequestContextHolder.
+[2026-05-01 20:22:26.984] [DEBUG] [] []: ==》/webapi/dashboard/summary -> into PreRequestContextFilter.
+[2026-05-01 20:22:26.984] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-01 20:22:26.984] [DEBUG] [] [ab9d8c4fac204a838fb570912ba3621c]: 地址 /webapi/dashboard/summary 进入过滤器
+[2026-05-01 20:22:26.984] [DEBUG] [] [61134590e87a420fbf6f388fe88d95d1]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-01 20:22:26.985] [ERROR] [] [ab9d8c4fac204a838fb570912ba3621c]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:22:26.985] [ERROR] [] [61134590e87a420fbf6f388fe88d95d1]: ValidateToken error signatureException: JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+[2026-05-01 20:22:26.986] [DEBUG] [] [61134590e87a420fbf6f388fe88d95d1]: ==> leave RequestContextHolder.
+[2026-05-01 20:22:26.986] [DEBUG] [] [ab9d8c4fac204a838fb570912ba3621c]: ==> leave RequestContextHolder.
+[2026-05-01 20:22:26.986] [DEBUG] [] [ab9d8c4fac204a838fb570912ba3621c]: ==> leave RequestContextHolder.
+[2026-05-01 20:22:26.986] [DEBUG] [] [61134590e87a420fbf6f388fe88d95d1]: ==> leave RequestContextHolder.
+[2026-05-01 20:58:34.287] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 13300 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 20:58:34.288] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 20:58:34.289] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 20:58:36.453] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 20:58:36.453] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 20:58:36.453] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 20:58:37.780] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 20:58:37.781] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 20:58:37.907] [INFO ] [] []: ===>> Load HttpMessageConverters: 3 : [org.springframework.http.converter.ByteArrayHttpMessageConverter@758655a9, cn.nine.commons.web.model.converter.MyJackson2HttpMessageConverter@21f94fe3, org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@458704ee]
+[2026-05-01 20:58:37.952] [DEBUG] [] []: this converter not supports the request, use next.
+[2026-05-01 20:58:38.371] [INFO ] [] []: Started SeniorPostApplication in 4.789 seconds (process running for 6.553)
+[2026-05-01 20:58:38.377] [INFO ] [] []: 
+----------------------------------------------------------
+	Application Senior Post API is running! Access URLs:
+	Local: 		http://localhost:9011
+	External: 	http://192.168.0.136:9011
+	swagger-ui: http://192.168.0.136:9011/doc.html
+----------------------------------------------------------
+[2026-05-01 20:58:46.550] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 20:58:46.725] [DEBUG] [] [5bb1065c35844920a040b5f033fdf6a0]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (email = ? AND del_flag = ?)
+[2026-05-01 20:58:46.732] [DEBUG] [] [5bb1065c35844920a040b5f033fdf6a0]: ==> Parameters: admin@staff.local(String), false(Boolean)
+[2026-05-01 20:58:46.963] [DEBUG] [] [5bb1065c35844920a040b5f033fdf6a0]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:127.0.0.1
+[2026-05-01 20:58:46.964] [DEBUG] [] [5bb1065c35844920a040b5f033fdf6a0]: 请求错误-返回：Error attempting to get column 'created_by' from result set.  Cause: org.postgresql.util.PSQLException: 不良的类型值 long : system
+; 不良的类型值 long : system  ,地址：http://localhost/webapi/auth/login
+[2026-05-01 20:58:46.964] [ERROR] [] [5bb1065c35844920a040b5f033fdf6a0]: 请求异常 - 客户端: 版本:null 地址:http://localhost/webapi/auth/login 异常:Error attempting to get column 'created_by' from result set.  Cause: org.postgresql.util.PSQLException: 不良的类型值 long : system
+; 不良的类型值 long : system
+org.springframework.dao.DataIntegrityViolationException: Error attempting to get column 'created_by' from result set.  Cause: org.postgresql.util.PSQLException: 不良的类型值 long : system
+; 不良的类型值 long : system
+	at org.springframework.jdbc.support.SQLStateSQLExceptionTranslator.doTranslate(SQLStateSQLExceptionTranslator.java:118)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:116)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:116)
+	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:95)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:347)
+	at jdk.proxy2/jdk.proxy2.$Proxy103.selectList(Unknown Source)
+	at org.mybatis.spring.SqlSessionTemplate.selectList(SqlSessionTemplate.java:194)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.executeForMany(MybatisMapperMethod.java:164)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.execute(MybatisMapperMethod.java:77)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$PlainMethodInvoker.invoke(MybatisMapperProxy.java:156)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:93)
+	at jdk.proxy2/jdk.proxy2.$Proxy110.selectList(Unknown Source)
+	at com.baomidou.mybatisplus.core.mapper.BaseMapper.selectOne(BaseMapper.java:337)
+	at java.base/java.lang.invoke.MethodHandle.invokeWithArguments(MethodHandle.java:732)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$DefaultMethodInvoker.invoke(MybatisMapperProxy.java:182)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:93)
+	at jdk.proxy2/jdk.proxy2.$Proxy110.selectOne(Unknown Source)
+	at com.baomidou.mybatisplus.extension.repository.AbstractRepository.getOne(AbstractRepository.java:78)
+	at com.baomidou.mybatisplus.extension.repository.IRepository.getOne(IRepository.java:221)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:355)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:716)
+	at cn.nine.pros.post.biz.service.base.impl.UserServiceImpl$$SpringCGLIB$$0.getOne(<generated>)
+	at cn.nine.pros.post.biz.controller.admin.AdminAuthController.login(AdminAuthController.java:54)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ForwardedHeaderFilter.doFilterInternal(ForwardedHeaderFilter.java:173)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: org.postgresql.util.PSQLException: 不良的类型值 long : system
+	at org.postgresql.jdbc.PgResultSet.toLong(PgResultSet.java:3328)
+	at org.postgresql.jdbc.PgResultSet.getLong(PgResultSet.java:2540)
+	at org.postgresql.jdbc.PgResultSet.getLong(PgResultSet.java:2914)
+	at com.zaxxer.hikari.pool.HikariProxyResultSet.getLong(HikariProxyResultSet.java)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.apache.ibatis.logging.jdbc.ResultSetLogger.invoke(ResultSetLogger.java:68)
+	at jdk.proxy3/jdk.proxy3.$Proxy183.getLong(Unknown Source)
+	at org.apache.ibatis.type.LongTypeHandler.getNullableResult(LongTypeHandler.java:35)
+	at org.apache.ibatis.type.LongTypeHandler.getNullableResult(LongTypeHandler.java:26)
+	at org.apache.ibatis.type.BaseTypeHandler.getResult(BaseTypeHandler.java:85)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.applyAutomaticMappings(DefaultResultSetHandler.java:586)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.getRowValue(DefaultResultSetHandler.java:416)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.handleRowValuesForSimpleResultMap(DefaultResultSetHandler.java:366)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.handleRowValues(DefaultResultSetHandler.java:337)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.handleResultSet(DefaultResultSetHandler.java:310)
+	at org.apache.ibatis.executor.resultset.DefaultResultSetHandler.handleResultSets(DefaultResultSetHandler.java:202)
+	at org.apache.ibatis.executor.statement.PreparedStatementHandler.query(PreparedStatementHandler.java:66)
+	at org.apache.ibatis.executor.statement.RoutingStatementHandler.query(RoutingStatementHandler.java:80)
+	at org.apache.ibatis.executor.SimpleExecutor.doQuery(SimpleExecutor.java:65)
+	at org.apache.ibatis.executor.BaseExecutor.queryFromDatabase(BaseExecutor.java:336)
+	at org.apache.ibatis.executor.BaseExecutor.query(BaseExecutor.java:158)
+	at org.apache.ibatis.executor.CachingExecutor.query(CachingExecutor.java:110)
+	at org.apache.ibatis.executor.CachingExecutor.query(CachingExecutor.java:90)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:154)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:147)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:142)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:333)
+	... 94 common frames omitted
+[2026-05-01 20:58:47.149] [DEBUG] [] [5bb1065c35844920a040b5f033fdf6a0]: ==> leave RequestContextHolder.
+[2026-05-01 21:01:07.852] [INFO ] [] []: 开始优雅停机...
+[2026-05-01 21:01:08.122] [INFO ] [] []: 已停止接收新请求
+[2026-05-01 21:01:08.122] [INFO ] [] []: 优雅停机完成
+[2026-05-01 21:01:11.127] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 5560 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 21:01:11.128] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 21:01:11.130] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 21:01:12.948] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 21:01:12.948] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 21:01:12.948] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 21:03:52.348] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 15076 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 21:03:52.349] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 21:03:52.349] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 21:03:54.280] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 21:03:54.280] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 21:03:54.280] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 21:04:51.298] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 15308 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 21:04:51.300] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 21:04:51.300] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 21:04:53.339] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 21:04:53.340] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 21:04:53.340] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 21:05:34.543] [INFO ] [] []: Starting SeniorPostApplication using Java 17.0.14 with PID 29584 (D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\server\target\classes started by Administrator in D:\04_idea_workplace\05_cursor\senior-golden)
+[2026-05-01 21:05:34.544] [DEBUG] [] []: Running with Spring Boot v3.2.12, Spring v6.1.15
+[2026-05-01 21:05:34.544] [INFO ] [] []: The following 1 profile is active: "local"
+[2026-05-01 21:05:36.385] [DEBUG] [] []: Filter 'redisAuthFilter' configured for use
+[2026-05-01 21:05:36.385] [DEBUG] [] []: Filter 'preRequestContextFilter' configured for use
+[2026-05-01 21:05:36.385] [DEBUG] [] []: Filter 'platformSettingFilter' configured for use
+[2026-05-01 21:05:37.710] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 21:05:37.713] [INFO ] [] []: ===>> create HttpMessageConverter:class cn.nine.commons.web.config.autoconfigure.JacksonAutoConfiguration
+[2026-05-01 21:05:37.846] [INFO ] [] []: ===>> Load HttpMessageConverters: 3 : [org.springframework.http.converter.ByteArrayHttpMessageConverter@218e186b, cn.nine.commons.web.model.converter.MyJackson2HttpMessageConverter@15a5cc6e, org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@12925d2]
+[2026-05-01 21:05:37.893] [DEBUG] [] []: this converter not supports the request, use next.
+[2026-05-01 21:05:38.334] [INFO ] [] []: Started SeniorPostApplication in 4.316 seconds (process running for 5.266)
+[2026-05-01 21:05:38.342] [INFO ] [] []: 
+----------------------------------------------------------
+	Application Senior Post API is running! Access URLs:
+	Local: 		http://localhost:9011
+	External: 	http://192.168.0.136:9011
+	swagger-ui: http://192.168.0.136:9011/doc.html
+----------------------------------------------------------
+[2026-05-01 21:06:02.367] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 21:06:02.538] [DEBUG] [] [7975b3571486475c8b3fbac98415c50f]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (email = ? AND del_flag = ?)
+[2026-05-01 21:06:02.545] [DEBUG] [] [7975b3571486475c8b3fbac98415c50f]: ==> Parameters: admin@staff.local(String), false(Boolean)
+[2026-05-01 21:06:02.555] [DEBUG] [] [7975b3571486475c8b3fbac98415c50f]: <==      Total: 1
+[2026-05-01 21:06:02.556] [DEBUG] [] [7975b3571486475c8b3fbac98415c50f]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:127.0.0.1
+[2026-05-01 21:06:02.556] [DEBUG] [] [7975b3571486475c8b3fbac98415c50f]: 请求错误-返回：用户名或密码错误  ,地址：http://localhost/webapi/auth/login
+[2026-05-01 21:06:02.556] [ERROR] [] [7975b3571486475c8b3fbac98415c50f]: 请求异常 - 客户端: 版本:null 地址:http://localhost/webapi/auth/login 异常:用户名或密码错误
+cn.nine.commons.basic.exception.BadRequestException: 用户名或密码错误
+	at cn.nine.pros.post.biz.controller.admin.AdminAuthController.login(AdminAuthController.java:58)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ForwardedHeaderFilter.doFilterInternal(ForwardedHeaderFilter.java:173)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+[2026-05-01 21:06:02.563] [DEBUG] [] [7975b3571486475c8b3fbac98415c50f]: ==> leave RequestContextHolder.
+[2026-05-01 21:06:09.427] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 21:06:09.432] [DEBUG] [] [b0ec684727c4419dabf2ddebe8e031e6]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (email = ? AND del_flag = ?)
+[2026-05-01 21:06:09.432] [DEBUG] [] [b0ec684727c4419dabf2ddebe8e031e6]: ==> Parameters: admin@staff.local(String), false(Boolean)
+[2026-05-01 21:06:09.432] [DEBUG] [] [b0ec684727c4419dabf2ddebe8e031e6]: <==      Total: 1
+[2026-05-01 21:06:09.433] [DEBUG] [] [b0ec684727c4419dabf2ddebe8e031e6]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:127.0.0.1
+[2026-05-01 21:06:09.433] [DEBUG] [] [b0ec684727c4419dabf2ddebe8e031e6]: 请求错误-返回：用户名或密码错误  ,地址：http://localhost/webapi/auth/login
+[2026-05-01 21:06:09.433] [ERROR] [] [b0ec684727c4419dabf2ddebe8e031e6]: 请求异常 - 客户端: 版本:null 地址:http://localhost/webapi/auth/login 异常:用户名或密码错误
+cn.nine.commons.basic.exception.BadRequestException: 用户名或密码错误
+	at cn.nine.pros.post.biz.controller.admin.AdminAuthController.login(AdminAuthController.java:58)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ForwardedHeaderFilter.doFilterInternal(ForwardedHeaderFilter.java:173)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+[2026-05-01 21:06:09.433] [DEBUG] [] [b0ec684727c4419dabf2ddebe8e031e6]: ==> leave RequestContextHolder.
+[2026-05-01 21:07:13.742] [DEBUG] [] []: ==》/webapi/auth/login -> into PreRequestContextFilter.
+[2026-05-01 21:07:13.745] [DEBUG] [] [72d769fab5e64a778703153491b1bf91]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (email = ? AND del_flag = ?)
+[2026-05-01 21:07:13.745] [DEBUG] [] [72d769fab5e64a778703153491b1bf91]: ==> Parameters: admin@staff.local(String), false(Boolean)
+[2026-05-01 21:07:13.747] [DEBUG] [] [72d769fab5e64a778703153491b1bf91]: <==      Total: 1
+[2026-05-01 21:07:13.815] [DEBUG] [] [72d769fab5e64a778703153491b1bf91]: ==>  Preparing: UPDATE bu_user SET last_login_at=?,updated_at=? WHERE (id = ?)
+[2026-05-01 21:07:13.816] [DEBUG] [] [72d769fab5e64a778703153491b1bf91]: ==> Parameters: 2026-05-01T21:07:13.813145600(LocalDateTime), 2026-05-01T21:07:13.814145700(LocalDateTime), 1(Long)
+[2026-05-01 21:07:13.819] [DEBUG] [] [72d769fab5e64a778703153491b1bf91]: <==    Updates: 1
+[2026-05-01 21:07:13.955] [DEBUG] [] [72d769fab5e64a778703153491b1bf91]: 异常：当前用户ID:null 客户端类型: 版本号:null Ip地址:127.0.0.1
+[2026-05-01 21:07:13.955] [DEBUG] [] [72d769fab5e64a778703153491b1bf91]: 请求错误-返回：The signing key's size is 192 bits which is not secure enough for the HS256 algorithm.  The JWT JWA Specification (RFC 7518, Section 3.2) states that keys used with HS256 MUST have a size >= 256 bits (the key size must be greater than or equal to the hash output size).  Consider using the io.jsonwebtoken.security.Keys class's 'secretKeyFor(SignatureAlgorithm.HS256)' method to create a key guaranteed to be secure enough for HS256.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more information.  ,地址：http://localhost/webapi/auth/login
+[2026-05-01 21:07:13.955] [ERROR] [] [72d769fab5e64a778703153491b1bf91]: 请求异常 - 客户端: 版本:null 地址:http://localhost/webapi/auth/login 异常:The signing key's size is 192 bits which is not secure enough for the HS256 algorithm.  The JWT JWA Specification (RFC 7518, Section 3.2) states that keys used with HS256 MUST have a size >= 256 bits (the key size must be greater than or equal to the hash output size).  Consider using the io.jsonwebtoken.security.Keys class's 'secretKeyFor(SignatureAlgorithm.HS256)' method to create a key guaranteed to be secure enough for HS256.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more information.
+io.jsonwebtoken.security.WeakKeyException: The signing key's size is 192 bits which is not secure enough for the HS256 algorithm.  The JWT JWA Specification (RFC 7518, Section 3.2) states that keys used with HS256 MUST have a size >= 256 bits (the key size must be greater than or equal to the hash output size).  Consider using the io.jsonwebtoken.security.Keys class's 'secretKeyFor(SignatureAlgorithm.HS256)' method to create a key guaranteed to be secure enough for HS256.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more information.
+	at io.jsonwebtoken.SignatureAlgorithm.assertValid(SignatureAlgorithm.java:389)
+	at io.jsonwebtoken.SignatureAlgorithm.assertValidSigningKey(SignatureAlgorithm.java:317)
+	at io.jsonwebtoken.impl.DefaultJwtBuilder.signWith(DefaultJwtBuilder.java:255)
+	at io.jsonwebtoken.impl.DefaultJwtBuilder.signWith(DefaultJwtBuilder.java:267)
+	at io.jsonwebtoken.impl.DefaultJwtBuilder.signWith(DefaultJwtBuilder.java:277)
+	at cn.nine.commons.basic.util.TokenResolver.createToken(TokenResolver.java:120)
+	at cn.nine.pros.post.biz.service.app.AppJwtService.buildToken(AppJwtService.java:35)
+	at cn.nine.pros.post.biz.service.app.AppJwtService.createToken(AppJwtService.java:27)
+	at cn.nine.pros.post.biz.controller.admin.AdminAuthController.login(AdminAuthController.java:80)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:924)
+	at org.apache.catalina.filters.RemoteIpFilter.doFilter(RemoteIpFilter.java:980)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at cn.nine.commons.web.filter.PreRequestContextFilter.doFilterInternal(PreRequestContextFilter.java:92)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:113)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ForwardedHeaderFilter.doFilterInternal(ForwardedHeaderFilter.java:173)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+[2026-05-01 21:07:13.955] [DEBUG] [] [72d769fab5e64a778703153491b1bf91]: ==> leave RequestContextHolder.

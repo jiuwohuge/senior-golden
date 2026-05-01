@@ -29,8 +29,8 @@ logging:
     org.springframework.beans.factory.support.DefaultSingletonBeanRegistry: WARN
 jh:
   config:
-    auth: false
-    token-auth: false
+    auth: true
+    token-auth: true
   security:
     debug: false
     key: 8e32de3646dc4c02ae2507511202c7ca

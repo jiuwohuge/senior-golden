@@ -2,7 +2,7 @@ package cn.nine.pros.post.client.api.admin;
 
 import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
-import cn.nine.pros.post.client.model.db.AdminUserDTO;
+import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
 import cn.nine.pros.post.client.model.input.admin.UserQueryInDto;
@@ -28,5 +28,5 @@ public interface AdminUserApi {
 
     @Operation(summary = "获取当前管理员")
     @GetMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/current-admin")
-    AdminUserDTO currentAdmin();
+    UserDTO currentAdmin();
 }

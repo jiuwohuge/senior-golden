@@ -50,7 +50,7 @@ public class AdminReportController implements AdminReportApi {
                 .eq(ReportDomain::getId, id)
                 .set(ReportDomain::getStatus, 1)
                 .set(ReportDomain::getHandleNote, body.getHandleNote())
-                .set(ReportDomain::getHandlerUserId, MyRequestContextHolder.userIdNum()));
+                .set(ReportDomain::getHandlerUserId, MyRequestContextHolder.userId()));
     }
 
     @Override
@@ -59,6 +59,6 @@ public class AdminReportController implements AdminReportApi {
                 .eq(ReportDomain::getId, id)
                 .set(ReportDomain::getStatus, 2)
                 .set(ReportDomain::getHandleNote, body.getHandleNote())
-                .set(ReportDomain::getHandlerUserId, MyRequestContextHolder.userIdNum()));
+                .set(ReportDomain::getHandlerUserId, MyRequestContextHolder.userId()));
     }
 }

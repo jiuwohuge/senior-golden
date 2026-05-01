@@ -1,48 +1,49 @@
 package cn.nine.pros.post.biz.service.app;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import cn.nine.commons.basic.context.MyRequestContextHolder;
+import cn.nine.commons.basic.context.RequestContext;
+import cn.nine.commons.basic.exception.BadRequestException;
+import cn.nine.commons.basic.model.TokenInfo;
+import cn.nine.commons.basic.util.TokenResolver;
+import cn.nine.commons.web.filter.adapter.RedisCacheAdapter;
+import cn.nine.pros.post.client.common.constant.RedisConstant;
+import com.alibaba.fastjson2.JSON;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-
 /**
- * App 用户 JWT（与请求头 {@code Token} 对齐；生产环境请配置足够长的 secret 并与网关/框架验签策略一致）。
+ * App / 管理端共用：subject 为 {@code bu_user.id}，与框架验签使用同一 {@code senior-post.app.jwt.secret}。
  */
 @Service
 public class AppJwtService {
 
-    @Value("${senior-post.app.jwt.secret:dev-senior-post-jwt-secret-change-me-in-prod!!}")
-    private String secret;
-
-    @Value("${senior-post.app.jwt.expire-days:7}")
-    private long expireDays;
+    @Autowired
+    private RedisCacheAdapter redisCacheAdapter;
 
     public String createToken(long userId) {
-        Instant now = Instant.now();
-        Instant exp = now.plus(expireDays, ChronoUnit.DAYS);
-        return Jwts.builder()
-                .subject(String.valueOf(userId))
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(exp))
-                .signWith(signingKey())
-                .compact();
+        if (userId <= 0) {
+            throw new BadRequestException("非法用户");
+        }
+        return buildToken(userId);
     }
 
-    private SecretKey signingKey() {
-        byte[] raw = secret.getBytes(StandardCharsets.UTF_8);
-        try {
-            raw = MessageDigest.getInstance("SHA-256").digest(raw);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
-        }
-        return Keys.hmacShaKeyFor(raw);
+    private String buildToken(long subjectNumeric) {
+        TokenInfo tokenInfo = new TokenInfo();
+        tokenInfo.setApp(RedisConstant.PROJECT);
+        tokenInfo.setUserId(subjectNumeric);
+        tokenInfo.setTimestampVersion(System.currentTimeMillis());
+        String token = TokenResolver.createToken(JSON.toJSONString(tokenInfo), TokenResolver.MONTH_SECOND);
+        //填充上下文，并加入到缓存
+        fillUpContent(token, tokenInfo);
+        return token;
     }
+
+    private void fillUpContent(String token, TokenInfo tokenInfo) {
+        RequestContext context = MyRequestContextHolder.getContext();
+        if (null != context) {
+            context.setTokenInfo(tokenInfo);
+        }
+        redisCacheAdapter.addCache(token);
+    }
+
 }

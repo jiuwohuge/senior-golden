@@ -36,10 +36,10 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
-        <!-- commons-data -->
+        <!-- commons-web -->
         <dependency>
             <groupId>cn.nine.commons</groupId>
-            <artifactId>commons-basic</artifactId>
+            <artifactId>commons-web</artifactId>
         </dependency>
 
         <!-- senior-post-client -->

@@ -21,7 +21,7 @@ export default function Login() {
         <Typography.Title level={3} style={{ textAlign: 'center' }}>Senior Post 管理后台</Typography.Title>
         <Form layout="vertical" onFinish={onFinish}>
           <Form.Item label="用户名" name="username" rules={[{ required: true }]}>
-            <Input />
+            <Input placeholder="admin（将登录为 admin@staff.local）或完整邮箱" />
           </Form.Item>
           <Form.Item label="密码" name="password" rules={[{ required: true }]}>
             <Input.Password />

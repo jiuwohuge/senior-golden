@@ -4,16 +4,12 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
-import cn.nine.pros.post.biz.model.domain.AdminUserDomain;
 import cn.nine.pros.post.biz.model.domain.UserDeviceDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
-import cn.nine.pros.post.biz.model.mapstruct.AdminUserMapstruct;
 import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
-import cn.nine.pros.post.biz.service.base.AdminUserService;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.api.admin.AdminUserApi;
-import cn.nine.pros.post.client.model.db.AdminUserDTO;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
 import cn.nine.pros.post.client.model.input.admin.UserQueryInDto;
@@ -31,11 +27,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminUserController implements AdminUserApi {
 
+    private static boolean canLoginConsole(UserDomain u) {
+        return u != null && u.getStaffRole() != null && u.getStaffRole() != 0;
+    }
+
+    private static String auditUserId() {
+        Long uid = MyRequestContextHolder.userId();
+        return uid == null ? "0" : String.valueOf(uid);
+    }
+
     private final UserService userService;
     private final UserMapstruct userMapstruct;
     private final UserDeviceService userDeviceService;
-    private final AdminUserService adminUserService;
-    private final AdminUserMapstruct adminUserMapstruct;
 
     @Override
     public PageData<UserDTO> paging(UserQueryInDto body) {
@@ -65,7 +68,7 @@ public class AdminUserController implements AdminUserApi {
         userService.update(new LambdaUpdateWrapper<UserDomain>()
                 .eq(UserDomain::getId, id)
                 .set(UserDomain::getStatus, status)
-                .set(UserDomain::getUpdatedBy, MyRequestContextHolder.userId())
+                .set(UserDomain::getUpdatedBy, auditUserId())
                 .set(UserDomain::getUpdatedAt, java.time.LocalDateTime.now()));
     }
 
@@ -75,17 +78,24 @@ public class AdminUserController implements AdminUserApi {
                 .eq(UserDeviceDomain::getDeviceUuid, body.getDeviceUuid())
                 .eq(UserDeviceDomain::isDelFlag, false)
                 .set(UserDeviceDomain::getStatus, 2)
-                .set(UserDeviceDomain::getUpdatedBy, MyRequestContextHolder.userId())
+                .set(UserDeviceDomain::getUpdatedBy, auditUserId())
                 .set(UserDeviceDomain::getUpdatedAt, java.time.LocalDateTime.now()));
     }
 
     @Override
-    public AdminUserDTO currentAdmin() {
-        Long adminId = MyRequestContextHolder.userIdNum();
-        if (adminId == null) {
+    public UserDTO currentAdmin() {
+        Long uid = MyRequestContextHolder.userId();
+        if (uid == null) {
             return null;
         }
-        AdminUserDomain d = adminUserService.getById(adminId);
-        return d == null ? null : adminUserMapstruct.toDTO(d);
+        UserDomain d = userService.getById(uid);
+        if (d == null || !canLoginConsole(d)) {
+            return null;
+        }
+        UserDTO dto = userMapstruct.toDTO(d);
+        if (dto != null) {
+            dto.setPasswordHash(null);
+        }
+        return dto;
     }
 }

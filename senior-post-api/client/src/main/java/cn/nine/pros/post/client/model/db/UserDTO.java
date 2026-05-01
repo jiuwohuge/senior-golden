@@ -79,6 +79,11 @@ public class UserDTO extends AbstractAuditableDTO {
     @Schema(description = "状态：1正常 2封禁 3注销")
     private Object status;
     /**
+     * 是否可登录管理后台：0 否；非 0 可登录（暂均为超管）
+     */
+    @Schema(description = "0 不可登录后台；非 0 可登录管理端（暂均为超管）")
+    private Integer staffRole;
+    /**
      * 注册IP
      */
     @Schema(description = "注册IP")
