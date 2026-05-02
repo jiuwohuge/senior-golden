@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.base.impl;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
+import cn.nine.commons.basic.exception.BadRequestException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.nine.pros.post.biz.mapper.UserMapper;
@@ -49,6 +50,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
 
     @Override
     public void delByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        long staffCount = count(new LambdaQueryWrapper<UserDomain>()
+                .in(UserDomain::getId, ids)
+                .eq(UserDomain::isDelFlag, false)
+                .isNotNull(UserDomain::getStaffRole)
+                .ne(UserDomain::getStaffRole, 0));
+        if (staffCount > 0) {
+            throw new BadRequestException("不可删除可登录管理后台的账号");
+        }
         UserDomain userDomain = new UserDomain();
         userDomain.setDelFlag(true);
         userDomain.setUpdatedAt(LocalDateTime.now());

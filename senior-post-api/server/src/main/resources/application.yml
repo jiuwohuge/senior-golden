@@ -65,14 +65,20 @@ jh:
     # 需要对请求参数解密的接口
     reqDecryptUris:
       - /api/**
-    # 忽略返回值加密的接口（管理端 /webapi 与遗留 /webapp 均明文 JSON）
+    # 忽略返回值加密的接口（管理端 /webapp 与 /webapi 明文；App 未接 AES 前的公开接口明文）
     resIgnoreEncryptUris:
       - /webapp/**
       - /webapi/**
+      - /api/auth/login
+      - /api/auth/register
+      - /api/bootstrap/init
     # 忽略参数解密的接口
     reqIgnoreDecryptUris:
       - /webapp/**
       - /webapi/**
+      - /api/auth/login
+      - /api/auth/register
+      - /api/bootstrap/init
 
 knife4j:
   enable: true  # 启用 Knife4j 增强（必须，否则仅启用 springdoc 默认 UI）

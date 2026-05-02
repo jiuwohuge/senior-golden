@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import 'package:senior_post_flutter/widgets/postal_decorations.dart';
 
-import '../../app/theme/postal_tokens.dart';
+import '../directory/directory_page.dart';
+import '../mailbox/mailbox_page.dart';
+import '../post_wall/post_wall_page.dart';
 import '../profile/profile_page.dart';
 
 /// 底部四 Tab 与路由路径（与需求文档 Tab 结构一致）。
@@ -83,32 +85,13 @@ class _MainShellState extends State<MainShell> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          const PostalPerforationStrip(),
-          Expanded(
-            child: IndexedStack(
-              index: _index,
-              children: [
-                _PostalPlaceholderTab(
-                  key: const ValueKey('wall'),
-                  sectionTitle: l10n.tabPostWall,
-                  semanticLabel: l10n.a11yTabPostWall,
-                ),
-                _PostalPlaceholderTab(
-                  key: const ValueKey('directory'),
-                  sectionTitle: l10n.tabDirectory,
-                  semanticLabel: l10n.a11yTabDirectory,
-                ),
-                _PostalPlaceholderTab(
-                  key: const ValueKey('mailbox'),
-                  sectionTitle: l10n.tabMailbox,
-                  semanticLabel: l10n.a11yTabMailbox,
-                ),
-                const ProfilePage(key: ValueKey('profile')),
-              ],
-            ),
-          ),
+      body: IndexedStack(
+        index: _index,
+        children: const [
+          PostWallPage(key: ValueKey('wall')),
+          DirectoryPage(key: ValueKey('directory')),
+          MailboxPage(key: ValueKey('mailbox')),
+          ProfilePage(key: ValueKey('profile')),
         ],
       ),
       bottomNavigationBar: Semantics(
@@ -162,149 +145,6 @@ class _MainShellState extends State<MainShell> {
               label: l10n.tabProfile,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PostalPlaceholderTab extends StatelessWidget {
-  const _PostalPlaceholderTab({
-    super.key,
-    required this.sectionTitle,
-    required this.semanticLabel,
-  });
-
-  final String sectionTitle;
-  final String semanticLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Semantics(
-      label: semanticLabel,
-      child: SafeArea(
-        top: false,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 520),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(22, 22, 22, 26),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Container(
-                              height: 5,
-                              decoration: BoxDecoration(
-                                color: PostalTokens.stampVermilion,
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: PostalTokens.postboxGreen.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: PostalTokens.perforationLine,
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    Icons.mark_as_unread_outlined,
-                                    size: 32,
-                                    color: PostalTokens.postboxGreen,
-                                    semanticLabel:
-                                        l10n.postalMotifContentDescription,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        sectionTitle,
-                                        style: theme.textTheme.titleLarge,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        l10n.placeholderWelcomeTitle,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              color: PostalTokens.inkSecondary,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              l10n.placeholderWelcomeBody,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: PostalTokens.inkNavy,
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: PostalTokens.paperCard,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: PostalTokens.perforationLine,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(
-                                      Icons.info_outline,
-                                      size: 26,
-                                      color: PostalTokens.kraftBrown,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        l10n.placeholderHint,
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              color: PostalTokens.inkSecondary,
-                                              height: 1.45,
-                                            ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
         ),
       ),
     );

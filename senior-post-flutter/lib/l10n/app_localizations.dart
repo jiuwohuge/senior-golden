@@ -307,6 +307,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Birth year list is empty. Check server config for minimum age.'**
   String get authBirthYearRangeError;
+
+  /// No description provided for @authWelcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back to your global post office.'**
+  String get authWelcomeBack;
+
+  /// No description provided for @authMockTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Mock mode is enabled. You can try all flows without backend APIs.'**
+  String get authMockTip;
+
+  /// No description provided for @authAgreeTpl.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read and agree to {terms} and {privacy}.'**
+  String authAgreeTpl(Object privacy, Object terms);
+
+  /// No description provided for @authTermsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get authTermsTitle;
+
+  /// No description provided for @authPrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get authPrivacyTitle;
+
+  /// No description provided for @authForgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password'**
+  String get authForgotPassword;
+
+  /// No description provided for @authOnboardingAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'View introduction'**
+  String get authOnboardingAgain;
+
+  /// No description provided for @authEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address'**
+  String get authEmailInvalid;
+
+  /// No description provided for @authRegisterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your postal social account in one minute.'**
+  String get authRegisterSubtitle;
+
+  /// No description provided for @authConfirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get authConfirmPasswordLabel;
+
+  /// No description provided for @authPasswordNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get authPasswordNotMatch;
+
+  /// No description provided for @authBirthYearRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose your year of birth'**
+  String get authBirthYearRequired;
+
+  /// No description provided for @authForgotStepEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authForgotStepEmail;
+
+  /// No description provided for @authForgotStepCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get authForgotStepCode;
+
+  /// No description provided for @authForgotStepDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get authForgotStepDone;
+
+  /// No description provided for @authForgotSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset email'**
+  String get authForgotSendCode;
+
+  /// No description provided for @authForgotMailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset instructions have been sent.'**
+  String get authForgotMailSent;
+
+  /// No description provided for @authForgotCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get authForgotCode;
+
+  /// No description provided for @authForgotNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get authForgotNewPassword;
+
+  /// No description provided for @authForgotResetNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get authForgotResetNow;
+
+  /// No description provided for @authForgotDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset complete'**
+  String get authForgotDoneTitle;
+
+  /// No description provided for @authForgotDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can now return to login and sign in with your new password.'**
+  String get authForgotDoneBody;
+
+  /// No description provided for @authBackToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to login'**
+  String get authBackToLogin;
+
+  /// No description provided for @onboardTitle1.
+  ///
+  /// In en, this message translates to:
+  /// **'A global postal social network'**
+  String get onboardTitle1;
+
+  /// No description provided for @onboardBody1.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet peers worldwide in a calm, respectful, non-dating environment.'**
+  String get onboardBody1;
+
+  /// No description provided for @onboardTitle2.
+  ///
+  /// In en, this message translates to:
+  /// **'Slow letters, real companionship'**
+  String get onboardTitle2;
+
+  /// No description provided for @onboardBody2.
+  ///
+  /// In en, this message translates to:
+  /// **'Send postcards and letters at your own pace. No like-count pressure.'**
+  String get onboardBody2;
+
+  /// No description provided for @onboardTitle3.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted and age-friendly'**
+  String get onboardTitle3;
+
+  /// No description provided for @onboardBody3.
+  ///
+  /// In en, this message translates to:
+  /// **'Designed for 45+ users with clear typography, calm colors and privacy-first defaults.'**
+  String get onboardBody3;
+
+  /// No description provided for @onboardSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardSkip;
+
+  /// No description provided for @onboardNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardNext;
+
+  /// No description provided for @onboardDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Start now'**
+  String get onboardDone;
+
+  /// No description provided for @legalEffectiveDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective date: 2026-05-01'**
+  String get legalEffectiveDate;
+
+  /// No description provided for @legalTermsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'1) This app provides interest-based social communication for adults aged 45+ only.\\n\\n2) The product does not provide dating or matchmaking services.\\n\\n3) You are responsible for the legality of your content and must not publish prohibited content.\\n\\n4) We may suspend accounts for abuse, harassment, spam, fraud, or policy violations.\\n\\n5) We provide moderation and reporting mechanisms to maintain a safe communication environment.'**
+  String get legalTermsContent;
+
+  /// No description provided for @legalPrivacyContent.
+  ///
+  /// In en, this message translates to:
+  /// **'1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.'**
+  String get legalPrivacyContent;
 }
 
 class _AppLocalizationsDelegate

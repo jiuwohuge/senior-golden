@@ -277,6 +277,8 @@ flowchart LR
 - **管理后台迭代（2026-05-01）**：配置分页入参 **`ConfigQueryInDto`**（`page` + 可选 `configGroup`）；新增 **`/webapi/country/*`** 国家/地区维护；`application.yml` 放行 **`/webapi/auth/login`**（与 `jh.config.auth` 开启时一致）；前端补齐 **VIP 配置页**、**国家/地区页**、看板 Loading、侧栏选中态与当前管理员展示。
 - **管理端认证（2026-05-01，修订）**：管理端与 App 共用 **`bu_user`**；JWT 均为 **`AppJwtService.createToken(bu_user.id)`**（`sub` 即用户主键）。管理端登录仅允许 **`staff_role != 0`** 的账号；`getCurrentAdmin` 返回 **`UserDTO`**（清 **`passwordHash`**）。审计 **`updated_by`**、举报 **`handler_user_id`** 等直接使用 **`MyRequestContextHolder.userId()`**（或 `"0"`）字符串化，不再使用 `AdminTokenSupport`。
 - **本次新增（2026-05-01，App 同步）**：`application.yml` 将 **`/api/bootstrap/init`** 纳入 **`exclude-interceptor-pattern`**，未登录注册页可拉取配置；Flutter 抽取 **`appBootstrapProvider`**（`AppBootstrapData` / `CountryItem` 含 `nameZh`），**注册页**用服务端 **`minRegisterAge`** 生成出生年范围（上限 110 岁）、国家下拉与后端列表一致；**个人中心**复用同一 Provider，并 **`watch(authTokenProvider)`** 在登录后刷新资料。
+- **注册联调修复（2026-05-01）**：根 `application.yml` 对 **`/api/auth/login`、`/api/auth/register`、`/api/bootstrap/init`** 加入 **`jh.security` 加解密忽略**（客户端尚未接 AES 时仍可解析 JSON）；Flutter 侧 **`INTERNET`** 写入主 Manifest、**Debug 明文 HTTP**、iOS **`NSAllowsLocalNetworking`**；**`kApiBaseUrl`** 集中 **`API_BASE_URL`**，注册失败页 Debug 展示 **Dio 详情 + 真机 `--dart-define` 提示**。
+- **本次新增（2026-05-01，设计沟通）**：确认 UI 方向从“邮政蓝主导”调整为 **浅灰复古主导**。设计关键词：**可靠、成熟、全球化、低刺激**；目标人群 45+ 优先可读性与可操作性。登录/注册页面要求：中部卡片式布局、协议勾选必选、补齐忘记密码、按钮禁用/加载/错误反馈完整。
 
 ---
 
@@ -306,6 +308,8 @@ flowchart LR
 - [x] B11. Flutter 状态管理最终拍板：Riverpod
 - [x] B12. 管理后台技术栈确认：React
 - [x] B13. 国家编码策略：ISO 3166-1 alpha-2 + Locale 自动获取 + 前后端共用常量
+- [ ] B14. 视觉主色最终确认：浅灰复古方案（废弃高占比蓝色）
+- [ ] B15. 登录/注册视觉规范确认：中部卡片布局 + 协议勾选 + 忘记密码 + 完整状态反馈
 
 ---
 
@@ -400,3 +404,4 @@ flowchart LR
 - [x] S7. Flyway + `/webapi` 基线与文档对齐（2026-05-01）
 - [x] S8. M1 表结构与认证/配置接口落地
 - [ ] S9. M2 帖子/目录/写信主链路落地
+- [x] S10. 管理后台：`senior-post-manage` 修复配置页 UTF-8 乱码源码、侧边栏二级分组菜单；`UserServiceImpl.delByIds` 禁止删除 `staff_role != 0` 的可登录后台账号（2026-05-01）

@@ -1,0 +1,103 @@
+import 'package:flutter/material.dart';
+
+import '../../app/theme/postal_tokens.dart';
+
+/// 信封卡片：邮票区 + 邮戳 + 内容；用于明信片墙 / 名录 / 信箱列表统一观感。
+class PostalCardEnvelope extends StatelessWidget {
+  const PostalCardEnvelope({
+    super.key,
+    required this.child,
+    this.header,
+    this.footer,
+    this.padding = const EdgeInsets.fromLTRB(
+      PostalTokens.s20,
+      PostalTokens.s16,
+      PostalTokens.s20,
+      PostalTokens.s16,
+    ),
+    this.onTap,
+    this.accent = PostalTokens.stampVermilion,
+  });
+
+  final Widget child;
+  final Widget? header;
+  final Widget? footer;
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onTap;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = DecoratedBox(
+      decoration: BoxDecoration(
+        color: PostalTokens.paperEnvelope,
+        borderRadius: PostalTokens.shapeMd,
+        border: Border.all(color: PostalTokens.perforationLine),
+        boxShadow: PostalTokens.shadowSoft,
+      ),
+      child: ClipRRect(
+        borderRadius: PostalTokens.shapeMd,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              height: 4,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    accent,
+                    accent.withValues(alpha: 0.7),
+                    PostalTokens.stampGold.withValues(alpha: 0.8),
+                  ],
+                ),
+              ),
+            ),
+            if (header != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  PostalTokens.s20,
+                  PostalTokens.s16,
+                  PostalTokens.s20,
+                  PostalTokens.s8,
+                ),
+                child: header,
+              ),
+            Padding(padding: padding, child: child),
+            if (footer != null)
+              Container(
+                padding: const EdgeInsets.fromLTRB(
+                  PostalTokens.s20,
+                  PostalTokens.s12,
+                  PostalTokens.s20,
+                  PostalTokens.s16,
+                ),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: PostalTokens.perforationLine,
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: footer,
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (onTap == null) return content;
+    return Material(
+      color: Colors.transparent,
+      borderRadius: PostalTokens.shapeMd,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: PostalTokens.shapeMd,
+        child: content,
+      ),
+    );
+  }
+}

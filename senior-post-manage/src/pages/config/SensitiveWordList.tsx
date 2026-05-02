@@ -10,13 +10,13 @@ export default function SensitiveWordList() {
 
   return <>
     <Form form={form} layout="inline" onFinish={async(v)=>{await api.saveSensitiveWord(v);form.resetFields();load()}} style={{ marginBottom:16 }}>
-      <Form.Item name="word" rules={[{required:true}]}><Input placeholder="��д�" /></Form.Item>
-      <Form.Item name="langCode" rules={[{required:true}]}><Input placeholder="����" /></Form.Item>
-      <Button type="primary" htmlType="submit">����</Button>
+      <Form.Item name="word" rules={[{required:true}]}><Input placeholder="敏感词" /></Form.Item>
+      <Form.Item name="langCode" rules={[{required:true}]}><Input placeholder="语言代码，如 zh、en" /></Form.Item>
+      <Button type="primary" htmlType="submit">保存</Button>
     </Form>
     <Table rowKey="id" dataSource={rows} columns={[
-      { title:'��', dataIndex:'word' }, { title:'����', dataIndex:'langCode' },
-      { title:'����', render:(_,r)=><Space><Button danger size="small" onClick={async()=>{await api.deleteSensitiveWord(r.id);load()}}>ɾ��</Button></Space>}
+      { title: '敏感词', dataIndex: 'word' }, { title: '语言', dataIndex: 'langCode' },
+      { title: '操作', render: (_, r) => <Space><Button danger size="small" onClick={async () => { await api.deleteSensitiveWord(r.id); load() }}>删除</Button></Space> },
     ]} />
   </>
 }

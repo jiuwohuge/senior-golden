@@ -19,6 +19,11 @@ export default function UserList() {
         { title: 'ID', dataIndex: 'id' },
         { title: 'Email', dataIndex: 'email' },
         { title: 'Nickname', dataIndex: 'nickname' },
+        {
+          title: '管理后台',
+          dataIndex: 'staffRole',
+          render: (v: number | null | undefined) => (v != null && v !== 0 ? '是' : '否'),
+        },
         { title: 'Status', dataIndex: 'status' },
         {
           title: 'Actions',

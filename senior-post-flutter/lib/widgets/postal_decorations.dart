@@ -1,8 +1,14 @@
+/// 兼容旧引用：原 `PostalPostmarkHeader` / `PostalPerforationStrip` 现位于
+/// `widgets/postal/postal_painters.dart`。新代码请改用 `widgets/postal/postal.dart`。
+library;
+
 import 'package:flutter/material.dart';
 
-import '../app/theme/postal_tokens.dart';
+import 'postal/postal_painters.dart';
 
-/// 顶部「邮戳」装饰圆环 + 齿孔条，强化邮政世界观且不干扰可读性。
+export 'postal/postal_painters.dart' show PostalPerforationStrip;
+
+/// 旧版本的顶部邮戳头，保留以避免破坏其他 import。
 class PostalPostmarkHeader extends StatelessWidget {
   const PostalPostmarkHeader({super.key, required this.child});
 
@@ -17,11 +23,10 @@ class PostalPostmarkHeader extends StatelessWidget {
           right: 12,
           top: 8,
           child: IgnorePointer(
-            child: CustomPaint(
-              size: const Size(56, 56),
-              painter: _PostmarkRingPainter(
-                color: Colors.white.withValues(alpha: 0.22),
-              ),
+            child: PostmarkRing(
+              size: 56,
+              strokeWidth: 1.6,
+              color: Colors.white.withValues(alpha: 0.32),
             ),
           ),
         ),
@@ -29,57 +34,4 @@ class PostalPostmarkHeader extends StatelessWidget {
       ],
     );
   }
-}
-
-class _PostmarkRingPainter extends CustomPainter {
-  _PostmarkRingPainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-    canvas.drawCircle(center, size.width * 0.38, paint);
-    canvas.drawCircle(center, size.width * 0.28, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// 内容区顶部细齿孔分隔，暗示邮票齿边。
-class PostalPerforationStrip extends StatelessWidget {
-  const PostalPerforationStrip({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(double.infinity, 10),
-      painter: _PerforationPainter(
-        color: PostalTokens.perforationLine.withValues(alpha: 0.9),
-      ),
-    );
-  }
-}
-
-class _PerforationPainter extends CustomPainter {
-  _PerforationPainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const gap = 7.0;
-    final paint = Paint()..color = color;
-    for (double x = 0; x < size.width; x += gap) {
-      canvas.drawCircle(Offset(x + gap / 2, size.height / 2), 1.8, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

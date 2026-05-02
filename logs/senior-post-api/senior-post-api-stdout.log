@@ -9426,3 +9426,214 @@ Caused by: org.postgresql.util.PSQLException: 错误: 无效的类型 bigint 输
 [2026-05-01 21:05:36.998] [INFO ] [] []: Successfully applied 2 migrations to schema "public", now at version v3 (execution time 00:00.012s)
 [2026-05-01 21:05:37.916] [INFO ] [] []: Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@37ff4054
 [2026-05-01 21:05:38.748] [INFO ] [] []: Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2026-05-01 21:18:11.407] [INFO ] [] []: HikariPool-1 - Shutdown initiated...
+[2026-05-01 21:18:11.410] [INFO ] [] []: HikariPool-1 - Shutdown completed.
+[2026-05-01 21:18:26.775] [INFO ] [] []: Starting service [Tomcat]
+[2026-05-01 21:18:26.776] [INFO ] [] []: Starting Servlet engine: [Apache Tomcat/10.1.33]
+[2026-05-01 21:18:26.840] [INFO ] [] []: Initializing Spring embedded WebApplicationContext
+[2026-05-01 21:18:27.711] [INFO ] [] []: HikariPool-1 - Starting...
+[2026-05-01 21:18:27.876] [INFO ] [] []: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@5f32ab17
+[2026-05-01 21:18:27.879] [INFO ] [] []: HikariPool-1 - Start completed.
+[2026-05-01 21:18:27.937] [INFO ] [] []: Flyway Community Edition 9.22.3 by Redgate
+[2026-05-01 21:18:27.938] [INFO ] [] []: See release notes here: https://rd.gt/416ObMi
+[2026-05-01 21:18:27.938] [INFO ] [] []: 
+[2026-05-01 21:18:27.952] [INFO ] [] []: Database: jdbc:postgresql://localhost:5432/senior_post (PostgreSQL 14.12)
+[2026-05-01 21:18:27.991] [WARN ] [] []: Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'adminAnnouncementController' defined in file [D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\biz\target\classes\cn\nine\pros\post\biz\controller\admin\AdminAnnouncementController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'announcementServiceImpl': Unsatisfied dependency expressed through field 'baseMapper': Error creating bean with name 'announcementMapper' defined in file [D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\biz\target\classes\cn\nine\pros\post\biz\mapper\AnnouncementMapper.class]: Unsatisfied dependency expressed through bean property 'sqlSessionTemplate': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Validate failed: Migrations have failed validation
+Migration checksum mismatch for migration version 3
+-> Applied to database : 1973061681
+-> Resolved locally    : 863430470
+Either revert the changes to the migration, or run repair to update the schema history.
+Need more flexibility with validation rules? Learn more: https://rd.gt/3AbJUZE
+[2026-05-01 21:18:27.991] [INFO ] [] []: HikariPool-1 - Shutdown initiated...
+[2026-05-01 21:18:28.065] [INFO ] [] []: HikariPool-1 - Shutdown completed.
+[2026-05-01 21:18:28.089] [INFO ] [] []: Stopping service [Tomcat]
+[2026-05-01 21:18:28.117] [ERROR] [] []: Application run failed
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'adminAnnouncementController' defined in file [D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\biz\target\classes\cn\nine\pros\post\biz\controller\admin\AdminAnnouncementController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'announcementServiceImpl': Unsatisfied dependency expressed through field 'baseMapper': Error creating bean with name 'announcementMapper' defined in file [D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\biz\target\classes\cn\nine\pros\post\biz\mapper\AnnouncementMapper.class]: Unsatisfied dependency expressed through bean property 'sqlSessionTemplate': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Validate failed: Migrations have failed validation
+Migration checksum mismatch for migration version 3
+-> Applied to database : 1973061681
+-> Resolved locally    : 863430470
+Either revert the changes to the migration, or run repair to update the schema history.
+Need more flexibility with validation rules? Learn more: https://rd.gt/3AbJUZE
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:975)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:971)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:335)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1363)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1352)
+	at cn.nine.pros.post.server.SeniorPostApplication.main(SeniorPostApplication.java:19)
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'announcementServiceImpl': Unsatisfied dependency expressed through field 'baseMapper': Error creating bean with name 'announcementMapper' defined in file [D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\biz\target\classes\cn\nine\pros\post\biz\mapper\AnnouncementMapper.class]: Unsatisfied dependency expressed through bean property 'sqlSessionTemplate': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Validate failed: Migrations have failed validation
+Migration checksum mismatch for migration version 3
+-> Applied to database : 1973061681
+-> Resolved locally    : 863430470
+Either revert the changes to the migration, or run repair to update the schema history.
+Need more flexibility with validation rules? Learn more: https://rd.gt/3AbJUZE
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:788)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:768)
+	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:145)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:509)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1439)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
+	... 19 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'announcementMapper' defined in file [D:\04_idea_workplace\05_cursor\senior-golden\senior-post-api\biz\target\classes\cn\nine\pros\post\biz\mapper\AnnouncementMapper.class]: Unsatisfied dependency expressed through bean property 'sqlSessionTemplate': Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Validate failed: Migrations have failed validation
+Migration checksum mismatch for migration version 3
+-> Applied to database : 1973061681
+-> Resolved locally    : 863430470
+Either revert the changes to the migration, or run repair to update the schema history.
+Need more flexibility with validation rules? Learn more: https://rd.gt/3AbJUZE
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireByType(AbstractAutowireCapableBeanFactory.java:1536)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1430)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:785)
+	... 34 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Validate failed: Migrations have failed validation
+Migration checksum mismatch for migration version 3
+-> Applied to database : 1973061681
+-> Resolved locally    : 863430470
+Either revert the changes to the migration, or run repair to update the schema history.
+Need more flexibility with validation rules? Learn more: https://rd.gt/3AbJUZE
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1806)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:600)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:313)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireByType(AbstractAutowireCapableBeanFactory.java:1521)
+	... 45 common frames omitted
+Caused by: org.flywaydb.core.api.exception.FlywayValidateException: Validate failed: Migrations have failed validation
+Migration checksum mismatch for migration version 3
+-> Applied to database : 1973061681
+-> Resolved locally    : 863430470
+Either revert the changes to the migration, or run repair to update the schema history.
+Need more flexibility with validation rules? Learn more: https://rd.gt/3AbJUZE
+	at org.flywaydb.core.Flyway.lambda$migrate$0(Flyway.java:146)
+	at org.flywaydb.core.FlywayExecutor.execute(FlywayExecutor.java:213)
+	at org.flywaydb.core.Flyway.migrate(Flyway.java:140)
+	at org.springframework.boot.autoconfigure.flyway.FlywayMigrationInitializer.afterPropertiesSet(FlywayMigrationInitializer.java:66)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1853)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1802)
+	... 57 common frames omitted
+[2026-05-01 21:18:48.602] [INFO ] [] []: Starting service [Tomcat]
+[2026-05-01 21:18:48.603] [INFO ] [] []: Starting Servlet engine: [Apache Tomcat/10.1.33]
+[2026-05-01 21:18:48.668] [INFO ] [] []: Initializing Spring embedded WebApplicationContext
+[2026-05-01 21:18:49.419] [INFO ] [] []: HikariPool-1 - Starting...
+[2026-05-01 21:18:49.572] [INFO ] [] []: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6fe9c048
+[2026-05-01 21:18:49.573] [INFO ] [] []: HikariPool-1 - Start completed.
+[2026-05-01 21:18:49.628] [INFO ] [] []: Flyway Community Edition 9.22.3 by Redgate
+[2026-05-01 21:18:49.628] [INFO ] [] []: See release notes here: https://rd.gt/416ObMi
+[2026-05-01 21:18:49.628] [INFO ] [] []: 
+[2026-05-01 21:18:49.639] [INFO ] [] []: Database: jdbc:postgresql://localhost:5432/senior_post (PostgreSQL 14.12)
+[2026-05-01 21:18:49.661] [INFO ] [] []: Schema history table "public"."flyway_schema_history" does not exist yet
+[2026-05-01 21:18:49.664] [INFO ] [] []: Successfully validated 3 migrations (execution time 00:00.014s)
+[2026-05-01 21:18:49.673] [INFO ] [] []: Creating Schema History table "public"."flyway_schema_history" ...
+[2026-05-01 21:18:49.759] [INFO ] [] []: Current version of schema "public": << Empty Schema >>
+[2026-05-01 21:18:49.775] [INFO ] [] []: Migrating schema "public" to version "1 - init"
+[2026-05-01 21:18:50.196] [INFO ] [] []: Migrating schema "public" to version "2 - initial country data"
+[2026-05-01 21:18:50.205] [INFO ] [] []: Migrating schema "public" to version "3 - seed super admin"
+[2026-05-01 21:18:50.213] [INFO ] [] []: Successfully applied 3 migrations to schema "public", now at version v3 (execution time 00:00.416s)
+[2026-05-01 21:18:51.117] [INFO ] [] []: Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@37ff4054
+[2026-05-01 21:18:51.861] [INFO ] [] []: Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2026-05-01 21:23:40.963] [INFO ] [] []: HikariPool-1 - Shutdown initiated...
+[2026-05-01 21:23:40.966] [INFO ] [] []: HikariPool-1 - Shutdown completed.
+[2026-05-01 21:24:50.676] [INFO ] [] []: Starting service [Tomcat]
+[2026-05-01 21:24:50.677] [INFO ] [] []: Starting Servlet engine: [Apache Tomcat/10.1.33]
+[2026-05-01 21:24:50.730] [INFO ] [] []: Initializing Spring embedded WebApplicationContext
+[2026-05-01 21:24:51.300] [INFO ] [] []: HikariPool-1 - Starting...
+[2026-05-01 21:24:51.452] [INFO ] [] []: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1c5fd813
+[2026-05-01 21:24:51.454] [INFO ] [] []: HikariPool-1 - Start completed.
+[2026-05-01 21:24:51.529] [INFO ] [] []: Flyway Community Edition 9.22.3 by Redgate
+[2026-05-01 21:24:51.529] [INFO ] [] []: See release notes here: https://rd.gt/416ObMi
+[2026-05-01 21:24:51.530] [INFO ] [] []: 
+[2026-05-01 21:24:51.549] [INFO ] [] []: Database: jdbc:postgresql://localhost:5432/senior_post (PostgreSQL 14.12)
+[2026-05-01 21:24:51.639] [INFO ] [] []: Successfully validated 3 migrations (execution time 00:00.067s)
+[2026-05-01 21:24:51.745] [INFO ] [] []: Current version of schema "public": 3
+[2026-05-01 21:24:51.746] [INFO ] [] []: Schema "public" is up to date. No migration necessary.
+[2026-05-01 21:24:52.732] [INFO ] [] []: Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@37ff4054
+[2026-05-01 21:24:53.513] [INFO ] [] []: Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2026-05-01 21:36:01.079] [INFO ] [] []: HikariPool-1 - Shutdown initiated...
+[2026-05-01 21:36:01.092] [INFO ] [] []: HikariPool-1 - Shutdown completed.
+[2026-05-01 21:36:15.060] [INFO ] [] []: Starting service [Tomcat]
+[2026-05-01 21:36:15.061] [INFO ] [] []: Starting Servlet engine: [Apache Tomcat/10.1.33]
+[2026-05-01 21:36:15.258] [INFO ] [] []: Initializing Spring embedded WebApplicationContext
+[2026-05-01 21:36:16.783] [INFO ] [] []: HikariPool-1 - Starting...
+[2026-05-01 21:36:17.053] [INFO ] [] []: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4aea57dc
+[2026-05-01 21:36:17.055] [INFO ] [] []: HikariPool-1 - Start completed.
+[2026-05-01 21:36:17.155] [INFO ] [] []: Flyway Community Edition 9.22.3 by Redgate
+[2026-05-01 21:36:17.155] [INFO ] [] []: See release notes here: https://rd.gt/416ObMi
+[2026-05-01 21:36:17.156] [INFO ] [] []: 
+[2026-05-01 21:36:17.180] [INFO ] [] []: Database: jdbc:postgresql://localhost:5432/senior_post (PostgreSQL 14.12)
+[2026-05-01 21:36:17.265] [INFO ] [] []: Successfully validated 3 migrations (execution time 00:00.055s)
+[2026-05-01 21:36:17.331] [INFO ] [] []: Current version of schema "public": 3
+[2026-05-01 21:36:17.333] [INFO ] [] []: Schema "public" is up to date. No migration necessary.
+[2026-05-01 21:36:19.367] [INFO ] [] []: Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@37ff4054
+[2026-05-01 21:36:21.859] [INFO ] [] []: Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2026-05-01 21:37:46.641] [INFO ] [] []: HikariPool-1 - Shutdown initiated...
+[2026-05-01 21:37:46.663] [INFO ] [] []: HikariPool-1 - Shutdown completed.
+[2026-05-01 21:40:04.466] [INFO ] [] []: Starting service [Tomcat]
+[2026-05-01 21:40:04.467] [INFO ] [] []: Starting Servlet engine: [Apache Tomcat/10.1.33]
+[2026-05-01 21:40:04.518] [INFO ] [] []: Initializing Spring embedded WebApplicationContext
+[2026-05-01 21:40:05.130] [INFO ] [] []: HikariPool-1 - Starting...
+[2026-05-01 21:40:05.286] [INFO ] [] []: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@70e54ec3
+[2026-05-01 21:40:05.289] [INFO ] [] []: HikariPool-1 - Start completed.
+[2026-05-01 21:40:05.346] [INFO ] [] []: Flyway Community Edition 9.22.3 by Redgate
+[2026-05-01 21:40:05.346] [INFO ] [] []: See release notes here: https://rd.gt/416ObMi
+[2026-05-01 21:40:05.346] [INFO ] [] []: 
+[2026-05-01 21:40:05.358] [INFO ] [] []: Database: jdbc:postgresql://localhost:5432/senior_post (PostgreSQL 14.12)
+[2026-05-01 21:40:05.386] [INFO ] [] []: Successfully validated 3 migrations (execution time 00:00.018s)
+[2026-05-01 21:40:05.458] [INFO ] [] []: Current version of schema "public": 3
+[2026-05-01 21:40:05.461] [INFO ] [] []: Schema "public" is up to date. No migration necessary.
+[2026-05-01 21:40:06.424] [INFO ] [] []: Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@37ff4054
+[2026-05-01 21:40:07.314] [INFO ] [] []: Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2026-05-01 21:44:44.437] [INFO ] [] []: HikariPool-1 - Shutdown initiated...
+[2026-05-01 21:44:44.441] [INFO ] [] []: HikariPool-1 - Shutdown completed.
+[2026-05-01 21:44:59.109] [INFO ] [] []: Starting service [Tomcat]
+[2026-05-01 21:44:59.110] [INFO ] [] []: Starting Servlet engine: [Apache Tomcat/10.1.33]
+[2026-05-01 21:44:59.160] [INFO ] [] []: Initializing Spring embedded WebApplicationContext
+[2026-05-01 21:44:59.780] [INFO ] [] []: HikariPool-1 - Starting...
+[2026-05-01 21:44:59.937] [INFO ] [] []: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@54d46c8
+[2026-05-01 21:44:59.940] [INFO ] [] []: HikariPool-1 - Start completed.
+[2026-05-01 21:44:59.998] [INFO ] [] []: Flyway Community Edition 9.22.3 by Redgate
+[2026-05-01 21:44:59.998] [INFO ] [] []: See release notes here: https://rd.gt/416ObMi
+[2026-05-01 21:44:59.998] [INFO ] [] []: 
+[2026-05-01 21:45:00.015] [INFO ] [] []: Database: jdbc:postgresql://localhost:5432/senior_post (PostgreSQL 14.12)
+[2026-05-01 21:45:00.048] [INFO ] [] []: Successfully validated 3 migrations (execution time 00:00.019s)
+[2026-05-01 21:45:00.122] [INFO ] [] []: Current version of schema "public": 3
+[2026-05-01 21:45:00.124] [INFO ] [] []: Schema "public" is up to date. No migration necessary.
+[2026-05-01 21:45:01.070] [INFO ] [] []: Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@37ff4054
+[2026-05-01 21:45:01.637] [INFO ] [] []: Initializing Spring DispatcherServlet 'dispatcherServlet'

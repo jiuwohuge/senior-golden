@@ -6,17 +6,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api/api_exception.dart';
 import '../auth/auth_storage.dart';
 import '../auth/auth_token.dart';
+import '../config/api_base_url.dart';
 import '../device/device_ids.dart';
 import 'router_refresh.dart';
 
-/// 业务 HTTP 客户端。BaseURL：`--dart-define=API_BASE_URL=http://10.0.2.2:9011`（Android 模拟器访问本机）。
+/// 业务 HTTP 客户端。真机勿依赖默认 127.0.0.1，见 [kApiBaseUrl]。
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: const String.fromEnvironment(
-        'API_BASE_URL',
-        defaultValue: 'http://127.0.0.1:9011',
-      ),
+      baseUrl: kApiBaseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       headers: {

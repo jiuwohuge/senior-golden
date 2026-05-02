@@ -5,29 +5,54 @@ import '../../core/auth/auth_token.dart';
 import '../../core/network/router_refresh.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/auth/login_routes.dart';
+import '../../features/auth/onboarding_page.dart';
 import '../../features/auth/register_page.dart';
+import '../../features/auth/forgot_password_page.dart';
+import '../../features/auth/legal_page.dart';
+import '../../features/directory/user_card_page.dart';
+import '../../features/mailbox/letter_detail_page.dart';
+import '../../features/post_wall/post_compose_page.dart';
+import '../../features/post_wall/post_detail_page.dart';
+import '../../features/profile/about_page.dart';
+import '../../features/profile/account_delete_page.dart';
+import '../../features/profile/interests_picker_page.dart';
+import '../../features/profile/profile_edit_page.dart';
+import '../../features/profile/settings_page.dart';
+import '../../features/profile/stamps_ledger_page.dart';
+import '../../features/profile/vip_center_page.dart';
 import '../../features/shell/main_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refresh = ref.read(routerRefreshProvider);
 
   return GoRouter(
-    initialLocation: MainShellRoute.pathPostWall,
+    initialLocation: LoginRoutes.onboarding,
     refreshListenable: refresh,
     redirect: (context, state) {
       final token = ref.read(authTokenProvider);
       final loc = state.matchedLocation;
-      final authPaths = {LoginRoutes.login, LoginRoutes.register};
+      final authPaths = {
+        LoginRoutes.onboarding,
+        LoginRoutes.login,
+        LoginRoutes.register,
+        LoginRoutes.forgotPassword,
+        LoginRoutes.legalTerms,
+        LoginRoutes.legalPrivacy,
+      };
       final loggedIn = token != null && token.isNotEmpty;
       if (!loggedIn && !authPaths.contains(loc)) {
         return LoginRoutes.login;
       }
-      if (loggedIn && authPaths.contains(loc)) {
+      if (loggedIn && authPaths.contains(loc) && loc != LoginRoutes.legalTerms && loc != LoginRoutes.legalPrivacy) {
         return MainShellRoute.pathPostWall;
       }
       return null;
     },
     routes: [
+      GoRoute(
+        path: LoginRoutes.onboarding,
+        builder: (context, state) => const OnboardingPage(),
+      ),
       GoRoute(
         path: LoginRoutes.login,
         builder: (context, state) => const LoginPage(),
@@ -35,6 +60,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: LoginRoutes.register,
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: LoginRoutes.forgotPassword,
+        builder: (context, state) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: LoginRoutes.legalTerms,
+        builder: (context, state) => const LegalPage(type: LegalPageType.terms),
+      ),
+      GoRoute(
+        path: LoginRoutes.legalPrivacy,
+        builder: (context, state) => const LegalPage(type: LegalPageType.privacy),
       ),
       GoRoute(
         path: MainShellRoute.pathPostWall,
@@ -51,6 +88,53 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: MainShellRoute.pathProfile,
         builder: (context, state) => const MainShell(initialIndex: 3),
+      ),
+      GoRoute(
+        path: '/post/new',
+        builder: (context, state) => const PostComposePage(),
+      ),
+      GoRoute(
+        path: '/post/:id',
+        builder: (context, state) =>
+            PostDetailPage(postId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/user/:id',
+        builder: (context, state) =>
+            UserCardPage(userId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/letter/:id',
+        builder: (context, state) =>
+            LetterDetailPage(letterId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/profile/edit',
+        builder: (context, state) => const ProfileEditPage(),
+      ),
+      GoRoute(
+        path: '/profile/interests',
+        builder: (context, state) => const InterestsPickerPage(),
+      ),
+      GoRoute(
+        path: '/profile/stamps',
+        builder: (context, state) => const StampsLedgerPage(),
+      ),
+      GoRoute(
+        path: '/profile/vip',
+        builder: (context, state) => const VipCenterPage(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: '/about',
+        builder: (context, state) => const AboutPage(),
+      ),
+      GoRoute(
+        path: '/account/delete',
+        builder: (context, state) => const AccountDeletePage(),
       ),
     ],
   );
