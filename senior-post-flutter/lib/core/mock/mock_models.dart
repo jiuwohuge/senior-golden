@@ -85,7 +85,11 @@ class MockComment {
 
 enum LetterType { registered, standard }
 
-enum LetterStatus { delivering, delivered }
+/// 与后端 `LetterBizStatus` 对齐：运输中 / 已送达 / 已挂号（待策略转送达）。
+enum LetterStatus { delivering, delivered, registered }
+
+/// 与后端 `LetterSendMode` 对齐。
+enum LetterSendMode { standardPost, registeredMail, directVip }
 
 class MockLetter {
   MockLetter({
@@ -98,6 +102,7 @@ class MockLetter {
     required this.sentAt,
     this.deliveryAt,
     this.outgoing = true,
+    this.sendMode = LetterSendMode.standardPost,
   });
 
   final String id;
@@ -109,6 +114,20 @@ class MockLetter {
   final DateTime sentAt;
   DateTime? deliveryAt;
   final bool outgoing;
+  final LetterSendMode sendMode;
+}
+
+/// Mock-only：已建联会话行（真实环境由 TIM getConversationList 提供）。
+class MockImConnectionRow {
+  const MockImConnectionRow({
+    required this.peer,
+    required this.lastMessage,
+    required this.lastTime,
+  });
+
+  final MockUser peer;
+  final String lastMessage;
+  final DateTime lastTime;
 }
 
 class MockStampLedgerEntry {

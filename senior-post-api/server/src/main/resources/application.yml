@@ -41,6 +41,11 @@ senior-post:
     jwt:
       secret: ${APP_JWT_SECRET:dev-senior-post-jwt-secret-change-me-in-prod!!}
       expire-days: 7
+  # 腾讯 IM：控制台 SDKAppID + 密钥；sdk-app-id=0 时 /api/im/usersig 返回业务错误提示未配置
+  tencent-im:
+    sdk-app-id: ${TENCENT_IM_SDK_APP_ID:0}
+    secret-key: ${TENCENT_IM_SECRET_KEY:}
+    user-sig-expire-seconds: 604800
 
 jh:
   config:
@@ -72,6 +77,8 @@ jh:
       - /api/auth/login
       - /api/auth/register
       - /api/bootstrap/init
+      - /api/mailbox/**
+      - /api/im/**
     # 忽略参数解密的接口
     reqIgnoreDecryptUris:
       - /webapp/**
@@ -79,6 +86,8 @@ jh:
       - /api/auth/login
       - /api/auth/register
       - /api/bootstrap/init
+      - /api/mailbox/**
+      - /api/im/**
 
 knife4j:
   enable: true  # 启用 Knife4j 增强（必须，否则仅启用 springdoc 默认 UI）

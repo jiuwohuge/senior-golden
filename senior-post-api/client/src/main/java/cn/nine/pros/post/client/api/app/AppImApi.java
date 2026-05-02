@@ -1,0 +1,15 @@
+package cn.nine.pros.post.client.api.app;
+
+import cn.nine.pros.post.client.common.constant.AppServiceDefine;
+import cn.nine.pros.post.client.model.out.AppImUserSigVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Tag(name = "App-腾讯IM")
+public interface AppImApi {
+
+    @Operation(summary = "获取当前用户 UserSig（用于 TIM SDK 登录）")
+    @GetMapping(AppServiceDefine.SERVER_PREFIX + "/im/usersig")
+    AppImUserSigVO userSig();
+}

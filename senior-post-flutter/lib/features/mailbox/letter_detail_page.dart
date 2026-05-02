@@ -2,16 +2,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/mock/mock_models.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
-import 'mailbox_page.dart';
+import 'mailbox_providers.dart';
 import 'speed_up_sheet.dart';
 
-final letterDetailProvider = FutureProvider.family<MockLetter?, String>((ref, id) async {
+final letterDetailProvider = FutureProvider.family<MockLetter?, String>((
+  ref,
+  id,
+) async {
   return ref.read(mockMailboxRepositoryProvider).findById(id);
 });
 
@@ -26,11 +31,25 @@ class LetterDetailPage extends ConsumerStatefulWidget {
 class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
   final _reply = TextEditingController();
   bool _busy = false;
+  bool _acceptBusy = false;
 
   @override
   void dispose() {
     _reply.dispose();
     super.dispose();
+  }
+
+  Widget _statusChip(MockLetter letter) {
+    return switch (letter.status) {
+      LetterStatus.delivering => PostalStatusChip.delivering(),
+      LetterStatus.registered => PostalStatusChip.registered(
+        label: 'Registered',
+      ),
+      LetterStatus.delivered =>
+        letter.type == LetterType.registered
+            ? PostalStatusChip.registered(label: 'Registered')
+            : PostalStatusChip.delivered(),
+    };
   }
 
   @override
@@ -40,7 +59,8 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
       appBar: AppBar(title: const Text('Letter detail')),
       body: SafeArea(
         child: letterAsync.when(
-          loading: () => const PostalSkeletonList(itemCount: 1, itemHeight: 260),
+          loading: () =>
+              const PostalSkeletonList(itemCount: 1, itemHeight: 260),
           error: (e, _) => PostalEmptyState(
             title: 'Unable to load letter',
             subtitle: '$e',
@@ -54,6 +74,13 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
               );
             }
             final isDelivering = letter.status == LetterStatus.delivering;
+            final isRegistered = letter.status == LetterStatus.registered;
+            final repo = ref.read(mockMailboxRepositoryProvider);
+            final canAccept =
+                !letter.outgoing &&
+                letter.status == LetterStatus.delivered &&
+                !repo.friendsWithPeer(letter.peer.id);
+
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
               children: [
@@ -68,15 +95,25 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
-                      isDelivering
-                          ? PostalStatusChip.delivering()
-                          : PostalStatusChip.delivered(),
+                      _statusChip(letter),
                     ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(letter.body, style: Theme.of(context).textTheme.bodyLarge),
+                      if (isRegistered)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Text(
+                            'Registered mail: filing complete. It will show as delivered in a moment.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: PostalTokens.inkSecondary),
+                          ),
+                        ),
+                      Text(
+                        letter.body,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                       const SizedBox(height: 12),
                       Text(
                         'Sent at ${DateFormat('MM-dd HH:mm').format(letter.sentAt)}',
@@ -84,7 +121,11 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                       ),
                       if (letter.deliveryAt != null)
                         Text(
-                          '${isDelivering ? 'Estimated delivery' : 'Delivered'} ${DateFormat('MM-dd HH:mm').format(letter.deliveryAt!)}',
+                          '${isDelivering
+                              ? 'Estimated delivery'
+                              : isRegistered
+                              ? 'Expected delivery'
+                              : 'Delivered'} ${DateFormat('MM-dd HH:mm').format(letter.deliveryAt!)}',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                     ],
@@ -98,10 +139,14 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                 onPressed: () async {
                                   await showModalBottomSheet<void>(
                                     context: context,
-                                    builder: (_) => SpeedUpSheet(letterId: letter.id),
+                                    builder: (_) =>
+                                        SpeedUpSheet(letterId: letter.id),
                                   );
-                                  ref.invalidate(letterDetailProvider(widget.letterId));
+                                  ref.invalidate(
+                                    letterDetailProvider(widget.letterId),
+                                  );
                                   ref.invalidate(mailboxLettersProvider);
+                                  ref.invalidate(postalInboxLettersProvider);
                                 },
                               ),
                             ),
@@ -109,6 +154,51 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                         )
                       : null,
                 ),
+                if (canAccept) ...[
+                  const SizedBox(height: 14),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 320),
+                    child: PostalButton(
+                      key: ValueKey('accept_${letter.id}'),
+                      label: 'Accept postal contact',
+                      busy: _acceptBusy,
+                      onPressed: _acceptBusy
+                          ? null
+                          : () async {
+                              setState(() => _acceptBusy = true);
+                              try {
+                                await ref
+                                    .read(mockMailboxRepositoryProvider)
+                                    .acceptPostalConnection(letter.id);
+                                if (!context.mounted) return;
+                                PostalSnack.show(
+                                  context,
+                                  'You can now chat in Connections.',
+                                  tone: PostalSnackTone.success,
+                                );
+                                ref.invalidate(
+                                  letterDetailProvider(widget.letterId),
+                                );
+                                ref.invalidate(mailboxLettersProvider);
+                                ref.invalidate(postalInboxLettersProvider);
+                                ref.invalidate(mockConnectionsProvider);
+                              } on ApiBusinessException catch (e) {
+                                if (context.mounted) {
+                                  PostalSnack.show(
+                                    context,
+                                    e.message,
+                                    tone: PostalSnackTone.error,
+                                  );
+                                }
+                              } finally {
+                                if (context.mounted) {
+                                  setState(() => _acceptBusy = false);
+                                }
+                              }
+                            },
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 PostalTextField(
                   controller: _reply,
@@ -121,7 +211,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                 PostalButton(
                   label: 'Send reply',
                   busy: _busy,
-                  onPressed: _busy
+                  onPressed: (letter.status != LetterStatus.delivered || _busy)
                       ? null
                       : () async {
                           if (_reply.text.trim().isEmpty) {
@@ -134,10 +224,9 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                           }
                           setState(() => _busy = true);
                           try {
-                            await ref.read(mockMailboxRepositoryProvider).reply(
-                                  letter.id,
-                                  _reply.text.trim(),
-                                );
+                            await ref
+                                .read(mockMailboxRepositoryProvider)
+                                .reply(letter.id, _reply.text.trim());
                             if (!context.mounted) return;
                             PostalSnack.show(
                               context,
@@ -146,6 +235,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                             );
                             _reply.clear();
                             ref.invalidate(mailboxLettersProvider);
+                            ref.invalidate(postalInboxLettersProvider);
                           } on ApiBusinessException catch (e) {
                             if (context.mounted) {
                               PostalSnack.show(
@@ -159,6 +249,15 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                           }
                         },
                 ),
+                if (ref
+                    .read(mockMailboxRepositoryProvider)
+                    .friendsWithPeer(letter.peer.id)) ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () => context.push('/chat/${letter.peer.id}'),
+                    child: const Text('Open instant chat'),
+                  ),
+                ],
               ],
             );
           },

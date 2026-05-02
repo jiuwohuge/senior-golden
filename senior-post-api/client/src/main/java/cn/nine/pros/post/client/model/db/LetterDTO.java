@@ -73,5 +73,10 @@ public class LetterDTO extends AbstractAuditableDTO {
      */
     @Schema(description = "回复的信件ID（自关联）")
     private Long parentLetterId;
+    /**
+     * 发送模式：1平邮路径 2挂号路径 3直发/VIP
+     */
+    @Schema(description = "发送模式：1平邮路径 2挂号路径 3直发/VIP")
+    private Integer sendMode;
 
 }

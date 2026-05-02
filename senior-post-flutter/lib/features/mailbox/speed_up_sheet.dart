@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
-import 'mailbox_page.dart';
+import 'mailbox_providers.dart';
 
 class SpeedUpSheet extends ConsumerStatefulWidget {
   const SpeedUpSheet({super.key, required this.letterId});
@@ -50,6 +50,7 @@ class _SpeedUpSheetState extends ConsumerState<SpeedUpSheet> {
                             .speedUp(widget.letterId);
                         if (!context.mounted) return;
                         ref.invalidate(mailboxLettersProvider);
+                        ref.invalidate(postalInboxLettersProvider);
                         PostalSnack.show(
                           context,
                           'Mock: delivery completed',

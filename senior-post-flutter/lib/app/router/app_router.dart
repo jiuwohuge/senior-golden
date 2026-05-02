@@ -10,7 +10,9 @@ import '../../features/auth/register_page.dart';
 import '../../features/auth/forgot_password_page.dart';
 import '../../features/auth/legal_page.dart';
 import '../../features/directory/user_card_page.dart';
+import '../../features/mailbox/chat_page.dart';
 import '../../features/mailbox/letter_detail_page.dart';
+import '../../features/mailbox/mailbox_archive_page.dart';
 import '../../features/post_wall/post_compose_page.dart';
 import '../../features/post_wall/post_detail_page.dart';
 import '../../features/profile/about_page.dart';
@@ -43,7 +45,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (!loggedIn && !authPaths.contains(loc)) {
         return LoginRoutes.login;
       }
-      if (loggedIn && authPaths.contains(loc) && loc != LoginRoutes.legalTerms && loc != LoginRoutes.legalPrivacy) {
+      if (loggedIn &&
+          authPaths.contains(loc) &&
+          loc != LoginRoutes.legalTerms &&
+          loc != LoginRoutes.legalPrivacy) {
         return MainShellRoute.pathPostWall;
       }
       return null;
@@ -71,7 +76,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: LoginRoutes.legalPrivacy,
-        builder: (context, state) => const LegalPage(type: LegalPageType.privacy),
+        builder: (context, state) =>
+            const LegalPage(type: LegalPageType.privacy),
       ),
       GoRoute(
         path: MainShellRoute.pathPostWall,
@@ -109,6 +115,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             LetterDetailPage(letterId: state.pathParameters['id']!),
       ),
       GoRoute(
+        path: '/mailbox/archive',
+        builder: (context, state) => const MailboxArchivePage(),
+      ),
+      GoRoute(
+        path: '/chat/:userId',
+        builder: (context, state) =>
+            ChatPage(peerUserId: state.pathParameters['userId']!),
+      ),
+      GoRoute(
         path: '/profile/edit',
         builder: (context, state) => const ProfileEditPage(),
       ),
@@ -128,10 +143,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/settings',
         builder: (context, state) => const SettingsPage(),
       ),
-      GoRoute(
-        path: '/about',
-        builder: (context, state) => const AboutPage(),
-      ),
+      GoRoute(path: '/about', builder: (context, state) => const AboutPage()),
       GoRoute(
         path: '/account/delete',
         builder: (context, state) => const AccountDeletePage(),

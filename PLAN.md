@@ -82,7 +82,7 @@
 | 本地持久化 | **hive** 或 **isar**（二选一锁定） | 用户设置、草稿、非敏感缓存；**禁止**用全局静态变量代替持久化 |
 | 敏感数据 | **flutter_secure_storage** | Token、密钥类 |
 | 国际化 | **intl** + ARB | 中英（A10） |
-| IM / Chat UI | **腾讯云 TUIKit（Flutter）** | 与决策 B2 一致；业务用户体系与后端映射 |
+| IM / Chat UI | **`tencent_cloud_chat_sdk`（无 UI SDK）+ 自研会话/气泡** | 与决策 B2 一致（Chat 能力）；UserSig 走 **`GET /api/im/usersig`**；TUIKit 仍为可选升级路径 |
 
 **与后端交互方式**：HTTPS → 业务 REST **`/api/...`**；IM **userId = 业务用户 ID**，走腾讯 SDK；媒体上传：调用后端 **`get_sign`**（命名以最终实现为准）→ 客户端 **PUT** 至 OSS。
 
@@ -101,9 +101,9 @@
 | `features/auth/` | 注册、登录、资料完善、协议与年龄门槛 UI |
 | `features/post_wall/` | Tab1 列表/详情、发布、评论、举报 |
 | `features/directory/` | Tab2 信件架网格、筛选、用户卡、Send Letter 入口 |
-| `features/mailbox/` | Tab3 列表、邮票展示、平邮状态、加速 |
+| `features/mailbox/` | Tab3：**Postal inbox / Connections** 分段、归档、`tim_facade`（TIM 登录与会话）、`chat_page`、信件详情建联 |
 | `features/profile/` | Tab4 个人中心、编辑资料、设置、注销/GDPR 入口（M4） |
-| `features/im/` | 腾讯 TUIKit 初始化、会话列表与聊天页与业务路由衔接 |
+| `features/im/` | **已并入 `features/mailbox/`**（TIM 初始化与会话列表）；若后续引入 TUIKit 再拆独立目录 |
 | `shared/` | 通用 Widget、分页组件、图片/OSS 上传封装、国家与标签选择器 |
 
 ### 与需求文档的页面对照
@@ -113,11 +113,11 @@
 | 注册与资料（§四） | 邮箱注册、密码、协议勾选、出生年/年龄（读配置门槛）、昵称/国家/标签(≥3)/简介/头像；完成后进 Tab1 |
 | Tab1 Post Wall（§五） | 信息流、发帖（文+图）、评论（纯文本）、无 Like、Send Letter、举报 |
 | Tab2 Directory（§六） | 邮局架 UI、国家/年龄/兴趣筛选、同龄/同兴趣排序由后端；用户卡 + Send Letter |
-| Tab3 Post Box（§七~九） | 邮票 `x/3` 或 VIP Unlimited、运输中横幅、会话/信件列表状态（✅ 即时 / ✉️ 运输 / 已送达）、平邮加速 |
+| Tab3 Post Box（§七~九） | 邮票 `x/3` 或 VIP Unlimited、运输中横幅、**Postal / Connections 双列表**、归档、信件状态（含已挂号）、平邮加速、**收件 Accept 建联 → IM** |
 | 邮票与 VIP（§十~十一） | 余额与上限展示、挂号消耗提示、VIP 权益由配置驱动展示（开关） |
 | 设备 ID（§十二） | 启动/登录链路采集合规设备标识并随请求或专用接口上报（契约以后端为准） |
 | 国际化（§十六） | `intl` + ARB：英文默认 + 中文 |
-| IM（§十七） | TUIKit：userId 与业务用户一致，UserSig 等走后端 |
+| IM（§十七） | **userId = 业务用户 ID**；**UserSig 后端签发**（`/api/im/usersig`）；客户端 **`tencent_cloud_chat_sdk`** 登录 + 会话列表 + 自研聊天页（TUIKit 可选） |
 
 ### 按 M1~M4 的 App 侧任务（与本文「开发计划」对齐）
 
@@ -134,7 +134,7 @@
 - **Shell**：底部四 Tab（Post Wall / Directory / Post Box / My Post）。
 - Tab1：明信片列表分页、详情、发布页（OSS 直传：`get_sign` → PUT）、审核中/仅己可见等状态展示。
 - Tab2：名录网格、筛选表单、用户详情底部表或全屏卡、**Send Letter** 弹层（挂号/平邮二选一 UI）。
-- Tab3（最小）：信箱列表拉取、与 IM/信件接口的初版列表（若后端拆信与 IM，按契约二选一或组合展示）。
+- Tab3：**Postal inbox / Connections 分段**、归档、Mock 建联与 **TIM SDK**；后端已备 **`/api/mailbox/*` + `/api/im/usersig`**；Flutter 真联调信件列表仍可与 Mock 并行切换。
 - 评论、举报入口与错误提示（敏感词等由后端返回）。
 
 **M3 — 信箱与资产闭环**
@@ -232,7 +232,7 @@ flowchart LR
 | **M1** | `email_outbox`（可选）或复用通用 `notification_log` | 异步发信队列：重试、状态，与下方邮件场景配合 |
 | **M2** | `post` / `comment` | UGC 主体；**审核状态**（待审/通过/拒绝）、可见性以「通过」为对外前提 |
 | **M2** | `content_audit_log`（可选） | 审核人、时间、结论、备注 |
-| **M3** | `letter` / `mailbox` | 信件状态机、挂号/平邮、延迟投递时间点 |
+| **M3** | `letter` / `mailbox` | 信件状态机、挂号/平邮、延迟投递时间点；**`bu_friendship`（建联）**、**`bu_letter.send_mode`**（Flyway `V4`，2026-05-02） |
 | **M3** | `stamp_account` + `stamp_ledger` | 余额 + 流水账本 |
 | **跨阶段** | `admin_user` / `admin_role`（若与 App 用户分表） | 管理端账号与权限；**首期也可**共用 `sys_user` + role 字段，按你偏好二选一 |
 
@@ -260,7 +260,8 @@ flowchart LR
 - [ ] A2. 用户资料中心（头像、昵称、国家、兴趣、简介、资料编辑）
 - [ ] A3. Post Wall（发帖、浏览、评论、举报、内容审核）
 - [ ] A4. Post Directory（筛选、排序、用户卡片、写信入口）
-- [ ] A5. Post Box（挂号信即时送达、平邮延迟送达、平邮加速）
+- [ ] A5. Post Box（挂号信即时送达、平邮延迟送达、平邮加速；**App 发信/拉信全量走真实 REST 仍待联调**）
+- [x] A5-IM. 邮政信箱 × 腾讯 IM 双轨：**后端** `V4`（`bu_friendship` + `send_mode`）、`GET/POST /api/mailbox/*`、`GET /api/im/usersig`（`tls-sig-api-v2` + `senior-post.tencent-im`）；**Flutter** Tab 分段、归档、`tim_facade`、`chat_page`、`tencent_cloud_chat_sdk:8.8.7373`、Mock 建联与单元测试 `test/mailbox_models_test.dart`（2026-05-02）
 - [ ] A6. Chat Stamp（发放、消耗、上限、余额校验、日志）
 - [ ] A7. VIP 权益（无限邮票、免费加速、访客、无痕、推荐权重）
 - [ ] A8. 风控与合规（设备标识、敏感词、图片审核、GDPR 删除与注销）
@@ -279,6 +280,10 @@ flowchart LR
 - **本次新增（2026-05-01，App 同步）**：`application.yml` 将 **`/api/bootstrap/init`** 纳入 **`exclude-interceptor-pattern`**，未登录注册页可拉取配置；Flutter 抽取 **`appBootstrapProvider`**（`AppBootstrapData` / `CountryItem` 含 `nameZh`），**注册页**用服务端 **`minRegisterAge`** 生成出生年范围（上限 110 岁）、国家下拉与后端列表一致；**个人中心**复用同一 Provider，并 **`watch(authTokenProvider)`** 在登录后刷新资料。
 - **注册联调修复（2026-05-01）**：根 `application.yml` 对 **`/api/auth/login`、`/api/auth/register`、`/api/bootstrap/init`** 加入 **`jh.security` 加解密忽略**（客户端尚未接 AES 时仍可解析 JSON）；Flutter 侧 **`INTERNET`** 写入主 Manifest、**Debug 明文 HTTP**、iOS **`NSAllowsLocalNetworking`**；**`kApiBaseUrl`** 集中 **`API_BASE_URL`**，注册失败页 Debug 展示 **Dio 详情 + 真机 `--dart-define` 提示**。
 - **本次新增（2026-05-01，设计沟通）**：确认 UI 方向从“邮政蓝主导”调整为 **浅灰复古主导**。设计关键词：**可靠、成熟、全球化、低刺激**；目标人群 45+ 优先可读性与可操作性。登录/注册页面要求：中部卡片式布局、协议勾选必选、补齐忘记密码、按钮禁用/加载/错误反馈完整。
+- **本次新增（2026-05-02，邮政 × IM）**：
+  - **后端**：Flyway **`V4__mailbox_im_friendship.sql`**（`bu_friendship`、`bu_letter.send_mode`）；`LetterDTO`/`LetterDomain` 补 `sendMode`；`AppMailboxApi`（`/api/mailbox/postal`、`/sync`、`/archive`、`/letters/{id}/accept-postal`）、`AppImApi`（`/api/im/usersig`）；`AppImService`（`com.github.tencentyun:tls-sig-api-v2:2.0`）；`TencentImFriendshipNotifier` 占位；`application.yml` 增加 **`senior-post.tencent-im`** 与 **`/api/mailbox/**`、`/api/im/**`** 加解密白名单。
+  - **Flutter**：`pubspec` 引入 **`tencent_cloud_chat_sdk:8.8.7373`**；`mailbox_page` **Postal / Connections**、`mailbox_archive_page`、`chat_page`（邮政主题气泡 + C2C 历史）、`tim_facade`、`mailbox_providers`；Mock 扩展 **`LetterStatus.registered` / `LetterSendMode` / 建联集合**；路由 **`/mailbox/archive`、`/chat/:userId`**。
+  - **验证**：`mvn compile -DskipTests`（`senior-post-api`）；`flutter analyze`；`flutter test test/mailbox_models_test.dart`。
 
 ---
 
@@ -287,7 +292,7 @@ flowchart LR
 - **需求澄清阶段**：关键决策清单闭合；产出 API + 事件 + 状态流契约草案。
 - **开发阶段**：
   - Backend：单元测试 + 集成测试 + HTTP 冒烟；Knife4j `/doc.html` 契约可视。
-  - Flutter：`flutter analyze`、Widget/Integration 测试、真机联调、`85xx` 链路。
+  - Flutter：`flutter analyze`、Widget/Integration 测试、真机联调、`85xx` 链路；**邮政 Tab：Accept → Connections → Chat（Mock）**；**配置 `TENCENT_IM_*` 后验证 `/api/im/usersig` + TIM 会话列表**。
   - IM：双端消息、离线、重连、未读数。
   - 数据：邮票账本与信件状态事务一致。
 
@@ -361,8 +366,8 @@ flowchart LR
   - 验收：从浏览用户到发信完整可走通；未审核内容对前台不可见
 - M3（信箱与资产系统）
   - 目标：Post Box、平邮延迟投递、加速、邮票账本全部闭环
-  - 后端：Redis+DB 延迟队列、信件状态机、邮票余额与流水、加速扣减原子事务
-  - Flutter：信箱列表状态（Delivering/Delivered）、加速按钮、邮票余额展示
+  - 后端：Redis+DB 延迟队列、信件状态机、邮票余额与流水、加速扣减原子事务；**建联表 + UserSig 已落地（2026-05-02）**，信件写接口与队列投递仍按原计划推进
+  - Flutter：信箱列表状态（Delivering/Delivered/**Registered**）、加速按钮、邮票余额展示；**Postal/Connections/Archive、TIM 登录与自研聊天页已落地（2026-05-02）**
   - 管理后台：邮票配置中心、用户邮票流水查询、封禁/设备拉黑
   - 验收：平邮延迟与加速行为正确；账本可追溯且余额一致
 - M4（风控合规与上线准备）
@@ -404,4 +409,5 @@ flowchart LR
 - [x] S7. Flyway + `/webapi` 基线与文档对齐（2026-05-01）
 - [x] S8. M1 表结构与认证/配置接口落地
 - [ ] S9. M2 帖子/目录/写信主链路落地
+- [x] S11. 邮政信箱 × 腾讯 IM 双轨契约与 Flutter 分段 UI + TIM 登录链路（2026-05-02；腾讯 REST 好友同步仍为占位）
 - [x] S10. 管理后台：`senior-post-manage` 修复配置页 UTF-8 乱码源码、侧边栏二级分组菜单；`UserServiceImpl.delByIds` 禁止删除 `staff_role != 0` 的可登录后台账号（2026-05-01）

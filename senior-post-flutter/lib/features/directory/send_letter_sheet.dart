@@ -5,6 +5,7 @@ import '../../core/api/api_exception.dart';
 import '../../core/mock/mock_models.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
+import '../mailbox/mailbox_providers.dart';
 
 class SendLetterSheet extends ConsumerStatefulWidget {
   const SendLetterSheet({super.key, required this.user});
@@ -27,21 +28,31 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
 
   Future<void> _send() async {
     if (_body.text.trim().isEmpty) {
-      PostalSnack.show(context, 'Please write letter content.', tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        'Please write letter content.',
+        tone: PostalSnackTone.warning,
+      );
       return;
     }
     setState(() => _busy = true);
     try {
-      await ref.read(mockMailboxRepositoryProvider).send(
-            peer: widget.user,
-            body: _body.text.trim(),
-            type: _type,
-          );
+      await ref
+          .read(mockMailboxRepositoryProvider)
+          .send(peer: widget.user, body: _body.text.trim(), type: _type);
       if (!mounted) return;
-      PostalSnack.show(context, 'Mock: letter sent', tone: PostalSnackTone.success);
+      ref.invalidate(mailboxLettersProvider);
+      ref.invalidate(postalInboxLettersProvider);
+      PostalSnack.show(
+        context,
+        'Mock: letter sent',
+        tone: PostalSnackTone.success,
+      );
       Navigator.of(context).pop();
     } on ApiBusinessException catch (e) {
-      if (mounted) PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -72,7 +83,9 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                     // ignore: deprecated_member_use
                     onChanged: _busy ? null : (v) => setState(() => _type = v!),
                     title: const Text('Registered Mail'),
-                    subtitle: Text(session.isVip ? 'Free for VIP' : 'Consumes 1 stamp'),
+                    subtitle: Text(
+                      session.isVip ? 'Free for VIP' : 'Consumes 1 stamp',
+                    ),
                   ),
                 ),
               ],

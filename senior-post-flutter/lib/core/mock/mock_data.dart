@@ -109,7 +109,8 @@ abstract final class MockData {
       countryCode: 'AR',
       countryName: 'Argentina',
       birthYear: _now - 64,
-      bio: 'Tango aficionado from Buenos Aires. I write letters in three colors of ink.',
+      bio:
+          'Tango aficionado from Buenos Aires. I write letters in three colors of ink.',
       interests: const ['music', 'language', 'volunteering'],
     ),
   ];
@@ -157,8 +158,7 @@ abstract final class MockData {
       MockPost(
         id: 'p_004',
         author: users[6],
-        content:
-            '今天去江边走了很久。看了一会儿水鸟，又去邮局寄了三封信。希望都能慢慢到。',
+        content: '今天去江边走了很久。看了一会儿水鸟，又去邮局寄了三封信。希望都能慢慢到。',
         createdAt: now.subtract(const Duration(days: 1, hours: 3)),
         commentCount: 5,
       ),
@@ -193,7 +193,8 @@ abstract final class MockData {
       MockComment(
         id: 'c_${postId}_2',
         author: users[3],
-        content: 'I keep my pen and paper next to the kettle for the same reason.',
+        content:
+            'I keep my pen and paper next to the kettle for the same reason.',
         createdAt: now.subtract(const Duration(hours: 2)),
       ),
       MockComment(
@@ -219,6 +220,7 @@ abstract final class MockData {
         sentAt: now.subtract(const Duration(hours: 1)),
         deliveryAt: now.subtract(const Duration(hours: 1)),
         outgoing: false,
+        sendMode: LetterSendMode.registeredMail,
       ),
       MockLetter(
         id: 'l_002',
@@ -231,6 +233,7 @@ abstract final class MockData {
         sentAt: now.subtract(const Duration(minutes: 36)),
         deliveryAt: now.add(const Duration(hours: 1, minutes: 24)),
         outgoing: false,
+        sendMode: LetterSendMode.standardPost,
       ),
       MockLetter(
         id: 'l_003',
@@ -243,6 +246,7 @@ abstract final class MockData {
         sentAt: now.subtract(const Duration(days: 1)),
         deliveryAt: now.subtract(const Duration(hours: 22)),
         outgoing: false,
+        sendMode: LetterSendMode.standardPost,
       ),
       MockLetter(
         id: 'l_004',
@@ -255,6 +259,7 @@ abstract final class MockData {
         sentAt: now.subtract(const Duration(days: 2)),
         deliveryAt: now.subtract(const Duration(days: 2)),
         outgoing: false,
+        sendMode: LetterSendMode.registeredMail,
       ),
     ];
   }
@@ -293,8 +298,7 @@ abstract final class MockData {
     ];
   }
 
-  static const List<({String code, String nameEn, String nameZh})>
-  countries = [
+  static const List<({String code, String nameEn, String nameZh})> countries = [
     (code: 'GB', nameEn: 'United Kingdom', nameZh: '英国'),
     (code: 'US', nameEn: 'United States', nameZh: '美国'),
     (code: 'FR', nameEn: 'France', nameZh: '法国'),
