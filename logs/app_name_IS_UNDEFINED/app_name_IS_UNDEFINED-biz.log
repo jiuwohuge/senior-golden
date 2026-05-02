@@ -35380,3 +35380,2854 @@ class cn.nine.pros.post.client.model.db.UserDTO
 [2026-05-02 17:19:22.284] [DEBUG] [] [1a5d76fb83ea4f6abb73817c806b817d]: =========================================
 [2026-05-02 17:19:22.284] [DEBUG] [] [1a5d76fb83ea4f6abb73817c806b817d]: ==> leave RequestContextHolder.
 [2026-05-02 17:19:22.284] [DEBUG] [] [1a5d76fb83ea4f6abb73817c806b817d]: ==> leave RequestContextHolder.
+[2026-05-02 17:23:56.306] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:23:56.306] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:23:56.306] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:23:56.306] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:23:56.306] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:23:56.306] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:23:56.314] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:23:56.314] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: ==> Parameters: 1(Long)
+[2026-05-02 17:23:56.314] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:23:56.314] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:23:56.314] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: ==> Parameters: false(Boolean)
+[2026-05-02 17:23:56.314] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: ==> Parameters: false(Boolean)
+[2026-05-02 17:23:56.315] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: <==      Total: 1
+[2026-05-02 17:23:56.315] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:23:56.315] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:23:56.315] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:23:56.315] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: <==      Total: 1
+[2026-05-02 17:23:56.315] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:23:56.315] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: =========================================
+[2026-05-02 17:23:56.315] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:23:56.315] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:23:56.315] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: =========================================
+[2026-05-02 17:23:56.315] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:23:56.315] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:23:56.315] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:23:56.315] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: =========================================
+[2026-05-02 17:23:56.315] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:23:56.315] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: =========================================
+[2026-05-02 17:23:56.315] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: <==      Total: 1
+[2026-05-02 17:23:56.315] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: ==> leave RequestContextHolder.
+[2026-05-02 17:23:56.315] [DEBUG] [] [4388546589904cdcb6b2a88d32f05588]: ==> leave RequestContextHolder.
+[2026-05-02 17:23:56.315] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:23:56.315] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:23:56.315] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:23:56.315] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: ==> leave RequestContextHolder.
+[2026-05-02 17:23:56.315] [DEBUG] [] [1e03afcab7cf45efb4d4b507a59e4384]: ==> leave RequestContextHolder.
+[2026-05-02 17:23:56.315] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:23:56.315] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: =========================================
+[2026-05-02 17:23:56.315] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:23:56.315] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: =========================================
+[2026-05-02 17:23:56.315] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: ==> leave RequestContextHolder.
+[2026-05-02 17:23:56.315] [DEBUG] [] [04893eb5bf244c9cb44b0cb7947f89e1]: ==> leave RequestContextHolder.
+[2026-05-02 17:23:56.318] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:23:56.319] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:23:56.321] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:23:56.321] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: ==> Parameters: 1(Long)
+[2026-05-02 17:23:56.321] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: <==      Total: 1
+[2026-05-02 17:23:56.321] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:23:56.321] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:23:56.321] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:23:56.321] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:23:56.321] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: =========================================
+[2026-05-02 17:23:56.321] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:23:56.321] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: =========================================
+[2026-05-02 17:23:56.322] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: ==> leave RequestContextHolder.
+[2026-05-02 17:23:56.322] [DEBUG] [] [bb5ee2a4c6f3427f8cd7d1d7bd127bda]: ==> leave RequestContextHolder.
+[2026-05-02 17:30:22.286] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:30:22.286] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:30:22.287] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:30:22.287] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:30:22.287] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:30:22.287] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:30:22.294] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:30:22.294] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: ==> Parameters: 1(Long)
+[2026-05-02 17:30:22.294] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:30:22.294] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: ==> Parameters: false(Boolean)
+[2026-05-02 17:30:22.294] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:30:22.294] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: ==> Parameters: false(Boolean)
+[2026-05-02 17:30:22.298] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: <==      Total: 1
+[2026-05-02 17:30:22.298] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: <==      Total: 1
+[2026-05-02 17:30:22.298] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:30:22.298] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:30:22.298] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:30:22.298] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:30:22.298] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:30:22.298] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:30:22.298] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:30:22.298] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: <==      Total: 1
+[2026-05-02 17:30:22.298] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:30:22.298] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: =========================================
+[2026-05-02 17:30:22.298] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:30:22.298] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: =========================================
+[2026-05-02 17:30:22.299] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:30:22.299] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:30:22.299] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:30:22.299] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: =========================================
+[2026-05-02 17:30:22.299] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:30:22.299] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:30:22.299] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: =========================================
+[2026-05-02 17:30:22.299] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: =========================================
+[2026-05-02 17:30:22.299] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:30:22.299] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: =========================================
+[2026-05-02 17:30:22.299] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: ==> leave RequestContextHolder.
+[2026-05-02 17:30:22.299] [DEBUG] [] [4e4db51d70304f479eeae3d8e0faddd1]: ==> leave RequestContextHolder.
+[2026-05-02 17:30:22.299] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: ==> leave RequestContextHolder.
+[2026-05-02 17:30:22.299] [DEBUG] [] [475fcdfce1fb4a7c94ad7a6ebe7ee71b]: ==> leave RequestContextHolder.
+[2026-05-02 17:30:22.299] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: ==> leave RequestContextHolder.
+[2026-05-02 17:30:22.299] [DEBUG] [] [e812a875883d4feb8d6a8700a27a7f0e]: ==> leave RequestContextHolder.
+[2026-05-02 17:30:22.301] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:30:22.301] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:30:22.302] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:30:22.302] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: ==> Parameters: 1(Long)
+[2026-05-02 17:30:22.304] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: <==      Total: 1
+[2026-05-02 17:30:22.304] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:30:22.304] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:30:22.304] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:30:22.304] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:30:22.304] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: =========================================
+[2026-05-02 17:30:22.304] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:30:22.304] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: =========================================
+[2026-05-02 17:30:22.304] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: ==> leave RequestContextHolder.
+[2026-05-02 17:30:22.304] [DEBUG] [] [5cf871335a8b4995a403df050147cb9e]: ==> leave RequestContextHolder.
+[2026-05-02 17:34:56.224] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:34:56.225] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:34:56.225] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:34:56.225] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:34:56.225] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:34:56.225] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:34:56.232] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:34:56.232] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: ==> Parameters: 1(Long)
+[2026-05-02 17:34:56.232] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:34:56.232] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: ==> Parameters: false(Boolean)
+[2026-05-02 17:34:56.233] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:34:56.233] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: ==> Parameters: false(Boolean)
+[2026-05-02 17:34:56.238] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: <==      Total: 1
+[2026-05-02 17:34:56.238] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: <==      Total: 1
+[2026-05-02 17:34:56.238] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: <==      Total: 1
+[2026-05-02 17:34:56.238] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:34:56.238] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:34:56.238] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:34:56.238] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:34:56.238] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:34:56.238] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:34:56.238] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:34:56.238] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:34:56.238] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:34:56.239] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:34:56.239] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:34:56.239] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: =========================================
+[2026-05-02 17:34:56.239] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:34:56.239] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:34:56.239] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: =========================================
+[2026-05-02 17:34:56.239] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: =========================================
+[2026-05-02 17:34:56.239] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:34:56.239] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: =========================================
+[2026-05-02 17:34:56.239] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: =========================================
+[2026-05-02 17:34:56.239] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:34:56.239] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: =========================================
+[2026-05-02 17:34:56.239] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: ==> leave RequestContextHolder.
+[2026-05-02 17:34:56.239] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: ==> leave RequestContextHolder.
+[2026-05-02 17:34:56.239] [DEBUG] [] [38fe881e1ee4418a90ae23a06a8b8bac]: ==> leave RequestContextHolder.
+[2026-05-02 17:34:56.239] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: ==> leave RequestContextHolder.
+[2026-05-02 17:34:56.239] [DEBUG] [] [e951df0cedd84353831e9474d7a34029]: ==> leave RequestContextHolder.
+[2026-05-02 17:34:56.239] [DEBUG] [] [be6b69ae13b64889abe500fd94cb9580]: ==> leave RequestContextHolder.
+[2026-05-02 17:34:56.243] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:34:56.243] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:34:56.245] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:34:56.245] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: ==> Parameters: 1(Long)
+[2026-05-02 17:34:56.246] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: <==      Total: 1
+[2026-05-02 17:34:56.246] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:34:56.246] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:34:56.246] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:34:56.246] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:34:56.246] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: =========================================
+[2026-05-02 17:34:56.246] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:34:56.246] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: =========================================
+[2026-05-02 17:34:56.246] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: ==> leave RequestContextHolder.
+[2026-05-02 17:34:56.246] [DEBUG] [] [ef58bb300def480281e14d41ec67cde4]: ==> leave RequestContextHolder.
+[2026-05-02 17:41:22.260] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:41:22.260] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:41:22.260] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:41:22.260] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:41:22.261] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:41:22.261] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:41:22.263] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:41:22.263] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: ==> Parameters: 1(Long)
+[2026-05-02 17:41:22.263] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:41:22.263] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: ==> Parameters: false(Boolean)
+[2026-05-02 17:41:22.263] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:41:22.263] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: <==      Total: 1
+[2026-05-02 17:41:22.263] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: ==> Parameters: false(Boolean)
+[2026-05-02 17:41:22.263] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:41:22.263] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:41:22.263] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:41:22.263] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:41:22.263] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: =========================================
+[2026-05-02 17:41:22.263] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:41:22.263] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: =========================================
+[2026-05-02 17:41:22.263] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: <==      Total: 1
+[2026-05-02 17:41:22.265] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:41:22.265] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:41:22.265] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:41:22.265] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:41:22.265] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: ==> leave RequestContextHolder.
+[2026-05-02 17:41:22.265] [DEBUG] [] [96b03ceb30454128bf589b342d632a3e]: ==> leave RequestContextHolder.
+[2026-05-02 17:41:22.265] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: =========================================
+[2026-05-02 17:41:22.265] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: <==      Total: 1
+[2026-05-02 17:41:22.265] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:41:22.265] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: =========================================
+[2026-05-02 17:41:22.265] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:41:22.265] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:41:22.265] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:41:22.265] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:41:22.265] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: =========================================
+[2026-05-02 17:41:22.265] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: ==> leave RequestContextHolder.
+[2026-05-02 17:41:22.265] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:41:22.265] [DEBUG] [] [6be8762a836e48dfb71d012d61e43b3f]: ==> leave RequestContextHolder.
+[2026-05-02 17:41:22.265] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: =========================================
+[2026-05-02 17:41:22.265] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: ==> leave RequestContextHolder.
+[2026-05-02 17:41:22.265] [DEBUG] [] [cbac20f164194ae4b8d25447e1db4b92]: ==> leave RequestContextHolder.
+[2026-05-02 17:41:22.267] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:41:22.267] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: ==> Parameters: 1(Long)
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: <==      Total: 1
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: =========================================
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: =========================================
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: ==> leave RequestContextHolder.
+[2026-05-02 17:41:22.269] [DEBUG] [] [af199b564e454e3c9207a9e60c9b30f3]: ==> leave RequestContextHolder.
+[2026-05-02 17:45:56.589] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:45:56.589] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:45:56.592] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:45:56.593] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:45:56.593] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:45:56.594] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:45:56.602] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:45:56.603] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: ==> Parameters: 1(Long)
+[2026-05-02 17:45:56.603] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:45:56.603] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:45:56.603] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: ==> Parameters: false(Boolean)
+[2026-05-02 17:45:56.603] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: ==> Parameters: false(Boolean)
+[2026-05-02 17:45:56.603] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: <==      Total: 1
+[2026-05-02 17:45:56.603] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: <==      Total: 1
+[2026-05-02 17:45:56.603] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: <==      Total: 1
+[2026-05-02 17:45:56.603] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:45:56.603] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:45:56.603] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:45:56.603] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:45:56.603] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:45:56.603] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:45:56.603] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:45:56.603] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:45:56.603] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:45:56.603] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: =========================================
+[2026-05-02 17:45:56.603] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:45:56.604] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:45:56.604] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:45:56.604] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: =========================================
+[2026-05-02 17:45:56.604] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: =========================================
+[2026-05-02 17:45:56.604] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:45:56.604] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:45:56.604] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: =========================================
+[2026-05-02 17:45:56.604] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: =========================================
+[2026-05-02 17:45:56.604] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:45:56.604] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: =========================================
+[2026-05-02 17:45:56.604] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: ==> leave RequestContextHolder.
+[2026-05-02 17:45:56.604] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: ==> leave RequestContextHolder.
+[2026-05-02 17:45:56.604] [DEBUG] [] [0a6e278daae44fdc86b0a6c461544a0a]: ==> leave RequestContextHolder.
+[2026-05-02 17:45:56.604] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: ==> leave RequestContextHolder.
+[2026-05-02 17:45:56.604] [DEBUG] [] [433d1e66563d4c718c481eeecf2da331]: ==> leave RequestContextHolder.
+[2026-05-02 17:45:56.604] [DEBUG] [] [375c6bcbbfd049c0a7e08245cf29d34e]: ==> leave RequestContextHolder.
+[2026-05-02 17:45:56.608] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:45:56.608] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:45:56.610] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:45:56.610] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: ==> Parameters: 1(Long)
+[2026-05-02 17:45:56.611] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: <==      Total: 1
+[2026-05-02 17:45:56.611] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:45:56.611] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:45:56.611] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:45:56.611] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:45:56.611] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: =========================================
+[2026-05-02 17:45:56.611] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:45:56.611] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: =========================================
+[2026-05-02 17:45:56.612] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: ==> leave RequestContextHolder.
+[2026-05-02 17:45:56.612] [DEBUG] [] [2290ecaa509242fb92bef5c17a169653]: ==> leave RequestContextHolder.
+[2026-05-02 17:51:22.319] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:51:22.319] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:51:22.319] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:51:22.319] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:51:22.319] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:51:22.319] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:51:22.327] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:51:22.328] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: ==> Parameters: 1(Long)
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: ==> Parameters: false(Boolean)
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: ==> Parameters: false(Boolean)
+[2026-05-02 17:51:22.329] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: <==      Total: 1
+[2026-05-02 17:51:22.329] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: <==      Total: 1
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: <==      Total: 1
+[2026-05-02 17:51:22.329] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:51:22.329] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:51:22.329] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:51:22.329] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: =========================================
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:51:22.329] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:51:22.329] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: =========================================
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: =========================================
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: =========================================
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: =========================================
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: =========================================
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: ==> leave RequestContextHolder.
+[2026-05-02 17:51:22.329] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: ==> leave RequestContextHolder.
+[2026-05-02 17:51:22.329] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: ==> leave RequestContextHolder.
+[2026-05-02 17:51:22.331] [DEBUG] [] [3b41654702664bc89fce354e6b489e10]: ==> leave RequestContextHolder.
+[2026-05-02 17:51:22.329] [DEBUG] [] [e1d9f5da18f0490e9f1fa2b827983f7f]: ==> leave RequestContextHolder.
+[2026-05-02 17:51:22.331] [DEBUG] [] [631b850e20ad4d688f09cdfd488f5394]: ==> leave RequestContextHolder.
+[2026-05-02 17:51:22.333] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:51:22.333] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:51:22.335] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:51:22.335] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: ==> Parameters: 1(Long)
+[2026-05-02 17:51:22.336] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: <==      Total: 1
+[2026-05-02 17:51:22.336] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:51:22.336] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:51:22.336] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:51:22.336] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:51:22.336] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: =========================================
+[2026-05-02 17:51:22.336] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:51:22.336] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: =========================================
+[2026-05-02 17:51:22.336] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: ==> leave RequestContextHolder.
+[2026-05-02 17:51:22.336] [DEBUG] [] [40b8256d89cb4a36925b3f6eff7d788c]: ==> leave RequestContextHolder.
+[2026-05-02 17:55:56.286] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:55:56.286] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 17:55:56.287] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:55:56.287] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 17:55:56.287] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:55:56.287] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:55:56.288] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:55:56.288] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: ==> Parameters: 1(Long)
+[2026-05-02 17:55:56.288] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:55:56.288] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: ==> Parameters: false(Boolean)
+[2026-05-02 17:55:56.289] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 17:55:56.289] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: ==> Parameters: false(Boolean)
+[2026-05-02 17:55:56.289] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: <==      Total: 1
+[2026-05-02 17:55:56.289] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:55:56.289] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:55:56.289] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:55:56.289] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:55:56.289] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: =========================================
+[2026-05-02 17:55:56.289] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: <==      Total: 1
+[2026-05-02 17:55:56.289] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: <==      Total: 1
+[2026-05-02 17:55:56.289] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:55:56.289] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: =========================================
+[2026-05-02 17:55:56.289] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:55:56.289] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:55:56.289] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:55:56.289] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:55:56.289] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:55:56.289] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:55:56.289] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:55:56.289] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: =========================================
+[2026-05-02 17:55:56.289] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 17:55:56.289] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:55:56.290] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: =========================================
+[2026-05-02 17:55:56.290] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: ==> leave RequestContextHolder.
+[2026-05-02 17:55:56.290] [DEBUG] [] [fdb4431c2d5e48308bb92c7db952c061]: ==> leave RequestContextHolder.
+[2026-05-02 17:55:56.290] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: =========================================
+[2026-05-02 17:55:56.290] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 17:55:56.290] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: =========================================
+[2026-05-02 17:55:56.290] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: ==> leave RequestContextHolder.
+[2026-05-02 17:55:56.290] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: ==> leave RequestContextHolder.
+[2026-05-02 17:55:56.290] [DEBUG] [] [3a4286bfd1574349b87f6afc382abf67]: ==> leave RequestContextHolder.
+[2026-05-02 17:55:56.290] [DEBUG] [] [200fb8d6fab04d63a1c1dbccd223e779]: ==> leave RequestContextHolder.
+[2026-05-02 17:55:56.292] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 17:55:56.292] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 17:55:56.292] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 17:55:56.293] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: ==> Parameters: 1(Long)
+[2026-05-02 17:55:56.293] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: <==      Total: 1
+[2026-05-02 17:55:56.293] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:55:56.293] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 17:55:56.293] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: ===> Supports JSON Message Converter : true
+[2026-05-02 17:55:56.293] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 17:55:56.293] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: =========================================
+[2026-05-02 17:55:56.293] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 17:55:56.293] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: =========================================
+[2026-05-02 17:55:56.293] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: ==> leave RequestContextHolder.
+[2026-05-02 17:55:56.294] [DEBUG] [] [68412445f0b54794a57d92fd20000ea8]: ==> leave RequestContextHolder.
+[2026-05-02 18:02:22.312] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:02:22.312] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:02:22.312] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:02:22.312] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:02:22.312] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:02:22.312] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:02:22.319] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:02:22.319] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: ==> Parameters: 1(Long)
+[2026-05-02 18:02:22.319] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:02:22.319] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:02:22.319] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: ==> Parameters: false(Boolean)
+[2026-05-02 18:02:22.319] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: ==> Parameters: false(Boolean)
+[2026-05-02 18:02:22.325] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: <==      Total: 1
+[2026-05-02 18:02:22.325] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: <==      Total: 1
+[2026-05-02 18:02:22.324] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: <==      Total: 1
+[2026-05-02 18:02:22.325] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:02:22.325] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:02:22.325] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:02:22.325] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:02:22.325] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:02:22.325] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:02:22.325] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:02:22.325] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:02:22.325] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:02:22.325] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:02:22.325] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:02:22.325] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: =========================================
+[2026-05-02 18:02:22.325] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:02:22.325] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:02:22.325] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: =========================================
+[2026-05-02 18:02:22.325] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: =========================================
+[2026-05-02 18:02:22.325] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:02:22.325] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: =========================================
+[2026-05-02 18:02:22.325] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: =========================================
+[2026-05-02 18:02:22.325] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:02:22.325] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: =========================================
+[2026-05-02 18:02:22.325] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: ==> leave RequestContextHolder.
+[2026-05-02 18:02:22.325] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: ==> leave RequestContextHolder.
+[2026-05-02 18:02:22.325] [DEBUG] [] [f356e9b84e7a40d9b8dcbe5372d28121]: ==> leave RequestContextHolder.
+[2026-05-02 18:02:22.325] [DEBUG] [] [5e78a427f055491c827abf7aa1367f46]: ==> leave RequestContextHolder.
+[2026-05-02 18:02:22.325] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: ==> leave RequestContextHolder.
+[2026-05-02 18:02:22.325] [DEBUG] [] [42ca4a0e279541b8a640beb5835222b7]: ==> leave RequestContextHolder.
+[2026-05-02 18:02:22.329] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:02:22.329] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:02:22.330] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:02:22.330] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: ==> Parameters: 1(Long)
+[2026-05-02 18:02:22.331] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: <==      Total: 1
+[2026-05-02 18:02:22.332] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:02:22.332] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:02:22.332] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:02:22.332] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:02:22.332] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: =========================================
+[2026-05-02 18:02:22.332] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:02:22.332] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: =========================================
+[2026-05-02 18:02:22.332] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: ==> leave RequestContextHolder.
+[2026-05-02 18:02:22.332] [DEBUG] [] [c1c958d934de433784a1dd90a74f6b82]: ==> leave RequestContextHolder.
+[2026-05-02 18:06:56.268] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:06:56.268] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:06:56.275] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:06:56.275] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: ==> Parameters: false(Boolean)
+[2026-05-02 18:06:56.276] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: <==      Total: 1
+[2026-05-02 18:06:56.276] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:06:56.276] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:06:56.276] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:06:56.276] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:06:56.276] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: =========================================
+[2026-05-02 18:06:56.276] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:06:56.276] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: =========================================
+[2026-05-02 18:06:56.276] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: ==> leave RequestContextHolder.
+[2026-05-02 18:06:56.276] [DEBUG] [] [44174c1ddad54062b2e988bf0f2e881f]: ==> leave RequestContextHolder.
+[2026-05-02 18:06:56.284] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:06:56.284] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:06:56.285] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:06:56.285] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:06:56.286] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:06:56.286] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: ==> Parameters: 1(Long)
+[2026-05-02 18:06:56.287] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: <==      Total: 1
+[2026-05-02 18:06:56.287] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:06:56.287] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: ==> Parameters: false(Boolean)
+[2026-05-02 18:06:56.287] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:06:56.287] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:06:56.287] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:06:56.287] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:06:56.287] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: =========================================
+[2026-05-02 18:06:56.287] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:06:56.287] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: =========================================
+[2026-05-02 18:06:56.287] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: ==> leave RequestContextHolder.
+[2026-05-02 18:06:56.287] [DEBUG] [] [48047c8a2a2b448687f05b90cfad3bc5]: ==> leave RequestContextHolder.
+[2026-05-02 18:06:56.288] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:06:56.288] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:06:56.289] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:06:56.289] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: ==> Parameters: 1(Long)
+[2026-05-02 18:06:56.289] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: <==      Total: 1
+[2026-05-02 18:06:56.289] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: <==      Total: 1
+[2026-05-02 18:06:56.290] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:06:56.290] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:06:56.290] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:06:56.290] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:06:56.290] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:06:56.290] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:06:56.290] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:06:56.290] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: =========================================
+[2026-05-02 18:06:56.290] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:06:56.290] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:06:56.290] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: =========================================
+[2026-05-02 18:06:56.290] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: =========================================
+[2026-05-02 18:06:56.290] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:06:56.290] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: =========================================
+[2026-05-02 18:06:56.290] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: ==> leave RequestContextHolder.
+[2026-05-02 18:06:56.290] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: ==> leave RequestContextHolder.
+[2026-05-02 18:06:56.290] [DEBUG] [] [c5de3d0127fb4ed5bf44be6cf69e5899]: ==> leave RequestContextHolder.
+[2026-05-02 18:06:56.290] [DEBUG] [] [a340f1742c12488b9c0a6030eaf1d85e]: ==> leave RequestContextHolder.
+[2026-05-02 18:12:22.283] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:12:22.284] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:12:22.284] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:12:22.284] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:12:22.285] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:12:22.285] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:12:22.287] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:12:22.287] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: ==> Parameters: 1(Long)
+[2026-05-02 18:12:22.288] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:12:22.288] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:12:22.288] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: ==> Parameters: false(Boolean)
+[2026-05-02 18:12:22.288] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: ==> Parameters: false(Boolean)
+[2026-05-02 18:12:22.288] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: <==      Total: 1
+[2026-05-02 18:12:22.288] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:12:22.288] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:12:22.288] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:12:22.288] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:12:22.288] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: =========================================
+[2026-05-02 18:12:22.288] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:12:22.289] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: =========================================
+[2026-05-02 18:12:22.289] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: <==      Total: 1
+[2026-05-02 18:12:22.289] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:12:22.289] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:12:22.289] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:12:22.289] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: ==> leave RequestContextHolder.
+[2026-05-02 18:12:22.289] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:12:22.289] [DEBUG] [] [8faae52361a644f2a6e164e7ec26ff32]: ==> leave RequestContextHolder.
+[2026-05-02 18:12:22.289] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: =========================================
+[2026-05-02 18:12:22.289] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:12:22.289] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: =========================================
+[2026-05-02 18:12:22.289] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: ==> leave RequestContextHolder.
+[2026-05-02 18:12:22.289] [DEBUG] [] [8d7a4ff212c241218bdddcc7deb81e52]: ==> leave RequestContextHolder.
+[2026-05-02 18:12:22.290] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:12:22.290] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:12:22.291] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: ==> Parameters: 1(Long)
+[2026-05-02 18:12:22.293] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: <==      Total: 1
+[2026-05-02 18:12:22.293] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:12:22.293] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:12:22.293] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:12:22.293] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:12:22.293] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: =========================================
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: <==      Total: 1
+[2026-05-02 18:12:22.293] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:12:22.293] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: =========================================
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: =========================================
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: =========================================
+[2026-05-02 18:12:22.293] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: ==> leave RequestContextHolder.
+[2026-05-02 18:12:22.293] [DEBUG] [] [9d84c77933d646259e7cc89295fae1dc]: ==> leave RequestContextHolder.
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: ==> leave RequestContextHolder.
+[2026-05-02 18:12:22.293] [DEBUG] [] [c56f6f215ada4f528acb30de8c0a1026]: ==> leave RequestContextHolder.
+[2026-05-02 18:16:56.364] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:16:56.364] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:16:56.364] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:16:56.364] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:16:56.364] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:16:56.365] [DEBUG] [] [474c5dd059544b279e5742191546f131]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:16:56.374] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:16:56.374] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: ==> Parameters: 1(Long)
+[2026-05-02 18:16:56.374] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:16:56.374] [DEBUG] [] [474c5dd059544b279e5742191546f131]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:16:56.374] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: ==> Parameters: false(Boolean)
+[2026-05-02 18:16:56.374] [DEBUG] [] [474c5dd059544b279e5742191546f131]: ==> Parameters: false(Boolean)
+[2026-05-02 18:16:56.374] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: <==      Total: 1
+[2026-05-02 18:16:56.374] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:16:56.374] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: <==      Total: 1
+[2026-05-02 18:16:56.374] [DEBUG] [] [474c5dd059544b279e5742191546f131]: <==      Total: 1
+[2026-05-02 18:16:56.374] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:16:56.374] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:16:56.374] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:16:56.374] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: =========================================
+[2026-05-02 18:16:56.374] [DEBUG] [] [474c5dd059544b279e5742191546f131]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:16:56.374] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:16:56.374] [DEBUG] [] [474c5dd059544b279e5742191546f131]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:16:56.374] [DEBUG] [] [474c5dd059544b279e5742191546f131]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:16:56.374] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:16:56.374] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:16:56.374] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:16:56.374] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: =========================================
+[2026-05-02 18:16:56.374] [DEBUG] [] [474c5dd059544b279e5742191546f131]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:16:56.374] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:16:56.374] [DEBUG] [] [474c5dd059544b279e5742191546f131]: =========================================
+[2026-05-02 18:16:56.374] [DEBUG] [] [474c5dd059544b279e5742191546f131]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:16:56.374] [DEBUG] [] [474c5dd059544b279e5742191546f131]: =========================================
+[2026-05-02 18:16:56.374] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: =========================================
+[2026-05-02 18:16:56.374] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:16:56.376] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: =========================================
+[2026-05-02 18:16:56.376] [DEBUG] [] [474c5dd059544b279e5742191546f131]: ==> leave RequestContextHolder.
+[2026-05-02 18:16:56.376] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: ==> leave RequestContextHolder.
+[2026-05-02 18:16:56.376] [DEBUG] [] [474c5dd059544b279e5742191546f131]: ==> leave RequestContextHolder.
+[2026-05-02 18:16:56.376] [DEBUG] [] [2a758f12686948bea5d21e7870e34c6e]: ==> leave RequestContextHolder.
+[2026-05-02 18:16:56.376] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: ==> leave RequestContextHolder.
+[2026-05-02 18:16:56.376] [DEBUG] [] [33aca59345a7476faf9b981d44de9804]: ==> leave RequestContextHolder.
+[2026-05-02 18:16:56.379] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:16:56.380] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:16:56.382] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:16:56.382] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: ==> Parameters: 1(Long)
+[2026-05-02 18:16:56.383] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: <==      Total: 1
+[2026-05-02 18:16:56.384] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:16:56.384] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:16:56.384] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:16:56.384] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:16:56.384] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: =========================================
+[2026-05-02 18:16:56.385] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:16:56.385] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: =========================================
+[2026-05-02 18:16:56.385] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: ==> leave RequestContextHolder.
+[2026-05-02 18:16:56.385] [DEBUG] [] [4e2aae00c2fe480d84f6504219375e1e]: ==> leave RequestContextHolder.
+[2026-05-02 18:22:22.269] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:22:22.269] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:22:22.269] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:22:22.269] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:22:22.269] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:22:22.269] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:22:22.276] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:22:22.276] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:22:22.276] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: ==> Parameters: 1(Long)
+[2026-05-02 18:22:22.276] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: ==> Parameters: false(Boolean)
+[2026-05-02 18:22:22.276] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:22:22.276] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: ==> Parameters: false(Boolean)
+[2026-05-02 18:22:22.277] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: <==      Total: 1
+[2026-05-02 18:22:22.277] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: <==      Total: 1
+[2026-05-02 18:22:22.277] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: <==      Total: 1
+[2026-05-02 18:22:22.277] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:22:22.277] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:22:22.277] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:22:22.277] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:22:22.277] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:22:22.277] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:22:22.277] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:22:22.277] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:22:22.277] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:22:22.277] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:22:22.277] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:22:22.277] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:22:22.277] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: =========================================
+[2026-05-02 18:22:22.277] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:22:22.277] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: =========================================
+[2026-05-02 18:22:22.277] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: =========================================
+[2026-05-02 18:22:22.278] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:22:22.278] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: =========================================
+[2026-05-02 18:22:22.278] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: =========================================
+[2026-05-02 18:22:22.278] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:22:22.278] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: =========================================
+[2026-05-02 18:22:22.278] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: ==> leave RequestContextHolder.
+[2026-05-02 18:22:22.278] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: ==> leave RequestContextHolder.
+[2026-05-02 18:22:22.278] [DEBUG] [] [13d72d94379e43518ed5609b2de20d53]: ==> leave RequestContextHolder.
+[2026-05-02 18:22:22.278] [DEBUG] [] [6d6cf5a6d7ab4f5ca5d2468f5c7da077]: ==> leave RequestContextHolder.
+[2026-05-02 18:22:22.278] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: ==> leave RequestContextHolder.
+[2026-05-02 18:22:22.278] [DEBUG] [] [f5b7946a9ea74a76a1a77bc1eb964090]: ==> leave RequestContextHolder.
+[2026-05-02 18:22:22.282] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:22:22.282] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:22:22.285] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:22:22.285] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: ==> Parameters: 1(Long)
+[2026-05-02 18:22:22.285] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: <==      Total: 1
+[2026-05-02 18:22:22.285] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:22:22.285] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:22:22.285] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:22:22.285] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:22:22.286] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: =========================================
+[2026-05-02 18:22:22.286] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:22:22.286] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: =========================================
+[2026-05-02 18:22:22.286] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: ==> leave RequestContextHolder.
+[2026-05-02 18:22:22.286] [DEBUG] [] [284307ae267648ee8794410b1dc193fe]: ==> leave RequestContextHolder.
+[2026-05-02 18:26:56.259] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:26:56.259] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:26:56.259] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:26:56.259] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: ==> Parameters: false(Boolean)
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: ==> Parameters: false(Boolean)
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: <==      Total: 1
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: <==      Total: 1
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: =========================================
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: =========================================
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: =========================================
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: =========================================
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: ==> leave RequestContextHolder.
+[2026-05-02 18:26:56.262] [DEBUG] [] [0d8326d5fc7645c89c394c9f39ab7ed1]: ==> leave RequestContextHolder.
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: ==> leave RequestContextHolder.
+[2026-05-02 18:26:56.262] [DEBUG] [] [2e6a82d14fa743f2a536776314509d33]: ==> leave RequestContextHolder.
+[2026-05-02 18:26:56.282] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:26:56.282] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:26:56.285] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:26:56.285] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: ==> Parameters: 1(Long)
+[2026-05-02 18:26:56.286] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: <==      Total: 1
+[2026-05-02 18:26:56.286] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:26:56.286] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:26:56.286] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:26:56.286] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:26:56.286] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: =========================================
+[2026-05-02 18:26:56.286] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:26:56.286] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: =========================================
+[2026-05-02 18:26:56.286] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: ==> leave RequestContextHolder.
+[2026-05-02 18:26:56.286] [DEBUG] [] [d3fd8bf4526343b3b903b4acc5b5b91a]: ==> leave RequestContextHolder.
+[2026-05-02 18:26:56.298] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:26:56.298] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:26:56.300] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:26:56.300] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: ==> Parameters: 1(Long)
+[2026-05-02 18:26:56.301] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: <==      Total: 1
+[2026-05-02 18:26:56.301] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:26:56.301] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:26:56.301] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:26:56.301] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:26:56.301] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: =========================================
+[2026-05-02 18:26:56.301] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:26:56.301] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: =========================================
+[2026-05-02 18:26:56.301] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: ==> leave RequestContextHolder.
+[2026-05-02 18:26:56.301] [DEBUG] [] [eafb5fd39fd94331a28a96907e63618d]: ==> leave RequestContextHolder.
+[2026-05-02 18:33:22.270] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:33:22.271] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:33:22.271] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:33:22.271] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:33:22.271] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:33:22.271] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:33:22.277] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:33:22.277] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: ==> Parameters: 1(Long)
+[2026-05-02 18:33:22.277] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:33:22.277] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:33:22.277] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: ==> Parameters: false(Boolean)
+[2026-05-02 18:33:22.277] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: ==> Parameters: false(Boolean)
+[2026-05-02 18:33:22.280] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: <==      Total: 1
+[2026-05-02 18:33:22.280] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:33:22.281] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:33:22.281] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:33:22.281] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:33:22.281] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: <==      Total: 1
+[2026-05-02 18:33:22.281] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: =========================================
+[2026-05-02 18:33:22.281] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:33:22.281] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: =========================================
+[2026-05-02 18:33:22.281] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: <==      Total: 1
+[2026-05-02 18:33:22.281] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:33:22.281] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:33:22.281] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:33:22.281] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:33:22.281] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:33:22.281] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:33:22.281] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:33:22.282] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: =========================================
+[2026-05-02 18:33:22.282] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:33:22.282] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:33:22.282] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: =========================================
+[2026-05-02 18:33:22.282] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: ==> leave RequestContextHolder.
+[2026-05-02 18:33:22.282] [DEBUG] [] [8b8702f19a5a41768e8371e830803d37]: ==> leave RequestContextHolder.
+[2026-05-02 18:33:22.282] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: =========================================
+[2026-05-02 18:33:22.282] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:33:22.282] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: =========================================
+[2026-05-02 18:33:22.282] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: ==> leave RequestContextHolder.
+[2026-05-02 18:33:22.282] [DEBUG] [] [02100d4e64e645ba9470ebe737ff98c7]: ==> leave RequestContextHolder.
+[2026-05-02 18:33:22.282] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: ==> leave RequestContextHolder.
+[2026-05-02 18:33:22.282] [DEBUG] [] [249fe32dce83405a813b8fc817b9b746]: ==> leave RequestContextHolder.
+[2026-05-02 18:33:22.284] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:33:22.284] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:33:22.285] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:33:22.285] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: ==> Parameters: 1(Long)
+[2026-05-02 18:33:22.287] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: <==      Total: 1
+[2026-05-02 18:33:22.287] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:33:22.287] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:33:22.287] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:33:22.287] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:33:22.287] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: =========================================
+[2026-05-02 18:33:22.287] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:33:22.287] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: =========================================
+[2026-05-02 18:33:22.288] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: ==> leave RequestContextHolder.
+[2026-05-02 18:33:22.288] [DEBUG] [] [e98414b60cf8432e909edc026056c720]: ==> leave RequestContextHolder.
+[2026-05-02 18:37:56.285] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:37:56.285] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:37:56.285] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:37:56.285] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:37:56.285] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:37:56.285] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:37:56.292] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:37:56.292] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: ==> Parameters: 1(Long)
+[2026-05-02 18:37:56.294] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: <==      Total: 1
+[2026-05-02 18:37:56.294] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:37:56.294] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: ==> Parameters: false(Boolean)
+[2026-05-02 18:37:56.294] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:37:56.294] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: ==> Parameters: false(Boolean)
+[2026-05-02 18:37:56.294] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:37:56.294] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:37:56.294] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:37:56.294] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:37:56.294] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: =========================================
+[2026-05-02 18:37:56.294] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:37:56.294] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: =========================================
+[2026-05-02 18:37:56.295] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: <==      Total: 1
+[2026-05-02 18:37:56.295] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: <==      Total: 1
+[2026-05-02 18:37:56.295] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: ==> leave RequestContextHolder.
+[2026-05-02 18:37:56.295] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:37:56.295] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:37:56.295] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:37:56.295] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:37:56.295] [DEBUG] [] [ccc17bf10924468f8f0d18159988fee6]: ==> leave RequestContextHolder.
+[2026-05-02 18:37:56.295] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:37:56.295] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:37:56.295] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:37:56.295] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: =========================================
+[2026-05-02 18:37:56.295] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:37:56.295] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:37:56.295] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: =========================================
+[2026-05-02 18:37:56.295] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: =========================================
+[2026-05-02 18:37:56.295] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:37:56.295] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: =========================================
+[2026-05-02 18:37:56.295] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: ==> leave RequestContextHolder.
+[2026-05-02 18:37:56.295] [DEBUG] [] [921d6aba7b0442fa839215a87cdf1cc4]: ==> leave RequestContextHolder.
+[2026-05-02 18:37:56.295] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: ==> leave RequestContextHolder.
+[2026-05-02 18:37:56.295] [DEBUG] [] [26667c2e0bdd48b1a5cde64e006419ce]: ==> leave RequestContextHolder.
+[2026-05-02 18:37:56.297] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:37:56.298] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:37:56.300] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:37:56.300] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: ==> Parameters: 1(Long)
+[2026-05-02 18:37:56.301] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: <==      Total: 1
+[2026-05-02 18:37:56.301] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:37:56.301] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:37:56.301] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:37:56.301] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:37:56.301] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: =========================================
+[2026-05-02 18:37:56.301] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:37:56.301] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: =========================================
+[2026-05-02 18:37:56.301] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: ==> leave RequestContextHolder.
+[2026-05-02 18:37:56.301] [DEBUG] [] [bc7480378ada4b0e831e22532e4760a8]: ==> leave RequestContextHolder.
+[2026-05-02 18:45:22.313] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:45:22.313] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:45:22.313] [DEBUG] [] []: ==》/webapi/user/paging -> into PreRequestContextFilter.
+[2026-05-02 18:45:22.314] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:45:22.314] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:45:22.314] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: 地址 /webapi/user/paging 进入过滤器
+[2026-05-02 18:45:22.321] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:45:22.322] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: ==> Parameters: 1(Long)
+[2026-05-02 18:45:22.322] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:45:22.322] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: ==> Parameters: false(Boolean)
+[2026-05-02 18:45:22.323] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: <==      Total: 1
+[2026-05-02 18:45:22.323] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE (del_flag = ?) ORDER BY created_at DESC
+[2026-05-02 18:45:22.323] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: ==> Parameters: false(Boolean)
+[2026-05-02 18:45:22.323] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:45:22.323] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:45:22.323] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:45:22.323] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:45:22.323] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: =========================================
+[2026-05-02 18:45:22.323] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:45:22.323] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: <==      Total: 1
+[2026-05-02 18:45:22.323] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: =========================================
+[2026-05-02 18:45:22.323] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:45:22.323] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:45:22.323] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:45:22.323] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: <==      Total: 1
+[2026-05-02 18:45:22.323] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:45:22.323] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: =========================================
+[2026-05-02 18:45:22.323] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: ==> leave RequestContextHolder.
+[2026-05-02 18:45:22.323] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:45:22.323] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:45:22.324] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:45:22.324] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: =========================================
+[2026-05-02 18:45:22.324] [DEBUG] [] [79de870b5cf245b8993ffad20eda45da]: ==> leave RequestContextHolder.
+[2026-05-02 18:45:22.324] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:45:22.324] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: Writing [PageData(total=0, page=1, size=50, pages=0, records=[UserDTO(super=AbstractAuditableDTO(createdAt=20 (truncated)...]
+[2026-05-02 18:45:22.324] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: =========================================
+[2026-05-02 18:45:22.324] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: ==> leave RequestContextHolder.
+[2026-05-02 18:45:22.324] [DEBUG] [] [ff26094e37c446f2a353822801aae0ba]: ==> leave RequestContextHolder.
+[2026-05-02 18:45:22.324] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"empty":false,
+		"page":1,
+		"pages":0,
+		"recordCount":1,
+		"records":[
+			{
+				"birthYear":1990,
+				"createdAt":"2026-05-01 21:18:50",
+				"createdBy":0,
+				"delFlag":false,
+				"email":"admin@staff.local",
+				"id":1,
+				"isVip":false,
+				"lastLoginAt":"2026-05-01 21:45:13.229045",
+				"nickname":"超级管理员",
+				"passwordHash":"$2a$10$YTUeGZqQ/xrX1d9V26669ubXuH90MthjRxhXxJV5EldtWdFm0WQbS",
+				"staffRole":1,
+				"stampsBalance":0,
+				"status":1,
+				"updatedAt":"2026-05-01 21:45:13",
+				"updatedBy":0
+			}
+		],
+		"size":50,
+		"total":0
+	},
+	"message":"OK",
+	"success":true
+} 
+cn.nine.commons.data.page.PageData<cn.nine.pros.post.client.model.db.UserDTO>
+
+[2026-05-02 18:45:22.324] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: =========================================
+[2026-05-02 18:45:22.324] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: ==> leave RequestContextHolder.
+[2026-05-02 18:45:22.324] [DEBUG] [] [e8bbd71191e3422cb352b594800cd513]: ==> leave RequestContextHolder.
+[2026-05-02 18:45:22.326] [DEBUG] [] []: ==》/webapi/auth/current -> into PreRequestContextFilter.
+[2026-05-02 18:45:22.326] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: 地址 /webapi/auth/current 进入过滤器
+[2026-05-02 18:45:22.327] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: ==>  Preparing: SELECT id,email,password_hash,nickname,birth_year,country_code,bio,avatar_url,stamps_balance,is_vip,vip_expire_at,status,staff_role,register_ip,last_login_at,created_at,created_by,updated_at,updated_by,del_flag FROM bu_user WHERE id=?
+[2026-05-02 18:45:22.327] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: ==> Parameters: 1(Long)
+[2026-05-02 18:45:22.329] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: <==      Total: 1
+[2026-05-02 18:45:22.329] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:45:22.329] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+[2026-05-02 18:45:22.329] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: ===> Supports JSON Message Converter : true
+[2026-05-02 18:45:22.329] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: Writing [UserDTO(super=AbstractAuditableDTO(createdAt=2026-05-01T21:18:50.206341, createdBy=0, updatedAt=2026 (truncated)...]
+[2026-05-02 18:45:22.329] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: =========================================
+[2026-05-02 18:45:22.329] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: ===>> Output object : 
+
+{
+	"alg":"SALT_MD5",
+	"code":200,
+	"data":{
+		"birthYear":1990,
+		"createdAt":"2026-05-01 21:18:50",
+		"createdBy":0,
+		"delFlag":false,
+		"email":"admin@staff.local",
+		"id":1,
+		"isVip":false,
+		"lastLoginAt":"2026-05-01 21:45:13.229045",
+		"nickname":"超级管理员",
+		"staffRole":1,
+		"stampsBalance":0,
+		"status":1,
+		"updatedAt":"2026-05-01 21:45:13",
+		"updatedBy":0
+	},
+	"message":"OK",
+	"success":true
+} 
+class cn.nine.pros.post.client.model.db.UserDTO
+
+[2026-05-02 18:45:22.330] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: =========================================
+[2026-05-02 18:45:22.330] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: ==> leave RequestContextHolder.
+[2026-05-02 18:45:22.330] [DEBUG] [] [b38c8acd11fb416b9771e4de021a1a56]: ==> leave RequestContextHolder.
+[2026-05-02 18:47:28.198] [INFO ] [] []: 开始优雅停机...
+[2026-05-02 18:47:28.479] [INFO ] [] []: 已停止接收新请求
+[2026-05-02 18:47:28.479] [INFO ] [] []: 优雅停机完成

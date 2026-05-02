@@ -58,3 +58,47 @@
 
 - 忘记密码是否在首发范围（PLAN 邮件能力已规划密码重置）。
 - IM 好友同步占位替换为正式策略的时间点（与发信/建联顺序）。
+
+---
+
+## 5. 摸底补充（2026-05-02 · 文档体系落地前核对）
+
+### 5.1 App 已实现 HTTP（`client/api/app` 实现类）
+
+| 方法 | 路径 |
+|------|------|
+| POST | `/api/auth/register`、`/api/auth/login` |
+| GET | `/api/auth/me` |
+| GET | `/api/bootstrap/init` |
+| GET | `/api/mailbox/postal`、`/api/mailbox/sync`、`/api/mailbox/archive` |
+| POST | `/api/mailbox/letters/{letterId}/accept-postal` |
+| POST | `/api/mailbox/letters/send`（body：`AppSendLetterInDto`：`toUserId`、`content`、`letterType` 1=挂号 2=平邮） |
+| GET | `/api/im/usersig` |
+| GET | `/api/oss/put-sign`（需登录；`scene=postcard|avatar|letter`，`ext` 可选） |
+| GET | `/api/stamps/balance` |
+| POST | `/api/stamps/ledger/paging`（body：`AppStampLedgerPageInDto` 含 `page`） |
+
+**缺口**：无 `AppPostcard*`、`AppComment*`、`AppDirectory*`、`AppReport*` 等；**已有** `AppOssApi`、`AppStampsApi`；**发信**已并入 `AppMailboxApi.sendLetter`（2026-05-02）。
+
+### 5.2 管理端已实现 HTTP（抽样）
+
+`/webapi/auth/*`、`/webapi/user/*`、`/webapi/content/postcard/*`、`/webapi/content/comment/*`、`/webapi/report/*`、`/webapi/config/*`、`/webapi/country/*`、`/webapi/sensitive-word/*`、`/webapi/version/*`、`/webapi/announcement/*`、`/webapi/dashboard/summary`、`/webapi/log/action/paging`、`/webapi/log/login/paging`。
+
+### 5.3 Flutter `features` 完成度（相对 `AppEnv.useMock`）
+
+| Feature | 数据层 |
+|---------|--------|
+| `auth` | Mock 或真实 `dio` 二轨；忘记密码页存在但后端 `AppAuthController` 无对应端点 |
+| `post_wall` | 完全 Mock |
+| `directory` | 完全 Mock |
+| `mailbox`（信件） | 完全 Mock；TIM 在非 Mock 下接 `usersig` |
+| `profile` | 完全 Mock |
+
+### 5.4 Manage 小缺口（再次确认）
+
+- `api.ts` 中 `blockDevice` 已定义，`UserList` 未调用。
+- 无「邮票流水」独立管理页与 `/webapi` 绑定。
+
+### 5.5 文档索引
+
+执行层规划见 [`task_plan.md`](task_plan.md) 与 [`doc/plan/01-feature-list.md`](doc/plan/01-feature-list.md) 起共 6 份。

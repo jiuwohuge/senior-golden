@@ -4,6 +4,7 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.service.app.AppMailboxService;
 import cn.nine.pros.post.client.api.app.AppMailboxApi;
+import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
@@ -41,6 +42,12 @@ public class AppMailboxController implements AppMailboxApi {
     public AcceptPostalContactResultVO acceptPostalContact(Long letterId) {
         Long uid = requireUserId();
         return appMailboxService.acceptPostalContact(uid, letterId);
+    }
+
+    @Override
+    public MailboxLetterItemVO sendLetter(AppSendLetterInDto body) {
+        Long uid = requireUserId();
+        return appMailboxService.sendLetter(uid, body);
     }
 
     private static Long requireUserId() {

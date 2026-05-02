@@ -11,3 +11,5 @@ java.lang.IllegalArgumentException: Invalid character found in method name [0x16
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:842)
+[2026-05-02 18:47:28.667] [INFO ] [] []: HikariPool-1 - Shutdown initiated...
+[2026-05-02 18:47:28.672] [INFO ] [] []: HikariPool-1 - Shutdown completed.
