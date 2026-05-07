@@ -72,7 +72,11 @@ class UserCardPage extends ConsumerWidget {
                     await showModalBottomSheet<void>(
                       context: context,
                       isScrollControlled: true,
-                      builder: (_) => SendLetterSheet(user: user),
+                      builder: (_) => SendLetterSheet(
+                        peerId: user.id,
+                        peerNickname: user.nickname,
+                        countryLabel: user.countryName,
+                      ),
                     );
                   },
                 ),

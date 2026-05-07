@@ -4,6 +4,8 @@ import cn.nine.commons.data.dto.AbstractAuditableDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.util.List;
+
 /**
  * 明信片墙表（用户发布的公开明信片） DTO
  *
@@ -34,10 +36,15 @@ public class PostcardDTO extends AbstractAuditableDTO {
     @Schema(description = "文字内容")
     private String content;
     /**
-     * 图片URL数组
+     * 配图 URL 列表
      */
-    @Schema(description = "图片URL数组")
-    private Object images;
+    @Schema(description = "配图 URL 列表")
+    private List<String> images;
+    /**
+     * 首张配图 URL（冗余列）
+     */
+    @Schema(description = "首张配图 URL")
+    private String mainImageUrl;
     /**
      * 状态：1公开 2隐藏 3违规删除
      */

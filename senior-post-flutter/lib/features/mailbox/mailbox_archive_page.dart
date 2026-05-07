@@ -3,13 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/mock/mock_models.dart';
-import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
-
-final mailboxArchiveProvider = FutureProvider<List<MockLetter>>((ref) async {
-  return ref.read(mockMailboxRepositoryProvider).listArchive();
-});
+import 'mailbox_providers.dart';
 
 class MailboxArchivePage extends ConsumerWidget {
   const MailboxArchivePage({super.key});

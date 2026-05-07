@@ -7,6 +7,7 @@ import '../../core/auth/auth_token.dart';
 import '../../core/device/device_ids.dart';
 import '../../core/env/app_env.dart';
 import '../../core/mock/mock_delay.dart';
+import '../../core/mock/mock_repository.dart';
 import '../../core/network/dio_provider.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -97,6 +98,47 @@ class AuthRepository {
     _ref.read(authTokenProvider.notifier).state = null;
   }
 
+  /// 拉取 `/api/auth/me` 并写入 [mockSessionProvider]（非 Mock 下个人中心等展示用）。
+  Future<void> refreshSessionFromServer() async {
+    if (AppEnv.useMock) return;
+    final dio = _ref.read(dioProvider);
+    try {
+      final res = await dio.get<Map<String, dynamic>>('/api/auth/me');
+      final data = unwrapData<Map<String, dynamic>>(res, (raw) {
+        return raw! as Map<String, dynamic>;
+      });
+      _ref.read(mockSessionProvider.notifier).applyFromPublicUserVo(data);
+    } on DioException catch (e) {
+      _throwMappedDio(e);
+    }
+  }
+
+  /// `PATCH /api/auth/profile`，成功后刷新本地会话展示态。
+  Future<void> updateProfileOnServer({
+    required String nickname,
+    String? countryCode,
+    required String bio,
+  }) async {
+    if (AppEnv.useMock) return;
+    final dio = _ref.read(dioProvider);
+    try {
+      final res = await dio.patch<Map<String, dynamic>>(
+        '/api/auth/profile',
+        data: <String, dynamic>{
+          'nickname': nickname.trim(),
+          'countryCode': countryCode?.trim() ?? '',
+          'bio': bio.trim(),
+        },
+      );
+      final data = unwrapData<Map<String, dynamic>>(res, (raw) {
+        return raw! as Map<String, dynamic>;
+      });
+      _ref.read(mockSessionProvider.notifier).applyFromPublicUserVo(data);
+    } on DioException catch (e) {
+      _throwMappedDio(e);
+    }
+  }
+
   // ──────────────────────────────────────────────
   // Mock 分支
   // ──────────────────────────────────────────────
@@ -161,6 +203,10 @@ class AuthRepository {
       final token = data['token']! as String;
       await AuthStorage.writeToken(token);
       _ref.read(authTokenProvider.notifier).state = token;
+      final userMap = data['user'] as Map<String, dynamic>?;
+      if (userMap != null) {
+        _ref.read(mockSessionProvider.notifier).applyFromPublicUserVo(userMap);
+      }
     } on DioException catch (e) {
       _throwMappedDio(e);
     }
@@ -197,6 +243,10 @@ class AuthRepository {
       final token = data['token']! as String;
       await AuthStorage.writeToken(token);
       _ref.read(authTokenProvider.notifier).state = token;
+      final userMap = data['user'] as Map<String, dynamic>?;
+      if (userMap != null) {
+        _ref.read(mockSessionProvider.notifier).applyFromPublicUserVo(userMap);
+      }
     } on DioException catch (e) {
       _throwMappedDio(e);
     }

@@ -37,20 +37,21 @@ server:
   forward-headers-strategy: framework
 
 senior-post:
-  # 腾讯 IM：控制台 SDKAppID + 密钥；sdk-app-id=0 时 /api/im/usersig 返回业务错误提示未配置
+  # 腾讯 IM：控制台「同一应用」的 SDKAppID + 密钥（须配对；错配会 IM 70009 UserSig verification failed）
+  # sdk-app-id=0 时 /api/im/usersig 返回业务错误；密钥禁止写入仓库，用环境变量或本地 profile（见 doc/plan/06-env-setup.md）
   tencent-im:
-    sdk-app-id: ${TENCENT_IM_SDK_APP_ID:20039789}
-    secret-key: ${TENCENT_IM_SECRET_KEY:e55901f8f1a66f78cb57159d315c9832d19c81aaba95d0c751de8a6bcc7963dc}
+    sdk-app-id: ${TENCENT_IM_SDK_APP_ID:0}
+    secret-key: ${TENCENT_IM_SECRET_KEY:}
     user-sig-expire-seconds: 604800
-  # 阿里云 OSS：未配置 endpoint 时 /api/oss/put-sign 返回业务错误提示
+  # 阿里云 OSS：未配置完整四项时 /api/oss/put-sign 返回业务错误提示
   oss:
-    endpoint: ${ALIYUN_OSS_ENDPOINT:oss-ap-southeast-1.aliyuncs.com}
-    access-key-id: ${ALIYUN_OSS_ACCESS_KEY_ID:LTAI5t72mBzidgMu1hnajdBJ}
-    access-key-secret: ${ALIYUN_OSS_ACCESS_KEY_SECRET:a5FhWu7DkebWuqCGxXSJy33bAtrNb2}
-    bucket-name: ${ALIYUN_OSS_BUCKET:senior_post}
+    endpoint: ${ALIYUN_OSS_ENDPOINT:}
+    access-key-id: ${ALIYUN_OSS_ACCESS_KEY_ID:}
+    access-key-secret: ${ALIYUN_OSS_ACCESS_KEY_SECRET:}
+    bucket-name: ${ALIYUN_OSS_BUCKET:}
     put-expire-seconds: 900
     key-prefix: app/uploads
-    public-read-base-url: ${ALIYUN_OSS_PUBLIC_BASE_URL:seniorpost.oss-ap-southeast-1.aliyuncs.com}
+    public-read-base-url: ${ALIYUN_OSS_PUBLIC_BASE_URL:}
 
 jh:
   config:
@@ -86,6 +87,9 @@ jh:
       - /api/im/**
       - /api/oss/**
       - /api/stamps/**
+      - /api/postcards/**
+      - /api/reports/**
+      - /api/directory/**
     # 忽略参数解密的接口
     reqIgnoreDecryptUris:
       - /webapp/**
@@ -97,6 +101,9 @@ jh:
       - /api/im/**
       - /api/oss/**
       - /api/stamps/**
+      - /api/postcards/**
+      - /api/reports/**
+      - /api/directory/**
 
 knife4j:
   enable: true  # 启用 Knife4j 增强（必须，否则仅启用 springdoc 默认 UI）

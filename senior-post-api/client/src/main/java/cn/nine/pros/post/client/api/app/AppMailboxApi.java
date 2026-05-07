@@ -41,4 +41,16 @@ public interface AppMailboxApi {
     @Operation(summary = "发送信件（挂号即时送达 / 平邮运输中）；非 VIP 挂号消耗邮票")
     @PostMapping(AppServiceDefine.SERVER_PREFIX + "/mailbox/letters/send")
     MailboxLetterItemVO sendLetter(@RequestBody @Valid AppSendLetterInDto body);
+
+    @Operation(summary = "信件详情（参与方可读，含正文）")
+    @GetMapping(AppServiceDefine.SERVER_PREFIX + "/mailbox/letters/{letterId}")
+    MailboxLetterItemVO getLetter(@PathVariable("letterId") Long letterId);
+
+    @Operation(summary = "是否与指定用户已邮政建联（活跃好友）")
+    @GetMapping(AppServiceDefine.SERVER_PREFIX + "/mailbox/peers/{peerUserId}/friendship-active")
+    boolean isFriendshipActive(@PathVariable("peerUserId") Long peerUserId);
+
+    @Operation(summary = "平邮加速：发件人消耗 1 邮票立即送达；VIP 免扣")
+    @PostMapping(AppServiceDefine.SERVER_PREFIX + "/mailbox/letters/{letterId}/speed-up")
+    MailboxLetterItemVO speedUpLetter(@PathVariable("letterId") Long letterId);
 }

@@ -256,13 +256,13 @@ flowchart LR
 
 ## [功能清单]
 
-- [ ] A1. 账号注册登录（邮箱注册、年龄门槛、协议同意、资料完善）
-- [ ] A2. 用户资料中心（头像、昵称、国家、兴趣、简介、资料编辑）
-- [ ] A3. Post Wall（发帖、浏览、评论、举报、内容审核）
-- [ ] A4. Post Directory（筛选、排序、用户卡片、写信入口）
-- [ ] A5. Post Box（挂号信即时送达、平邮延迟送达、平邮加速；**App 发信/拉信全量走真实 REST 仍待联调**）
+- [ ] A1. 账号注册登录（邮箱注册、年龄门槛、协议同意；**忘记密码/重置仍待后端**）
+- [ ] A2. 用户资料中心（**`me` + `PATCH /api/auth/profile` + 流水页已接 REST**；头像 URL 写回、兴趣写回仍待办）
+- [ ] A3. Post Wall（**列表/详情/发帖/评论 + OSS 配图已接 REST**；举报入口、敏感词写入、审核态作者侧 UX 仍待办）
+- [ ] A4. Post Directory（**名录分页与筛选 + 写信联动已接 REST**；同龄/同兴趣排序、独立用户公开页仍待办）
+- [ ] A5. Post Box（**发信/收件/归档/详情/Accept/IM sig、平邮加速 `speed-up` 已接 REST**；平邮到期 Worker 仍待办）
 - [x] A5-IM. 邮政信箱 × 腾讯 IM 双轨：**后端** `V4`（`bu_friendship` + `send_mode`）、`GET/POST /api/mailbox/*`、`GET /api/im/usersig`（`tls-sig-api-v2` + `senior-post.tencent-im`）；**Flutter** Tab 分段、归档、`tim_facade`、`chat_page`、`tencent_cloud_chat_sdk:8.8.7373`、Mock 建联与单元测试 `test/mailbox_models_test.dart`（2026-05-02）
-- [ ] A6. Chat Stamp（发放、消耗、上限、余额校验、日志）
+- [ ] A6. Chat Stamp（**余额 + 流水分页（App + Flutter 流水页）已接**；登录赠送/日上限、加速专用接口、管理流水页仍待办）
 - [ ] A7. VIP 权益（无限邮票、免费加速、访客、无痕、推荐权重）
 - [ ] A8. 风控与合规（设备标识、敏感词、图片审核、GDPR 删除与注销）
 - [ ] A9. 管理后台（用户、内容、举报、配置中心、日志、看板）
@@ -284,6 +284,9 @@ flowchart LR
   - **后端**：Flyway **`V4__mailbox_im_friendship.sql`**（`bu_friendship`、`bu_letter.send_mode`）；`LetterDTO`/`LetterDomain` 补 `sendMode`；`AppMailboxApi`（`/api/mailbox/postal`、`/sync`、`/archive`、`/letters/{id}/accept-postal`）、`AppImApi`（`/api/im/usersig`）；`AppImService`（`com.github.tencentyun:tls-sig-api-v2:2.0`）；`TencentImFriendshipNotifier` 占位；`application.yml` 增加 **`senior-post.tencent-im`** 与 **`/api/mailbox/**`、`/api/im/**`** 加解密白名单。
   - **Flutter**：`pubspec` 引入 **`tencent_cloud_chat_sdk:8.8.7373`**；`mailbox_page` **Postal / Connections**、`mailbox_archive_page`、`chat_page`（邮政主题气泡 + C2C 历史）、`tim_facade`、`mailbox_providers`；Mock 扩展 **`LetterStatus.registered` / `LetterSendMode` / 建联集合**；路由 **`/mailbox/archive`、`/chat/:userId`**。
   - **验证**：`mvn compile -DskipTests`（`senior-post-api`）；`flutter analyze`；`flutter test test/mailbox_models_test.dart`。
+- **本次新增（2026-05-02，资料写回 FP-A2-001）**：后端 **`PATCH /api/auth/profile`**（`AppAuthProfilePatchInDto`，昵称/国家/简介部分更新）；Flutter **`AuthRepository.refreshSessionFromServer`**（`GET /api/auth/me`）、**登录/注册响应 `user` 写入 `mockSessionProvider`**、**`ProfileEditPage` / `ProfilePage` 非 Mock 联调**；兴趣标签与头像 URL 写回仍待后续项。
+- **本次新增（2026-05-02，文档对齐 + 邮票流水 Flutter）**：`doc/plan/01-feature-list.md` 与 **`PLAN.md` [功能清单]** 回写 **A3/A4/A5/A6** 与仓库一致（明信片墙、名录、Accept、OSS 发帖图、**`stamps_remote` + 个人中心流水页** 非 Mock 走 **`POST /api/stamps/ledger/paging`**）。
+- **本次新增（2026-05-06，FP-A5-005）**：**`POST /api/mailbox/letters/{letterId}/speed-up`**（发件人、平邮运输中、VIP 免扣票、非 VIP CAS 扣 1 + 流水）；Flutter **`mailbox_remote.speedUp`**、**`speed_up_sheet`** / **`letter_detail_page`** 真联调。
 
 ---
 

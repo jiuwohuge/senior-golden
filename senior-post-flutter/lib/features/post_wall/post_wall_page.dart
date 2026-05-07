@@ -5,12 +5,9 @@ import 'package:intl/intl.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/mock/mock_models.dart';
-import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
-
-final postWallListProvider = FutureProvider<List<MockPost>>((ref) async {
-  return ref.read(mockPostsRepositoryProvider).list();
-});
+import '../directory/send_letter_sheet.dart';
+import 'post_providers.dart';
 
 class PostWallPage extends ConsumerWidget {
   const PostWallPage({super.key});
@@ -118,15 +115,75 @@ class _PostCard extends StatelessWidget {
             color: PostalTokens.postboxGreen,
           ),
           IconButton(
-            onPressed: () => context.push('/post/${post.id}'),
+            tooltip: 'Send letter',
+            onPressed: () {
+              showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                builder: (ctx) => SendLetterSheet(
+                  peerId: post.author.id,
+                  peerNickname: post.author.nickname,
+                  countryLabel: post.author.countryName.isNotEmpty
+                      ? post.author.countryName
+                      : post.author.countryCode,
+                ),
+              );
+            },
             icon: const Icon(Icons.mail_outline),
             color: PostalTokens.stampVermilion,
           ),
         ],
       ),
-      child: Text(
-        post.content,
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.55),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (post.resolvedImageUrls.isNotEmpty) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      post.resolvedImageUrls.first,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const ColoredBox(
+                        color: Color(0xFFE8E4DC),
+                        child: Icon(Icons.broken_image_outlined),
+                      ),
+                    ),
+                    if (post.resolvedImageUrls.length > 1)
+                      Positioned(
+                        right: 8,
+                        bottom: 8,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Text(
+                              '${post.resolvedImageUrls.length} photos',
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.white,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+          Text(
+            post.content,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.55),
+          ),
+        ],
       ),
     );
   }

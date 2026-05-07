@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "管理后台-内容")
 public interface AdminContentApi {
 
+    @Operation(summary = "明信片详情（审核预览，含配图列表）")
+    @GetMapping(AppServiceDefine.WEBAPI_PREFIX + "/content/postcard/{id}")
+    PostcardDTO getPostcard(@PathVariable("id") Long id);
+
     @Operation(summary = "分页查询明信片")
     @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/content/postcard/paging")
     PageData<PostcardDTO> pagingPostcards(@RequestBody @Valid PostcardQueryInDto body);

@@ -10,6 +10,7 @@ export const api = {
   blockDevice: (deviceUuid: string, reason?: string) => request.post('/webapi/user/device/block', { deviceUuid, reason }),
 
   postcards: (params: any) => request.post('/webapi/content/postcard/paging', params),
+  postcardDetail: (id: number) => request.get(`/webapi/content/postcard/${id}`),
   comments: (params: any) => request.post('/webapi/content/comment/paging', params),
   approvePostcard: (id: number) => request.post(`/webapi/content/postcard/${id}/approve`),
   rejectPostcard: (id: number, reason: string) => request.post(`/webapi/content/postcard/${id}/reject`, { reason }),

@@ -73,6 +73,8 @@
 | GET | `/api/mailbox/postal`、`/api/mailbox/sync`、`/api/mailbox/archive` |
 | POST | `/api/mailbox/letters/{letterId}/accept-postal` |
 | POST | `/api/mailbox/letters/send`（body：`AppSendLetterInDto`：`toUserId`、`content`、`letterType` 1=挂号 2=平邮） |
+| GET | `/api/mailbox/letters/{letterId}`（详情，含 `content` 正文） |
+| GET | `/api/mailbox/peers/{peerUserId}/friendship-active`（是否已建联） |
 | GET | `/api/im/usersig` |
 | GET | `/api/oss/put-sign`（需登录；`scene=postcard|avatar|letter`，`ext` 可选） |
 | GET | `/api/stamps/balance` |
@@ -90,8 +92,8 @@
 |---------|--------|
 | `auth` | Mock 或真实 `dio` 二轨；忘记密码页存在但后端 `AppAuthController` 无对应端点 |
 | `post_wall` | 完全 Mock |
-| `directory` | 完全 Mock |
-| `mailbox`（信件） | 完全 Mock；TIM 在非 Mock 下接 `usersig` |
+| `directory` | 完全 Mock（名录数据仍 Mock；**发信**已接真实 API） |
+| `mailbox`（信件） | **`USE_MOCK=false` 时**：`mailbox_remote` 接 postal/archive/详情/发信/建联/好友判断/`speed-up`；顶栏邮票接 `/api/stamps/balance`；**回信**仍仅 Mock 或未接 |
 | `profile` | 完全 Mock |
 
 ### 5.4 Manage 小缺口（再次确认）

@@ -59,6 +59,8 @@ class MockPost {
     required this.createdAt,
     required this.commentCount,
     this.imageUrl,
+    this.imageUrls,
+    this.reviewStatus,
   });
 
   final String id;
@@ -66,7 +68,22 @@ class MockPost {
   final String content;
   final DateTime createdAt;
   final int commentCount;
+  /// 首张图（与后端 `imageUrl` 对齐）
   final String? imageUrl;
+  /// 全部配图（与后端 `imageUrls` 对齐）
+  final List<String>? imageUrls;
+  /// 审核状态：0 待审 1 通过 2 驳回（详情接口返回，列表项多为 null）
+  final int? reviewStatus;
+
+  List<String> get resolvedImageUrls {
+    if (imageUrls != null && imageUrls!.isNotEmpty) {
+      return imageUrls!;
+    }
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return <String>[imageUrl!];
+    }
+    return const <String>[];
+  }
 }
 
 class MockComment {

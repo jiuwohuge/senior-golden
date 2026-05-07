@@ -37,6 +37,13 @@
             </list>
           </value>
         </entry>
+        <entry key="cross_file">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/cross_file-0.3.5+2/lib" />
+            </list>
+          </value>
+        </entry>
         <entry key="cupertino_icons">
           <value>
             <list>
@@ -72,6 +79,34 @@
             </list>
           </value>
         </entry>
+        <entry key="file_selector_linux">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/file_selector_linux-0.9.4/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="file_selector_macos">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/file_selector_macos-0.9.5/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="file_selector_platform_interface">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/file_selector_platform_interface-2.7.0/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="file_selector_windows">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/file_selector_windows-0.9.3+5/lib" />
+            </list>
+          </value>
+        </entry>
         <entry key="flutter">
           <value>
             <list>
@@ -90,6 +125,13 @@
           <value>
             <list>
               <option value="$PROJECT_DIR$/../../../env/flutter/packages/flutter_localizations/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="flutter_plugin_android_lifecycle">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/flutter_plugin_android_lifecycle-2.0.34/lib" />
             </list>
           </value>
         </entry>
@@ -163,10 +205,73 @@
             </list>
           </value>
         </entry>
+        <entry key="http">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/http-1.6.0/lib" />
+            </list>
+          </value>
+        </entry>
         <entry key="http_parser">
           <value>
             <list>
               <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/http_parser-4.1.2/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="image_picker">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker-1.2.2/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="image_picker_android">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_android-0.8.13+17/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="image_picker_for_web">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_for_web-3.1.1/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="image_picker_ios">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_ios-0.8.13+3/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="image_picker_linux">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_linux-0.2.2/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="image_picker_macos">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_macos-0.2.2+1/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="image_picker_platform_interface">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_platform_interface-2.11.1/lib" />
+            </list>
+          </value>
+        </entry>
+        <entry key="image_picker_windows">
+          <value>
+            <list>
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_windows-0.2.2/lib" />
             </list>
           </value>
         </entry>
@@ -437,12 +542,18 @@
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/characters-1.4.0/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/clock-1.1.2/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/collection-1.19.1/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/cross_file-0.3.5+2/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/cupertino_icons-1.0.9/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/dio-5.9.2/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/dio_web_adapter-2.1.2/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/fake_async-1.3.3/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/ffi-2.2.0/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/file_selector_linux-0.9.4/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/file_selector_macos-0.9.5/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/file_selector_platform_interface-2.7.0/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/file_selector_windows-0.9.3+5/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/flutter_lints-5.0.0/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/flutter_plugin_android_lifecycle-2.0.34/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/flutter_riverpod-2.6.1/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/flutter_secure_storage-9.2.4/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/flutter_secure_storage_linux-1.2.3/lib" />
@@ -451,7 +562,16 @@
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/flutter_secure_storage_web-1.2.1/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/flutter_secure_storage_windows-3.1.2/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/go_router-14.8.1/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/http-1.6.0/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/http_parser-4.1.2/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker-1.2.2/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_android-0.8.13+17/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_for_web-3.1.1/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_ios-0.8.13+3/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_linux-0.2.2/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_macos-0.2.2+1/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_platform_interface-2.11.1/lib" />
+      <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/image_picker_windows-0.2.2/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/intl-0.20.2/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/js-0.6.7/lib" />
       <root url="file://$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/leak_tracker-11.0.2/lib" />

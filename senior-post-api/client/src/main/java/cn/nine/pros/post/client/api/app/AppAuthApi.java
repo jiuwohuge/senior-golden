@@ -1,6 +1,7 @@
 package cn.nine.pros.post.client.api.app;
 
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
+import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
 import cn.nine.pros.post.client.model.out.AppAuthResultVO;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -26,4 +28,8 @@ public interface AppAuthApi {
     @Operation(summary = "当前登录用户")
     @GetMapping(AppServiceDefine.SERVER_PREFIX + "/auth/me")
     AppPublicUserVO me();
+
+    @Operation(summary = "更新当前用户资料（昵称/国家/简介）")
+    @PatchMapping(AppServiceDefine.SERVER_PREFIX + "/auth/profile")
+    AppPublicUserVO updateProfile(@RequestBody @Valid AppAuthProfilePatchInDto body);
 }

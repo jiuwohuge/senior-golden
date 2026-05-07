@@ -14,14 +14,16 @@
 | FP-A6-001 | AI + Owner | S1 | W1D1 | W1D2 | DONE | `GET /api/stamps/balance` 与 `bu_user.stamps_balance` 一致 | `AppStampsApi`、`AppStampsController`、`AppStampBalanceVO` |
 | FP-A6-002 | AI + Owner | S1 | W1D1 | W1D2 | DONE | `POST /api/stamps/ledger/paging` 分页 | `AppStampLedgerPageInDto`、`ledgerPaging` |
 | FP-A5-001 | AI + Owner | S1 | W1D3 | W1D3 | DONE | Knife4j 发信成功；非 VIP 挂号扣 1 邮票且 `log_stamp_transaction` 有记录 | `AppSendLetterInDto`、`AppMailboxServiceImpl.sendLetter` |
+| FP-A5-Fl | AI + Owner | S2 | W2D1 | W2D1 | DONE | `USE_MOCK=false`：postal/archive/detail/send/accept、邮票顶栏、`friendship-active` | `mailbox_remote.dart`、各 mailbox/directory 页 |
 | FP-A6-004 | AI + Owner | S1 | W1D2 | W1D3 | TODO | 并发压测 100 次无负余额 | `StampAccountService` 单测 |
-| FP-A5-001 | AI + Owner | S1 | W1D2 | W1D4 | TODO | 双用户各见 postal/sync 正确 | `AppMailboxApi` 扩展 + `LetterService` |
-| FP-A3-001 | AI + Owner | S1 | W1D3 | W1D4 | TODO | 未审帖不在 App 列表 | `AppPostcardApi` + Mapper SQL |
-| FP-A3-002 | AI + Owner | S1 | W1D4 | W1D4 | TODO | 未审详情不可见 | 同上 |
-| FP-A3-003 | AI + Owner | S1 | W1D4 | W1D5 | TODO | 后台待审队列有记录 | create + 可选 OSS URL |
-| FP-A3-004 | AI + Owner | S1 | W1D5 | W1D6 | TODO | 评论待审 | comment API |
-| FP-A2-001 | AI + Owner | S1 | W1D5 | W1D6 | TODO | `me` 与编辑后一致 | profile update API |
-| FP-A4-001 | AI + Owner | S1 | W1D6 | W1D7 | TODO | 分页 total 正确 | directory API |
+| FP-A5-002 | AI + Owner | S1 | W1D2 | W1D4 | TODO | 双用户各见 postal/sync 正确 | `AppMailboxApi` 扩展 + `LetterService` |
+| FP-A3-001 | AI + Owner | S1 | W1D3 | W1D4 | DONE | 未审帖不在 App 列表（`review_status=1`） | `AppPostcardServiceImpl.wallPage` |
+| FP-A3-002 | AI + Owner | S1 | W1D4 | W1D4 | DONE | 未审详情对非作者不可见 | `getDetail` |
+| FP-A3-003 | AI + Owner | S1 | W1D4 | W1D5 | DONE | 发帖落库 + OSS 可选 URL | `AppPostcardServiceImpl.create` |
+| FP-A3-004 | AI + Owner | S1 | W1D5 | W1D6 | DONE | 评论分页与发表 | `commentsPaging` / `createComment` |
+| FP-A2-001 | AI + Owner | S1 | W1D5 | W1D6 | DONE | `PATCH /api/auth/profile` + Flutter 编辑页/登录会话与 `me` 一致 | `AppAuthProfilePatchInDto`、`AuthRepository` |
+| FP-A4-001 | AI + Owner | S1 | W1D6 | W1D7 | DONE | 分页 total 正确 | `AppDirectoryServiceImpl`、`directory_remote` |
+| FP-A6-002-Fl | AI + Owner | S2 | W2D1 | W2D1 | DONE | `USE_MOCK=false` 流水页调 ledger paging | `stamps_remote.dart`、`stamps_ledger_page.dart` |
 
 ---
 
@@ -30,9 +32,9 @@
 | FP | 负责人 | Sprint | 起 | 止 | 状态 | 验收标准 | 交付物 |
 |----|--------|--------|----|----|------|----------|--------|
 | 总闸 Mock | AI + Owner | S2 | W2D1 | W2D1 | TODO | `USE_MOCK=false` 主路径可演示 | `app_env` 文档 + 默认策略决策 |
-| FP-A3-* UI | AI + Owner | S2 | W2D1 | W2D4 | TODO | Tab1 全真数据 | `post_wall` 等改 Repository |
-| FP-A5-* UI | AI + Owner | S2 | W2D2 | W2D4 | TODO | 发信后列表刷新 | `mailbox_providers` + sheet |
-| FP-A2/A4 UI | AI + Owner | S2 | W2D4 | W2D5 | TODO | 编辑保存成功 | profile/directory |
+| FP-A3-* UI | AI + Owner | S2 | W2D1 | W2D4 | DONE | Tab1 全真数据 | `post_wall_remote`、compose/detail |
+| FP-A5-* UI | AI + Owner | S2 | W2D2 | W2D4 | DONE | 发信后列表刷新 | `mailbox_providers` + sheet（见 FP-A5-Fl） |
+| FP-A2/A4 UI | AI + Owner | S2 | W2D4 | W2D5 | DONE | 编辑保存成功 | profile/directory |
 | E2E 冒烟 | AI + Owner | S2 | W2D5 | W2D5 | TODO | 脚本或录屏通过 | `doc/plan/` 或 `tests/` 记录 |
 
 ---
@@ -42,7 +44,7 @@
 | FP | 负责人 | Sprint | 起 | 止 | 状态 | 验收标准 | 交付物 |
 |----|--------|--------|----|----|------|----------|--------|
 | FP-A5d-002 | AI + Owner | S3 | W3D1 | W3D3 | TODO | 平邮到期自动送达 | Redis + Worker + 单测 |
-| FP-A5-005 | AI + Owner | S3 | W3D2 | W3D3 | TODO | 扣邮票后变已送达 | speed-up API |
+| FP-A5-005 | AI + Owner | S3 | W3D2 | W3D3 | DONE | 扣邮票后变已送达 | `POST .../speed-up`、`AppMailboxServiceImpl.speedUpLetter`、`mailbox_remote` |
 | FP-A5d-004 | AI + Owner | S3 | W3D3 | W3D4 | TODO | 腾讯返回成功或可观测失败 | Notifier 实现 + 配置 |
 | FP-A6-002/003 | AI + Owner | S3 | W3D4 | W3D5 | TODO | 流水页与管理配置一致 | API + Flutter 页 |
 | FP-A7-* | AI + Owner | S3 | W3D4 | W3D6 | TODO | VIP 开关影响扣费 | VO + Flutter |
@@ -78,3 +80,5 @@
 | 日期 | 变更 |
 |------|------|
 | 2026-05-02 | 初版：按 `04-dev-plan` 与 `03-priority-grouping` 生成 |
+| 2026-05-02 | FP-A2-001：`PATCH /api/auth/profile`、Flutter `refreshSessionFromServer` / `updateProfileOnServer`、资料页拉 `me` |
+| 2026-05-02 | 文档回写 A3/A4/A5/A6；Sprint1 标 DONE：FP-A3-001~004、FP-A4-001；修正重复 FP 编号为 FP-A5-002；FP-A6-002-Fl 流水页 |

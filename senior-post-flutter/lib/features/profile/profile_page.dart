@@ -3,16 +3,36 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_token.dart';
+import '../../core/env/app_env.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../auth/login_routes.dart';
 
-class ProfilePage extends ConsumerWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+    if (!AppEnv.useMock) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          await ref.read(authRepositoryProvider).refreshSessionFromServer();
+        } catch (_) {
+          // 静默：无网或 token 失效时仍展示上次缓存的 mockSession
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final session = ref.watch(mockSessionProvider);
     final user = session.user;
     return SafeArea(

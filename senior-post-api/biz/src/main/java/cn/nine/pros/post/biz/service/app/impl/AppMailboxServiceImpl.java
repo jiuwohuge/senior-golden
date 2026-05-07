@@ -44,6 +44,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private static final int SEND_MODE_VIP_DIRECT = 3;
     /** 非 VIP 发送挂号信消耗的邮票数（后续可接配置中心） */
     private static final int REGISTERED_STAMP_COST = 1;
+    /** 非 VIP 平邮加速消耗的邮票数 */
+    private static final int SPEED_UP_STAMP_COST = 1;
     private static final int USER_STATUS_NORMAL = 1;
 
     private final LetterMapper letterMapper;
@@ -61,7 +63,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             if (friendshipService.areActiveFriends(userId, peer)) {
                 continue;
             }
-            out.add(toItem(l, userId));
+            out.add(toItem(l, userId, false));
         }
         return out;
     }
@@ -70,7 +72,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     public LetterSyncResultVO sync(Long userId, LocalDateTime since) {
         List<LetterDomain> letters = loadLettersForUser(userId, since, 200);
         List<MailboxLetterItemVO> items = letters.stream()
-                .map(l -> toItem(l, userId))
+                .map(l -> toItem(l, userId, false))
                 .collect(Collectors.toList());
         return LetterSyncResultVO.builder()
                 .letters(items)
@@ -81,7 +83,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     @Override
     public List<MailboxLetterItemVO> listArchive(Long userId) {
         return loadLettersForUser(userId, null, 500).stream()
-                .map(l -> toItem(l, userId))
+                .map(l -> toItem(l, userId, false))
                 .collect(Collectors.toList());
     }
 
@@ -186,7 +188,95 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         }
 
         LetterDomain saved = letterService.getById(letter.getId());
-        return toItem(saved, fromUserId);
+        return toItem(saved, fromUserId, false);
+    }
+
+    @Override
+    public MailboxLetterItemVO getLetter(long viewerUserId, long letterId) {
+        LetterDomain l = letterMapper.selectById(letterId);
+        if (l == null || l.isDelFlag()) {
+            throw new BadRequestException("信件不存在");
+        }
+        if (l.getFromUserId() != viewerUserId && l.getToUserId() != viewerUserId) {
+            throw new BadRequestException("无权查看该信件");
+        }
+        return toItem(l, viewerUserId, true);
+    }
+
+    @Override
+    public boolean isFriendshipActive(long viewerUserId, long peerUserId) {
+        return friendshipService.areActiveFriends(viewerUserId, peerUserId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MailboxLetterItemVO speedUpLetter(long actorUserId, long letterId) {
+        LetterDomain letter = letterMapper.selectById(letterId);
+        if (letter == null || letter.isDelFlag()) {
+            throw new BadRequestException("信件不存在");
+        }
+        if (letter.getFromUserId() != actorUserId) {
+            throw new BadRequestException("仅发件人可加速平邮");
+        }
+        if (toInt(letter.getLetterType()) != LETTER_TYPE_STANDARD) {
+            throw new BadRequestException("仅平邮信件可加速");
+        }
+        if (toInt(letter.getStatus()) != STATUS_DELIVERING) {
+            throw new BadRequestException("当前状态不可加速");
+        }
+        if (Boolean.TRUE.equals(letter.getIsAccelerated())) {
+            throw new BadRequestException("该信件已加速");
+        }
+
+        UserDTO sender = userService.findById(actorUserId);
+        if (sender == null || userStatus(sender.getStatus()) != USER_STATUS_NORMAL) {
+            throw new BadRequestException("账号状态异常");
+        }
+        boolean vip = Boolean.TRUE.equals(sender.getIsVip());
+        LocalDateTime now = LocalDateTime.now();
+
+        if (!vip) {
+            int oldBal = sender.getStampsBalance() != null ? sender.getStampsBalance() : 0;
+            if (oldBal < SPEED_UP_STAMP_COST) {
+                throw new BadRequestException("邮票不足，无法加速");
+            }
+            int newBal = oldBal - SPEED_UP_STAMP_COST;
+            boolean patched = userService.update(new LambdaUpdateWrapper<UserDomain>()
+                    .eq(UserDomain::getId, actorUserId)
+                    .eq(UserDomain::isDelFlag, false)
+                    .eq(UserDomain::getStampsBalance, oldBal)
+                    .set(UserDomain::getStampsBalance, newBal)
+                    .set(UserDomain::getUpdatedAt, now)
+                    .set(UserDomain::getUpdatedBy, actorUserId));
+            if (!patched) {
+                throw new BadRequestException("邮票扣减失败，请重试");
+            }
+            StampTransactionDTO tx = new StampTransactionDTO();
+            tx.setUserId(actorUserId);
+            tx.setChangeAmount(-SPEED_UP_STAMP_COST);
+            tx.setBalanceAfter(newBal);
+            tx.setReason("平邮加速消耗");
+            tx.setRefId(letterId);
+            stampTransactionService.upsert(tx);
+        }
+
+        boolean letterPatched = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
+                .eq(LetterDomain::getId, letterId)
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getStatus, STATUS_DELIVERING)
+                .eq(LetterDomain::getFromUserId, actorUserId)
+                .set(LetterDomain::getStatus, STATUS_DELIVERED)
+                .set(LetterDomain::getIsAccelerated, true)
+                .set(LetterDomain::getAcceleratedAt, now)
+                .set(LetterDomain::getActualArrivalTime, now)
+                .set(LetterDomain::getUpdatedAt, now)
+                .set(LetterDomain::getUpdatedBy, actorUserId));
+        if (!letterPatched) {
+            throw new BadRequestException("信件状态已变更，请刷新后重试");
+        }
+
+        LetterDomain saved = letterService.getById(letterId);
+        return toItem(saved, actorUserId, false);
     }
 
     private static int userStatus(Object status) {
@@ -217,7 +307,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         return l.getFromUserId();
     }
 
-    private MailboxLetterItemVO toItem(LetterDomain l, long viewer) {
+    private MailboxLetterItemVO toItem(LetterDomain l, long viewer, boolean includeFullContent) {
         long peerId = peerUserId(l, viewer);
         UserDTO peer = userService.findById(peerId);
         String content = l.getContent() != null ? l.getContent() : "";
@@ -229,6 +319,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .sendMode(l.getSendMode() != null ? l.getSendMode() : 1)
                 .status(toInt(l.getStatus()))
                 .preview(preview)
+                .content(includeFullContent ? content : null)
                 .fromMe(l.getFromUserId() == viewer)
                 .sentAt(l.getCreatedAt())
                 .updatedAt(l.getUpdatedAt())

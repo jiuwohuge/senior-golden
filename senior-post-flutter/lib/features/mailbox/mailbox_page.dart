@@ -7,9 +7,9 @@ import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
-import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
+import 'mailbox_remote.dart';
 
 class MailboxPage extends ConsumerStatefulWidget {
   const MailboxPage({super.key});
@@ -36,7 +36,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
 
   @override
   Widget build(BuildContext context) {
-    final session = ref.watch(mockSessionProvider);
+    final stampHeader = ref.watch(mailboxStampHeaderProvider);
     final lettersAsync = ref.watch(postalInboxLettersProvider);
     return SafeArea(
       top: false,
@@ -47,10 +47,22 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
             child: Row(
               children: [
-                PostalStampBadge(
-                  balance: session.stampBalance,
-                  cap: session.dailyStampCap,
-                  isVip: session.isVip,
+                stampHeader.when(
+                  data: (s) => PostalStampBadge(
+                    balance: s.balance,
+                    cap: s.cap,
+                    isVip: s.isVip,
+                  ),
+                  loading: () => const PostalStampBadge(
+                    balance: 0,
+                    cap: 3,
+                    isVip: false,
+                  ),
+                  error: (_, __) => const PostalStampBadge(
+                    balance: 0,
+                    cap: 3,
+                    isVip: false,
+                  ),
                 ),
                 const Spacer(),
                 TextButton(

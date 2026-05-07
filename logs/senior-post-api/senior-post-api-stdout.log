@@ -1,95 +1,13 @@
-[2026-05-02 18:47:08.134] [INFO ] [] []: Starting service [Tomcat]
-[2026-05-02 18:47:08.135] [INFO ] [] []: Starting Servlet engine: [Apache Tomcat/10.1.33]
-[2026-05-02 18:47:08.218] [INFO ] [] []: Initializing Spring embedded WebApplicationContext
-[2026-05-02 18:47:08.979] [INFO ] [] []: HikariPool-1 - Starting...
-[2026-05-02 18:47:09.201] [INFO ] [] []: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@19e5e110
-[2026-05-02 18:47:09.203] [INFO ] [] []: HikariPool-1 - Start completed.
-[2026-05-02 18:47:09.283] [INFO ] [] []: Flyway Community Edition 9.22.3 by Redgate
-[2026-05-02 18:47:09.283] [INFO ] [] []: See release notes here: https://rd.gt/416ObMi
-[2026-05-02 18:47:09.283] [INFO ] [] []: 
-[2026-05-02 18:47:09.303] [INFO ] [] []: Database: jdbc:postgresql://localhost:5432/senior_post (PostgreSQL 14.12)
-[2026-05-02 18:47:09.391] [INFO ] [] []: Successfully validated 4 migrations (execution time 00:00.070s)
-[2026-05-02 18:47:09.411] [INFO ] [] []: Current version of schema "public": 3
-[2026-05-02 18:47:09.424] [INFO ] [] []: Migrating schema "public" to version "4 - mailbox im friendship"
-[2026-05-02 18:47:09.591] [INFO ] [] []: Successfully applied 1 migration to schema "public", now at version v4 (execution time 00:00.156s)
-[2026-05-02 18:47:11.173] [INFO ] [] []: Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@150d80c4
-[2026-05-02 18:47:11.708] [WARN ] [] []: Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-[2026-05-02 18:47:11.714] [INFO ] [] []: HikariPool-1 - Shutdown initiated...
-[2026-05-02 18:47:11.718] [INFO ] [] []: HikariPool-1 - Shutdown completed.
-[2026-05-02 18:47:11.765] [ERROR] [] []: 
-
-***************************
-APPLICATION FAILED TO START
-***************************
-
-Description:
-
-Web server failed to start. Port 9011 was already in use.
-
-Action:
-
-Identify and stop the process that's listening on port 9011 or configure this application to listen on another port.
-
-[2026-05-02 18:47:20.845] [INFO ] [] []: Starting service [Tomcat]
-[2026-05-02 18:47:20.846] [INFO ] [] []: Starting Servlet engine: [Apache Tomcat/10.1.33]
-[2026-05-02 18:47:20.911] [INFO ] [] []: Initializing Spring embedded WebApplicationContext
-[2026-05-02 18:47:21.570] [INFO ] [] []: HikariPool-1 - Starting...
-[2026-05-02 18:47:21.749] [INFO ] [] []: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4fce3ed7
-[2026-05-02 18:47:21.752] [INFO ] [] []: HikariPool-1 - Start completed.
-[2026-05-02 18:47:21.829] [INFO ] [] []: Flyway Community Edition 9.22.3 by Redgate
-[2026-05-02 18:47:21.829] [INFO ] [] []: See release notes here: https://rd.gt/416ObMi
-[2026-05-02 18:47:21.829] [INFO ] [] []: 
-[2026-05-02 18:47:21.842] [INFO ] [] []: Database: jdbc:postgresql://localhost:5432/senior_post (PostgreSQL 14.12)
-[2026-05-02 18:47:21.888] [INFO ] [] []: Successfully validated 4 migrations (execution time 00:00.033s)
-[2026-05-02 18:47:21.958] [INFO ] [] []: Current version of schema "public": 4
-[2026-05-02 18:47:21.960] [INFO ] [] []: Schema "public" is up to date. No migration necessary.
-[2026-05-02 18:47:23.233] [INFO ] [] []: Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@7af707e0
-[2026-05-02 18:47:23.735] [WARN ] [] []: Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-[2026-05-02 18:47:23.740] [INFO ] [] []: HikariPool-1 - Shutdown initiated...
-[2026-05-02 18:47:23.744] [INFO ] [] []: HikariPool-1 - Shutdown completed.
-[2026-05-02 18:47:23.786] [ERROR] [] []: 
-
-***************************
-APPLICATION FAILED TO START
-***************************
-
-Description:
-
-Web server failed to start. Port 9011 was already in use.
-
-Action:
-
-Identify and stop the process that's listening on port 9011 or configure this application to listen on another port.
-
-[2026-05-02 18:47:48.123] [INFO ] [] []: Starting service [Tomcat]
-[2026-05-02 18:47:48.124] [INFO ] [] []: Starting Servlet engine: [Apache Tomcat/10.1.33]
-[2026-05-02 18:47:48.187] [INFO ] [] []: Initializing Spring embedded WebApplicationContext
-[2026-05-02 18:47:49.017] [INFO ] [] []: HikariPool-1 - Starting...
-[2026-05-02 18:47:49.237] [INFO ] [] []: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@301e5d23
-[2026-05-02 18:47:49.241] [INFO ] [] []: HikariPool-1 - Start completed.
-[2026-05-02 18:47:49.330] [INFO ] [] []: Flyway Community Edition 9.22.3 by Redgate
-[2026-05-02 18:47:49.330] [INFO ] [] []: See release notes here: https://rd.gt/416ObMi
-[2026-05-02 18:47:49.330] [INFO ] [] []: 
-[2026-05-02 18:47:49.345] [INFO ] [] []: Database: jdbc:postgresql://localhost:5432/senior_post (PostgreSQL 14.12)
-[2026-05-02 18:47:49.405] [INFO ] [] []: Successfully validated 4 migrations (execution time 00:00.042s)
-[2026-05-02 18:47:49.454] [INFO ] [] []: Current version of schema "public": 4
-[2026-05-02 18:47:49.459] [INFO ] [] []: Schema "public" is up to date. No migration necessary.
-[2026-05-02 18:47:51.483] [INFO ] [] []: Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@df4b72
-[2026-05-02 18:47:52.824] [INFO ] [] []: Initializing Spring DispatcherServlet 'dispatcherServlet'
-[2026-05-02 19:12:41.309] [INFO ] [] []: HikariPool-1 - Shutdown initiated...
-[2026-05-02 19:12:41.316] [INFO ] [] []: HikariPool-1 - Shutdown completed.
-[2026-05-02 19:12:47.618] [INFO ] [] []: Starting service [Tomcat]
-[2026-05-02 19:12:47.619] [INFO ] [] []: Starting Servlet engine: [Apache Tomcat/10.1.33]
-[2026-05-02 19:12:47.688] [INFO ] [] []: Initializing Spring embedded WebApplicationContext
-[2026-05-02 19:12:48.315] [INFO ] [] []: HikariPool-1 - Starting...
-[2026-05-02 19:12:48.467] [INFO ] [] []: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@19e5e110
-[2026-05-02 19:12:48.469] [INFO ] [] []: HikariPool-1 - Start completed.
-[2026-05-02 19:12:48.532] [INFO ] [] []: Flyway Community Edition 9.22.3 by Redgate
-[2026-05-02 19:12:48.533] [INFO ] [] []: See release notes here: https://rd.gt/416ObMi
-[2026-05-02 19:12:48.533] [INFO ] [] []: 
-[2026-05-02 19:12:48.547] [INFO ] [] []: Database: jdbc:postgresql://localhost:5432/senior_post (PostgreSQL 14.12)
-[2026-05-02 19:12:48.587] [INFO ] [] []: Successfully validated 4 migrations (execution time 00:00.022s)
-[2026-05-02 19:12:48.647] [INFO ] [] []: Current version of schema "public": 4
-[2026-05-02 19:12:48.650] [INFO ] [] []: Schema "public" is up to date. No migration necessary.
-[2026-05-02 19:12:49.648] [INFO ] [] []: Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@11ce2e22
-[2026-05-02 19:12:50.305] [INFO ] [] []: Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2026-05-07 06:19:59.166] [INFO ] [] []: Error parsing HTTP request header
+ Note: further occurrences of HTTP request parsing errors will be logged at DEBUG level.
+java.lang.IllegalArgumentException: Invalid character found in method name [0x120x010x00/0x000x000x000x000x000x000x1a0x000x060x010x00 ]. HTTP method names must be tokens
+	at org.apache.coyote.http11.Http11InputBuffer.parseRequestLine(Http11InputBuffer.java:406)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:270)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)

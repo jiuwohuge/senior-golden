@@ -22,4 +22,13 @@ public interface AppMailboxService {
      * 当前用户向 {@code body.toUserId} 发送信件。
      */
     MailboxLetterItemVO sendLetter(long fromUserId, AppSendLetterInDto body);
+
+    MailboxLetterItemVO getLetter(long viewerUserId, long letterId);
+
+    boolean isFriendshipActive(long viewerUserId, long peerUserId);
+
+    /**
+     * 发件人对运输中的平邮加速：非 VIP 扣 1 邮票，VIP 免扣；信件变为已送达。
+     */
+    MailboxLetterItemVO speedUpLetter(long actorUserId, long letterId);
 }

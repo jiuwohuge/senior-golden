@@ -23,6 +23,7 @@ class SeniorPostTimFacade {
   final Ref _ref;
   final V2TIMManager _tim = V2TIMManager();
   bool _sdkInited = false;
+  int? _initSdkAppId;
   String? _loggedUserId;
 
   Future<void> disposeAsync() async {
@@ -31,6 +32,7 @@ class SeniorPostTimFacade {
       await _tim.logout();
     } catch (_) {}
     _sdkInited = false;
+    _initSdkAppId = null;
     _loggedUserId = null;
   }
 
@@ -51,6 +53,12 @@ class SeniorPostTimFacade {
     if (userId.isEmpty || sig.isEmpty) {
       throw ApiBusinessException(400, 'Invalid UserSig response');
     }
+    // UserSig 与 initSDK 的 sdkAppID 必须一致；配置变更后需重新 init。
+    if (_sdkInited && _initSdkAppId != null && _initSdkAppId != sdk) {
+      await _tim.unInitSDK();
+      _sdkInited = false;
+      _loggedUserId = null;
+    }
     if (!_sdkInited) {
       final init = await _tim.initSDK(
         sdkAppID: sdk,
@@ -61,6 +69,7 @@ class SeniorPostTimFacade {
         throw ApiBusinessException(init.code, init.desc);
       }
       _sdkInited = true;
+      _initSdkAppId = sdk;
     }
     if (_loggedUserId == userId) {
       return;

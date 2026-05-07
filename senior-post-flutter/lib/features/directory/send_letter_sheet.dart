@@ -2,14 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
+import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import '../mailbox/mailbox_providers.dart';
+import '../mailbox/mailbox_remote.dart';
 
 class SendLetterSheet extends ConsumerStatefulWidget {
-  const SendLetterSheet({super.key, required this.user});
-  final MockUser user;
+  const SendLetterSheet({
+    super.key,
+    required this.peerId,
+    required this.peerNickname,
+    required this.countryLabel,
+  });
+
+  final String peerId;
+  final String peerNickname;
+  final String countryLabel;
 
   @override
   ConsumerState<SendLetterSheet> createState() => _SendLetterSheetState();
@@ -37,15 +47,37 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
     }
     setState(() => _busy = true);
     try {
-      await ref
-          .read(mockMailboxRepositoryProvider)
-          .send(peer: widget.user, body: _body.text.trim(), type: _type);
+      if (AppEnv.useMock) {
+        final user = MockUser(
+          id: widget.peerId,
+          nickname: widget.peerNickname,
+          email: '',
+          countryCode: '',
+          countryName: widget.countryLabel,
+          birthYear: 1970,
+          bio: '',
+          interests: const [],
+        );
+        await ref.read(mockMailboxRepositoryProvider).send(
+              peer: user,
+              body: _body.text.trim(),
+              type: _type,
+            );
+      } else {
+        await ref.read(mailboxRemoteRepositoryProvider).sendLetter(
+              toUserId: widget.peerId,
+              content: _body.text.trim(),
+              type: _type,
+            );
+        ref.invalidate(stampBalanceHeaderProvider);
+      }
       if (!mounted) return;
       ref.invalidate(mailboxLettersProvider);
       ref.invalidate(postalInboxLettersProvider);
+      ref.invalidate(mailboxArchiveProvider);
       PostalSnack.show(
         context,
-        'Mock: letter sent',
+        AppEnv.useMock ? 'Mock: letter sent' : 'Letter sent',
         tone: PostalSnackTone.success,
       );
       Navigator.of(context).pop();
@@ -60,7 +92,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final session = ref.watch(mockSessionProvider);
+    final stampHeader = ref.watch(mailboxStampHeaderProvider);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
@@ -68,8 +100,8 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
           shrinkWrap: true,
           children: [
             PostalSectionTitle(
-              title: 'Send letter to ${widget.user.nickname}',
-              subtitle: widget.user.countryName,
+              title: 'Send letter to ${widget.peerNickname}',
+              subtitle: widget.countryLabel,
             ),
             const SizedBox(height: 12),
             Row(
@@ -84,7 +116,10 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                     onChanged: _busy ? null : (v) => setState(() => _type = v!),
                     title: const Text('Registered Mail'),
                     subtitle: Text(
-                      session.isVip ? 'Free for VIP' : 'Consumes 1 stamp',
+                      stampHeader.maybeWhen(
+                        data: (s) => s.isVip ? 'Free for VIP' : 'Consumes 1 stamp',
+                        orElse: () => 'Consumes 1 stamp',
+                      ),
                     ),
                   ),
                 ),
@@ -107,10 +142,22 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
               ],
             ),
             const SizedBox(height: 6),
-            PostalStampBadge(
-              balance: session.stampBalance,
-              cap: session.dailyStampCap,
-              isVip: session.isVip,
+            stampHeader.when(
+              data: (s) => PostalStampBadge(
+                balance: s.balance,
+                cap: s.cap,
+                isVip: s.isVip,
+              ),
+              loading: () => const PostalStampBadge(
+                balance: 0,
+                cap: 3,
+                isVip: false,
+              ),
+              error: (_, __) => const PostalStampBadge(
+                balance: 0,
+                cap: 3,
+                isVip: false,
+              ),
             ),
             const SizedBox(height: 12),
             PostalTextField(

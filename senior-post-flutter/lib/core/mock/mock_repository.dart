@@ -63,6 +63,37 @@ class MockSessionNotifier extends StateNotifier<MockSessionState> {
     );
   }
 
+  /// 将后端 `AppPublicUserVO`（`/api/auth/me`、登录 user、PATCH profile）同步到本地展示态。
+  void applyFromPublicUserVo(Map<String, dynamic> m) {
+    final code = (m['countryCode'] as String?) ?? '';
+    var nameEn = code;
+    for (final c in MockData.countries) {
+      if (c.code == code) {
+        nameEn = c.nameEn;
+        break;
+      }
+    }
+    final uid = m['id'];
+    final idStr = uid == null
+        ? state.user.id
+        : (uid is int ? '$uid' : (uid as num).toString());
+    state = state.copyWith(
+      user: MockUser(
+        id: idStr,
+        nickname: (m['nickname'] as String?) ?? state.user.nickname,
+        email: (m['email'] as String?) ?? state.user.email,
+        countryCode: code,
+        countryName: nameEn,
+        birthYear: (m['birthYear'] as num?)?.toInt() ?? state.user.birthYear,
+        bio: m['bio'] as String? ?? '',
+        interests: state.user.interests,
+        avatarUrl: m['avatarUrl'] as String?,
+        isVip: m['isVip'] as bool? ?? state.user.isVip,
+      ),
+      stampBalance: (m['stampsBalance'] as num?)?.toInt() ?? state.stampBalance,
+    );
+  }
+
   /// 消耗邮票（挂号信、加速）；不足时抛业务异常。
   void consume(int amount) {
     if (state.isVip) return;
@@ -128,15 +159,26 @@ class MockPostsRepository {
     return MockData.commentsFor(postId);
   }
 
-  Future<MockPost> publish(String content) async {
+  Future<MockPost> publish(
+    String content, {
+    String? imageUrl,
+    List<String>? imageUrls,
+  }) async {
     await MockDelay.network();
     final session = _ref.read(mockSessionProvider);
+    final urls = imageUrls != null && imageUrls.isNotEmpty
+        ? imageUrls
+        : (imageUrl != null && imageUrl!.isNotEmpty ? <String>[imageUrl!] : null);
+    final first = urls != null && urls.isNotEmpty ? urls.first : null;
     final created = MockPost(
       id: 'p_${DateTime.now().millisecondsSinceEpoch}',
       author: session.user,
       content: content,
       createdAt: DateTime.now(),
       commentCount: 0,
+      imageUrl: first,
+      imageUrls: urls,
+      reviewStatus: 1,
     );
     _store.insert(0, created);
     _ref.read(mockSessionProvider.notifier).grant(1);
@@ -144,6 +186,10 @@ class MockPostsRepository {
   }
 
   Future<void> reportPost(String postId, String reason) async {
+    await MockDelay.network();
+  }
+
+  Future<void> reportComment(String commentId, String reason) async {
     await MockDelay.network();
   }
 }

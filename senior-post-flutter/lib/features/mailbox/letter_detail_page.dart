@@ -7,17 +7,22 @@ import 'package:intl/intl.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
+import 'mailbox_remote.dart';
 import 'speed_up_sheet.dart';
 
 final letterDetailProvider = FutureProvider.family<MockLetter?, String>((
   ref,
   id,
 ) async {
-  return ref.read(mockMailboxRepositoryProvider).findById(id);
+  if (AppEnv.useMock) {
+    return ref.read(mockMailboxRepositoryProvider).findById(id);
+  }
+  return ref.read(mailboxRemoteRepositoryProvider).getLetter(id);
 });
 
 class LetterDetailPage extends ConsumerStatefulWidget {
@@ -75,11 +80,16 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
             }
             final isDelivering = letter.status == LetterStatus.delivering;
             final isRegistered = letter.status == LetterStatus.registered;
-            final repo = ref.read(mockMailboxRepositoryProvider);
+            final AsyncValue<bool>? friendsAsync = AppEnv.useMock
+                ? null
+                : ref.watch(friendshipActiveProvider(letter.peer.id));
+            final isFriend = AppEnv.useMock
+                ? ref.read(mockMailboxRepositoryProvider).friendsWithPeer(letter.peer.id)
+                : (friendsAsync!.valueOrNull ?? false);
             final canAccept =
                 !letter.outgoing &&
                 letter.status == LetterStatus.delivered &&
-                !repo.friendsWithPeer(letter.peer.id);
+                !isFriend;
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
@@ -130,7 +140,9 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                         ),
                     ],
                   ),
-                  footer: isDelivering
+                  footer: isDelivering &&
+                          letter.outgoing &&
+                          letter.type == LetterType.standard
                       ? Row(
                           children: [
                             Expanded(
@@ -167,9 +179,15 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                           : () async {
                               setState(() => _acceptBusy = true);
                               try {
-                                await ref
-                                    .read(mockMailboxRepositoryProvider)
-                                    .acceptPostalConnection(letter.id);
+                                if (AppEnv.useMock) {
+                                  await ref
+                                      .read(mockMailboxRepositoryProvider)
+                                      .acceptPostalConnection(letter.id);
+                                } else {
+                                  await ref
+                                      .read(mailboxRemoteRepositoryProvider)
+                                      .acceptPostalContact(letter.id);
+                                }
                                 if (!context.mounted) return;
                                 PostalSnack.show(
                                   context,
@@ -182,6 +200,10 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                 ref.invalidate(mailboxLettersProvider);
                                 ref.invalidate(postalInboxLettersProvider);
                                 ref.invalidate(mockConnectionsProvider);
+                                ref.invalidate(
+                                  friendshipActiveProvider(letter.peer.id),
+                                );
+                                ref.invalidate(timConversationsProvider);
                               } on ApiBusinessException catch (e) {
                                 if (context.mounted) {
                                   PostalSnack.show(
@@ -209,9 +231,11 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                 ),
                 const SizedBox(height: 12),
                 PostalButton(
-                  label: 'Send reply',
+                  label: AppEnv.useMock ? 'Send reply' : 'Send reply (soon)',
                   busy: _busy,
-                  onPressed: (letter.status != LetterStatus.delivered || _busy)
+                  onPressed: (!AppEnv.useMock ||
+                          letter.status != LetterStatus.delivered ||
+                          _busy)
                       ? null
                       : () async {
                           if (_reply.text.trim().isEmpty) {
@@ -249,9 +273,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                           }
                         },
                 ),
-                if (ref
-                    .read(mockMailboxRepositoryProvider)
-                    .friendsWithPeer(letter.peer.id)) ...[
+                if (isFriend) ...[
                   const SizedBox(height: 12),
                   OutlinedButton(
                     onPressed: () => context.push('/chat/${letter.peer.id}'),

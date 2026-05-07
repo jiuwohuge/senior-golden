@@ -26,6 +26,8 @@ public class MailboxLetterItemVO {
     private Integer status;
     @Schema(description = "列表摘要")
     private String preview;
+    @Schema(description = "全文（仅详情接口返回；列表为 null 以省流量）")
+    private String content;
     @Schema(description = "是否本人发出")
     private Boolean fromMe;
     @Schema(description = "发送时间")

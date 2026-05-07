@@ -9,11 +9,16 @@ class PostalSkeletonList extends StatefulWidget {
     this.itemCount = 4,
     this.itemHeight = 130,
     this.padding = const EdgeInsets.fromLTRB(20, 20, 20, 20),
+    /// 为 true 时用于嵌套在外层 [ListView] 等不可无限延展的滚动容器内，避免布局断言/白屏。
+    this.shrinkWrap = false,
+    this.physics,
   });
 
   final int itemCount;
   final double itemHeight;
   final EdgeInsetsGeometry padding;
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
 
   @override
   State<PostalSkeletonList> createState() => _PostalSkeletonListState();
@@ -41,6 +46,9 @@ class _PostalSkeletonListState extends State<PostalSkeletonList>
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      shrinkWrap: widget.shrinkWrap,
+      physics: widget.physics ??
+          (widget.shrinkWrap ? const NeverScrollableScrollPhysics() : null),
       padding: widget.padding,
       itemCount: widget.itemCount,
       separatorBuilder: (_, _) => const SizedBox(height: 12),

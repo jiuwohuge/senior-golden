@@ -36,51 +36,53 @@ class PostalEmptyState extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 360),
         child: Padding(
           padding: const EdgeInsets.all(PostalTokens.s24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: accent.withValues(alpha: 0.08),
-                  border: Border.all(
-                    color: accent.withValues(alpha: 0.3),
-                    width: 1.4,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: accent.withValues(alpha: 0.08),
+                    border: Border.all(
+                      color: accent.withValues(alpha: 0.3),
+                      width: 1.4,
+                    ),
                   ),
+                  alignment: Alignment.center,
+                  child: Icon(icon, color: accent, size: 44),
                 ),
-                alignment: Alignment.center,
-                child: Icon(icon, color: accent, size: 44),
-              ),
-              const SizedBox(height: PostalTokens.s20),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge,
-              ),
-              if (subtitle != null && subtitle!.isNotEmpty) ...[
-                const SizedBox(height: PostalTokens.s8),
+                const SizedBox(height: PostalTokens.s20),
                 Text(
-                  subtitle!,
+                  title,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: PostalTokens.inkSecondary,
-                    height: 1.5,
+                  style: theme.textTheme.titleLarge,
+                ),
+                if (subtitle != null && subtitle!.isNotEmpty) ...[
+                  const SizedBox(height: PostalTokens.s8),
+                  SelectableText(
+                    subtitle!,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: PostalTokens.inkSecondary,
+                      height: 1.5,
+                    ),
                   ),
-                ),
+                ],
+                if (actionLabel != null && onAction != null) ...[
+                  const SizedBox(height: PostalTokens.s24),
+                  PostalButton(
+                    label: actionLabel!,
+                    onPressed: onAction,
+                    variant: PostalButtonVariant.secondary,
+                    expand: false,
+                    minHeight: 48,
+                  ),
+                ],
               ],
-              if (actionLabel != null && onAction != null) ...[
-                const SizedBox(height: PostalTokens.s24),
-                PostalButton(
-                  label: actionLabel!,
-                  onPressed: onAction,
-                  variant: PostalButtonVariant.secondary,
-                  expand: false,
-                  minHeight: 48,
-                ),
-              ],
-            ],
+            ),
           ),
         ),
       ),

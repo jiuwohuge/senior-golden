@@ -7,6 +7,7 @@ import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
+import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
 import cn.nine.pros.post.client.model.out.AppAuthResultVO;
@@ -115,6 +116,45 @@ public class AppAuthService {
             return null;
         }
         return toPublic(dto);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public AppPublicUserVO updateProfile(AppAuthProfilePatchInDto body) {
+        Long uid = MyRequestContextHolder.userId();
+        if (uid == null) {
+            throw new BadRequestException("未登录或登录已失效");
+        }
+        UserDTO existing = userService.findById(uid);
+        if (existing == null) {
+            throw new BadRequestException("用户不存在");
+        }
+        boolean changed = false;
+        LambdaUpdateWrapper<UserDomain> uw =
+                new LambdaUpdateWrapper<UserDomain>().eq(UserDomain::getId, uid);
+        if (body.getNickname() != null) {
+            String n = body.getNickname().trim();
+            if (n.isEmpty()) {
+                throw new BadRequestException("昵称不能为空");
+            }
+            uw.set(UserDomain::getNickname, n);
+            changed = true;
+        }
+        if (body.getCountryCode() != null) {
+            String c = body.getCountryCode().trim();
+            uw.set(UserDomain::getCountryCode, c.isEmpty() ? null : c);
+            changed = true;
+        }
+        if (body.getBio() != null) {
+            uw.set(UserDomain::getBio, body.getBio().trim());
+            changed = true;
+        }
+        if (!changed) {
+            throw new BadRequestException("请至少提交一项可更新字段");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        uw.set(UserDomain::getUpdatedAt, now).set(UserDomain::getUpdatedBy, uid);
+        userService.update(uw);
+        return toPublic(userService.findById(uid));
     }
 
     private static Integer convertStatus(Object status) {

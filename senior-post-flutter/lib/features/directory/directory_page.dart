@@ -2,21 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'directory_filter_sheet.dart';
+import 'directory_remote.dart';
 
 final directoryFilterProvider =
     StateProvider<DirectoryFilter>((ref) => const DirectoryFilter());
 
 final directoryUsersProvider = FutureProvider<List<MockUser>>((ref) async {
   final filter = ref.watch(directoryFilterProvider);
-  return ref.read(mockDirectoryRepositoryProvider).list(
+  if (AppEnv.useMock) {
+    return ref.read(mockDirectoryRepositoryProvider).list(
+          countryCode: filter.countryCode,
+          minAge: filter.minAge,
+          maxAge: filter.maxAge,
+          interests: filter.interests,
+        );
+  }
+  return ref.read(directoryRemoteProvider).pageUsers(
+        page: 1,
+        size: 60,
         countryCode: filter.countryCode,
         minAge: filter.minAge,
         maxAge: filter.maxAge,
-        interests: filter.interests,
+        interestNames: filter.interests.toList(),
       );
 });
 

@@ -22,3 +22,27 @@
 
 - **动作**：`POST /api/mailbox/letters/send`（`AppSendLetterInDto`）；平邮 `status=1` + 随机预计 10–120 分钟；挂号非 VIP 扣 1 邮票 CAS 更新 + 流水；挂号 VIP `sendMode=3` 不扣票；`mvn -pl server -am compile -DskipTests` 通过。
 - **下一步建议**：Flutter `send_letter_sheet` 接该接口；后端 **FP-A5d** 平邮到期自动变已送达仍待做。
+
+## 2026-05-02 — 邮票流水 Flutter + 计划文档对齐
+
+- **动作**：新增 `stamps_remote.dart`；`stamps_ledger_provider` 在 `USE_MOCK=false` 时调 `POST /api/stamps/ledger/paging`；更新 `doc/plan/01-feature-list.md`（A1/A3/A4/A5/A6）、`PLAN.md` 功能清单与改动预测、`05-task-tracker.md`（FP-A3-001~004、FP-A4-001、FP-A6-002-Fl、Sprint2 若干 DONE；`FP-A5-001` 重复行改为 `FP-A5-002`）。
+- **验证**：`dart analyze`。
+- **下一步建议**：FP-A3-005 举报、FP-A5-005 加速 API，或 FP-A6-004 压测单测。
+
+## 2026-05-02 — FP-A2-001：资料 PATCH + 个人中心拉 me
+
+- **动作**：后端 `AppAuthProfilePatchInDto`、`PATCH /api/auth/profile`；`AppAuthService.updateProfile`；Flutter `AuthRepository.refreshSessionFromServer` / `updateProfileOnServer`、`mockSessionProvider.applyFromPublicUserVo`；登录/注册响应 `user` 写会话；`profile_edit_page` / `profile_page` 非 Mock 联调；`doc/plan/01`、`05` 与 `progress` 更新。
+- **验证**：`mvn -pl server -am compile -DskipTests`、`dart analyze` 已通过。
+- **下一步建议**：兴趣标签写回（FP-A2-003）或邮票流水页接 `ledger/paging`。
+
+## 2026-05-02 — Flutter 信箱 × 邮票 REST 接线
+
+- **动作**：新增 `mailbox_remote.dart`（postal/archive/letters/send/accept/friendship、stamps balance）；`mailbox_providers`、`mailbox_archive`、`letter_detail`、`mailbox_page`、`send_letter_sheet` 在 `USE_MOCK=false` 时走 `dio`；后端补 `GET /api/mailbox/letters/{id}`、`GET .../friendship-active`，`MailboxLetterItemVO.content` 详情用。
+- **验证**：`dart analyze`（上述目录）无告警。
+- **下一步建议**：Post Wall / Directory 真接口；平邮 **FP-A5d** Worker；Flutter **Speed Up** 接后端。
+
+## 2026-05-06 — FP-A5-005：平邮加速 API + Flutter
+
+- **动作**：`POST /api/mailbox/letters/{letterId}/speed-up`（仅发件人、平邮运输中、VIP 免扣、非 VIP CAS 扣 1 票 + `log_stamp_transaction`）；`mailbox_remote.speedUp`、`speed_up_sheet` 非 Mock 分支、`letter_detail` 对本人平邮运输中展示 Speed Up（去 Mock 专属门闸）。
+- **验证**：`mvn -pl server -am compile -DskipTests`；`dart analyze`（上述 mailbox 三文件）无告警。
+- **下一步建议**：**FP-A5d-002** 平邮到期自动送达 Worker，或 **FP-A3-005** 举报。

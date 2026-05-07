@@ -50,6 +50,24 @@ public class AppMailboxController implements AppMailboxApi {
         return appMailboxService.sendLetter(uid, body);
     }
 
+    @Override
+    public MailboxLetterItemVO getLetter(Long letterId) {
+        Long uid = requireUserId();
+        return appMailboxService.getLetter(uid, letterId);
+    }
+
+    @Override
+    public boolean isFriendshipActive(Long peerUserId) {
+        Long uid = requireUserId();
+        return appMailboxService.isFriendshipActive(uid, peerUserId);
+    }
+
+    @Override
+    public MailboxLetterItemVO speedUpLetter(Long letterId) {
+        Long uid = requireUserId();
+        return appMailboxService.speedUpLetter(uid, letterId);
+    }
+
     private static Long requireUserId() {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {

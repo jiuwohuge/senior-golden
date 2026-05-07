@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
+import 'stamps_remote.dart';
 
 final stampsLedgerProvider = FutureProvider<List<MockStampLedgerEntry>>((ref) async {
-  return ref.read(mockStampsRepositoryProvider).list();
+  if (AppEnv.useMock) {
+    return ref.read(mockStampsRepositoryProvider).list();
+  }
+  return ref.read(stampsRemoteProvider).ledgerPage();
 });
 
 class StampsLedgerPage extends ConsumerWidget {

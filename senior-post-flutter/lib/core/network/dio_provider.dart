@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/api_exception.dart';
@@ -9,6 +10,9 @@ import '../auth/auth_token.dart';
 import '../config/api_base_url.dart';
 import '../device/device_ids.dart';
 import 'router_refresh.dart';
+
+/// 是否打印 Dio 请求/响应（默认：debug 模式开启；Release 可加 `--dart-define=API_LOG=true`）。
+const bool _kApiVerboseLog = bool.fromEnvironment('API_LOG', defaultValue: false);
 
 /// 业务 HTTP 客户端。真机勿依赖默认 127.0.0.1，见 [kApiBaseUrl]。
 final dioProvider = Provider<Dio>((ref) {
@@ -84,6 +88,19 @@ final dioProvider = Provider<Dio>((ref) {
       },
     ),
   );
+
+  if (kDebugMode || _kApiVerboseLog) {
+    dio.interceptors.add(
+      LogInterceptor(
+        requestHeader: true,
+        requestBody: true,
+        responseHeader: false,
+        responseBody: true,
+        error: true,
+        logPrint: (o) => debugPrint('[DIO] $o'),
+      ),
+    );
+  }
 
   return dio;
 });

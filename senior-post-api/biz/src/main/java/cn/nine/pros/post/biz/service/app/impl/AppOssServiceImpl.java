@@ -64,8 +64,9 @@ public class AppOssServiceImpl implements AppOssService {
         req.setExpiration(expiration);
         req.setContentType(resolvedCt);
 
+        String endpoint = withHttpsScheme(ossProperties.getEndpoint().trim());
         OSS ossClient = new OSSClientBuilder().build(
-                ossProperties.getEndpoint().trim(),
+                endpoint,
                 ossProperties.getAccessKeyId().trim(),
                 ossProperties.getAccessKeySecret().trim());
         try {
@@ -73,7 +74,8 @@ public class AppOssServiceImpl implements AppOssService {
             long expireMs = expiration.getTime();
             String readUrl = null;
             if (StringUtils.hasText(ossProperties.getPublicReadBaseUrl())) {
-                String base = ossProperties.getPublicReadBaseUrl().replaceAll("/+$", "");
+                String base = withHttpsScheme(ossProperties.getPublicReadBaseUrl().trim())
+                        .replaceAll("/+$", "");
                 readUrl = base + "/" + objectKey;
             }
             return OssPutSignResultVO.builder()
@@ -86,5 +88,17 @@ public class AppOssServiceImpl implements AppOssService {
         } finally {
             ossClient.shutdown();
         }
+    }
+
+    /** 允许配置为 host 无 scheme（如 oss-ap-southeast-1.aliyuncs.com），SDK 需要 https。 */
+    private static String withHttpsScheme(String hostOrUrl) {
+        if (!StringUtils.hasText(hostOrUrl)) {
+            return hostOrUrl;
+        }
+        String s = hostOrUrl.trim();
+        if (s.startsWith("http://") || s.startsWith("https://")) {
+            return s;
+        }
+        return "https://" + s;
     }
 }

@@ -1,5 +1,6 @@
 package cn.nine.pros.post.biz.controller.admin;
 
+import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.model.domain.PostcardCommentDomain;
@@ -31,6 +32,15 @@ public class AdminContentController implements AdminContentApi {
     private final PostcardMapstruct postcardMapstruct;
     private final PostcardCommentService postcardCommentService;
     private final PostcardCommentMapstruct postcardCommentMapstruct;
+
+    @Override
+    public PostcardDTO getPostcard(Long id) {
+        PostcardDomain row = postcardService.getById(id);
+        if (row == null || row.isDelFlag()) {
+            throw new BadRequestException("明信片不存在");
+        }
+        return postcardMapstruct.toDTO(row);
+    }
 
     @Override
     public PageData<PostcardDTO> pagingPostcards(PostcardQueryInDto body) {

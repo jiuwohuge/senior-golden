@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
+import '../../core/env/app_env.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
+import 'mailbox_remote.dart';
 
 class SpeedUpSheet extends ConsumerStatefulWidget {
   const SpeedUpSheet({super.key, required this.letterId});
@@ -19,22 +21,27 @@ class _SpeedUpSheetState extends ConsumerState<SpeedUpSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final session = ref.watch(mockSessionProvider);
+    final stampHeader = ref.watch(mailboxStampHeaderProvider);
+    final balance = stampHeader.valueOrNull?.balance ?? 0;
+    final cap = stampHeader.valueOrNull?.cap ?? 3;
+    final isVip = stampHeader.valueOrNull?.isVip ?? false;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const PostalSectionTitle(
+            PostalSectionTitle(
               title: 'Speed Up Delivery',
-              subtitle: 'Consume 1 stamp to deliver immediately',
+              subtitle: isVip
+                  ? 'VIP: deliver immediately at no stamp cost'
+                  : 'Consume 1 stamp to deliver immediately',
             ),
             const SizedBox(height: 10),
             PostalStampBadge(
-              balance: session.stampBalance,
-              cap: session.dailyStampCap,
-              isVip: session.isVip,
+              balance: balance,
+              cap: cap,
+              isVip: isVip,
             ),
             const SizedBox(height: 12),
             PostalButton(
@@ -45,15 +52,24 @@ class _SpeedUpSheetState extends ConsumerState<SpeedUpSheet> {
                   : () async {
                       setState(() => _busy = true);
                       try {
-                        await ref
-                            .read(mockMailboxRepositoryProvider)
-                            .speedUp(widget.letterId);
+                        if (AppEnv.useMock) {
+                          await ref
+                              .read(mockMailboxRepositoryProvider)
+                              .speedUp(widget.letterId);
+                        } else {
+                          await ref
+                              .read(mailboxRemoteRepositoryProvider)
+                              .speedUp(widget.letterId);
+                        }
                         if (!context.mounted) return;
                         ref.invalidate(mailboxLettersProvider);
                         ref.invalidate(postalInboxLettersProvider);
+                        ref.invalidate(stampBalanceHeaderProvider);
                         PostalSnack.show(
                           context,
-                          'Mock: delivery completed',
+                          AppEnv.useMock
+                              ? 'Mock: delivery completed'
+                              : 'Delivery completed',
                           tone: PostalSnackTone.success,
                         );
                         if (context.mounted) Navigator.of(context).pop();

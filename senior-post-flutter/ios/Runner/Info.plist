@@ -50,5 +50,9 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>用于选择明信片配图并上传到对象存储。</string>
+	<key>NSCameraUsageDescription</key>
+	<string>用于拍摄明信片配图（可选）。</string>
 </dict>
 </plist>

@@ -10,7 +10,7 @@
 
 | FP ID | 功能点 | 后端 | Flutter | 备注 |
 |-------|--------|------|---------|------|
-| FP-A1-001 | 邮箱注册 / 登录 / `me` | 已有 `/api/auth/*` | `USE_MOCK=false` 时已有 `dio` 路径 | |
+| FP-A1-001 | 邮箱注册 / 登录 / `me` / 资料 PATCH | 已有 `/api/auth/*`（含 `PATCH /api/auth/profile`） | `USE_MOCK=false` 时已有 `dio` 路径；编辑资料写回 | |
 | FP-A1-002 | Bootstrap（年龄门槛、国家列表） | 已有 `/api/bootstrap/init` | 已有 `appBootstrapProvider` | |
 | FP-A1-003 | 忘记密码 / 重置密码 | **缺**（`AppAuthController` 仅 register/login/me） | 页面存在，依赖后端契约 | 需 `client` 契约 + Service + 邮件 |
 | FP-A1-004 | 密码强度 / 重试限制 / 风控 | 缺产品细则与实现 | 部分 UI | |
@@ -24,10 +24,10 @@
 
 | FP ID | 功能点 | 后端 | Flutter | 备注 |
 |-------|--------|------|---------|------|
-| FP-A2-001 | 资料更新（昵称、国家、简介、兴趣） | **缺** App 专用写接口 | `profile_edit` 仅 Mock | 可扩展 `PATCH /api/auth/me` 或独立 `profile` |
+| FP-A2-001 | 资料更新（昵称、国家、简介、兴趣） | **已有** `PATCH /api/auth/profile`（兴趣仍仅 Mock） | `USE_MOCK=false` 时编辑页走接口 | 兴趣写回待用户画像 API |
 | FP-A2-002 | 头像上传 | **缺** OSS 签名 + 更新头像 URL | 字母占位头像 | 依赖 FP-X-OSS |
 | FP-A2-003 | 兴趣标签 ≥3 校验（注册/编辑） | 缺或与注册 DTO 合并 | 部分 UI | |
-| FP-A2-004 | 个人中心展示与 `me` 一致 | 已有 `me` | Profile 主数据仍 Mock | 需接 `me` + 编辑回写 |
+| FP-A2-004 | 个人中心展示与 `me` 一致 | 已有 `GET /api/auth/me` | 非 Mock 进入 Tab 拉取 `me`；登录/注册写回 `user` | 冷启动仅 token 时依赖首次进 Profile 拉取 |
 
 ---
 
@@ -35,14 +35,14 @@
 
 | FP ID | 功能点 | 后端 | Flutter | Manage |
 |-------|--------|------|---------|--------|
-| FP-A3-001 | App 明信片分页列表（仅已通过审核） | **缺** App Controller | Mock | 审核已有 `/webapi/content/postcard/*` |
-| FP-A3-002 | App 明信片详情 | **缺** | Mock | — |
-| FP-A3-003 | App 发布明信片（文+图） | **缺** | Mock，图「待 OSS」 | 审核流依赖 `review_status` |
-| FP-A3-004 | App 评论列表与发表 | **缺** | Mock | 审核已有 comment API |
+| FP-A3-001 | App 明信片分页列表（仅已通过审核） | **已有** `POST /api/postcards/paging`（`review_status=1`） | **非 Mock** `post_wall_remote` + Tab1 | 审核已有 `/webapi/content/postcard/*` |
+| FP-A3-002 | App 明信片详情 | **已有** `GET /api/postcards/{id}`（未审仅作者可见） | **非 Mock** `post_detail_page` | — |
+| FP-A3-003 | App 发布明信片（文+图） | **已有** `POST /api/postcards` | **非 Mock** `post_compose_page`；图走 `oss_upload_service` + `put-sign` | 审核流依赖 `review_status` |
+| FP-A3-004 | App 评论列表与发表 | **已有** `.../comments/paging`、`POST .../comments` | **非 Mock** 详情页评论 | 审核已有 comment API |
 | FP-A3-005 | App 举报提交 | **缺** | 无入口 | 处理已有 `/webapi/report/*` |
-| FP-A3-006 | OSS 直传签名 | **缺** | — | — |
+| FP-A3-006 | OSS 直传签名 | **已有** `GET /api/oss/put-sign` | **部分** 发帖配图上传 | — |
 | FP-A3-007 | 敏感词拦截（发帖/评论） | 部分（Admin 词库） | 缺 | 词库 CRUD 已有 |
-| FP-A3-008 | 审核中 / 仅作者可见等状态展示 | 缺 App 契约字段约定 | 缺 | — |
+| FP-A3-008 | 审核中 / 仅作者可见等状态展示 | **部分**（详情对作者返回未审帖） | **部分**（未审 UI 提示可加强） | — |
 
 ---
 
@@ -50,11 +50,11 @@
 
 | FP ID | 功能点 | 后端 | Flutter |
 |-------|--------|------|---------|
-| FP-A4-001 | 名录分页与用户公开字段 | **缺** App API | Mock 列表 |
-| FP-A4-002 | 筛选（国家、年龄、兴趣） | **缺** | 有筛选 UI |
-| FP-A4-003 | 排序（同龄、同兴趣） | **缺** 由后端实现 | 未见排序 UI |
-| FP-A4-004 | 用户卡 / 详情页数据源 | **缺** | UI 有 |
-| FP-A4-005 | Send Letter 入口与写信联动 | 缺发信 API | Mock 发信 |
+| FP-A4-001 | 名录分页与用户公开字段 | **已有** `POST /api/directory/users/paging` | **非 Mock** `directory_remote` + 列表 |
+| FP-A4-002 | 筛选（国家、年龄、兴趣） | **已有**（`interestNames` EXISTS） | **非 Mock** 筛选参数下发 |
+| FP-A4-003 | 排序（同龄、同兴趣） | **缺** 专用排序策略 | 未见排序 UI |
+| FP-A4-004 | 用户卡 / 详情页数据源 | **部分**（名录 VO 可支撑卡；无单独「用户公开页」） | UI 有 |
+| FP-A4-005 | Send Letter 入口与写信联动 | **已有** `POST /api/mailbox/letters/send` | **非 Mock** `send_letter_sheet` |
 
 ---
 
@@ -62,11 +62,11 @@
 
 | FP ID | 功能点 | 后端 | Flutter |
 |-------|--------|------|---------|
-| FP-A5-001 | 发信（挂号/平邮）写库 + 业务校验 | **已有** `POST /api/mailbox/letters/send` | `send_letter_sheet` → Mock（待 Flutter 接线） |
-| FP-A5-002 | 邮政收件箱 / 同步 / 归档 | **已有** `GET /api/mailbox/postal|sync|archive` | **缺** 接真实 DTO |
-| FP-A5-003 | 建联 Accept | **已有** `POST .../accept-postal` | Mock 路径 |
-| FP-A5-004 | 信件详情（单封） | 部分（列表项含预览） | 路由 `/letter/:id` Mock |
-| FP-A5-005 | 平邮加速（扣邮票） | **缺** HTTP | Mock `speed_up_sheet` |
+| FP-A5-001 | 发信（挂号/平邮）写库 + 业务校验 | **已有** `POST /api/mailbox/letters/send` | **`USE_MOCK=false` 已接** `send_letter_sheet` + `mailbox_remote` |
+| FP-A5-002 | 邮政收件箱 / 同步 / 归档 | **已有** `GET /api/mailbox/postal|sync|archive` | **非 Mock 已接** postal + archive（`mailbox_page` / 归档页） |
+| FP-A5-003 | 建联 Accept | **已有** `POST .../accept-postal` | **非 Mock** `mailbox_remote.acceptPostalContact` |
+| FP-A5-004 | 信件详情（单封） | **已有** `GET /api/mailbox/letters/{letterId}` | **非 Mock 已接** `letter_detail` |
+| FP-A5-005 | 平邮加速（扣邮票） | **`POST /api/mailbox/letters/{id}/speed-up`** | `mailbox_remote` + `speed_up_sheet` |
 | FP-A5-006 | IM UserSig | **已有** `/api/im/usersig` | 非 Mock 已接 |
 | FP-A5-007 | 会话列表 + 聊天页 | TIM SDK | 已有 `chat_page` |
 
@@ -87,10 +87,10 @@
 
 | FP ID | 功能点 | 后端 | Flutter |
 |-------|--------|------|---------|
-| FP-A6-001 | 余额查询 | **已有** `GET /api/stamps/balance` | Mock `stampBalance`（待 Flutter 接线） |
-| FP-A6-002 | 流水查询分页 | **已有** `POST /api/stamps/ledger/paging` | Mock `stamps_ledger`（待 Flutter 接线） |
+| FP-A6-001 | 余额查询 | **已有** `GET /api/stamps/balance` | **邮政 Tab 顶栏**非 Mock 已接 |
+| FP-A6-002 | 流水查询分页 | **已有** `POST /api/stamps/ledger/paging` | **非 Mock** `stamps_remote` + `stamps_ledger_page` |
 | FP-A6-003 | 登录赠送 / 发帖奖励 / 日上限 | 缺定时或同步任务与配置 | 缺 |
-| FP-A6-004 | 挂号消耗、加速消耗原子记账 | 缺与信件同事务 | — |
+| FP-A6-004 | 挂号消耗、加速消耗原子记账 | **部分**（发信扣票与流水已有） | — |
 | FP-A6-005 | 管理端用户流水查询 | **缺** 页面与 API | — |
 
 ---
@@ -163,8 +163,8 @@
 
 | 状态 | 数量级 |
 |------|--------|
-| 已有 / 可演示 | ~15 FP |
-| 部分 | ~12 FP |
-| 缺 | ~45 FP |
+| 已有 / 可演示 | ~22 FP |
+| 部分 | ~14 FP |
+| 缺 | ~38 FP |
 
 *精确数以实现迭代后回写本表为准。*
