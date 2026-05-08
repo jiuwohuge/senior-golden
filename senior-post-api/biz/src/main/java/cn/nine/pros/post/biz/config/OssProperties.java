@@ -27,6 +27,11 @@ public class OssProperties {
     private int putExpireSeconds = 900;
 
     /**
+     * 预签名 GET（读）有效期（秒），默认 900；与 PUT 分离便于单独调短。
+     */
+    private int getExpireSeconds = 900;
+
+    /**
      * 对象键前缀，如 app/uploads。
      */
     private String keyPrefix = "app/uploads";

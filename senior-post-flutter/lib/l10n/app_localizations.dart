@@ -344,6 +344,30 @@ abstract class AppLocalizations {
   /// **'Forgot password'**
   String get authForgotPassword;
 
+  /// No description provided for @authForgotIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll email a 6-digit code to your registered address. In local dev, check server logs if SMTP is not configured.'**
+  String get authForgotIntro;
+
+  /// No description provided for @authForgotCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get authForgotCodeHint;
+
+  /// No description provided for @authForgotResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated. You can sign in now.'**
+  String get authForgotResetSuccess;
+
+  /// No description provided for @authForgotCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code'**
+  String get authForgotCodeInvalid;
+
   /// No description provided for @authOnboardingAgain.
   ///
   /// In en, this message translates to:
@@ -499,6 +523,396 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start now'**
   String get onboardDone;
+
+  /// No description provided for @commonRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get commonRetry;
+
+  /// No description provided for @postWallUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Post wall is temporarily unavailable'**
+  String get postWallUnavailable;
+
+  /// No description provided for @postWallEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No postcards yet'**
+  String get postWallEmptyTitle;
+
+  /// No description provided for @postWallEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to share a postcard today.'**
+  String get postWallEmptySubtitle;
+
+  /// No description provided for @postWallWriteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Write postcard'**
+  String get postWallWriteAction;
+
+  /// No description provided for @postWallFAB.
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get postWallFAB;
+
+  /// No description provided for @postWallPhotosLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} photos'**
+  String postWallPhotosLabel(Object count);
+
+  /// No description provided for @postWallSendLetterTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Send letter'**
+  String get postWallSendLetterTooltip;
+
+  /// No description provided for @postWallCommentsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments {count}'**
+  String postWallCommentsCount(Object count);
+
+  /// No description provided for @postComposeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write postcard'**
+  String get postComposeTitle;
+
+  /// No description provided for @postComposeSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compose'**
+  String get postComposeSectionTitle;
+
+  /// No description provided for @postComposeSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write one postcard for today'**
+  String get postComposeSectionSubtitle;
+
+  /// No description provided for @postComposeContentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Postcard content'**
+  String get postComposeContentLabel;
+
+  /// No description provided for @postComposeContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your day, thoughts, or greetings…'**
+  String get postComposeContentHint;
+
+  /// No description provided for @postComposeMaxImages.
+  ///
+  /// In en, this message translates to:
+  /// **'At most {max} images'**
+  String postComposeMaxImages(Object max);
+
+  /// No description provided for @postComposeUploadNeedRealApi.
+  ///
+  /// In en, this message translates to:
+  /// **'OSS upload requires Mock off: flutter run --dart-define=USE_MOCK=false …'**
+  String get postComposeUploadNeedRealApi;
+
+  /// No description provided for @postComposePickerChannelError.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery channel not connected. Fully stop the app and run again; if it persists run flutter clean.'**
+  String get postComposePickerChannelError;
+
+  /// No description provided for @postComposeImageUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Image uploaded'**
+  String get postComposeImageUploaded;
+
+  /// No description provided for @postComposeNeedContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Please write something first.'**
+  String get postComposeNeedContent;
+
+  /// No description provided for @postComposePublishedMock.
+  ///
+  /// In en, this message translates to:
+  /// **'Mock: postcard published (+1 stamp)'**
+  String get postComposePublishedMock;
+
+  /// No description provided for @postComposePublishedReal.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted for review. It will appear after approval.'**
+  String get postComposePublishedReal;
+
+  /// No description provided for @postComposeUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading…'**
+  String get postComposeUploading;
+
+  /// No description provided for @postComposeAddImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add image (OSS)'**
+  String get postComposeAddImage;
+
+  /// No description provided for @postComposeAddAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another ({n}/{max})'**
+  String postComposeAddAnother(Object n, Object max);
+
+  /// No description provided for @postComposePublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish now'**
+  String get postComposePublish;
+
+  /// No description provided for @directoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Post Directory'**
+  String get directoryTitle;
+
+  /// No description provided for @directorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find pen pals by country and interests'**
+  String get directorySubtitle;
+
+  /// No description provided for @directoryLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load directory'**
+  String get directoryLoadFailed;
+
+  /// No description provided for @directoryEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching members'**
+  String get directoryEmptyTitle;
+
+  /// No description provided for @directoryEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try clearing filters or changing age range.'**
+  String get directoryEmptySubtitle;
+
+  /// No description provided for @directoryAgeYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{age} years old'**
+  String directoryAgeYears(Object age);
+
+  /// No description provided for @authBirthYearSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Year of birth'**
+  String get authBirthYearSheetTitle;
+
+  /// No description provided for @authBirthYearFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{year} ({age})'**
+  String authBirthYearFormat(Object year, Object age);
+
+  /// No description provided for @authCountryAutoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Region (from app language)'**
+  String get authCountryAutoLabel;
+
+  /// No description provided for @authEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'name@example.com'**
+  String get authEmailHint;
+
+  /// No description provided for @profileEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get profileEditTitle;
+
+  /// No description provided for @profileNickname.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname'**
+  String get profileNickname;
+
+  /// No description provided for @profileCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get profileCountry;
+
+  /// No description provided for @profileBio.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get profileBio;
+
+  /// No description provided for @profileSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get profileSave;
+
+  /// No description provided for @profileMockUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Mock: profile updated'**
+  String get profileMockUpdated;
+
+  /// No description provided for @profileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile saved'**
+  String get profileSaved;
+
+  /// No description provided for @profileAvatarChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change profile photo'**
+  String get profileAvatarChange;
+
+  /// No description provided for @profileAvatarCropTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop photo'**
+  String get profileAvatarCropTitle;
+
+  /// No description provided for @profileAvatarCropDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get profileAvatarCropDone;
+
+  /// No description provided for @profileAvatarUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading photo…'**
+  String get profileAvatarUploading;
+
+  /// No description provided for @profileEditProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get profileEditProfile;
+
+  /// No description provided for @profileInterestTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest tags'**
+  String get profileInterestTags;
+
+  /// No description provided for @profileStampsLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamps ledger'**
+  String get profileStampsLedger;
+
+  /// No description provided for @profileVipCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'VIP center'**
+  String get profileVipCenter;
+
+  /// No description provided for @profileSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get profileSettings;
+
+  /// No description provided for @profileAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get profileAbout;
+
+  /// No description provided for @profileUserAgreement.
+  ///
+  /// In en, this message translates to:
+  /// **'User Agreement'**
+  String get profileUserAgreement;
+
+  /// No description provided for @profilePrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get profilePrivacyPolicy;
+
+  /// No description provided for @profileLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get profileLogout;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsPushNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Push notifications'**
+  String get settingsPushNotifications;
+
+  /// No description provided for @settingsUnreadBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'Show unread badges'**
+  String get settingsUnreadBadges;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsLanguageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'English / 中文 / System'**
+  String get settingsLanguageSubtitle;
+
+  /// No description provided for @settingsLanguageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get settingsLanguageEnglish;
+
+  /// No description provided for @settingsLanguageChinese.
+  ///
+  /// In en, this message translates to:
+  /// **'中文'**
+  String get settingsLanguageChinese;
+
+  /// No description provided for @settingsLanguageSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow system'**
+  String get settingsLanguageSystem;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get settingsDeleteAccount;
 
   /// No description provided for @legalEffectiveDate.
   ///

@@ -11,6 +11,8 @@ export const api = {
 
   postcards: (params: any) => request.post('/webapi/content/postcard/paging', params),
   postcardDetail: (id: number) => request.get(`/webapi/content/postcard/${id}`),
+  /** 私有桶看图：列表/详情已服务端换签；此接口供扩展场景批量换签 */
+  ossGetSign: (body: { objectKeys: string[] }) => request.post('/webapi/oss/get-sign', body),
   comments: (params: any) => request.post('/webapi/content/comment/paging', params),
   approvePostcard: (id: number) => request.post(`/webapi/content/postcard/${id}/approve`),
   rejectPostcard: (id: number, reason: string) => request.post(`/webapi/content/postcard/${id}/reject`, { reason }),

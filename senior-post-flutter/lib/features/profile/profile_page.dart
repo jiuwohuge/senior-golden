@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../core/auth/auth_token.dart';
 import '../../core/env/app_env.dart';
@@ -33,6 +34,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final session = ref.watch(mockSessionProvider);
     final user = session.user;
     return SafeArea(
@@ -43,7 +45,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           PostalCardEnvelope(
             child: Column(
               children: [
-                PostalAvatar(name: user.nickname, size: 80),
+                PostalAvatar(name: user.nickname, size: 80, imageUrl: user.avatarUrl),
                 const SizedBox(height: 10),
                 Text(
                   user.nickname,
@@ -77,42 +79,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               children: [
                 _ProfileItem(
                   icon: Icons.edit_note,
-                  title: 'Edit Profile',
+                  title: l10n.profileEditProfile,
                   onTap: () => context.push('/profile/edit'),
                 ),
                 _ProfileItem(
                   icon: Icons.interests_outlined,
-                  title: 'Interest tags',
+                  title: l10n.profileInterestTags,
                   onTap: () => context.push('/profile/interests'),
                 ),
                 _ProfileItem(
                   icon: Icons.receipt_long_outlined,
-                  title: 'Stamps ledger',
+                  title: l10n.profileStampsLedger,
                   onTap: () => context.push('/profile/stamps'),
                 ),
                 _ProfileItem(
                   icon: Icons.workspace_premium_outlined,
-                  title: 'VIP center',
+                  title: l10n.profileVipCenter,
                   onTap: () => context.push('/profile/vip'),
                 ),
                 _ProfileItem(
                   icon: Icons.settings_outlined,
-                  title: 'Settings',
+                  title: l10n.profileSettings,
                   onTap: () => context.push('/settings'),
                 ),
                 _ProfileItem(
                   icon: Icons.info_outline,
-                  title: 'About',
+                  title: l10n.profileAbout,
                   onTap: () => context.push('/about'),
                 ),
                 _ProfileItem(
                   icon: Icons.policy_outlined,
-                  title: 'User Agreement',
+                  title: l10n.profileUserAgreement,
                   onTap: () => context.push(LoginRoutes.legalTerms),
                 ),
                 _ProfileItem(
                   icon: Icons.privacy_tip_outlined,
-                  title: 'Privacy Policy',
+                  title: l10n.profilePrivacyPolicy,
                   onTap: () => context.push(LoginRoutes.legalPrivacy),
                 ),
               ],
@@ -120,7 +122,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
           const SizedBox(height: 14),
           PostalButton(
-            label: 'Logout',
+            label: l10n.profileLogout,
             variant: PostalButtonVariant.secondary,
             onPressed: () async {
               await ref.read(authRepositoryProvider).logout();

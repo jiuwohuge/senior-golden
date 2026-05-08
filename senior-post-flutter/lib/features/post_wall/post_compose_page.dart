@@ -3,15 +3,26 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../core/api/api_exception.dart';
 import '../../core/env/app_env.dart';
 import '../../core/mock/mock_repository.dart';
-import 'post_providers.dart';
-import 'post_wall_remote.dart';
 import '../../core/oss/oss_upload_service.dart';
 import '../../widgets/postal/postal.dart';
 import '../shell/main_shell.dart';
+import 'post_providers.dart';
+import 'post_wall_remote.dart';
+
+class _PickedImage {
+  _PickedImage({required this.backendRef, required this.previewBytes});
+
+  /// 提交给后端的 objectKey 或可读 URL。
+  final String backendRef;
+
+  /// 本地预览（私有桶下 [backendRef] 可能无法被 Image.network 读取）。
+  final Uint8List previewBytes;
+}
 
 class PostComposePage extends ConsumerStatefulWidget {
   const PostComposePage({super.key});
@@ -26,7 +37,7 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
   final _content = TextEditingController();
   bool _busy = false;
   bool _uploadBusy = false;
-  final List<String> _imageUrls = <String>[];
+  final List<_PickedImage> _images = <_PickedImage>[];
 
   @override
   void dispose() {
@@ -52,15 +63,20 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
   }
 
   Future<void> _pickAndUploadImage() async {
-    if (_imageUrls.length >= _maxImages) {
-      PostalSnack.show(context, '最多 $_maxImages 张配图', tone: PostalSnackTone.warning);
+    final l10n = AppLocalizations.of(context)!;
+    if (_images.length >= _maxImages) {
+      PostalSnack.show(
+        context,
+        l10n.postComposeMaxImages('$_maxImages'),
+        tone: PostalSnackTone.warning,
+      );
       return;
     }
     if (AppEnv.useMock) {
       if (!mounted) return;
       PostalSnack.show(
         context,
-        'OSS 上传需关闭 Mock：flutter run --dart-define=USE_MOCK=false ...',
+        l10n.postComposeUploadNeedRealApi,
         tone: PostalSnackTone.info,
       );
       return;
@@ -79,7 +95,7 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
       if (e.code == 'channel-error') {
         PostalSnack.show(
           context,
-          '相册插件通道未连接。请完全停止应用后重新运行；仍失败请执行 flutter clean 再构建。',
+          l10n.postComposePickerChannelError,
           tone: PostalSnackTone.error,
         );
       } else {
@@ -105,8 +121,8 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
             contentType: ct,
           );
       if (!mounted) return;
-      setState(() => _imageUrls.add(url));
-      PostalSnack.show(context, 'Image uploaded', tone: PostalSnackTone.success);
+      setState(() => _images.add(_PickedImage(backendRef: url, previewBytes: bytes)));
+      PostalSnack.show(context, l10n.postComposeImageUploaded, tone: PostalSnackTone.success);
     } on ApiBusinessException catch (e) {
       if (mounted) {
         PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
@@ -117,30 +133,30 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
   }
 
   Future<void> _publish() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_content.text.trim().isEmpty) {
-      PostalSnack.show(context, 'Please write something first.', tone: PostalSnackTone.warning);
+      PostalSnack.show(context, l10n.postComposeNeedContent, tone: PostalSnackTone.warning);
       return;
     }
     setState(() => _busy = true);
     try {
+      final refs = _images.map((e) => e.backendRef).toList();
       if (AppEnv.useMock) {
         await ref.read(mockPostsRepositoryProvider).publish(
               _content.text.trim(),
-              imageUrls: _imageUrls.isEmpty ? null : List<String>.from(_imageUrls),
+              imageUrls: refs.isEmpty ? null : refs,
             );
       } else {
         await ref.read(postWallRemoteProvider).createPost(
               content: _content.text.trim(),
-              imageUrls: _imageUrls.isEmpty ? null : List<String>.from(_imageUrls),
+              imageUrls: refs.isEmpty ? null : refs,
             );
       }
       ref.invalidate(postWallListProvider);
       if (!mounted) return;
       PostalSnack.show(
         context,
-        AppEnv.useMock
-            ? 'Mock: postcard published (+1 stamp)'
-            : '已提交审核，审核通过后将出现在明信片墙',
+        AppEnv.useMock ? l10n.postComposePublishedMock : l10n.postComposePublishedReal,
         tone: PostalSnackTone.success,
       );
       context.go(MainShellRoute.pathPostWall);
@@ -153,39 +169,40 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Write postcard')),
+      appBar: AppBar(title: Text(l10n.postComposeTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
           children: [
             PostalCardEnvelope(
-              header: const PostalSectionTitle(
-                title: 'Compose',
-                subtitle: 'Write one postcard for today',
+              header: PostalSectionTitle(
+                title: l10n.postComposeSectionTitle,
+                subtitle: l10n.postComposeSectionSubtitle,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   PostalTextField(
                     controller: _content,
-                    label: 'Postcard content',
-                    hint: 'Write your day, thoughts, or greetings...',
+                    label: l10n.postComposeContentLabel,
+                    hint: l10n.postComposeContentHint,
                     maxLines: 8,
                     minLines: 6,
                     maxLength: 2000,
                     showClearButton: false,
                   ),
                   const SizedBox(height: 12),
-                  if (_imageUrls.isNotEmpty) ...[
+                  if (_images.isNotEmpty) ...[
                     SizedBox(
                       height: 108,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: _imageUrls.length,
+                        itemCount: _images.length,
                         separatorBuilder: (_, _) => const SizedBox(width: 10),
                         itemBuilder: (_, i) {
-                          final u = _imageUrls[i];
+                          final item = _images[i];
                           return Stack(
                             clipBehavior: Clip.none,
                             children: [
@@ -194,13 +211,9 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
                                 child: SizedBox(
                                   width: 140,
                                   height: 100,
-                                  child: Image.network(
-                                    u,
+                                  child: Image.memory(
+                                    item.previewBytes,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => const ColoredBox(
-                                      color: Color(0xFFE8E4DC),
-                                      child: Center(child: Icon(Icons.broken_image_outlined)),
-                                    ),
                                   ),
                                 ),
                               ),
@@ -217,7 +230,7 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
                                     icon: const Icon(Icons.close, color: Colors.white, size: 18),
                                     onPressed: _busy || _uploadBusy
                                         ? null
-                                        : () => setState(() => _imageUrls.removeAt(i)),
+                                        : () => setState(() => _images.removeAt(i)),
                                   ),
                                 ),
                               ),
@@ -230,11 +243,11 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
                   ],
                   PostalButton(
                     label: _uploadBusy
-                        ? 'Uploading…'
-                        : (_imageUrls.isEmpty
-                            ? 'Add image (OSS)'
-                            : 'Add another (${_imageUrls.length}/$_maxImages)'),
-                    onPressed: (_busy || _uploadBusy || _imageUrls.length >= _maxImages)
+                        ? l10n.postComposeUploading
+                        : (_images.isEmpty
+                            ? l10n.postComposeAddImage
+                            : l10n.postComposeAddAnother('${_images.length}', '$_maxImages')),
+                    onPressed: (_busy || _uploadBusy || _images.length >= _maxImages)
                         ? null
                         : _pickAndUploadImage,
                     busy: _uploadBusy,
@@ -242,7 +255,7 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
                   ),
                   const SizedBox(height: 14),
                   PostalButton(
-                    label: 'Publish now',
+                    label: l10n.postComposePublish,
                     onPressed: _busy ? null : _publish,
                     busy: _busy,
                   ),

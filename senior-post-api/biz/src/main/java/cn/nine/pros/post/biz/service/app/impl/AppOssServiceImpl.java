@@ -3,6 +3,11 @@ package cn.nine.pros.post.biz.service.app.impl;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.OssProperties;
 import cn.nine.pros.post.biz.service.app.AppOssService;
+import cn.nine.pros.post.biz.service.app.support.OssGetPresigner;
+import cn.nine.pros.post.biz.service.app.support.OssObjectKeyResolver;
+import cn.nine.pros.post.biz.service.base.OssReadAuthorizationService;
+import cn.nine.pros.post.client.model.out.OssGetSignBatchResultVO;
+import cn.nine.pros.post.client.model.out.OssGetSignItemVO;
 import cn.nine.pros.post.client.model.out.OssPutSignResultVO;
 import com.aliyun.oss.HttpMethod;
 import com.aliyun.oss.OSS;
@@ -14,8 +19,11 @@ import org.springframework.util.StringUtils;
 
 import java.net.URL;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,15 +35,13 @@ public class AppOssServiceImpl implements AppOssService {
     private static final Set<String> ALLOWED_SCENE = Set.of("postcard", "avatar", "letter");
 
     private final OssProperties ossProperties;
+    private final OssObjectKeyResolver objectKeyResolver;
+    private final OssReadAuthorizationService readAuthorizationService;
+    private final OssGetPresigner ossGetPresigner;
 
     @Override
     public OssPutSignResultVO signPut(long userId, String scene, String ext, String contentType) {
-        if (!StringUtils.hasText(ossProperties.getEndpoint())
-                || !StringUtils.hasText(ossProperties.getAccessKeyId())
-                || !StringUtils.hasText(ossProperties.getAccessKeySecret())
-                || !StringUtils.hasText(ossProperties.getBucketName())) {
-            throw new BadRequestException("未配置 OSS（senior-post.oss.endpoint/accessKeyId/accessKeySecret/bucketName）");
-        }
+        ensureOssConfigured();
         if (!StringUtils.hasText(scene) || !ALLOWED_SCENE.contains(scene.toLowerCase(Locale.ROOT))) {
             throw new BadRequestException("scene 须为 postcard、avatar 或 letter");
         }
@@ -64,11 +70,7 @@ public class AppOssServiceImpl implements AppOssService {
         req.setExpiration(expiration);
         req.setContentType(resolvedCt);
 
-        String endpoint = withHttpsScheme(ossProperties.getEndpoint().trim());
-        OSS ossClient = new OSSClientBuilder().build(
-                endpoint,
-                ossProperties.getAccessKeyId().trim(),
-                ossProperties.getAccessKeySecret().trim());
+        OSS ossClient = buildOssClient();
         try {
             URL signed = ossClient.generatePresignedUrl(req);
             long expireMs = expiration.getTime();
@@ -88,6 +90,56 @@ public class AppOssServiceImpl implements AppOssService {
         } finally {
             ossClient.shutdown();
         }
+    }
+
+    @Override
+    public OssGetSignBatchResultVO signGetBatch(long userId, List<String> objectKeys) {
+        Objects.requireNonNull(userId, "userId");
+        ensureOssConfigured();
+        if (objectKeys == null || objectKeys.isEmpty()) {
+            throw new BadRequestException("objectKeys 不能为空");
+        }
+        List<String> normalizedKeys = new ArrayList<>(objectKeys.size());
+        for (String raw : objectKeys) {
+            String normalized = objectKeyResolver.requireObjectKey(raw);
+            readAuthorizationService.assertAppUserCanRead(userId, normalized, raw);
+            normalizedKeys.add(normalized);
+        }
+        List<OssGetSignItemVO> items = ossGetPresigner.signGetUrls(normalizedKeys);
+        return OssGetSignBatchResultVO.builder().items(items).build();
+    }
+
+    @Override
+    public OssGetSignBatchResultVO signGetBatchStaff(List<String> objectKeys) {
+        ensureOssConfigured();
+        if (objectKeys == null || objectKeys.isEmpty()) {
+            throw new BadRequestException("objectKeys 不能为空");
+        }
+        List<String> normalizedKeys = new ArrayList<>(objectKeys.size());
+        for (String raw : objectKeys) {
+            String normalized = objectKeyResolver.requireObjectKey(raw);
+            readAuthorizationService.assertStaffCanRead(normalized);
+            normalizedKeys.add(normalized);
+        }
+        List<OssGetSignItemVO> items = ossGetPresigner.signGetUrls(normalizedKeys);
+        return OssGetSignBatchResultVO.builder().items(items).build();
+    }
+
+    private void ensureOssConfigured() {
+        if (!StringUtils.hasText(ossProperties.getEndpoint())
+                || !StringUtils.hasText(ossProperties.getAccessKeyId())
+                || !StringUtils.hasText(ossProperties.getAccessKeySecret())
+                || !StringUtils.hasText(ossProperties.getBucketName())) {
+            throw new BadRequestException("未配置 OSS（senior-post.oss.endpoint/accessKeyId/accessKeySecret/bucketName）");
+        }
+    }
+
+    private OSS buildOssClient() {
+        String endpoint = withHttpsScheme(ossProperties.getEndpoint().trim());
+        return new OSSClientBuilder().build(
+                endpoint,
+                ossProperties.getAccessKeyId().trim(),
+                ossProperties.getAccessKeySecret().trim());
     }
 
     /** 允许配置为 host 无 scheme（如 oss-ap-southeast-1.aliyuncs.com），SDK 需要 https。 */

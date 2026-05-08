@@ -22,6 +22,8 @@ dependencies:
   intl: ^0.20.2
   tencent_cloud_chat_sdk: 8.8.7373
   image_picker: ^1.1.2
+  crop_your_image: ^2.0.0
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:

@@ -7,6 +7,7 @@ import cn.nine.pros.post.biz.model.domain.PostcardCommentDomain;
 import cn.nine.pros.post.biz.model.domain.PostcardDomain;
 import cn.nine.pros.post.biz.model.mapstruct.PostcardCommentMapstruct;
 import cn.nine.pros.post.biz.model.mapstruct.PostcardMapstruct;
+import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.PostcardCommentService;
 import cn.nine.pros.post.biz.service.base.PostcardService;
 import cn.nine.pros.post.client.api.admin.AdminContentApi;
@@ -19,9 +20,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,6 +38,7 @@ public class AdminContentController implements AdminContentApi {
     private final PostcardMapstruct postcardMapstruct;
     private final PostcardCommentService postcardCommentService;
     private final PostcardCommentMapstruct postcardCommentMapstruct;
+    private final OssDisplayUrlService ossDisplayUrlService;
 
     @Override
     public PostcardDTO getPostcard(Long id) {
@@ -39,7 +46,9 @@ public class AdminContentController implements AdminContentApi {
         if (row == null || row.isDelFlag()) {
             throw new BadRequestException("明信片不存在");
         }
-        return postcardMapstruct.toDTO(row);
+        PostcardDTO dto = postcardMapstruct.toDTO(row);
+        applyStaffPostcardImages(dto);
+        return dto;
     }
 
     @Override
@@ -56,6 +65,9 @@ public class AdminContentController implements AdminContentApi {
         }
         Page<PostcardDomain> p = postcardService.page(AdminPageHelper.mpPage(pageQuery), qw);
         List<PostcardDTO> list = p.getRecords().stream().map(postcardMapstruct::toDTO).collect(Collectors.toList());
+        for (PostcardDTO dto : list) {
+            applyStaffPostcardImages(dto);
+        }
         return AdminPageHelper.pageData(pageQuery, p, list);
     }
 
@@ -106,5 +118,42 @@ public class AdminContentController implements AdminContentApi {
                 .eq(PostcardCommentDomain::getId, id)
                 .set(PostcardCommentDomain::getReviewStatus, 2)
                 .set(PostcardCommentDomain::getStatus, 2));
+    }
+
+    private void applyStaffPostcardImages(PostcardDTO dto) {
+        if (dto == null) {
+            return;
+        }
+        Set<String> refs = new LinkedHashSet<>();
+        if (dto.getImages() != null) {
+            for (String u : dto.getImages()) {
+                if (StringUtils.hasText(u)) {
+                    refs.add(u.trim());
+                }
+            }
+        }
+        if (StringUtils.hasText(dto.getMainImageUrl())) {
+            refs.add(dto.getMainImageUrl().trim());
+        }
+        if (refs.isEmpty()) {
+            return;
+        }
+        Map<String, String> m = ossDisplayUrlService.signForStaffBatch(refs);
+        if (StringUtils.hasText(dto.getMainImageUrl())) {
+            String k = dto.getMainImageUrl().trim();
+            dto.setMainImageUrl(m.getOrDefault(k, dto.getMainImageUrl()));
+        }
+        if (dto.getImages() != null) {
+            List<String> next = new ArrayList<>();
+            for (String u : dto.getImages()) {
+                if (!StringUtils.hasText(u)) {
+                    next.add(u);
+                    continue;
+                }
+                String t = u.trim();
+                next.add(m.getOrDefault(t, u));
+            }
+            dto.setImages(next);
+        }
     }
 }

@@ -22,4 +22,8 @@ public class AppAuthProfilePatchInDto {
     @Size(max = 2000)
     @Schema(description = "简介；非 null 时更新（可为空串）")
     private String bio;
+
+    @Size(max = 512)
+    @Schema(description = "头像对象存储引用（通常为 objectKey）；非 null 时更新，空串表示清空")
+    private String avatarUrl;
 }

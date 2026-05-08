@@ -17,6 +17,7 @@ class DirectoryRemoteRepository {
     int? minAge,
     int? maxAge,
     List<String> interestNames = const [],
+    String sort = 'DEFAULT',
   }) async {
     final r = await _dio.post<dynamic>(
       '/api/directory/users/paging',
@@ -26,6 +27,7 @@ class DirectoryRemoteRepository {
         if (minAge != null) 'minAge': minAge,
         if (maxAge != null) 'maxAge': maxAge,
         if (interestNames.isNotEmpty) 'interestNames': interestNames,
+        if (sort.isNotEmpty) 'sort': sort,
       },
     );
     final raw = r.data;

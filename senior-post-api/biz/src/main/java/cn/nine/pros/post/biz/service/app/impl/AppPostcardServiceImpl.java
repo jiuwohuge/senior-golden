@@ -7,8 +7,10 @@ import cn.nine.pros.post.biz.controller.app.AppPageHelper;
 import cn.nine.pros.post.biz.model.domain.PostcardCommentDomain;
 import cn.nine.pros.post.biz.model.domain.PostcardDomain;
 import cn.nine.pros.post.biz.service.app.AppPostcardService;
+import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.PostcardCommentService;
 import cn.nine.pros.post.biz.service.base.PostcardService;
+import cn.nine.pros.post.biz.service.base.SensitiveWordService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.app.AppPostcardCommentCreateInDto;
@@ -42,6 +44,8 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     private final PostcardService postcardService;
     private final PostcardCommentService postcardCommentService;
     private final UserService userService;
+    private final SensitiveWordService sensitiveWordService;
+    private final OssDisplayUrlService ossDisplayUrlService;
 
     @Override
     @SuppressWarnings("unused")
@@ -59,6 +63,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
             int cc = countApprovedComments(row.getId());
             records.add(toWallItem(row, authorMap.get(row.getUserId()), cc));
         }
+        ossDisplayUrlService.applyPostcardWall(userId, records);
         return AppPageHelper.pageData(pq, p, records);
     }
 
@@ -71,12 +76,16 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         if (isApprovedPublic(p)) {
             UserDTO author = userService.findById(p.getUserId());
             int cc = countApprovedComments(p.getId());
-            return toDetail(p, author, cc, viewerUserId);
+            PostcardDetailVO vo = toDetail(p, author, cc, viewerUserId);
+            ossDisplayUrlService.applyPostcardDetail(viewerUserId, vo);
+            return vo;
         }
         if (Objects.equals(viewerUserId, p.getUserId())) {
             UserDTO author = userService.findById(p.getUserId());
             int cc = countApprovedComments(p.getId());
-            return toDetail(p, author, cc, viewerUserId);
+            PostcardDetailVO vo = toDetail(p, author, cc, viewerUserId);
+            ossDisplayUrlService.applyPostcardDetail(viewerUserId, vo);
+            return vo;
         }
         throw new BadRequestException("明信片不存在");
     }
@@ -90,6 +99,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         if (content.length() > 2000) {
             throw new BadRequestException("正文过长");
         }
+        sensitiveWordService.assertPlainTextAllowed(content);
         List<String> urls = new ArrayList<>();
         if (body.getImageUrls() != null) {
             for (String u : body.getImageUrls()) {
@@ -115,7 +125,9 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         postcardService.save(d);
         PostcardDomain fresh = postcardService.getById(d.getId());
         UserDTO author = userService.findById(userId);
-        return toDetail(fresh, author, 0, userId);
+        PostcardDetailVO vo = toDetail(fresh, author, 0, userId);
+        ossDisplayUrlService.applyPostcardDetail(userId, vo);
+        return vo;
     }
 
     @Override
@@ -135,6 +147,11 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         List<PostcardCommentItemVO> list = p.getRecords().stream()
                 .map(c -> toCommentItem(c, authors.get(c.getUserId())))
                 .collect(Collectors.toList());
+        for (PostcardCommentItemVO c : list) {
+            if (c.getAuthor() != null) {
+                ossDisplayUrlService.applyAuthor(viewerUserId, c.getAuthor());
+            }
+        }
         return AppPageHelper.pageData(pq, p, list);
     }
 
@@ -148,6 +165,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         if (text.length() > 1000) {
             throw new BadRequestException("评论过长");
         }
+        sensitiveWordService.assertPlainTextAllowed(text);
         PostcardCommentDomain c = new PostcardCommentDomain();
         c.setPostcardId(postcardId);
         c.setUserId(userId);
@@ -158,7 +176,11 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         postcardCommentService.save(c);
         PostcardCommentDomain fresh = postcardCommentService.getById(c.getId());
         UserDTO author = userService.findById(userId);
-        return toCommentItem(fresh, author);
+        PostcardCommentItemVO vo = toCommentItem(fresh, author);
+        if (vo.getAuthor() != null) {
+            ossDisplayUrlService.applyAuthor(userId, vo.getAuthor());
+        }
+        return vo;
     }
 
     private PostcardDomain requireApprovedPostcardForComments(Long postcardId) {

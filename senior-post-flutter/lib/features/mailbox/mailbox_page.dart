@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -19,19 +20,33 @@ class MailboxPage extends ConsumerStatefulWidget {
 }
 
 class _MailboxPageState extends ConsumerState<MailboxPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.invalidate(postalInboxLettersProvider);
+        ref.invalidate(mailboxArchiveProvider);
+        ref.invalidate(mailboxLettersProvider);
+      });
+    }
   }
 
   @override
@@ -99,7 +114,15 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
                     actionLabel: 'Retry',
                     onAction: () => ref.invalidate(postalInboxLettersProvider),
                   ),
-                  data: (letters) => _PostalInboxBody(letters: letters),
+                  data: (letters) => _PostalInboxBody(
+                    letters: letters,
+                    onSyncMailbox: () async {
+                      ref.invalidate(postalInboxLettersProvider);
+                      ref.invalidate(mailboxArchiveProvider);
+                      ref.invalidate(mailboxLettersProvider);
+                      await ref.read(postalInboxLettersProvider.future);
+                    },
+                  ),
                 ),
                 const _ConnectionsTab(),
               ],
@@ -112,8 +135,13 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
 }
 
 class _PostalInboxBody extends ConsumerWidget {
-  const _PostalInboxBody({required this.letters});
+  const _PostalInboxBody({
+    required this.letters,
+    required this.onSyncMailbox,
+  });
+
   final List<MockLetter> letters;
+  final Future<void> Function() onSyncMailbox;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -141,18 +169,31 @@ class _PostalInboxBody extends ConsumerWidget {
             ),
           ),
         Expanded(
-          child: letters.isEmpty
-              ? const PostalEmptyState(
-                  title: 'Postal inbox is clear',
-                  subtitle:
-                      'No pending letters. Connections appear after you accept a delivered letter.',
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  itemCount: letters.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (_, i) => _LetterTile(letter: letters[i]),
-                ),
+          child: RefreshIndicator(
+            onRefresh: onSyncMailbox,
+            child: letters.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    children: const [
+                      SizedBox(
+                        height: 280,
+                        child: PostalEmptyState(
+                          title: 'Postal inbox is clear',
+                          subtitle:
+                              'No pending letters. Connections appear after you accept a delivered letter.',
+                        ),
+                      ),
+                    ],
+                  )
+                : ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    itemCount: letters.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    itemBuilder: (_, i) => _LetterTile(letter: letters[i]),
+                  ),
+          ),
         ),
       ],
     );
@@ -342,7 +383,11 @@ class _LetterTile extends StatelessWidget {
       onTap: () => context.push('/letter/${letter.id}'),
       header: Row(
         children: [
-          PostalAvatar(name: letter.peer.nickname, size: 40),
+          PostalAvatar(
+            name: letter.peer.nickname,
+            size: 40,
+            imageUrl: letter.peer.avatarUrl,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

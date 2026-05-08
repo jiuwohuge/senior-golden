@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../core/auth/auth_token.dart';
+import '../core/i18n/app_locale_provider.dart';
 import '../core/network/router_refresh.dart';
 import 'router/app_router.dart';
 import 'theme/postal_theme.dart';
@@ -53,6 +54,7 @@ class SeniorPostApp extends ConsumerWidget {
     });
 
     final router = ref.watch(appRouterProvider);
+    final localeOverride = ref.watch(appLocaleProvider);
 
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
@@ -60,7 +62,11 @@ class SeniorPostApp extends ConsumerWidget {
       routerConfig: router,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      localeListResolutionCallback: _resolveLocale,
+      locale: localeOverride,
+      localeListResolutionCallback: localeOverride != null
+          ? null
+          : (deviceLocales, supported) =>
+              _resolveLocale(deviceLocales, supported),
     );
   }
 }

@@ -6,7 +6,7 @@ export default function ReportList() {
   const [rows, setRows] = useState<any[]>([])
   const load = () => {
     api.reports({ page: { page: 1, size: 50 } })
-      .then((d: any) => setRows(d.records || []))
+      .then((d: any) => setRows(d.records || d.list || []))
       .catch((e: any) => message.error(e.message))
   }
   useEffect(() => { load() }, [])
@@ -17,9 +17,10 @@ export default function ReportList() {
       dataSource={rows}
       columns={[
         { title: 'ID', dataIndex: 'id' },
+        { title: 'Reporter', dataIndex: 'reporterUserId' },
         { title: 'Type', dataIndex: 'targetType' },
         { title: 'Target', dataIndex: 'targetId' },
-        { title: 'Reason', dataIndex: 'reason' },
+        { title: 'Reason', dataIndex: 'reason', ellipsis: true },
         { title: 'Status', dataIndex: 'status' },
         {
           title: 'Actions',

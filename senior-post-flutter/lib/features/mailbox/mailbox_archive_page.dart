@@ -40,7 +40,11 @@ class MailboxArchivePage extends ConsumerWidget {
                 onTap: () => context.push('/letter/${l.id}'),
                 header: Row(
                   children: [
-                    PostalAvatar(name: l.peer.nickname, size: 36),
+                    PostalAvatar(
+                    name: l.peer.nickname,
+                    size: 36,
+                    imageUrl: l.peer.avatarUrl,
+                  ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

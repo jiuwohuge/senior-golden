@@ -47,6 +47,10 @@
   "authTermsTitle": "用户协议",
   "authPrivacyTitle": "隐私政策",
   "authForgotPassword": "忘记密码",
+  "authForgotIntro": "我们将向您的注册邮箱发送 6 位数字验证码，请在邮箱或（开发环境）服务端日志中查看。",
+  "authForgotCodeHint": "6 位数字",
+  "authForgotResetSuccess": "密码已更新，请返回登录。",
+  "authForgotCodeInvalid": "请输入 6 位数字验证码",
   "authOnboardingAgain": "查看功能引导",
   "authEmailInvalid": "请输入有效邮箱地址",
   "authRegisterSubtitle": "一分钟创建你的邮政社交账号。",
@@ -73,6 +77,103 @@
   "onboardSkip": "跳过",
   "onboardNext": "下一步",
   "onboardDone": "开始使用",
+  "commonRetry": "重试",
+  "postWallUnavailable": "明信片墙暂时不可用",
+  "postWallEmptyTitle": "还没有明信片",
+  "postWallEmptySubtitle": "今天由你来发第一张明信片吧。",
+  "postWallWriteAction": "写明信片",
+  "postWallFAB": "去写",
+  "postWallPhotosLabel": "{count} 张配图",
+  "@postWallPhotosLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "postWallSendLetterTooltip": "写信",
+  "postWallCommentsCount": "评论 {count}",
+  "@postWallCommentsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "postComposeTitle": "写明信片",
+  "postComposeSectionTitle": "撰写",
+  "postComposeSectionSubtitle": "写下今日的一张明信片",
+  "postComposeContentLabel": "明信片正文",
+  "postComposeContentHint": "记录今天的心情、想法或问候…",
+  "postComposeMaxImages": "最多 {max} 张配图",
+  "@postComposeMaxImages": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "postComposeUploadNeedRealApi": "OSS 上传需关闭 Mock：flutter run --dart-define=USE_MOCK=false …",
+  "postComposePickerChannelError": "相册插件未连接。请完全停止应用后重新运行；仍失败请执行 flutter clean。",
+  "postComposeImageUploaded": "图片已上传",
+  "postComposeNeedContent": "请先写一些内容。",
+  "postComposePublishedMock": "Mock：明信片已发布（+1 邮票）",
+  "postComposePublishedReal": "已提交审核，通过后将出现在明信片墙",
+  "postComposeUploading": "上传中…",
+  "postComposeAddImage": "添加配图（OSS）",
+  "postComposeAddAnother": "继续添加（{n}/{max}）",
+  "@postComposeAddAnother": {
+    "placeholders": {
+      "n": {},
+      "max": {}
+    }
+  },
+  "postComposePublish": "立即发布",
+  "directoryTitle": "通信名录",
+  "directorySubtitle": "按国家与兴趣寻找笔友",
+  "directoryLoadFailed": "名录加载失败",
+  "directoryEmptyTitle": "没有符合条件的会员",
+  "directoryEmptySubtitle": "尝试清空筛选或调整年龄范围。",
+  "directoryAgeYears": "{age} 岁",
+  "@directoryAgeYears": {
+    "placeholders": {
+      "age": {}
+    }
+  },
+  "authBirthYearSheetTitle": "出生年份",
+  "authBirthYearFormat": "{year}（{age} 岁）",
+  "@authBirthYearFormat": {
+    "placeholders": {
+      "year": {},
+      "age": {}
+    }
+  },
+  "authCountryAutoLabel": "地区（随界面语言）",
+  "authEmailHint": "name@example.com",
+  "profileEditTitle": "编辑资料",
+  "profileNickname": "昵称",
+  "profileCountry": "国家/地区",
+  "profileBio": "个人简介",
+  "profileSave": "保存",
+  "profileMockUpdated": "Mock：资料已更新",
+  "profileSaved": "资料已保存",
+  "profileAvatarChange": "更换头像",
+  "profileAvatarCropTitle": "裁剪头像",
+  "profileAvatarCropDone": "完成",
+  "profileAvatarUploading": "正在上传头像…",
+  "profileEditProfile": "编辑资料",
+  "profileInterestTags": "兴趣标签",
+  "profileStampsLedger": "邮票流水",
+  "profileVipCenter": "VIP 中心",
+  "profileSettings": "设置",
+  "profileAbout": "关于",
+  "profileUserAgreement": "用户协议",
+  "profilePrivacyPolicy": "隐私政策",
+  "profileLogout": "退出登录",
+  "settingsTitle": "设置",
+  "settingsPushNotifications": "推送通知",
+  "settingsUnreadBadges": "显示未读角标",
+  "settingsLanguage": "语言",
+  "settingsLanguageSubtitle": "English / 中文 / 跟随系统",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageChinese": "中文",
+  "settingsLanguageSystem": "跟随系统",
+  "settingsAbout": "关于",
+  "settingsDeleteAccount": "注销账号",
   "legalEffectiveDate": "生效日期：2026-05-01",
   "legalTermsContent": "1）本应用面向 45+ 成年用户提供兴趣陪伴社交服务。\\n\\n2）本产品不提供婚恋与匹配服务。\\n\\n3）你需对发布内容负责，不得发布违法违规内容。\\n\\n4）对于骚扰、刷屏、欺诈等行为，平台可限制或封禁账号。\\n\\n5）平台提供举报和审核机制以维护安全交流环境。",
   "legalPrivacyContent": "1）我们会收集账号与设备信息用于安全风控与服务提供。\\n\\n2）我们依据适用隐私法规处理数据，并提供删除/导出路径。\\n\\n3）我们不会出售你的个人数据。\\n\\n4）部分数据处理用于实现核心消息与内容审核能力。\\n\\n5）你可联系支持申请账号删除与相关数据清理。"

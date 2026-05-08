@@ -110,7 +110,11 @@ class PostDetailPage extends ConsumerWidget {
                       PostalCardEnvelope(
                         header: Row(
                           children: [
-                            PostalAvatar(name: post.author.nickname, size: 42),
+                            PostalAvatar(
+                              name: post.author.nickname,
+                              size: 42,
+                              imageUrl: post.author.avatarUrl,
+                            ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
@@ -181,7 +185,11 @@ class PostDetailPage extends ConsumerWidget {
                                         children: [
                                           Row(
                                             children: [
-                                              PostalAvatar(name: c.author.nickname, size: 34),
+                                              PostalAvatar(
+                                                name: c.author.nickname,
+                                                size: 34,
+                                                imageUrl: c.author.avatarUrl,
+                                              ),
                                               const SizedBox(width: 8),
                                               Expanded(child: Text(c.author.nickname)),
                                               Text(DateFormat('MM-dd HH:mm').format(c.createdAt)),

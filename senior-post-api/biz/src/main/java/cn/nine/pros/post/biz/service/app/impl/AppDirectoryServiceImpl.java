@@ -5,6 +5,7 @@ import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.controller.app.AppPageHelper;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.app.AppDirectoryService;
+import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.input.app.AppDirectoryPageInDto;
 import cn.nine.pros.post.client.model.out.DirectoryUserItemVO;
@@ -23,7 +24,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AppDirectoryServiceImpl implements AppDirectoryService {
 
+    private static final String SORT_DEFAULT = "DEFAULT";
+    private static final String SORT_SAME_AGE = "SAME_AGE";
+    private static final String SORT_SHARED_INTEREST = "SHARED_INTEREST";
+
     private final UserService userService;
+    private final OssDisplayUrlService ossDisplayUrlService;
 
     @Override
     public PageData<DirectoryUserItemVO> pageUsers(long viewerUserId, AppDirectoryPageInDto body) {
@@ -32,8 +38,9 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
                 .eq(UserDomain::isDelFlag, false)
                 .apply("status = 1")
                 .eq(UserDomain::getStaffRole, 0)
-                .ne(UserDomain::getId, viewerUserId)
-                .orderByDesc(UserDomain::getCreatedAt);
+                .ne(UserDomain::getId, viewerUserId);
+
+        applySort(qw, viewerUserId, body);
 
         if (body != null && StringUtils.hasText(body.getCountryCode())) {
             qw.eq(UserDomain::getCountryCode, body.getCountryCode().trim());
@@ -60,19 +67,49 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
         Page<UserDomain> p = userService.page(AppPageHelper.mpPage(pq), qw);
         List<DirectoryUserItemVO> records = new ArrayList<>();
         for (UserDomain u : p.getRecords()) {
-            records.add(toVo(u));
+            records.add(toVo(viewerUserId, u));
         }
         return AppPageHelper.pageData(pq, p, records);
     }
 
-    private static DirectoryUserItemVO toVo(UserDomain u) {
+    private void applySort(LambdaQueryWrapper<UserDomain> qw, long viewerUserId, AppDirectoryPageInDto body) {
+        String sort = SORT_DEFAULT;
+        if (body != null && StringUtils.hasText(body.getSort())) {
+            sort = body.getSort().trim().toUpperCase();
+        }
+        if (!SORT_SAME_AGE.equals(sort) && !SORT_SHARED_INTEREST.equals(sort)) {
+            qw.orderByDesc(UserDomain::getCreatedAt);
+            return;
+        }
+        if (SORT_SAME_AGE.equals(sort)) {
+            UserDomain viewer = userService.getById(viewerUserId);
+            Integer vy = viewer != null ? viewer.getBirthYear() : null;
+            if (vy != null && vy > 0) {
+                qw.last("ORDER BY CASE WHEN birth_year IS NULL THEN 999 ELSE ABS(birth_year - "
+                        + vy + ") END ASC, created_at DESC");
+            } else {
+                qw.orderByDesc(UserDomain::getCreatedAt);
+            }
+            return;
+        }
+        // SHARED_INTEREST：与浏览者共同标签数降序，再按注册时间
+        qw.last("ORDER BY (SELECT COUNT(*)::int FROM bu_user_tag ut INNER JOIN bu_user_tag ut2 ON ut.tag_id = ut2.tag_id "
+                + "AND ut2.user_id = " + viewerUserId + " AND ut2.del_flag = FALSE "
+                + "WHERE ut.user_id = bu_user.id AND ut.del_flag = FALSE) DESC NULLS LAST, created_at DESC");
+    }
+
+    private DirectoryUserItemVO toVo(long viewerUserId, UserDomain u) {
+        String av = u.getAvatarUrl();
+        if (StringUtils.hasText(av)) {
+            av = ossDisplayUrlService.signAvatarForViewer(viewerUserId, av.trim());
+        }
         return DirectoryUserItemVO.builder()
                 .id(u.getId())
                 .nickname(u.getNickname())
                 .countryCode(u.getCountryCode())
                 .bio(u.getBio())
                 .birthYear(u.getBirthYear())
-                .avatarUrl(u.getAvatarUrl())
+                .avatarUrl(av)
                 .isVip(Boolean.TRUE.equals(u.getIsVip()))
                 .build();
     }

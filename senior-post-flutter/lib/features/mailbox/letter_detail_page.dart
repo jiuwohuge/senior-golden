@@ -97,7 +97,11 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                 PostalCardEnvelope(
                   header: Row(
                     children: [
-                      PostalAvatar(name: letter.peer.nickname, size: 40),
+                      PostalAvatar(
+                        name: letter.peer.nickname,
+                        size: 40,
+                        imageUrl: letter.peer.avatarUrl,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(

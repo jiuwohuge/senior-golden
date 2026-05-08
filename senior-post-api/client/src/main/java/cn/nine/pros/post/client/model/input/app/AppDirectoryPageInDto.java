@@ -24,4 +24,10 @@ public class AppDirectoryPageInDto {
 
     @Schema(description = "兴趣标签名（与 sys_tag.tag_name 匹配，AND 关系；可空）")
     private List<String> interestNames;
+
+    /**
+     * DEFAULT：按注册时间倒序；SAME_AGE：与当前登录用户出生年接近优先；SHARED_INTEREST：共同兴趣标签数多优先。
+     */
+    @Schema(description = "排序：DEFAULT | SAME_AGE | SHARED_INTEREST", example = "DEFAULT")
+    private String sort;
 }

@@ -15,8 +15,8 @@
 | FP-A6-002 | AI + Owner | S1 | W1D1 | W1D2 | DONE | `POST /api/stamps/ledger/paging` 分页 | `AppStampLedgerPageInDto`、`ledgerPaging` |
 | FP-A5-001 | AI + Owner | S1 | W1D3 | W1D3 | DONE | Knife4j 发信成功；非 VIP 挂号扣 1 邮票且 `log_stamp_transaction` 有记录 | `AppSendLetterInDto`、`AppMailboxServiceImpl.sendLetter` |
 | FP-A5-Fl | AI + Owner | S2 | W2D1 | W2D1 | DONE | `USE_MOCK=false`：postal/archive/detail/send/accept、邮票顶栏、`friendship-active` | `mailbox_remote.dart`、各 mailbox/directory 页 |
-| FP-A6-004 | AI + Owner | S1 | W1D2 | W1D3 | TODO | 并发压测 100 次无负余额 | `StampAccountService` 单测 |
-| FP-A5-002 | AI + Owner | S1 | W1D2 | W1D4 | TODO | 双用户各见 postal/sync 正确 | `AppMailboxApi` 扩展 + `LetterService` |
+| FP-A6-004 | AI + Owner | S1 | W1D2 | W1D3 | DONE | 并发压测 100 次无负余额；CAS 扣减抽取为 `StampAccountService` | `StampAccountService`/`Impl`、H2 JDBC 并发单测、`StampAccountServiceImplTest` |
+| FP-A5-002 | AI + Owner | S1 | W1D2 | W1D4 | DONE | sync 时间戳一致；端上刷新/前台恢复拉新 | `AppMailboxServiceImpl` COALESCE；`mailbox_page` RefreshIndicator + `WidgetsBindingObserver` |
 | FP-A3-001 | AI + Owner | S1 | W1D3 | W1D4 | DONE | 未审帖不在 App 列表（`review_status=1`） | `AppPostcardServiceImpl.wallPage` |
 | FP-A3-002 | AI + Owner | S1 | W1D4 | W1D4 | DONE | 未审详情对非作者不可见 | `getDetail` |
 | FP-A3-003 | AI + Owner | S1 | W1D4 | W1D5 | DONE | 发帖落库 + OSS 可选 URL | `AppPostcardServiceImpl.create` |
@@ -36,6 +36,7 @@
 | FP-A5-* UI | AI + Owner | S2 | W2D2 | W2D4 | DONE | 发信后列表刷新 | `mailbox_providers` + sheet（见 FP-A5-Fl） |
 | FP-A2/A4 UI | AI + Owner | S2 | W2D4 | W2D5 | DONE | 编辑保存成功 | profile/directory |
 | E2E 冒烟 | AI + Owner | S2 | W2D5 | W2D5 | TODO | 脚本或录屏通过 | `doc/plan/` 或 `tests/` 记录 |
+| FP-X-005 | AI + Owner | S2 | W2D5 | W2D6 | TODO | 私有桶：`objectKey` 经服务端换 **GET** 签后浏览器/`Image.network` 200；非法 key / 越权 4xx；生产不依赖 `public-read-base-url` | `AppOssApi` 扩展、`AppOssServiceImpl.signGet`、VO 或批量 DTO、Flutter 过期重试、可选 `/webapi` 审核读图 |
 
 ---
 
@@ -43,13 +44,13 @@
 
 | FP | 负责人 | Sprint | 起 | 止 | 状态 | 验收标准 | 交付物 |
 |----|--------|--------|----|----|------|----------|--------|
-| FP-A5d-002 | AI + Owner | S3 | W3D1 | W3D3 | TODO | 平邮到期自动送达 | Redis + Worker + 单测 |
+| FP-A5d-002 | AI + Owner | S3 | W3D1 | W3D3 | DONE | 平邮到期自动送达 | `StandardLetterDeliveryService`、`StandardLetterDeliveryScheduler`、`V7` 索引、`StandardLetterDeliveryServiceTest` |
 | FP-A5-005 | AI + Owner | S3 | W3D2 | W3D3 | DONE | 扣邮票后变已送达 | `POST .../speed-up`、`AppMailboxServiceImpl.speedUpLetter`、`mailbox_remote` |
 | FP-A5d-004 | AI + Owner | S3 | W3D3 | W3D4 | TODO | 腾讯返回成功或可观测失败 | Notifier 实现 + 配置 |
 | FP-A6-002/003 | AI + Owner | S3 | W3D4 | W3D5 | TODO | 流水页与管理配置一致 | API + Flutter 页 |
 | FP-A7-* | AI + Owner | S3 | W3D4 | W3D6 | TODO | VIP 开关影响扣费 | VO + Flutter |
-| FP-A3-005 | AI + Owner | S3 | W3D5 | W3D5 | TODO | 举报单进后台 | App POST + UI |
-| FP-A4-002~004 | AI + Owner | S3 | W3D5 | W3D6 | TODO | 筛选排序生效 | Query + UI |
+| FP-A3-005 | AI + Owner | S3 | W3D5 | W3D5 | DONE | 举报单进后台；工单列表可看举报人 | `AppReport*` + Manage `report/List.tsx` |
+| FP-A4-002~004 | AI + Owner | S3 | W3D5 | W3D6 | DONE | 筛选 + 排序（`sort`）全链；独立公开页 API 仍属 FP-A4-004 | `AppDirectoryPageInDto`、`AppDirectoryServiceImpl`、`directory_remote`、筛选 Sheet |
 
 ---
 
@@ -58,7 +59,7 @@
 | FP | 负责人 | Sprint | 起 | 止 | 状态 | 验收标准 | 交付物 |
 |----|--------|--------|----|----|------|----------|--------|
 | FP-X-001 | AI + Owner | S4 | W4D1 | W4D3 | TODO | 本地收到测试邮件 | EmailService + 表 |
-| FP-A1-003 | AI + Owner | S4 | W4D2 | W4D3 | TODO | 重置后可用新密码登录 | Auth API + 邮件模板 |
+| FP-A1-003 | AI + Owner | S4 | W4D2 | W4D3 | DONE | 重置后可用新密码登录 | Flyway V8 + Auth API + 可选 SMTP / 本地日志 |
 | FP-A1-007 | AI + Owner | S4 | W4D3 | W4D5 | TODO | 加解密与后端互通 | Flutter 拦截器 + 配置说明 |
 | FP-A8-005 | AI + Owner | S4 | W4D4 | W4D5 | TODO | 注销策略可演示 | API + Job + Flutter |
 | FP-X-003 | AI + Owner | S4 | W4D5 | W4D5 | TODO | 低版本拦截 | bootstrap 或 version API |
@@ -82,3 +83,6 @@
 | 2026-05-02 | 初版：按 `04-dev-plan` 与 `03-priority-grouping` 生成 |
 | 2026-05-02 | FP-A2-001：`PATCH /api/auth/profile`、Flutter `refreshSessionFromServer` / `updateProfileOnServer`、资料页拉 `me` |
 | 2026-05-02 | 文档回写 A3/A4/A5/A6；Sprint1 标 DONE：FP-A3-001~004、FP-A4-001；修正重复 FP 编号为 FP-A5-002；FP-A6-002-Fl 流水页 |
+| 2026-05-08 | FP-A6-004：`StampAccountService` 统一 CAS；`StampBalanceCasConcurrencyJdbcTest`（H2 100/200 线程）；`StampAccountServiceImplTest` |
+| 2026-05-09 | FP-A4-003 / Sprint3 `FP-A4-002~004`：`AppDirectoryPageInDto.sort`、`SAME_AGE`/`SHARED_INTEREST` SQL 排序；Flutter 筛选 Sheet + `directory_remote`；Mock `list` 对齐 |
+| 2026-05-09 | FP-A3-005/007 + FP-A5-002：敏感词发帖/评/信 + 词库缓存失效；`sync` COALESCE；邮箱页下拉刷新与 `resumed` 刷新；举报列表 `reporterUserId` + `records`/`list` |

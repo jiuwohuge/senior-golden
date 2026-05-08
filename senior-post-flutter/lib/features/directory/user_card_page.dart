@@ -42,7 +42,11 @@ class UserCardPage extends ConsumerWidget {
                 PostalCardEnvelope(
                   child: Column(
                     children: [
-                      PostalAvatar(name: user.nickname, size: 68),
+                      PostalAvatar(
+                        name: user.nickname,
+                        size: 68,
+                        imageUrl: user.avatarUrl,
+                      ),
                       const SizedBox(height: 10),
                       Text(user.nickname, style: Theme.of(context).textTheme.headlineSmall),
                       const SizedBox(height: 6),

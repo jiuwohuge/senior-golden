@@ -287,6 +287,7 @@ flowchart LR
 - **本次新增（2026-05-02，资料写回 FP-A2-001）**：后端 **`PATCH /api/auth/profile`**（`AppAuthProfilePatchInDto`，昵称/国家/简介部分更新）；Flutter **`AuthRepository.refreshSessionFromServer`**（`GET /api/auth/me`）、**登录/注册响应 `user` 写入 `mockSessionProvider`**、**`ProfileEditPage` / `ProfilePage` 非 Mock 联调**；兴趣标签与头像 URL 写回仍待后续项。
 - **本次新增（2026-05-02，文档对齐 + 邮票流水 Flutter）**：`doc/plan/01-feature-list.md` 与 **`PLAN.md` [功能清单]** 回写 **A3/A4/A5/A6** 与仓库一致（明信片墙、名录、Accept、OSS 发帖图、**`stamps_remote` + 个人中心流水页** 非 Mock 走 **`POST /api/stamps/ledger/paging`**）。
 - **本次新增（2026-05-06，FP-A5-005）**：**`POST /api/mailbox/letters/{letterId}/speed-up`**（发件人、平邮运输中、VIP 免扣票、非 VIP CAS 扣 1 + 流水）；Flutter **`mailbox_remote.speedUp`**、**`speed_up_sheet`** / **`letter_detail_page`** 真联调。
+- **规划文档（2026-05-07）**：新增 **`doc/plan/07-gap-analysis-and-roadmap.md`** — 遗漏功能系统化清单（描述、预期行为、优先级、与现有模块关联）与四阶段开发路线图（顺序、技术方案、资源粗估）；执行时与 **`doc/plan/05-task-tracker.md`** 联动勾选 FP。
 
 ---
 

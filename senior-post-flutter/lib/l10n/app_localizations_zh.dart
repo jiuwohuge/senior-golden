@@ -134,6 +134,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authForgotPassword => '忘记密码';
 
   @override
+  String get authForgotIntro => '我们将向您的注册邮箱发送 6 位数字验证码，请在邮箱或（开发环境）服务端日志中查看。';
+
+  @override
+  String get authForgotCodeHint => '6 位数字';
+
+  @override
+  String get authForgotResetSuccess => '密码已更新，请返回登录。';
+
+  @override
+  String get authForgotCodeInvalid => '请输入 6 位数字验证码';
+
+  @override
   String get authOnboardingAgain => '查看功能引导';
 
   @override
@@ -210,6 +222,215 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardDone => '开始使用';
+
+  @override
+  String get commonRetry => '重试';
+
+  @override
+  String get postWallUnavailable => '明信片墙暂时不可用';
+
+  @override
+  String get postWallEmptyTitle => '还没有明信片';
+
+  @override
+  String get postWallEmptySubtitle => '今天由你来发第一张明信片吧。';
+
+  @override
+  String get postWallWriteAction => '写明信片';
+
+  @override
+  String get postWallFAB => '去写';
+
+  @override
+  String postWallPhotosLabel(Object count) {
+    return '$count 张配图';
+  }
+
+  @override
+  String get postWallSendLetterTooltip => '写信';
+
+  @override
+  String postWallCommentsCount(Object count) {
+    return '评论 $count';
+  }
+
+  @override
+  String get postComposeTitle => '写明信片';
+
+  @override
+  String get postComposeSectionTitle => '撰写';
+
+  @override
+  String get postComposeSectionSubtitle => '写下今日的一张明信片';
+
+  @override
+  String get postComposeContentLabel => '明信片正文';
+
+  @override
+  String get postComposeContentHint => '记录今天的心情、想法或问候…';
+
+  @override
+  String postComposeMaxImages(Object max) {
+    return '最多 $max 张配图';
+  }
+
+  @override
+  String get postComposeUploadNeedRealApi =>
+      'OSS 上传需关闭 Mock：flutter run --dart-define=USE_MOCK=false …';
+
+  @override
+  String get postComposePickerChannelError =>
+      '相册插件未连接。请完全停止应用后重新运行；仍失败请执行 flutter clean。';
+
+  @override
+  String get postComposeImageUploaded => '图片已上传';
+
+  @override
+  String get postComposeNeedContent => '请先写一些内容。';
+
+  @override
+  String get postComposePublishedMock => 'Mock：明信片已发布（+1 邮票）';
+
+  @override
+  String get postComposePublishedReal => '已提交审核，通过后将出现在明信片墙';
+
+  @override
+  String get postComposeUploading => '上传中…';
+
+  @override
+  String get postComposeAddImage => '添加配图（OSS）';
+
+  @override
+  String postComposeAddAnother(Object n, Object max) {
+    return '继续添加（$n/$max）';
+  }
+
+  @override
+  String get postComposePublish => '立即发布';
+
+  @override
+  String get directoryTitle => '通信名录';
+
+  @override
+  String get directorySubtitle => '按国家与兴趣寻找笔友';
+
+  @override
+  String get directoryLoadFailed => '名录加载失败';
+
+  @override
+  String get directoryEmptyTitle => '没有符合条件的会员';
+
+  @override
+  String get directoryEmptySubtitle => '尝试清空筛选或调整年龄范围。';
+
+  @override
+  String directoryAgeYears(Object age) {
+    return '$age 岁';
+  }
+
+  @override
+  String get authBirthYearSheetTitle => '出生年份';
+
+  @override
+  String authBirthYearFormat(Object year, Object age) {
+    return '$year（$age 岁）';
+  }
+
+  @override
+  String get authCountryAutoLabel => '地区（随界面语言）';
+
+  @override
+  String get authEmailHint => 'name@example.com';
+
+  @override
+  String get profileEditTitle => '编辑资料';
+
+  @override
+  String get profileNickname => '昵称';
+
+  @override
+  String get profileCountry => '国家/地区';
+
+  @override
+  String get profileBio => '个人简介';
+
+  @override
+  String get profileSave => '保存';
+
+  @override
+  String get profileMockUpdated => 'Mock：资料已更新';
+
+  @override
+  String get profileSaved => '资料已保存';
+
+  @override
+  String get profileAvatarChange => '更换头像';
+
+  @override
+  String get profileAvatarCropTitle => '裁剪头像';
+
+  @override
+  String get profileAvatarCropDone => '完成';
+
+  @override
+  String get profileAvatarUploading => '正在上传头像…';
+
+  @override
+  String get profileEditProfile => '编辑资料';
+
+  @override
+  String get profileInterestTags => '兴趣标签';
+
+  @override
+  String get profileStampsLedger => '邮票流水';
+
+  @override
+  String get profileVipCenter => 'VIP 中心';
+
+  @override
+  String get profileSettings => '设置';
+
+  @override
+  String get profileAbout => '关于';
+
+  @override
+  String get profileUserAgreement => '用户协议';
+
+  @override
+  String get profilePrivacyPolicy => '隐私政策';
+
+  @override
+  String get profileLogout => '退出登录';
+
+  @override
+  String get settingsTitle => '设置';
+
+  @override
+  String get settingsPushNotifications => '推送通知';
+
+  @override
+  String get settingsUnreadBadges => '显示未读角标';
+
+  @override
+  String get settingsLanguage => '语言';
+
+  @override
+  String get settingsLanguageSubtitle => 'English / 中文 / 跟随系统';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsLanguageChinese => '中文';
+
+  @override
+  String get settingsLanguageSystem => '跟随系统';
+
+  @override
+  String get settingsAbout => '关于';
+
+  @override
+  String get settingsDeleteAccount => '注销账号';
 
   @override
   String get legalEffectiveDate => '生效日期：2026-05-01';

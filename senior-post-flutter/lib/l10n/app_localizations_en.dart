@@ -142,6 +142,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authForgotPassword => 'Forgot password';
 
   @override
+  String get authForgotIntro =>
+      'We\'ll email a 6-digit code to your registered address. In local dev, check server logs if SMTP is not configured.';
+
+  @override
+  String get authForgotCodeHint => '6-digit code';
+
+  @override
+  String get authForgotResetSuccess => 'Password updated. You can sign in now.';
+
+  @override
+  String get authForgotCodeInvalid => 'Enter the 6-digit code';
+
+  @override
   String get authOnboardingAgain => 'View introduction';
 
   @override
@@ -223,6 +236,218 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardDone => 'Start now';
+
+  @override
+  String get commonRetry => 'Retry';
+
+  @override
+  String get postWallUnavailable => 'Post wall is temporarily unavailable';
+
+  @override
+  String get postWallEmptyTitle => 'No postcards yet';
+
+  @override
+  String get postWallEmptySubtitle => 'Be the first to share a postcard today.';
+
+  @override
+  String get postWallWriteAction => 'Write postcard';
+
+  @override
+  String get postWallFAB => 'Write';
+
+  @override
+  String postWallPhotosLabel(Object count) {
+    return '$count photos';
+  }
+
+  @override
+  String get postWallSendLetterTooltip => 'Send letter';
+
+  @override
+  String postWallCommentsCount(Object count) {
+    return 'Comments $count';
+  }
+
+  @override
+  String get postComposeTitle => 'Write postcard';
+
+  @override
+  String get postComposeSectionTitle => 'Compose';
+
+  @override
+  String get postComposeSectionSubtitle => 'Write one postcard for today';
+
+  @override
+  String get postComposeContentLabel => 'Postcard content';
+
+  @override
+  String get postComposeContentHint =>
+      'Write your day, thoughts, or greetings…';
+
+  @override
+  String postComposeMaxImages(Object max) {
+    return 'At most $max images';
+  }
+
+  @override
+  String get postComposeUploadNeedRealApi =>
+      'OSS upload requires Mock off: flutter run --dart-define=USE_MOCK=false …';
+
+  @override
+  String get postComposePickerChannelError =>
+      'Gallery channel not connected. Fully stop the app and run again; if it persists run flutter clean.';
+
+  @override
+  String get postComposeImageUploaded => 'Image uploaded';
+
+  @override
+  String get postComposeNeedContent => 'Please write something first.';
+
+  @override
+  String get postComposePublishedMock => 'Mock: postcard published (+1 stamp)';
+
+  @override
+  String get postComposePublishedReal =>
+      'Submitted for review. It will appear after approval.';
+
+  @override
+  String get postComposeUploading => 'Uploading…';
+
+  @override
+  String get postComposeAddImage => 'Add image (OSS)';
+
+  @override
+  String postComposeAddAnother(Object n, Object max) {
+    return 'Add another ($n/$max)';
+  }
+
+  @override
+  String get postComposePublish => 'Publish now';
+
+  @override
+  String get directoryTitle => 'Post Directory';
+
+  @override
+  String get directorySubtitle => 'Find pen pals by country and interests';
+
+  @override
+  String get directoryLoadFailed => 'Unable to load directory';
+
+  @override
+  String get directoryEmptyTitle => 'No matching members';
+
+  @override
+  String get directoryEmptySubtitle =>
+      'Try clearing filters or changing age range.';
+
+  @override
+  String directoryAgeYears(Object age) {
+    return '$age years old';
+  }
+
+  @override
+  String get authBirthYearSheetTitle => 'Year of birth';
+
+  @override
+  String authBirthYearFormat(Object year, Object age) {
+    return '$year ($age)';
+  }
+
+  @override
+  String get authCountryAutoLabel => 'Region (from app language)';
+
+  @override
+  String get authEmailHint => 'name@example.com';
+
+  @override
+  String get profileEditTitle => 'Edit profile';
+
+  @override
+  String get profileNickname => 'Nickname';
+
+  @override
+  String get profileCountry => 'Country';
+
+  @override
+  String get profileBio => 'Bio';
+
+  @override
+  String get profileSave => 'Save';
+
+  @override
+  String get profileMockUpdated => 'Mock: profile updated';
+
+  @override
+  String get profileSaved => 'Profile saved';
+
+  @override
+  String get profileAvatarChange => 'Change profile photo';
+
+  @override
+  String get profileAvatarCropTitle => 'Crop photo';
+
+  @override
+  String get profileAvatarCropDone => 'Done';
+
+  @override
+  String get profileAvatarUploading => 'Uploading photo…';
+
+  @override
+  String get profileEditProfile => 'Edit profile';
+
+  @override
+  String get profileInterestTags => 'Interest tags';
+
+  @override
+  String get profileStampsLedger => 'Stamps ledger';
+
+  @override
+  String get profileVipCenter => 'VIP center';
+
+  @override
+  String get profileSettings => 'Settings';
+
+  @override
+  String get profileAbout => 'About';
+
+  @override
+  String get profileUserAgreement => 'User Agreement';
+
+  @override
+  String get profilePrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get profileLogout => 'Log out';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsPushNotifications => 'Push notifications';
+
+  @override
+  String get settingsUnreadBadges => 'Show unread badges';
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsLanguageSubtitle => 'English / 中文 / System';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsLanguageChinese => '中文';
+
+  @override
+  String get settingsLanguageSystem => 'Follow system';
+
+  @override
+  String get settingsAbout => 'About';
+
+  @override
+  String get settingsDeleteAccount => 'Delete account';
 
   @override
   String get legalEffectiveDate => 'Effective date: 2026-05-01';

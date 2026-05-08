@@ -12,7 +12,7 @@
 |-------|--------|------|---------|------|
 | FP-A1-001 | 邮箱注册 / 登录 / `me` / 资料 PATCH | 已有 `/api/auth/*`（含 `PATCH /api/auth/profile`） | `USE_MOCK=false` 时已有 `dio` 路径；编辑资料写回 | |
 | FP-A1-002 | Bootstrap（年龄门槛、国家列表） | 已有 `/api/bootstrap/init` | 已有 `appBootstrapProvider` | |
-| FP-A1-003 | 忘记密码 / 重置密码 | **缺**（`AppAuthController` 仅 register/login/me） | 页面存在，依赖后端契约 | 需 `client` 契约 + Service + 邮件 |
+| FP-A1-003 | 忘记密码 / 重置密码 | **已有**：`POST /api/auth/forgot-password`、`POST /api/auth/reset-password`；`bu_password_reset_token`；SMTP 可选（未配则日志 WARN 出码） | Flutter 三步流 + 6 位码校验 | 生产配 `spring.mail.*` + `PASSWORD_RESET_PEPPER`；持久 outbox 仍属 **FP-X-001** |
 | FP-A1-004 | 密码强度 / 重试限制 / 风控 | 缺产品细则与实现 | 部分 UI | |
 | FP-A1-005 | JWT、`85xx`、单端登录 | 已有框架能力 | 已有拦截器清 Token | 见底层框架文档 |
 | FP-A1-006 | 设备 `deviceUuid` / `deviceId` 上报 | 注册登录 body/头可带 | `dio` 头已写 | 与 `user_device` 落库一致性待核对 |
@@ -39,9 +39,9 @@
 | FP-A3-002 | App 明信片详情 | **已有** `GET /api/postcards/{id}`（未审仅作者可见） | **非 Mock** `post_detail_page` | — |
 | FP-A3-003 | App 发布明信片（文+图） | **已有** `POST /api/postcards` | **非 Mock** `post_compose_page`；图走 `oss_upload_service` + `put-sign` | 审核流依赖 `review_status` |
 | FP-A3-004 | App 评论列表与发表 | **已有** `.../comments/paging`、`POST .../comments` | **非 Mock** 详情页评论 | 审核已有 comment API |
-| FP-A3-005 | App 举报提交 | **缺** | 无入口 | 处理已有 `/webapi/report/*` |
+| FP-A3-005 | App 举报提交 | **已有** `POST /api/reports` | **非 Mock** `PostWallReportSheet` → `post_wall_remote` | **举报工单**页展示举报人列；分页兼容 `records`/`list` |
 | FP-A3-006 | OSS 直传签名 | **已有** `GET /api/oss/put-sign` | **部分** 发帖配图上传 | — |
-| FP-A3-007 | 敏感词拦截（发帖/评论） | 部分（Admin 词库） | 缺 | 词库 CRUD 已有 |
+| FP-A3-007 | 敏感词拦截（发帖/评论） | **已有** `SensitiveWordService.assertPlainTextAllowed`（发帖/评论/写信正文）；60s 本地缓存 | — | 词库 CRUD 已有 |
 | FP-A3-008 | 审核中 / 仅作者可见等状态展示 | **部分**（详情对作者返回未审帖） | **部分**（未审 UI 提示可加强） | — |
 
 ---
@@ -52,7 +52,7 @@
 |-------|--------|------|---------|
 | FP-A4-001 | 名录分页与用户公开字段 | **已有** `POST /api/directory/users/paging` | **非 Mock** `directory_remote` + 列表 |
 | FP-A4-002 | 筛选（国家、年龄、兴趣） | **已有**（`interestNames` EXISTS） | **非 Mock** 筛选参数下发 |
-| FP-A4-003 | 排序（同龄、同兴趣） | **缺** 专用排序策略 | 未见排序 UI |
+| FP-A4-003 | 排序（同龄、同兴趣） | **已有** `sort`：`DEFAULT` / `SAME_AGE` / `SHARED_INTEREST`（`AppDirectoryServiceImpl`） | 筛选 Sheet 内 ChoiceChip；Mock 名录同步 |
 | FP-A4-004 | 用户卡 / 详情页数据源 | **部分**（名录 VO 可支撑卡；无单独「用户公开页」） | UI 有 |
 | FP-A4-005 | Send Letter 入口与写信联动 | **已有** `POST /api/mailbox/letters/send` | **非 Mock** `send_letter_sheet` |
 
@@ -63,7 +63,7 @@
 | FP ID | 功能点 | 后端 | Flutter |
 |-------|--------|------|---------|
 | FP-A5-001 | 发信（挂号/平邮）写库 + 业务校验 | **已有** `POST /api/mailbox/letters/send` | **`USE_MOCK=false` 已接** `send_letter_sheet` + `mailbox_remote` |
-| FP-A5-002 | 邮政收件箱 / 同步 / 归档 | **已有** `GET /api/mailbox/postal|sync|archive` | **非 Mock 已接** postal + archive（`mailbox_page` / 归档页） |
+| FP-A5-002 | 邮政收件箱 / 同步 / 归档 | **已有**；`sync` 增量条件 `COALESCE(updated_at, created_at) > since` | **下拉刷新 + 回到前台自动 invalidate** postal/archive/letters | 双端仍依赖各自拉取；无推送 |
 | FP-A5-003 | 建联 Accept | **已有** `POST .../accept-postal` | **非 Mock** `mailbox_remote.acceptPostalContact` |
 | FP-A5-004 | 信件详情（单封） | **已有** `GET /api/mailbox/letters/{letterId}` | **非 Mock 已接** `letter_detail` |
 | FP-A5-005 | 平邮加速（扣邮票） | **`POST /api/mailbox/letters/{id}/speed-up`** | `mailbox_remote` + `speed_up_sheet` |
@@ -77,7 +77,7 @@
 | FP ID | 功能点 | 后端 | 备注 |
 |-------|--------|------|------|
 | FP-A5d-001 | 平邮延迟区间（配置驱动） | 缺调度与状态推进 | 与 `sys_config` 键对齐 |
-| FP-A5d-002 | Redis + PG 延迟队列 / 投递 Worker | **缺** | PLAN B3 |
+| FP-A5d-002 | 平邮到期自动送达 Worker | **`StandardLetterDeliveryScheduler` + PG 条件更新**；Redis ZSET 可后续加 | Flyway `V7` 索引 |
 | FP-A5d-003 | 挂号即时送达状态机 | 缺与发信同事务 | |
 | FP-A5d-004 | `TencentImFriendshipNotifier` 调腾讯 REST | **占位**（日志） | `FriendshipServiceImpl` 已调用钩子 |
 
@@ -90,7 +90,7 @@
 | FP-A6-001 | 余额查询 | **已有** `GET /api/stamps/balance` | **邮政 Tab 顶栏**非 Mock 已接 |
 | FP-A6-002 | 流水查询分页 | **已有** `POST /api/stamps/ledger/paging` | **非 Mock** `stamps_remote` + `stamps_ledger_page` |
 | FP-A6-003 | 登录赠送 / 发帖奖励 / 日上限 | 缺定时或同步任务与配置 | 缺 |
-| FP-A6-004 | 挂号消耗、加速消耗原子记账 | **部分**（发信扣票与流水已有） | — |
+| FP-A6-004 | 挂号消耗、加速消耗原子记账 | **已有** `StampAccountService` CAS + 并发语义单测（H2）；寄信/加速仍依赖业务层先读后写 | — |
 | FP-A6-005 | 管理端用户流水查询 | **缺** 页面与 API | — |
 
 ---
@@ -111,7 +111,7 @@
 |-------|--------|------|---------|--------|
 | FP-A8-001 | 用户状态封禁 / 启用 | — | — | **已有** `user/{id}/status` |
 | FP-A8-002 | 设备拉黑 | API 存在 | — | **`blockDevice` 未接 UI**（见 findings） |
-| FP-A8-003 | 敏感词在 App 写入路径生效 | **缺** | — | 词库已有 |
+| FP-A8-003 | 敏感词在 App 写入路径生效 | **已有**（明信片/评论/信件正文） | — | 词库已有 |
 | FP-A8-004 | 图片审核（先审后发已部分） | 贴/评审核已有 | App 上传后待审提示 | — |
 | FP-A8-005 | GDPR 注销 / 冷静期 | **缺** | `account_delete` Mock | — |
 | FP-A8-006 | App 举报与工单闭环 | **缺** App 提交 | 缺入口 | 处理已有 |
@@ -145,6 +145,7 @@
 |-------|--------|------|
 | FP-X-001 | `EmailService` + outbox（重置密码、通知） | **缺** |
 | FP-X-002 | OSS PUT 预签名（`/api/oss/put-sign`） | **已有**（需配置 `senior-post.oss` 或环境变量） |
+| FP-X-005 | OSS 私有桶 **GET** 预签名（读链：批量换签或 VO 出站换签；**不做**公共前缀） | **缺**（见 `task_plan.md` OSS 子阶段 O1–O7） |
 | FP-X-003 | App 版本检查 / 强更提示 | **缺**（`versionCode` 写死） |
 | FP-X-004 | 可观测性（日志规范、关键指标） | 部分 Actuator |
 

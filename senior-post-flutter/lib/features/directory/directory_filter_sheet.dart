@@ -17,6 +17,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
   int _minAge = 45;
   int _maxAge = 80;
   final Set<String> _interests = {};
+  String _sort = 'DEFAULT';
 
   @override
   void initState() {
@@ -26,6 +27,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
     _minAge = f.minAge;
     _maxAge = f.maxAge;
     _interests.addAll(f.interests);
+    _sort = f.sort;
   }
 
   @override
@@ -38,7 +40,31 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
           children: [
             const PostalSectionTitle(
               title: 'Filter directory',
-              subtitle: 'Country, age range, and interests',
+              subtitle: 'Country, age range, interests, and sort',
+            ),
+            const SizedBox(height: 8),
+            Text('Sort', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ChoiceChip(
+                  label: const Text('Newest'),
+                  selected: _sort == 'DEFAULT',
+                  onSelected: (_) => setState(() => _sort = 'DEFAULT'),
+                ),
+                ChoiceChip(
+                  label: const Text('Closest age'),
+                  selected: _sort == 'SAME_AGE',
+                  onSelected: (_) => setState(() => _sort = 'SAME_AGE'),
+                ),
+                ChoiceChip(
+                  label: const Text('Shared interests'),
+                  selected: _sort == 'SHARED_INTEREST',
+                  onSelected: (_) => setState(() => _sort = 'SHARED_INTEREST'),
+                ),
+              ],
             ),
             const SizedBox(height: 14),
             DropdownButtonFormField<String?>(
@@ -112,6 +138,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                       minAge: min,
                       maxAge: max,
                       interests: _interests,
+                      sort: _sort,
                     );
                 ref.invalidate(directoryUsersProvider);
                 Navigator.of(context).pop();

@@ -8,6 +8,7 @@ import '../../widgets/postal/postal.dart';
 import 'auth_repository.dart';
 import 'login_routes.dart';
 
+/// 浅灰复古邮政风：分步卡片 + 轻量过渡动画，强调 45+ 可读性与反馈完整性。
 class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -15,17 +16,29 @@ class ForgotPasswordPage extends ConsumerStatefulWidget {
   ConsumerState<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
-class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
+class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
+    with SingleTickerProviderStateMixin {
   final _email = TextEditingController();
-  final _code = TextEditingController(text: '2026');
+  final _code = TextEditingController();
   final _newPwd = TextEditingController();
   final _formKey1 = GlobalKey<FormState>();
   final _formKey2 = GlobalKey<FormState>();
   int _step = 0;
   bool _busy = false;
+  late final AnimationController _inkCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _inkCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+  }
 
   @override
   void dispose() {
+    _inkCtrl.dispose();
     _email.dispose();
     _code.dispose();
     _newPwd.dispose();
@@ -58,6 +71,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             newPassword: _newPwd.text,
           );
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      PostalSnack.show(context, l10n.authForgotResetSuccess, tone: PostalSnackTone.success);
       setState(() => _step = 2);
     } on ApiBusinessException catch (e) {
       if (mounted) PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
@@ -69,6 +84,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.authForgotPassword)),
       body: PaperTextureBackground(
@@ -76,15 +92,89 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
             children: [
+              _vintageHeader(context, l10n, cs),
+              const SizedBox(height: 20),
               _stepper(context, l10n),
-              const SizedBox(height: 18),
-              if (_step == 0) _stepEmail(context, l10n),
-              if (_step == 1) _stepReset(context, l10n),
-              if (_step == 2) _stepDone(context, l10n),
+              const SizedBox(height: 22),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 380),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, anim) {
+                  return FadeTransition(
+                    opacity: anim,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.04, 0),
+                        end: Offset.zero,
+                      ).animate(anim),
+                      child: child,
+                    ),
+                  );
+                },
+                child: KeyedSubtree(
+                  key: ValueKey<int>(_step),
+                  child: _step == 0
+                      ? _stepEmail(context, l10n)
+                      : _step == 1
+                          ? _stepReset(context, l10n)
+                          : _stepDone(context, l10n),
+                ),
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _vintageHeader(BuildContext context, AppLocalizations l10n, ColorScheme cs) {
+    return AnimatedBuilder(
+      animation: _inkCtrl,
+      builder: (context, _) {
+        final pulse = 0.92 + 0.08 * Curves.easeInOut.transform(_inkCtrl.value);
+        return Transform.scale(
+          scale: pulse,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.6)),
+              boxShadow: [
+                BoxShadow(
+                  color: cs.shadow.withValues(alpha: 0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'POSTAL · RECOVERY',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          letterSpacing: 3.2,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.authForgotIntro,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          height: 1.45,
+                          color: cs.onSurface.withValues(alpha: 0.88),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -171,9 +261,15 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             PostalTextField(
               controller: _code,
               label: l10n.authForgotCode,
-              hint: '2026',
+              hint: l10n.authForgotCodeHint,
               prefixIcon: Icons.verified_outlined,
-              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.authFieldRequired : null,
+              keyboardType: TextInputType.number,
+              validator: (v) {
+                final s = v?.trim() ?? '';
+                if (s.isEmpty) return l10n.authFieldRequired;
+                if (!RegExp(r'^\d{6}$').hasMatch(s)) return l10n.authForgotCodeInvalid;
+                return null;
+              },
             ),
             const SizedBox(height: 14),
             PostalTextField(

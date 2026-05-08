@@ -3,8 +3,10 @@ package cn.nine.pros.post.biz.controller.app;
 import cn.nine.pros.post.biz.service.app.AppAuthService;
 import cn.nine.pros.post.client.api.app.AppAuthApi;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
+import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
+import cn.nine.pros.post.client.model.input.AppResetPasswordInDto;
 import cn.nine.pros.post.client.model.out.AppAuthResultVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,16 @@ public class AppAuthController implements AppAuthApi {
     @Override
     public AppAuthResultVO login(AppLoginInDto body) {
         return appAuthService.login(body);
+    }
+
+    @Override
+    public void forgotPassword(AppForgotPasswordInDto body) {
+        appAuthService.forgotPassword(body);
+    }
+
+    @Override
+    public void resetPassword(AppResetPasswordInDto body) {
+        appAuthService.resetPassword(body);
     }
 
     @Override

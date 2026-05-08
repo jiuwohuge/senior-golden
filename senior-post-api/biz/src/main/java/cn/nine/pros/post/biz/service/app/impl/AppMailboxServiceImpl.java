@@ -4,10 +4,12 @@ import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.mapper.LetterMapper;
 import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
-import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.app.AppMailboxService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.LetterService;
+import cn.nine.pros.post.biz.service.base.SensitiveWordService;
+import cn.nine.pros.post.biz.service.base.StampAccountService;
+import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.StampTransactionService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.StampTransactionDTO;
@@ -52,7 +54,10 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private final LetterService letterService;
     private final FriendshipService friendshipService;
     private final UserService userService;
+    private final SensitiveWordService sensitiveWordService;
+    private final StampAccountService stampAccountService;
     private final StampTransactionService stampTransactionService;
+    private final OssDisplayUrlService ossDisplayUrlService;
 
     @Override
     public List<MailboxLetterItemVO> listPostalInbox(Long userId) {
@@ -112,6 +117,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         if (content.length() > 20000) {
             throw new BadRequestException("信件过长");
         }
+        sensitiveWordService.assertPlainTextAllowed(content);
         int letterType = body.getLetterType();
         if (letterType != LETTER_TYPE_REGISTERED && letterType != LETTER_TYPE_STANDARD) {
             throw new BadRequestException("letterType 须为 1（挂号）或 2（平邮）");
@@ -168,13 +174,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         if (letterType == LETTER_TYPE_REGISTERED && !vip) {
             int oldBal = sender.getStampsBalance() != null ? sender.getStampsBalance() : 0;
             int newBal = oldBal - REGISTERED_STAMP_COST;
-            boolean patched = userService.update(new LambdaUpdateWrapper<UserDomain>()
-                    .eq(UserDomain::getId, fromUserId)
-                    .eq(UserDomain::isDelFlag, false)
-                    .eq(UserDomain::getStampsBalance, oldBal)
-                    .set(UserDomain::getStampsBalance, newBal)
-                    .set(UserDomain::getUpdatedAt, now)
-                    .set(UserDomain::getUpdatedBy, fromUserId));
+            boolean patched = stampAccountService.tryDecrementBalance(fromUserId, oldBal,
+                    REGISTERED_STAMP_COST, now, fromUserId);
             if (!patched) {
                 throw new BadRequestException("邮票扣减失败，请重试");
             }
@@ -241,13 +242,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 throw new BadRequestException("邮票不足，无法加速");
             }
             int newBal = oldBal - SPEED_UP_STAMP_COST;
-            boolean patched = userService.update(new LambdaUpdateWrapper<UserDomain>()
-                    .eq(UserDomain::getId, actorUserId)
-                    .eq(UserDomain::isDelFlag, false)
-                    .eq(UserDomain::getStampsBalance, oldBal)
-                    .set(UserDomain::getStampsBalance, newBal)
-                    .set(UserDomain::getUpdatedAt, now)
-                    .set(UserDomain::getUpdatedBy, actorUserId));
+            boolean patched = stampAccountService.tryDecrementBalance(actorUserId, oldBal,
+                    SPEED_UP_STAMP_COST, now, actorUserId);
             if (!patched) {
                 throw new BadRequestException("邮票扣减失败，请重试");
             }
@@ -294,7 +290,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .eq(LetterDomain::isDelFlag, false)
                 .and(w -> w.eq(LetterDomain::getFromUserId, userId).or().eq(LetterDomain::getToUserId, userId));
         if (since != null) {
-            q.gt(LetterDomain::getUpdatedAt, since);
+            q.apply("COALESCE(updated_at, created_at) > {0}", since);
         }
         q.orderByDesc(LetterDomain::getUpdatedAt).last("LIMIT " + limit);
         return letterMapper.selectList(q);
@@ -312,9 +308,13 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         UserDTO peer = userService.findById(peerId);
         String content = l.getContent() != null ? l.getContent() : "";
         String preview = content.length() > 280 ? content.substring(0, 280) + "…" : content;
+        AppPublicUserVO peerVo = toPublic(peer);
+        if (StringUtils.hasText(peerVo.getAvatarUrl())) {
+            peerVo.setAvatarUrl(ossDisplayUrlService.signAvatarForViewer(viewer, peerVo.getAvatarUrl()));
+        }
         return MailboxLetterItemVO.builder()
                 .letterId(l.getId())
-                .peer(toPublic(peer))
+                .peer(peerVo)
                 .letterType(toInt(l.getLetterType()))
                 .sendMode(l.getSendMode() != null ? l.getSendMode() : 1)
                 .status(toInt(l.getStatus()))

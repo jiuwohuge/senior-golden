@@ -5,6 +5,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../core/api/api_exception.dart';
 import '../../core/bootstrap/app_bootstrap.dart';
+import '../../core/i18n/country_from_locale.dart';
 import '../../widgets/postal/postal.dart';
 import '../shell/main_shell.dart';
 import 'auth_repository.dart';
@@ -26,7 +27,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _nickname = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   int? _birthYear;
-  String? _countryCode;
   bool _agreed = false;
   bool _busy = false;
 
@@ -47,7 +47,58 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return [for (var i = maxY; i >= minY; i--) i];
   }
 
-  Future<void> _submit() async {
+  Future<void> _pickBirthYear(List<int> years) async {
+    if (years.isEmpty || _busy) return;
+    final l10n = AppLocalizations.of(context)!;
+    final nowY = DateTime.now().year;
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.55,
+          minChildSize: 0.35,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            return SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                    child: Text(
+                      l10n.authBirthYearSheetTitle,
+                      style: Theme.of(ctx).textTheme.titleLarge,
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: years.length,
+                      itemBuilder: (_, i) {
+                        final y = years[i];
+                        final age = nowY - y;
+                        return ListTile(
+                          title: Text(l10n.authBirthYearFormat('$y', '$age')),
+                          onTap: () => Navigator.pop(ctx, y),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() => _birthYear = picked);
+    }
+  }
+
+  Future<void> _submit(String? autoCountryCode) async {
     final l10n = AppLocalizations.of(context)!;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_birthYear == null) {
@@ -65,7 +116,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             password: _password.text,
             nickname: _nickname.text,
             birthYear: _birthYear!,
-            countryCode: _countryCode,
+            countryCode: autoCountryCode,
             agreedTerms: _agreed,
           );
       if (mounted) context.go(MainShellRoute.pathPostWall);
@@ -81,8 +132,21 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final lang = Localizations.localeOf(context).languageCode;
+    final locale = Localizations.localeOf(context);
     final bootstrapAsync = ref.watch(appBootstrapProvider);
+
+    ref.listen<AsyncValue<AppBootstrapData>>(appBootstrapProvider, (prev, next) {
+      next.whenData((b) {
+        final years = _birthYearChoices(b.minRegisterAge);
+        if (!mounted || years.isEmpty || _birthYear != null) return;
+        final target = DateTime.now().year - 45;
+        setState(() {
+          _birthYear = years.contains(target) ? target : years.first;
+        });
+      });
+    });
+
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return Scaffold(
       body: PaperTextureBackground(
@@ -98,8 +162,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             ),
             data: (bootstrap) {
               final years = _birthYearChoices(bootstrap.minRegisterAge);
+              final autoCc = countryCodeForAppLocale(locale, bootstrap.countries);
+              CountryItem? countryItem;
+              for (final c in bootstrap.countries) {
+                if (c.code == autoCc) {
+                  countryItem = c;
+                  break;
+                }
+              }
+              final countryLabel =
+                  countryItem?.displayName(locale.languageCode) ?? autoCc ?? '—';
+
               return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                padding: EdgeInsets.fromLTRB(20, 16, 20, 28 + bottomInset),
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 560),
                   child: Center(
@@ -120,7 +196,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                 PostalTextField(
                                   controller: _email,
                                   label: l10n.authEmailLabel,
-                                  hint: 'name@example.com',
+                                  hint: l10n.authEmailHint,
                                   prefixIcon: Icons.alternate_email,
                                   keyboardType: TextInputType.emailAddress,
                                   validator: (v) {
@@ -185,37 +261,34 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                         ),
                                   )
                                 else
-                                  DropdownButtonFormField<int>(
-                                    // ignore: deprecated_member_use
-                                    value: _birthYear,
-                                    decoration: InputDecoration(
-                                      labelText: l10n.authBirthYearLabel,
-                                    ),
-                                    items: years
-                                        .map((y) => DropdownMenuItem(value: y, child: Text('$y')))
-                                        .toList(),
-                                    onChanged: _busy ? null : (v) => setState(() => _birthYear = v),
-                                  ),
-                                const SizedBox(height: 14),
-                                DropdownButtonFormField<String?>(
-                                  // ignore: deprecated_member_use
-                                  value: _countryCode,
-                                  decoration: InputDecoration(
-                                    labelText: l10n.authCountryCodeLabel,
-                                  ),
-                                  items: [
-                                    DropdownMenuItem<String?>(
-                                      value: null,
-                                      child: Text(l10n.authCountrySkip),
-                                    ),
-                                    ...bootstrap.countries.map(
-                                      (c) => DropdownMenuItem<String?>(
-                                        value: c.code,
-                                        child: Text(c.displayName(lang)),
+                                  InkWell(
+                                    onTap: _busy ? null : () => _pickBirthYear(years),
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: InputDecorator(
+                                      decoration: InputDecoration(
+                                        labelText: l10n.authBirthYearLabel,
+                                        suffixIcon: const Icon(Icons.expand_more),
+                                      ),
+                                      child: Text(
+                                        _birthYear == null
+                                            ? '—'
+                                            : l10n.authBirthYearFormat(
+                                                '$_birthYear',
+                                                '${DateTime.now().year - _birthYear!}',
+                                              ),
+                                        style: Theme.of(context).textTheme.bodyLarge,
                                       ),
                                     ),
-                                  ],
-                                  onChanged: _busy ? null : (v) => setState(() => _countryCode = v),
+                                  ),
+                                const SizedBox(height: 14),
+                                InputDecorator(
+                                  decoration: InputDecoration(
+                                    labelText: l10n.authCountryAutoLabel,
+                                  ),
+                                  child: Text(
+                                    countryLabel,
+                                    style: Theme.of(context).textTheme.bodyLarge,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 PostalCheckboxField(
@@ -238,7 +311,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                 const SizedBox(height: 14),
                                 PostalButton(
                                   label: l10n.authRegisterSubmit,
-                                  onPressed: (_busy || years.isEmpty) ? null : _submit,
+                                  onPressed: (_busy || years.isEmpty) ? null : () => _submit(autoCc),
                                   busy: _busy,
                                 ),
                                 const SizedBox(height: 10),

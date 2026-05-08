@@ -46,7 +46,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
       body: PaperTextureBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 22),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              12,
+              20,
+              22 + MediaQuery.viewPaddingOf(context).bottom,
+            ),
             child: Column(
               children: [
                 Align(

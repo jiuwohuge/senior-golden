@@ -73,16 +73,16 @@ class OssUploadService {
         e.message ?? 'OSS upload failed',
       );
     }
+    if (sign.objectKey.isNotEmpty) {
+      return sign.objectKey;
+    }
     if (sign.readUrl != null && sign.readUrl!.isNotEmpty) {
       return sign.readUrl!;
     }
-    throw ApiBusinessException(
-      0,
-      'Upload OK but no readUrl; set ALIYUN_OSS_PUBLIC_BASE_URL on server',
-    );
+    throw ApiBusinessException(0, 'Upload OK but missing objectKey from server');
   }
 
-  /// 场景 `postcard` 上传一张图，返回可公开访问的 URL。
+  /// 场景 `postcard` 上传一张图，返回写入后端的地址（私有桶为 objectKey；公开读配置下可能为 readUrl）。
   Future<String> uploadPostcardImage({
     required Uint8List bytes,
     required String ext,
@@ -90,6 +90,19 @@ class OssUploadService {
   }) async {
     final sign = await fetchPutSign(
       scene: 'postcard',
+      ext: ext,
+      contentType: contentType,
+    );
+    return uploadBytes(sign: sign, bytes: bytes);
+  }
+
+  Future<String> uploadAvatarImage({
+    required Uint8List bytes,
+    required String ext,
+    String? contentType,
+  }) async {
+    final sign = await fetchPutSign(
+      scene: 'avatar',
       ext: ext,
       contentType: contentType,
     );

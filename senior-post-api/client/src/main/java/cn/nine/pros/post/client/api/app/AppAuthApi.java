@@ -2,8 +2,10 @@ package cn.nine.pros.post.client.api.app;
 
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
+import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
+import cn.nine.pros.post.client.model.input.AppResetPasswordInDto;
 import cn.nine.pros.post.client.model.out.AppAuthResultVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +26,14 @@ public interface AppAuthApi {
     @Operation(summary = "登录")
     @PostMapping(AppServiceDefine.SERVER_PREFIX + "/auth/login")
     AppAuthResultVO login(@RequestBody @Valid AppLoginInDto body);
+
+    @Operation(summary = "忘记密码：发送邮件验证码（防枚举：未注册邮箱也返回成功）")
+    @PostMapping(AppServiceDefine.SERVER_PREFIX + "/auth/forgot-password")
+    void forgotPassword(@RequestBody @Valid AppForgotPasswordInDto body);
+
+    @Operation(summary = "重置密码（验证码一次性）")
+    @PostMapping(AppServiceDefine.SERVER_PREFIX + "/auth/reset-password")
+    void resetPassword(@RequestBody @Valid AppResetPasswordInDto body);
 
     @Operation(summary = "当前登录用户")
     @GetMapping(AppServiceDefine.SERVER_PREFIX + "/auth/me")

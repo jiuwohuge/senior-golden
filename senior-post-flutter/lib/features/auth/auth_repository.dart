@@ -73,7 +73,7 @@ class AuthRepository {
   }) async {
     if (AppEnv.useMock) {
       await MockDelay.network();
-      if (code.trim().length < 4) {
+      if (!RegExp(r'^\d{6}$').hasMatch(code.trim())) {
         throw ApiBusinessException(4003, 'Verification code is incorrect.');
       }
       return;
@@ -118,17 +118,22 @@ class AuthRepository {
     required String nickname,
     String? countryCode,
     required String bio,
+    String? avatarUrl,
   }) async {
     if (AppEnv.useMock) return;
     final dio = _ref.read(dioProvider);
     try {
+      final body = <String, dynamic>{
+        'nickname': nickname.trim(),
+        'countryCode': countryCode?.trim() ?? '',
+        'bio': bio.trim(),
+      };
+      if (avatarUrl != null) {
+        body['avatarUrl'] = avatarUrl;
+      }
       final res = await dio.patch<Map<String, dynamic>>(
         '/api/auth/profile',
-        data: <String, dynamic>{
-          'nickname': nickname.trim(),
-          'countryCode': countryCode?.trim() ?? '',
-          'bio': bio.trim(),
-        },
+        data: body,
       );
       final data = unwrapData<Map<String, dynamic>>(res, (raw) {
         return raw! as Map<String, dynamic>;

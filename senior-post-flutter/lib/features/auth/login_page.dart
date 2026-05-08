@@ -105,7 +105,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             PostalTextField(
                               controller: _email,
                               label: l10n.authEmailLabel,
-                              hint: 'name@example.com',
+                              hint: l10n.authEmailHint,
                               keyboardType: TextInputType.emailAddress,
                               textInputAction: TextInputAction.next,
                               prefixIcon: Icons.alternate_email,

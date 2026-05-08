@@ -19,4 +19,9 @@ public interface SensitiveWordService extends IService<SensitiveWordDomain> {
 
     void delByIds(List<Integer> ids);
 
+    /**
+     * 用户生成内容发布前校验：命中 {@code sys_sensitive_word} 中未删除词条则抛出业务异常。
+     */
+    void assertPlainTextAllowed(String text);
+
 }

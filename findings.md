@@ -23,16 +23,13 @@
 
 ## 2. 代码与契约层面的缺口（抽样）
 
-### 2.1 App 信箱 API（`client`）
+### 2.1 App 信箱 API（`client`）— 2026-05-07 勘误
 
-`AppMailboxApi.java` 当前仅有：
+**历史结论（2026-05-02）已过期**：当时 `AppMailboxApi` 未暴露发信。当前仓库已包含（与 §5.1 一致）：
 
-- `GET .../mailbox/postal`
-- `GET .../mailbox/sync`
-- `GET .../mailbox/archive`
-- `POST .../mailbox/letters/{letterId}/accept-postal`
+- `POST .../mailbox/letters/send`、`GET .../mailbox/letters/{letterId}`、加速等扩展。
 
-**未发现**「创建信件 / 发送挂号信或平邮」的契约方法 — 与 PLAN「写信主流程」及 A5 联调描述一致：**发信写库仍为待办**。
+**仍待验收的**是双用户场景下 **postal/sync 一致性**（见 `doc/plan/07` FP-A5-002），而非「缺发信契约」。
 
 ### 2.2 Flutter 信箱数据
 
@@ -68,6 +65,8 @@
 | 方法 | 路径 |
 |------|------|
 | POST | `/api/auth/register`、`/api/auth/login` |
+| POST | `/api/auth/forgot-password`（body：`email`；防枚举） |
+| POST | `/api/auth/reset-password`（body：`email`、`code` 6 位、`newPassword`） |
 | GET | `/api/auth/me` |
 | GET | `/api/bootstrap/init` |
 | GET | `/api/mailbox/postal`、`/api/mailbox/sync`、`/api/mailbox/archive` |
@@ -80,21 +79,25 @@
 | GET | `/api/stamps/balance` |
 | POST | `/api/stamps/ledger/paging`（body：`AppStampLedgerPageInDto` 含 `page`） |
 
-**缺口**：无 `AppPostcard*`、`AppComment*`、`AppDirectory*`、`AppReport*` 等；**已有** `AppOssApi`、`AppStampsApi`；**发信**已并入 `AppMailboxApi.sendLetter`（2026-05-02）。
+**平邮自动送达（2026-05-07）**：`StandardLetterDeliveryScheduler` 定时将 `expected_arrival_time` 已到的平邮（`letter_type=2`,`status=1`）更新为已送达并写 `actual_arrival_time`；幂等条件 UPDATE。Redis ZSET 未接，可后续优化扫表。
+
+**缺口（相对首发清单）**：敏感词写路径、邮件/outbox、AES 全链、部分 Manage 运营页等；**client 已存在** `AppPostcardApi`、`AppDirectoryApi`、`AppReportApi` 等（与 Flutter `post_wall` / `directory` 真接口联调进度以 [`01-feature-list.md`](doc/plan/01-feature-list.md) 为准）。
 
 ### 5.2 管理端已实现 HTTP（抽样）
 
 `/webapi/auth/*`、`/webapi/user/*`、`/webapi/content/postcard/*`、`/webapi/content/comment/*`、`/webapi/report/*`、`/webapi/config/*`、`/webapi/country/*`、`/webapi/sensitive-word/*`、`/webapi/version/*`、`/webapi/announcement/*`、`/webapi/dashboard/summary`、`/webapi/log/action/paging`、`/webapi/log/login/paging`。
 
-### 5.3 Flutter `features` 完成度（相对 `AppEnv.useMock`）
+### 5.3 Flutter `features` 完成度（相对 `AppEnv.useMock`）— 2026-05-07 勘误
+
+**口径**：下表描述「Mock 分支 vs 非 Mock 分支」的粗粒度事实；**与 `01-feature-list` 中各 FP 勾选不一致时，以 `01` + [`07-gap-analysis-and-roadmap.md`](doc/plan/07-gap-analysis-and-roadmap.md) 为准**（避免「完全 Mock」与已接线 REST 并存时产生歧义）。
 
 | Feature | 数据层 |
 |---------|--------|
-| `auth` | Mock 或真实 `dio` 二轨；忘记密码页存在但后端 `AppAuthController` 无对应端点 |
-| `post_wall` | 完全 Mock |
-| `directory` | 完全 Mock（名录数据仍 Mock；**发信**已接真实 API） |
-| `mailbox`（信件） | **`USE_MOCK=false` 时**：`mailbox_remote` 接 postal/archive/详情/发信/建联/好友判断/`speed-up`；顶栏邮票接 `/api/stamps/balance`；**回信**仍仅 Mock 或未接 |
-| `profile` | 完全 Mock |
+| `auth` | Mock 或真实 `dio` 二轨；**FP-A1-003** 已接 `forgot-password` / `reset-password`；**FP-X-001** 全量 outbox 仍可选 |
+| `post_wall` | `USE_MOCK=false` 时走 `post_wall_remote` 等真实 API（多图/举报等迭代见 `01`）；Mock 分支仍保留 |
+| `directory` | `USE_MOCK=false` 时走名录分页等真实 API；发信已接真实 API |
+| `mailbox`（信件） | **`USE_MOCK=false` 时**：`mailbox_remote` 接 postal/archive/详情/发信/建联/好友判断/`speed-up`；顶栏邮票接 `/api/stamps/balance`；**回信**仍待产品化（见 `07`） |
+| `profile` | `USE_MOCK=false` 时 bootstrap/me/PATCH profile 已有多处接线；头像 OSS 写回等见 **FP-A2-002** |
 
 ### 5.4 Manage 小缺口（再次确认）
 
@@ -103,4 +106,16 @@
 
 ### 5.5 文档索引
 
-执行层规划见 [`task_plan.md`](task_plan.md) 与 [`doc/plan/01-feature-list.md`](doc/plan/01-feature-list.md) 起共 6 份。
+执行层规划见 [`task_plan.md`](task_plan.md) 与 [`doc/plan/01-feature-list.md`](doc/plan/01-feature-list.md) 起共 **7** 份（含 [`07-gap-analysis-and-roadmap.md`](doc/plan/07-gap-analysis-and-roadmap.md) 遗漏清单与路线图）。
+
+---
+
+## 6. OSS 私有读（2026-05-08）
+
+**已存在事实**：仅 [`AppOssServiceImpl`](senior-post-api/biz/src/main/java/cn/nine/pros/post/biz/service/app/impl/AppOssServiceImpl.java) 签发 **PUT** 预签名；`OssPutSignResultVO.readUrl` 依赖 `senior-post.oss.public-read-base-url`，**私有桶下应为空**，否则客户端误用不可匿名访问的拼接 URL。
+
+**缺口**：无 **GET** 预签名接口；`PostcardWallItemVO` / `avatarUrl` 等若落库为不可读 URL，则 App `Image.network` 与后续 Web 审核台均无法稳定展示。
+
+**改造原则（与产品对齐）**：首发 **不做** 匿名公共前缀；读链路由服务端换签 + 短 TTL + objectKey 白名单与业务权限校验。
+
+**执行跟踪**：`task_plan.md`「OSS 私有读改造」子阶段 O1–O7；FP **FP-X-005**（`05-task-tracker.md`）。

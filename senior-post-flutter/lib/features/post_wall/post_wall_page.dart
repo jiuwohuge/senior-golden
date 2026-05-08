@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/mock/mock_models.dart';
@@ -9,11 +10,30 @@ import '../../widgets/postal/postal.dart';
 import '../directory/send_letter_sheet.dart';
 import 'post_providers.dart';
 
-class PostWallPage extends ConsumerWidget {
+class PostWallPage extends ConsumerStatefulWidget {
   const PostWallPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PostWallPage> createState() => _PostWallPageState();
+}
+
+class _PostWallPageState extends ConsumerState<PostWallPage> {
+  bool _refreshing = false;
+
+  Future<void> _onRefresh() async {
+    if (_refreshing) return;
+    _refreshing = true;
+    try {
+      ref.invalidate(postWallListProvider);
+      await ref.read(postWallListProvider.future);
+    } finally {
+      if (mounted) _refreshing = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final postsAsync = ref.watch(postWallListProvider);
     return SafeArea(
       top: false,
@@ -24,28 +44,32 @@ class PostWallPage extends ConsumerWidget {
             child: postsAsync.when(
               loading: () => const PostalSkeletonList(),
               error: (error, _) => PostalEmptyState(
-                title: 'Post wall is temporarily unavailable',
+                title: l10n.postWallUnavailable,
                 subtitle: '$error',
-                actionLabel: 'Retry',
+                actionLabel: l10n.commonRetry,
                 onAction: () => ref.invalidate(postWallListProvider),
                 tone: PostalEmptyTone.error,
               ),
               data: (posts) {
                 if (posts.isEmpty) {
                   return PostalEmptyState(
-                    title: 'No postcards yet',
-                    subtitle: 'Be the first to share a postcard today.',
-                    actionLabel: 'Write postcard',
+                    title: l10n.postWallEmptyTitle,
+                    subtitle: l10n.postWallEmptySubtitle,
+                    actionLabel: l10n.postWallWriteAction,
                     onAction: () => context.push('/post/new'),
                   );
                 }
                 return Stack(
                   children: [
-                    ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 90),
-                      itemCount: posts.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (_, i) => _PostCard(post: posts[i]),
+                    RefreshIndicator(
+                      onRefresh: _onRefresh,
+                      child: ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 90),
+                        itemCount: posts.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (_, i) => _PostCard(post: posts[i]),
+                      ),
                     ),
                     Positioned(
                       right: 20,
@@ -53,7 +77,7 @@ class PostWallPage extends ConsumerWidget {
                       child: FloatingActionButton.extended(
                         onPressed: () => context.push('/post/new'),
                         icon: const Icon(Icons.edit_note),
-                        label: const Text('Write'),
+                        label: Text(l10n.postWallFAB),
                       ),
                     ),
                   ],
@@ -73,12 +97,17 @@ class _PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final dt = DateFormat('MM-dd HH:mm').format(post.createdAt);
     return PostalCardEnvelope(
       onTap: () => context.push('/post/${post.id}'),
       header: Row(
         children: [
-          PostalAvatar(name: post.author.nickname, size: 44),
+          PostalAvatar(
+            name: post.author.nickname,
+            size: 44,
+            imageUrl: post.author.avatarUrl,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -107,7 +136,9 @@ class _PostCard extends StatelessWidget {
       ),
       footer: Row(
         children: [
-          PostalStatusChip.draft(label: 'Comments ${post.commentCount}'),
+          PostalStatusChip.draft(
+            label: l10n.postWallCommentsCount('${post.commentCount}'),
+          ),
           const Spacer(),
           IconButton(
             onPressed: () => context.push('/post/${post.id}'),
@@ -115,7 +146,7 @@ class _PostCard extends StatelessWidget {
             color: PostalTokens.postboxGreen,
           ),
           IconButton(
-            tooltip: 'Send letter',
+            tooltip: l10n.postWallSendLetterTooltip,
             onPressed: () {
               showModalBottomSheet<void>(
                 context: context,
@@ -165,7 +196,7 @@ class _PostCard extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             child: Text(
-                              '${post.resolvedImageUrls.length} photos',
+                              l10n.postWallPhotosLabel('${post.resolvedImageUrls.length}'),
                               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                     color: Colors.white,
                                   ),

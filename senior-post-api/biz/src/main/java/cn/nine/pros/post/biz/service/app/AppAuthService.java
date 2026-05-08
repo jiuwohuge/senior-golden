@@ -2,14 +2,19 @@ package cn.nine.pros.post.biz.service.app;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
+import cn.nine.pros.post.biz.config.OssProperties;
 import cn.nine.pros.post.biz.model.domain.UserDeviceDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
+import cn.nine.pros.post.biz.service.app.support.OssReadableKeyValidator;
+import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
+import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
+import cn.nine.pros.post.client.model.input.AppResetPasswordInDto;
 import cn.nine.pros.post.client.model.out.AppAuthResultVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -18,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -35,6 +41,9 @@ public class AppAuthService {
     private final UserDeviceService userDeviceService;
     private final PasswordEncoder passwordEncoder;
     private final AppJwtService appJwtService;
+    private final OssDisplayUrlService ossDisplayUrlService;
+    private final PasswordResetService passwordResetService;
+    private final OssProperties ossProperties;
 
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO register(AppRegisterInDto body) {
@@ -72,9 +81,10 @@ public class AppAuthService {
         touchDevice(user.getId(), body.getDeviceUuid(), body.getDeviceType());
 
         String token = appJwtService.createToken(user.getId());
+        UserDTO regFresh = userService.findById(user.getId());
         return AppAuthResultVO.builder()
                 .token(token)
-                .user(toPublic(userService.findById(user.getId())))
+                .user(toPublic(regFresh, regFresh.getId()))
                 .build();
     }
 
@@ -102,8 +112,16 @@ public class AppAuthService {
         UserDTO fresh = userService.findById(dto.getId());
         return AppAuthResultVO.builder()
                 .token(token)
-                .user(toPublic(fresh))
+                .user(toPublic(fresh, fresh.getId()))
                 .build();
+    }
+
+    public void forgotPassword(AppForgotPasswordInDto body) {
+        passwordResetService.requestForgotPassword(body.getEmail());
+    }
+
+    public void resetPassword(AppResetPasswordInDto body) {
+        passwordResetService.completeReset(body.getEmail(), body.getCode(), body.getNewPassword());
     }
 
     public AppPublicUserVO me() {
@@ -115,7 +133,7 @@ public class AppAuthService {
         if (dto == null) {
             return null;
         }
-        return toPublic(dto);
+        return toPublic(dto, dto.getId());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -148,13 +166,29 @@ public class AppAuthService {
             uw.set(UserDomain::getBio, body.getBio().trim());
             changed = true;
         }
+        if (body.getAvatarUrl() != null) {
+            String raw = body.getAvatarUrl().trim();
+            if (raw.isEmpty()) {
+                uw.set(UserDomain::getAvatarUrl, null);
+            } else {
+                String normalized =
+                        OssReadableKeyValidator.normalizeAndValidate(ossProperties.getKeyPrefix(), raw);
+                OssReadableKeyValidator.ParsedOssKey p =
+                        OssReadableKeyValidator.parseNormalizedKey(ossProperties.getKeyPrefix(), normalized);
+                if (!"avatar".equals(p.sceneLower()) || p.ownerUserId() != uid) {
+                    throw new BadRequestException("头像路径无效或不属于当前用户");
+                }
+                uw.set(UserDomain::getAvatarUrl, normalized);
+            }
+            changed = true;
+        }
         if (!changed) {
             throw new BadRequestException("请至少提交一项可更新字段");
         }
         LocalDateTime now = LocalDateTime.now();
         uw.set(UserDomain::getUpdatedAt, now).set(UserDomain::getUpdatedBy, uid);
         userService.update(uw);
-        return toPublic(userService.findById(uid));
+        return toPublic(userService.findById(uid), uid);
     }
 
     private static Integer convertStatus(Object status) {
@@ -193,9 +227,13 @@ public class AppAuthService {
         userDeviceService.save(d);
     }
 
-    private static AppPublicUserVO toPublic(UserDTO dto) {
+    private AppPublicUserVO toPublic(UserDTO dto, Long viewerUserId) {
         if (dto == null) {
             return null;
+        }
+        String av = dto.getAvatarUrl();
+        if (viewerUserId != null && StringUtils.hasText(av)) {
+            av = ossDisplayUrlService.signAvatarForViewer(viewerUserId, av.trim());
         }
         return AppPublicUserVO.builder()
                 .id(dto.getId())
@@ -204,7 +242,7 @@ public class AppAuthService {
                 .birthYear(dto.getBirthYear())
                 .countryCode(dto.getCountryCode())
                 .bio(dto.getBio())
-                .avatarUrl(dto.getAvatarUrl())
+                .avatarUrl(av)
                 .stampsBalance(dto.getStampsBalance())
                 .isVip(dto.getIsVip())
                 .build();

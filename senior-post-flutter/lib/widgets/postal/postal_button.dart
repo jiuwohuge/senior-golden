@@ -121,6 +121,7 @@ class PostalButton extends StatelessWidget {
       onPressed: _disabled ? null : onPressed,
       style: TextButton.styleFrom(
         foregroundColor: PostalTokens.postboxGreen,
+        backgroundColor: PostalTokens.paperCard.withValues(alpha: 0.92),
         padding: EdgeInsets.zero,
         shape: const RoundedRectangleBorder(
           borderRadius: PostalTokens.shapeMd,

@@ -6,12 +6,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 @Slf4j
 @MapperScan("cn.nine.pros.post.biz.mapper")
+@EnableScheduling
 @SpringBootApplication(scanBasePackages = "cn.nine.pros")
 public class SeniorPostApplication {
 

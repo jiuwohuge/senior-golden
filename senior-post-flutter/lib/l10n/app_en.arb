@@ -60,6 +60,10 @@
   "authTermsTitle": "Terms of Service",
   "authPrivacyTitle": "Privacy Policy",
   "authForgotPassword": "Forgot password",
+  "authForgotIntro": "We'll email a 6-digit code to your registered address. In local dev, check server logs if SMTP is not configured.",
+  "authForgotCodeHint": "6-digit code",
+  "authForgotResetSuccess": "Password updated. You can sign in now.",
+  "authForgotCodeInvalid": "Enter the 6-digit code",
   "authOnboardingAgain": "View introduction",
   "authEmailInvalid": "Please enter a valid email address",
   "authRegisterSubtitle": "Create your postal social account in one minute.",
@@ -86,6 +90,103 @@
   "onboardSkip": "Skip",
   "onboardNext": "Next",
   "onboardDone": "Start now",
+  "commonRetry": "Retry",
+  "postWallUnavailable": "Post wall is temporarily unavailable",
+  "postWallEmptyTitle": "No postcards yet",
+  "postWallEmptySubtitle": "Be the first to share a postcard today.",
+  "postWallWriteAction": "Write postcard",
+  "postWallFAB": "Write",
+  "postWallPhotosLabel": "{count} photos",
+  "@postWallPhotosLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "postWallSendLetterTooltip": "Send letter",
+  "postWallCommentsCount": "Comments {count}",
+  "@postWallCommentsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "postComposeTitle": "Write postcard",
+  "postComposeSectionTitle": "Compose",
+  "postComposeSectionSubtitle": "Write one postcard for today",
+  "postComposeContentLabel": "Postcard content",
+  "postComposeContentHint": "Write your day, thoughts, or greetings…",
+  "postComposeMaxImages": "At most {max} images",
+  "@postComposeMaxImages": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "postComposeUploadNeedRealApi": "OSS upload requires Mock off: flutter run --dart-define=USE_MOCK=false …",
+  "postComposePickerChannelError": "Gallery channel not connected. Fully stop the app and run again; if it persists run flutter clean.",
+  "postComposeImageUploaded": "Image uploaded",
+  "postComposeNeedContent": "Please write something first.",
+  "postComposePublishedMock": "Mock: postcard published (+1 stamp)",
+  "postComposePublishedReal": "Submitted for review. It will appear after approval.",
+  "postComposeUploading": "Uploading…",
+  "postComposeAddImage": "Add image (OSS)",
+  "postComposeAddAnother": "Add another ({n}/{max})",
+  "@postComposeAddAnother": {
+    "placeholders": {
+      "n": {},
+      "max": {}
+    }
+  },
+  "postComposePublish": "Publish now",
+  "directoryTitle": "Post Directory",
+  "directorySubtitle": "Find pen pals by country and interests",
+  "directoryLoadFailed": "Unable to load directory",
+  "directoryEmptyTitle": "No matching members",
+  "directoryEmptySubtitle": "Try clearing filters or changing age range.",
+  "directoryAgeYears": "{age} years old",
+  "@directoryAgeYears": {
+    "placeholders": {
+      "age": {}
+    }
+  },
+  "authBirthYearSheetTitle": "Year of birth",
+  "authBirthYearFormat": "{year} ({age})",
+  "@authBirthYearFormat": {
+    "placeholders": {
+      "year": {},
+      "age": {}
+    }
+  },
+  "authCountryAutoLabel": "Region (from app language)",
+  "authEmailHint": "name@example.com",
+  "profileEditTitle": "Edit profile",
+  "profileNickname": "Nickname",
+  "profileCountry": "Country",
+  "profileBio": "Bio",
+  "profileSave": "Save",
+  "profileMockUpdated": "Mock: profile updated",
+  "profileSaved": "Profile saved",
+  "profileAvatarChange": "Change profile photo",
+  "profileAvatarCropTitle": "Crop photo",
+  "profileAvatarCropDone": "Done",
+  "profileAvatarUploading": "Uploading photo…",
+  "profileEditProfile": "Edit profile",
+  "profileInterestTags": "Interest tags",
+  "profileStampsLedger": "Stamps ledger",
+  "profileVipCenter": "VIP center",
+  "profileSettings": "Settings",
+  "profileAbout": "About",
+  "profileUserAgreement": "User Agreement",
+  "profilePrivacyPolicy": "Privacy Policy",
+  "profileLogout": "Log out",
+  "settingsTitle": "Settings",
+  "settingsPushNotifications": "Push notifications",
+  "settingsUnreadBadges": "Show unread badges",
+  "settingsLanguage": "Language",
+  "settingsLanguageSubtitle": "English / 中文 / System",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageChinese": "中文",
+  "settingsLanguageSystem": "Follow system",
+  "settingsAbout": "About",
+  "settingsDeleteAccount": "Delete account",
   "legalEffectiveDate": "Effective date: 2026-05-01",
   "legalTermsContent": "1) This app provides interest-based social communication for adults aged 45+ only.\\n\\n2) The product does not provide dating or matchmaking services.\\n\\n3) You are responsible for the legality of your content and must not publish prohibited content.\\n\\n4) We may suspend accounts for abuse, harassment, spam, fraud, or policy violations.\\n\\n5) We provide moderation and reporting mechanisms to maintain a safe communication environment.",
   "legalPrivacyContent": "1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal."

@@ -51,6 +51,7 @@ class MockSessionNotifier extends StateNotifier<MockSessionState> {
     String? countryCode,
     String? countryName,
     List<String>? interests,
+    String? avatarUrl,
   }) {
     state = state.copyWith(
       user: state.user.copyWith(
@@ -59,6 +60,7 @@ class MockSessionNotifier extends StateNotifier<MockSessionState> {
         countryCode: countryCode,
         countryName: countryName,
         interests: interests,
+        avatarUrl: avatarUrl,
       ),
     );
   }
@@ -168,7 +170,7 @@ class MockPostsRepository {
     final session = _ref.read(mockSessionProvider);
     final urls = imageUrls != null && imageUrls.isNotEmpty
         ? imageUrls
-        : (imageUrl != null && imageUrl!.isNotEmpty ? <String>[imageUrl!] : null);
+        : (imageUrl != null && imageUrl.isNotEmpty ? <String>[imageUrl] : null);
     final first = urls != null && urls.isNotEmpty ? urls.first : null;
     final created = MockPost(
       id: 'p_${DateTime.now().millisecondsSinceEpoch}',
@@ -205,6 +207,9 @@ class MockDirectoryRepository {
     int? minAge,
     int? maxAge,
     Set<String> interests = const {},
+    String sort = 'DEFAULT',
+    int? viewerBirthYear,
+    Set<String> viewerInterests = const {},
   }) async {
     await MockDelay.network();
     MockDelay.maybeThrow(message: 'Mock: Failed to load directory.');
@@ -222,6 +227,25 @@ class MockDirectoryRepository {
       result = result.where((u) {
         return u.interests.any(interests.contains);
       }).toList();
+    }
+    switch (sort.toUpperCase()) {
+      case 'SAME_AGE':
+        final vy = viewerBirthYear;
+        if (vy != null) {
+          result.sort((a, b) {
+            final da = (a.birthYear - vy).abs();
+            final db = (b.birthYear - vy).abs();
+            return da.compareTo(db);
+          });
+        }
+        break;
+      case 'SHARED_INTEREST':
+        int shared(MockUser u) =>
+            u.interests.where(viewerInterests.contains).length;
+        result.sort((a, b) => shared(b).compareTo(shared(a)));
+        break;
+      default:
+        break;
     }
     return result;
   }
