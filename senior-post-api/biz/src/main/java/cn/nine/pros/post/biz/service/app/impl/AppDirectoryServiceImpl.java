@@ -1,5 +1,6 @@
 package cn.nine.pros.post.biz.service.app.impl;
 
+import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.controller.app.AppPageHelper;
@@ -23,6 +24,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AppDirectoryServiceImpl implements AppDirectoryService {
+
+    private static final int USER_STATUS_NORMAL = 1;
 
     private static final String SORT_DEFAULT = "DEFAULT";
     private static final String SORT_SAME_AGE = "SAME_AGE";
@@ -72,6 +75,18 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
         return AppPageHelper.pageData(pq, p, records);
     }
 
+    @Override
+    public DirectoryUserItemVO getDirectoryUser(long viewerUserId, long targetUserId) {
+        UserDomain u = userService.getById(targetUserId);
+        if (u == null || u.isDelFlag()) {
+            throw new BadRequestException("用户不存在");
+        }
+        if (!isDirectoryListableUser(u)) {
+            throw new BadRequestException("该用户暂不可见");
+        }
+        return toVo(viewerUserId, u);
+    }
+
     private void applySort(LambdaQueryWrapper<UserDomain> qw, long viewerUserId, AppDirectoryPageInDto body) {
         String sort = SORT_DEFAULT;
         if (body != null && StringUtils.hasText(body.getSort())) {
@@ -112,5 +127,24 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
                 .avatarUrl(av)
                 .isVip(Boolean.TRUE.equals(u.getIsVip()))
                 .build();
+    }
+
+    /** 与 {@link #pageUsers} 查询条件一致：正常用户、非后台账号、未删除。 */
+    private boolean isDirectoryListableUser(UserDomain u) {
+        if (userStatus(u.getStatus()) != USER_STATUS_NORMAL) {
+            return false;
+        }
+        Integer sr = u.getStaffRole();
+        return sr != null && sr == 0;
+    }
+
+    private static int userStatus(Object status) {
+        if (status instanceof Number n) {
+            return n.intValue();
+        }
+        if (status instanceof String s) {
+            return Integer.parseInt(s);
+        }
+        return 0;
     }
 }

@@ -7,4 +7,6 @@ import cn.nine.pros.post.client.model.out.DirectoryUserItemVO;
 public interface AppDirectoryService {
 
     PageData<DirectoryUserItemVO> pageUsers(long viewerUserId, AppDirectoryPageInDto body);
+
+    DirectoryUserItemVO getDirectoryUser(long viewerUserId, long targetUserId);
 }

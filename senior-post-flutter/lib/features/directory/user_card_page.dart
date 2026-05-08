@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
+import 'directory_remote.dart';
 import 'send_letter_sheet.dart';
 
 final directoryUserProvider = FutureProvider.family<MockUser?, String>((ref, userId) async {
-  return ref.read(mockDirectoryRepositoryProvider).findById(userId);
+  if (AppEnv.useMock) {
+    return ref.read(mockDirectoryRepositoryProvider).findById(userId);
+  }
+  return ref.read(directoryRemoteProvider).getDirectoryUser(userId);
 });
 
 class UserCardPage extends ConsumerWidget {
@@ -36,6 +41,7 @@ class UserCardPage extends ConsumerWidget {
                 subtitle: 'The member may no longer be available.',
               );
             }
+            final theme = Theme.of(context);
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
               children: [
@@ -44,28 +50,54 @@ class UserCardPage extends ConsumerWidget {
                     children: [
                       PostalAvatar(
                         name: user.nickname,
-                        size: 68,
+                        size: 72,
                         imageUrl: user.avatarUrl,
                       ),
+                      const SizedBox(height: 14),
+                      Text(
+                        user.nickname,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.2,
+                          height: 1.15,
+                        ),
+                      ),
                       const SizedBox(height: 10),
-                      Text(user.nickname, style: Theme.of(context).textTheme.headlineSmall),
-                      const SizedBox(height: 6),
                       PostalCountrySeal(
                         countryCode: user.countryCode,
                         countryName: user.countryName,
                       ),
-                      const SizedBox(height: 8),
-                      Text('${user.age} years', style: Theme.of(context).textTheme.bodySmall),
-                      const SizedBox(height: 12),
-                      Text(user.bio, textAlign: TextAlign.center),
-                      const SizedBox(height: 14),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: user.interests
-                            .map((t) => Chip(label: Text(t)))
-                            .toList(),
+                      const SizedBox(height: 10),
+                      Text(
+                        '${user.age} years',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          letterSpacing: 0.2,
+                        ),
                       ),
+                      if (user.bio.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          user.bio,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            height: 1.45,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.88),
+                          ),
+                        ),
+                      ],
+                      if (user.interests.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          alignment: WrapAlignment.center,
+                          children: user.interests
+                              .map((t) => Chip(label: Text(t)))
+                              .toList(),
+                        ),
+                      ],
                     ],
                   ),
                 ),

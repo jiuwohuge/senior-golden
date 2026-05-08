@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
+import '../../core/mock/mock_data.dart';
 import '../../core/mock/mock_models.dart';
 import '../../core/network/dio_provider.dart';
 
@@ -44,18 +45,50 @@ class DirectoryRemoteRepository {
     }
     return rows.whereType<Map<String, dynamic>>().map(_voToMockUser).toList();
   }
+
+  /// 名录公开用户卡（与分页 VO 字段一致）。不可见或不存在时返回 `null`。
+  Future<MockUser?> getDirectoryUser(String userId) async {
+    if (int.tryParse(userId) == null) {
+      return null;
+    }
+    try {
+      final r = await _dio.get<dynamic>('/api/directory/users/$userId');
+      return unwrapData(r, (raw) {
+        if (raw is! Map<String, dynamic>) {
+          throw ApiBusinessException(0, 'Invalid user payload');
+        }
+        return _voToMockUser(raw);
+      });
+    } on DioException catch (e) {
+      final err = e.error;
+      if (err is ApiBusinessException) {
+        final msg = err.message;
+        if (msg.contains('用户不存在') || msg.contains('该用户暂不可见')) {
+          return null;
+        }
+      }
+      rethrow;
+    }
+  }
 }
 
 MockUser _voToMockUser(Map<String, dynamic> m) {
   final id = (m['id'] as num?)?.toInt() ?? 0;
   final birthYear = (m['birthYear'] as num?)?.toInt() ?? 1970;
   final cc = (m['countryCode'] as String?) ?? '';
+  var countryName = cc;
+  for (final c in MockData.countries) {
+    if (c.code == cc) {
+      countryName = c.nameEn;
+      break;
+    }
+  }
   return MockUser(
     id: '$id',
     nickname: (m['nickname'] as String?) ?? 'User',
     email: '',
     countryCode: cc,
-    countryName: cc,
+    countryName: countryName,
     birthYear: birthYear,
     bio: (m['bio'] as String?) ?? '',
     interests: const [],

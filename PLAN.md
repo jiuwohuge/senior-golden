@@ -259,7 +259,7 @@ flowchart LR
 - [ ] A1. 账号注册登录（邮箱注册、年龄门槛、协议同意；**忘记密码/重置仍待后端**）
 - [ ] A2. 用户资料中心（**`me` + `PATCH /api/auth/profile` + 流水页已接 REST**；头像 URL 写回、兴趣写回仍待办）
 - [ ] A3. Post Wall（**列表/详情/发帖/评论 + OSS 配图已接 REST**；举报入口、敏感词写入、审核态作者侧 UX 仍待办）
-- [ ] A4. Post Directory（**名录分页与筛选 + 写信联动已接 REST**；同龄/同兴趣排序、独立用户公开页仍待办）
+- [ ] A4. Post Directory（**名录分页与筛选 + 同龄/同兴趣排序 + 写信联动 + 用户公开卡 `GET /api/directory/users/{id}` 已接 REST（Flutter `UserCardPage` 非 Mock 走远程）**；名录 VO 展示兴趣标签仍待扩展）
 - [ ] A5. Post Box（**发信/收件/归档/详情/Accept/IM sig、平邮加速 `speed-up` 已接 REST**；平邮到期 Worker 仍待办）
 - [x] A5-IM. 邮政信箱 × 腾讯 IM 双轨：**后端** `V4`（`bu_friendship` + `send_mode`）、`GET/POST /api/mailbox/*`、`GET /api/im/usersig`（`tls-sig-api-v2` + `senior-post.tencent-im`）；**Flutter** Tab 分段、归档、`tim_facade`、`chat_page`、`tencent_cloud_chat_sdk:8.8.7373`、Mock 建联与单元测试 `test/mailbox_models_test.dart`（2026-05-02）
 - [ ] A6. Chat Stamp（**余额 + 流水分页（App + Flutter 流水页）已接**；登录赠送/日上限、加速专用接口、管理流水页仍待办）
@@ -272,6 +272,7 @@ flowchart LR
 
 ## [改动预测]
 
+- **FP-A4-004（2026-05-08）**：名录详情阻塞修复——后端新增 **`GET /api/directory/users/{userId}`**（与分页项同 VO、同可见性规则）；Flutter **`directoryUserProvider`** 在 **`AppEnv.useMock == false`** 时改走 **`DirectoryRemoteRepository.getDirectoryUser`**，避免列表为真实 ID、详情仍查 Mock 导致的「Profile not found」。
 - **已完成（2026-05-01）**：接入 **Flyway**（`server` 依赖 + `db/migration` 基线脚本）；**`/webapi`** 与 **`AppServiceDefine.WEBAPI_PREFIX`**；`application.yml` 拦截器/加解密忽略列表；**PLAN / 底层框架能力 / backend skill** 与本次决策对齐。
 - **后续**：按「库表规划」追加 `V3__...sql` 与 M2 业务代码；**`get_sign`**、邮件 SPI、腾讯 UserSig 等按模块逐项实现。
 - **本次新增（2026-05-01）**：新增 App 启动配置接口 **`GET /api/bootstrap/init`**（返回注册最小年龄 + 国家列表），Flutter Profile Tab 已改为真实数据页，联调 **`/api/auth/me` + `/api/bootstrap/init`** 并支持退出登录。
