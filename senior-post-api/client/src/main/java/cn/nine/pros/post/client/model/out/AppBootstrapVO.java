@@ -16,4 +16,7 @@ public class AppBootstrapVO {
 
     @Schema(description = "国家列表")
     private List<AppCountryVO> countries;
+
+    @Schema(description = "注册/登录前可选：按 lang 返回兴趣标签选项（与名录选项一致）")
+    private List<InterestTagOptionVO> interestTagOptions;
 }

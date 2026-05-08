@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -33,4 +35,10 @@ public class DirectoryUserItemVO {
 
     @Schema(description = "是否 VIP")
     private Boolean isVip;
+
+    @Schema(description = "兴趣标签 ID（与 bu_user_tag / sys_tag 一致）")
+    private List<Integer> interestTagIds;
+
+    @Schema(description = "兴趣标签名称（与 sys_tag.tag_name 一致，名录筛选 interestNames 用名）")
+    private List<String> interestTagNames;
 }

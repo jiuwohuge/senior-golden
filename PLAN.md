@@ -272,7 +272,8 @@ flowchart LR
 
 ## [改动预测]
 
-- **FP-A4-004（2026-05-08）**：名录详情阻塞修复——后端新增 **`GET /api/directory/users/{userId}`**（与分页项同 VO、同可见性规则）；Flutter **`directoryUserProvider`** 在 **`AppEnv.useMock == false`** 时改走 **`DirectoryRemoteRepository.getDirectoryUser`**，避免列表为真实 ID、详情仍查 Mock 导致的「Profile not found」。
+- **FP-A4-004（2026-05-08）**：名录详情阻塞修复——后端新增 **`GET /api/directory/users/{userId}`**；Flutter **`directoryUserProvider`** 走 **`DirectoryRemoteRepository.getDirectoryUser`**，避免列表为真实 ID、详情仍查 Mock 导致的「Profile not found」。
+- **名录 Mock 剥离（2026-05-08 续）**：后端 **`GET /api/directory/interest-tags?lang=`**（`sys_tag`，与筛选 `interestNames` 一致）；Flutter 筛选国家改 **`appBootstrapProvider`**，兴趣选项走 **`directoryFilterTagOptionsProvider`**；**Tab2 列表 / 用户卡 / Send Letter** 固定远程，**`MockDirectoryRepository` 不再参与 directory 流程**（`AppEnv` 注释已说明）。
 - **已完成（2026-05-01）**：接入 **Flyway**（`server` 依赖 + `db/migration` 基线脚本）；**`/webapi`** 与 **`AppServiceDefine.WEBAPI_PREFIX`**；`application.yml` 拦截器/加解密忽略列表；**PLAN / 底层框架能力 / backend skill** 与本次决策对齐。
 - **后续**：按「库表规划」追加 `V3__...sql` 与 M2 业务代码；**`get_sign`**、邮件 SPI、腾讯 UserSig 等按模块逐项实现。
 - **本次新增（2026-05-01）**：新增 App 启动配置接口 **`GET /api/bootstrap/init`**（返回注册最小年龄 + 国家列表），Flutter Profile Tab 已改为真实数据页，联调 **`/api/auth/me` + `/api/bootstrap/init`** 并支持退出登录。

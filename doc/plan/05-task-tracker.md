@@ -22,6 +22,7 @@
 | FP-A3-003 | AI + Owner | S1 | W1D4 | W1D5 | DONE | 发帖落库 + OSS 可选 URL | `AppPostcardServiceImpl.create` |
 | FP-A3-004 | AI + Owner | S1 | W1D5 | W1D6 | DONE | 评论分页与发表 | `commentsPaging` / `createComment` |
 | FP-A2-001 | AI + Owner | S1 | W1D5 | W1D6 | DONE | `PATCH /api/auth/profile` + Flutter 编辑页/登录会话与 `me` 一致 | `AppAuthProfilePatchInDto`、`AuthRepository` |
+| FP-A2-003 | AI + Owner | S2 | W2D6 | W2D6 | DONE | 兴趣 ≥3：`PATCH` `interestTagIds`；`AppPublicUserVO` 带标签 id/名；名录选项 `GET /api/directory/interest-tag-options`；筛选仍传 `tag_name` | `AppAuthService`、`UserTagService`、`AppDirectoryController`、`interests_picker_page`、`MockUser.interestTagIds` |
 | FP-A4-001 | AI + Owner | S1 | W1D6 | W1D7 | DONE | 分页 total 正确 | `AppDirectoryServiceImpl`、`directory_remote` |
 | FP-A6-002-Fl | AI + Owner | S2 | W2D1 | W2D1 | DONE | `USE_MOCK=false` 流水页调 ledger paging | `stamps_remote.dart`、`stamps_ledger_page.dart` |
 

@@ -51,6 +51,7 @@ class MockSessionNotifier extends StateNotifier<MockSessionState> {
     String? countryCode,
     String? countryName,
     List<String>? interests,
+    List<int>? interestTagIds,
     String? avatarUrl,
   }) {
     state = state.copyWith(
@@ -60,6 +61,7 @@ class MockSessionNotifier extends StateNotifier<MockSessionState> {
         countryCode: countryCode,
         countryName: countryName,
         interests: interests,
+        interestTagIds: interestTagIds,
         avatarUrl: avatarUrl,
       ),
     );
@@ -79,6 +81,20 @@ class MockSessionNotifier extends StateNotifier<MockSessionState> {
     final idStr = uid == null
         ? state.user.id
         : (uid is int ? '$uid' : (uid as num).toString());
+    var interests = state.user.interests;
+    final namesRaw = m['interestTagNames'];
+    if (namesRaw is List<dynamic>) {
+      interests = namesRaw
+          .whereType<String>()
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+    }
+    var interestTagIds = state.user.interestTagIds;
+    final idsRaw = m['interestTagIds'];
+    if (idsRaw is List<dynamic>) {
+      interestTagIds = idsRaw.whereType<num>().map((n) => n.toInt()).toList();
+    }
     state = state.copyWith(
       user: MockUser(
         id: idStr,
@@ -88,7 +104,8 @@ class MockSessionNotifier extends StateNotifier<MockSessionState> {
         countryName: nameEn,
         birthYear: (m['birthYear'] as num?)?.toInt() ?? state.user.birthYear,
         bio: m['bio'] as String? ?? '',
-        interests: state.user.interests,
+        interests: interests,
+        interestTagIds: interestTagIds,
         avatarUrl: m['avatarUrl'] as String?,
         isVip: m['isVip'] as bool? ?? state.user.isVip,
       ),
@@ -110,6 +127,33 @@ class MockSessionNotifier extends StateNotifier<MockSessionState> {
     state = state.copyWith(stampBalance: state.stampBalance + amount);
   }
 
+  /// Mock 注册成功后写入新会话（与真接口返回的 `user` 字段语义接近）。
+  void seedNewMockAccount({
+    required String email,
+    required String nickname,
+    required int birthYear,
+    required String countryCode,
+    required String countryName,
+    required List<String> interests,
+  }) {
+    state = MockSessionState(
+      user: MockUser(
+        id: 'mock_${DateTime.now().millisecondsSinceEpoch}',
+        nickname: nickname,
+        email: email,
+        countryCode: countryCode,
+        countryName: countryName,
+        birthYear: birthYear,
+        bio: '',
+        interests: interests,
+        interestTagIds: const [],
+        isVip: false,
+      ),
+      stampBalance: 3,
+      dailyStampCap: 3,
+    );
+  }
+
   /// 切换 VIP（仅 Mock 演示）。
   void toggleVip() {
     final user = state.user;
@@ -123,6 +167,7 @@ class MockSessionNotifier extends StateNotifier<MockSessionState> {
         birthYear: user.birthYear,
         bio: user.bio,
         interests: user.interests,
+        interestTagIds: user.interestTagIds,
         avatarUrl: user.avatarUrl,
         isVip: !user.isVip,
       ),

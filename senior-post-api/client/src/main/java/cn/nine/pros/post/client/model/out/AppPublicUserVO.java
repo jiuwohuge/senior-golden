@@ -1,6 +1,7 @@
 package cn.nine.pros.post.client.model.out;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,4 +35,10 @@ public class AppPublicUserVO {
     private Integer stampsBalance;
     @Schema(description = "是否 VIP")
     private Boolean isVip;
+
+    @Schema(description = "用户已选兴趣标签 ID（与 bu_user_tag.tag_id 一致）")
+    private List<Integer> interestTagIds;
+
+    @Schema(description = "用户已选兴趣标签名称（展示用，与 sys_tag.tag_name 一致）")
+    private List<String> interestTagNames;
 }

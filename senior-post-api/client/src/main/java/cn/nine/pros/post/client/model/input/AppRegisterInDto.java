@@ -4,8 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.util.List;
+
 /**
- * App 邮箱注册入参（M1：资料可后续在「完善资料」接口补齐）。
+ * App 邮箱注册入参；须提交至少 3 个有效兴趣标签 ID（与 {@code sys_tag} 一致）。
  */
 @Data
 @Schema(description = "App 注册请求")
@@ -48,4 +50,9 @@ public class AppRegisterInDto {
     @NotBlank
     @Schema(description = "设备类型：android / ios 等")
     private String deviceType;
+
+    @NotNull
+    @Size(min = 3, max = 30)
+    @Schema(description = "兴趣标签 ID（至少 3 个，写入 bu_user_tag）")
+    private List<@NotNull Integer> interestTagIds;
 }

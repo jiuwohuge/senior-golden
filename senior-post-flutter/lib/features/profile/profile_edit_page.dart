@@ -243,7 +243,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
     final user = ref.watch(mockSessionProvider).user;
-    final bootstrapAsync = ref.watch(appBootstrapProvider);
+    final bootstrapAsync = ref.watch(appBootstrapProvider(locale.languageCode));
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
@@ -257,7 +257,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   title: l10n.authBootstrapLoadFailed,
                   subtitle: bootstrapDebugErrorHint(err),
                   actionLabel: l10n.authRetry,
-                  onAction: () => ref.invalidate(appBootstrapProvider),
+                  onAction: () => ref.invalidate(appBootstrapProvider(locale.languageCode)),
                   tone: PostalEmptyTone.error,
                 ),
                 data: (bootstrap) => ListView(

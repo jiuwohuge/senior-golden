@@ -6,6 +6,7 @@ import cn.nine.pros.post.biz.service.base.ConfigService;
 import cn.nine.pros.post.biz.service.base.CountryService;
 import cn.nine.pros.post.client.model.out.AppBootstrapVO;
 import cn.nine.pros.post.client.model.out.AppCountryVO;
+import cn.nine.pros.post.client.model.out.InterestTagOptionVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +20,18 @@ public class AppBootstrapService {
 
     private final ConfigService configService;
     private final CountryService countryService;
+    private final AppDirectoryService appDirectoryService;
 
-    public AppBootstrapService(ConfigService configService, CountryService countryService) {
+    public AppBootstrapService(
+            ConfigService configService,
+            CountryService countryService,
+            AppDirectoryService appDirectoryService) {
         this.configService = configService;
         this.countryService = countryService;
+        this.appDirectoryService = appDirectoryService;
     }
 
-    public AppBootstrapVO init() {
+    public AppBootstrapVO init(String langCode) {
         Integer minAge = loadMinAge();
         List<AppCountryVO> countries = countryService.list(
                         new LambdaQueryWrapper<CountryDomain>()
@@ -39,9 +45,11 @@ public class AppBootstrapService {
                         .nameZh(country.getCountryNameZh())
                         .build())
                 .toList();
+        List<InterestTagOptionVO> interestOpts = appDirectoryService.listInterestTagOptions(langCode);
         return AppBootstrapVO.builder()
                 .minRegisterAge(minAge)
                 .countries(countries)
+                .interestTagOptions(interestOpts)
                 .build();
     }
 

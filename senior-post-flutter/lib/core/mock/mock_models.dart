@@ -11,6 +11,7 @@ class MockUser {
     required this.birthYear,
     required this.bio,
     required this.interests,
+    this.interestTagIds = const [],
     this.avatarUrl,
     this.isVip = false,
   });
@@ -23,6 +24,8 @@ class MockUser {
   final int birthYear;
   final String bio;
   final List<String> interests;
+  /// 后端 `sys_tag.id`，与 `PATCH /api/auth/profile` 的 `interestTagIds` 对齐；Mock 下可为空。
+  final List<int> interestTagIds;
   final String? avatarUrl;
   final bool isVip;
 
@@ -34,6 +37,7 @@ class MockUser {
     String? countryCode,
     String? countryName,
     List<String>? interests,
+    List<int>? interestTagIds,
     String? avatarUrl,
   }) {
     return MockUser(
@@ -45,6 +49,7 @@ class MockUser {
       birthYear: birthYear,
       bio: bio ?? this.bio,
       interests: interests ?? this.interests,
+      interestTagIds: interestTagIds ?? this.interestTagIds,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       isVip: isVip,
     );

@@ -24,9 +24,9 @@
 
 | FP ID | 功能点 | 后端 | Flutter | 备注 |
 |-------|--------|------|---------|------|
-| FP-A2-001 | 资料更新（昵称、国家、简介、兴趣） | **已有** `PATCH /api/auth/profile`（兴趣仍仅 Mock） | `USE_MOCK=false` 时编辑页走接口 | 兴趣写回待用户画像 API |
+| FP-A2-001 | 资料更新（昵称、国家、简介、兴趣） | **已有** `PATCH /api/auth/profile`（含 `interestTagIds` 写 `bu_user_tag`） | `USE_MOCK=false` 时编辑页走接口 | `me`/PATCH 返回 `interestTagNames` + `interestTagIds` |
 | FP-A2-002 | 头像上传 | **缺** OSS 签名 + 更新头像 URL | 字母占位头像 | 依赖 FP-X-OSS |
-| FP-A2-003 | 兴趣标签 ≥3 校验（注册/编辑） | 缺或与注册 DTO 合并 | 部分 UI | |
+| FP-A2-003 | 兴趣标签 ≥3 校验（注册/编辑） | **已有** 注册 `AppRegisterInDto.interestTagIds`（≥3）+ 写 `bu_user_tag`；`GET /api/bootstrap/init?lang=` 带 `interestTagOptions`；名录项 `interestTagIds`/`interestTagNames` | 注册页多选；`interests_picker` PATCH；名录 VO 展示兴趣 | — |
 | FP-A2-004 | 个人中心展示与 `me` 一致 | 已有 `GET /api/auth/me` | 非 Mock 进入 Tab 拉取 `me`；登录/注册写回 `user` | 冷启动仅 token 时依赖首次进 Profile 拉取 |
 
 ---

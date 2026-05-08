@@ -4,12 +4,16 @@ import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.controller.app.AppPageHelper;
+import cn.nine.pros.post.biz.model.domain.TagDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.app.AppDirectoryService;
+import cn.nine.pros.post.biz.service.app.support.UserInterestAssembler;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
+import cn.nine.pros.post.biz.service.base.TagService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.input.app.AppDirectoryPageInDto;
 import cn.nine.pros.post.client.model.out.DirectoryUserItemVO;
+import cn.nine.pros.post.client.model.out.InterestTagOptionVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +36,9 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
     private static final String SORT_SHARED_INTEREST = "SHARED_INTEREST";
 
     private final UserService userService;
+    private final TagService tagService;
     private final OssDisplayUrlService ossDisplayUrlService;
+    private final UserInterestAssembler userInterestAssembler;
 
     @Override
     public PageData<DirectoryUserItemVO> pageUsers(long viewerUserId, AppDirectoryPageInDto body) {
@@ -87,6 +93,63 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
         return toVo(viewerUserId, u);
     }
 
+    @Override
+    public List<String> listInterestTagNames(String langCode) {
+        String lang = StringUtils.hasText(langCode) ? langCode.trim().toLowerCase() : "en";
+        List<String> primary = loadTagNamesForLang(lang);
+        if (!primary.isEmpty()) {
+            return primary;
+        }
+        if (!"en".equals(lang)) {
+            return loadTagNamesForLang("en");
+        }
+        return List.of();
+    }
+
+    @Override
+    public List<InterestTagOptionVO> listInterestTagOptions(String langCode) {
+        String lang = StringUtils.hasText(langCode) ? langCode.trim().toLowerCase() : "en";
+        List<InterestTagOptionVO> primary = loadTagOptionsForLang(lang);
+        if (!primary.isEmpty()) {
+            return primary;
+        }
+        if (!"en".equals(lang)) {
+            return loadTagOptionsForLang("en");
+        }
+        return List.of();
+    }
+
+    private List<InterestTagOptionVO> loadTagOptionsForLang(String lang) {
+        return tagService.list(new LambdaQueryWrapper<TagDomain>()
+                        .eq(TagDomain::isDelFlag, false)
+                        .eq(TagDomain::getLangCode, lang)
+                        .orderByAsc(TagDomain::getSortOrder)
+                        .orderByAsc(TagDomain::getId))
+                .stream()
+                .filter(t -> t.getId() != null && StringUtils.hasText(t.getTagName()))
+                .map(
+                        t -> InterestTagOptionVO.builder()
+                                .id(t.getId())
+                                .tagName(t.getTagName().trim())
+                                .langCode(lang)
+                                .build())
+                .collect(Collectors.toList());
+    }
+
+    private List<String> loadTagNamesForLang(String lang) {
+        return tagService.list(new LambdaQueryWrapper<TagDomain>()
+                        .eq(TagDomain::isDelFlag, false)
+                        .eq(TagDomain::getLangCode, lang)
+                        .orderByAsc(TagDomain::getSortOrder)
+                        .orderByAsc(TagDomain::getId))
+                .stream()
+                .map(TagDomain::getTagName)
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     private void applySort(LambdaQueryWrapper<UserDomain> qw, long viewerUserId, AppDirectoryPageInDto body) {
         String sort = SORT_DEFAULT;
         if (body != null && StringUtils.hasText(body.getSort())) {
@@ -118,6 +181,7 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
         if (StringUtils.hasText(av)) {
             av = ossDisplayUrlService.signAvatarForViewer(viewerUserId, av.trim());
         }
+        UserInterestAssembler.Payload interests = userInterestAssembler.loadForUser(u.getId());
         return DirectoryUserItemVO.builder()
                 .id(u.getId())
                 .nickname(u.getNickname())
@@ -126,6 +190,8 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
                 .birthYear(u.getBirthYear())
                 .avatarUrl(av)
                 .isVip(Boolean.TRUE.equals(u.getIsVip()))
+                .interestTagIds(interests.ids())
+                .interestTagNames(interests.names())
                 .build();
     }
 

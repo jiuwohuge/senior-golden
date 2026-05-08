@@ -5,7 +5,9 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../core/api/api_exception.dart';
 import '../../core/bootstrap/app_bootstrap.dart';
+import '../../core/env/app_env.dart';
 import '../../core/i18n/country_from_locale.dart';
+import '../../core/mock/mock_data.dart';
 import '../../widgets/postal/postal.dart';
 import '../shell/main_shell.dart';
 import 'auth_repository.dart';
@@ -29,6 +31,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   int? _birthYear;
   bool _agreed = false;
   bool _busy = false;
+  final Set<int> _interestTagIds = {};
+  final Set<String> _mockInterestKeys = {};
 
   @override
   void dispose() {
@@ -45,6 +49,69 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final maxY = y - minRegisterAge;
     if (maxY < minY) return <int>[];
     return [for (var i = maxY; i >= minY; i--) i];
+  }
+
+  Widget _interestPicker(BuildContext context, AppBootstrapData bootstrap) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('Interests', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        if (AppEnv.useMock)
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: MockData.interests
+                .map(
+                  (e) => FilterChip(
+                    label: Text(e.label),
+                    selected: _mockInterestKeys.contains(e.id),
+                    onSelected: _busy
+                        ? null
+                        : (v) {
+                            setState(() {
+                              if (v) {
+                                _mockInterestKeys.add(e.id);
+                              } else {
+                                _mockInterestKeys.remove(e.id);
+                              }
+                            });
+                          },
+                  ),
+                )
+                .toList(),
+          )
+        else if (bootstrap.interestTagOptions.isEmpty)
+          Text(
+            'No interest tags from server. Try another language or add tags in admin.',
+            style: Theme.of(context).textTheme.bodySmall,
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: bootstrap.interestTagOptions
+                .map(
+                  (o) => FilterChip(
+                    label: Text(o.tagName),
+                    selected: _interestTagIds.contains(o.id),
+                    onSelected: _busy
+                        ? null
+                        : (v) {
+                            setState(() {
+                              if (v) {
+                                _interestTagIds.add(o.id);
+                              } else {
+                                _interestTagIds.remove(o.id);
+                              }
+                            });
+                          },
+                  ),
+                )
+                .toList(),
+          ),
+      ],
+    );
   }
 
   Future<void> _pickBirthYear(List<int> years) async {
@@ -109,6 +176,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       PostalSnack.show(context, l10n.authAgreeRequired, tone: PostalSnackTone.warning);
       return;
     }
+    if (AppEnv.useMock) {
+      if (_mockInterestKeys.length < 3) {
+        PostalSnack.show(
+          context,
+          'Please select at least 3 interests.',
+          tone: PostalSnackTone.warning,
+        );
+        return;
+      }
+    } else {
+      if (_interestTagIds.length < 3) {
+        PostalSnack.show(
+          context,
+          'Please select at least 3 interests.',
+          tone: PostalSnackTone.warning,
+        );
+        return;
+      }
+    }
     setState(() => _busy = true);
     try {
       await ref.read(authRepositoryProvider).register(
@@ -118,6 +204,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             birthYear: _birthYear!,
             countryCode: autoCountryCode,
             agreedTerms: _agreed,
+            interestTagIds: AppEnv.useMock ? const [] : _interestTagIds.toList(),
+            mockInterestKeys: AppEnv.useMock ? _mockInterestKeys.toList() : null,
           );
       if (mounted) context.go(MainShellRoute.pathPostWall);
     } on ApiBusinessException catch (e) {
@@ -133,9 +221,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
-    final bootstrapAsync = ref.watch(appBootstrapProvider);
+    final lang = locale.languageCode;
+    final bootstrapAsync = ref.watch(appBootstrapProvider(lang));
 
-    ref.listen<AsyncValue<AppBootstrapData>>(appBootstrapProvider, (prev, next) {
+    ref.listen<AsyncValue<AppBootstrapData>>(appBootstrapProvider(lang), (prev, next) {
       next.whenData((b) {
         final years = _birthYearChoices(b.minRegisterAge);
         if (!mounted || years.isEmpty || _birthYear != null) return;
@@ -157,7 +246,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               title: l10n.authBootstrapLoadFailed,
               subtitle: bootstrapDebugErrorHint(error),
               actionLabel: l10n.authRetry,
-              onAction: () => ref.invalidate(appBootstrapProvider),
+              onAction: () => ref.invalidate(appBootstrapProvider(lang)),
               tone: PostalEmptyTone.error,
             ),
             data: (bootstrap) {
@@ -290,6 +379,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                     style: Theme.of(context).textTheme.bodyLarge,
                                   ),
                                 ),
+                                const SizedBox(height: 14),
+                                _interestPicker(context, bootstrap),
                                 const SizedBox(height: 8),
                                 PostalCheckboxField(
                                   value: _agreed,

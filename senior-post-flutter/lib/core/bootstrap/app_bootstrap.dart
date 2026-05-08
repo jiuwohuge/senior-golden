@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../env/app_env.dart';
 import '../mock/mock_data.dart';
 import '../mock/mock_delay.dart';
+import '../models/interest_tag_option.dart';
 import '../network/dio_provider.dart';
 
 /// 与后端 `AppBootstrapVO` / `AppCountryVO` 对齐。
@@ -12,18 +13,26 @@ class AppBootstrapData {
   const AppBootstrapData({
     required this.minRegisterAge,
     required this.countries,
+    this.interestTagOptions = const [],
   });
 
   final int minRegisterAge;
   final List<CountryItem> countries;
+  final List<InterestTagOption> interestTagOptions;
 
   factory AppBootstrapData.fromJson(Map<String, dynamic> json) {
     final countriesRaw = json['countries'] as List<dynamic>? ?? const [];
+    final tagsRaw = json['interestTagOptions'] as List<dynamic>? ?? const [];
     return AppBootstrapData(
       minRegisterAge: (json['minRegisterAge'] as num?)?.toInt() ?? 45,
       countries: countriesRaw
           .whereType<Map<String, dynamic>>()
           .map(CountryItem.fromJson)
+          .toList(),
+      interestTagOptions: tagsRaw
+          .whereType<Map<String, dynamic>>()
+          .map(InterestTagOption.fromJson)
+          .where((e) => e.id > 0 && e.tagName.isNotEmpty)
           .toList(),
     );
   }
@@ -60,8 +69,8 @@ class CountryItem {
   }
 }
 
-/// 启动配置（注册门槛、国家列表）。未登录即可调用，与 `/api/bootstrap/init` 同步。
-final appBootstrapProvider = FutureProvider<AppBootstrapData>((ref) async {
+/// 启动配置（注册门槛、国家列表、兴趣标签选项）。未登录即可调用，与 `/api/bootstrap/init?lang=` 同步。
+final appBootstrapProvider = FutureProvider.family<AppBootstrapData, String>((ref, lang) async {
   if (AppEnv.useMock) {
     await MockDelay.instant();
     return AppBootstrapData(
@@ -75,10 +84,14 @@ final appBootstrapProvider = FutureProvider<AppBootstrapData>((ref) async {
             ),
           )
           .toList(),
+      interestTagOptions: const [],
     );
   }
   final dio = ref.read(dioProvider);
-  final res = await dio.get<Map<String, dynamic>>('/api/bootstrap/init');
+  final res = await dio.get<Map<String, dynamic>>(
+    '/api/bootstrap/init',
+    queryParameters: <String, dynamic>{if (lang.isNotEmpty) 'lang': lang},
+  );
   final raw = unwrapData<Map<String, dynamic>>(res, (r) {
     return r! as Map<String, dynamic>;
   });

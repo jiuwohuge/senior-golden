@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
-import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
-import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'directory_filter_sheet.dart';
 import 'directory_remote.dart';
@@ -13,20 +11,9 @@ import 'directory_remote.dart';
 final directoryFilterProvider =
     StateProvider<DirectoryFilter>((ref) => const DirectoryFilter());
 
+/// 名录列表仅走 `/api/directory/users/paging`（排序与筛选由服务端计算）。
 final directoryUsersProvider = FutureProvider<List<MockUser>>((ref) async {
   final filter = ref.watch(directoryFilterProvider);
-  if (AppEnv.useMock) {
-    final me = ref.read(mockSessionProvider).user;
-    return ref.read(mockDirectoryRepositoryProvider).list(
-          countryCode: filter.countryCode,
-          minAge: filter.minAge,
-          maxAge: filter.maxAge,
-          interests: filter.interests,
-          sort: filter.sort,
-          viewerBirthYear: me.birthYear,
-          viewerInterests: me.interests.toSet(),
-        );
-  }
   return ref.read(directoryRemoteProvider).pageUsers(
         page: 1,
         size: 60,

@@ -6,6 +6,7 @@ import '../../core/auth/auth_storage.dart';
 import '../../core/auth/auth_token.dart';
 import '../../core/device/device_ids.dart';
 import '../../core/env/app_env.dart';
+import '../../core/mock/mock_data.dart';
 import '../../core/mock/mock_delay.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../core/network/dio_provider.dart';
@@ -33,9 +34,21 @@ class AuthRepository {
     required int birthYear,
     String? countryCode,
     required bool agreedTerms,
+    List<int> interestTagIds = const [],
+    List<String>? mockInterestKeys,
   }) async {
     if (AppEnv.useMock) {
-      return _mockRegister(email: email);
+      return _mockRegister(
+        email: email,
+        password: password,
+        nickname: nickname,
+        birthYear: birthYear,
+        countryCode: countryCode,
+        interests: mockInterestKeys ?? const [],
+      );
+    }
+    if (interestTagIds.length < 3) {
+      throw ApiBusinessException(400, 'Please select at least 3 interests.');
     }
     return _realRegister(
       email: email,
@@ -44,6 +57,7 @@ class AuthRepository {
       birthYear: birthYear,
       countryCode: countryCode,
       agreedTerms: agreedTerms,
+      interestTagIds: interestTagIds,
     );
   }
 
@@ -115,21 +129,33 @@ class AuthRepository {
 
   /// `PATCH /api/auth/profile`，成功后刷新本地会话展示态。
   Future<void> updateProfileOnServer({
-    required String nickname,
+    String? nickname,
     String? countryCode,
-    required String bio,
+    String? bio,
     String? avatarUrl,
+    List<int>? interestTagIds,
   }) async {
     if (AppEnv.useMock) return;
     final dio = _ref.read(dioProvider);
     try {
-      final body = <String, dynamic>{
-        'nickname': nickname.trim(),
-        'countryCode': countryCode?.trim() ?? '',
-        'bio': bio.trim(),
-      };
+      final body = <String, dynamic>{};
+      if (nickname != null) {
+        body['nickname'] = nickname.trim();
+      }
+      if (countryCode != null) {
+        body['countryCode'] = countryCode.trim();
+      }
+      if (bio != null) {
+        body['bio'] = bio.trim();
+      }
       if (avatarUrl != null) {
         body['avatarUrl'] = avatarUrl;
+      }
+      if (interestTagIds != null) {
+        body['interestTagIds'] = interestTagIds;
+      }
+      if (body.isEmpty) {
+        throw StateError('updateProfileOnServer: at least one field required');
       }
       final res = await dio.patch<Map<String, dynamic>>(
         '/api/auth/profile',
@@ -164,14 +190,40 @@ class AuthRepository {
     _ref.read(authTokenProvider.notifier).state = mockToken;
   }
 
-  Future<void> _mockRegister({required String email}) async {
+  Future<void> _mockRegister({
+    required String email,
+    required String password,
+    required String nickname,
+    required int birthYear,
+    String? countryCode,
+    required List<String> interests,
+  }) async {
     await MockDelay.network();
     if (!_isLikelyEmail(email)) {
       throw ApiBusinessException(4002, 'Please enter a valid email address.');
     }
+    if (password.trim().length < 8) {
+      throw ApiBusinessException(4004, 'Password must be at least 8 characters.');
+    }
+    final cc = countryCode?.trim() ?? '';
+    var countryName = cc;
+    for (final c in MockData.countries) {
+      if (c.code == cc) {
+        countryName = c.nameEn;
+        break;
+      }
+    }
     const mockToken = 'mock.jwt.token.senior-post';
     await AuthStorage.writeToken(mockToken);
     _ref.read(authTokenProvider.notifier).state = mockToken;
+    _ref.read(mockSessionProvider.notifier).seedNewMockAccount(
+          email: email.trim(),
+          nickname: nickname.trim(),
+          birthYear: birthYear,
+          countryCode: cc,
+          countryName: countryName,
+          interests: interests,
+        );
   }
 
   bool _isLikelyEmail(String value) {
@@ -224,6 +276,7 @@ class AuthRepository {
     required int birthYear,
     String? countryCode,
     required bool agreedTerms,
+    required List<int> interestTagIds,
   }) async {
     final dio = _ref.read(dioProvider);
     final deviceUuid = _ref.read(deviceInstallIdStateProvider);
@@ -238,6 +291,7 @@ class AuthRepository {
           if (countryCode != null && countryCode.isNotEmpty)
             'countryCode': countryCode.trim(),
           'agreedTerms': agreedTerms,
+          'interestTagIds': interestTagIds,
           'deviceUuid': deviceUuid,
           'deviceType': _deviceTypeBody(),
         },

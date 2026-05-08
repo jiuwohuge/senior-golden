@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 用户兴趣标签关联表 ServiceImpl
@@ -54,6 +56,32 @@ public class UserTagServiceImpl extends ServiceImpl<UserTagMapper, UserTagDomain
         userTagDomain.setUpdatedAt(LocalDateTime.now());
         update(userTagDomain, new LambdaQueryWrapper<UserTagDomain>()
                 .in(UserTagDomain::getId, ids));
+    }
+
+    @Override
+    public void replaceUserTags(long actorUserId, long userId, List<Integer> distinctTagIds) {
+        Set<Integer> unique = new LinkedHashSet<>();
+        if (distinctTagIds != null) {
+            for (Integer id : distinctTagIds) {
+                if (id != null) {
+                    unique.add(id);
+                }
+            }
+        }
+        UserTagDomain soft = new UserTagDomain();
+        soft.setDelFlag(true);
+        soft.setUpdatedAt(LocalDateTime.now());
+        soft.setUpdatedBy(actorUserId);
+        update(soft, new LambdaQueryWrapper<UserTagDomain>()
+                .eq(UserTagDomain::getUserId, userId)
+                .eq(UserTagDomain::isDelFlag, false));
+        for (Integer tagId : unique) {
+            UserTagDomain row = new UserTagDomain();
+            row.setUserId(userId);
+            row.setTagId(tagId);
+            row.initAudit(actorUserId);
+            save(row);
+        }
     }
 
 }

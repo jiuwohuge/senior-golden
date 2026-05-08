@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
-import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import '../mailbox/mailbox_providers.dart';
 import '../mailbox/mailbox_remote.dart';
@@ -47,37 +45,19 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
     }
     setState(() => _busy = true);
     try {
-      if (AppEnv.useMock) {
-        final user = MockUser(
-          id: widget.peerId,
-          nickname: widget.peerNickname,
-          email: '',
-          countryCode: '',
-          countryName: widget.countryLabel,
-          birthYear: 1970,
-          bio: '',
-          interests: const [],
-        );
-        await ref.read(mockMailboxRepositoryProvider).send(
-              peer: user,
-              body: _body.text.trim(),
-              type: _type,
-            );
-      } else {
-        await ref.read(mailboxRemoteRepositoryProvider).sendLetter(
-              toUserId: widget.peerId,
-              content: _body.text.trim(),
-              type: _type,
-            );
-        ref.invalidate(stampBalanceHeaderProvider);
-      }
+      await ref.read(mailboxRemoteRepositoryProvider).sendLetter(
+            toUserId: widget.peerId,
+            content: _body.text.trim(),
+            type: _type,
+          );
+      ref.invalidate(stampBalanceHeaderProvider);
       if (!mounted) return;
       ref.invalidate(mailboxLettersProvider);
       ref.invalidate(postalInboxLettersProvider);
       ref.invalidate(mailboxArchiveProvider);
       PostalSnack.show(
         context,
-        AppEnv.useMock ? 'Mock: letter sent' : 'Letter sent',
+        'Letter sent',
         tone: PostalSnackTone.success,
       );
       Navigator.of(context).pop();

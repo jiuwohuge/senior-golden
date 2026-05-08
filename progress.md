@@ -97,3 +97,16 @@
 - **后端**：`AppAuthProfilePatchInDto.avatarUrl`；`AppAuthService.updateProfile` 校验 OSS key 为 `avatar` 场景且属当前用户；`mvn -pl biz,client -am compile` 通过。
 - **Flutter**：发帖页本地上传后立即 `Image.memory` 预览（私有桶 objectKey 友好）；明信片墙/名录 `RefreshIndicator` + 防并发刷新；注册页出生年份底部表格式、默认 45 岁、地区按语言自动匹配；资料页头像选图→`crop_your_image` 圆裁→OSS `avatar`→PATCH；`shared_preferences` + `appLocaleProvider` 设置页语言切换；`post_en/zh.arb` 增补一批 UI 文案；`PostalButton` ghost 浅色底防「透明看不见」；引导页底部 safe inset。
 - **验证**：`flutter analyze` 无告警。
+
+## 2026-05-08 — FP-A2-003：兴趣标签持久化 + App 写回（续）
+
+- **后端**：`GET /api/directory/interest-tag-options?lang=` → `List<InterestTagOptionVO>`（`AppDirectoryService`/`Impl`、`AppDirectoryApi`、`AppDirectoryController`）；与既有 `PATCH profile` `interestTagIds`、`me` 载荷及 `UserTagService.replaceUserTags` 衔接。
+- **Flutter**：`DirectoryRemoteRepository.listInterestTagOptions`；名录筛选非 Mock 改拉选项（`value` 仍为 `tag_name`）；`InterestsPickerPage` 非 Mock 多选 id 并 `PATCH`；`MockUser.interestTagIds` + `applyFromPublicUserVo` 解析 `interestTagIds`/`interestTagNames`；`AuthRepository.updateProfileOnServer` 支持仅提交 `interestTagIds`。
+- **验证**：`mvn -pl biz,client -am compile -DskipTests`；`dart analyze`（上述变更文件）无告警。
+- **文档**：`doc/plan/01-feature-list.md` A2 行、`05-task-tracker.md` 增 FP-A2-003 DONE。
+
+## 2026-05-08 — 注册强制兴趣 + 名录 VO 带兴趣
+
+- **后端**：`AppRegisterInDto.interestTagIds`（`@NotNull` + `@Size(min=3,max=30)`）；注册后 `replaceUserTags`；`DirectoryUserItemVO` 增加 `interestTagIds`/`interestTagNames`，`UserInterestAssembler` 供资料与名录复用；`AppBootstrapVO.interestTagOptions` + `GET /api/bootstrap/init?lang=`（匿名）拉选项。
+- **Flutter**：`appBootstrapProvider(lang)`；注册页兴趣 chips；`AuthRepository.register` 提交 `interestTagIds` / Mock `seedNewMockAccount`；`directory_remote` 映射名录兴趣字段。
+- **验证**：`mvn -pl biz,client -am compile -DskipTests`；`dart analyze`（相关文件）通过。

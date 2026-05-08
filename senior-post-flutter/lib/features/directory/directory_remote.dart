@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/mock/mock_data.dart';
 import '../../core/mock/mock_models.dart';
+import '../../core/models/interest_tag_option.dart';
 import '../../core/network/dio_provider.dart';
 
 class DirectoryRemoteRepository {
@@ -70,6 +71,42 @@ class DirectoryRemoteRepository {
       rethrow;
     }
   }
+
+  /// 带 `id` 的选项，供资料编辑多选；筛选名录仍用 [listInterestTagNames] 的 `tag_name`。
+  Future<List<InterestTagOption>> listInterestTagOptions({required String lang}) async {
+    final r = await _dio.get<dynamic>(
+      '/api/directory/interest-tag-options',
+      queryParameters: <String, dynamic>{'lang': lang},
+    );
+    return unwrapData(r, (raw) {
+      if (raw is! List<dynamic>) {
+        throw ApiBusinessException(0, 'Expected interest tag options');
+      }
+      return raw
+          .whereType<Map<String, dynamic>>()
+          .map(InterestTagOption.fromJson)
+          .where((e) => e.id > 0 && e.tagName.isNotEmpty)
+          .toList();
+    });
+  }
+
+  /// 与 `sys_tag.tag_name` 一致，供筛选 `interestNames` 使用。
+  Future<List<String>> listInterestTagNames({required String lang}) async {
+    final r = await _dio.get<dynamic>(
+      '/api/directory/interest-tags',
+      queryParameters: <String, dynamic>{'lang': lang},
+    );
+    return unwrapData(r, (raw) {
+      if (raw is! List<dynamic>) {
+        throw ApiBusinessException(0, 'Expected interest tag list');
+      }
+      return raw
+          .whereType<String>()
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+    });
+  }
 }
 
 MockUser _voToMockUser(Map<String, dynamic> m) {
@@ -83,6 +120,20 @@ MockUser _voToMockUser(Map<String, dynamic> m) {
       break;
     }
   }
+  var interestNames = const <String>[];
+  final namesRaw = m['interestTagNames'];
+  if (namesRaw is List<dynamic>) {
+    interestNames = namesRaw
+        .whereType<String>()
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+  var interestIds = const <int>[];
+  final idsRaw = m['interestTagIds'];
+  if (idsRaw is List<dynamic>) {
+    interestIds = idsRaw.whereType<num>().map((e) => e.toInt()).toList();
+  }
   return MockUser(
     id: '$id',
     nickname: (m['nickname'] as String?) ?? 'User',
@@ -91,7 +142,8 @@ MockUser _voToMockUser(Map<String, dynamic> m) {
     countryName: countryName,
     birthYear: birthYear,
     bio: (m['bio'] as String?) ?? '',
-    interests: const [],
+    interests: interestNames,
+    interestTagIds: interestIds,
     avatarUrl: m['avatarUrl'] as String?,
     isVip: m['isVip'] as bool? ?? false,
   );

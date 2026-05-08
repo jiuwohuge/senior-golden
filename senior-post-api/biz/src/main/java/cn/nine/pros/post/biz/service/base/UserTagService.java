@@ -19,4 +19,6 @@ public interface UserTagService extends IService<UserTagDomain> {
 
     void delByIds(List<Long> ids);
 
+    /** 软删用户既有标签关联后，按顺序插入新关联。 */
+    void replaceUserTags(long actorUserId, long userId, List<Integer> distinctTagIds);
 }

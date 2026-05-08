@@ -2,17 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
-import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'directory_remote.dart';
 import 'send_letter_sheet.dart';
 
 final directoryUserProvider = FutureProvider.family<MockUser?, String>((ref, userId) async {
-  if (AppEnv.useMock) {
-    return ref.read(mockDirectoryRepositoryProvider).findById(userId);
-  }
   return ref.read(directoryRemoteProvider).getDirectoryUser(userId);
 });
 
