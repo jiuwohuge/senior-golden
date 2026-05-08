@@ -386,6 +386,144 @@ abstract class AppLocalizations {
   /// **'Create your postal social account in one minute.'**
   String get authRegisterSubtitle;
 
+  /// No description provided for @authRegisterWizardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any step below to jump — your entries stay until you submit.'**
+  String get authRegisterWizardHint;
+
+  /// No description provided for @authRegisterTabAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get authRegisterTabAccount;
+
+  /// No description provided for @authRegisterTabProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get authRegisterTabProfile;
+
+  /// No description provided for @authRegisterTabInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests'**
+  String get authRegisterTabInterests;
+
+  /// No description provided for @authRegisterTabReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get authRegisterTabReview;
+
+  /// No description provided for @authRegisterStepProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String authRegisterStepProgress(Object current, Object total);
+
+  /// No description provided for @authRegisterStepAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in details'**
+  String get authRegisterStepAccountTitle;
+
+  /// No description provided for @authRegisterStepAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We’ll use your email to reach you about letters and security.'**
+  String get authRegisterStepAccountSubtitle;
+
+  /// No description provided for @authRegisterStepProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About you'**
+  String get authRegisterStepProfileTitle;
+
+  /// No description provided for @authRegisterStepProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This is how you appear on postcards, letters, and the directory.'**
+  String get authRegisterStepProfileSubtitle;
+
+  /// No description provided for @authRegisterStepInterestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests'**
+  String get authRegisterStepInterestsTitle;
+
+  /// No description provided for @authRegisterStepInterestsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least three tags — they power better pen-pal matches.'**
+  String get authRegisterStepInterestsSubtitle;
+
+  /// No description provided for @authRegisterStepReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & terms'**
+  String get authRegisterStepReviewTitle;
+
+  /// No description provided for @authRegisterStepReviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your details, then accept the policies to open your account.'**
+  String get authRegisterStepReviewSubtitle;
+
+  /// No description provided for @authRegisterNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get authRegisterNext;
+
+  /// No description provided for @authRegisterBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get authRegisterBack;
+
+  /// No description provided for @authRegisterSummaryEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authRegisterSummaryEmail;
+
+  /// No description provided for @authRegisterSummaryNickname.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname'**
+  String get authRegisterSummaryNickname;
+
+  /// No description provided for @authRegisterSummaryBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Year of birth'**
+  String get authRegisterSummaryBirth;
+
+  /// No description provided for @authRegisterSummaryCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country / region'**
+  String get authRegisterSummaryCountry;
+
+  /// No description provided for @authRegisterSummaryInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests'**
+  String get authRegisterSummaryInterests;
+
+  /// No description provided for @authRegisterInterestsMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least three interests.'**
+  String get authRegisterInterestsMin;
+
+  /// No description provided for @authRegisterInterestsServerEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No interest tags from the server. Try another language or ask an admin to add tags.'**
+  String get authRegisterInterestsServerEmpty;
+
   /// No description provided for @authConfirmPasswordLabel.
   ///
   /// In en, this message translates to:

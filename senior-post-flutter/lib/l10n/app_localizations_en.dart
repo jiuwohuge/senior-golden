@@ -165,6 +165,84 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create your postal social account in one minute.';
 
   @override
+  String get authRegisterWizardHint =>
+      'Tap any step below to jump — your entries stay until you submit.';
+
+  @override
+  String get authRegisterTabAccount => 'Account';
+
+  @override
+  String get authRegisterTabProfile => 'Profile';
+
+  @override
+  String get authRegisterTabInterests => 'Interests';
+
+  @override
+  String get authRegisterTabReview => 'Review';
+
+  @override
+  String authRegisterStepProgress(Object current, Object total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get authRegisterStepAccountTitle => 'Sign-in details';
+
+  @override
+  String get authRegisterStepAccountSubtitle =>
+      'We’ll use your email to reach you about letters and security.';
+
+  @override
+  String get authRegisterStepProfileTitle => 'About you';
+
+  @override
+  String get authRegisterStepProfileSubtitle =>
+      'This is how you appear on postcards, letters, and the directory.';
+
+  @override
+  String get authRegisterStepInterestsTitle => 'Interests';
+
+  @override
+  String get authRegisterStepInterestsSubtitle =>
+      'Choose at least three tags — they power better pen-pal matches.';
+
+  @override
+  String get authRegisterStepReviewTitle => 'Review & terms';
+
+  @override
+  String get authRegisterStepReviewSubtitle =>
+      'Check your details, then accept the policies to open your account.';
+
+  @override
+  String get authRegisterNext => 'Continue';
+
+  @override
+  String get authRegisterBack => 'Back';
+
+  @override
+  String get authRegisterSummaryEmail => 'Email';
+
+  @override
+  String get authRegisterSummaryNickname => 'Nickname';
+
+  @override
+  String get authRegisterSummaryBirth => 'Year of birth';
+
+  @override
+  String get authRegisterSummaryCountry => 'Country / region';
+
+  @override
+  String get authRegisterSummaryInterests => 'Interests';
+
+  @override
+  String get authRegisterInterestsMin =>
+      'Please select at least three interests.';
+
+  @override
+  String get authRegisterInterestsServerEmpty =>
+      'No interest tags from the server. Try another language or ask an admin to add tags.';
+
+  @override
   String get authConfirmPasswordLabel => 'Confirm password';
 
   @override

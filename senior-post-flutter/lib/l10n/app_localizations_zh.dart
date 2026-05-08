@@ -155,6 +155,77 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authRegisterSubtitle => '一分钟创建你的邮政社交账号。';
 
   @override
+  String get authRegisterWizardHint => '点击下方任一步骤可跳转；已填内容在提交前会一直保留。';
+
+  @override
+  String get authRegisterTabAccount => '账号';
+
+  @override
+  String get authRegisterTabProfile => '资料';
+
+  @override
+  String get authRegisterTabInterests => '兴趣';
+
+  @override
+  String get authRegisterTabReview => '确认';
+
+  @override
+  String authRegisterStepProgress(Object current, Object total) {
+    return '第 $current 步，共 $total 步';
+  }
+
+  @override
+  String get authRegisterStepAccountTitle => '登录信息';
+
+  @override
+  String get authRegisterStepAccountSubtitle => '邮箱用于安全提醒与重要通知。';
+
+  @override
+  String get authRegisterStepProfileTitle => '个人资料';
+
+  @override
+  String get authRegisterStepProfileSubtitle => '将显示在明信片、信件与名录中。';
+
+  @override
+  String get authRegisterStepInterestsTitle => '兴趣标签';
+
+  @override
+  String get authRegisterStepInterestsSubtitle => '至少选择三个，便于匹配笔友。';
+
+  @override
+  String get authRegisterStepReviewTitle => '确认与条款';
+
+  @override
+  String get authRegisterStepReviewSubtitle => '核对信息并同意条款后即可完成注册。';
+
+  @override
+  String get authRegisterNext => '继续';
+
+  @override
+  String get authRegisterBack => '上一步';
+
+  @override
+  String get authRegisterSummaryEmail => '邮箱';
+
+  @override
+  String get authRegisterSummaryNickname => '昵称';
+
+  @override
+  String get authRegisterSummaryBirth => '出生年份';
+
+  @override
+  String get authRegisterSummaryCountry => '国家 / 地区';
+
+  @override
+  String get authRegisterSummaryInterests => '兴趣标签';
+
+  @override
+  String get authRegisterInterestsMin => '请至少选择三个兴趣标签。';
+
+  @override
+  String get authRegisterInterestsServerEmpty => '服务器暂无兴趣标签，可尝试切换语言或由管理员维护词表。';
+
+  @override
   String get authConfirmPasswordLabel => '确认密码';
 
   @override
