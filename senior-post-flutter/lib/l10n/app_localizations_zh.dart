@@ -373,7 +373,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileAvatarCropDone => '完成';
 
   @override
+  String get profileAvatarCropCancel => '取消';
+
+  @override
+  String get profileAvatarCropConfirm => '确认裁剪';
+
+  @override
+  String get profileAvatarCropHelp => '拖动、缩放，将头像对准圆内。取消则不保存。';
+
+  @override
+  String get profileAvatarPreviewHint =>
+      '拖动缩放选区后点「确认裁剪」。回到本页后点「确认上传」保存头像，或点「放弃」取消。';
+
+  @override
+  String get profileAvatarConfirmUpload => '确认上传';
+
+  @override
+  String get profileAvatarDiscardUpload => '放弃';
+
+  @override
+  String get profileAvatarUploadSuccess => '头像已更新';
+
+  @override
+  String get profileAvatarUploadFailed => '头像上传失败';
+
+  @override
   String get profileAvatarUploading => '正在上传头像…';
+
+  @override
+  String get profileEditCancel => '关闭';
 
   @override
   String get profileEditProfile => '编辑资料';

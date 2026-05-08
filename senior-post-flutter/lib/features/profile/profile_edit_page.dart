@@ -4,15 +4,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
+import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/bootstrap/app_bootstrap.dart';
 import '../../core/env/app_env.dart';
-import '../../core/mock/mock_data.dart';
 import '../../core/mock/mock_repository.dart';
 import '../../core/oss/oss_upload_service.dart';
-import '../../app/theme/postal_tokens.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import 'avatar_crop_page.dart';
+
+/// ISO 国家码统一大写、去空格，避免下拉项出现重复 value（如 id / ID）。
+String? _normalizeCountryCode(String? raw) {
+  if (raw == null) return null;
+  final t = raw.trim();
+  if (t.isEmpty) return null;
+  return t.toUpperCase();
+}
 
 class ProfileEditPage extends ConsumerStatefulWidget {
   const ProfileEditPage({super.key});
@@ -28,7 +36,8 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   bool _loadingMe = false;
   bool _saving = false;
   bool _avatarBusy = false;
-  Uint8List? _avatarPreviewBytes;
+  /// 裁剪完成、待用户点击「确认上传」的头像字节。
+  Uint8List? _avatarPendingBytes;
 
   @override
   void initState() {
@@ -36,7 +45,9 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     final user = ref.read(mockSessionProvider).user;
     _nickname = TextEditingController(text: user.nickname);
     _bio = TextEditingController(text: user.bio);
-    _countryCode = user.countryCode.isEmpty ? null : user.countryCode;
+    _countryCode = _normalizeCountryCode(
+      user.countryCode.isEmpty ? null : user.countryCode,
+    );
     if (!AppEnv.useMock) {
       _loadingMe = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => _pullMe());
@@ -51,8 +62,10 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       setState(() {
         _nickname.text = u.nickname;
         _bio.text = u.bio;
-        _countryCode = u.countryCode.isEmpty ? null : u.countryCode;
-        _avatarPreviewBytes = null;
+        _countryCode = _normalizeCountryCode(
+          u.countryCode.isEmpty ? null : u.countryCode,
+        );
+        _avatarPendingBytes = null;
         _loadingMe = false;
       });
     } on ApiBusinessException catch (e) {
@@ -75,16 +88,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     super.dispose();
   }
 
-  Future<void> _onChangeAvatar() async {
-    final l10n = AppLocalizations.of(context)!;
-    if (AppEnv.useMock) {
-      ref.read(mockSessionProvider.notifier).updateProfile(avatarUrl: 'mock://avatar');
-      setState(() => _avatarPreviewBytes = null);
-      if (mounted) {
-        PostalSnack.show(context, l10n.profileMockUpdated, tone: PostalSnackTone.success);
-      }
-      return;
-    }
+  Future<void> _onPickAvatar() async {
     if (_avatarBusy || _saving) return;
     final XFile? x;
     try {
@@ -101,7 +105,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       }
       return;
     }
-    if (x == null) return;
+    if (x == null || !mounted) return;
     final raw = await x.readAsBytes();
     if (!mounted) return;
     final cropped = await Navigator.of(context).push<Uint8List>(
@@ -110,13 +114,31 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       ),
     );
     if (cropped == null || !mounted) return;
-    setState(() {
-      _avatarBusy = true;
-      _avatarPreviewBytes = cropped;
-    });
+    setState(() => _avatarPendingBytes = cropped);
+  }
+
+  void _discardPendingAvatar() {
+    setState(() => _avatarPendingBytes = null);
+  }
+
+  Future<void> _confirmAvatarUpload() async {
+    final pending = _avatarPendingBytes;
+    if (pending == null || _avatarBusy) return;
+    final l10n = AppLocalizations.of(context)!;
+
+    if (AppEnv.useMock) {
+      ref.read(mockSessionProvider.notifier).updateProfile(avatarUrl: 'mock://avatar');
+      setState(() => _avatarPendingBytes = null);
+      if (mounted) {
+        PostalSnack.show(context, l10n.profileMockUpdated, tone: PostalSnackTone.success);
+      }
+      return;
+    }
+
+    setState(() => _avatarBusy = true);
     try {
       final key = await ref.read(ossUploadServiceProvider).uploadAvatarImage(
-            bytes: cropped,
+            bytes: pending,
             ext: 'jpg',
             contentType: 'image/jpeg',
           );
@@ -127,128 +149,275 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
             avatarUrl: key,
           );
       if (mounted) {
-        setState(() => _avatarPreviewBytes = null);
-        PostalSnack.show(context, l10n.profileSaved, tone: PostalSnackTone.success);
+        setState(() => _avatarPendingBytes = null);
+        PostalSnack.show(
+          context,
+          l10n.profileAvatarUploadSuccess,
+          tone: PostalSnackTone.success,
+        );
       }
     } on ApiBusinessException catch (e) {
-      if (mounted) PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      if (mounted) {
+        PostalSnack.show(
+          context,
+          e.message.isNotEmpty ? e.message : l10n.profileAvatarUploadFailed,
+          tone: PostalSnackTone.error,
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        PostalSnack.show(context, l10n.profileAvatarUploadFailed, tone: PostalSnackTone.error);
+      }
     } finally {
       if (mounted) setState(() => _avatarBusy = false);
     }
   }
 
+  List<DropdownMenuItem<String>> _countryDropdownItems(
+    List<CountryItem> countries,
+    String languageCode,
+  ) {
+    final firstByNorm = <String, CountryItem>{};
+    for (final c in countries) {
+      if (c.code.isEmpty) continue;
+      final k = c.code.trim().toUpperCase();
+      firstByNorm.putIfAbsent(k, () => c);
+    }
+    final items = firstByNorm.entries
+        .map(
+          (e) => DropdownMenuItem<String>(
+            value: e.key,
+            child: Text('${e.value.displayName(languageCode)} (${e.key})'),
+          ),
+        )
+        .toList();
+    final cc = _countryCode;
+    if (cc != null && cc.isNotEmpty && !firstByNorm.containsKey(cc)) {
+      items.insert(
+        0,
+        DropdownMenuItem<String>(
+          value: cc,
+          child: Text(
+            '$cc (${languageCode.startsWith('zh') ? '当前资料' : 'from profile'})',
+          ),
+        ),
+      );
+    }
+    return items;
+  }
+
+  PreferredSizeWidget _buildAppBar(AppLocalizations l10n) {
+    return AppBar(
+      backgroundColor: PostalTokens.postboxGreen,
+      foregroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      shadowColor: PostalTokens.inkNavy.withValues(alpha: 0.2),
+      elevation: 0,
+      scrolledUnderElevation: 2,
+      iconTheme: const IconThemeData(color: Colors.white, size: 26),
+      title: Text(
+        l10n.profileEditTitle,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+          fontSize: 20,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: (_saving || _avatarBusy) ? null : () => Navigator.of(context).maybePop(),
+          child: Text(
+            l10n.profileEditCancel,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: _saving || _avatarBusy ? 0.45 : 1),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
     final user = ref.watch(mockSessionProvider).user;
+    final bootstrapAsync = ref.watch(appBootstrapProvider);
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.profileEditTitle)),
+      appBar: _buildAppBar(l10n),
       body: SafeArea(
         child: _loadingMe
             ? const Center(child: CircularProgressIndicator())
-            : ListView(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-                children: [
-                  Center(
-                    child: Column(
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: PostalTokens.kraftBrown, width: 1.4),
-                              ),
-                              child: ClipOval(
-                                child: _avatarPreviewBytes != null
-                                    ? Image.memory(
-                                        _avatarPreviewBytes!,
-                                        width: 96,
-                                        height: 96,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : PostalAvatar(
-                                        name: user.nickname,
-                                        size: 96,
-                                        imageUrl: user.avatarUrl,
-                                        framed: false,
-                                      ),
-                              ),
-                            ),
-                            if (_avatarBusy)
-                              const SizedBox(
-                                width: 104,
-                                height: 104,
-                                child: Center(
-                                  child: SizedBox(
-                                    width: 28,
-                                    height: 28,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  ),
+            : bootstrapAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => PostalEmptyState(
+                  title: l10n.authBootstrapLoadFailed,
+                  subtitle: bootstrapDebugErrorHint(err),
+                  actionLabel: l10n.authRetry,
+                  onAction: () => ref.invalidate(appBootstrapProvider),
+                  tone: PostalEmptyTone.error,
+                ),
+                data: (bootstrap) => ListView(
+                  padding: EdgeInsets.fromLTRB(20, 18, 20, 24 + bottomInset),
+                  children: [
+                    Center(
+                      child: Column(
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: PostalTokens.kraftBrown, width: 1.4),
+                                ),
+                                child: ClipOval(
+                                  child: _avatarPendingBytes != null
+                                      ? Image.memory(
+                                          _avatarPendingBytes!,
+                                          width: 96,
+                                          height: 96,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : PostalAvatar(
+                                          name: user.nickname,
+                                          size: 96,
+                                          imageUrl: user.avatarUrl,
+                                          framed: false,
+                                        ),
                                 ),
                               ),
+                              if (_avatarBusy)
+                                Container(
+                                  width: 104,
+                                  height: 104,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.black.withValues(alpha: 0.35),
+                                  ),
+                                  child: const Center(
+                                    child: SizedBox(
+                                      width: 32,
+                                      height: 32,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          PostalButton(
+                            label: l10n.profileAvatarChange,
+                            icon: Icons.photo_camera_outlined,
+                            variant: PostalButtonVariant.secondary,
+                            expand: false,
+                            minHeight: 48,
+                            busy: false,
+                            onPressed: (_avatarBusy || _saving)
+                                ? null
+                                : _onPickAvatar,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_avatarPendingBytes != null) ...[
+                      const SizedBox(height: 16),
+                      PostalCardEnvelope(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.check_circle_outline,
+                                    color: PostalTokens.postboxGreen, size: 22),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    l10n.profileAvatarPreviewHint,
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: PostalTokens.inkSecondary,
+                                          height: 1.45,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            PostalButton(
+                              label: l10n.profileAvatarConfirmUpload,
+                              icon: Icons.cloud_upload_outlined,
+                              busy: _avatarBusy,
+                              onPressed: _avatarBusy ? null : _confirmAvatarUpload,
+                            ),
+                            const SizedBox(height: 10),
+                            PostalButton(
+                              label: l10n.profileAvatarDiscardUpload,
+                              variant: PostalButtonVariant.ghost,
+                              busy: false,
+                              onPressed:
+                                  _avatarBusy ? null : _discardPendingAvatar,
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        TextButton.icon(
-                          onPressed: _avatarBusy ? null : _onChangeAvatar,
-                          icon: const Icon(Icons.photo_camera_outlined),
-                          label: Text(l10n.profileAvatarChange),
-                        ),
-                      ],
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    PostalTextField(controller: _nickname, label: l10n.profileNickname),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      // ignore: deprecated_member_use
+                      value: _countryCode == null || _countryCode!.isEmpty ? null : _countryCode,
+                      decoration: InputDecoration(labelText: l10n.profileCountry),
+                      items: _countryDropdownItems(bootstrap.countries, locale.languageCode),
+                      onChanged: (v) => setState(() => _countryCode = v),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  PostalTextField(controller: _nickname, label: l10n.profileNickname),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    // ignore: deprecated_member_use
-                    value: _countryCode,
-                    decoration: InputDecoration(labelText: l10n.profileCountry),
-                    items: MockData.countries
-                        .map(
-                          (c) => DropdownMenuItem<String>(
-                            value: c.code,
-                            child: Text('${c.nameEn} (${c.code})'),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) => setState(() => _countryCode = v),
-                  ),
-                  const SizedBox(height: 12),
-                  PostalTextField(
-                    controller: _bio,
-                    label: l10n.profileBio,
-                    maxLines: 6,
-                    minLines: 4,
-                    showClearButton: false,
-                  ),
-                  const SizedBox(height: 14),
-                  PostalButton(
-                    label: l10n.profileSave,
-                    busy: _saving,
-                    onPressed: _saving ? null : () => _onSave(context),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    PostalTextField(
+                      controller: _bio,
+                      label: l10n.profileBio,
+                      maxLines: 6,
+                      minLines: 4,
+                      showClearButton: false,
+                    ),
+                    const SizedBox(height: 20),
+                    PostalButton(
+                      label: l10n.profileSave,
+                      icon: Icons.save_outlined,
+                      busy: _saving,
+                      onPressed: _saving ? null : () => _onSave(context, bootstrap.countries),
+                    ),
+                  ],
+                ),
               ),
       ),
     );
   }
 
-  Future<void> _onSave(BuildContext context) async {
+  Future<void> _onSave(BuildContext context, List<CountryItem> countries) async {
     final l10n = AppLocalizations.of(context)!;
-    final country = MockData.countries.firstWhere(
-      (c) => c.code == _countryCode,
-      orElse: () => MockData.countries.first,
-    );
+    String? countryName;
+    if (_countryCode != null && _countryCode!.isNotEmpty) {
+      for (final c in countries) {
+        if (c.code.trim().toUpperCase() == _countryCode) {
+          countryName = c.nameEn;
+          break;
+        }
+      }
+      countryName ??= _countryCode;
+    }
     if (AppEnv.useMock) {
       ref.read(mockSessionProvider.notifier).updateProfile(
             nickname: _nickname.text.trim(),
             bio: _bio.text.trim(),
-            countryCode: country.code,
-            countryName: country.nameEn,
+            countryCode: _countryCode,
+            countryName: countryName,
           );
       if (context.mounted) {
         PostalSnack.show(
@@ -264,7 +433,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     try {
       await ref.read(authRepositoryProvider).updateProfileOnServer(
             nickname: _nickname.text.trim(),
-            countryCode: country.code,
+            countryCode: _countryCode,
             bio: _bio.text,
           );
       if (context.mounted) {

@@ -794,11 +794,65 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get profileAvatarCropDone;
 
+  /// No description provided for @profileAvatarCropCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get profileAvatarCropCancel;
+
+  /// No description provided for @profileAvatarCropConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm crop'**
+  String get profileAvatarCropConfirm;
+
+  /// No description provided for @profileAvatarCropHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag and pinch to fit your face in the circle. Cancel returns without saving.'**
+  String get profileAvatarCropHelp;
+
+  /// No description provided for @profileAvatarPreviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the circle, then confirm crop. On the previous screen, tap Upload photo to save, or Discard to cancel.'**
+  String get profileAvatarPreviewHint;
+
+  /// No description provided for @profileAvatarConfirmUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload photo'**
+  String get profileAvatarConfirmUpload;
+
+  /// No description provided for @profileAvatarDiscardUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get profileAvatarDiscardUpload;
+
+  /// No description provided for @profileAvatarUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo updated'**
+  String get profileAvatarUploadSuccess;
+
+  /// No description provided for @profileAvatarUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not upload photo'**
+  String get profileAvatarUploadFailed;
+
   /// No description provided for @profileAvatarUploading.
   ///
   /// In en, this message translates to:
   /// **'Uploading photo…'**
   String get profileAvatarUploading;
+
+  /// No description provided for @profileEditCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get profileEditCancel;
 
   /// No description provided for @profileEditProfile.
   ///

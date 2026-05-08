@@ -37,10 +37,15 @@ abstract final class PostalTheme {
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: 0,
-        scrolledUnderElevation: 1,
+        scrolledUnderElevation: 2,
+        shadowColor: PostalTokens.inkNavy.withValues(alpha: 0.18),
+        surfaceTintColor: Colors.transparent,
         backgroundColor: PostalTokens.postboxGreen,
         foregroundColor: Colors.white,
-        titleTextStyle: textTheme.titleLarge?.copyWith(color: Colors.white),
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+        ),
         iconTheme: const IconThemeData(color: Colors.white, size: 26),
       ),
       navigationBarTheme: NavigationBarThemeData(

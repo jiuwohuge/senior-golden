@@ -390,7 +390,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileAvatarCropDone => 'Done';
 
   @override
+  String get profileAvatarCropCancel => 'Cancel';
+
+  @override
+  String get profileAvatarCropConfirm => 'Confirm crop';
+
+  @override
+  String get profileAvatarCropHelp =>
+      'Drag and pinch to fit your face in the circle. Cancel returns without saving.';
+
+  @override
+  String get profileAvatarPreviewHint =>
+      'Adjust the circle, then confirm crop. On the previous screen, tap Upload photo to save, or Discard to cancel.';
+
+  @override
+  String get profileAvatarConfirmUpload => 'Upload photo';
+
+  @override
+  String get profileAvatarDiscardUpload => 'Discard';
+
+  @override
+  String get profileAvatarUploadSuccess => 'Profile photo updated';
+
+  @override
+  String get profileAvatarUploadFailed => 'Could not upload photo';
+
+  @override
   String get profileAvatarUploading => 'Uploading photo…';
+
+  @override
+  String get profileEditCancel => 'Close';
 
   @override
   String get profileEditProfile => 'Edit profile';
