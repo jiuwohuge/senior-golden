@@ -6,6 +6,7 @@ import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.controller.app.AppPageHelper;
 import cn.nine.pros.post.biz.model.domain.TagDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
+import cn.nine.pros.post.biz.service.app.AppBlacklistService;
 import cn.nine.pros.post.biz.service.app.AppDirectoryService;
 import cn.nine.pros.post.biz.service.app.support.UserInterestAssembler;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
@@ -39,6 +40,7 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
     private final TagService tagService;
     private final OssDisplayUrlService ossDisplayUrlService;
     private final UserInterestAssembler userInterestAssembler;
+    private final AppBlacklistService appBlacklistService;
 
     @Override
     public PageData<DirectoryUserItemVO> pageUsers(long viewerUserId, AppDirectoryPageInDto body) {
@@ -47,7 +49,10 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
                 .eq(UserDomain::isDelFlag, false)
                 .apply("status = 1")
                 .eq(UserDomain::getStaffRole, 0)
-                .ne(UserDomain::getId, viewerUserId);
+                .ne(UserDomain::getId, viewerUserId)
+                .apply("NOT EXISTS (SELECT 1 FROM bu_user_blacklist bl WHERE bl.del_flag = FALSE "
+                        + "AND ((bl.user_id = {0} AND bl.blocked_user_id = bu_user.id) "
+                        + "OR (bl.user_id = bu_user.id AND bl.blocked_user_id = {0})))", viewerUserId);
 
         applySort(qw, viewerUserId, body);
 
@@ -88,6 +93,9 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
             throw new BadRequestException("用户不存在");
         }
         if (!isDirectoryListableUser(u)) {
+            throw new BadRequestException("该用户暂不可见");
+        }
+        if (appBlacklistService.areMutuallyBlocked(viewerUserId, targetUserId)) {
             throw new BadRequestException("该用户暂不可见");
         }
         return toVo(viewerUserId, u);

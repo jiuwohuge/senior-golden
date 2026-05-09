@@ -1,24 +1,21 @@
 // ignore_for_file: sort_child_properties_last
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal.dart';
+import '../auth/auth_repository.dart';
 import 'mailbox_providers.dart';
 import 'mailbox_remote.dart';
 import 'speed_up_sheet.dart';
-
-final letterDetailProvider = FutureProvider.family<MailboxLetter?, String>((
-  ref,
-  id,
-) async {
-  return ref.read(mailboxRemoteRepositoryProvider).getLetter(id);
-});
 
 class LetterDetailPage extends ConsumerStatefulWidget {
   const LetterDetailPage({super.key, required this.letterId});
@@ -32,6 +29,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
   final _reply = TextEditingController();
   bool _acceptBusy = false;
   bool _replyBusy = false;
+  bool _earlyOpenBusy = false;
   LetterType _replyType = LetterType.standard;
 
   @override
@@ -56,8 +54,9 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
   @override
   Widget build(BuildContext context) {
     final letterAsync = ref.watch(letterDetailProvider(widget.letterId));
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Letter detail')),
+      appBar: AppBar(title: Text(l10n.letterDetailTitle)),
       body: SafeArea(
         child: letterAsync.when(
           loading: () =>
@@ -119,10 +118,43 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                 ?.copyWith(color: PostalTokens.inkSecondary),
                           ),
                         ),
-                      Text(
-                        letter.body,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
+                      if (letter.contentHidden)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: SizedBox(
+                            height: 140,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Text(
+                                  letter.body,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                                BackdropFilter(
+                                  filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    color: PostalTokens.kraftBrownMuted.withValues(alpha: 0.42),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    child: Text(
+                                      l10n.letterContentHiddenHint,
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            height: 1.45,
+                                            color: PostalTokens.inkSecondary,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        Text(
+                          letter.body,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
                       const SizedBox(height: 12),
                       Text(
                         'Sent at ${DateFormat('MM-dd HH:mm').format(letter.sentAt)}',
@@ -139,31 +171,89 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                         ),
                     ],
                   ),
-                  footer: isDelivering &&
-                          letter.outgoing &&
-                          letter.type == LetterType.standard
-                      ? Row(
-                          children: [
-                            Expanded(
-                              child: PostalButton(
-                                label: 'Speed Up',
-                                onPressed: () async {
-                                  await showModalBottomSheet<void>(
-                                    context: context,
-                                    builder: (_) =>
-                                        SpeedUpSheet(letterId: letter.id),
-                                  );
-                                  ref.invalidate(
-                                    letterDetailProvider(widget.letterId),
-                                  );
-                                  ref.invalidate(mailboxLettersProvider);
-                                  ref.invalidate(postalInboxLettersProvider);
+                  footer: () {
+                    final foot = <Widget>[];
+                    if (isDelivering &&
+                        letter.outgoing &&
+                        letter.type == LetterType.standard) {
+                      foot.add(
+                        PostalButton(
+                          label: 'Speed Up',
+                          onPressed: () async {
+                            await showModalBottomSheet<void>(
+                              context: context,
+                              builder: (_) => SpeedUpSheet(letterId: letter.id),
+                            );
+                            ref.invalidate(letterDetailProvider(widget.letterId));
+                            ref.invalidate(mailboxLettersProvider);
+                            ref.invalidate(postalInboxLettersProvider);
+                          },
+                        ),
+                      );
+                    }
+                    if (isDelivering &&
+                        !letter.outgoing &&
+                        letter.type == LetterType.standard &&
+                        letter.contentHidden) {
+                      foot.add(
+                        PostalButton(
+                          label: l10n.letterEarlyOpenCta,
+                          busy: _earlyOpenBusy,
+                          onPressed: _earlyOpenBusy
+                              ? null
+                              : () async {
+                                  setState(() => _earlyOpenBusy = true);
+                                  try {
+                                    await ref
+                                        .read(mailboxRemoteRepositoryProvider)
+                                        .earlyOpen(letter.id);
+                                    if (!context.mounted) {
+                                      return;
+                                    }
+                                    await ref
+                                        .read(authRepositoryProvider)
+                                        .refreshSessionFromServer();
+                                    if (!context.mounted) {
+                                      return;
+                                    }
+                                    ref.invalidate(letterDetailProvider(widget.letterId));
+                                    ref.invalidate(mailboxLettersProvider);
+                                    ref.invalidate(postalInboxLettersProvider);
+                                    PostalSnack.show(
+                                      context,
+                                      l10n.letterEarlyOpenSuccess,
+                                      tone: PostalSnackTone.success,
+                                    );
+                                  } on ApiBusinessException catch (e) {
+                                    if (context.mounted) {
+                                      PostalSnack.show(
+                                        context,
+                                        e.message,
+                                        tone: PostalSnackTone.error,
+                                      );
+                                    }
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() => _earlyOpenBusy = false);
+                                    }
+                                  }
                                 },
-                              ),
-                            ),
-                          ],
-                        )
-                      : null,
+                        ),
+                      );
+                    }
+                    if (foot.isEmpty) {
+                      return null;
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var i = 0; i < foot.length; i++) ...[
+                          if (i > 0) const SizedBox(height: 10),
+                          foot[i],
+                        ],
+                      ],
+                    );
+                  }(),
                 ),
                 if (canAccept) ...[
                   const SizedBox(height: 14),

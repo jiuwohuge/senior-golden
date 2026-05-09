@@ -39,6 +39,14 @@ public class AppPostcardController implements AppPostcardApi {
     }
 
     @Override
+    @Operation(summary = "我的明信片分页（含待审/驳回，仅本人）")
+    @PostMapping(AppServiceDefine.SERVER_PREFIX + "/postcards/mine/paging")
+    public PageData<PostcardWallItemVO> minePaging(@RequestBody @Valid AppPostcardPageInDto body) {
+        long uid = requireUserId();
+        return appPostcardService.minePage(uid, body);
+    }
+
+    @Override
     @Operation(summary = "明信片详情（公开仅已通过；作者可查看待审/驳回）")
     @GetMapping(AppServiceDefine.SERVER_PREFIX + "/postcards/{postcardId}")
     public PostcardDetailVO getDetail(@PathVariable("postcardId") Long postcardId) {

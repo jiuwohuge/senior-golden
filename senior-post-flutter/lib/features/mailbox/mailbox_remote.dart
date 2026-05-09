@@ -65,6 +65,14 @@ class MailboxRemoteRepository {
     return _voToMailboxLetter(map);
   }
 
+  Future<MailboxLetter> earlyOpen(String letterId) async {
+    final r = await _dio.post<dynamic>(
+      '/api/mailbox/letters/${int.parse(letterId)}/early-open',
+    );
+    final map = _unwrapMapData(r);
+    return _voToMailboxLetter(map);
+  }
+
   Future<List<FriendListRow>> listMailboxFriends() async {
     final r = await _dio.get<dynamic>('/api/mailbox/friends');
     final rows = _unwrapListData(r);
@@ -181,6 +189,17 @@ MailboxLetter _voToMailboxLetter(Map<String, dynamic> m) {
   final content = (m['content'] as String?) ?? preview;
   final fromMe = m['fromMe'] as bool? ?? true;
   final sentAt = _parseDate(m['sentAt']) ?? DateTime.now();
+  final contentHidden = m['contentHidden'] as bool? ?? false;
+  final expectedArrival = _parseDate(m['expectedArrivalTime']);
+  final actualArrival = _parseDate(m['actualArrivalTime']);
+  final st = switch (status) {
+    1 => LetterStatus.delivering,
+    3 => LetterStatus.registered,
+    _ => LetterStatus.delivered,
+  };
+  final deliveryAt = st == LetterStatus.delivering
+      ? expectedArrival
+      : (actualArrival ?? expectedArrival);
 
   return MailboxLetter(
     id: letterId,
@@ -188,19 +207,18 @@ MailboxLetter _voToMailboxLetter(Map<String, dynamic> m) {
     preview: preview,
     body: content,
     type: letterType == 1 ? LetterType.registered : LetterType.standard,
-    status: switch (status) {
-      1 => LetterStatus.delivering,
-      3 => LetterStatus.registered,
-      _ => LetterStatus.delivered,
-    },
+    status: st,
     sentAt: sentAt,
-    deliveryAt: null,
+    deliveryAt: deliveryAt,
     outgoing: fromMe,
     sendMode: switch (sendMode) {
       2 => LetterSendMode.registeredMail,
       3 => LetterSendMode.directVip,
       _ => LetterSendMode.standardPost,
     },
+    contentHidden: contentHidden,
+    expectedArrivalAt: expectedArrival,
+    actualArrivalAt: actualArrival,
   );
 }
 

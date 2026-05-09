@@ -36,4 +36,10 @@ public class PostcardWallItemVO {
 
     @Schema(description = "作者")
     private PostcardAuthorVO author;
+
+    @Schema(description = "审核状态：0待审 1通过 2驳回（「我的明信片」流水返回；墙列表可为空）")
+    private Integer reviewStatus;
+
+    @Schema(description = "内容状态：1公开 2隐藏 3违规删除（「我的明信片」流水返回；墙列表可为空）")
+    private Integer postStatus;
 }

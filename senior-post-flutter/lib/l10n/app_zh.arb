@@ -152,6 +152,45 @@
     }
   },
   "postComposePublish": "立即发布",
+  "postcardImageCropTitle": "裁剪配图（4:3）",
+  "postcardImageCropHelp": "拖动与缩放选区，确认后以 4:3 比例裁剪并上传。",
+  "profileBlacklist": "黑名单",
+  "settingsFeedback": "意见反馈",
+  "dialogConfirm": "确定",
+  "socialBlockUser": "拉黑",
+  "socialBlockConfirmTitle": "加入黑名单？",
+  "socialBlockConfirmMessage": "对方将无法向你寄信，公开墙与名录中也不会互相看到。",
+  "socialBlockSuccess": "已拉黑",
+  "socialUnblock": "取消拉黑",
+  "socialUnblockConfirm": "确定取消对「{name}」的拉黑？",
+  "@socialUnblockConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "socialUnblockSuccess": "已取消拉黑",
+  "socialBlacklistTitle": "黑名单",
+  "socialBlacklistSubtitle": "已屏蔽的用户不会出现在墙与名录，且无法寄信。",
+  "socialBlacklistEmpty": "暂无拉黑用户",
+  "socialBlockedAt": "拉黑时间：{time}",
+  "@socialBlockedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "feedbackTitle": "意见反馈",
+  "feedbackBodyLabel": "问题或建议（必填）",
+  "feedbackBodyHint": "请描述操作步骤、期望与实际表现，便于我们排查。",
+  "feedbackSubmit": "提交",
+  "feedbackSubmitting": "提交中…",
+  "feedbackSuccess": "感谢反馈，我们会尽快查阅。",
+  "feedbackNeedContent": "请填写反馈正文。",
+  "userCardTitle": "会员资料",
+  "userCardSendLetter": "寄信",
+  "userCardBack": "返回",
+  "userCardErrorTitle": "无法加载资料",
+  "userCardNotFoundTitle": "找不到该会员",
+  "userCardNotFoundSubtitle": "对方可能暂不可用，或与你的关系受限。",
   "directoryTitle": "通信名录",
   "directorySubtitle": "按国家与兴趣寻找笔友",
   "directoryLoadFailed": "名录加载失败",
@@ -230,5 +269,22 @@
     "placeholders": {
       "error": {}
     }
-  }
+  },
+  "profileMyPostcards": "我的明信片",
+  "myPostcardsEmptyTitle": "还没有明信片",
+  "myPostcardsEmptySubtitle": "在「明信片墙」发布内容后，将在此显示审核进度。",
+  "myPostcardsLoadFailedTitle": "明信片列表加载失败",
+  "postcardReviewPendingBadge": "待审核",
+  "postcardReviewApprovedBadge": "审核通过",
+  "postcardReviewRejectedBadge": "审核拒绝",
+  "postcardPostHiddenBadge": "已隐藏",
+  "postcardPostRemovedBadge": "已删除",
+  "postcardReviewPendingBanner": "明信片待审核，仅本人可见。",
+  "postcardReviewRejectedBanner": "明信片未通过公开审核，仍可在列表中查看。",
+  "letterMailboxSealedPreview": "信件密封递送中",
+  "letterContentHiddenHint": "平邮运输中，正文已密封。自然送达后将自动展示，或使用 1 枚邮票提前拆信（VIP 免扣）。",
+  "letterEarlyOpenCta": "提前拆信（1 枚邮票）",
+  "letterEarlyOpenSuccess": "已提前拆信，可阅读全文。",
+  "postDetailTitle": "明信片",
+  "letterDetailTitle": "信件详情"
 }

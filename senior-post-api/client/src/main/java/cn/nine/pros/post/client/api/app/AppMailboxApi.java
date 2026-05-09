@@ -58,4 +58,8 @@ public interface AppMailboxApi {
     @Operation(summary = "平邮加速：发件人消耗 1 邮票立即送达；VIP 免扣")
     @PostMapping(AppServiceDefine.SERVER_PREFIX + "/mailbox/letters/{letterId}/speed-up")
     MailboxLetterItemVO speedUpLetter(@PathVariable("letterId") Long letterId);
+
+    @Operation(summary = "平邮提前拆信：收件人消耗 1 邮票在运输中阅读正文；VIP 免扣")
+    @PostMapping(AppServiceDefine.SERVER_PREFIX + "/mailbox/letters/{letterId}/early-open")
+    MailboxLetterItemVO earlyOpenLetter(@PathVariable("letterId") Long letterId);
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
@@ -22,20 +24,61 @@ void _showContentReport(
   );
 }
 
-class PostDetailPage extends ConsumerWidget {
+class PostDetailPage extends ConsumerStatefulWidget {
   const PostDetailPage({super.key, required this.postId});
   final String postId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PostDetailPage> createState() => _PostDetailPageState();
+}
+
+class _PostDetailPageState extends ConsumerState<PostDetailPage> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        ref.invalidate(postDetailProvider(widget.postId));
+        ref.invalidate(postCommentsProvider(widget.postId));
+      });
+    }
+  }
+
+  Future<void> _onRefresh() async {
+    ref.invalidate(postDetailProvider(widget.postId));
+    ref.invalidate(postCommentsProvider(widget.postId));
+    await Future.wait([
+      ref.read(postDetailProvider(widget.postId).future),
+      ref.read(postCommentsProvider(widget.postId).future),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final postId = widget.postId;
     final postAsync = ref.watch(postDetailProvider(postId));
     final commentsAsync = ref.watch(postCommentsProvider(postId));
+    final l10n = AppLocalizations.of(context)!;
 
     final meId = ref.watch(appSessionProvider).user.id;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Postcard'),
+        title: Text(l10n.postDetailTitle),
         actions: [
           if (postAsync.valueOrNull != null && meId != postAsync.valueOrNull!.author.id)
             IconButton(
@@ -65,17 +108,20 @@ class PostDetailPage extends ConsumerWidget {
               );
             }
             final review = post.reviewStatus;
-            final reviewLabel = review == null
+            final String? reviewLabel = review == null
                 ? null
                 : switch (review) {
-                    0 => '????????????????',
-                    2 => '?????',
+                    0 => l10n.postcardReviewPendingBanner,
+                    2 => l10n.postcardReviewRejectedBanner,
                     _ => null,
                   };
             return Column(
               children: [
                 Expanded(
-                  child: ListView(
+                  child: RefreshIndicator(
+                    onRefresh: _onRefresh,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
                     children: [
                       if (reviewLabel != null)
@@ -214,6 +260,7 @@ class PostDetailPage extends ConsumerWidget {
                     ],
                   ),
                 ),
+              ),
                 _CommentComposer(postId: postId),
               ],
             );
@@ -257,6 +304,7 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
       if (!mounted) return;
       _commentCtrl.clear();
       ref.invalidate(postCommentsProvider(widget.postId));
+      ref.invalidate(postDetailProvider(widget.postId));
       PostalSnack.show(
         context,
         'Comment posted',

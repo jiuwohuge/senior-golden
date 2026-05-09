@@ -1,10 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/oss/oss_get_sign_service.dart';
 import '../../core/oss/oss_object_key_hint.dart';
 
-/// Loads network images; when [enableResign] and first frame fails, tries one OSS resign.
+/// 稳定 `cacheKey`（objectKey 或去掉 query 的 URL path）+ 可选换签重试。
 class PostalOssNetworkImage extends ConsumerStatefulWidget {
   const PostalOssNetworkImage({
     super.key,
@@ -26,12 +27,25 @@ class PostalOssNetworkImage extends ConsumerStatefulWidget {
   final Widget Function(BuildContext context)? errorBuilder;
 
   @override
-  ConsumerState<PostalOssNetworkImage> createState() => _PostalOssNetworkImageState();
+  ConsumerState<PostalOssNetworkImage> createState() =>
+      _PostalOssNetworkImageState();
 }
 
 class _PostalOssNetworkImageState extends ConsumerState<PostalOssNetworkImage> {
   late String _displayUrl;
   bool _resignScheduled = false;
+
+  static String _stableCacheKey(String originalUrl) {
+    final k = tryParseOssObjectKey(originalUrl);
+    if (k != null && k.isNotEmpty) {
+      return k;
+    }
+    final u = Uri.tryParse(originalUrl.trim());
+    if (u != null && u.hasScheme && u.host.isNotEmpty) {
+      return '${u.scheme}://${u.host}${u.path}';
+    }
+    return originalUrl.trim();
+  }
 
   @override
   void initState() {
@@ -65,13 +79,20 @@ class _PostalOssNetworkImageState extends ConsumerState<PostalOssNetworkImage> {
 
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      _displayUrl,
-      fit: widget.fit,
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final memW = widget.width != null ? (widget.width! * dpr).round() : null;
+    final memH = widget.height != null ? (widget.height! * dpr).round() : null;
+
+    return CachedNetworkImage(
+      imageUrl: _displayUrl,
+      cacheKey: _stableCacheKey(widget.imageUrl),
       width: widget.width,
       height: widget.height,
+      fit: widget.fit,
       alignment: widget.alignment,
-      errorBuilder: (ctx, _, __) {
+      memCacheWidth: memW,
+      memCacheHeight: memH,
+      errorWidget: (ctx, _, __) {
         final allow = widget.enableResign && !_resignScheduled;
         if (allow) {
           final key = tryParseOssObjectKey(widget.imageUrl);

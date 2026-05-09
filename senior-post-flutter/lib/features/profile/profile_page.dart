@@ -54,7 +54,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           PostalCardEnvelope(
             child: Column(
               children: [
-                PostalAvatar(name: user.nickname, size: 80, imageUrl: user.avatarUrl),
+                PostalAvatar(
+                  name: user.nickname,
+                  size: 80,
+                  imageUrl: user.avatarUrl,
+                ),
                 const SizedBox(height: 10),
                 Text(
                   user.nickname.isEmpty ? '?' : user.nickname,
@@ -87,6 +91,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Column(
               children: [
                 _ProfileItem(
+                  icon: Icons.photo_album_outlined,
+                  title: l10n.profileMyPostcards,
+                  onTap: () => context.push('/profile/my-postcards'),
+                ),
+                _ProfileItem(
                   icon: Icons.edit_note,
                   title: l10n.profileEditProfile,
                   onTap: () => context.push('/profile/edit'),
@@ -105,6 +114,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   icon: Icons.workspace_premium_outlined,
                   title: l10n.profileVipCenter,
                   onTap: () => context.push('/profile/vip'),
+                ),
+                _ProfileItem(
+                  icon: Icons.block_outlined,
+                  title: l10n.profileBlacklist,
+                  onTap: () => context.push('/profile/blocks'),
                 ),
                 _ProfileItem(
                   icon: Icons.settings_outlined,

@@ -13,6 +13,8 @@ public interface AppPostcardService {
 
     PageData<PostcardWallItemVO> wallPage(long userId, AppPostcardPageInDto body);
 
+    PageData<PostcardWallItemVO> minePage(long userId, AppPostcardPageInDto body);
+
     PostcardDetailVO getDetail(long viewerUserId, Long postcardId);
 
     PostcardDetailVO create(long userId, AppPostcardCreateInDto body);

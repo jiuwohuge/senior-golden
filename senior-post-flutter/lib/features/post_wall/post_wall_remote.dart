@@ -56,6 +56,18 @@ class PostWallRemoteRepository {
     return _voToWallPost(map);
   }
 
+  Future<List<WallPost>> listMinePostcards({int page = 1, int size = 50}) async {
+    final r = await _dio.post<dynamic>(
+      '/api/postcards/mine/paging',
+      data: <String, dynamic>{
+        'page': <String, dynamic>{'page': page, 'size': size},
+      },
+    );
+    final pd = _unwrapPageData(r);
+    final rows = _recordsList(pd);
+    return rows.whereType<Map<String, dynamic>>().map(_voToWallPost).toList();
+  }
+
   Future<void> createComment({
     required String postcardId,
     required String content,
@@ -161,6 +173,7 @@ WallPost _voToWallPost(Map<String, dynamic> m) {
     imageUrl: single ?? (urls != null && urls.isNotEmpty ? urls.first : null),
     imageUrls: urls,
     reviewStatus: (m['reviewStatus'] as num?)?.toInt(),
+    postStatus: (m['postStatus'] as num?)?.toInt(),
   );
 }
 

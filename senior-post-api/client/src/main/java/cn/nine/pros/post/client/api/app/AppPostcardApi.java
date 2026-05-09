@@ -17,6 +17,8 @@ public interface AppPostcardApi {
 
     PageData<PostcardWallItemVO> paging(AppPostcardPageInDto body);
 
+    PageData<PostcardWallItemVO> minePaging(AppPostcardPageInDto body);
+
     PostcardDetailVO getDetail(Long postcardId);
 
     PostcardDetailVO create(AppPostcardCreateInDto body);

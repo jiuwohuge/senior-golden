@@ -4,6 +4,7 @@ import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.mapper.LetterMapper;
 import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
+import cn.nine.pros.post.biz.service.app.AppBlacklistService;
 import cn.nine.pros.post.biz.service.app.AppMailboxService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.LetterService;
@@ -50,6 +51,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private static final int REGISTERED_STAMP_COST = 1;
     /** 非 VIP 平邮加速消耗的邮票数 */
     private static final int SPEED_UP_STAMP_COST = 1;
+    /** 非 VIP 收件人提前拆信消耗的邮票数 */
+    private static final int RECIPIENT_EARLY_OPEN_STAMP_COST = 1;
     private static final int USER_STATUS_NORMAL = 1;
 
     private final LetterMapper letterMapper;
@@ -60,6 +63,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private final StampAccountService stampAccountService;
     private final StampTransactionService stampTransactionService;
     private final OssDisplayUrlService ossDisplayUrlService;
+    private final AppBlacklistService appBlacklistService;
 
     @Override
     public List<MailboxLetterItemVO> listPostalInbox(Long userId) {
@@ -157,6 +161,9 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         UserDTO sender = userService.findById(fromUserId);
         if (sender == null || userStatus(sender.getStatus()) != USER_STATUS_NORMAL) {
             throw new BadRequestException("发件人状态异常");
+        }
+        if (appBlacklistService.areMutuallyBlocked(fromUserId, toUserId)) {
+            throw new BadRequestException("无法向对方寄信");
         }
 
         boolean vip = Boolean.TRUE.equals(sender.getIsVip());
@@ -264,6 +271,66 @@ public class AppMailboxServiceImpl implements AppMailboxService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public MailboxLetterItemVO earlyOpenLetter(long actorUserId, long letterId) {
+        LetterDomain letter = letterMapper.selectById(letterId);
+        if (letter == null || letter.isDelFlag()) {
+            throw new BadRequestException("信件不存在");
+        }
+        if (letter.getToUserId() == null || !Objects.equals(letter.getToUserId(), actorUserId)) {
+            throw new BadRequestException("仅收件人可提前拆信");
+        }
+        if (toInt(letter.getLetterType()) != LETTER_TYPE_STANDARD) {
+            throw new BadRequestException("仅平邮信件可提前拆信");
+        }
+        if (toInt(letter.getStatus()) != STATUS_DELIVERING) {
+            throw new BadRequestException("当前状态不可提前拆信");
+        }
+        if (letter.getRecipientEarlyOpenAt() != null) {
+            throw new BadRequestException("已提前拆信");
+        }
+        UserDTO recipient = userService.findById(actorUserId);
+        if (recipient == null || userStatus(recipient.getStatus()) != USER_STATUS_NORMAL) {
+            throw new BadRequestException("账号状态异常");
+        }
+        boolean vip = Boolean.TRUE.equals(recipient.getIsVip());
+        LocalDateTime now = LocalDateTime.now();
+        if (!vip) {
+            int oldBal = recipient.getStampsBalance() != null ? recipient.getStampsBalance() : 0;
+            if (oldBal < RECIPIENT_EARLY_OPEN_STAMP_COST) {
+                throw new BadRequestException("邮票不足，无法提前拆信");
+            }
+            int newBal = oldBal - RECIPIENT_EARLY_OPEN_STAMP_COST;
+            boolean patched = stampAccountService.tryDecrementBalance(actorUserId, oldBal,
+                    RECIPIENT_EARLY_OPEN_STAMP_COST, now, actorUserId);
+            if (!patched) {
+                throw new BadRequestException("邮票扣减失败，请重试");
+            }
+            StampTransactionDTO tx = new StampTransactionDTO();
+            tx.setUserId(actorUserId);
+            tx.setChangeAmount(-RECIPIENT_EARLY_OPEN_STAMP_COST);
+            tx.setBalanceAfter(newBal);
+            tx.setReason("平邮提前拆信消耗");
+            tx.setRefId(letterId);
+            stampTransactionService.upsert(tx);
+        }
+        boolean letterPatched = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
+                .eq(LetterDomain::getId, letterId)
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getStatus, STATUS_DELIVERING)
+                .eq(LetterDomain::getToUserId, actorUserId)
+                .isNull(LetterDomain::getRecipientEarlyOpenAt)
+                .set(LetterDomain::getRecipientEarlyOpenAt, now)
+                .set(LetterDomain::getUpdatedAt, now)
+                .set(LetterDomain::getUpdatedBy, actorUserId));
+        if (!letterPatched) {
+            throw new BadRequestException("信件状态已变更，请刷新后重试");
+        }
+        LetterDomain saved = letterService.getById(letterId);
+        return toItem(saved, actorUserId, true);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public MailboxLetterItemVO speedUpLetter(long actorUserId, long letterId) {
         LetterDomain letter = letterMapper.selectById(letterId);
         if (letter == null || letter.isDelFlag()) {
@@ -359,12 +426,32 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private MailboxLetterItemVO toItem(LetterDomain l, long viewer, boolean includeFullContent) {
         long peerId = peerUserId(l, viewer);
         UserDTO peer = userService.findById(peerId);
-        String content = l.getContent() != null ? l.getContent() : "";
-        String preview = content.length() > 280 ? content.substring(0, 280) + "…" : content;
+        boolean fromMe = Objects.equals(l.getFromUserId(), viewer);
+        boolean delivering = toInt(l.getStatus()) == STATUS_DELIVERING;
+        boolean standard = toInt(l.getLetterType()) == LETTER_TYPE_STANDARD;
+        boolean openedEarly = l.getRecipientEarlyOpenAt() != null;
+        boolean hideBody = !fromMe && delivering && standard && !openedEarly;
+
+        String fullContent = l.getContent() != null ? l.getContent() : "";
+        String preview;
+        String contentOut = null;
+        if (hideBody) {
+            preview = "";
+            if (includeFullContent) {
+                contentOut = "";
+            }
+        } else {
+            preview = fullContent.length() > 280 ? fullContent.substring(0, 280) + "…" : fullContent;
+            if (includeFullContent) {
+                contentOut = fullContent;
+            }
+        }
         AppPublicUserVO peerVo = toPublic(peer);
         if (StringUtils.hasText(peerVo.getAvatarUrl())) {
             peerVo.setAvatarUrl(ossDisplayUrlService.signAvatarForViewer(viewer, peerVo.getAvatarUrl()));
         }
+        LocalDateTime expected = toLocalDateTimeField(l.getExpectedArrivalTime());
+        LocalDateTime actual = toLocalDateTimeField(l.getActualArrivalTime());
         return MailboxLetterItemVO.builder()
                 .letterId(l.getId())
                 .peer(peerVo)
@@ -372,11 +459,27 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .sendMode(l.getSendMode() != null ? l.getSendMode() : 1)
                 .status(toInt(l.getStatus()))
                 .preview(preview)
-                .content(includeFullContent ? content : null)
-                .fromMe(l.getFromUserId() == viewer)
+                .content(contentOut)
+                .fromMe(fromMe)
                 .sentAt(l.getCreatedAt())
                 .updatedAt(l.getUpdatedAt())
+                .expectedArrivalTime(expected)
+                .actualArrivalTime(actual)
+                .contentHidden(hideBody)
                 .build();
+    }
+
+    private static LocalDateTime toLocalDateTimeField(Object raw) {
+        if (raw == null) {
+            return null;
+        }
+        if (raw instanceof LocalDateTime ldt) {
+            return ldt;
+        }
+        if (raw instanceof java.sql.Timestamp ts) {
+            return ts.toLocalDateTime();
+        }
+        return null;
     }
 
     private static AppPublicUserVO toPublic(UserDTO dto) {

@@ -812,6 +812,180 @@ abstract class AppLocalizations {
   /// **'Publish now'**
   String get postComposePublish;
 
+  /// No description provided for @postcardImageCropTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop image (4:3)'**
+  String get postcardImageCropTitle;
+
+  /// No description provided for @postcardImageCropHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Pan and zoom, then confirm to crop to 4:3 and upload.'**
+  String get postcardImageCropHelp;
+
+  /// No description provided for @profileBlacklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked users'**
+  String get profileBlacklist;
+
+  /// No description provided for @settingsFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get settingsFeedback;
+
+  /// No description provided for @dialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get dialogConfirm;
+
+  /// No description provided for @socialBlockUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Block'**
+  String get socialBlockUser;
+
+  /// No description provided for @socialBlockConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Block this user?'**
+  String get socialBlockConfirmTitle;
+
+  /// No description provided for @socialBlockConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'They won\'t be able to send you letters, and you won\'t see each other on the wall or directory.'**
+  String get socialBlockConfirmMessage;
+
+  /// No description provided for @socialBlockSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'User blocked'**
+  String get socialBlockSuccess;
+
+  /// No description provided for @socialUnblock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock'**
+  String get socialUnblock;
+
+  /// No description provided for @socialUnblockConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock {name}?'**
+  String socialUnblockConfirm(Object name);
+
+  /// No description provided for @socialUnblockSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblocked'**
+  String get socialUnblockSuccess;
+
+  /// No description provided for @socialBlacklistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked users'**
+  String get socialBlacklistTitle;
+
+  /// No description provided for @socialBlacklistSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked users won\'t appear on the wall or directory and can\'t send you letters.'**
+  String get socialBlacklistSubtitle;
+
+  /// No description provided for @socialBlacklistEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No blocked users'**
+  String get socialBlacklistEmpty;
+
+  /// No description provided for @socialBlockedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked at: {time}'**
+  String socialBlockedAt(Object time);
+
+  /// No description provided for @feedbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get feedbackTitle;
+
+  /// No description provided for @feedbackBodyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your message (required)'**
+  String get feedbackBodyLabel;
+
+  /// No description provided for @feedbackBodyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe steps, what you expected, and what happened.'**
+  String get feedbackBodyHint;
+
+  /// No description provided for @feedbackSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get feedbackSubmit;
+
+  /// No description provided for @feedbackSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting…'**
+  String get feedbackSubmitting;
+
+  /// No description provided for @feedbackSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks — we\'ll review it soon.'**
+  String get feedbackSuccess;
+
+  /// No description provided for @feedbackNeedContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your feedback.'**
+  String get feedbackNeedContent;
+
+  /// No description provided for @userCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Member profile'**
+  String get userCardTitle;
+
+  /// No description provided for @userCardSendLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Send letter'**
+  String get userCardSendLetter;
+
+  /// No description provided for @userCardBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get userCardBack;
+
+  /// No description provided for @userCardErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load profile'**
+  String get userCardErrorTitle;
+
+  /// No description provided for @userCardNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile not found'**
+  String get userCardNotFoundTitle;
+
+  /// No description provided for @userCardNotFoundSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This member may be unavailable or restricted for you.'**
+  String get userCardNotFoundSubtitle;
+
   /// No description provided for @directoryTitle.
   ///
   /// In en, this message translates to:
@@ -1159,6 +1333,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load VIP info: {error}'**
   String vipCenterLoadFailed(Object error);
+
+  /// No description provided for @profileMyPostcards.
+  ///
+  /// In en, this message translates to:
+  /// **'My postcards'**
+  String get profileMyPostcards;
+
+  /// No description provided for @myPostcardsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No postcards yet'**
+  String get myPostcardsEmptyTitle;
+
+  /// No description provided for @myPostcardsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write one from the Post Wall tab — it will appear here with review status.'**
+  String get myPostcardsEmptySubtitle;
+
+  /// No description provided for @myPostcardsLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load postcards'**
+  String get myPostcardsLoadFailedTitle;
+
+  /// No description provided for @postcardReviewPendingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending review'**
+  String get postcardReviewPendingBadge;
+
+  /// No description provided for @postcardReviewApprovedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get postcardReviewApprovedBadge;
+
+  /// No description provided for @postcardReviewRejectedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get postcardReviewRejectedBadge;
+
+  /// No description provided for @postcardPostHiddenBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get postcardPostHiddenBadge;
+
+  /// No description provided for @postcardPostRemovedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get postcardPostRemovedBadge;
+
+  /// No description provided for @postcardReviewPendingBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This postcard is pending review. Only you can see it here.'**
+  String get postcardReviewPendingBanner;
+
+  /// No description provided for @postcardReviewRejectedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This postcard was not approved for the public wall. You can still view it from your list.'**
+  String get postcardReviewRejectedBanner;
+
+  /// No description provided for @letterMailboxSealedPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter sealed until arrival'**
+  String get letterMailboxSealedPreview;
+
+  /// No description provided for @letterContentHiddenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This letter is still on its way. The message is hidden until it arrives, or you can open it early with one stamp (VIP free).'**
+  String get letterContentHiddenHint;
+
+  /// No description provided for @letterEarlyOpenCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Open early (1 stamp)'**
+  String get letterEarlyOpenCta;
+
+  /// No description provided for @letterEarlyOpenSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter opened — full message is now visible.'**
+  String get letterEarlyOpenSuccess;
+
+  /// No description provided for @postDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Postcard'**
+  String get postDetailTitle;
+
+  /// No description provided for @letterDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter'**
+  String get letterDetailTitle;
 }
 
 class _AppLocalizationsDelegate

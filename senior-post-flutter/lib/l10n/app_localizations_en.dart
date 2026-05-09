@@ -403,6 +403,102 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postComposePublish => 'Publish now';
 
   @override
+  String get postcardImageCropTitle => 'Crop image (4:3)';
+
+  @override
+  String get postcardImageCropHelp =>
+      'Pan and zoom, then confirm to crop to 4:3 and upload.';
+
+  @override
+  String get profileBlacklist => 'Blocked users';
+
+  @override
+  String get settingsFeedback => 'Send feedback';
+
+  @override
+  String get dialogConfirm => 'OK';
+
+  @override
+  String get socialBlockUser => 'Block';
+
+  @override
+  String get socialBlockConfirmTitle => 'Block this user?';
+
+  @override
+  String get socialBlockConfirmMessage =>
+      'They won\'t be able to send you letters, and you won\'t see each other on the wall or directory.';
+
+  @override
+  String get socialBlockSuccess => 'User blocked';
+
+  @override
+  String get socialUnblock => 'Unblock';
+
+  @override
+  String socialUnblockConfirm(Object name) {
+    return 'Unblock $name?';
+  }
+
+  @override
+  String get socialUnblockSuccess => 'Unblocked';
+
+  @override
+  String get socialBlacklistTitle => 'Blocked users';
+
+  @override
+  String get socialBlacklistSubtitle =>
+      'Blocked users won\'t appear on the wall or directory and can\'t send you letters.';
+
+  @override
+  String get socialBlacklistEmpty => 'No blocked users';
+
+  @override
+  String socialBlockedAt(Object time) {
+    return 'Blocked at: $time';
+  }
+
+  @override
+  String get feedbackTitle => 'Feedback';
+
+  @override
+  String get feedbackBodyLabel => 'Your message (required)';
+
+  @override
+  String get feedbackBodyHint =>
+      'Describe steps, what you expected, and what happened.';
+
+  @override
+  String get feedbackSubmit => 'Submit';
+
+  @override
+  String get feedbackSubmitting => 'Submitting…';
+
+  @override
+  String get feedbackSuccess => 'Thanks — we\'ll review it soon.';
+
+  @override
+  String get feedbackNeedContent => 'Please enter your feedback.';
+
+  @override
+  String get userCardTitle => 'Member profile';
+
+  @override
+  String get userCardSendLetter => 'Send letter';
+
+  @override
+  String get userCardBack => 'Back';
+
+  @override
+  String get userCardErrorTitle => 'Unable to load profile';
+
+  @override
+  String get userCardNotFoundTitle => 'Profile not found';
+
+  @override
+  String get userCardNotFoundSubtitle =>
+      'This member may be unavailable or restricted for you.';
+
+  @override
   String get directoryTitle => 'Post Directory';
 
   @override
@@ -591,4 +687,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String vipCenterLoadFailed(Object error) {
     return 'Failed to load VIP info: $error';
   }
+
+  @override
+  String get profileMyPostcards => 'My postcards';
+
+  @override
+  String get myPostcardsEmptyTitle => 'No postcards yet';
+
+  @override
+  String get myPostcardsEmptySubtitle =>
+      'Write one from the Post Wall tab — it will appear here with review status.';
+
+  @override
+  String get myPostcardsLoadFailedTitle => 'Could not load postcards';
+
+  @override
+  String get postcardReviewPendingBadge => 'Pending review';
+
+  @override
+  String get postcardReviewApprovedBadge => 'Approved';
+
+  @override
+  String get postcardReviewRejectedBadge => 'Rejected';
+
+  @override
+  String get postcardPostHiddenBadge => 'Hidden';
+
+  @override
+  String get postcardPostRemovedBadge => 'Removed';
+
+  @override
+  String get postcardReviewPendingBanner =>
+      'This postcard is pending review. Only you can see it here.';
+
+  @override
+  String get postcardReviewRejectedBanner =>
+      'This postcard was not approved for the public wall. You can still view it from your list.';
+
+  @override
+  String get letterMailboxSealedPreview => 'Letter sealed until arrival';
+
+  @override
+  String get letterContentHiddenHint =>
+      'This letter is still on its way. The message is hidden until it arrives, or you can open it early with one stamp (VIP free).';
+
+  @override
+  String get letterEarlyOpenCta => 'Open early (1 stamp)';
+
+  @override
+  String get letterEarlyOpenSuccess =>
+      'Letter opened — full message is now visible.';
+
+  @override
+  String get postDetailTitle => 'Postcard';
+
+  @override
+  String get letterDetailTitle => 'Letter';
 }

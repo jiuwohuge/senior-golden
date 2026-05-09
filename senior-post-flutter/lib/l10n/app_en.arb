@@ -165,6 +165,45 @@
     }
   },
   "postComposePublish": "Publish now",
+  "postcardImageCropTitle": "Crop image (4:3)",
+  "postcardImageCropHelp": "Pan and zoom, then confirm to crop to 4:3 and upload.",
+  "profileBlacklist": "Blocked users",
+  "settingsFeedback": "Send feedback",
+  "dialogConfirm": "OK",
+  "socialBlockUser": "Block",
+  "socialBlockConfirmTitle": "Block this user?",
+  "socialBlockConfirmMessage": "They won't be able to send you letters, and you won't see each other on the wall or directory.",
+  "socialBlockSuccess": "User blocked",
+  "socialUnblock": "Unblock",
+  "socialUnblockConfirm": "Unblock {name}?",
+  "@socialUnblockConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "socialUnblockSuccess": "Unblocked",
+  "socialBlacklistTitle": "Blocked users",
+  "socialBlacklistSubtitle": "Blocked users won't appear on the wall or directory and can't send you letters.",
+  "socialBlacklistEmpty": "No blocked users",
+  "socialBlockedAt": "Blocked at: {time}",
+  "@socialBlockedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "feedbackTitle": "Feedback",
+  "feedbackBodyLabel": "Your message (required)",
+  "feedbackBodyHint": "Describe steps, what you expected, and what happened.",
+  "feedbackSubmit": "Submit",
+  "feedbackSubmitting": "Submitting…",
+  "feedbackSuccess": "Thanks — we'll review it soon.",
+  "feedbackNeedContent": "Please enter your feedback.",
+  "userCardTitle": "Member profile",
+  "userCardSendLetter": "Send letter",
+  "userCardBack": "Back",
+  "userCardErrorTitle": "Unable to load profile",
+  "userCardNotFoundTitle": "Profile not found",
+  "userCardNotFoundSubtitle": "This member may be unavailable or restricted for you.",
   "directoryTitle": "Post Directory",
   "directorySubtitle": "Find pen pals by country and interests",
   "directoryLoadFailed": "Unable to load directory",
@@ -243,5 +282,22 @@
     "placeholders": {
       "error": {}
     }
-  }
+  },
+  "profileMyPostcards": "My postcards",
+  "myPostcardsEmptyTitle": "No postcards yet",
+  "myPostcardsEmptySubtitle": "Write one from the Post Wall tab — it will appear here with review status.",
+  "myPostcardsLoadFailedTitle": "Could not load postcards",
+  "postcardReviewPendingBadge": "Pending review",
+  "postcardReviewApprovedBadge": "Approved",
+  "postcardReviewRejectedBadge": "Rejected",
+  "postcardPostHiddenBadge": "Hidden",
+  "postcardPostRemovedBadge": "Removed",
+  "postcardReviewPendingBanner": "This postcard is pending review. Only you can see it here.",
+  "postcardReviewRejectedBanner": "This postcard was not approved for the public wall. You can still view it from your list.",
+  "letterMailboxSealedPreview": "Letter sealed until arrival",
+  "letterContentHiddenHint": "This letter is still on its way. The message is hidden until it arrives, or you can open it early with one stamp (VIP free).",
+  "letterEarlyOpenCta": "Open early (1 stamp)",
+  "letterEarlyOpenSuccess": "Letter opened — full message is now visible.",
+  "postDetailTitle": "Postcard",
+  "letterDetailTitle": "Letter"
 }

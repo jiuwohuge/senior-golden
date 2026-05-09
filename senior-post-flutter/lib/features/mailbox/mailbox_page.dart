@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal.dart';
@@ -302,12 +303,13 @@ class _ImStyleRow extends StatelessWidget {
   }
 }
 
-class _LetterTile extends StatelessWidget {
+class _LetterTile extends ConsumerWidget {
   const _LetterTile({required this.letter});
   final MailboxLetter letter;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final statusChip = switch (letter.status) {
       LetterStatus.delivering => PostalStatusChip.delivering(),
       LetterStatus.registered => PostalStatusChip.registered(
@@ -319,7 +321,10 @@ class _LetterTile extends StatelessWidget {
             : PostalStatusChip.delivered(),
     };
     return PostalCardEnvelope(
-      onTap: () => context.push('/letter/${letter.id}'),
+      onTap: () {
+        ref.invalidate(letterDetailProvider(letter.id));
+        context.push('/letter/${letter.id}');
+      },
       header: Row(
         children: [
           PostalAvatar(
@@ -340,7 +345,13 @@ class _LetterTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(letter.preview, maxLines: 2, overflow: TextOverflow.ellipsis),
+          Text(
+            letter.contentHidden && letter.preview.isEmpty
+                ? l10n.letterMailboxSealedPreview
+                : letter.preview,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
           const SizedBox(height: 8),
           Text(
             DateFormat('MM-dd HH:mm').format(letter.sentAt),

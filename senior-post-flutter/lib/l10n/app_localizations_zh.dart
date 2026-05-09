@@ -379,6 +379,97 @@ class AppLocalizationsZh extends AppLocalizations {
   String get postComposePublish => '立即发布';
 
   @override
+  String get postcardImageCropTitle => '裁剪配图（4:3）';
+
+  @override
+  String get postcardImageCropHelp => '拖动与缩放选区，确认后以 4:3 比例裁剪并上传。';
+
+  @override
+  String get profileBlacklist => '黑名单';
+
+  @override
+  String get settingsFeedback => '意见反馈';
+
+  @override
+  String get dialogConfirm => '确定';
+
+  @override
+  String get socialBlockUser => '拉黑';
+
+  @override
+  String get socialBlockConfirmTitle => '加入黑名单？';
+
+  @override
+  String get socialBlockConfirmMessage => '对方将无法向你寄信，公开墙与名录中也不会互相看到。';
+
+  @override
+  String get socialBlockSuccess => '已拉黑';
+
+  @override
+  String get socialUnblock => '取消拉黑';
+
+  @override
+  String socialUnblockConfirm(Object name) {
+    return '确定取消对「$name」的拉黑？';
+  }
+
+  @override
+  String get socialUnblockSuccess => '已取消拉黑';
+
+  @override
+  String get socialBlacklistTitle => '黑名单';
+
+  @override
+  String get socialBlacklistSubtitle => '已屏蔽的用户不会出现在墙与名录，且无法寄信。';
+
+  @override
+  String get socialBlacklistEmpty => '暂无拉黑用户';
+
+  @override
+  String socialBlockedAt(Object time) {
+    return '拉黑时间：$time';
+  }
+
+  @override
+  String get feedbackTitle => '意见反馈';
+
+  @override
+  String get feedbackBodyLabel => '问题或建议（必填）';
+
+  @override
+  String get feedbackBodyHint => '请描述操作步骤、期望与实际表现，便于我们排查。';
+
+  @override
+  String get feedbackSubmit => '提交';
+
+  @override
+  String get feedbackSubmitting => '提交中…';
+
+  @override
+  String get feedbackSuccess => '感谢反馈，我们会尽快查阅。';
+
+  @override
+  String get feedbackNeedContent => '请填写反馈正文。';
+
+  @override
+  String get userCardTitle => '会员资料';
+
+  @override
+  String get userCardSendLetter => '寄信';
+
+  @override
+  String get userCardBack => '返回';
+
+  @override
+  String get userCardErrorTitle => '无法加载资料';
+
+  @override
+  String get userCardNotFoundTitle => '找不到该会员';
+
+  @override
+  String get userCardNotFoundSubtitle => '对方可能暂不可用，或与你的关系受限。';
+
+  @override
   String get directoryTitle => '通信名录';
 
   @override
@@ -562,4 +653,56 @@ class AppLocalizationsZh extends AppLocalizations {
   String vipCenterLoadFailed(Object error) {
     return '加载 VIP 信息失败：$error';
   }
+
+  @override
+  String get profileMyPostcards => '我的明信片';
+
+  @override
+  String get myPostcardsEmptyTitle => '还没有明信片';
+
+  @override
+  String get myPostcardsEmptySubtitle => '在「明信片墙」发布内容后，将在此显示审核进度。';
+
+  @override
+  String get myPostcardsLoadFailedTitle => '明信片列表加载失败';
+
+  @override
+  String get postcardReviewPendingBadge => '待审核';
+
+  @override
+  String get postcardReviewApprovedBadge => '审核通过';
+
+  @override
+  String get postcardReviewRejectedBadge => '审核拒绝';
+
+  @override
+  String get postcardPostHiddenBadge => '已隐藏';
+
+  @override
+  String get postcardPostRemovedBadge => '已删除';
+
+  @override
+  String get postcardReviewPendingBanner => '明信片待审核，仅本人可见。';
+
+  @override
+  String get postcardReviewRejectedBanner => '明信片未通过公开审核，仍可在列表中查看。';
+
+  @override
+  String get letterMailboxSealedPreview => '信件密封递送中';
+
+  @override
+  String get letterContentHiddenHint =>
+      '平邮运输中，正文已密封。自然送达后将自动展示，或使用 1 枚邮票提前拆信（VIP 免扣）。';
+
+  @override
+  String get letterEarlyOpenCta => '提前拆信（1 枚邮票）';
+
+  @override
+  String get letterEarlyOpenSuccess => '已提前拆信，可阅读全文。';
+
+  @override
+  String get postDetailTitle => '明信片';
+
+  @override
+  String get letterDetailTitle => '信件详情';
 }

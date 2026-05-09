@@ -53,6 +53,15 @@ Token: {{token}}
   "page": { "page": 1, "size": 20 }
 }
 
+### 4b) App：我的明信片流水（含待审/驳回；仅本人）
+POST {{host}}/api/postcards/mine/paging
+Content-Type: application/json
+Token: {{token}}
+
+{
+  "page": { "page": 1, "size": 20 }
+}
+
 ### 5) Manage：审核通过明信片（staff JWT；见 AdminContentApi）
 POST {{host}}/webapi/content/postcard/{{postcardId}}/approve
 Token: {{adminToken}}

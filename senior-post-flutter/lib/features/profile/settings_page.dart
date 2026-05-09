@@ -34,12 +34,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
               ListTile(
                 title: Text(l10n.settingsLanguageEnglish),
-                trailing: current?.languageCode == 'en' ? const Icon(Icons.check) : null,
+                trailing: current?.languageCode == 'en'
+                    ? const Icon(Icons.check)
+                    : null,
                 onTap: () => Navigator.pop(ctx, 'en'),
               ),
               ListTile(
                 title: Text(l10n.settingsLanguageChinese),
-                trailing: current?.languageCode == 'zh' ? const Icon(Icons.check) : null,
+                trailing: current?.languageCode == 'zh'
+                    ? const Icon(Icons.check)
+                    : null,
                 onTap: () => Navigator.pop(ctx, 'zh'),
               ),
             ],
@@ -85,6 +89,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     subtitle: Text(l10n.settingsLanguageSubtitle),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _pickLanguage,
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.feedback_outlined),
+                    title: Text(l10n.settingsFeedback),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/settings/feedback'),
                   ),
                 ],
               ),

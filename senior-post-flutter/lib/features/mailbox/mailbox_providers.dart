@@ -18,3 +18,9 @@ final postalInboxLettersProvider = FutureProvider<List<MailboxLetter>>((ref) asy
 final mailboxFriendsProvider = FutureProvider<List<FriendListRow>>((ref) async {
   return ref.read(mailboxRemoteRepositoryProvider).listMailboxFriends();
 });
+
+/// 信件详情；[autoDispose] 避免列表已刷新后仍命中旧缓存。
+final letterDetailProvider =
+    FutureProvider.autoDispose.family<MailboxLetter?, String>((ref, id) async {
+  return ref.read(mailboxRemoteRepositoryProvider).getLetter(id);
+});

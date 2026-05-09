@@ -14,3 +14,7 @@ final postDetailProvider = FutureProvider.family<WallPost?, String>((ref, id) as
 final postCommentsProvider = FutureProvider.family<List<WallComment>, String>((ref, id) async {
   return ref.read(postWallRemoteProvider).listComments(id);
 });
+
+final myPostcardsProvider = FutureProvider<List<WallPost>>((ref) async {
+  return ref.read(postWallRemoteProvider).listMinePostcards();
+});

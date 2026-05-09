@@ -34,4 +34,13 @@ public class MailboxLetterItemVO {
     private LocalDateTime sentAt;
     @Schema(description = "更新时间（同步用）")
     private LocalDateTime updatedAt;
+
+    @Schema(description = "预计送达时间（平邮运输中）")
+    private LocalDateTime expectedArrivalTime;
+
+    @Schema(description = "实际送达时间")
+    private LocalDateTime actualArrivalTime;
+
+    @Schema(description = "收件人视角：运输中平邮正文是否隐藏（提前拆信后为 false）")
+    private Boolean contentHidden;
 }

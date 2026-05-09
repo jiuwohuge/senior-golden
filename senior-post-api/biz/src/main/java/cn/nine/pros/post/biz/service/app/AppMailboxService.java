@@ -34,4 +34,9 @@ public interface AppMailboxService {
      * 发件人对运输中的平邮加速：非 VIP 扣 1 邮票，VIP 免扣；信件变为已送达。
      */
     MailboxLetterItemVO speedUpLetter(long actorUserId, long letterId);
+
+    /**
+     * 收件人对运输中的平邮提前拆信：非 VIP 扣 1 邮票，VIP 免扣；不改变送达状态，仅解锁正文。
+     */
+    MailboxLetterItemVO earlyOpenLetter(long actorUserId, long letterId);
 }

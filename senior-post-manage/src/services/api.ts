@@ -49,4 +49,5 @@ export const api = {
   actionLogs: (params: any) => request.post('/webapi/log/action/paging', params),
   loginLogs: (params: any) => request.post('/webapi/log/login/paging', params),
   stampLedgerPaging: (params: any) => request.post('/webapi/stamps/ledger/paging', params),
+  feedbackPaging: (params: any) => request.post('/webapi/feedback/paging', params),
 }

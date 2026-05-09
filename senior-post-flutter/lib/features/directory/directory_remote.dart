@@ -24,7 +24,8 @@ class DirectoryRemoteRepository {
       '/api/directory/users/paging',
       data: <String, dynamic>{
         'page': <String, dynamic>{'page': page, 'size': size},
-        if (countryCode != null && countryCode.isNotEmpty) 'countryCode': countryCode,
+        if (countryCode != null && countryCode.isNotEmpty)
+          'countryCode': countryCode,
         if (minAge != null) 'minAge': minAge,
         if (maxAge != null) 'maxAge': maxAge,
         if (interestNames.isNotEmpty) 'interestNames': interestNames,
@@ -72,7 +73,9 @@ class DirectoryRemoteRepository {
   }
 
   /// 带 `id` 的选项，供资料编辑多选；筛选名录仍用 [listInterestTagNames] 的 `tag_name`。
-  Future<List<InterestTagOption>> listInterestTagOptions({required String lang}) async {
+  Future<List<InterestTagOption>> listInterestTagOptions({
+    required String lang,
+  }) async {
     final r = await _dio.get<dynamic>(
       '/api/directory/interest-tag-options',
       queryParameters: <String, dynamic>{'lang': lang},
@@ -109,39 +112,7 @@ class DirectoryRemoteRepository {
 }
 
 AppUser _voToAppUser(Map<String, dynamic> m) {
-  final id = (m['id'] as num?)?.toInt() ?? 0;
-  final birthYear = (m['birthYear'] as num?)?.toInt() ?? 1970;
-  final cc = (m['countryCode'] as String?) ?? '';
-  final countryName = (m['countryName'] as String?)?.trim().isNotEmpty == true
-      ? (m['countryName'] as String).trim()
-      : cc;
-  var interestNames = const <String>[];
-  final namesRaw = m['interestTagNames'];
-  if (namesRaw is List<dynamic>) {
-    interestNames = namesRaw
-        .whereType<String>()
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
-  }
-  var interestIds = const <int>[];
-  final idsRaw = m['interestTagIds'];
-  if (idsRaw is List<dynamic>) {
-    interestIds = idsRaw.whereType<num>().map((e) => e.toInt()).toList();
-  }
-  return AppUser(
-    id: '$id',
-    nickname: (m['nickname'] as String?) ?? 'User',
-    email: '',
-    countryCode: cc,
-    countryName: countryName,
-    birthYear: birthYear,
-    bio: (m['bio'] as String?) ?? '',
-    interests: interestNames,
-    interestTagIds: interestIds,
-    avatarUrl: m['avatarUrl'] as String?,
-    isVip: m['isVip'] as bool? ?? false,
-  );
+  return AppUser.fromPublicVoJson(m);
 }
 
 final directoryRemoteProvider = Provider<DirectoryRemoteRepository>(

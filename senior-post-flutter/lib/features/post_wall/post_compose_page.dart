@@ -5,11 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
+import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/oss/oss_upload_service.dart';
 import '../../widgets/postal/postal.dart';
 import '../shell/main_shell.dart';
 import 'post_providers.dart';
+import 'postcard_image_crop_page.dart';
 import 'post_wall_remote.dart';
 
 class _PickedImage {
@@ -41,23 +43,6 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
   void dispose() {
     _content.dispose();
     super.dispose();
-  }
-
-  String _extFromName(String name) {
-    final i = name.lastIndexOf('.');
-    if (i < 0 || i == name.length - 1) {
-      return 'jpg';
-    }
-    return name.substring(i + 1).toLowerCase();
-  }
-
-  String _contentTypeForExt(String ext) {
-    return switch (ext) {
-      'png' => 'image/png',
-      'webp' => 'image/webp',
-      'gif' => 'image/gif',
-      _ => 'image/jpeg',
-    };
   }
 
   Future<void> _pickAndUploadImage() async {
@@ -99,19 +84,33 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
     if (x == null) {
       return;
     }
+    final rawBytes = await x.readAsBytes();
+    if (!mounted) return;
+    final cropped = await Navigator.of(context).push<Uint8List>(
+      MaterialPageRoute<Uint8List>(
+        fullscreenDialog: true,
+        builder: (_) => PostcardImageCropPage(imageBytes: rawBytes),
+      ),
+    );
+    if (cropped == null || !mounted) {
+      return;
+    }
     setState(() => _uploadBusy = true);
     try {
-      final bytes = await x.readAsBytes();
-      final ext = _extFromName(x.name);
-      final ct = _contentTypeForExt(ext);
-      final url = await ref.read(ossUploadServiceProvider).uploadPostcardImage(
-            bytes: bytes,
-            ext: ext,
-            contentType: ct,
-          );
+      const ext = 'png';
+      const ct = 'image/png';
+      final url = await ref
+          .read(ossUploadServiceProvider)
+          .uploadPostcardImage(bytes: cropped, ext: ext, contentType: ct);
       if (!mounted) return;
-      setState(() => _images.add(_PickedImage(backendRef: url, previewBytes: bytes)));
-      PostalSnack.show(context, l10n.postComposeImageUploaded, tone: PostalSnackTone.success);
+      setState(
+        () => _images.add(_PickedImage(backendRef: url, previewBytes: cropped)),
+      );
+      PostalSnack.show(
+        context,
+        l10n.postComposeImageUploaded,
+        tone: PostalSnackTone.success,
+      );
     } on ApiBusinessException catch (e) {
       if (mounted) {
         PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
@@ -124,13 +123,19 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
   Future<void> _publish() async {
     final l10n = AppLocalizations.of(context)!;
     if (_content.text.trim().isEmpty) {
-      PostalSnack.show(context, l10n.postComposeNeedContent, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.postComposeNeedContent,
+        tone: PostalSnackTone.warning,
+      );
       return;
     }
     setState(() => _busy = true);
     try {
       final refs = _images.map((e) => e.backendRef).toList();
-      await ref.read(postWallRemoteProvider).createPost(
+      await ref
+          .read(postWallRemoteProvider)
+          .createPost(
             content: _content.text.trim(),
             imageUrls: refs.isEmpty ? null : refs,
           );
@@ -143,7 +148,9 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
       );
       context.go(MainShellRoute.pathPostWall);
     } on ApiBusinessException catch (e) {
-      if (mounted) PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -176,64 +183,116 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
                     showClearButton: false,
                   ),
                   const SizedBox(height: 12),
-                  if (_images.isNotEmpty) ...[
-                    SizedBox(
-                      height: 108,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _images.length,
-                        separatorBuilder: (_, _) => const SizedBox(width: 10),
-                        itemBuilder: (_, i) {
-                          final item = _images[i];
-                          return Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: SizedBox(
-                                  width: 140,
-                                  height: 100,
-                                  child: Image.memory(
-                                    item.previewBytes,
-                                    fit: BoxFit.cover,
+                  SizedBox(
+                    height: 112,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: Center(
+                            child: Opacity(
+                              opacity:
+                                  (_busy ||
+                                      _uploadBusy ||
+                                      _images.length >= _maxImages)
+                                  ? 0.45
+                                  : 1,
+                              child: Material(
+                                color: PostalTokens.paperEnvelope,
+                                shape: const CircleBorder(),
+                                elevation: 1,
+                                shadowColor: PostalTokens.inkNavy.withValues(
+                                  alpha: 0.12,
+                                ),
+                                child: InkWell(
+                                  customBorder: const CircleBorder(),
+                                  onTap:
+                                      (_busy ||
+                                          _uploadBusy ||
+                                          _images.length >= _maxImages)
+                                      ? null
+                                      : _pickAndUploadImage,
+                                  child: SizedBox(
+                                    width: 72,
+                                    height: 72,
+                                    child: _uploadBusy
+                                        ? const Padding(
+                                            padding: EdgeInsets.all(18),
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.6,
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.add_photo_alternate_outlined,
+                                            size: 30,
+                                            color: PostalTokens.postboxGreen
+                                                .withValues(alpha: 0.9),
+                                          ),
                                   ),
                                 ),
                               ),
-                              Positioned(
-                                top: 4,
-                                right: 4,
-                                child: Material(
-                                  color: Colors.black54,
-                                  shape: const CircleBorder(),
-                                  child: IconButton(
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                    icon: const Icon(Icons.close, color: Colors.white, size: 18),
-                                    onPressed: _busy || _uploadBusy
-                                        ? null
-                                        : () => setState(() => _images.removeAt(i)),
+                            ),
+                          ),
+                        ),
+                        ..._images.asMap().entries.map((e) {
+                          final i = e.key;
+                          final item = e.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: SizedBox(
+                                    width: 132,
+                                    height: 100,
+                                    child: Image.memory(
+                                      item.previewBytes,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Material(
+                                    color: Colors.black54,
+                                    shape: const CircleBorder(),
+                                    child: IconButton(
+                                      visualDensity: VisualDensity.compact,
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(
+                                        minWidth: 32,
+                                        minHeight: 32,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                      onPressed: _busy || _uploadBusy
+                                          ? null
+                                          : () => setState(
+                                              () => _images.removeAt(i),
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           );
-                        },
-                      ),
+                        }),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                  ],
-                  PostalButton(
-                    label: _uploadBusy
-                        ? l10n.postComposeUploading
-                        : (_images.isEmpty
-                            ? l10n.postComposeAddImage
-                            : l10n.postComposeAddAnother('${_images.length}', '$_maxImages')),
-                    onPressed: (_busy || _uploadBusy || _images.length >= _maxImages)
-                        ? null
-                        : _pickAndUploadImage,
-                    busy: _uploadBusy,
-                    variant: PostalButtonVariant.secondary,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.postComposeMaxImages('$_maxImages'),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: PostalTokens.inkSecondary,
+                    ),
                   ),
                   const SizedBox(height: 14),
                   PostalButton(

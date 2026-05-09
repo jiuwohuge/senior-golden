@@ -2,6 +2,9 @@ package cn.nine.pros.post.biz.model.domain;
 
 import cn.nine.commons.data.domain.AbstractAuditableDomain;
 import com.baomidou.mybatisplus.annotation.IdType;
+import java.time.LocalDateTime;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -80,5 +83,12 @@ public class LetterDomain extends AbstractAuditableDomain {
      */
     @Schema(description = "发送模式：1平邮路径 2挂号路径 3直发/VIP")
     private Integer sendMode;
+
+    /**
+     * 收件人提前拆信（消耗邮票后运输中可读正文）
+     */
+    @Schema(description = "收件人提前拆信时间")
+    @TableField("recipient_early_open_at")
+    private LocalDateTime recipientEarlyOpenAt;
 
 }

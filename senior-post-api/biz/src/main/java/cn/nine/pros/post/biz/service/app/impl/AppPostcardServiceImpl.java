@@ -6,6 +6,7 @@ import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.controller.app.AppPageHelper;
 import cn.nine.pros.post.biz.model.domain.PostcardCommentDomain;
 import cn.nine.pros.post.biz.model.domain.PostcardDomain;
+import cn.nine.pros.post.biz.service.app.AppBlacklistService;
 import cn.nine.pros.post.biz.service.app.AppPostcardService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.PostcardCommentService;
@@ -49,6 +50,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     private final SensitiveWordService sensitiveWordService;
     private final OssDisplayUrlService ossDisplayUrlService;
     private final StampGrantService stampGrantService;
+    private final AppBlacklistService appBlacklistService;
 
     @Override
     @SuppressWarnings("unused")
@@ -58,13 +60,34 @@ public class AppPostcardServiceImpl implements AppPostcardService {
                 .eq(PostcardDomain::isDelFlag, false)
                 .apply("review_status = 1")
                 .apply("status = 1")
+                .apply("NOT EXISTS (SELECT 1 FROM bu_user_blacklist bl WHERE bl.del_flag = FALSE "
+                        + "AND ((bl.user_id = {0} AND bl.blocked_user_id = bu_postcard.user_id) "
+                        + "OR (bl.user_id = bu_postcard.user_id AND bl.blocked_user_id = {0})))", userId)
                 .orderByDesc(PostcardDomain::getPublishedAt);
         Page<PostcardDomain> p = postcardService.page(AppPageHelper.mpPage(pq), qw);
         Map<Long, UserDTO> authorMap = loadAuthors(p.getRecords());
         List<PostcardWallItemVO> records = new ArrayList<>();
         for (PostcardDomain row : p.getRecords()) {
             int cc = countApprovedComments(row.getId());
-            records.add(toWallItem(row, authorMap.get(row.getUserId()), cc));
+            records.add(toWallItem(row, authorMap.get(row.getUserId()), cc, false));
+        }
+        ossDisplayUrlService.applyPostcardWall(userId, records);
+        return AppPageHelper.pageData(pq, p, records);
+    }
+
+    @Override
+    public PageData<PostcardWallItemVO> minePage(long userId, AppPostcardPageInDto body) {
+        PageQuery pq = AppPageHelper.normalize(body == null ? null : body.getPage());
+        LambdaQueryWrapper<PostcardDomain> qw = new LambdaQueryWrapper<PostcardDomain>()
+                .eq(PostcardDomain::isDelFlag, false)
+                .eq(PostcardDomain::getUserId, userId)
+                .orderByDesc(PostcardDomain::getPublishedAt);
+        Page<PostcardDomain> p = postcardService.page(AppPageHelper.mpPage(pq), qw);
+        Map<Long, UserDTO> authorMap = loadAuthors(p.getRecords());
+        List<PostcardWallItemVO> records = new ArrayList<>();
+        for (PostcardDomain row : p.getRecords()) {
+            int cc = countApprovedComments(row.getId());
+            records.add(toWallItem(row, authorMap.get(row.getUserId()), cc, true));
         }
         ossDisplayUrlService.applyPostcardWall(userId, records);
         return AppPageHelper.pageData(pq, p, records);
@@ -77,6 +100,9 @@ public class AppPostcardServiceImpl implements AppPostcardService {
             throw new BadRequestException("明信片不存在");
         }
         if (isApprovedPublic(p)) {
+            if (appBlacklistService.areMutuallyBlocked(viewerUserId, p.getUserId())) {
+                throw new BadRequestException("明信片不存在");
+            }
             UserDTO author = userService.findById(p.getUserId());
             int cc = countApprovedComments(p.getId());
             PostcardDetailVO vo = toDetail(p, author, cc, viewerUserId);
@@ -245,18 +271,22 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         return map;
     }
 
-    private static PostcardWallItemVO toWallItem(PostcardDomain row, UserDTO author, int commentCount) {
+    private static PostcardWallItemVO toWallItem(PostcardDomain row, UserDTO author, int commentCount, boolean includeAuditFields) {
         List<String> imgs = normalizeImageUrls(row);
         String first = imgs.isEmpty() ? null : imgs.get(0);
-        return PostcardWallItemVO.builder()
+        PostcardWallItemVO.PostcardWallItemVOBuilder b = PostcardWallItemVO.builder()
                 .id(row.getId())
                 .content(row.getContent())
                 .imageUrl(first)
                 .imageUrls(imgs.isEmpty() ? null : imgs)
                 .publishedAt(toLocalDateTime(row.getPublishedAt()))
                 .commentCount(commentCount)
-                .author(toAuthor(author))
-                .build();
+                .author(toAuthor(author));
+        if (includeAuditFields) {
+            b.reviewStatus(intVal(row.getReviewStatus()))
+                    .postStatus(intVal(row.getStatus()));
+        }
+        return b.build();
     }
 
     private PostcardDetailVO toDetail(PostcardDomain row, UserDTO author, int commentCount, long viewerUserId) {

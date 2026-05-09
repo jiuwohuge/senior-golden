@@ -17,7 +17,10 @@ import '../../features/post_wall/post_compose_page.dart';
 import '../../features/post_wall/post_detail_page.dart';
 import '../../features/profile/about_page.dart';
 import '../../features/profile/account_delete_page.dart';
+import '../../features/profile/blacklist_page.dart';
+import '../../features/profile/feedback_page.dart';
 import '../../features/profile/interests_picker_page.dart';
+import '../../features/profile/my_postcards_page.dart';
 import '../../features/profile/profile_edit_page.dart';
 import '../../features/profile/settings_page.dart';
 import '../../features/profile/stamps_ledger_page.dart';
@@ -140,8 +143,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const VipCenterPage(),
       ),
       GoRoute(
+        path: '/profile/my-postcards',
+        builder: (context, state) => const MyPostcardsPage(),
+      ),
+      GoRoute(
+        path: '/profile/blocks',
+        builder: (context, state) => const BlacklistPage(),
+      ),
+      GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: '/settings/feedback',
+        builder: (context, state) => const FeedbackPage(),
       ),
       GoRoute(path: '/about', builder: (context, state) => const AboutPage()),
       GoRoute(
