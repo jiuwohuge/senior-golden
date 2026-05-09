@@ -589,7 +589,13 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                 if (isFriend) ...[
                   const SizedBox(height: 12),
                   OutlinedButton(
-                    onPressed: () => context.push('/chat/${letter.peer.id}'),
+                    onPressed: () => context.push(
+                      '/chat/${letter.peer.id}',
+                      extra: <String, dynamic>{
+                        'name': letter.peer.nickname,
+                        'avatarUrl': letter.peer.avatarUrl,
+                      },
+                    ),
                     child: const Text('Open instant chat'),
                   ),
                 ],

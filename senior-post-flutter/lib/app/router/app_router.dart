@@ -129,10 +129,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/chat/:userId',
         builder: (context, state) {
           final extra = state.extra;
-          final displayName = extra is String ? extra : null;
+          String? displayName;
+          String? peerAvatarUrl;
+          if (extra is Map) {
+            displayName = extra['name'] as String? ??
+                extra['displayName'] as String?;
+            peerAvatarUrl = extra['avatarUrl'] as String?;
+          } else if (extra is String) {
+            displayName = extra;
+          }
           return ChatPage(
             peerUserId: state.pathParameters['userId']!,
             displayName: displayName,
+            peerAvatarUrl: peerAvatarUrl,
           );
         },
       ),

@@ -41,10 +41,10 @@ class MailboxArchivePage extends ConsumerWidget {
                 header: Row(
                   children: [
                     PostalAvatar(
-                    name: l.peer.nickname,
-                    size: 36,
-                    imageUrl: l.peer.avatarUrl,
-                  ),
+                      name: l.peer.nickname,
+                      size: 36,
+                      imageUrl: l.peer.avatarUrl,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

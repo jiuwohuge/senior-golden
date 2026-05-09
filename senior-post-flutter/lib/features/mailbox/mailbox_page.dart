@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +11,9 @@ import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../auth/auth_repository.dart';
 import '../../widgets/postal/postal.dart';
+import 'im_unread_providers.dart';
 import 'mailbox_providers.dart';
+import 'tim_facade.dart';
 
 class MailboxPage extends ConsumerStatefulWidget {
   const MailboxPage({super.key});
@@ -27,6 +31,18 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(_primeImForUnread());
+    });
+  }
+
+  Future<void> _primeImForUnread() async {
+    try {
+      await ref.read(seniorPostTimFacadeProvider).ensureLoggedIn();
+    } catch (_) {
+      // 无好友、IM 未配置等：进聊天页会再尝试。
+    }
   }
 
   @override
@@ -46,6 +62,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
         ref.invalidate(mailboxLettersProvider);
         ref.invalidate(mailboxFriendsProvider);
         ref.read(authRepositoryProvider).refreshSessionFromServer();
+        ref.read(seniorPostTimFacadeProvider).refreshC2cUnreadIfLoggedIn();
       });
     }
   }
@@ -193,6 +210,7 @@ class _ConnectionsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(mailboxFriendsProvider);
+    final unreadMap = ref.watch(imC2cUnreadProvider);
     return async.when(
       loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 72),
       error: (e, _) => PostalEmptyState(
@@ -218,13 +236,15 @@ class _ConnectionsTab extends ConsumerWidget {
           separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (_, i) {
             final r = rows[i];
+            final id = r.peer.id.trim();
+            final unread = (id.isEmpty || id == '0') ? 0 : (unreadMap[id] ?? 0);
             return _ImStyleRow(
               title: r.peer.nickname,
               subtitle: r.lastMessage,
               time: r.lastTime,
               avatarUrl: r.peer.avatarUrl,
+              unreadCount: unread,
               onTap: () {
-                final id = r.peer.id.trim();
                 if (id.isEmpty || id == '0') {
                   PostalSnack.show(
                     context,
@@ -233,7 +253,13 @@ class _ConnectionsTab extends ConsumerWidget {
                   );
                   return;
                 }
-                context.push('/chat/$id', extra: r.peer.nickname);
+                context.push(
+                  '/chat/$id',
+                  extra: <String, dynamic>{
+                    'name': r.peer.nickname,
+                    'avatarUrl': r.peer.avatarUrl,
+                  },
+                );
               },
             );
           },
@@ -250,6 +276,7 @@ class _ImStyleRow extends StatelessWidget {
     required this.time,
     required this.onTap,
     this.avatarUrl,
+    this.unreadCount = 0,
   });
 
   final String title;
@@ -257,44 +284,95 @@ class _ImStyleRow extends StatelessWidget {
   final DateTime time;
   final VoidCallback onTap;
   final String? avatarUrl;
+  final int unreadCount;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PostalAvatar(name: title, size: 44, imageUrl: avatarUrl),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Text(title, style: theme.textTheme.titleSmall),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: PostalTokens.inkTertiary,
+                  PostalAvatar(name: title, size: 48, imageUrl: avatarUrl),
+                  if (unreadCount > 0)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 2,
+                        ),
+                        constraints: const BoxConstraints(minWidth: 18),
+                        decoration: BoxDecoration(
+                          color: PostalTokens.stampVermilion,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: PostalTokens.paperCream,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Text(
+                          unreadCount > 99 ? '99+' : '$unreadCount',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
                 ],
               ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              DateFormat('MM-dd').format(time),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: PostalTokens.inkTertiary,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: unreadCount > 0
+                            ? FontWeight.w700
+                            : FontWeight.w600,
+                        color: PostalTokens.inkNavy,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: unreadCount > 0
+                            ? PostalTokens.inkSecondary
+                            : PostalTokens.inkTertiary,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: 10),
+              Text(
+                DateFormat('MM-dd').format(time),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: PostalTokens.inkTertiary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,22 +1,34 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tencent_cloud_chat_sdk/enum/V2TimAdvancedMsgListener.dart';
 import 'package:tencent_cloud_chat_sdk/enum/message_elem_type.dart';
 import 'package:tencent_cloud_chat_sdk/enum/message_priority_enum.dart';
+import 'package:tencent_cloud_chat_sdk/enum/message_status.dart';
 import 'package:tencent_cloud_chat_sdk/manager/v2_tim_manager.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_message.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
+import 'chat_senior_emojis.dart';
+import 'im_unread_providers.dart';
 import 'mailbox_remote.dart';
 import 'tim_facade.dart';
 
 /// C2C 聊天（自研气泡 + 邮政主题），消息走腾讯 IM SDK。
 class ChatPage extends ConsumerStatefulWidget {
-  const ChatPage({super.key, required this.peerUserId, this.displayName});
+  const ChatPage({
+    super.key,
+    required this.peerUserId,
+    this.displayName,
+    this.peerAvatarUrl,
+  });
   final String peerUserId;
   final String? displayName;
+  final String? peerAvatarUrl;
 
   @override
   ConsumerState<ChatPage> createState() => _ChatPageState();
@@ -82,9 +94,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         _sentMessageSink.value = delivered;
       }
       _input.clear();
-      if (mounted) {
-        PostalSnack.show(context, 'Sent', tone: PostalSnackTone.success);
-      }
     } on ApiBusinessException catch (e) {
       if (mounted) {
         PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
@@ -94,55 +103,189 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
   }
 
+  void _openEmojiPicker() {
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: PostalTokens.paperEnvelope,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + bottomInset * 0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Friendly stamps',
+                style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                  color: PostalTokens.inkNavy,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Tap an emoji to add it to your message.',
+                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                  color: PostalTokens.inkSecondary,
+                ),
+              ),
+              const SizedBox(height: 14),
+              SizedBox(
+                height: 220,
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 5,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    childAspectRatio: 1.1,
+                  ),
+                  itemCount: kSeniorFriendlyEmojis.length,
+                  itemBuilder: (_, i) {
+                    final e = kSeniorFriendlyEmojis[i];
+                    return Material(
+                      color: PostalTokens.paperCard,
+                      borderRadius: BorderRadius.circular(14),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: () {
+                          _input.text = '${_input.text}$e';
+                          _input.selection = TextSelection.collapsed(
+                            offset: _input.text.length,
+                          );
+                          Navigator.of(ctx).pop();
+                        },
+                        child: Center(
+                          child: Text(e, style: const TextStyle(fontSize: 30)),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final title = widget.displayName ?? widget.peerUserId;
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      backgroundColor: PostalTokens.paperCream,
+      appBar: AppBar(
+        title: Text(
+          title,
+          style: textTheme.titleMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        backgroundColor: PostalTokens.postboxGreen,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+      ),
       body: Column(
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: PostalTokens.paperCream,
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  PostalTokens.postboxGreen.withValues(alpha: 0.14),
+                  PostalTokens.paperCream,
+                ],
+              ),
+            ),
             child: Text(
-              'Postal thread: letter history stays in Archive.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: PostalTokens.inkSecondary),
+              'Postal chat — letters stay in Archive; here is for quick notes.',
+              style: textTheme.bodyMedium?.copyWith(
+                color: PostalTokens.inkSecondary,
+                height: 1.4,
+              ),
             ),
           ),
           Expanded(
-            child: _CloudChatBody(
-              peerUserId: widget.peerUserId,
-              scrollController: _scroll,
-              sentMessageSink: _sentMessageSink,
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [PostalTokens.paperCream, PostalTokens.paperEnvelope],
+                ),
+              ),
+              child: _CloudChatBody(
+                peerUserId: widget.peerUserId,
+                peerDisplayName: widget.displayName,
+                peerAvatarUrl: widget.peerAvatarUrl,
+                scrollController: _scroll,
+                sentMessageSink: _sentMessageSink,
+              ),
             ),
           ),
           SafeArea(
             top: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: PostalTextField(
-                      controller: _input,
-                      label: 'Message',
-                      maxLines: 4,
-                      minLines: 1,
-                      showClearButton: false,
+              padding: const EdgeInsets.fromLTRB(14, 8, 14, 14),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 360;
+                  return DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: PostalTokens.paperCard,
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: PostalTokens.shadowSoft,
+                      border: Border.all(
+                        color: PostalTokens.kraftBrown.withValues(alpha: 0.28),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  PostalButton(
-                    label: 'Send',
-                    expand: false,
-                    busy: _busy,
-                    onPressed: _busy ? null : _send,
-                  ),
-                ],
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isNarrow ? 4 : 8,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            tooltip: 'Emoji',
+                            iconSize: 28,
+                            onPressed: _busy ? null : _openEmojiPicker,
+                            icon: Icon(
+                              Icons.emoji_emotions_outlined,
+                              color: _busy
+                                  ? PostalTokens.inkTertiary
+                                  : PostalTokens.postboxGreen,
+                            ),
+                          ),
+                          Expanded(
+                            child: PostalTextField(
+                              controller: _input,
+                              label: 'Write a message',
+                              maxLines: 4,
+                              minLines: 1,
+                              showClearButton: false,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          _ChatSendButton(
+                            busy: _busy,
+                            onPressed: _busy ? null : _send,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -152,16 +295,82 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   }
 }
 
+class _ChatSendButton extends StatefulWidget {
+  const _ChatSendButton({required this.busy, required this.onPressed});
+
+  final bool busy;
+  final VoidCallback? onPressed;
+
+  @override
+  State<_ChatSendButton> createState() => _ChatSendButtonState();
+}
+
+class _ChatSendButtonState extends State<_ChatSendButton> {
+  @override
+  Widget build(BuildContext context) {
+    final enabled = widget.onPressed != null && !widget.busy;
+    return Material(
+      color: enabled
+          ? PostalTokens.postboxGreen
+          : PostalTokens.inkTertiary.withValues(alpha: 0.35),
+      borderRadius: BorderRadius.circular(18),
+      elevation: enabled ? 3 : 0,
+      shadowColor: PostalTokens.inkNavy.withValues(alpha: 0.25),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: widget.onPressed,
+        splashColor: Colors.white.withValues(alpha: 0.2),
+        highlightColor: Colors.white.withValues(alpha: 0.08),
+        child: SizedBox(
+          width: 54,
+          height: 54,
+          child: widget.busy
+              ? const Padding(
+                  padding: EdgeInsets.all(15),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Colors.white,
+                  ),
+                )
+              : Icon(
+                  Icons.send_rounded,
+                  color: enabled ? Colors.white : Colors.white70,
+                  size: 26,
+                ),
+        ),
+      ),
+    );
+  }
+}
+
 class _Bubble {
-  _Bubble({required this.text, required this.incoming, required this.isSystem});
+  _Bubble({
+    required this.text,
+    required this.incoming,
+    required this.isSystem,
+    this.sendStatus,
+  });
   final String text;
   final bool incoming;
   final bool isSystem;
+
+  /// 仅发出消息：[MessageStatus] 取值，用于静默展示送达态。
+  final int? sendStatus;
 }
 
 class _BubbleTile extends StatelessWidget {
-  const _BubbleTile({required this.bubble});
+  const _BubbleTile({
+    required this.bubble,
+    required this.avatarImageUrl,
+    required this.avatarName,
+  });
   final _Bubble bubble;
+
+  /// 本条消息旁展示的发送方头像（OSS URL 或 TIM faceUrl）。
+  final String? avatarImageUrl;
+
+  /// 头像占位首字母用。
+  final String avatarName;
 
   @override
   Widget build(BuildContext context) {
@@ -201,29 +410,83 @@ class _BubbleTile extends StatelessWidget {
         alpha: bubble.incoming ? 0.25 : 0.0,
       ),
     );
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+    final delivered =
+        bubble.sendStatus == MessageStatus.V2TIM_MSG_STATUS_SEND_SUCC;
+    final sending = bubble.sendStatus == MessageStatus.V2TIM_MSG_STATUS_SENDING;
+    final failed =
+        bubble.sendStatus == MessageStatus.V2TIM_MSG_STATUS_SEND_FAIL;
+    final maxBubbleW = MediaQuery.sizeOf(context).width * 0.72;
+    const avatarSize = 42.0;
+    final bubbleCard = Container(
+      constraints: BoxConstraints(maxWidth: maxBubbleW),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(16),
+        border: border,
+        boxShadow: PostalTokens.shadowSoft,
+      ),
       child: Column(
         crossAxisAlignment: align,
         children: [
-          Container(
-            constraints: const BoxConstraints(maxWidth: 320),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: bg,
-              borderRadius: BorderRadius.circular(14),
-              border: border,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
+          Text(
+            bubble.text,
+            style: TextStyle(color: fg, height: 1.4, fontSize: 16),
+          ),
+          if (!bubble.incoming && (delivered || sending || failed)) ...[
+            const SizedBox(height: 6),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (delivered)
+                  Icon(
+                    Icons.done_all_rounded,
+                    size: 17,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                if (sending)
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
+                  ),
+                if (failed)
+                  Icon(
+                    Icons.error_outline_rounded,
+                    size: 17,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
               ],
             ),
-            child: Text(bubble.text, style: TextStyle(color: fg, height: 1.35)),
-          ),
+          ],
         ],
+      ),
+    );
+    final avatar = PostalAvatar(
+      name: avatarName,
+      size: avatarSize,
+      imageUrl: avatarImageUrl,
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: bubble.incoming
+            ? <Widget>[
+                avatar,
+                const SizedBox(width: 10),
+                bubbleCard,
+                const Spacer(),
+              ]
+            : <Widget>[
+                const Spacer(),
+                bubbleCard,
+                const SizedBox(width: 10),
+                avatar,
+              ],
       ),
     );
   }
@@ -234,8 +497,12 @@ class _CloudChatBody extends ConsumerStatefulWidget {
     required this.peerUserId,
     required this.scrollController,
     required this.sentMessageSink,
+    this.peerDisplayName,
+    this.peerAvatarUrl,
   });
   final String peerUserId;
+  final String? peerDisplayName;
+  final String? peerAvatarUrl;
   final ScrollController scrollController;
   final ValueNotifier<V2TimMessage?> sentMessageSink;
 
@@ -302,9 +569,7 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
       _loading = false;
       _loadError = null;
       _items = [..._items, m]
-        ..sort(
-          (a, b) => (a.timestamp ?? 0).compareTo(b.timestamp ?? 0),
-        );
+        ..sort((a, b) => (a.timestamp ?? 0).compareTo(b.timestamp ?? 0));
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !widget.scrollController.hasClients) {
@@ -314,6 +579,20 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
         widget.scrollController.position.maxScrollExtent,
       );
     });
+    if (_selfId.isNotEmpty && m.sender != null && m.sender != _selfId) {
+      unawaited(_markConversationReadOnServer());
+    }
+  }
+
+  Future<void> _markConversationReadOnServer() async {
+    final tim = V2TIMManager();
+    // ignore: deprecated_member_use
+    final r = await tim.v2TIMMessageManager.markC2CMessageAsRead(
+      userID: widget.peerUserId,
+    );
+    if (r.code == 0 && mounted) {
+      ref.read(imC2cUnreadProvider.notifier).clearPeer(widget.peerUserId);
+    }
   }
 
   Future<void> _attachMsgListener() async {
@@ -372,9 +651,7 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
       final list = r.data != null
           ? List<V2TimMessage>.from(r.data!)
           : <V2TimMessage>[];
-      list.sort(
-        (a, b) => (a.timestamp ?? 0).compareTo(b.timestamp ?? 0),
-      );
+      list.sort((a, b) => (a.timestamp ?? 0).compareTo(b.timestamp ?? 0));
       _seenMsgIds
         ..clear()
         ..addAll(
@@ -390,6 +667,13 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
         _items = list;
       });
       await _attachMsgListener();
+      // ignore: deprecated_member_use
+      final read = await tim.v2TIMMessageManager.markC2CMessageAsRead(
+        userID: widget.peerUserId,
+      );
+      if (read.code == 0 && mounted) {
+        ref.read(imC2cUnreadProvider.notifier).clearPeer(widget.peerUserId);
+      }
     } on ApiBusinessException catch (e) {
       if (mounted) {
         setState(() {
@@ -424,11 +708,49 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
       );
     }
     if (_items.isEmpty) {
-      return const Center(child: Text('No messages yet'));
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.mark_chat_unread_outlined,
+                size: 56,
+                color: PostalTokens.postboxGreen.withValues(alpha: 0.45),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'No messages yet',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: PostalTokens.inkNavy,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Say hello — your note will appear here right away.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: PostalTokens.inkSecondary,
+                  height: 1.45,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
+    final session = ref.watch(appSessionProvider);
+    final selfName = session.user.nickname.trim().isEmpty
+        ? 'Me'
+        : session.user.nickname.trim();
+    final selfAvatar = session.user.avatarUrl;
+    final peerName = (widget.peerDisplayName ?? widget.peerUserId).trim();
     return ListView.builder(
       controller: widget.scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      padding: const EdgeInsets.fromLTRB(14, 20, 14, 24),
       itemCount: _items.length,
       itemBuilder: (_, i) {
         final m = _items[i];
@@ -438,11 +760,24 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
             m.textElem != null) {
           text = m.textElem!.text ?? '';
         }
+        final timFace = m.faceUrl?.trim();
+        final timFaceOk = timFace != null && timFace.isNotEmpty;
+        final avatarUrl = incoming
+            ? (timFaceOk ? timFace : widget.peerAvatarUrl)
+            : (timFaceOk ? timFace : selfAvatar);
+        final avatarLabel = incoming
+            ? (m.nickName?.trim().isNotEmpty == true
+                  ? m.nickName!.trim()
+                  : peerName)
+            : selfName;
         return _BubbleTile(
+          avatarImageUrl: avatarUrl,
+          avatarName: avatarLabel,
           bubble: _Bubble(
             text: text.isEmpty ? '(unsupported)' : text,
             incoming: incoming,
             isSystem: false,
+            sendStatus: incoming ? null : m.status,
           ),
         );
       },
