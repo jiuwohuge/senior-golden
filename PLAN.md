@@ -265,11 +265,11 @@ flowchart LR
 - [x] A2. 用户资料中心（**`me` + PATCH + 兴趣标签 + 头像 OSS 写回已接**；冷启动仅 Token 时提前拉 `me` 仍可优化）
 - [x] A3. Post Wall（**列表/详情/发帖/评论/OSS/举报/敏感词已接**；**审核中/驳回作者侧 UX 仍可加强**）
 - [x] A4. Post Directory（**分页/筛选/排序/用户卡 API/写信已接**）
-- [x] A5. Post Box（**发信/收/归档/详情/Accept/好友列表/加速/平邮到期 Worker 已接**；**回信产品化、平邮延迟完全配置化仍待**）
+- [x] A5. Post Box（**发信/收/归档/详情/Accept/好友列表/加速/平邮到期 Worker、`parentLetterId` 回信已接**；**平邮延迟完全配置化仍待**）
 - [x] A5-IM. 邮政信箱 × 腾讯 IM 双轨：**后端** `V4`（`bu_friendship` + `send_mode`）、`GET/POST /api/mailbox/*`、`GET /api/im/usersig`（`tls-sig-api-v2` + `senior-post.tencent-im`）；**Flutter** Tab 分段、归档、`tim_facade`、`chat_page`、`tencent_cloud_chat_sdk:8.8.7373`、Mock 建联与单元测试 `test/mailbox_models_test.dart`（2026-05-02）
 - [x] A6. Chat Stamp（**余额/流水/CAS/登录·发帖赠票与加速扣减已接**；**Manage 邮票流水页已接**）
 - [x] A7. VIP 权益（**`GET /api/bootstrap/init` 已返回 `vipProduct`（`AppVipProductConfigVO`，读 `sys_config` 与 Manage「VIP 配置」同源键）**；**Flutter `vip_center_page` 非 Mock 读 `appBootstrapProvider` 展示开关与文案**；**订阅/支付、到期校验全链、扣费规则与配置单一真源文档化仍待**，见 `01` **FP-A7-002 / FP-A7-003**）
-- [x] A8. 风控与合规（**敏感词、举报链路、Manage 设备拉黑已接**；仍待：**GDPR 注销**、**图片机审**、`user_device` 一致性核对）
+- [x] A8. 风控与合规（**敏感词、举报链路、Manage 设备拉黑已接**；**注销申请 + 冷静期 MVP 已接**（见 `doc/plan/08-mock-removal-gaps.md`）；仍待：**注销邮件/审计增强**、**图片机审**、`user_device` 一致性核对）
 - [x] A9. 管理后台（**看板/用户/审核/举报/配置/国家/敏感词/版本/公告/日志、邮票流水、用户设备列表与封禁已接**；**UAT 清单仍待**）
 - [~] A10. 国际化（**Flutter**：ARB + 设置持久化 + `Accept-Language`；**后端 App API**：`messages/app*.properties` + `AppMessages` + `Accept-Language`；**仍待**：全量 Flutter 硬编码扫尾、邮件主题/模板双语、可选 `/webapi` 独立默认语）
 

@@ -489,6 +489,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userCardBack => 'Back';
 
   @override
+  String get userCardBioSection => 'Introduction';
+
+  @override
+  String get userCardBioEmpty => 'No introduction yet.';
+
+  @override
+  String get userCardReportUser => 'Report';
+
+  @override
+  String get userCardReportSheetTitle => 'Report this member';
+
+  @override
   String get userCardErrorTitle => 'Unable to load profile';
 
   @override

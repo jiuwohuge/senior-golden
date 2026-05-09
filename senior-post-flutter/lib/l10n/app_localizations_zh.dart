@@ -461,6 +461,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userCardBack => '返回';
 
   @override
+  String get userCardBioSection => '个人简介';
+
+  @override
+  String get userCardBioEmpty => '暂无简介';
+
+  @override
+  String get userCardReportUser => '举报';
+
+  @override
+  String get userCardReportSheetTitle => '举报该用户';
+
+  @override
   String get userCardErrorTitle => '无法加载资料';
 
   @override

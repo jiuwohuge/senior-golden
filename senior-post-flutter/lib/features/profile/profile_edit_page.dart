@@ -175,7 +175,10 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
         .map(
           (e) => DropdownMenuItem<String>(
             value: e.key,
-            child: Text('${e.value.displayName(languageCode)} (${e.key})'),
+            child: Text(
+              '${e.value.displayName(languageCode)} (${e.key})',
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         )
         .toList();
@@ -187,6 +190,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
           value: cc,
           child: Text(
             '$cc (${languageCode.startsWith('zh') ? '??????????' : 'from profile'})',
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       );
@@ -195,30 +199,57 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   }
 
   PreferredSizeWidget _buildAppBar(AppLocalizations l10n) {
+    final busy = _saving || _avatarBusy;
     return AppBar(
-      backgroundColor: PostalTokens.postboxGreen,
-      foregroundColor: Colors.white,
+      // 与正文同为纸感浅色底 + 深色前景，避免「白字叠奶油底」不可读；与全站邮筒绿点缀统一。
+      backgroundColor: PostalTokens.paperEnvelope,
+      foregroundColor: PostalTokens.inkNavy,
       surfaceTintColor: Colors.transparent,
-      shadowColor: PostalTokens.inkNavy.withValues(alpha: 0.2),
+      shadowColor: Colors.transparent,
       elevation: 0,
-      scrolledUnderElevation: 2,
-      iconTheme: const IconThemeData(color: Colors.white, size: 26),
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+      iconTheme: IconThemeData(color: PostalTokens.postboxGreen, size: 24),
+      leading: IconButton(
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+        onPressed: busy ? null : () => Navigator.of(context).maybePop(),
+        icon: Icon(
+          Icons.arrow_back_rounded,
+          color: busy
+              ? PostalTokens.postboxGreen.withValues(alpha: 0.35)
+              : PostalTokens.postboxGreen,
+        ),
+      ),
       title: Text(
         l10n.profileEditTitle,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: PostalTokens.inkNavy,
           fontWeight: FontWeight.w800,
           fontSize: 20,
+          letterSpacing: 0.2,
+        ),
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(
+          height: 1,
+          color: PostalTokens.perforationLine.withValues(alpha: 0.9),
         ),
       ),
       actions: [
         TextButton(
-          onPressed: (_saving || _avatarBusy) ? null : () => Navigator.of(context).maybePop(),
+          onPressed: busy ? null : () => Navigator.of(context).maybePop(),
           child: Text(
             l10n.profileEditCancel,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: _saving || _avatarBusy ? 0.45 : 1),
+              color: busy
+                  ? PostalTokens.postboxGreen.withValues(alpha: 0.4)
+                  : PostalTokens.postboxGreen,
               fontWeight: FontWeight.w700,
+              fontSize: 16,
             ),
           ),
         ),
@@ -235,6 +266,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
+      backgroundColor: PostalTokens.paperCream,
       appBar: _buildAppBar(l10n),
       body: SafeArea(
         child: _loadingMe
@@ -251,41 +283,61 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                 data: (bootstrap) => ListView(
                   padding: EdgeInsets.fromLTRB(20, 18, 20, 24 + bottomInset),
                   children: [
-                    Center(
-                      child: Column(
-                        children: [
-                          Stack(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(2),
+                              DecoratedBox(
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: PostalTokens.kraftBrown, width: 1.4),
+                                  boxShadow: PostalTokens.shadowSoft,
                                 ),
-                                child: ClipOval(
-                                  child: _avatarPendingBytes != null
-                                      ? Image.memory(
-                                          _avatarPendingBytes!,
-                                          width: 96,
-                                          height: 96,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : PostalAvatar(
-                                          name: user.nickname,
-                                          size: 96,
-                                          imageUrl: user.avatarUrl,
-                                          framed: false,
-                                        ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: PostalTokens.postboxGreen.withValues(alpha: 0.35),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: PostalTokens.kraftBrown,
+                                        width: 1.35,
+                                      ),
+                                    ),
+                                    child: ClipOval(
+                                      child: _avatarPendingBytes != null
+                                          ? Image.memory(
+                                              _avatarPendingBytes!,
+                                              width: 100,
+                                              height: 100,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : PostalAvatar(
+                                              name: user.nickname,
+                                              size: 100,
+                                              imageUrl: user.avatarUrl,
+                                              framed: false,
+                                            ),
+                                    ),
+                                  ),
                                 ),
                               ),
                               if (_avatarBusy)
                                 Container(
-                                  width: 104,
-                                  height: 104,
+                                  width: 116,
+                                  height: 116,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Colors.black.withValues(alpha: 0.35),
+                                    color: Colors.black.withValues(alpha: 0.38),
                                   ),
                                   child: const Center(
                                     child: SizedBox(
@@ -300,20 +352,14 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          PostalButton(
-                            label: l10n.profileAvatarChange,
-                            icon: Icons.photo_camera_outlined,
-                            variant: PostalButtonVariant.secondary,
-                            expand: false,
-                            minHeight: 48,
-                            busy: false,
-                            onPressed: (_avatarBusy || _saving)
-                                ? null
-                                : _onPickAvatar,
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 18),
+                        _ProfilePhotoPickButton(
+                          label: l10n.profileAvatarChange,
+                          enabled: !_avatarBusy && !_saving,
+                          onPressed: _onPickAvatar,
+                        ),
+                      ],
                     ),
                     if (_avatarPendingBytes != null) ...[
                       const SizedBox(height: 16),
@@ -362,6 +408,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                     DropdownButtonFormField<String>(
                       // ignore: deprecated_member_use
                       value: _countryCode == null || _countryCode!.isEmpty ? null : _countryCode,
+                      isExpanded: true,
                       decoration: InputDecoration(labelText: l10n.profileCountry),
                       items: _countryDropdownItems(bootstrap.countries, locale.languageCode),
                       onChanged: (v) => setState(() => _countryCode = v),
@@ -422,5 +469,76 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+}
+
+/// 资料页头像入口：邮筒绿填充浅底 + 圆角胶囊 + `add_photo` 图标，与邮政主色一致且比细描边 secondary 更易识别。
+class _ProfilePhotoPickButton extends StatelessWidget {
+  const _ProfilePhotoPickButton({
+    required this.label,
+    required this.onPressed,
+    required this.enabled,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final onTap = enabled ? onPressed : null;
+    return Material(
+      color: PostalTokens.postboxGreen.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(26),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        splashColor: PostalTokens.postboxGreen.withValues(alpha: 0.14),
+        highlightColor: PostalTokens.postboxGreen.withValues(alpha: 0.06),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: enabled
+                  ? PostalTokens.postboxGreen
+                  : PostalTokens.postboxGreen.withValues(alpha: 0.38),
+              width: 1.35,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.add_photo_alternate_rounded,
+                  size: 23,
+                  color: enabled
+                      ? PostalTokens.postboxGreen
+                      : PostalTokens.postboxGreen.withValues(alpha: 0.45),
+                ),
+                const SizedBox(width: 10),
+                Flexible(
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: enabled
+                          ? PostalTokens.postboxGreen
+                          : PostalTokens.postboxGreen.withValues(alpha: 0.45),
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.15,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -1,7 +1,7 @@
 # 07 — 遗漏功能系统化清单与开发路线图
 
 > **文档元信息**  
-> **版本**：1.3 · **更新**：2026-05-09 · **维护人**：AI + Owner  
+> **版本**：1.4 · **更新**：2026-05-09 · **维护人**：AI + Owner  
 > **重要**：§2 为 2026-05-07 起稿的「历史遗漏叙事」；**当前是否仍缺以 §2.0 为准**，避免与已交付代码冲突。
 
 **依据**：[`01-feature-list.md`](01-feature-list.md)、[`05-task-tracker.md`](05-task-tracker.md)、[`03-priority-grouping.md`](03-priority-grouping.md)、根目录 [`findings.md`](../../findings.md)、[`progress.md`](../../progress.md)、[`PLAN.md`](../../PLAN.md)。  
@@ -38,9 +38,11 @@
 | FP-A1-004、FP-A1-007、FP-X-001、FP-X-003 | **仍待** | 见 `01` |
 | FP-A9-002 / FP-A9-003 | **已交付** | `POST /webapi/stamps/ledger/paging` + 邮票流水页；`GET /webapi/user/{id}/devices` + `UserList` 设备拉黑 |
 | FP-A7-001 | **部分已交付** | bootstrap **`vipProduct`** + Flutter VIP 中心读 bootstrap；**非**独立 `GET /api/vip/bootstrap` |
-| FP-A7-002 / FP-A7-003、FP-A8-005、FP-A9-004、FP-A5d-001/003、回信 | **仍待** | 见 `01` / `PLAN` |
+| FP-A7-002 / FP-A7-003、FP-A9-004、FP-A5d-001/003 | **仍待** | 见 `01` / `PLAN` |
+| FP-A8-005（注销） | **MVP 已交付** | 申请 + 冷静期 + 期满冻结登录；**非**邮件 outbox 通知链；见 [`08-mock-removal-gaps.md`](08-mock-removal-gaps.md) |
+| 信箱「回信」 | **已交付** | `AppSendLetterInDto.parentLetterId` + Flutter 详情页回复；见 `08` §3 |
 
-§3 各阶段「推荐顺序」仍可作为**波次参考**；其中 **3.1 第 1～5 步** 对应能力多数已在 2026-05-08～09 交付，后续迭代请从 **VIP 订阅与扣费真源（FP-A7-002/003）**、**UAT（FP-A9-004）**、**合规（FP-X-001 / A8-005）** 等待办项接续。
+§3 各阶段「推荐顺序」仍可作为**波次参考**；其中 **3.1 第 1～5 步** 对应能力多数已在 2026-05-08～09 交付，后续迭代请从 **VIP 订阅与扣费真源（FP-A7-002/003）**、**UAT（FP-A9-004）**、**合规横切（FP-X-001、AES、强更；注销主流程见 A8-005 MVP，邮件/审计类增强可并行）** 接续。
 
 ---
 

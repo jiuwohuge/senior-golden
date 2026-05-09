@@ -9,6 +9,8 @@ import cn.nine.pros.post.biz.service.app.AppReportService;
 import cn.nine.pros.post.biz.service.base.PostcardCommentService;
 import cn.nine.pros.post.biz.service.base.PostcardService;
 import cn.nine.pros.post.biz.service.base.ReportService;
+import cn.nine.pros.post.biz.service.base.UserService;
+import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.app.AppReportCreateInDto;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
@@ -24,17 +26,19 @@ public class AppReportServiceImpl implements AppReportService {
 
     private static final String TYPE_POSTCARD = "postcard";
     private static final String TYPE_COMMENT = "comment";
+    private static final String TYPE_USER = "user";
 
     private final ReportService reportService;
     private final PostcardService postcardService;
     private final PostcardCommentService postcardCommentService;
+    private final UserService userService;
     private final AppMessages appMessages;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void submit(long reporterUserId, AppReportCreateInDto body) {
         String rawType = body.getTargetType() == null ? "" : body.getTargetType().trim().toLowerCase();
-        if (!TYPE_POSTCARD.equals(rawType) && !TYPE_COMMENT.equals(rawType)) {
+        if (!TYPE_POSTCARD.equals(rawType) && !TYPE_COMMENT.equals(rawType) && !TYPE_USER.equals(rawType)) {
             throw new BadRequestException(appMessages.get("app.error.report.targetType"));
         }
         String reason = body.getReason() == null ? "" : body.getReason().trim();
@@ -46,8 +50,10 @@ public class AppReportServiceImpl implements AppReportService {
         }
         if (TYPE_POSTCARD.equals(rawType)) {
             validatePostcardTarget(reporterUserId, body.getTargetId());
-        } else {
+        } else if (TYPE_COMMENT.equals(rawType)) {
             validateCommentTarget(reporterUserId, body.getTargetId());
+        } else {
+            validateUserTarget(reporterUserId, body.getTargetId());
         }
 
         long pending = reportService.count(new LambdaQueryWrapper<ReportDomain>()
@@ -88,6 +94,16 @@ public class AppReportServiceImpl implements AppReportService {
         }
         if (Objects.equals(reporterUserId, c.getUserId())) {
             throw new BadRequestException(appMessages.get("app.error.report.ownComment"));
+        }
+    }
+
+    private void validateUserTarget(long reporterUserId, long reportedUserId) {
+        if (Objects.equals(reporterUserId, reportedUserId)) {
+            throw new BadRequestException(appMessages.get("app.error.report.ownUser"));
+        }
+        UserDTO u = userService.findById(reportedUserId);
+        if (u == null) {
+            throw new BadRequestException(appMessages.get("app.error.report.userNotFound"));
         }
     }
 }

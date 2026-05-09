@@ -1,7 +1,7 @@
 # 研究发现（规划会话）
 
 > **文档元信息**  
-> **版本**：1.3 · **更新**：2026-05-09 · **维护人**：AI + Owner
+> **版本**：1.4 · **更新**：2026-05-09 · **维护人**：AI + Owner
 
 本文档记录**从仓库内可验证事实**归纳的约束、缺口与勘误，供 `task_plan.md` 与 `doc/plan/*` 引用。
 
@@ -93,7 +93,7 @@
 | `auth` | Mock 或真实 `dio` 二轨；**FP-A1-003** 已接 `forgot-password` / `reset-password`；**FP-X-001** 全量 outbox 仍可选 |
 | `post_wall` | `USE_MOCK=false` 时走 `post_wall_remote` 等真实 API（多图/举报等迭代见 `01`）；Mock 分支仍保留 |
 | `directory` | `USE_MOCK=false` 时走名录分页等真实 API；发信已接真实 API |
-| `mailbox`（信件） | **`USE_MOCK=false`**：`mailbox_remote` 接 postal/archive/详情/发信/建联/好友判断/`speed-up`；**Connections** 接 **`GET /api/mailbox/friends`**（好友列表）；顶栏邮票 `/api/stamps/balance`；聊天页仍用 TIM SDK（UserSig）；**回信**仍待产品化（见 `07`） |
+| `mailbox`（信件） | **远程**：`mailbox_remote` 接 postal/archive/详情/发信（含 **`parentLetterId` 回信**）/建联/好友判断/`speed-up`；**Connections** 接 **`GET /api/mailbox/friends`**；顶栏邮票与 `appSessionProvider` 同步；聊天页用 TIM SDK（UserSig）；见 [`doc/plan/08-mock-removal-gaps.md`](doc/plan/08-mock-removal-gaps.md) |
 | `profile` | `USE_MOCK=false` 时 bootstrap/me/PATCH profile 已有多处接线；头像 OSS 写回等见 **FP-A2-002** |
 
 ### 5.4 Manage 小缺口（再次确认）

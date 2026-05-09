@@ -1,7 +1,7 @@
 # 01 — 功能清单（FP 全表）
 
 > **文档元信息**  
-> **版本**：1.6 · **更新**：2026-05-09 · **维护人**：AI + Owner
+> **版本**：1.7 · **更新**：2026-05-09 · **维护人**：AI + Owner
 
 **状态图例**：`已有` 仓库内可调用或可演示；`部分` 有一侧无闭环；`缺` 未实现或未接契约。
 
@@ -65,7 +65,7 @@
 
 | FP ID | 功能点 | 后端 | Flutter |
 |-------|--------|------|---------|
-| FP-A5-001 | 发信（挂号/平邮）写库 + 业务校验 | **已有** `POST /api/mailbox/letters/send` | **`USE_MOCK=false` 已接** `send_letter_sheet` + `mailbox_remote` |
+| FP-A5-001 | 发信（挂号/平邮）写库 + 业务校验 | **已有** `POST /api/mailbox/letters/send`（含 **`parentLetterId` 回信** 校验与落库） | **`send_letter_sheet` + `mailbox_remote`**；详情页回信见 [`08-mock-removal-gaps.md`](08-mock-removal-gaps.md) |
 | FP-A5-002 | 邮政收件箱 / 同步 / 归档 | **已有**；`sync` 增量条件 `COALESCE(updated_at, created_at) > since` | **下拉刷新 + 回到前台自动 invalidate** postal/archive/letters | 双端仍依赖各自拉取；无推送 |
 | FP-A5-003 | 建联 Accept | **已有** `POST .../accept-postal` | **非 Mock** `mailbox_remote.acceptPostalContact` |
 | FP-A5-004 | 信件详情（单封） | **已有** `GET /api/mailbox/letters/{letterId}` | **非 Mock 已接** `letter_detail` |
@@ -116,7 +116,7 @@
 | FP-A8-002 | 设备拉黑 | **已有** `POST /webapi/user/device/block` | — | **已有** 用户列表「设备拉黑」+ `GET /webapi/user/{userId}/devices` |
 | FP-A8-003 | 敏感词在 App 写入路径生效 | **已有**（明信片/评论/信件正文） | — | 词库已有 |
 | FP-A8-004 | 图片审核（先审后发已部分） | 贴/评审核已有 | App 上传后待审提示 | — |
-| FP-A8-005 | GDPR 注销 / 冷静期 | **缺** | `account_delete` Mock | — |
+| FP-A8-005 | GDPR 注销 / 冷静期 | **部分（MVP）**：`POST /api/auth/account/deletion-request`；`bu_user` 冷静期字段；期满 `status=3`；`me` 返回删除申请时间；**正式注销前**解除好友 + 腾讯双向删好友（见 `findings.md` §15.2） | **`account_delete_page` 真接口** + Profile 提示卡片 | 与 **FP-X-001**（邮件通知）仍可解耦增强；完整合规叙事见 `08-mock-removal-gaps.md` §3 |
 | FP-A8-006 | App 举报与工单闭环 | **已有** `POST /api/reports` | **非 Mock** `PostWallReportSheet` → `post_wall_remote` | Manage 列表含 Reporter（见 FP-A3-005） |
 
 ---

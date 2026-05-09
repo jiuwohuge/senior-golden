@@ -968,6 +968,30 @@ abstract class AppLocalizations {
   /// **'Back'**
   String get userCardBack;
 
+  /// No description provided for @userCardBioSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Introduction'**
+  String get userCardBioSection;
+
+  /// No description provided for @userCardBioEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No introduction yet.'**
+  String get userCardBioEmpty;
+
+  /// No description provided for @userCardReportUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get userCardReportUser;
+
+  /// No description provided for @userCardReportSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this member'**
+  String get userCardReportSheetTitle;
+
   /// No description provided for @userCardErrorTitle.
   ///
   /// In en, this message translates to:

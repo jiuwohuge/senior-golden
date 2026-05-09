@@ -1,7 +1,7 @@
 # 功能总览（模块 → 功能）
 
 > **文档元信息**  
-> **版本**：1.4 · **更新**：2026-05-09 · **维护人**：AI + Owner
+> **版本**：1.5 · **更新**：2026-05-09 · **维护人**：AI + Owner
 
 **用途**：快速把握各模块能力边界与完成度。  
 **状态取值**：`已完成` | `进行中` | `未开始`（以 App + `senior-post-api` + Manage 可联调闭环为准）。  
@@ -73,7 +73,7 @@
 | 信件详情 | 已完成 | 单封正文与元数据 | `GET .../letters/{id}` |
 | IM UserSig 与聊天 | 已完成 | 登录后可与好友发起 **C2C 聊天**并发消息 | `/api/im/usersig` + TIM SDK（聊天页；列表仍以 `/friends` 为准） |
 | 双用户 postal/sync 一致性 | 已完成（拉取侧） | 收件方及时看到依赖刷新；增量 `sync` 用 `COALESCE(updated_at,created_at)` | 下拉刷新 + App `resumed` 自动刷新 postal/archive；双机仍建议人工点刷新或后续推送 |
-| 从信件上下文「回信」 | 未开始 | 一键带入对端并发新信 | 产品定交互后接 API |
+| 从信件上下文「回信」 | 已完成 | 详情页发起回复，后端 `parentLetterId` 关联 | `AppSendLetterInDto.parentLetterId` + Flutter；见 [`doc/plan/08-mock-removal-gaps.md`](plan/08-mock-removal-gaps.md) |
 
 ---
 
@@ -116,7 +116,7 @@
 | 用户封禁 / 启用 | 已完成 | 后台操作后 App 行为符合设计 | Manage `user` 状态接口 |
 | 设备拉黑 | 已完成 | 后台一键拉黑设备 | `GET /webapi/user/{userId}/devices` + `POST /webapi/user/device/block`；Manage 用户列表 |
 | 敏感词在 App 写路径 | 已完成 | 与 §3 一致 | 见 §3 |
-| GDPR / 账号注销 | 未开始 | 冷静期与数据策略可演示 | API + Job + Flutter 流程 |
+| GDPR / 账号注销 | 进行中（MVP） | 申请注销、冷静期、期满账号冻结；正式注销前解除好友与腾讯删好友 | `POST /api/auth/account/deletion-request` + Flutter；邮件通知与审计增强仍待（`FP-X-001` 等）；见 `08` §3 |
 | 举报工单闭环 | 已完成 | 从 App 提交到后台处理 | App + Manage 列表与处理按钮 |
 
 ---
@@ -168,11 +168,11 @@
 |------|----------------|----------|
 | 1–2 | 注册登录、bootstrap、资料 PATCH、忘记密码、兴趣、头像 | AES、冷启动拉 `me`、弱密码频控 |
 | 3–4 | 墙/名录主链路、写信入口、举报、敏感词、排序 | 审核态 UX、名录 ARB 扫尾 |
-| 5–6 | 发收信、归档、Worker、加速、IM 聊天、好友 REST 同步 | 回信、延迟完全配置化、挂号事务边界复审 |
+| 5–6 | 发收信、归档、Worker、加速、IM 聊天、好友 REST 同步、**回信** | 延迟完全配置化、挂号事务边界复审 |
 | 7–8 | 余额、流水、赠票、CAS、VIP bootstrap | VIP 订阅全链、事务边界复审 |
-| 9–10 | 审核与用户管理主体 | 注销、UAT 清单 |
+| 9–10 | 审核与用户管理主体、**注销 MVP** | 注销合规增强、UAT 清单 |
 | 11–13 | 部分 i18n、设置页语言切换 | 邮件 outbox、强更、主题 B14/B15 |
 
 ---
 
-*文档版本：1.4 · 与 `01-feature-list` 对齐日期 2026-05-09；细粒度 FP 以 `01` 为准。*
+*文档版本：1.5 · 与 `01-feature-list` 对齐日期 2026-05-09；细粒度 FP 以 `01` 为准。*

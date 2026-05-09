@@ -1,5 +1,10 @@
 # 会话进度日志
 
+## 2026-05-09 — 文档：功能完成度再对齐（注销 MVP / 回信 / 优先级摘要）
+
+- **动作**：对照 `08-mock-removal-gaps.md` 与代码，回写 **`doc/plan/01-feature-list.md`**（`FP-A8-005` 由「缺」→ **部分 MVP**；`FP-A5-001` 注明 **`parentLetterId` 回信**）；**`doc/plan/07-gap-analysis-and-roadmap.md`** §2.0 增 **注销 MVP**、**回信已交付** 行并修正 §2.0 后「下一步」措辞；**`PLAN.md`** A5/A8 功能清单表述；**`findings.md`** §5.3 信箱行去掉过时「回信仍待」；**`task_plan.md`** P3 与 `08` 一致。
+- **结论**：真源仍为 **`01` + `05`**；路线图读 **`07` §2.0**。
+
 ## 2026-05-09 — Locale：与 commons-web LocaleAutoConfiguration 对齐
 
 - **移除** `biz` 内 `AppI18nConfig`（避免与框架 `LocaleAutoConfiguration` 双注册 `LocaleResolver` / `@Primary` 顺序问题）。
