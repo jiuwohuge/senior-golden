@@ -317,7 +317,7 @@ abstract class AppLocalizations {
   /// No description provided for @authMockTip.
   ///
   /// In en, this message translates to:
-  /// **'Mock mode is enabled. You can try all flows without backend APIs.'**
+  /// **'Sign in with your registered email to use all features.'**
   String get authMockTip;
 
   /// No description provided for @authAgreeTpl.
@@ -755,7 +755,7 @@ abstract class AppLocalizations {
   /// No description provided for @postComposeUploadNeedRealApi.
   ///
   /// In en, this message translates to:
-  /// **'OSS upload requires Mock off: flutter run --dart-define=USE_MOCK=false …'**
+  /// **'Image upload needs a server-issued URL. Check your network and try again.'**
   String get postComposeUploadNeedRealApi;
 
   /// No description provided for @postComposePickerChannelError.
@@ -779,7 +779,7 @@ abstract class AppLocalizations {
   /// No description provided for @postComposePublishedMock.
   ///
   /// In en, this message translates to:
-  /// **'Mock: postcard published (+1 stamp)'**
+  /// **'Postcard submitted.'**
   String get postComposePublishedMock;
 
   /// No description provided for @postComposePublishedReal.
@@ -905,7 +905,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileMockUpdated.
   ///
   /// In en, this message translates to:
-  /// **'Mock: profile updated'**
+  /// **'Profile updated'**
   String get profileMockUpdated;
 
   /// No description provided for @profileSaved.

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/mock/mock_models.dart';
+import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal.dart';
 import '../mailbox/mailbox_providers.dart';
 import '../mailbox/mailbox_remote.dart';
@@ -50,7 +50,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
             content: _body.text.trim(),
             type: _type,
           );
-      ref.invalidate(stampBalanceHeaderProvider);
+      ref.invalidate(mailboxStampHeaderProvider);
       if (!mounted) return;
       ref.invalidate(mailboxLettersProvider);
       ref.invalidate(postalInboxLettersProvider);

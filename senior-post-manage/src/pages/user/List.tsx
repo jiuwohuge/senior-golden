@@ -1,4 +1,4 @@
-import { Button, Input, Modal, Space, Table, message } from 'antd'
+import { Button, Input, Modal, Space, Switch, Table, message } from 'antd'
 import { useEffect, useState } from 'react'
 import { api } from '../../services/api'
 
@@ -10,6 +10,11 @@ export default function UserList() {
   const [devicesLoading, setDevicesLoading] = useState(false)
   const [manualUuid, setManualUuid] = useState('')
   const [manualReason, setManualReason] = useState('')
+  const [vipModalOpen, setVipModalOpen] = useState(false)
+  const [vipUser, setVipUser] = useState<any>(null)
+  const [vipOn, setVipOn] = useState(false)
+  const [vipExpireLocal, setVipExpireLocal] = useState('')
+  const [vipClearExpire, setVipClearExpire] = useState(false)
 
   const load = () => {
     api
@@ -60,6 +65,40 @@ export default function UserList() {
     }
   }
 
+  const openVipModal = (user: any) => {
+    setVipUser(user)
+    setVipOn(!!user?.isVip)
+    setVipExpireLocal('')
+    setVipClearExpire(false)
+    setVipModalOpen(true)
+  }
+
+  const submitVipDebug = async () => {
+    if (!vipUser) return
+    try {
+      const body: { isVip: boolean; vipExpireAt?: string | null; clearVipExpireAt?: boolean } = {
+        isVip: vipOn,
+      }
+      if (vipClearExpire) {
+        body.clearVipExpireAt = true
+      } else if (vipExpireLocal.trim()) {
+        const d = new Date(vipExpireLocal)
+        if (Number.isNaN(d.getTime())) {
+          message.error('过期时间格式无效')
+          return
+        }
+        body.vipExpireAt = d.toISOString().slice(0, 19)
+      }
+      await api.userVipDebug(vipUser.id, body)
+      message.success('VIP 已更新')
+      setVipModalOpen(false)
+      setVipUser(null)
+      load()
+    } catch (e: any) {
+      message.error(e.message)
+    }
+  }
+
   return (
     <>
       <Table
@@ -76,9 +115,22 @@ export default function UserList() {
           },
           { title: 'Status', dataIndex: 'status' },
           {
+            title: 'VIP',
+            dataIndex: 'isVip',
+            width: 64,
+            render: (v: boolean | undefined) => (v ? 'Y' : ''),
+          },
+          {
             title: 'Actions',
             render: (_, r) => (
               <Space wrap>
+                <Button
+                  size="small"
+                  disabled={r.staffRole != null && r.staffRole !== 0}
+                  onClick={() => openVipModal(r)}
+                >
+                  调试 VIP
+                </Button>
                 <Button
                   size="small"
                   onClick={async () => {
@@ -161,6 +213,40 @@ export default function UserList() {
             </Button>
           </Space>
         </div>
+      </Modal>
+      <Modal
+        title={vipUser ? `调试 VIP — 用户 #${vipUser.id}` : 'VIP'}
+        open={vipModalOpen}
+        onOk={() => void submitVipDebug()}
+        onCancel={() => {
+          setVipModalOpen(false)
+          setVipUser(null)
+        }}
+        okText="保存"
+        destroyOnClose
+      >
+        <p style={{ marginBottom: 12, color: '#666' }}>
+          直接写库调试，非订阅支付。后台账号不可改。
+        </p>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Space>
+            <span>VIP</span>
+            <Switch checked={vipOn} onChange={setVipOn} />
+          </Space>
+          <Space align="start">
+            <Switch checked={vipClearExpire} onChange={setVipClearExpire} />
+            <span>清空过期时间（长期有效）</span>
+          </Space>
+          <div>
+            <div style={{ marginBottom: 4 }}>过期时间（datetime-local，可选）</div>
+            <Input
+              type="datetime-local"
+              disabled={vipClearExpire}
+              value={vipExpireLocal}
+              onChange={(e) => setVipExpireLocal(e.target.value)}
+            />
+          </div>
+        </Space>
       </Modal>
     </>
   )

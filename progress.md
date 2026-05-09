@@ -1,5 +1,16 @@
 # 会话进度日志
 
+## 2026-05-09 — 文档：PLAN A7 与 bootstrap `vipProduct` 对齐
+
+- **动作**：`PLAN.md` [功能清单] A7 由「全链仍待」改为 **已交付 bootstrap `vipProduct` + VIP 中心读 bootstrap**；缺口指向 **FP-A7-002/003**。同步 **`07` §2.0/§3.2/§3.4**、**`05`** Sprint3 拆分 A7 行、**`02` A7-001 技术列**、**`feature-overview` §8**、**`task_plan` 决策**、**`04-dev-plan`**。
+- **真源**：`doc/plan/01-feature-list.md` A7 表未改语义（A7-001 仍为「部分」——订阅侧待办）。
+
+## 2026-05-09 — FP-A9-003：设备封禁 UI + 用户设备列表 API（planning-with-files）
+
+- **后端**：`AdminUserApi` / `AdminUserController` 增加 `GET /webapi/user/{userId}/devices`（`UserDeviceDTO` 列表，`delFlag=false`，按 `updatedAt` 倒序）；`blockDevice` 仍为 `POST /webapi/user/device/block`。
+- **Manage**：`api.userDevices`；`api.blockDevice` 改为 JSON body；`UserList` 行内「设备拉黑」Modal（设备表逐行拉黑 + 手动填 UUID）。
+- **验证**：`mvn -pl biz,client -am compile -DskipTests`；`senior-post-manage` `npm run build` 成功。
+
 ## 2026-05-09 — FP-A9-002：管理端邮票流水 API + Manage 页（planning-with-files）
 
 - **后端**：`AdminStampsApi` / `AdminStampsController`；`POST /webapi/stamps/ledger/paging`；入参 `AdminStampLedgerPageInDto`（`page`、`userId?`、`reasonKeyword?`）；分页 `log_stamp_transaction`。

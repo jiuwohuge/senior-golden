@@ -1,7 +1,7 @@
 # 05 — 功能开发任务跟踪表
 
 > **文档元信息**  
-> **版本**：1.2 · **更新**：2026-05-09 · **维护人**：AI + Owner
+> **版本**：1.3 · **更新**：2026-05-09 · **维护人**：AI + Owner
 
 **负责人**：默认 `AI + Owner`（替换 `Owner` 为实际姓名即可）。  
 **周期**：`WnDx` = 第 n 周第 x 个工作日（相对，非自然日）。  
@@ -35,7 +35,7 @@
 
 | FP | 负责人 | Sprint | 起 | 止 | 状态 | 验收标准 | 交付物 |
 |----|--------|--------|----|----|------|----------|--------|
-| 总闸 Mock | AI + Owner | S2 | W2D1 | W2D1 | TODO | `USE_MOCK=false` 主路径可演示 | `app_env` 文档 + 默认策略决策 |
+| 总闸 Mock | AI + Owner | S2 | W2D1 | W2D1 | DONE | 已移除 `lib/core/mock` 与 `AppEnv.useMock`；主路径仅远程 API + TIM | `app_env.dart`、`directory_providers.dart`（解循环依赖）、[`08-mock-removal-gaps.md`](08-mock-removal-gaps.md) |
 | FP-A3-* UI | AI + Owner | S2 | W2D1 | W2D4 | DONE | Tab1 全真数据 | `post_wall_remote`、compose/detail |
 | FP-A5-* UI | AI + Owner | S2 | W2D2 | W2D4 | DONE | 发信后列表刷新 | `mailbox_providers` + sheet（见 FP-A5-Fl） |
 | FP-A2/A4 UI | AI + Owner | S2 | W2D4 | W2D5 | DONE | 编辑保存成功 | profile/directory |
@@ -52,7 +52,9 @@
 | FP-A5-005 | AI + Owner | S3 | W3D2 | W3D3 | DONE | 扣邮票后变已送达 | `POST .../speed-up`、`AppMailboxServiceImpl.speedUpLetter`、`mailbox_remote` |
 | FP-A5d-004 | AI + Owner | S3 | W3D3 | W3D4 | DONE | REST `account_import`+`friend_add` 双向；可配置关闭；重试与日志 | `TencentImRestApiClient`、`TencentImFriendshipNotifier`、`TencentImProperties` 扩展、单测 |
 | FP-A6-003 | AI + Owner | S3 | W3D4 | W3D5 | DONE | 登录/注册/发帖赠票；UTC 日切与日上限；`bu_stamp_daily_grant` 幂等 | `StampGrantService`、`V10`、`senior-post.stamps-grant`、单测 |
-| FP-A7-* | AI + Owner | S3 | W3D4 | W3D6 | TODO | VIP 开关影响扣费 | VO + Flutter |
+| FP-A7-001 | AI + Owner | S3 | W3D4 | W3D6 | DONE | `bootstrap/init` 含 `vipProduct`；Flutter VIP 中心读 bootstrap；与 Manage `VipConfig` 同源键 | `AppBootstrapVO`、`AppVipProductConfigVO`、`AppBootstrapService`、`vip_center_page` |
+| FP-A7-002 | AI + Owner | S3 | W3D4 | W3D6 | TODO | 订阅/到期与支付或手工策略可演示 | `vip_subscription`、校验 Job |
+| FP-A7-003 | AI + Owner | S3 | W3D4 | W3D6 | TODO | 扣费点与 `vipProduct` 配置单一真源、集成测试 | 与 `sendLetter` / `speedUp` 对齐 |
 | FP-A3-005 | AI + Owner | S3 | W3D5 | W3D5 | DONE | 举报单进后台；工单列表可看举报人 | `AppReport*` + Manage `report/List.tsx` |
 | FP-A4-002~004 | AI + Owner | S3 | W3D5 | W3D6 | DONE | 筛选 + 排序（`sort`）全链；独立公开页 API 仍属 FP-A4-004 | `AppDirectoryPageInDto`、`AppDirectoryServiceImpl`、`directory_remote`、筛选 Sheet |
 
@@ -68,7 +70,7 @@
 | FP-A8-005 | AI + Owner | S4 | W4D4 | W4D5 | TODO | 注销策略可演示 | API + Job + Flutter |
 | FP-X-003 | AI + Owner | S4 | W4D5 | W4D5 | TODO | 低版本拦截 | bootstrap 或 version API |
 | FP-A9-002 | AI + Owner | S4 | W4D5 | W4D6 | DONE | 管理端分页查 `log_stamp_transaction`；可选 userId、reason 过滤 | `AdminStampsApi`、`AdminStampsController`、`StampLedgerList.tsx` |
-| FP-A9-003 | AI + Owner | S4 | W4D5 | W4D6 | TODO | 用户列表接通 `blockDevice` | `UserList` + `api.blockDevice` |
+| FP-A9-003 | AI + Owner | S4 | W4D5 | W4D6 | DONE | 用户列表展示设备并拉黑；`GET /webapi/user/{userId}/devices` + `POST /webapi/user/device/block` | `AdminUserApi`、`AdminUserController`、`api.userDevices`、`UserList` Modal |
 | FP-B14/B15 | AI + Owner | S4 | W4D6 | W4D7 | TODO | 设计走查通过 | 主题 PR + 截图 |
 
 ---
@@ -91,3 +93,5 @@
 | 2026-05-08 | FP-A6-004：`StampAccountService` 统一 CAS；`StampBalanceCasConcurrencyJdbcTest`（H2 100/200 线程）；`StampAccountServiceImplTest` |
 | 2026-05-09 | FP-A9-002 DONE；`05` Sprint4 拆分 A9-002/003 行；`01` FP-A6-005 同步 |
 | 2026-05-09 | FP-A3-005/007 + FP-A5-002：敏感词发帖/评/信 + 词库缓存失效；`sync` COALESCE；邮箱页下拉刷新与 `resumed` 刷新；举报列表 `reporterUserId` + `records`/`list` |
+| 2026-05-09 | FP-A9-003 DONE：`GET /webapi/user/{userId}/devices`；Manage 用户列表「设备拉黑」Modal；`api.blockDevice` body 与后端 DTO 对齐 |
+| 2026-05-09 | PLAN/07/05 对齐 **FP-A7-001**：bootstrap `vipProduct` 已交付；Sprint3 拆分 **FP-A7-002/003** 仍为 TODO |

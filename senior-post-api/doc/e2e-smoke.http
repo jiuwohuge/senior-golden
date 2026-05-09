@@ -6,6 +6,7 @@
 @adminToken = REPLACE_WITH_WEBAPI_JWT
 @token = REPLACE_WITH_APP_JWT
 @postcardId = 1
+@letterId = 1
 
 ### 1) App：注册（返回 token；触发 FP-A6-003 每日登录赠票首登）
 POST {{host}}/api/auth/register
@@ -71,4 +72,30 @@ Token: {{token}}
 
 {
   "page": { "page": 1, "size": 20 }
+}
+
+### 9) App：提交账号注销申请（需登录；7 日冷静期）
+POST {{host}}/api/auth/account/deletion-request
+Token: {{token}}
+
+### 10) App：回信（parentLetterId；收信人回复原发件人）
+POST {{host}}/api/mailbox/letters/send
+Content-Type: application/json
+Token: {{token}}
+
+{
+  "toUserId": 1,
+  "content": "Reply body",
+  "letterType": 2,
+  "parentLetterId": {{letterId}}
+}
+
+### 11) Manage：调试设置用户 VIP（staff JWT）
+POST {{host}}/webapi/user/2/vip-debug
+Content-Type: application/json
+Token: {{adminToken}}
+
+{
+  "isVip": true,
+  "clearVipExpireAt": true
 }

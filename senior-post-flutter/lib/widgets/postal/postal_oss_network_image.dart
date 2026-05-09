@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/env/app_env.dart';
 import '../../core/oss/oss_get_sign_service.dart';
 import '../../core/oss/oss_object_key_hint.dart';
 
-/// 加载网络图片；在 **非 Mock** 且首帧加载失败时，尝试从 URL 解析 objectKey 并调用 `/api/oss/get-sign` **最多一次** 自愈（应对预签名过期）。
+/// Loads network images; when [enableResign] and first frame fails, tries one OSS resign.
 class PostalOssNetworkImage extends ConsumerStatefulWidget {
   const PostalOssNetworkImage({
     super.key,
@@ -73,7 +72,7 @@ class _PostalOssNetworkImageState extends ConsumerState<PostalOssNetworkImage> {
       height: widget.height,
       alignment: widget.alignment,
       errorBuilder: (ctx, _, __) {
-        final allow = widget.enableResign && !AppEnv.useMock && !_resignScheduled;
+        final allow = widget.enableResign && !_resignScheduled;
         if (allow) {
           final key = tryParseOssObjectKey(widget.imageUrl);
           if (key != null) {

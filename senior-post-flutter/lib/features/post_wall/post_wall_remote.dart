@@ -2,16 +2,16 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/mock/mock_models.dart';
+import '../../core/models/domain_models.dart';
 import '../../core/network/dio_provider.dart';
 
-/// 与 `/api/postcards/*` 对齐（`USE_MOCK=false`）。
+/// 与 `/api/postcards/*` 对齐。
 class PostWallRemoteRepository {
   PostWallRemoteRepository(this._dio);
 
   final Dio _dio;
 
-  Future<List<MockPost>> listWall({int page = 1, int size = 50}) async {
+  Future<List<WallPost>> listWall({int page = 1, int size = 50}) async {
     final r = await _dio.post<dynamic>(
       '/api/postcards/paging',
       data: <String, dynamic>{
@@ -20,16 +20,16 @@ class PostWallRemoteRepository {
     );
     final pd = _unwrapPageData(r);
     final rows = _recordsList(pd);
-    return rows.whereType<Map<String, dynamic>>().map(_voToMockPost).toList();
+    return rows.whereType<Map<String, dynamic>>().map(_voToWallPost).toList();
   }
 
-  Future<MockPost?> getPost(String id) async {
+  Future<WallPost?> getPost(String id) async {
     final r = await _dio.get<dynamic>('/api/postcards/$id');
     final map = _unwrapMapData(r);
-    return _voToMockPost(map);
+    return _voToWallPost(map);
   }
 
-  Future<List<MockComment>> listComments(String postcardId, {int page = 1, int size = 50}) async {
+  Future<List<WallComment>> listComments(String postcardId, {int page = 1, int size = 50}) async {
     final r = await _dio.post<dynamic>(
       '/api/postcards/$postcardId/comments/paging',
       data: <String, dynamic>{
@@ -38,10 +38,10 @@ class PostWallRemoteRepository {
     );
     final pd = _unwrapPageData(r);
     final rows = _recordsList(pd);
-    return rows.whereType<Map<String, dynamic>>().map(_voToMockComment).toList();
+    return rows.whereType<Map<String, dynamic>>().map(_voToWallComment).toList();
   }
 
-  Future<MockPost> createPost({
+  Future<WallPost> createPost({
     required String content,
     List<String>? imageUrls,
   }) async {
@@ -53,7 +53,7 @@ class PostWallRemoteRepository {
       },
     );
     final map = _unwrapMapData(r);
-    return _voToMockPost(map);
+    return _voToWallPost(map);
   }
 
   Future<void> createComment({
@@ -119,10 +119,10 @@ List<dynamic> _recordsList(Map<String, dynamic> pageData) {
   return rows;
 }
 
-MockUser _authorFromMap(Map<String, dynamic> a) {
+AppUser _authorFromMap(Map<String, dynamic> a) {
   final uid = (a['userId'] as num?)?.toInt() ?? 0;
   final cc = (a['countryCode'] as String?) ?? '';
-  return MockUser(
+  return AppUser(
     id: '$uid',
     nickname: (a['nickname'] as String?) ?? 'User',
     email: '',
@@ -138,7 +138,7 @@ MockUser _authorFromMap(Map<String, dynamic> a) {
   );
 }
 
-MockPost _voToMockPost(Map<String, dynamic> m) {
+WallPost _voToWallPost(Map<String, dynamic> m) {
   final authorRaw = m['author'];
   final authorMap = authorRaw is Map<String, dynamic> ? authorRaw : <String, dynamic>{};
   final id = '${m['id'] ?? ''}';
@@ -152,7 +152,7 @@ MockPost _voToMockPost(Map<String, dynamic> m) {
     }
   }
   final single = m['imageUrl'] as String?;
-  return MockPost(
+  return WallPost(
     id: id,
     author: _authorFromMap(authorMap),
     content: (m['content'] as String?) ?? '',
@@ -164,10 +164,10 @@ MockPost _voToMockPost(Map<String, dynamic> m) {
   );
 }
 
-MockComment _voToMockComment(Map<String, dynamic> m) {
+WallComment _voToWallComment(Map<String, dynamic> m) {
   final authorRaw = m['author'];
   final authorMap = authorRaw is Map<String, dynamic> ? authorRaw : <String, dynamic>{};
-  return MockComment(
+  return WallComment(
     id: '${m['id'] ?? ''}',
     author: _authorFromMap(authorMap),
     content: (m['content'] as String?) ?? '',

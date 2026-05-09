@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/env/app_env.dart';
 import '../../core/models/interest_tag_option.dart';
-import '../../core/mock/mock_data.dart';
-import '../../core/mock/mock_repository.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../directory/directory_remote.dart';
@@ -23,23 +21,18 @@ class InterestsPickerPage extends ConsumerStatefulWidget {
 }
 
 class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
-  final Set<String> _mockSelected = {};
-  final Set<int> _realSelected = {};
+  final Set<int> _selected = {};
   bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    final u = ref.read(mockSessionProvider).user;
-    if (AppEnv.useMock) {
-      _mockSelected.addAll(u.interests);
-    } else {
-      _realSelected.addAll(u.interestTagIds);
-    }
+    final u = ref.read(appSessionProvider).user;
+    _selected.addAll(u.interestTagIds);
   }
 
-  Future<void> _saveReal(BuildContext context) async {
-    if (_realSelected.length < 3) {
+  Future<void> _save(BuildContext context) async {
+    if (_selected.length < 3) {
       PostalSnack.show(
         context,
         'Please select at least 3 interests.',
@@ -50,7 +43,7 @@ class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
     setState(() => _saving = true);
     try {
       await ref.read(authRepositoryProvider).updateProfileOnServer(
-            interestTagIds: _realSelected.toList(),
+            interestTagIds: _selected.toList(),
           );
       if (!context.mounted) {
         return;
@@ -78,63 +71,6 @@ class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (AppEnv.useMock) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Interest tags')),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-            children: [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: MockData.interests
-                    .map(
-                      (e) => FilterChip(
-                        label: Text(e.label),
-                        selected: _mockSelected.contains(e.id),
-                        onSelected: (v) {
-                          setState(() {
-                            if (v) {
-                              _mockSelected.add(e.id);
-                            } else {
-                              _mockSelected.remove(e.id);
-                            }
-                          });
-                        },
-                      ),
-                    )
-                    .toList(),
-              ),
-              const SizedBox(height: 14),
-              PostalButton(
-                label: 'Save interests',
-                onPressed: () {
-                  if (_mockSelected.length < 3) {
-                    PostalSnack.show(
-                      context,
-                      'Please select at least 3 interests.',
-                      tone: PostalSnackTone.warning,
-                    );
-                    return;
-                  }
-                  ref.read(mockSessionProvider.notifier).updateProfile(
-                        interests: _mockSelected.toList(),
-                      );
-                  PostalSnack.show(
-                    context,
-                    'Mock: interests updated',
-                    tone: PostalSnackTone.success,
-                  );
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     final lang = Localizations.localeOf(context).languageCode;
     final asyncOpts = ref.watch(_pickerInterestOptionsProvider(lang));
 
@@ -167,13 +103,13 @@ class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
                       .map(
                         (o) => FilterChip(
                           label: Text(o.tagName),
-                          selected: _realSelected.contains(o.id),
+                          selected: _selected.contains(o.id),
                           onSelected: (v) {
                             setState(() {
                               if (v) {
-                                _realSelected.add(o.id);
+                                _selected.add(o.id);
                               } else {
-                                _realSelected.remove(o.id);
+                                _selected.remove(o.id);
                               }
                             });
                           },
@@ -185,7 +121,7 @@ class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
                 PostalButton(
                   label: 'Save interests',
                   busy: _saving,
-                  onPressed: _saving ? null : () => _saveReal(context),
+                  onPressed: _saving ? null : () => _save(context),
                 ),
               ],
             );

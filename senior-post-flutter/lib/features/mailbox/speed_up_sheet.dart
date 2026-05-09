@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
 import 'mailbox_remote.dart';
@@ -52,24 +50,16 @@ class _SpeedUpSheetState extends ConsumerState<SpeedUpSheet> {
                   : () async {
                       setState(() => _busy = true);
                       try {
-                        if (AppEnv.useMock) {
-                          await ref
-                              .read(mockMailboxRepositoryProvider)
-                              .speedUp(widget.letterId);
-                        } else {
-                          await ref
-                              .read(mailboxRemoteRepositoryProvider)
-                              .speedUp(widget.letterId);
-                        }
+                        await ref
+                            .read(mailboxRemoteRepositoryProvider)
+                            .speedUp(widget.letterId);
                         if (!context.mounted) return;
                         ref.invalidate(mailboxLettersProvider);
                         ref.invalidate(postalInboxLettersProvider);
-                        ref.invalidate(stampBalanceHeaderProvider);
+                        ref.invalidate(mailboxStampHeaderProvider);
                         PostalSnack.show(
                           context,
-                          AppEnv.useMock
-                              ? 'Mock: delivery completed'
-                              : 'Delivery completed',
+                          'Delivery completed',
                           tone: PostalSnackTone.success,
                         );
                         if (context.mounted) Navigator.of(context).pop();

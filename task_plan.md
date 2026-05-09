@@ -1,7 +1,7 @@
 # 任务总表（索引）
 
 > **文档元信息**  
-> **版本**：1.2 · **更新**：2026-05-09 · **维护人**：AI + Owner
+> **版本**：1.4 · **更新**：2026-05-09 · **维护人**：AI + Owner
 
 **角色**：与根目录 [`PLAN.md`](PLAN.md) 对齐；本文件只做**进度总览 + 文档导航**，细则见 [`doc/plan/`](doc/plan/) 与 [`doc/plan/00-documentation-governance.md`](doc/plan/00-documentation-governance.md)。
 
@@ -30,7 +30,7 @@
 |-------|------|------|
 | P0 | 阅读 `PLAN.md`「功能清单 / 开发计划 / 阻塞」并与 `01` 表对齐 | [x] 2026-05-09 全量梳理已对齐 `01`/`05`/`progress` |
 | P1 | M2 主路径：发帖/评论/目录/写信/OSS/Flutter Mock→REST | [~] 核心 REST 已接；**总闸 Mock 策略文档化**、**E2E 冒烟自动化/录屏**、审核态 UX 加强仍待 |
-| P2 | M3：平邮延迟队列、邮票事务、信箱全 REST、Manage 邮票页 | [~] 平邮到期 Worker、加速、赠票、IM REST、Connections 已落地；**Manage 邮票流水页**、**平邮区间配置化**、**挂号事务边界复审** 仍待 |
+| P2 | M3：平邮延迟队列、邮票事务、信箱全 REST、Manage 邮票页 | [~] 平邮到期 Worker、加速、赠票、IM REST、Connections、**Manage 邮票流水页**、**用户设备拉黑 UI** 已落地；**平邮区间配置化**、**挂号事务边界复审** 仍待 |
 | P3 | M1/M4：邮件 outbox、AES、GDPR、版本强更、密码风控 | [ ] |
 | P4 | 体验债：B14 主题、B15 登录注册视觉、A10 扫尾 | [ ] |
 | P5 | 质量闸门：`flutter analyze`、后端冒烟、IM 双端、UAT 清单 | [~] 分析/单测常态绿；**双用户集成/E2E**、**生产 IM 配置验收** 仍待 |
@@ -47,7 +47,8 @@
 | 2026-05-02 | 决策 | 文档体系 hybrid：`task_plan.md` + `doc/plan/01–07` |
 | 2026-05-07 | 决策 | 路线图叙事入口：[`07-gap-analysis-and-roadmap.md`](doc/plan/07-gap-analysis-and-roadmap.md)；**执行状态**以 [`01-feature-list.md`](doc/plan/01-feature-list.md) + **§2.0**（`07`）+ [`05-task-tracker.md`](doc/plan/05-task-tracker.md) 为准 |
 | 2026-05-09 | 决策 | 文档真源：`01`+`05` 为功能与 Sprint；`PLAN` 为架构基线；新增 `doc/README.md`、`00-documentation-governance.md` |
-| 2026-05-09 | 决策 | **Connections** 产品语义 **= IM「好友列表」**（`GET /api/mailbox/friends` / `bu_friendship`），**≠** TIM **`getConversationList` 会话列表**；文档与 Flutter 数据源已对齐 |
+| 2026-05-09 | 决策 | **FP-A9-003**：`GET /webapi/user/{userId}/devices` + Manage `UserList`「设备拉黑」；`blockDevice` 请求体与后端 DTO 对齐 |
+| 2026-05-09 | 决策 | **PLAN A7**：**FP-A7-001** 以 **`bootstrap/init` → `vipProduct`** 交付；**FP-A7-002/003**（订阅全链、扣费真源）仍为缺口，见 `01` |
 
 ---
 

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../app/theme/postal_tokens.dart';
-import '../../core/mock/mock_models.dart';
+import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
 import 'mailbox_remote.dart';
@@ -139,7 +139,7 @@ class _PostalInboxBody extends ConsumerWidget {
     required this.onSyncMailbox,
   });
 
-  final List<MockLetter> letters;
+  final List<MailboxLetter> letters;
   final Future<void> Function() onSyncMailbox;
 
   @override
@@ -304,7 +304,7 @@ class _ImStyleRow extends StatelessWidget {
 
 class _LetterTile extends StatelessWidget {
   const _LetterTile({required this.letter});
-  final MockLetter letter;
+  final MailboxLetter letter;
 
   @override
   Widget build(BuildContext context) {

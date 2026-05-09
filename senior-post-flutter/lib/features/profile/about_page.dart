@@ -18,7 +18,7 @@ class AboutPage extends StatelessWidget {
                 'Senior Post is a global postal-style social app for adults 45+.\n\n'
                 'We focus on calm companionship through postcards and letters, '
                 'instead of algorithmic matching and instant-pressure interactions.\n\n'
-                'Version: 1.0.0 (UI Mock Framework)',
+                'Senior Post · Flutter client',
               ),
             ),
           ],

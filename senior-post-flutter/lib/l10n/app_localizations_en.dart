@@ -125,7 +125,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authMockTip =>
-      'Mock mode is enabled. You can try all flows without backend APIs.';
+      'Sign in with your registered email to use all features.';
 
   @override
   String authAgreeTpl(Object privacy, Object terms) {
@@ -369,7 +369,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get postComposeUploadNeedRealApi =>
-      'OSS upload requires Mock off: flutter run --dart-define=USE_MOCK=false …';
+      'Image upload needs a server-issued URL. Check your network and try again.';
 
   @override
   String get postComposePickerChannelError =>
@@ -382,7 +382,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postComposeNeedContent => 'Please write something first.';
 
   @override
-  String get postComposePublishedMock => 'Mock: postcard published (+1 stamp)';
+  String get postComposePublishedMock => 'Postcard submitted.';
 
   @override
   String get postComposePublishedReal =>
@@ -453,7 +453,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSave => 'Save';
 
   @override
-  String get profileMockUpdated => 'Mock: profile updated';
+  String get profileMockUpdated => 'Profile updated';
 
   @override
   String get profileSaved => 'Profile saved';

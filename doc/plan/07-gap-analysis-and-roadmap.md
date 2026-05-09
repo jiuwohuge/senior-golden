@@ -1,7 +1,7 @@
 # 07 — 遗漏功能系统化清单与开发路线图
 
 > **文档元信息**  
-> **版本**：1.1 · **更新**：2026-05-09 · **维护人**：AI + Owner  
+> **版本**：1.3 · **更新**：2026-05-09 · **维护人**：AI + Owner  
 > **重要**：§2 为 2026-05-07 起稿的「历史遗漏叙事」；**当前是否仍缺以 §2.0 为准**，避免与已交付代码冲突。
 
 **依据**：[`01-feature-list.md`](01-feature-list.md)、[`05-task-tracker.md`](05-task-tracker.md)、[`03-priority-grouping.md`](03-priority-grouping.md)、根目录 [`findings.md`](../../findings.md)、[`progress.md`](../../progress.md)、[`PLAN.md`](../../PLAN.md)。  
@@ -36,9 +36,11 @@
 | FP-A6-003 / FP-A6-004 | **已交付** | `StampGrantService`、CAS 单测 |
 | FP-A2-002 / FP-A2-003 | **已交付** | 头像 OSS + PATCH；兴趣注册/PATCH/名录 VO |
 | FP-A1-004、FP-A1-007、FP-X-001、FP-X-003 | **仍待** | 见 `01` |
-| FP-A7-*、FP-A8-005、FP-A9-002/003/004、FP-A5d-001/003、回信 | **仍待** | 见 `01` / `PLAN` |
+| FP-A9-002 / FP-A9-003 | **已交付** | `POST /webapi/stamps/ledger/paging` + 邮票流水页；`GET /webapi/user/{id}/devices` + `UserList` 设备拉黑 |
+| FP-A7-001 | **部分已交付** | bootstrap **`vipProduct`** + Flutter VIP 中心读 bootstrap；**非**独立 `GET /api/vip/bootstrap` |
+| FP-A7-002 / FP-A7-003、FP-A8-005、FP-A9-004、FP-A5d-001/003、回信 | **仍待** | 见 `01` / `PLAN` |
 
-§3 各阶段「推荐顺序」仍可作为**波次参考**；其中 **3.1 第 1～5 步** 对应能力多数已在 2026-05-08～09 交付，后续迭代请从 **VIP（FP-A7-*）**、**Manage 流水（FP-A9-002）**、**合规（FP-X-001 / A8-005）** 等待办项接续。
+§3 各阶段「推荐顺序」仍可作为**波次参考**；其中 **3.1 第 1～5 步** 对应能力多数已在 2026-05-08～09 交付，后续迭代请从 **VIP 订阅与扣费真源（FP-A7-002/003）**、**UAT（FP-A9-004）**、**合规（FP-X-001 / A8-005）** 等待办项接续。
 
 ---
 
@@ -100,18 +102,18 @@
 | FP-A6-003 | 登录赠票、发帖奖、日上限 | 定时或事件写 `log_stamp_transaction`，余额 CAS | **P1** | `bu_user.stamps_balance`、配置中心 |
 | FP-A6-004 | 并发扣票单测 | 100 次并发无负余额 | **P0** | `UserService` CAS；`StampTransactionService` |
 | FP-A6-005 | 管理端邮票流水查询 | `/webapi` 分页 + Manage 页 | **P3** | 与 App `ledger/paging` 同源 |
-| FP-A7-001 ~ 003 | VIP 权益与扣费 | App 可读权益；挂号/加速/VIP 分支与配置一致 | **P1** | `bu_user.is_vip`、`VipConfig`、各扣费点 |
+| FP-A7-001 ~ 003 | VIP 权益与扣费 | App 可读权益；挂号/加速/VIP 分支与配置一致 | **P1** | **A7-001**：bootstrap **`vipProduct`** 已交付；**A7-002/003**：订阅/扣费真源与集成测试仍见 `01` |
 
 ### 2.7 风控、合规、管理端补口（A8 / A9）
 
 | ID | 具体描述 | 预期行为 | 优先级 | 与现有系统关联 |
 |----|----------|----------|--------|----------------|
-| FP-A8-002 | 设备拉黑 UI | Manage 用户列表调用 `blockDevice` | **P2** | `api.ts` 已有方法 |
+| FP-A8-002 | 设备拉黑 UI | Manage 用户列表调用 `blockDevice` | **P2** | **已有**：`userDevices` + `UserList` Modal |
 | FP-A8-003 | 敏感词在 App 写路径生效 | 同 FP-A3-007 | **P1** | — |
 | FP-A8-005 | GDPR 注销 / 冷静期 | API + 定时任务 + Flutter 流程 | **P2** | `account_delete` 页面 |
 | FP-A8-006 | 举报闭环 | App 提交 + 后台处理 + 状态回写（可选通知） | **P1** | `bu_report`、`AdminReportApi` |
 | FP-A9-002 | 管理端邮票流水页 | 同 FP-A6-005 | **P3** | — |
-| FP-A9-003 | 设备封禁按钮 | 同 FP-A8-002 | **P2** | — |
+| FP-A9-003 | 设备封禁按钮 | 同 FP-A8-002 | **P2** | **已有**（与 A8-002 同交付） |
 | FP-A9-004 | UAT / 权限验收清单 | 文档化用例与 85xx | **P3** | 与 `jh.config.auth` |
 
 ### 2.8 国际化与体验（A10 / B）
@@ -147,7 +149,7 @@
 | 顺序 | 工作包 | 技术方案要点 | 资源（粗估） |
 |------|--------|--------------|--------------|
 | 6 | **FP-A6-003** 赠票与日上限 | 登录 Hook + 配置；幂等键防重复 | 1.5～2 D |
-| 7 | **FP-A7-*** VIP 权益 | `GET /api/vip/bootstrap` 或并入 bootstrap；扣费点读配置 | 2 D 全栈 |
+| 7 | **FP-A7-002 / FP-A7-003** VIP 订阅与扣费真源 | **A7-001** 已并入 **`bootstrap/init` → `vipProduct`**；本步做订阅/到期与 `send`/`speed-up` 与配置一致性 | 1.5～2 D |
 | 8 | **FP-A5d-004** IM Notifier | 腾讯 REST 客户端、重试、日志与开关 | 2～3 D 后端 |
 | 9 | **FP-A2-002 / A2-003** 头像与兴趣 | OSS + PATCH；兴趣表或 JSON 列 | 1.5～2 D 全栈 |
 | 10 | **FP-A5d-001** 平邮延迟配置 | `sys_config` + `AppMailboxServiceImpl` 读配置 | 0.5～1 D |
@@ -164,9 +166,8 @@
 
 | 顺序 | 工作包 | 技术方案要点 | 资源（粗估） |
 |------|--------|--------------|--------------|
-| 14 | **FP-A9-002/003** Manage 流水与封禁 UI | Ant Design Table + 已有 API | 1～2 D 前端 |
-| 15 | **FP-A9-004 + E2E** | Markdown 用例清单 + 手动或自动化 | 1 D |
-| 16 | **FP-B14/B15 + A10** | 主题令牌、Auth 布局、ARB 扫尾 | 视设计投入 |
+| 14 | **FP-A9-004 + E2E** | **A9-002/003 已交付**；用例清单、角色与 85xx、冒烟脚本或录屏 | 1 D |
+| 15 | **FP-B14/B15 + A10** | 主题令牌、Auth 布局、ARB 扫尾 | 视设计投入 |
 
 ---
 
@@ -176,7 +177,7 @@
 |------|----------|
 | **后端（1）** | 事务与审核、邮件、IM Notifier、配置与 Job |
 | **Flutter（1）** | 举报/头像/兴趣/VIP 展示、AES、注销流程 |
-| **Manage（0.5）** | 流水页、封禁按钮、举报筛选优化 |
+| **Manage（0.5）** | UAT 协助、举报筛选优化；流水/设备封禁页已具备 |
 | **QA/产品** | E2E 清单、双用户场景、视觉走查 |
 
 *人日为粗算，可随团队并行度调整。*

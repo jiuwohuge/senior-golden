@@ -7,21 +7,16 @@ import 'package:intl/intl.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_models.dart';
-import '../../core/mock/mock_repository.dart';
+import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
 import 'mailbox_remote.dart';
 import 'speed_up_sheet.dart';
 
-final letterDetailProvider = FutureProvider.family<MockLetter?, String>((
+final letterDetailProvider = FutureProvider.family<MailboxLetter?, String>((
   ref,
   id,
 ) async {
-  if (AppEnv.useMock) {
-    return ref.read(mockMailboxRepositoryProvider).findById(id);
-  }
   return ref.read(mailboxRemoteRepositoryProvider).getLetter(id);
 });
 
@@ -35,8 +30,9 @@ class LetterDetailPage extends ConsumerStatefulWidget {
 
 class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
   final _reply = TextEditingController();
-  bool _busy = false;
   bool _acceptBusy = false;
+  bool _replyBusy = false;
+  LetterType _replyType = LetterType.standard;
 
   @override
   void dispose() {
@@ -44,7 +40,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
     super.dispose();
   }
 
-  Widget _statusChip(MockLetter letter) {
+  Widget _statusChip(MailboxLetter letter) {
     return switch (letter.status) {
       LetterStatus.delivering => PostalStatusChip.delivering(),
       LetterStatus.registered => PostalStatusChip.registered(
@@ -80,16 +76,15 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
             }
             final isDelivering = letter.status == LetterStatus.delivering;
             final isRegistered = letter.status == LetterStatus.registered;
-            final AsyncValue<bool>? friendsAsync = AppEnv.useMock
-                ? null
-                : ref.watch(friendshipActiveProvider(letter.peer.id));
-            final isFriend = AppEnv.useMock
-                ? ref.read(mockMailboxRepositoryProvider).friendsWithPeer(letter.peer.id)
-                : (friendsAsync!.valueOrNull ?? false);
+            final friendsAsync = ref.watch(friendshipActiveProvider(letter.peer.id));
+            final isFriend = friendsAsync.valueOrNull ?? false;
             final canAccept =
                 !letter.outgoing &&
                 letter.status == LetterStatus.delivered &&
                 !isFriend;
+            final canReply = !letter.outgoing &&
+                letter.status != LetterStatus.delivering &&
+                letter.peer.id.isNotEmpty;
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
@@ -183,15 +178,9 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                           : () async {
                               setState(() => _acceptBusy = true);
                               try {
-                                if (AppEnv.useMock) {
-                                  await ref
-                                      .read(mockMailboxRepositoryProvider)
-                                      .acceptPostalConnection(letter.id);
-                                } else {
-                                  await ref
-                                      .read(mailboxRemoteRepositoryProvider)
-                                      .acceptPostalContact(letter.id);
-                                }
+                                await ref
+                                    .read(mailboxRemoteRepositoryProvider)
+                                    .acceptPostalContact(letter.id);
                                 if (!context.mounted) return;
                                 PostalSnack.show(
                                   context,
@@ -222,57 +211,112 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                   ),
                 ],
                 const SizedBox(height: 16),
-                PostalTextField(
-                  controller: _reply,
-                  label: 'Reply',
-                  maxLines: 5,
-                  minLines: 4,
-                  showClearButton: false,
-                ),
-                const SizedBox(height: 12),
-                PostalButton(
-                  label: AppEnv.useMock ? 'Send reply' : 'Send reply (soon)',
-                  busy: _busy,
-                  onPressed: (!AppEnv.useMock ||
-                          letter.status != LetterStatus.delivered ||
-                          _busy)
-                      ? null
-                      : () async {
-                          if (_reply.text.trim().isEmpty) {
-                            PostalSnack.show(
-                              context,
-                              'Please enter reply content.',
-                              tone: PostalSnackTone.warning,
-                            );
-                            return;
-                          }
-                          setState(() => _busy = true);
-                          try {
-                            await ref
-                                .read(mockMailboxRepositoryProvider)
-                                .reply(letter.id, _reply.text.trim());
-                            if (!context.mounted) return;
-                            PostalSnack.show(
-                              context,
-                              'Mock: reply sent',
-                              tone: PostalSnackTone.success,
-                            );
-                            _reply.clear();
-                            ref.invalidate(mailboxLettersProvider);
-                            ref.invalidate(postalInboxLettersProvider);
-                          } on ApiBusinessException catch (e) {
-                            if (context.mounted) {
+                if (canReply) ...[
+                  Text(
+                    'Reply (same send rules as new letter; postage may apply).',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PostalTokens.inkSecondary,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Standard'),
+                        selected: _replyType == LetterType.standard,
+                        onSelected: (_) =>
+                            setState(() => _replyType = LetterType.standard),
+                      ),
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: const Text('Registered'),
+                        selected: _replyType == LetterType.registered,
+                        onSelected: (_) =>
+                            setState(() => _replyType = LetterType.registered),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  PostalTextField(
+                    controller: _reply,
+                    label: 'Reply',
+                    maxLines: 5,
+                    minLines: 3,
+                    showClearButton: true,
+                  ),
+                  const SizedBox(height: 12),
+                  PostalButton(
+                    label: 'Send reply',
+                    busy: _replyBusy,
+                    onPressed: _replyBusy
+                        ? null
+                        : () async {
+                            final text = _reply.text.trim();
+                            if (text.isEmpty) {
                               PostalSnack.show(
                                 context,
-                                e.message,
-                                tone: PostalSnackTone.error,
+                                'Please write your reply.',
+                                tone: PostalSnackTone.warning,
                               );
+                              return;
                             }
-                          } finally {
-                            if (context.mounted) setState(() => _busy = false);
-                          }
-                        },
-                ),
+                            setState(() => _replyBusy = true);
+                            try {
+                              await ref
+                                  .read(mailboxRemoteRepositoryProvider)
+                                  .sendLetter(
+                                    toUserId: letter.peer.id,
+                                    content: text,
+                                    type: _replyType,
+                                    parentLetterId: letter.id,
+                                  );
+                              if (!context.mounted) return;
+                              PostalSnack.show(
+                                context,
+                                'Reply sent',
+                                tone: PostalSnackTone.success,
+                              );
+                              _reply.clear();
+                              ref.invalidate(letterDetailProvider(widget.letterId));
+                              ref.invalidate(mailboxLettersProvider);
+                              ref.invalidate(postalInboxLettersProvider);
+                            } on ApiBusinessException catch (e) {
+                              if (context.mounted) {
+                                PostalSnack.show(
+                                  context,
+                                  e.message,
+                                  tone: PostalSnackTone.error,
+                                );
+                              }
+                            } finally {
+                              if (context.mounted) {
+                                setState(() => _replyBusy = false);
+                              }
+                            }
+                          },
+                  ),
+                ] else ...[
+                  Text(
+                    'Reply is available after the letter is received (not while delivering).',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PostalTokens.inkSecondary,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  PostalTextField(
+                    controller: _reply,
+                    label: 'Reply draft',
+                    maxLines: 5,
+                    minLines: 4,
+                    showClearButton: false,
+                    enabled: false,
+                  ),
+                  const SizedBox(height: 12),
+                  PostalButton(
+                    label: 'Send reply',
+                    onPressed: null,
+                  ),
+                ],
                 if (isFriend) ...[
                   const SizedBox(height: 12),
                   OutlinedButton(

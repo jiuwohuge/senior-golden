@@ -38,7 +38,7 @@
 |----|------|------|
 | Dart SDK | [ ] | `pubspec`：`>=3.9.0 <4.0.0`；对齐 `tool/flutter_sdk_version.txt` 推荐 |
 | `flutter pub get` | [ ] | 无报错 |
-| `--dart-define` | [ ] | `USE_MOCK=false`、`API_BASE_URL=http(s)://...`（见 PLAN 真机说明） |
+| `--dart-define` | [ ] | `API_BASE_URL=http(s)://...`（见 PLAN 真机说明）；客户端已移除 Mock 层，联调须指向真实后端 |
 | Android/iOS 网络 | [ ] | Debug 明文 HTTP、iOS `NSAllowsLocalNetworking`（见 PLAN 历史记录） |
 | 腾讯 IM 真机 | [ ] | `TENCENT_IM_*` 与后端一致 |
 
@@ -70,7 +70,7 @@
 1. 起 PostgreSQL + Redis  
 2. `mvn -pl senior-post-api/server -am spring-boot:run`（或模块等价命令）  
 3. 验 `/doc.html` 与 `/api/bootstrap/init`  
-4. `flutter run --dart-define=USE_MOCK=false --dart-define=API_BASE_URL=...`  
+4. `flutter run --dart-define=API_BASE_URL=...`  
 5. `npm run dev`（manage）并登录 `/webapi`
 
 ---

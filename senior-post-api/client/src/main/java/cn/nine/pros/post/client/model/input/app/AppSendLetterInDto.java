@@ -28,4 +28,7 @@ public class AppSendLetterInDto {
     @NotNull
     @Schema(description = "1挂号信 2平邮", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer letterType;
+
+    @Schema(description = "回复的原信件 ID；若填写则仅收信人可发，且收件人自动为原发件人")
+    private Long parentLetterId;
 }

@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
-import '../../core/mock/mock_models.dart';
+import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal.dart';
 import '../directory/send_letter_sheet.dart';
 import 'post_providers.dart';
@@ -93,7 +93,7 @@ class _PostWallPageState extends ConsumerState<PostWallPage> {
 
 class _PostCard extends StatelessWidget {
   const _PostCard({required this.post});
-  final MockPost post;
+  final WallPost post;
 
   @override
   Widget build(BuildContext context) {

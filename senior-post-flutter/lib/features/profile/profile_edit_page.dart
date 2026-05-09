@@ -7,14 +7,13 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/bootstrap/app_bootstrap.dart';
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_repository.dart';
+import '../../core/session/app_session.dart';
 import '../../core/oss/oss_upload_service.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import 'avatar_crop_page.dart';
 
-/// ISO 国家码统一大写、去空格，避免下拉项出现重复 value（如 id / ID）。
+/// Normalize ISO country codes (uppercase, trim) for stable dropdown values.
 String? _normalizeCountryCode(String? raw) {
   if (raw == null) return null;
   final t = raw.trim();
@@ -36,29 +35,27 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   bool _loadingMe = false;
   bool _saving = false;
   bool _avatarBusy = false;
-  /// 裁剪完成、待用户点击「确认上传」的头像字节。
+  /// Cropped avatar bytes until user confirms upload.
   Uint8List? _avatarPendingBytes;
 
   @override
   void initState() {
     super.initState();
-    final user = ref.read(mockSessionProvider).user;
+    final user = ref.read(appSessionProvider).user;
     _nickname = TextEditingController(text: user.nickname);
     _bio = TextEditingController(text: user.bio);
     _countryCode = _normalizeCountryCode(
       user.countryCode.isEmpty ? null : user.countryCode,
     );
-    if (!AppEnv.useMock) {
-      _loadingMe = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) => _pullMe());
-    }
+    _loadingMe = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _pullMe());
   }
 
   Future<void> _pullMe() async {
     try {
       await ref.read(authRepositoryProvider).refreshSessionFromServer();
       if (!mounted) return;
-      final u = ref.read(mockSessionProvider).user;
+      final u = ref.read(appSessionProvider).user;
       setState(() {
         _nickname.text = u.nickname;
         _bio.text = u.bio;
@@ -126,15 +123,6 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     if (pending == null || _avatarBusy) return;
     final l10n = AppLocalizations.of(context)!;
 
-    if (AppEnv.useMock) {
-      ref.read(mockSessionProvider.notifier).updateProfile(avatarUrl: 'mock://avatar');
-      setState(() => _avatarPendingBytes = null);
-      if (mounted) {
-        PostalSnack.show(context, l10n.profileMockUpdated, tone: PostalSnackTone.success);
-      }
-      return;
-    }
-
     setState(() => _avatarBusy = true);
     try {
       final key = await ref.read(ossUploadServiceProvider).uploadAvatarImage(
@@ -198,7 +186,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
         DropdownMenuItem<String>(
           value: cc,
           child: Text(
-            '$cc (${languageCode.startsWith('zh') ? '当前资料' : 'from profile'})',
+            '$cc (${languageCode.startsWith('zh') ? '??????????' : 'from profile'})',
           ),
         ),
       );
@@ -242,7 +230,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
-    final user = ref.watch(mockSessionProvider).user;
+    final user = ref.watch(appSessionProvider).user;
     final bootstrapAsync = ref.watch(appBootstrapProvider(locale.languageCode));
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
@@ -411,23 +399,6 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
         }
       }
       countryName ??= _countryCode;
-    }
-    if (AppEnv.useMock) {
-      ref.read(mockSessionProvider.notifier).updateProfile(
-            nickname: _nickname.text.trim(),
-            bio: _bio.text.trim(),
-            countryCode: _countryCode,
-            countryName: countryName,
-          );
-      if (context.mounted) {
-        PostalSnack.show(
-          context,
-          l10n.profileMockUpdated,
-          tone: PostalSnackTone.success,
-        );
-        Navigator.of(context).pop();
-      }
-      return;
     }
     setState(() => _saving = true);
     try {

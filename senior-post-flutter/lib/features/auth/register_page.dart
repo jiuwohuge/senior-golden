@@ -6,9 +6,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/bootstrap/app_bootstrap.dart';
-import '../../core/env/app_env.dart';
 import '../../core/i18n/country_from_locale.dart';
-import '../../core/mock/mock_data.dart';
 import '../../widgets/postal/postal.dart';
 import '../shell/main_shell.dart';
 import 'auth_repository.dart';
@@ -36,7 +34,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   bool _agreed = false;
   bool _busy = false;
   final Set<int> _interestTagIds = {};
-  final Set<String> _mockInterestKeys = {};
 
   @override
   void dispose() {
@@ -65,9 +62,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return '$head@$domain';
   }
 
-  int _interestCount() {
-    return AppEnv.useMock ? _mockInterestKeys.length : _interestTagIds.length;
-  }
+  int _interestCount() => _interestTagIds.length;
 
   void _goToStep(int index) {
     if (_busy || index < 0 || index >= _kRegisterSteps || index == _step) {
@@ -221,31 +216,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Widget _buildInterestChips(BuildContext context, AppBootstrapData bootstrap, AppLocalizations l10n) {
-    if (AppEnv.useMock) {
-      return Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: MockData.interests
-            .map(
-              (e) => FilterChip(
-                label: Text(e.label),
-                selected: _mockInterestKeys.contains(e.id),
-                onSelected: _busy
-                    ? null
-                    : (v) {
-                        setState(() {
-                          if (v) {
-                            _mockInterestKeys.add(e.id);
-                          } else {
-                            _mockInterestKeys.remove(e.id);
-                          }
-                        });
-                      },
-              ),
-            )
-            .toList(),
-      );
-    }
     if (bootstrap.interestTagOptions.isEmpty) {
       return Text(
         l10n.authRegisterInterestsServerEmpty,
@@ -379,7 +349,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           PostalSnack.show(context, l10n.authRegisterInterestsMin, tone: PostalSnackTone.warning);
           return false;
         }
-        if (!AppEnv.useMock && bootstrap.interestTagOptions.isEmpty) {
+        if (bootstrap.interestTagOptions.isEmpty) {
           PostalSnack.show(context, l10n.authRegisterInterestsServerEmpty, tone: PostalSnackTone.warning);
           return false;
         }
@@ -486,8 +456,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             birthYear: _birthYear!,
             countryCode: autoCountryCode,
             agreedTerms: _agreed,
-            interestTagIds: AppEnv.useMock ? const [] : _interestTagIds.toList(),
-            mockInterestKeys: AppEnv.useMock ? _mockInterestKeys.toList() : null,
+            interestTagIds: _interestTagIds.toList(),
           );
       if (mounted) context.go(MainShellRoute.pathPostWall);
     } on ApiBusinessException catch (e) {

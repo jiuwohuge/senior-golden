@@ -4,8 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../core/auth/auth_token.dart';
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_repository.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../auth/login_routes.dart';
@@ -21,34 +20,44 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    if (!AppEnv.useMock) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          await ref.read(authRepositoryProvider).refreshSessionFromServer();
-        } catch (_) {
-          // 静默：无网或 token 失效时仍展示上次缓存的 mockSession
-        }
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await ref.read(authRepositoryProvider).refreshSessionFromServer();
+      } catch (_) {}
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final session = ref.watch(mockSessionProvider);
+    final session = ref.watch(appSessionProvider);
     final user = session.user;
     return SafeArea(
       top: false,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
         children: [
+          if (user.deletionRequestedAt != null) ...[
+            Card(
+              color: Colors.amber.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  'Account deletion requested. Log in again within 7 days to cancel. '
+                  'Effective: ${user.deletionEffectiveAt ?? user.deletionRequestedAt!}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           PostalCardEnvelope(
             child: Column(
               children: [
                 PostalAvatar(name: user.nickname, size: 80, imageUrl: user.avatarUrl),
                 const SizedBox(height: 10),
                 Text(
-                  user.nickname,
+                  user.nickname.isEmpty ? '?' : user.nickname,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),

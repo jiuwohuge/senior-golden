@@ -1,6 +1,7 @@
 package cn.nine.pros.post.client.model.out;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,4 +42,10 @@ public class AppPublicUserVO {
 
     @Schema(description = "用户已选兴趣标签名称（展示用，与 sys_tag.tag_name 一致）")
     private List<String> interestTagNames;
+
+    @Schema(description = "申请注销时间（未申请则为 null）")
+    private LocalDateTime deletionRequestedAt;
+
+    @Schema(description = "注销预计生效时间（申请时间+7天，仅当 deletionRequestedAt 非空时有值）")
+    private LocalDateTime deletionEffectiveAt;
 }

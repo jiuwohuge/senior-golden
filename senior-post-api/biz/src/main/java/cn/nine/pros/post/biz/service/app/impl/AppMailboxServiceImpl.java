@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -107,9 +108,31 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MailboxLetterItemVO sendLetter(long fromUserId, AppSendLetterInDto body) {
-        if (body.getToUserId() == null || body.getToUserId().equals(fromUserId)) {
-            throw new BadRequestException("不能给自己寄信");
+        Long parentLetterId = body.getParentLetterId();
+        long toUserId;
+        if (parentLetterId != null) {
+            LetterDomain parent = letterMapper.selectById(parentLetterId);
+            if (parent == null || parent.isDelFlag()) {
+                throw new BadRequestException("原信件不存在");
+            }
+            if (!Objects.equals(parent.getToUserId(), fromUserId)) {
+                throw new BadRequestException("仅收信人可回复该信件");
+            }
+            long replyTo = parent.getFromUserId();
+            if (body.getToUserId() != null && !body.getToUserId().equals(replyTo)) {
+                throw new BadRequestException("回复收件人与原信件不一致");
+            }
+            if (replyTo == fromUserId) {
+                throw new BadRequestException("不能给自己寄信");
+            }
+            toUserId = replyTo;
+        } else {
+            if (body.getToUserId() == null || body.getToUserId().equals(fromUserId)) {
+                throw new BadRequestException("不能给自己寄信");
+            }
+            toUserId = body.getToUserId();
         }
+
         String raw = body.getContent();
         if (!StringUtils.hasText(raw)) {
             throw new BadRequestException("信件内容不能为空");
@@ -124,7 +147,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             throw new BadRequestException("letterType 须为 1（挂号）或 2（平邮）");
         }
 
-        UserDTO toUser = userService.findById(body.getToUserId());
+        UserDTO toUser = userService.findById(toUserId);
         if (toUser == null) {
             throw new BadRequestException("收件人不存在");
         }
@@ -140,10 +163,10 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         LocalDateTime now = LocalDateTime.now();
         LetterDomain letter = new LetterDomain();
         letter.setFromUserId(fromUserId);
-        letter.setToUserId(body.getToUserId());
+        letter.setToUserId(toUserId);
         letter.setContent(content);
         letter.setIsAccelerated(false);
-        letter.setParentLetterId(null);
+        letter.setParentLetterId(parentLetterId);
 
         if (letterType == LETTER_TYPE_STANDARD) {
             letter.setLetterType(LETTER_TYPE_STANDARD);

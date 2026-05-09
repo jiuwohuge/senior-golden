@@ -95,5 +95,10 @@ public class UserDomain extends AbstractAuditableDomain {
      */
     @Schema(description = "最后登录时间")
     private Object lastLoginAt;
+    /**
+     * 用户申请账号注销的时间（冷静期起点）；成功登录可清空。
+     */
+    @Schema(description = "申请注销时间")
+    private java.time.LocalDateTime deletionRequestedAt;
 
 }

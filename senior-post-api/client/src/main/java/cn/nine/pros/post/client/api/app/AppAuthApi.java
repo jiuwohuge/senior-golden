@@ -42,4 +42,8 @@ public interface AppAuthApi {
     @Operation(summary = "更新当前用户资料（昵称/国家/简介）")
     @PatchMapping(AppServiceDefine.SERVER_PREFIX + "/auth/profile")
     AppPublicUserVO updateProfile(@RequestBody @Valid AppAuthProfilePatchInDto body);
+
+    @Operation(summary = "提交账号注销申请（进入7日冷静期；期间再次登录将撤销申请）")
+    @PostMapping(AppServiceDefine.SERVER_PREFIX + "/auth/account/deletion-request")
+    void requestAccountDeletion();
 }

@@ -117,7 +117,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authWelcomeBack => '欢迎回到你的全球邮政社交空间。';
 
   @override
-  String get authMockTip => '当前为 Mock 模式，未接后端也可完整体验流程。';
+  String get authMockTip => '请使用已注册邮箱登录以使用全部功能。';
 
   @override
   String authAgreeTpl(Object privacy, Object terms) {
@@ -346,8 +346,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get postComposeUploadNeedRealApi =>
-      'OSS 上传需关闭 Mock：flutter run --dart-define=USE_MOCK=false …';
+  String get postComposeUploadNeedRealApi => '图片上传需要服务端签发地址，请检查网络后重试。';
 
   @override
   String get postComposePickerChannelError =>
@@ -360,7 +359,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get postComposeNeedContent => '请先写一些内容。';
 
   @override
-  String get postComposePublishedMock => 'Mock：明信片已发布（+1 邮票）';
+  String get postComposePublishedMock => '明信片已提交。';
 
   @override
   String get postComposePublishedReal => '已提交审核，通过后将出现在明信片墙';
@@ -429,7 +428,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileSave => '保存';
 
   @override
-  String get profileMockUpdated => 'Mock：资料已更新';
+  String get profileMockUpdated => '资料已更新';
 
   @override
   String get profileSaved => '资料已保存';

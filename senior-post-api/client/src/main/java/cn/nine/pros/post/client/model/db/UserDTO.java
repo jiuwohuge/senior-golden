@@ -94,4 +94,7 @@ public class UserDTO extends AbstractAuditableDTO {
     @Schema(description = "最后登录时间")
     private Object lastLoginAt;
 
+    @Schema(description = "申请注销时间（冷静期）")
+    private java.time.LocalDateTime deletionRequestedAt;
+
 }

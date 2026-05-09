@@ -2,16 +2,16 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/mock/mock_models.dart';
+import '../../core/models/domain_models.dart';
 import '../../core/network/dio_provider.dart';
 
-/// 与 `POST /api/stamps/ledger/paging` 对齐（`USE_MOCK=false`）。
+/// 与 `POST /api/stamps/ledger/paging` 对齐。
 class StampsRemoteRepository {
   StampsRemoteRepository(this._dio);
 
   final Dio _dio;
 
-  Future<List<MockStampLedgerEntry>> ledgerPage({int page = 1, int size = 40}) async {
+  Future<List<StampLedgerLine>> ledgerPage({int page = 1, int size = 40}) async {
     final r = await _dio.post<dynamic>(
       '/api/stamps/ledger/paging',
       data: <String, dynamic>{
@@ -48,10 +48,10 @@ List<dynamic> _recordsList(Map<String, dynamic> pageData) {
   return rows;
 }
 
-MockStampLedgerEntry _voToLedgerEntry(Map<String, dynamic> m) {
+StampLedgerLine _voToLedgerEntry(Map<String, dynamic> m) {
   final id = m['id'];
   final reason = (m['reason'] as String?)?.trim();
-  return MockStampLedgerEntry(
+  return StampLedgerLine(
     id: id == null ? '' : '$id',
     title: (reason != null && reason.isNotEmpty) ? reason : '—',
     delta: (m['changeAmount'] as num?)?.toInt() ?? 0,

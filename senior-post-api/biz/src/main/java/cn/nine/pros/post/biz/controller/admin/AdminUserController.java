@@ -13,6 +13,7 @@ import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.api.admin.AdminUserApi;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.db.UserDeviceDTO;
+import cn.nine.pros.post.client.model.input.admin.AdminUserVipDebugInDto;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
 import cn.nine.pros.post.client.model.input.admin.UserQueryInDto;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,6 +75,32 @@ public class AdminUserController implements AdminUserApi {
                 .set(UserDomain::getStatus, status)
                 .set(UserDomain::getUpdatedBy, auditUserId())
                 .set(UserDomain::getUpdatedAt, java.time.LocalDateTime.now()));
+    }
+
+    @Override
+    public void updateVipDebug(Long id, AdminUserVipDebugInDto body) {
+        if (id == null) {
+            throw new BadRequestException("非法用户 ID");
+        }
+        UserDomain u = userService.getById(id);
+        if (u == null || u.isDelFlag()) {
+            throw new BadRequestException("用户不存在");
+        }
+        if (u.getStaffRole() != null && u.getStaffRole() != 0) {
+            throw new BadRequestException("不可修改可登录管理后台账号的 VIP");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>()
+                .eq(UserDomain::getId, id)
+                .set(UserDomain::getIsVip, Boolean.TRUE.equals(body.getIsVip()))
+                .set(UserDomain::getUpdatedAt, now)
+                .set(UserDomain::getUpdatedBy, auditUserId());
+        if (Boolean.TRUE.equals(body.getClearVipExpireAt())) {
+            uw.set(UserDomain::getVipExpireAt, null);
+        } else if (body.getVipExpireAt() != null) {
+            uw.set(UserDomain::getVipExpireAt, body.getVipExpireAt());
+        }
+        userService.update(uw);
     }
 
     @Override

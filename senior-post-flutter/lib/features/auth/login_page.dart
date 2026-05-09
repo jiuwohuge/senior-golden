@@ -1,10 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/env/app_env.dart';
 import '../../widgets/postal/postal.dart';
 import '../shell/main_shell.dart';
 import 'auth_repository.dart';
@@ -18,11 +18,22 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final _email = TextEditingController(text: 'edith@example.com');
-  final _password = TextEditingController(text: '12345678');
+  late final TextEditingController _email;
+  late final TextEditingController _password;
   final _formKey = GlobalKey<FormState>();
   bool _agreed = false;
   bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _email = TextEditingController(
+      text: kDebugMode ? 'edith@example.com' : '',
+    );
+    _password = TextEditingController(
+      text: kDebugMode ? '12345678' : '',
+    );
+  }
 
   @override
   void dispose() {
@@ -73,16 +84,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: AppEnv.useMock
-                          ? PostalStampBadge(
-                              isVip: true,
-                              compact: true,
-                              onTap: () {},
-                            )
-                          : const SizedBox.shrink(),
-                    ),
                     const SizedBox(height: 8),
                     PostalBrandHeader(
                       title: l10n.appTitle,
@@ -93,9 +94,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     PostalCardEnvelope(
                       header: PostalSectionTitle(
                         title: l10n.authLoginTitle,
-                        subtitle: AppEnv.useMock
-                            ? l10n.authMockTip
-                            : l10n.authWelcomeBack,
+                        subtitle: l10n.authWelcomeBack,
                       ),
                       child: Form(
                         key: _formKey,

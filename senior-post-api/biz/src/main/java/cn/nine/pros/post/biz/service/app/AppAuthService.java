@@ -34,6 +34,7 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -44,6 +45,8 @@ public class AppAuthService {
      * M1 默认最低年龄；后续改为读取 sys_config。
      */
     private static final int MIN_AGE = 45;
+
+    private static final int ACCOUNT_DELETION_COOLDOWN_DAYS = 7;
 
     private final UserService userService;
     private final UserDeviceService userDeviceService;
@@ -114,13 +117,22 @@ public class AppAuthService {
         if (!passwordEncoder.matches(body.getPassword(), dto.getPasswordHash())) {
             throw new BadRequestException("邮箱或密码错误");
         }
+        finalizeAccountDeletionIfCooldownElapsed(dto.getId());
+        dto = userService.findById(dto.getId());
+        if (dto == null) {
+            throw new BadRequestException("邮箱或密码错误");
+        }
         if (dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
             throw new BadRequestException("账号不可用");
         }
 
+        LocalDateTime now = LocalDateTime.now();
         userService.update(new LambdaUpdateWrapper<UserDomain>()
                 .eq(UserDomain::getId, dto.getId())
-                .set(UserDomain::getLastLoginAt, LocalDateTime.now()));
+                .set(UserDomain::getLastLoginAt, now)
+                .set(UserDomain::getDeletionRequestedAt, null)
+                .set(UserDomain::getUpdatedAt, now)
+                .set(UserDomain::getUpdatedBy, dto.getId()));
 
         touchDevice(dto.getId(), body.getDeviceUuid(), body.getDeviceType());
 
@@ -146,11 +158,37 @@ public class AppAuthService {
         if (uid == null) {
             return null;
         }
+        finalizeAccountDeletionIfCooldownElapsed(uid);
         UserDTO dto = userService.findById(uid);
         if (dto == null) {
             return null;
         }
+        if (dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
+            throw new BadRequestException("账号已注销或不可用");
+        }
         return toPublic(dto, dto.getId());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void requestAccountDeletion() {
+        Long uid = MyRequestContextHolder.userId();
+        if (uid == null) {
+            throw new BadRequestException("未登录或登录已失效");
+        }
+        UserDTO dto = userService.findById(uid);
+        if (dto == null) {
+            throw new BadRequestException("用户不存在");
+        }
+        if (dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
+            throw new BadRequestException("当前账号状态不可申请注销");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        userService.update(new LambdaUpdateWrapper<UserDomain>()
+                .eq(UserDomain::getId, uid)
+                .eq(UserDomain::isDelFlag, false)
+                .set(UserDomain::getDeletionRequestedAt, now)
+                .set(UserDomain::getUpdatedAt, now)
+                .set(UserDomain::getUpdatedBy, uid));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -231,6 +269,31 @@ public class AppAuthService {
         return null;
     }
 
+    /**
+     * 冷静期满且用户未在期内登录撤销：将账号置为注销并清空申请时间。
+     */
+    private void finalizeAccountDeletionIfCooldownElapsed(Long userId) {
+        UserDomain u = userService.getById(userId);
+        if (u == null || Boolean.TRUE.equals(u.isDelFlag())) {
+            return;
+        }
+        LocalDateTime req = u.getDeletionRequestedAt();
+        if (req == null) {
+            return;
+        }
+        if (LocalDateTime.now().isBefore(req.plusDays(ACCOUNT_DELETION_COOLDOWN_DAYS))) {
+            return;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        userService.update(new LambdaUpdateWrapper<UserDomain>()
+                .eq(UserDomain::getId, userId)
+                .eq(UserDomain::isDelFlag, false)
+                .set(UserDomain::getStatus, 3)
+                .set(UserDomain::getDeletionRequestedAt, null)
+                .set(UserDomain::getUpdatedAt, now)
+                .set(UserDomain::getUpdatedBy, userId));
+    }
+
     private void touchDevice(long userId, String deviceUuid, String deviceType) {
         String uuid = deviceUuid.trim();
         UserDeviceDomain existing = userDeviceService.getOne(
@@ -276,6 +339,11 @@ public class AppAuthService {
                 .stampsBalance(dto.getStampsBalance())
                 .isVip(dto.getIsVip())
                 .build();
+        LocalDateTime reqAt = dto.getDeletionRequestedAt();
+        if (reqAt != null) {
+            vo.setDeletionRequestedAt(reqAt);
+            vo.setDeletionEffectiveAt(reqAt.plusDays(ACCOUNT_DELETION_COOLDOWN_DAYS));
+        }
         UserInterestAssembler.Payload interests = userInterestAssembler.loadForUser(dto.getId());
         vo.setInterestTagIds(interests.ids());
         vo.setInterestTagNames(interests.names());

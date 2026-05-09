@@ -259,7 +259,7 @@ flowchart LR
 
 ## [功能清单]
 
-> 与代码对齐日期：**2026-05-09**。细粒度以 `doc/plan/01-feature-list.md` 为准。
+> 与代码对齐日期：**2026-05-09**（**A7**：`bootstrap` **`vipProduct`** 与 **FP-A7-001** 对齐）。细粒度以 `doc/plan/01-feature-list.md` 为准。
 
 - [x] A1. 账号注册登录（邮箱、年龄、协议、JWT/`85xx`；**忘记密码/重置已接**；**AES、登录频控/弱密码策略仍待**）
 - [x] A2. 用户资料中心（**`me` + PATCH + 兴趣标签 + 头像 OSS 写回已接**；冷启动仅 Token 时提前拉 `me` 仍可优化）
@@ -267,10 +267,10 @@ flowchart LR
 - [x] A4. Post Directory（**分页/筛选/排序/用户卡 API/写信已接**）
 - [x] A5. Post Box（**发信/收/归档/详情/Accept/好友列表/加速/平邮到期 Worker 已接**；**回信产品化、平邮延迟完全配置化仍待**）
 - [x] A5-IM. 邮政信箱 × 腾讯 IM 双轨：**后端** `V4`（`bu_friendship` + `send_mode`）、`GET/POST /api/mailbox/*`、`GET /api/im/usersig`（`tls-sig-api-v2` + `senior-post.tencent-im`）；**Flutter** Tab 分段、归档、`tim_facade`、`chat_page`、`tencent_cloud_chat_sdk:8.8.7373`、Mock 建联与单元测试 `test/mailbox_models_test.dart`（2026-05-02）
-- [x] A6. Chat Stamp（**余额/流水/CAS/登录·发帖赠票与加速扣减已接**；**Manage 用户流水查询页仍待**）
-- [ ] A7. VIP 权益（App 可读权益模型与订阅/扣费全链仍待）
-- [x] A8. 风控与合规（**敏感词、举报链路已接**；仍待：**GDPR 注销**、**图片机审**、**Manage 设备拉黑 UI**、`user_device` 一致性核对）
-- [x] A9. 管理后台（**看板/用户/审核/举报/配置/国家/敏感词/版本/公告/日志已接**；**邮票流水页、设备封禁按钮、UAT 清单仍待**）
+- [x] A6. Chat Stamp（**余额/流水/CAS/登录·发帖赠票与加速扣减已接**；**Manage 邮票流水页已接**）
+- [x] A7. VIP 权益（**`GET /api/bootstrap/init` 已返回 `vipProduct`（`AppVipProductConfigVO`，读 `sys_config` 与 Manage「VIP 配置」同源键）**；**Flutter `vip_center_page` 非 Mock 读 `appBootstrapProvider` 展示开关与文案**；**订阅/支付、到期校验全链、扣费规则与配置单一真源文档化仍待**，见 `01` **FP-A7-002 / FP-A7-003**）
+- [x] A8. 风控与合规（**敏感词、举报链路、Manage 设备拉黑已接**；仍待：**GDPR 注销**、**图片机审**、`user_device` 一致性核对）
+- [x] A9. 管理后台（**看板/用户/审核/举报/配置/国家/敏感词/版本/公告/日志、邮票流水、用户设备列表与封禁已接**；**UAT 清单仍待**）
 - [x] A10. 国际化（**ARB + 设置页运行时语言切换已接**；主流程文案扫尾与邮件模板双语仍待）
 
 ---
@@ -282,6 +282,7 @@ flowchart LR
 - **已完成（2026-05-01）**：接入 **Flyway**（`server` 依赖 + `db/migration` 基线脚本）；**`/webapi`** 与 **`AppServiceDefine.WEBAPI_PREFIX`**；`application.yml` 拦截器/加解密忽略列表；**PLAN / 底层框架能力 / backend skill** 与本次决策对齐。
 - **后续**：按「库表规划」追加 `V3__...sql` 与 M2 业务代码；**`get_sign`**、邮件 SPI、腾讯 UserSig 等按模块逐项实现。
 - **本次新增（2026-05-01）**：新增 App 启动配置接口 **`GET /api/bootstrap/init`**（返回注册最小年龄 + 国家列表），Flutter Profile Tab 已改为真实数据页，联调 **`/api/auth/me` + `/api/bootstrap/init`** 并支持退出登录。
+- **FP-A7-001（2026-05-09）**：**`AppBootstrapVO.vipProduct`**；`AppBootstrapService` 批量读 vip 键组装 **`AppVipProductConfigVO`**；Flutter **`AppBootstrapData.vipProduct`** + **`vip_center_page`**（`productEnabled=false` 时提示关闭）；与 **Manage `VipConfig`** 同一 `sys_config` 键。
 - **管理后台迭代（2026-05-01）**：配置分页入参 **`ConfigQueryInDto`**（`page` + 可选 `configGroup`）；新增 **`/webapi/country/*`** 国家/地区维护；`application.yml` 放行 **`/webapi/auth/login`**（与 `jh.config.auth` 开启时一致）；前端补齐 **VIP 配置页**、**国家/地区页**、看板 Loading、侧栏选中态与当前管理员展示。
 - **管理端认证（2026-05-01，修订）**：管理端与 App 共用 **`bu_user`**；JWT 均为 **`AppJwtService.createToken(bu_user.id)`**（`sub` 即用户主键）。管理端登录仅允许 **`staff_role != 0`** 的账号；`getCurrentAdmin` 返回 **`UserDTO`**（清 **`passwordHash`**）。审计 **`updated_by`**、举报 **`handler_user_id`** 等直接使用 **`MyRequestContextHolder.userId()`**（或 `"0"`）字符串化，不再使用 `AdminTokenSupport`。
 - **本次新增（2026-05-01，App 同步）**：`application.yml` 将 **`/api/bootstrap/init`** 纳入 **`exclude-interceptor-pattern`**，未登录注册页可拉取配置；Flutter 抽取 **`appBootstrapProvider`**（`AppBootstrapData` / `CountryItem` 含 `nameZh`），**注册页**用服务端 **`minRegisterAge`** 生成出生年范围（上限 110 岁）、国家下拉与后端列表一致；**个人中心**复用同一 Provider，并 **`watch(authTokenProvider)`** 在登录后刷新资料。
@@ -291,7 +292,7 @@ flowchart LR
   - **后端**：Flyway **`V4__mailbox_im_friendship.sql`**（`bu_friendship`、`bu_letter.send_mode`）；`LetterDTO`/`LetterDomain` 补 `sendMode`；`AppMailboxApi`（`/api/mailbox/postal`、`/sync`、`/archive`、`/letters/{id}/accept-postal`）、`AppImApi`（`/api/im/usersig`）；`AppImService`（`com.github.tencentyun:tls-sig-api-v2:2.0`）；`TencentImFriendshipNotifier` 占位；`application.yml` 增加 **`senior-post.tencent-im`** 与 **`/api/mailbox/**`、`/api/im/**`** 加解密白名单。
   - **Flutter**：`pubspec` 引入 **`tencent_cloud_chat_sdk:8.8.7373`**；`mailbox_page` **Postal / Connections（好友列表；后续对齐 `/mailbox/friends`）**、`mailbox_archive_page`、`chat_page`（邮政主题气泡 + C2C 历史）、`tim_facade`、`mailbox_providers`；Mock 扩展 **`LetterStatus.registered` / `LetterSendMode` / 建联集合**；路由 **`/mailbox/archive`、`/chat/:userId`**。
   - **验证**：`mvn compile -DskipTests`（`senior-post-api`）；`flutter analyze`；`flutter test test/mailbox_models_test.dart`。
-- **本次新增（2026-05-02，资料写回 FP-A2-001）**：后端 **`PATCH /api/auth/profile`**（`AppAuthProfilePatchInDto`，昵称/国家/简介部分更新）；Flutter **`AuthRepository.refreshSessionFromServer`**（`GET /api/auth/me`）、**登录/注册响应 `user` 写入 `mockSessionProvider`**、**`ProfileEditPage` / `ProfilePage` 非 Mock 联调**；兴趣标签与头像 URL 写回仍待后续项。
+- **本次新增（2026-05-02，资料写回 FP-A2-001）**：后端 **`PATCH /api/auth/profile`**（`AppAuthProfilePatchInDto`，昵称/国家/简介部分更新）；Flutter **`AuthRepository.refreshSessionFromServer`**（`GET /api/auth/me`）、**登录/注册响应 `user` 写入 `appSessionProvider`**、**`ProfileEditPage` / `ProfilePage` 联调**；兴趣标签与头像 URL 写回仍待后续项。
 - **本次新增（2026-05-02，文档对齐 + 邮票流水 Flutter）**：`doc/plan/01-feature-list.md` 与 **`PLAN.md` [功能清单]** 回写 **A3/A4/A5/A6** 与仓库一致（明信片墙、名录、Accept、OSS 发帖图、**`stamps_remote` + 个人中心流水页** 非 Mock 走 **`POST /api/stamps/ledger/paging`**）。
 - **本次新增（2026-05-06，FP-A5-005）**：**`POST /api/mailbox/letters/{letterId}/speed-up`**（发件人、平邮运输中、VIP 免扣票、非 VIP CAS 扣 1 + 流水）；Flutter **`mailbox_remote.speedUp`**、**`speed_up_sheet`** / **`letter_detail_page`** 真联调。
 - **规划文档（2026-05-07）**：新增 **`doc/plan/07-gap-analysis-and-roadmap.md`** — 遗漏功能系统化清单（描述、预期行为、优先级、与现有模块关联）与四阶段开发路线图（顺序、技术方案、资源粗估）；执行时与 **`doc/plan/05-task-tracker.md`** 联动勾选 FP。
@@ -424,3 +425,4 @@ flowchart LR
 - [x] S9. M2 帖子/目录/写信主链路 REST 已落地（2026-05-09）；**E2E 自动化 / UAT 清单（FP-A9-004）仍待**
 - [x] S11. 邮政信箱 × 腾讯 IM 双轨契约与 Flutter 分段 UI + TIM 登录链路（2026-05-02；**腾讯 REST 好友同步已接** FP-A5d-004，生产依赖 `TENCENT_IM_REST_IDENTIFIER` 等配置）
 - [x] S10. 管理后台：`senior-post-manage` 修复配置页 UTF-8 乱码源码、侧边栏二级分组菜单；`UserServiceImpl.delByIds` 禁止删除 `staff_role != 0` 的可登录后台账号（2026-05-01）
+- [x] S12. Flutter **客户端 Mock 层已移除**（2026-05-09）：删除 `lib/core/mock`、`AppEnv.useMock`；名录 Provider 拆文件解循环依赖；缺口与验证见 **`doc/plan/08-mock-removal-gaps.md`**

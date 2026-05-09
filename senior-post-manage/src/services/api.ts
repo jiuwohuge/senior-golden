@@ -7,6 +7,8 @@ export const api = {
 
   users: (params: any) => request.post('/webapi/user/paging', params),
   userStatus: (id: number, status: number) => request.post(`/webapi/user/${id}/status?status=${status}`),
+  userVipDebug: (id: number, body: { isVip: boolean; vipExpireAt?: string | null; clearVipExpireAt?: boolean }) =>
+    request.post(`/webapi/user/${id}/vip-debug`, body),
   userDevices: (userId: number) => request.get(`/webapi/user/${userId}/devices`),
   blockDevice: (body: { deviceUuid: string; reason?: string }) => request.post('/webapi/user/device/block', body),
 

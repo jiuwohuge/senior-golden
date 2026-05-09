@@ -1,7 +1,7 @@
 # 04 — 开发计划（技术方案摘要 + 人日 + 风险）
 
 > **文档元信息**  
-> **版本**：1.1 · **更新**：2026-05-09 · **维护人**：AI + Owner
+> **版本**：1.2 · **更新**：2026-05-09 · **维护人**：AI + Owner
 
 **人日（D）**：单人全职粗估，含自测与文档；并行可压缩日历时间。  
 **资源**：默认 `AI + Owner`；若拆角色，后端/Flutter/Manage 列在「协作」列。
@@ -47,7 +47,7 @@
 | FP-A5-005 | `POST .../letters/{id}/speed-up` | Speed Up Sheet | 1 | 与 VIP 分支 |
 | FP-A5d-004 | `TencentImFriendshipNotifier` 调官方 REST；重试与降级 | — | 2 | 密钥与限频 |
 | FP-A6-002/003 | 流水分页；登录/发帖 Hook 赠邮票 | `stamps_ledger` | 2 | 日上限边界 |
-| FP-A7-* | 读 `vip` 配置 + 用户 VIP 表组装 VO | `vip_center` | 2 | 配置缓存一致性 |
+| FP-A7-* | 读 `vip` 配置 + 用户 VIP 表组装 VO；**权益展示已并入 `bootstrap/init` → `vipProduct`** | `vip_center` | 2 | 配置缓存一致性；**A7-002/003** 仍待 |
 | FP-A4-002~004 | Query 扩展 | Filter sheet | 1.5 | — |
 | FP-A3-005 | `POST /api/report` | 举报入口 | 1 | 防刷 |
 

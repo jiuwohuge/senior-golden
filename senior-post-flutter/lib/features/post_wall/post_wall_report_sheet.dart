@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'post_wall_remote.dart';
 
-/// 举报明信片或评论（Mock / 真实接口统一入口）。
+/// 举报明信片或评论。
 class PostWallReportSheet extends ConsumerStatefulWidget {
   const PostWallReportSheet({
     super.key,
@@ -17,7 +15,7 @@ class PostWallReportSheet extends ConsumerStatefulWidget {
 
   /// `postcard` 或 `comment`
   final String targetType;
-  /// 业务侧主键字符串；非 Mock 时为数字 ID 字符串以便 `int.parse`。
+  /// 数字 ID 字符串，解析为 `int` 提交后端。
   final String objectId;
 
   @override
@@ -42,24 +40,15 @@ class _PostWallReportSheetState extends ConsumerState<PostWallReportSheet> {
     }
     setState(() => _busy = true);
     try {
-      if (AppEnv.useMock) {
-        final repo = ref.read(mockPostsRepositoryProvider);
-        if (widget.targetType == 'comment') {
-          await repo.reportComment(widget.objectId, text);
-        } else {
-          await repo.reportPost(widget.objectId, text);
-        }
-      } else {
-        final id = int.tryParse(widget.objectId);
-        if (id == null) {
-          throw ApiBusinessException(0, '无效的内容 ID');
-        }
-        await ref.read(postWallRemoteProvider).submitReport(
-              targetType: widget.targetType,
-              targetId: id,
-              reason: text,
-            );
+      final id = int.tryParse(widget.objectId);
+      if (id == null) {
+        throw ApiBusinessException(0, '无效的内容 ID');
       }
+      await ref.read(postWallRemoteProvider).submitReport(
+            targetType: widget.targetType,
+            targetId: id,
+            reason: text,
+          );
       if (!mounted) return;
       PostalSnack.show(context, '举报已提交', tone: PostalSnackTone.success);
       Navigator.of(context).pop();

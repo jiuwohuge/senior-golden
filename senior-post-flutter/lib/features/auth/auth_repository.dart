@@ -5,11 +5,8 @@ import '../../core/api/api_exception.dart';
 import '../../core/auth/auth_storage.dart';
 import '../../core/auth/auth_token.dart';
 import '../../core/device/device_ids.dart';
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_data.dart';
-import '../../core/mock/mock_delay.dart';
-import '../../core/mock/mock_repository.dart';
 import '../../core/network/dio_provider.dart';
+import '../../core/session/app_session.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(ref);
@@ -21,10 +18,31 @@ class AuthRepository {
   final Ref _ref;
 
   Future<void> login({required String email, required String password}) async {
-    if (AppEnv.useMock) {
-      return _mockLogin(email: email, password: password);
+    final dio = _ref.read(dioProvider);
+    final deviceUuid = _ref.read(deviceInstallIdStateProvider);
+    try {
+      final res = await dio.post<Map<String, dynamic>>(
+        '/api/auth/login',
+        data: <String, dynamic>{
+          'email': email.trim(),
+          'password': password,
+          'deviceUuid': deviceUuid,
+          'deviceType': _deviceTypeBody(),
+        },
+      );
+      final data = unwrapData<Map<String, dynamic>>(res, (raw) {
+        return raw! as Map<String, dynamic>;
+      });
+      final token = data['token']! as String;
+      await AuthStorage.writeToken(token);
+      _ref.read(authTokenProvider.notifier).state = token;
+      final userMap = data['user'] as Map<String, dynamic>?;
+      if (userMap != null) {
+        _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
+      }
+    } on DioException catch (e) {
+      _throwMappedDio(e);
     }
-    return _realLogin(email: email, password: password);
   }
 
   Future<void> register({
@@ -35,40 +53,44 @@ class AuthRepository {
     String? countryCode,
     required bool agreedTerms,
     List<int> interestTagIds = const [],
-    List<String>? mockInterestKeys,
   }) async {
-    if (AppEnv.useMock) {
-      return _mockRegister(
-        email: email,
-        password: password,
-        nickname: nickname,
-        birthYear: birthYear,
-        countryCode: countryCode,
-        interests: mockInterestKeys ?? const [],
-      );
-    }
     if (interestTagIds.length < 3) {
       throw ApiBusinessException(400, 'Please select at least 3 interests.');
     }
-    return _realRegister(
-      email: email,
-      password: password,
-      nickname: nickname,
-      birthYear: birthYear,
-      countryCode: countryCode,
-      agreedTerms: agreedTerms,
-      interestTagIds: interestTagIds,
-    );
+    final dio = _ref.read(dioProvider);
+    final deviceUuid = _ref.read(deviceInstallIdStateProvider);
+    try {
+      final res = await dio.post<Map<String, dynamic>>(
+        '/api/auth/register',
+        data: <String, dynamic>{
+          'email': email.trim(),
+          'password': password,
+          'nickname': nickname.trim(),
+          'birthYear': birthYear,
+          if (countryCode != null && countryCode.isNotEmpty)
+            'countryCode': countryCode.trim(),
+          'agreedTerms': agreedTerms,
+          'interestTagIds': interestTagIds,
+          'deviceUuid': deviceUuid,
+          'deviceType': _deviceTypeBody(),
+        },
+      );
+      final data = unwrapData<Map<String, dynamic>>(res, (raw) {
+        return raw! as Map<String, dynamic>;
+      });
+      final token = data['token']! as String;
+      await AuthStorage.writeToken(token);
+      _ref.read(authTokenProvider.notifier).state = token;
+      final userMap = data['user'] as Map<String, dynamic>?;
+      if (userMap != null) {
+        _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
+      }
+    } on DioException catch (e) {
+      _throwMappedDio(e);
+    }
   }
 
   Future<void> forgotPassword({required String email}) async {
-    if (AppEnv.useMock) {
-      await MockDelay.network();
-      if (!_isLikelyEmail(email)) {
-        throw ApiBusinessException(4002, 'Please enter a valid email address.');
-      }
-      return;
-    }
     final dio = _ref.read(dioProvider);
     try {
       await dio.post<Map<String, dynamic>>(
@@ -85,13 +107,6 @@ class AuthRepository {
     required String code,
     required String newPassword,
   }) async {
-    if (AppEnv.useMock) {
-      await MockDelay.network();
-      if (!RegExp(r'^\d{6}$').hasMatch(code.trim())) {
-        throw ApiBusinessException(4003, 'Verification code is incorrect.');
-      }
-      return;
-    }
     final dio = _ref.read(dioProvider);
     try {
       await dio.post<Map<String, dynamic>>(
@@ -110,18 +125,28 @@ class AuthRepository {
   Future<void> logout() async {
     await AuthStorage.clearToken();
     _ref.read(authTokenProvider.notifier).state = null;
+    _ref.read(appSessionProvider.notifier).clear();
   }
 
-  /// 拉取 `/api/auth/me` 并写入 [mockSessionProvider]（非 Mock 下个人中心等展示用）。
+  /// 拉取 `/api/auth/me` 并写入 [appSessionProvider]。
   Future<void> refreshSessionFromServer() async {
-    if (AppEnv.useMock) return;
     final dio = _ref.read(dioProvider);
     try {
       final res = await dio.get<Map<String, dynamic>>('/api/auth/me');
       final data = unwrapData<Map<String, dynamic>>(res, (raw) {
         return raw! as Map<String, dynamic>;
       });
-      _ref.read(mockSessionProvider.notifier).applyFromPublicUserVo(data);
+      _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(data);
+    } on DioException catch (e) {
+      _throwMappedDio(e);
+    }
+  }
+
+  /// 提交账号注销申请（7 日冷静期；期间再次登录将撤销）。
+  Future<void> requestAccountDeletion() async {
+    final dio = _ref.read(dioProvider);
+    try {
+      await dio.post<Map<String, dynamic>>('/api/auth/account/deletion-request');
     } on DioException catch (e) {
       _throwMappedDio(e);
     }
@@ -135,7 +160,6 @@ class AuthRepository {
     String? avatarUrl,
     List<int>? interestTagIds,
   }) async {
-    if (AppEnv.useMock) return;
     final dio = _ref.read(dioProvider);
     try {
       final body = <String, dynamic>{};
@@ -164,148 +188,7 @@ class AuthRepository {
       final data = unwrapData<Map<String, dynamic>>(res, (raw) {
         return raw! as Map<String, dynamic>;
       });
-      _ref.read(mockSessionProvider.notifier).applyFromPublicUserVo(data);
-    } on DioException catch (e) {
-      _throwMappedDio(e);
-    }
-  }
-
-  // ──────────────────────────────────────────────
-  // Mock 分支
-  // ──────────────────────────────────────────────
-
-  Future<void> _mockLogin({
-    required String email,
-    required String password,
-  }) async {
-    await MockDelay.network();
-    if (!_isLikelyEmail(email)) {
-      throw ApiBusinessException(4002, 'Please enter a valid email address.');
-    }
-    if (password.trim().length < 8) {
-      throw ApiBusinessException(4004, 'Password must be at least 8 characters.');
-    }
-    const mockToken = 'mock.jwt.token.senior-post';
-    await AuthStorage.writeToken(mockToken);
-    _ref.read(authTokenProvider.notifier).state = mockToken;
-  }
-
-  Future<void> _mockRegister({
-    required String email,
-    required String password,
-    required String nickname,
-    required int birthYear,
-    String? countryCode,
-    required List<String> interests,
-  }) async {
-    await MockDelay.network();
-    if (!_isLikelyEmail(email)) {
-      throw ApiBusinessException(4002, 'Please enter a valid email address.');
-    }
-    if (password.trim().length < 8) {
-      throw ApiBusinessException(4004, 'Password must be at least 8 characters.');
-    }
-    final cc = countryCode?.trim() ?? '';
-    var countryName = cc;
-    for (final c in MockData.countries) {
-      if (c.code == cc) {
-        countryName = c.nameEn;
-        break;
-      }
-    }
-    const mockToken = 'mock.jwt.token.senior-post';
-    await AuthStorage.writeToken(mockToken);
-    _ref.read(authTokenProvider.notifier).state = mockToken;
-    _ref.read(mockSessionProvider.notifier).seedNewMockAccount(
-          email: email.trim(),
-          nickname: nickname.trim(),
-          birthYear: birthYear,
-          countryCode: cc,
-          countryName: countryName,
-          interests: interests,
-        );
-  }
-
-  bool _isLikelyEmail(String value) {
-    final v = value.trim();
-    if (v.length < 5) return false;
-    final at = v.indexOf('@');
-    if (at <= 0 || at == v.length - 1) return false;
-    return v.contains('.');
-  }
-
-  // ──────────────────────────────────────────────
-  // 真实接口（保留供后端联调阶段切回）
-  // ──────────────────────────────────────────────
-
-  Future<void> _realLogin({
-    required String email,
-    required String password,
-  }) async {
-    final dio = _ref.read(dioProvider);
-    final deviceUuid = _ref.read(deviceInstallIdStateProvider);
-    try {
-      final res = await dio.post<Map<String, dynamic>>(
-        '/api/auth/login',
-        data: <String, dynamic>{
-          'email': email.trim(),
-          'password': password,
-          'deviceUuid': deviceUuid,
-          'deviceType': _deviceTypeBody(),
-        },
-      );
-      final data = unwrapData<Map<String, dynamic>>(res, (raw) {
-        return raw! as Map<String, dynamic>;
-      });
-      final token = data['token']! as String;
-      await AuthStorage.writeToken(token);
-      _ref.read(authTokenProvider.notifier).state = token;
-      final userMap = data['user'] as Map<String, dynamic>?;
-      if (userMap != null) {
-        _ref.read(mockSessionProvider.notifier).applyFromPublicUserVo(userMap);
-      }
-    } on DioException catch (e) {
-      _throwMappedDio(e);
-    }
-  }
-
-  Future<void> _realRegister({
-    required String email,
-    required String password,
-    required String nickname,
-    required int birthYear,
-    String? countryCode,
-    required bool agreedTerms,
-    required List<int> interestTagIds,
-  }) async {
-    final dio = _ref.read(dioProvider);
-    final deviceUuid = _ref.read(deviceInstallIdStateProvider);
-    try {
-      final res = await dio.post<Map<String, dynamic>>(
-        '/api/auth/register',
-        data: <String, dynamic>{
-          'email': email.trim(),
-          'password': password,
-          'nickname': nickname.trim(),
-          'birthYear': birthYear,
-          if (countryCode != null && countryCode.isNotEmpty)
-            'countryCode': countryCode.trim(),
-          'agreedTerms': agreedTerms,
-          'interestTagIds': interestTagIds,
-          'deviceUuid': deviceUuid,
-          'deviceType': _deviceTypeBody(),
-        },
-      );
-      final data = unwrapData<Map<String, dynamic>>(res, (raw) {
-        return raw! as Map<String, dynamic>;
-      });
-      final token = data['token']! as String;
-      await AuthStorage.writeToken(token);
-      _ref.read(authTokenProvider.notifier).state = token;
-      final userMap = data['user'] as Map<String, dynamic>?;
-      if (userMap != null) {
-        _ref.read(mockSessionProvider.notifier).applyFromPublicUserVo(userMap);
-      }
+      _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(data);
     } on DioException catch (e) {
       _throwMappedDio(e);
     }

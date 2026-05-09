@@ -7,11 +7,10 @@ import 'package:tencent_cloud_chat_sdk/models/v2_tim_message.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
-import '../../core/env/app_env.dart';
 import '../../widgets/postal/postal.dart';
 import 'tim_facade.dart';
 
-/// C2C 聊天（自研气泡 + 邮政主题）；Mock 下为本地演示收发。
+/// C2C 聊天（自研气泡 + 邮政主题），消息走腾讯 IM SDK。
 class ChatPage extends ConsumerStatefulWidget {
   const ChatPage({super.key, required this.peerUserId, this.displayName});
   final String peerUserId;
@@ -25,7 +24,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   final _scroll = ScrollController();
   final _input = TextEditingController();
   bool _busy = false;
-  final List<_Bubble> _mockBubbles = [];
 
   @override
   void dispose() {
@@ -34,36 +32,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    if (AppEnv.useMock) {
-      _mockBubbles.add(
-        _Bubble(
-          text:
-              'You opened a postal connection. Instant messages stay here; letter history stays in Archive.',
-          incoming: true,
-          isSystem: true,
-        ),
-      );
-    }
-  }
-
   Future<void> _send() async {
     final text = _input.text.trim();
     if (text.isEmpty) return;
     setState(() => _busy = true);
     try {
-      if (AppEnv.useMock) {
-        setState(() {
-          _mockBubbles.add(
-            _Bubble(text: text, incoming: false, isSystem: false),
-          );
-          _input.clear();
-        });
-        _scrollToEnd();
-        return;
-      }
       final tim = V2TIMManager();
       final created = await tim.v2TIMMessageManager.createTextMessage(
         text: text,
@@ -94,18 +67,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
   }
 
-  void _scrollToEnd() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scroll.hasClients) {
-        _scroll.animateTo(
-          _scroll.position.maxScrollExtent + 80,
-          duration: const Duration(milliseconds: 280),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final title = widget.displayName ?? widget.peerUserId;
@@ -113,30 +74,22 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       appBar: AppBar(title: Text(title)),
       body: Column(
         children: [
-          if (!AppEnv.useMock)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: PostalTokens.paperCream,
-              child: Text(
-                'Postal thread: letter history stays in Archive.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PostalTokens.inkSecondary,
-                ),
-              ),
-            ),
-          Expanded(
-            child: AppEnv.useMock
-                ? ListView.builder(
-                    controller: _scroll,
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                    itemCount: _mockBubbles.length,
-                    itemBuilder: (_, i) => _BubbleTile(bubble: _mockBubbles[i]),
-                  )
-                : _CloudChatBody(
-                    peerUserId: widget.peerUserId,
-                    scrollController: _scroll,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            color: PostalTokens.paperCream,
+            child: Text(
+              'Postal thread: letter history stays in Archive.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PostalTokens.inkSecondary,
                   ),
+            ),
+          ),
+          Expanded(
+            child: _CloudChatBody(
+              peerUserId: widget.peerUserId,
+              scrollController: _scroll,
+            ),
           ),
           SafeArea(
             top: false,
@@ -247,7 +200,6 @@ class _BubbleTile extends StatelessWidget {
   }
 }
 
-/// 云端历史一屏（简化：仅拉取最近若干条文本）。
 class _CloudChatBody extends ConsumerStatefulWidget {
   const _CloudChatBody({
     required this.peerUserId,
@@ -263,6 +215,8 @@ class _CloudChatBody extends ConsumerStatefulWidget {
 class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
   List<V2TimMessage> _items = const [];
   String _selfId = '';
+  bool _loading = true;
+  String? _loadError;
 
   @override
   void initState() {
@@ -271,6 +225,11 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
   }
 
   Future<void> _load() async {
+    if (!mounted) return;
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
     try {
       await ref.read(seniorPostTimFacadeProvider).ensureLoggedIn();
       final tim = V2TIMManager();
@@ -281,17 +240,53 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
         lastMsg: null,
       );
       if (!mounted) return;
-      if (r.code == 0 && r.data != null) {
+      if (r.code != 0) {
         setState(() {
-          _selfId = me.data ?? '';
-          _items = List<V2TimMessage>.from(r.data!);
+          _loading = false;
+          _loadError = 'Load history failed: ${r.desc}';
+          _items = const [];
+        });
+        return;
+      }
+      setState(() {
+        _loading = false;
+        _loadError = null;
+        _selfId = me.data ?? '';
+        _items = r.data != null ? List<V2TimMessage>.from(r.data!) : const [];
+      });
+    } on ApiBusinessException catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = e.message;
+          _items = const [];
         });
       }
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = '$e';
+          _items = const [];
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_loadError != null) {
+      return PostalEmptyState(
+        title: 'Chat unavailable',
+        subtitle: _loadError!,
+        tone: PostalEmptyTone.error,
+        actionLabel: 'Retry',
+        onAction: _load,
+      );
+    }
     if (_items.isEmpty) {
       return const Center(child: Text('No messages yet'));
     }

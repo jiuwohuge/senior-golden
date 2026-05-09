@@ -6,8 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_repository.dart';
 import '../../core/oss/oss_upload_service.dart';
 import '../../widgets/postal/postal.dart';
 import '../shell/main_shell.dart';
@@ -72,15 +70,6 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
       );
       return;
     }
-    if (AppEnv.useMock) {
-      if (!mounted) return;
-      PostalSnack.show(
-        context,
-        l10n.postComposeUploadNeedRealApi,
-        tone: PostalSnackTone.info,
-      );
-      return;
-    }
     final XFile? x;
     try {
       final picker = ImagePicker();
@@ -141,22 +130,15 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
     setState(() => _busy = true);
     try {
       final refs = _images.map((e) => e.backendRef).toList();
-      if (AppEnv.useMock) {
-        await ref.read(mockPostsRepositoryProvider).publish(
-              _content.text.trim(),
-              imageUrls: refs.isEmpty ? null : refs,
-            );
-      } else {
-        await ref.read(postWallRemoteProvider).createPost(
-              content: _content.text.trim(),
-              imageUrls: refs.isEmpty ? null : refs,
-            );
-      }
+      await ref.read(postWallRemoteProvider).createPost(
+            content: _content.text.trim(),
+            imageUrls: refs.isEmpty ? null : refs,
+          );
       ref.invalidate(postWallListProvider);
       if (!mounted) return;
       PostalSnack.show(
         context,
-        AppEnv.useMock ? l10n.postComposePublishedMock : l10n.postComposePublishedReal,
+        l10n.postComposePublishedReal,
         tone: PostalSnackTone.success,
       );
       context.go(MainShellRoute.pathPostWall);

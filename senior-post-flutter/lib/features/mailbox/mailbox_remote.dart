@@ -2,50 +2,53 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_models.dart';
-import '../../core/mock/mock_repository.dart';
+import '../../core/models/domain_models.dart';
 import '../../core/network/dio_provider.dart';
 
-/// 与 `/api/mailbox/*`、`/api/stamps/balance` 对齐的远程调用（`USE_MOCK=false` 时使用）。
+/// 与 `/api/mailbox/*`、`/api/stamps/balance` 对齐。
 class MailboxRemoteRepository {
   MailboxRemoteRepository(this._dio);
 
   final Dio _dio;
 
-  Future<List<MockLetter>> listPostalInbox() async {
+  Future<List<MailboxLetter>> listPostalInbox() async {
     final r = await _dio.get<dynamic>('/api/mailbox/postal');
     final rows = _unwrapListData(r);
-    return rows.map(_voToMockLetter).toList();
+    return rows.map(_voToMailboxLetter).toList();
   }
 
-  Future<List<MockLetter>> listArchive() async {
+  Future<List<MailboxLetter>> listArchive() async {
     final r = await _dio.get<dynamic>('/api/mailbox/archive');
     final rows = _unwrapListData(r);
-    return rows.map(_voToMockLetter).toList();
+    return rows.map(_voToMailboxLetter).toList();
   }
 
-  Future<MockLetter?> getLetter(String letterId) async {
+  Future<MailboxLetter?> getLetter(String letterId) async {
     final r = await _dio.get<dynamic>('/api/mailbox/letters/$letterId');
     final map = _unwrapMapData(r);
-    return _voToMockLetter(map);
+    return _voToMailboxLetter(map);
   }
 
-  Future<MockLetter> sendLetter({
+  Future<MailboxLetter> sendLetter({
     required String toUserId,
     required String content,
     required LetterType type,
+    String? parentLetterId,
   }) async {
+    final body = <String, dynamic>{
+      'toUserId': int.parse(toUserId),
+      'content': content,
+      'letterType': type == LetterType.registered ? 1 : 2,
+    };
+    if (parentLetterId != null && parentLetterId.isNotEmpty) {
+      body['parentLetterId'] = int.parse(parentLetterId);
+    }
     final r = await _dio.post<dynamic>(
       '/api/mailbox/letters/send',
-      data: <String, dynamic>{
-        'toUserId': int.parse(toUserId),
-        'content': content,
-        'letterType': type == LetterType.registered ? 1 : 2,
-      },
+      data: body,
     );
     final map = _unwrapMapData(r);
-    return _voToMockLetter(map);
+    return _voToMailboxLetter(map);
   }
 
   Future<void> acceptPostalContact(String letterId) async {
@@ -54,16 +57,15 @@ class MailboxRemoteRepository {
     );
   }
 
-  Future<MockLetter> speedUp(String letterId) async {
+  Future<MailboxLetter> speedUp(String letterId) async {
     final r = await _dio.post<dynamic>(
       '/api/mailbox/letters/${int.parse(letterId)}/speed-up',
     );
     final map = _unwrapMapData(r);
-    return _voToMockLetter(map);
+    return _voToMailboxLetter(map);
   }
 
-  /// `GET /api/mailbox/friends` — Connections = 好友列表（bu_friendship），非会话列表。
-  Future<List<MockImConnectionRow>> listMailboxFriends() async {
+  Future<List<FriendListRow>> listMailboxFriends() async {
     final r = await _dio.get<dynamic>('/api/mailbox/friends');
     final rows = _unwrapListData(r);
     return rows.map(_voToFriendRow).toList();
@@ -126,10 +128,10 @@ Map<String, dynamic> _unwrapMapData(Response<dynamic> r) {
   return data;
 }
 
-MockUser _peerToMockUser(Map<String, dynamic> p) {
+AppUser _peerToAppUser(Map<String, dynamic> p) {
   final id = (p['id'] as num?)?.toInt() ?? 0;
   final birthYear = (p['birthYear'] as num?)?.toInt() ?? 1970;
-  return MockUser(
+  return AppUser(
     id: '$id',
     nickname: (p['nickname'] as String?) ?? 'User',
     email: (p['email'] as String?) ?? '',
@@ -143,12 +145,12 @@ MockUser _peerToMockUser(Map<String, dynamic> p) {
   );
 }
 
-MockImConnectionRow _voToFriendRow(Map<String, dynamic> m) {
+FriendListRow _voToFriendRow(Map<String, dynamic> m) {
   final peerId = (m['peerUserId'] as num?)?.toInt() ?? 0;
   final nick = (m['peerNickname'] as String?) ?? 'User';
   final cc = (m['peerCountryCode'] as String?) ?? '';
   final connected = _parseDate(m['connectedAt']) ?? DateTime.now();
-  final peer = MockUser(
+  final peer = AppUser(
     id: '$peerId',
     nickname: nick,
     email: '',
@@ -161,14 +163,14 @@ MockImConnectionRow _voToFriendRow(Map<String, dynamic> m) {
     isVip: false,
   );
   final sub = cc.isNotEmpty ? cc : 'Postal friend · tap to chat';
-  return MockImConnectionRow(
+  return FriendListRow(
     peer: peer,
     lastMessage: sub,
     lastTime: connected,
   );
 }
 
-MockLetter _voToMockLetter(Map<String, dynamic> m) {
+MailboxLetter _voToMailboxLetter(Map<String, dynamic> m) {
   final peer = m['peer'];
   final peerMap = peer is Map<String, dynamic> ? peer : <String, dynamic>{};
   final letterId = '${m['letterId'] ?? m['id'] ?? ''}';
@@ -180,9 +182,9 @@ MockLetter _voToMockLetter(Map<String, dynamic> m) {
   final fromMe = m['fromMe'] as bool? ?? true;
   final sentAt = _parseDate(m['sentAt']) ?? DateTime.now();
 
-  return MockLetter(
+  return MailboxLetter(
     id: letterId,
-    peer: _peerToMockUser(peerMap),
+    peer: _peerToAppUser(peerMap),
     preview: preview,
     body: content,
     type: letterType == 1 ? LetterType.registered : LetterType.standard,
@@ -221,19 +223,8 @@ final stampRemoteRepositoryProvider = Provider<StampRemoteRepository>(
   (ref) => StampRemoteRepository(ref.read(dioProvider)),
 );
 
-/// 邮政 Tab 顶栏：Mock 用 [mockSessionProvider]；真实接口用 `/api/stamps/balance`。
-final mailboxStampHeaderProvider = Provider<AsyncValue<({int balance, int cap, bool isVip})>>((ref) {
-  if (AppEnv.useMock) {
-    final s = ref.watch(mockSessionProvider);
-    return AsyncValue.data(
-      (balance: s.stampBalance, cap: s.dailyStampCap, isVip: s.isVip),
-    );
-  }
-  return ref.watch(stampBalanceHeaderProvider);
-});
-
-/// 非 Mock 时拉取 `/api/stamps/balance`；发信扣票后可 [invalidate] 本 Provider。
-final stampBalanceHeaderProvider =
+/// 邮政 Tab 顶栏：`/api/stamps/balance`。
+final mailboxStampHeaderProvider =
     FutureProvider<({int balance, int cap, bool isVip})>((ref) async {
   final row = await ref.read(stampRemoteRepositoryProvider).balance();
   return (balance: row.balance, cap: 3, isVip: row.isVip);
@@ -243,8 +234,5 @@ final friendshipActiveProvider = FutureProvider.family<bool, String>((
   ref,
   peerId,
 ) async {
-  if (AppEnv.useMock) {
-    return ref.read(mockMailboxRepositoryProvider).friendsWithPeer(peerId);
-  }
   return ref.read(mailboxRemoteRepositoryProvider).isFriendshipActive(peerId);
 });

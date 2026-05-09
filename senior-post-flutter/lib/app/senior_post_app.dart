@@ -6,6 +6,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../core/auth/auth_token.dart';
 import '../core/i18n/app_locale_provider.dart';
 import '../core/network/router_refresh.dart';
+import '../features/auth/auth_repository.dart';
 import 'router/app_router.dart';
 import 'theme/postal_theme.dart';
 
@@ -51,6 +52,13 @@ class SeniorPostApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<String?>(authTokenProvider, (previous, next) {
       ref.read(routerRefreshProvider).value++;
+      if (next != null && next.isNotEmpty) {
+        Future.microtask(() async {
+          try {
+            await ref.read(authRepositoryProvider).refreshSessionFromServer();
+          } catch (_) {}
+        });
+      }
     });
 
     final router = ref.watch(appRouterProvider);

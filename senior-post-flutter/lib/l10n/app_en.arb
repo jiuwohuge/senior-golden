@@ -55,7 +55,7 @@
   "authBirthYearRangeError": "Birth year list is empty. Check server config for minimum age."
   ,
   "authWelcomeBack": "Welcome back to your global post office.",
-  "authMockTip": "Mock mode is enabled. You can try all flows without backend APIs.",
+  "authMockTip": "Sign in with your registered email to use all features.",
   "authAgreeTpl": "I have read and agree to {terms} and {privacy}.",
   "authTermsTitle": "Terms of Service",
   "authPrivacyTitle": "Privacy Policy",
@@ -149,11 +149,11 @@
       "max": {}
     }
   },
-  "postComposeUploadNeedRealApi": "OSS upload requires Mock off: flutter run --dart-define=USE_MOCK=false …",
+  "postComposeUploadNeedRealApi": "Image upload needs a server-issued URL. Check your network and try again.",
   "postComposePickerChannelError": "Gallery channel not connected. Fully stop the app and run again; if it persists run flutter clean.",
   "postComposeImageUploaded": "Image uploaded",
   "postComposeNeedContent": "Please write something first.",
-  "postComposePublishedMock": "Mock: postcard published (+1 stamp)",
+  "postComposePublishedMock": "Postcard submitted.",
   "postComposePublishedReal": "Submitted for review. It will appear after approval.",
   "postComposeUploading": "Uploading…",
   "postComposeAddImage": "Add image (OSS)",
@@ -191,7 +191,7 @@
   "profileCountry": "Country",
   "profileBio": "Bio",
   "profileSave": "Save",
-  "profileMockUpdated": "Mock: profile updated",
+  "profileMockUpdated": "Profile updated",
   "profileSaved": "Profile saved",
   "profileAvatarChange": "Change profile photo",
   "profileAvatarCropTitle": "Crop photo",

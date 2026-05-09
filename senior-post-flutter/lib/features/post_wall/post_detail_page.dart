@@ -4,8 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_repository.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import 'post_providers.dart';
 import 'post_wall_report_sheet.dart';
@@ -32,7 +31,7 @@ class PostDetailPage extends ConsumerWidget {
     final postAsync = ref.watch(postDetailProvider(postId));
     final commentsAsync = ref.watch(postCommentsProvider(postId));
 
-    final meId = ref.watch(mockSessionProvider).user.id;
+    final meId = ref.watch(appSessionProvider).user.id;
 
     return Scaffold(
       appBar: AppBar(
@@ -69,8 +68,8 @@ class PostDetailPage extends ConsumerWidget {
             final reviewLabel = review == null
                 ? null
                 : switch (review) {
-                    0 => '审核中：仅自己可见，通过后将上墙',
-                    2 => '未通过审核',
+                    0 => '????????????????',
+                    2 => '?????',
                     _ => null,
                   };
             return Column(
@@ -251,15 +250,6 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
     }
     setState(() => _sending = true);
     try {
-      if (AppEnv.useMock) {
-        PostalSnack.show(
-          context,
-          'Mock: comment submitted successfully',
-          tone: PostalSnackTone.success,
-        );
-        _commentCtrl.clear();
-        return;
-      }
       await ref.read(postWallRemoteProvider).createComment(
             postcardId: widget.postId,
             content: text,
@@ -269,7 +259,7 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
       ref.invalidate(postCommentsProvider(widget.postId));
       PostalSnack.show(
         context,
-        '已提交审核',
+        'Comment posted',
         tone: PostalSnackTone.success,
       );
     } on ApiBusinessException catch (e) {
@@ -298,8 +288,7 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
             ),
           ),
           const SizedBox(width: 8),
-          // Row 对非 flex 子项会先给 maxWidth=∞；expand 的 PostalButton 内部为 width:infinity，
-          // 必须外包有界宽度，否则会触发 infinite width / LayoutBuilder 断言级联。
+          // PostalButton expand needs bounded width inside Row.
           SizedBox(
             width: 96,
             child: PostalButton(

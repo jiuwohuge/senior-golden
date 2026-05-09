@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/bootstrap/app_bootstrap.dart';
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_data.dart';
 import '../../widgets/postal/postal.dart';
-import 'directory_page.dart';
+import 'directory_providers.dart';
 import 'directory_remote.dart';
 
-/// 筛选「兴趣」选项：`value` 提交给后端（Mock 为本地 id；真实为 `sys_tag.tag_name`）。
+/// 筛选「兴趣」选项：`value` 为 `sys_tag.tag_name`，提交给 `interestNames`。
 class DirectoryFilterTagOption {
   const DirectoryFilterTagOption({required this.value, required this.label});
 
@@ -18,11 +16,6 @@ class DirectoryFilterTagOption {
 
 final directoryFilterTagOptionsProvider =
     FutureProvider.family<List<DirectoryFilterTagOption>, String>((ref, lang) async {
-  if (AppEnv.useMock) {
-    return MockData.interests
-        .map((i) => DirectoryFilterTagOption(value: i.id, label: i.label))
-        .toList();
-  }
   final options = await ref.read(directoryRemoteProvider).listInterestTagOptions(lang: lang);
   return options
       .map((o) => DirectoryFilterTagOption(value: o.tagName, label: o.tagName))

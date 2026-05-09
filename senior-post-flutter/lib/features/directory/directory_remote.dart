@@ -2,8 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
-import '../../core/mock/mock_data.dart';
-import '../../core/mock/mock_models.dart';
+import '../../core/models/domain_models.dart';
 import '../../core/models/interest_tag_option.dart';
 import '../../core/network/dio_provider.dart';
 
@@ -12,7 +11,7 @@ class DirectoryRemoteRepository {
 
   final Dio _dio;
 
-  Future<List<MockUser>> pageUsers({
+  Future<List<AppUser>> pageUsers({
     required int page,
     required int size,
     String? countryCode,
@@ -44,11 +43,11 @@ class DirectoryRemoteRepository {
     if (rows is! List<dynamic>) {
       throw ApiBusinessException(0, 'Expected page records');
     }
-    return rows.whereType<Map<String, dynamic>>().map(_voToMockUser).toList();
+    return rows.whereType<Map<String, dynamic>>().map(_voToAppUser).toList();
   }
 
   /// 名录公开用户卡（与分页 VO 字段一致）。不可见或不存在时返回 `null`。
-  Future<MockUser?> getDirectoryUser(String userId) async {
+  Future<AppUser?> getDirectoryUser(String userId) async {
     if (int.tryParse(userId) == null) {
       return null;
     }
@@ -58,7 +57,7 @@ class DirectoryRemoteRepository {
         if (raw is! Map<String, dynamic>) {
           throw ApiBusinessException(0, 'Invalid user payload');
         }
-        return _voToMockUser(raw);
+        return _voToAppUser(raw);
       });
     } on DioException catch (e) {
       final err = e.error;
@@ -109,17 +108,13 @@ class DirectoryRemoteRepository {
   }
 }
 
-MockUser _voToMockUser(Map<String, dynamic> m) {
+AppUser _voToAppUser(Map<String, dynamic> m) {
   final id = (m['id'] as num?)?.toInt() ?? 0;
   final birthYear = (m['birthYear'] as num?)?.toInt() ?? 1970;
   final cc = (m['countryCode'] as String?) ?? '';
-  var countryName = cc;
-  for (final c in MockData.countries) {
-    if (c.code == cc) {
-      countryName = c.nameEn;
-      break;
-    }
-  }
+  final countryName = (m['countryName'] as String?)?.trim().isNotEmpty == true
+      ? (m['countryName'] as String).trim()
+      : cc;
   var interestNames = const <String>[];
   final namesRaw = m['interestTagNames'];
   if (namesRaw is List<dynamic>) {
@@ -134,7 +129,7 @@ MockUser _voToMockUser(Map<String, dynamic> m) {
   if (idsRaw is List<dynamic>) {
     interestIds = idsRaw.whereType<num>().map((e) => e.toInt()).toList();
   }
-  return MockUser(
+  return AppUser(
     id: '$id',
     nickname: (m['nickname'] as String?) ?? 'User',
     email: '',

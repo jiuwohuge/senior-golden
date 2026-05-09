@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/api/api_exception.dart';
+import '../auth/auth_repository.dart';
+import '../auth/login_routes.dart';
 import '../../widgets/postal/postal.dart';
 
-class AccountDeletePage extends StatelessWidget {
+class AccountDeletePage extends ConsumerWidget {
   const AccountDeletePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('Delete account')),
       body: SafeArea(
@@ -28,15 +32,30 @@ class AccountDeletePage extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             PostalButton(
-              label: 'Submit deletion request (mock)',
+              label: 'Submit deletion request',
               variant: PostalButtonVariant.danger,
-              onPressed: () {
-                PostalSnack.show(
-                  context,
-                  'Mock: deletion request submitted',
-                  tone: PostalSnackTone.warning,
-                );
-                context.pop();
+              onPressed: () async {
+                try {
+                  await ref.read(authRepositoryProvider).requestAccountDeletion();
+                  if (!context.mounted) return;
+                  PostalSnack.show(
+                    context,
+                    'Deletion request submitted. You can log in again within 7 days to cancel.',
+                    tone: PostalSnackTone.warning,
+                  );
+                  await ref.read(authRepositoryProvider).logout();
+                  if (context.mounted) {
+                    context.go(LoginRoutes.login);
+                  }
+                } on ApiBusinessException catch (e) {
+                  if (context.mounted) {
+                    PostalSnack.show(
+                      context,
+                      e.message,
+                      tone: PostalSnackTone.error,
+                    );
+                  }
+                }
               },
             ),
           ],

@@ -2,9 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../env/app_env.dart';
-import '../mock/mock_data.dart';
-import '../mock/mock_delay.dart';
 import '../models/interest_tag_option.dart';
 import '../network/dio_provider.dart';
 
@@ -131,23 +128,6 @@ class CountryItem {
 
 /// 启动配置（注册门槛、国家列表、兴趣标签选项）。未登录即可调用，与 `/api/bootstrap/init?lang=` 同步。
 final appBootstrapProvider = FutureProvider.family<AppBootstrapData, String>((ref, lang) async {
-  if (AppEnv.useMock) {
-    await MockDelay.instant();
-    return AppBootstrapData(
-      minRegisterAge: 45,
-      countries: MockData.countries
-          .map(
-            (c) => CountryItem(
-              code: c.code,
-              nameEn: c.nameEn,
-              nameZh: c.nameZh,
-            ),
-          )
-          .toList(),
-      interestTagOptions: const [],
-      vipProduct: AppVipProductConfig.defaults,
-    );
-  }
   final dio = ref.read(dioProvider);
   final res = await dio.get<Map<String, dynamic>>(
     '/api/bootstrap/init',

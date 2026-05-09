@@ -1,8 +1,8 @@
-/// 与后端 DTO 对齐的轻量模型（Mock 期间使用）。后端联调阶段可换为契约 DTO。
+/// 与后端 VO 对齐的客户端领域模型（明信片墙、信箱、流水等）。
 library;
 
-class MockUser {
-  const MockUser({
+class AppUser {
+  const AppUser({
     required this.id,
     required this.nickname,
     required this.email,
@@ -14,6 +14,8 @@ class MockUser {
     this.interestTagIds = const [],
     this.avatarUrl,
     this.isVip = false,
+    this.deletionRequestedAt,
+    this.deletionEffectiveAt,
   });
 
   final String id;
@@ -24,14 +26,15 @@ class MockUser {
   final int birthYear;
   final String bio;
   final List<String> interests;
-  /// 后端 `sys_tag.id`，与 `PATCH /api/auth/profile` 的 `interestTagIds` 对齐；Mock 下可为空。
   final List<int> interestTagIds;
   final String? avatarUrl;
   final bool isVip;
+  final DateTime? deletionRequestedAt;
+  final DateTime? deletionEffectiveAt;
 
   int get age => DateTime.now().year - birthYear;
 
-  MockUser copyWith({
+  AppUser copyWith({
     String? nickname,
     String? bio,
     String? countryCode,
@@ -39,8 +42,11 @@ class MockUser {
     List<String>? interests,
     List<int>? interestTagIds,
     String? avatarUrl,
+    bool? isVip,
+    DateTime? deletionRequestedAt,
+    DateTime? deletionEffectiveAt,
   }) {
-    return MockUser(
+    return AppUser(
       id: id,
       nickname: nickname ?? this.nickname,
       email: email,
@@ -51,13 +57,15 @@ class MockUser {
       interests: interests ?? this.interests,
       interestTagIds: interestTagIds ?? this.interestTagIds,
       avatarUrl: avatarUrl ?? this.avatarUrl,
-      isVip: isVip,
+      isVip: isVip ?? this.isVip,
+      deletionRequestedAt: deletionRequestedAt ?? this.deletionRequestedAt,
+      deletionEffectiveAt: deletionEffectiveAt ?? this.deletionEffectiveAt,
     );
   }
 }
 
-class MockPost {
-  const MockPost({
+class WallPost {
+  const WallPost({
     required this.id,
     required this.author,
     required this.content,
@@ -69,15 +77,12 @@ class MockPost {
   });
 
   final String id;
-  final MockUser author;
+  final AppUser author;
   final String content;
   final DateTime createdAt;
   final int commentCount;
-  /// 首张图（与后端 `imageUrl` 对齐）
   final String? imageUrl;
-  /// 全部配图（与后端 `imageUrls` 对齐）
   final List<String>? imageUrls;
-  /// 审核状态：0 待审 1 通过 2 驳回（详情接口返回，列表项多为 null）
   final int? reviewStatus;
 
   List<String> get resolvedImageUrls {
@@ -91,8 +96,8 @@ class MockPost {
   }
 }
 
-class MockComment {
-  const MockComment({
+class WallComment {
+  const WallComment({
     required this.id,
     required this.author,
     required this.content,
@@ -100,21 +105,19 @@ class MockComment {
   });
 
   final String id;
-  final MockUser author;
+  final AppUser author;
   final String content;
   final DateTime createdAt;
 }
 
 enum LetterType { registered, standard }
 
-/// 与后端 `LetterBizStatus` 对齐：运输中 / 已送达 / 已挂号（待策略转送达）。
 enum LetterStatus { delivering, delivered, registered }
 
-/// 与后端 `LetterSendMode` 对齐。
 enum LetterSendMode { standardPost, registeredMail, directVip }
 
-class MockLetter {
-  MockLetter({
+class MailboxLetter {
+  MailboxLetter({
     required this.id,
     required this.peer,
     required this.preview,
@@ -128,7 +131,7 @@ class MockLetter {
   });
 
   final String id;
-  final MockUser peer;
+  final AppUser peer;
   final String preview;
   final String body;
   final LetterType type;
@@ -139,22 +142,21 @@ class MockLetter {
   final LetterSendMode sendMode;
 }
 
-/// 邮政 Tab「Connections」列表行 UI 模型：表示 **好友（笔友）关系**，不是 TIM 会话列表。
-/// Mock 下带预览文案；非 Mock 由 `GET /api/mailbox/friends` 映射，`lastMessage` 可为副标题占位。
-class MockImConnectionRow {
-  const MockImConnectionRow({
+/// 邮政 Tab「Connections」：好友（笔友）列表行，语义对齐 `GET /api/mailbox/friends`。
+class FriendListRow {
+  const FriendListRow({
     required this.peer,
     required this.lastMessage,
     required this.lastTime,
   });
 
-  final MockUser peer;
+  final AppUser peer;
   final String lastMessage;
   final DateTime lastTime;
 }
 
-class MockStampLedgerEntry {
-  const MockStampLedgerEntry({
+class StampLedgerLine {
+  const StampLedgerLine({
     required this.id,
     required this.title,
     required this.delta,
@@ -167,10 +169,4 @@ class MockStampLedgerEntry {
   final int delta;
   final int balanceAfter;
   final DateTime at;
-}
-
-class MockInterestTag {
-  const MockInterestTag({required this.id, required this.label});
-  final String id;
-  final String label;
 }

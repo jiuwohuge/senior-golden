@@ -2,16 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/env/app_env.dart';
-import '../../core/mock/mock_models.dart';
-import '../../core/mock/mock_repository.dart';
+import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal.dart';
 import 'stamps_remote.dart';
 
-final stampsLedgerProvider = FutureProvider<List<MockStampLedgerEntry>>((ref) async {
-  if (AppEnv.useMock) {
-    return ref.read(mockStampsRepositoryProvider).list();
-  }
+final stampsLedgerProvider = FutureProvider<List<StampLedgerLine>>((ref) async {
   return ref.read(stampsRemoteProvider).ledgerPage();
 });
 
@@ -41,23 +36,27 @@ class StampsLedgerPage extends ConsumerWidget {
               return PostalCardEnvelope(
                 child: Row(
                   children: [
-                    PostalStatusChip(
-                      label: delta,
-                      icon: e.delta >= 0 ? Icons.add : Icons.remove,
-                      color: e.delta >= 0 ? Colors.green : Colors.red,
-                    ),
-                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(e.title),
-                          const SizedBox(height: 2),
-                          Text(DateFormat('MM-dd HH:mm').format(e.at)),
+                          Text(e.title, style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: 4),
+                          Text(
+                            DateFormat('yyyy-MM-dd HH:mm').format(e.at),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                         ],
                       ),
                     ),
-                    Text('Bal ${e.balanceAfter}'),
+                    Text(
+                      delta,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: e.delta >= 0 ? Colors.green[700] : Colors.red[700],
+                          ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text('→ ${e.balanceAfter}', style: Theme.of(context).textTheme.bodyMedium),
                   ],
                 ),
               );

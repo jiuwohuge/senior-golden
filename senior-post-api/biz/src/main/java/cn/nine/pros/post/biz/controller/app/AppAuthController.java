@@ -49,4 +49,9 @@ public class AppAuthController implements AppAuthApi {
     public AppPublicUserVO updateProfile(AppAuthProfilePatchInDto body) {
         return appAuthService.updateProfile(body);
     }
+
+    @Override
+    public void requestAccountDeletion() {
+        appAuthService.requestAccountDeletion();
+    }
 }

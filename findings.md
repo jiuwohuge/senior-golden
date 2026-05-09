@@ -98,8 +98,8 @@
 
 ### 5.4 Manage 小缺口（再次确认）
 
-- `api.ts` 中 `blockDevice` 已定义，`UserList` 未调用。
-- 无「邮票流水」独立管理页与 `/webapi` 绑定。
+- **设备拉黑**：`UserList` 已接「设备拉黑」；`api.userDevices` + `api.blockDevice`（body `{ deviceUuid, reason? }`）与 `GET /webapi/user/{userId}/devices`、`POST /webapi/user/device/block` 对齐（2026-05-09）。
+- **邮票流水**：已有独立页与 `POST /webapi/stamps/ledger/paging`（见 FP-A9-002）。
 
 ### 5.5 文档索引
 
