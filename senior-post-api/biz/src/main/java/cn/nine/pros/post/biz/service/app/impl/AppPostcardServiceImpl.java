@@ -68,7 +68,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         Map<Long, UserDTO> authorMap = loadAuthors(p.getRecords());
         List<PostcardWallItemVO> records = new ArrayList<>();
         for (PostcardDomain row : p.getRecords()) {
-            int cc = countApprovedComments(row.getId());
+            int cc = countVisibleComments(row.getId());
             records.add(toWallItem(row, authorMap.get(row.getUserId()), cc, false));
         }
         ossDisplayUrlService.applyPostcardWall(userId, records);
@@ -86,7 +86,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         Map<Long, UserDTO> authorMap = loadAuthors(p.getRecords());
         List<PostcardWallItemVO> records = new ArrayList<>();
         for (PostcardDomain row : p.getRecords()) {
-            int cc = countApprovedComments(row.getId());
+            int cc = countVisibleComments(row.getId());
             records.add(toWallItem(row, authorMap.get(row.getUserId()), cc, true));
         }
         ossDisplayUrlService.applyPostcardWall(userId, records);
@@ -104,14 +104,14 @@ public class AppPostcardServiceImpl implements AppPostcardService {
                 throw new BadRequestException("明信片不存在");
             }
             UserDTO author = userService.findById(p.getUserId());
-            int cc = countApprovedComments(p.getId());
+            int cc = countVisibleComments(p.getId());
             PostcardDetailVO vo = toDetail(p, author, cc, viewerUserId);
             ossDisplayUrlService.applyPostcardDetail(viewerUserId, vo);
             return vo;
         }
         if (Objects.equals(viewerUserId, p.getUserId())) {
             UserDTO author = userService.findById(p.getUserId());
-            int cc = countApprovedComments(p.getId());
+            int cc = countVisibleComments(p.getId());
             PostcardDetailVO vo = toDetail(p, author, cc, viewerUserId);
             ossDisplayUrlService.applyPostcardDetail(viewerUserId, vo);
             return vo;
@@ -170,8 +170,9 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         LambdaQueryWrapper<PostcardCommentDomain> qw = new LambdaQueryWrapper<PostcardCommentDomain>()
                 .eq(PostcardCommentDomain::getPostcardId, postcardId)
                 .eq(PostcardCommentDomain::isDelFlag, false)
-                .apply("review_status = 1")
-                .apply("status = 1")
+                .eq(PostcardCommentDomain::getStatus, 1)
+                // 0=待审 1=通过：App 展示正文；2=驳回：不展示（与 DB 注释一致）
+                .apply("(review_status IS DISTINCT FROM 2)")
                 .orderByDesc(PostcardCommentDomain::getCreatedAt);
         Page<PostcardCommentDomain> p = postcardCommentService.page(AppPageHelper.mpPage(pq), qw);
         Map<Long, UserDTO> authors = loadAuthorsFromComments(p.getRecords());
@@ -239,12 +240,13 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         return 0;
     }
 
-    private int countApprovedComments(Long postcardId) {
+    /** 墙/详情评论数：与 commentsPage 列表可见范围一致（非驳回、未删）。 */
+    private int countVisibleComments(Long postcardId) {
         return (int) postcardCommentService.count(new LambdaQueryWrapper<PostcardCommentDomain>()
                 .eq(PostcardCommentDomain::getPostcardId, postcardId)
                 .eq(PostcardCommentDomain::isDelFlag, false)
-                .apply("review_status = 1")
-                .apply("status = 1"));
+                .eq(PostcardCommentDomain::getStatus, 1)
+                .apply("(review_status IS DISTINCT FROM 2)"));
     }
 
     private Map<Long, UserDTO> loadAuthors(List<PostcardDomain> rows) {

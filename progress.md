@@ -1,5 +1,37 @@
 # 会话进度日志
 
+## 2026-05-09 — 提前拆信：列表 status 与已读一致
+
+- **根因**：`earlyOpenLetter` 只写 `recipient_early_open_at`，`status` 仍为运输中，App 列表仍映射为 Delivering。
+- **修复**：`AppMailboxServiceImpl.earlyOpenLetter` 同步 `status=2`、`actual_arrival_time`；Flyway **`V15__letter_early_open_status_backfill.sql`** 回填历史数据。
+- **验证**：`mvn -pl biz -am compile -DskipTests`。
+
+## 2026-05-09 — SendLetterSheet：SnackBar 挂到 sheet 内 Messenger
+
+- **问题**：`State.context` 在嵌套 `ScaffoldMessenger` 之上，`PostalSnack` 命中父页 Messenger，bottom sheet 打开时看不到「请填写正文」等提示。
+- **修复**：`ScaffoldMessenger` 下包 `Builder`，`_send(sheetContext)` / 加速 sheet 的 `_confirm(sheetContext)` 全部用子树 context；异步后使用 `sheetContext.mounted`。
+- **顺带**：`postal_snack.dart` 补充 `show` 的 context 使用说明。
+- **验证**：`flutter analyze`（上述文件）无告警。
+
+## 2026-05-09 — App 明信片评论：待审可见、仅驳回隐藏
+
+- **需求**：评论正文默认展示，仅审核不通过（`review_status=2`）不展示。
+- **后端**：`AppPostcardServiceImpl` 中 `commentsPage` 与评论数统计由「仅已通过」改为「非驳回 + status=正常」；`countApprovedComments` 重命名为 `countVisibleComments`。
+- **验证**：`mvn -pl biz -am compile -DskipTests`。
+
+## 2026-05-09 — Flyway V14：可审计表补齐 created_by/updated_at/updated_by
+
+- **问题**：`bu_user_blacklist` 等 V1 表缺审计列，与 `AbstractAuditableDomain` 不一致，黑名单列表 SQL 报错。
+- **迁移**：`V14__auditable_columns_bu_and_log.sql` 对 `bu_user_blacklist`、`bu_im_message`、`bu_im_conversation`、`bu_visitor_record`、`bu_daily_publish_record`、`log_admin_operation` 执行 `ADD COLUMN IF NOT EXISTS`。
+- **验证**：`mvn -pl server -am compile -DskipTests`（执行后需对已部署库跑一次 Flyway migrate）。
+
+## 2026-05-09 — 邮政收件箱在途信 + 邮票与个人中心同步
+
+- **根因**：`AppMailboxServiceImpl.listPostalInbox` 对已建联笔友跳过全部信件，运输中平邮不出现在 `GET /api/mailbox/postal`；Flutter 邮箱邮票走独立 balance 接口与 `appSession` 分裂。
+- **后端**：`listPostalInbox` 在已是笔友时仍纳入 **status=运输中** 的信件。
+- **Flutter**：邮箱顶栏 / `SendLetterSheet` / `SpeedUpSheet` 使用 `appSessionProvider`；发信与加速成功后 `refreshSessionFromServer()`；移除 `mailboxStampHeaderProvider`；`MailboxPage` 回到前台时刷新 session。
+- **验证**：`flutter analyze`（上述路径）无问题；`mvn -pl biz -am compile -DskipTests`。
+
 ## 2026-05-09 — 文档：PLAN A7 与 bootstrap `vipProduct` 对齐
 
 - **动作**：`PLAN.md` [功能清单] A7 由「全链仍待」改为 **已交付 bootstrap `vipProduct` + VIP 中心读 bootstrap**；缺口指向 **FP-A7-002/003**。同步 **`07` §2.0/§3.2/§3.4**、**`05`** Sprint3 拆分 A7 行、**`02` A7-001 技术列**、**`feature-overview` §8**、**`task_plan` 决策**、**`04-dev-plan`**。

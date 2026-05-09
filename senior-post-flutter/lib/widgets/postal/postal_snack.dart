@@ -8,6 +8,9 @@ enum PostalSnackTone { info, success, warning, error }
 class PostalSnack {
   PostalSnack._();
 
+  /// [context] 应处于要展示 SnackBar 的 [ScaffoldMessenger] **子树**内
+  /// （例如 bottom sheet 内对 [ScaffoldMessenger] 包一层 [Builder] 再取 context），
+  /// 否则会命中上层页面的 Messenger，提示出现在 sheet 背后。
   static void show(
     BuildContext context,
     String message, {
@@ -31,6 +34,7 @@ class PostalSnack {
 
     final messenger = ScaffoldMessenger.maybeOf(context);
     if (messenger == null) return;
+    final bottomPad = MediaQuery.paddingOf(context).bottom;
     messenger
       ..clearSnackBars()
       ..showSnackBar(
@@ -38,7 +42,7 @@ class PostalSnack {
           duration: duration,
           backgroundColor: PostalTokens.inkNavy,
           behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.fromLTRB(16, 0, 16, 16 + bottomPad),
           shape: const RoundedRectangleBorder(
             borderRadius: PostalTokens.shapeMd,
           ),

@@ -6,9 +6,10 @@ import 'package:intl/intl.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/models/domain_models.dart';
+import '../../core/session/app_session.dart';
+import '../auth/auth_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
-import 'mailbox_remote.dart';
 
 class MailboxPage extends ConsumerStatefulWidget {
   const MailboxPage({super.key});
@@ -44,13 +45,14 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
         ref.invalidate(mailboxArchiveProvider);
         ref.invalidate(mailboxLettersProvider);
         ref.invalidate(mailboxFriendsProvider);
+        ref.read(authRepositoryProvider).refreshSessionFromServer();
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final stampHeader = ref.watch(mailboxStampHeaderProvider);
+    final session = ref.watch(appSessionProvider);
     final lettersAsync = ref.watch(postalInboxLettersProvider);
     return SafeArea(
       top: false,
@@ -61,22 +63,10 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
             child: Row(
               children: [
-                stampHeader.when(
-                  data: (s) => PostalStampBadge(
-                    balance: s.balance,
-                    cap: s.cap,
-                    isVip: s.isVip,
-                  ),
-                  loading: () => const PostalStampBadge(
-                    balance: 0,
-                    cap: 3,
-                    isVip: false,
-                  ),
-                  error: (_, __) => const PostalStampBadge(
-                    balance: 0,
-                    cap: 3,
-                    isVip: false,
-                  ),
+                PostalStampBadge(
+                  balance: session.stampBalance,
+                  cap: session.dailyStampCap,
+                  isVip: session.isVip,
                 ),
                 const Spacer(),
                 TextButton(
@@ -135,10 +125,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
 }
 
 class _PostalInboxBody extends ConsumerWidget {
-  const _PostalInboxBody({
-    required this.letters,
-    required this.onSyncMailbox,
-  });
+  const _PostalInboxBody({required this.letters, required this.onSyncMailbox});
 
   final List<MailboxLetter> letters;
   final Future<void> Function() onSyncMailbox;

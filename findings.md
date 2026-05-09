@@ -151,3 +151,39 @@
 | `findings.md` §2.1～2.2 | 信箱「仍待验收/需接 API」措辞过时 | 改为 DONE + 建议回归 |
 
 **未物理删除的文档**：`.cursor/skills/*` 为工具链技能非本业务维护范围；`doc/1、需求文档.md` **保留为产品归档**（已加定位块，不淘汰）。
+
+---
+
+## 10. 邮政收件箱「在途信」与邮票展示源（2026-05-09）
+
+| 事实 | 说明 |
+|------|------|
+| **后端 `listPostalInbox`**（`AppMailboxServiceImpl`）曾对所有「已与对方互为笔友」的信件 **整封跳过**，导致 **status=运输中** 的平邮在 Archive 全量接口可见，却在 `GET /mailbox/postal` 中消失。 | 已改为：笔友关系下 **仍返回运输中** 信件；非运输中且已是笔友则继续不进入邮政 Tab 列表（与「首封建联」语义一致）。 |
+| **收件人 B** 的平邮在途：`toItem` 中 `hideBody = !fromMe && delivering && standard && !openedEarly` 不变，列表/详情仍 **内容遮挡**。 | 与需求「B 与现在一样做信息遮挡」一致。 |
+| **Flutter 邮票** | 邮箱顶栏等曾独立请求 `/api/stamps/balance`，与 `appSessionProvider`（`/api/auth/me` 的 `stampsBalance`）不同步；扣费后只刷新前者时个人中心仍显示旧值。**已改**：统一以 `appSessionProvider` 展示；发信/加速成功后 `refreshSessionFromServer()`；回到前台时邮箱页顺带刷新 session。 |
+
+---
+
+## 13. 平邮提前拆信后列表仍显示运输中（2026-05-09）
+
+| 事实 | 说明 |
+|------|------|
+| **`earlyOpenLetter`** 仅写入 `recipient_early_open_at`，**未更新** `bu_letter.status`，VO 仍下发 `status=1`，Flutter 列表 chip 仍为 Delivering；`toItem` 已因 `openedEarly` 放开正文，造成「看得见正文却像未送达」。 | **代码**：提前拆信成功时同时 `status=2`、`actual_arrival_time=now()`。**数据**：`V15__letter_early_open_status_backfill.sql` 修正历史行。 |
+
+---
+
+## 11. 可审计表与 DB 列对齐（2026-05-09）
+
+| 事实 | 说明 |
+|------|------|
+| **V1** 中 `bu_user_blacklist`、`bu_im_message`、`bu_visitor_record`、`log_admin_operation` 等仅含 `created_at`+`del_flag`（或缺 `created_by`/`updated_by`），而对应 **Domain 继承 `AbstractAuditableDomain`**，MyBatis-Plus 生成 `SELECT ... created_by ...` 时在 PostgreSQL 上报错。 | **Flyway `V14__auditable_columns_bu_and_log.sql`**：为上述表及 `bu_im_conversation`、`bu_daily_publish_record` 补齐与框架一致的审计列。 |
+| **未纳入 V14** | `bu_password_reset_token`（`PasswordResetTokenDomain` 非可审计）、`bu_stamp_daily_grant`（幂等流水、非 `AbstractAuditableDomain`）保持原语义。 |
+
+---
+
+## 12. App 明信片评论列表口径（2026-05-09）
+
+| 事实 | 说明 |
+|------|------|
+| **`AppPostcardServiceImpl.commentsPage`** 曾固定 `review_status = 1 AND status = 1`，导致 **待审核（0）** 评论不出现在 App，用户刚发的评论在详情里看不到。 | 已改为：`status = 1` 且 **`review_status IS DISTINCT FROM 2`**（排除驳回）；与 **`countVisibleComments`**（原 `countApprovedComments`）及墙/详情 **commentCount** 一致。 |
+

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "明信片评论项（仅展示已通过审核）")
+@Schema(description = "明信片评论项（待审/已通过均返回正文；驳回的不进入列表）")
 public class PostcardCommentItemVO {
 
     @Schema(description = "评论 ID")

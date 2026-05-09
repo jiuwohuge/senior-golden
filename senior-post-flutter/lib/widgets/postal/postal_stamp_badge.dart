@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/postal_tokens.dart';
 
-/// 邮票余额徽标：`Stamps: x/3` 或 `VIP · Unlimited`。带齿边圆角，复古邮票质感。
+/// 邮票余额徽标：`Stamps: x`、可选 ` /上限`（仅当上限有效且 >0）、或 `VIP · Unlimited`。
 class PostalStampBadge extends StatelessWidget {
   const PostalStampBadge({
     super.key,
@@ -27,9 +27,11 @@ class PostalStampBadge extends StatelessWidget {
         ? PostalTokens.stampGold.withValues(alpha: 0.1)
         : PostalTokens.postboxGreen.withValues(alpha: 0.08);
 
+    final c = cap;
+    final capSuffix = c != null && c > 0 ? '/$c' : '';
     final label = isVip
         ? 'VIP · Unlimited'
-        : 'Stamps: ${balance ?? 0}${cap != null ? '/$cap' : ''}';
+        : 'Stamps: ${balance ?? 0}$capSuffix';
 
     final icon = Icon(
       isVip ? Icons.workspace_premium : Icons.local_post_office,

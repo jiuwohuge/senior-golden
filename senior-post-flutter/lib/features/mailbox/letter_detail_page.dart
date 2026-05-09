@@ -219,6 +219,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                     ref.invalidate(letterDetailProvider(widget.letterId));
                                     ref.invalidate(mailboxLettersProvider);
                                     ref.invalidate(postalInboxLettersProvider);
+                                    ref.invalidate(mailboxArchiveProvider);
                                     PostalSnack.show(
                                       context,
                                       l10n.letterEarlyOpenSuccess,

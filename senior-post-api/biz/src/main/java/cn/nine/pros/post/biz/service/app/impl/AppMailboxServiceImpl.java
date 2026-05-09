@@ -72,7 +72,11 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         for (LetterDomain l : letters) {
             long peer = peerUserId(l, userId);
             if (friendshipService.areActiveFriends(userId, peer)) {
-                continue;
+                // 已是笔友时：非「运输中」信件不再进入邮政收件箱（避免历史信占列表）；
+                // 「运输中」仍展示，发件人可看到在途，收件人侧继续走 toItem 的内容遮挡逻辑。
+                if (toInt(l.getStatus()) != STATUS_DELIVERING) {
+                    continue;
+                }
             }
             out.add(toItem(l, userId, false));
         }
@@ -320,6 +324,9 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .eq(LetterDomain::getToUserId, actorUserId)
                 .isNull(LetterDomain::getRecipientEarlyOpenAt)
                 .set(LetterDomain::getRecipientEarlyOpenAt, now)
+                // 收件人已付费拆信：对双方列表/归档与「已送达」语义一致，避免仍显示运输中
+                .set(LetterDomain::getStatus, STATUS_DELIVERED)
+                .set(LetterDomain::getActualArrivalTime, now)
                 .set(LetterDomain::getUpdatedAt, now)
                 .set(LetterDomain::getUpdatedBy, actorUserId));
         if (!letterPatched) {

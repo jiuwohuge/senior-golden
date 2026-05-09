@@ -5,7 +5,7 @@ import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/network/dio_provider.dart';
 
-/// 与 `/api/mailbox/*`、`/api/stamps/balance` 对齐。
+/// 与 `/api/mailbox/*` 对齐。邮票展示与 `/api/auth/me` 会话态一致（见 `appSessionProvider`）。
 class MailboxRemoteRepository {
   MailboxRemoteRepository(this._dio);
 
@@ -43,18 +43,13 @@ class MailboxRemoteRepository {
     if (parentLetterId != null && parentLetterId.isNotEmpty) {
       body['parentLetterId'] = int.parse(parentLetterId);
     }
-    final r = await _dio.post<dynamic>(
-      '/api/mailbox/letters/send',
-      data: body,
-    );
+    final r = await _dio.post<dynamic>('/api/mailbox/letters/send', data: body);
     final map = _unwrapMapData(r);
     return _voToMailboxLetter(map);
   }
 
   Future<void> acceptPostalContact(String letterId) async {
-    await _dio.post<dynamic>(
-      '/api/mailbox/letters/$letterId/accept-postal',
-    );
+    await _dio.post<dynamic>('/api/mailbox/letters/$letterId/accept-postal');
   }
 
   Future<MailboxLetter> speedUp(String letterId) async {
@@ -95,20 +90,6 @@ class MailboxRemoteRepository {
       return data.toLowerCase() == 'true';
     }
     throw ApiBusinessException(0, 'Invalid friendship response');
-  }
-}
-
-class StampRemoteRepository {
-  StampRemoteRepository(this._dio);
-
-  final Dio _dio;
-
-  Future<({int balance, bool isVip})> balance() async {
-    final r = await _dio.get<dynamic>('/api/stamps/balance');
-    final map = _unwrapMapData(r);
-    final bal = (map['stampsBalance'] as num?)?.toInt() ?? 0;
-    final vip = map['isVip'] as bool? ?? false;
-    return (balance: bal, isVip: vip);
   }
 }
 
@@ -171,11 +152,7 @@ FriendListRow _voToFriendRow(Map<String, dynamic> m) {
     isVip: false,
   );
   final sub = cc.isNotEmpty ? cc : 'Postal friend · tap to chat';
-  return FriendListRow(
-    peer: peer,
-    lastMessage: sub,
-    lastTime: connected,
-  );
+  return FriendListRow(peer: peer, lastMessage: sub, lastTime: connected);
 }
 
 MailboxLetter _voToMailboxLetter(Map<String, dynamic> m) {
@@ -227,8 +204,7 @@ DateTime? _parseDate(Object? v) {
     return null;
   }
   if (v is String) {
-    return DateTime.tryParse(v.replaceAll(' ', 'T')) ??
-        DateTime.tryParse(v);
+    return DateTime.tryParse(v.replaceAll(' ', 'T')) ?? DateTime.tryParse(v);
   }
   return null;
 }
@@ -236,17 +212,6 @@ DateTime? _parseDate(Object? v) {
 final mailboxRemoteRepositoryProvider = Provider<MailboxRemoteRepository>(
   (ref) => MailboxRemoteRepository(ref.read(dioProvider)),
 );
-
-final stampRemoteRepositoryProvider = Provider<StampRemoteRepository>(
-  (ref) => StampRemoteRepository(ref.read(dioProvider)),
-);
-
-/// 邮政 Tab 顶栏：`/api/stamps/balance`。
-final mailboxStampHeaderProvider =
-    FutureProvider<({int balance, int cap, bool isVip})>((ref) async {
-  final row = await ref.read(stampRemoteRepositoryProvider).balance();
-  return (balance: row.balance, cap: 3, isVip: row.isVip);
-});
 
 final friendshipActiveProvider = FutureProvider.family<bool, String>((
   ref,
