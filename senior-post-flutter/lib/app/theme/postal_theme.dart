@@ -236,6 +236,16 @@ abstract final class PostalTheme {
           fontWeight: FontWeight.w500,
         ),
       ),
+      // M3 Slider 默认未激活轨易与 paperCream 背景融在一起；显式对比色与邮筒绿拇指。
+      sliderTheme: SliderThemeData(
+        trackHeight: 5,
+        activeTrackColor: PostalTokens.postboxGreen,
+        inactiveTrackColor: PostalTokens.perforationLine,
+        secondaryActiveTrackColor: PostalTokens.postboxGreen.withValues(alpha: 0.55),
+        thumbColor: PostalTokens.postboxGreen,
+        overlayColor: PostalTokens.postboxGreen.withValues(alpha: 0.14),
+        valueIndicatorColor: PostalTokens.postboxGreen,
+      ),
     );
   }
 

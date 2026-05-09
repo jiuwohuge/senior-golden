@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme/postal_tokens.dart';
 import '../../core/bootstrap/app_bootstrap.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
@@ -48,27 +49,44 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
     _sort = f.sort;
   }
 
+  /// [Wrap] 内单颗芯片若「最小宽度」超过父级可用宽度会横向溢出；同时下拉未 `isExpanded` 时
+  /// 会以「最宽菜单项」为最小宽度，长国家名同样会 RIGHT OVERFLOW，把下方 Slider 挤出首屏。
   Widget _chipsForOptions(List<DirectoryFilterTagOption> options) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: options
-          .map(
-            (i) => FilterChip(
-              label: Text(i.label),
-              selected: _interests.contains(i.value),
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    _interests.add(i.value);
-                  } else {
-                    _interests.remove(i.value);
-                  }
-                });
-              },
-            ),
-          )
-          .toList(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxW = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: options
+              .map(
+                (i) => ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxW),
+                  child: FilterChip(
+                    label: Text(
+                      i.label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
+                    ),
+                    selected: _interests.contains(i.value),
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _interests.add(i.value);
+                        } else {
+                          _interests.remove(i.value);
+                        }
+                      });
+                    },
+                  ),
+                ),
+              )
+              .toList(),
+        );
+      },
     );
   }
 
@@ -79,121 +97,180 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
     final bootstrapAsync = ref.watch(appBootstrapProvider(lang));
     final tagsAsync = ref.watch(directoryFilterTagOptionsProvider(lang));
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        child: bootstrapAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('$e')),
-          data: (bootstrap) => tagsAsync.when(
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final sheetColor =
+        Theme.of(context).bottomSheetTheme.backgroundColor ?? PostalTokens.paperEnvelope;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: SizedBox(
+        height: MediaQuery.sizeOf(context).height * 0.92,
+        child: SafeArea(
+          child: bootstrapAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text('$e')),
-            data: (tagOptions) => ListView(
-              shrinkWrap: true,
-              children: [
-                PostalSectionTitle(
-                  title: l10n.directoryFilterSectionTitle,
-                  subtitle: l10n.directoryFilterSectionSubtitle,
-                ),
-                const SizedBox(height: 8),
-                Text(l10n.directoryFilterSort, style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ChoiceChip(
-                      label: Text(l10n.directoryFilterNewest),
-                      selected: _sort == 'DEFAULT',
-                      onSelected: (_) => setState(() => _sort = 'DEFAULT'),
-                    ),
-                    ChoiceChip(
-                      label: Text(l10n.directoryFilterClosestAge),
-                      selected: _sort == 'SAME_AGE',
-                      onSelected: (_) => setState(() => _sort = 'SAME_AGE'),
-                    ),
-                    ChoiceChip(
-                      label: Text(l10n.directoryFilterSharedInterests),
-                      selected: _sort == 'SHARED_INTEREST',
-                      onSelected: (_) => setState(() => _sort = 'SHARED_INTEREST'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                DropdownButtonFormField<String?>(
-                  // ignore: deprecated_member_use
-                  value: _countryCode,
-                  decoration: InputDecoration(labelText: l10n.directoryFilterCountryLabel),
-                  items: [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text(l10n.directoryFilterAllCountries),
-                    ),
-                    ...bootstrap.countries.map(
-                      (c) => DropdownMenuItem<String?>(
-                        value: c.code,
-                        child: Text('${c.displayName(lang)} (${c.code})'),
+            data: (bootstrap) => tagsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('$e')),
+              data: (tagOptions) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          PostalSectionTitle(
+                            title: l10n.directoryFilterSectionTitle,
+                            subtitle: l10n.directoryFilterSectionSubtitle,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(l10n.directoryFilterSort, style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: 8),
+                          // ChoiceChip 选中：secondary 底与字同为邮筒绿时不可读，局部改为白字。
+                          Theme(
+                            data: Theme.of(context).copyWith(
+                              chipTheme: ChipTheme.of(context).copyWith(
+                                secondaryLabelStyle:
+                                    ChipTheme.of(context).secondaryLabelStyle?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                checkmarkColor: Colors.white,
+                              ),
+                            ),
+                            child: Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                ChoiceChip(
+                                  label: Text(l10n.directoryFilterNewest),
+                                  selected: _sort == 'DEFAULT',
+                                  onSelected: (_) => setState(() => _sort = 'DEFAULT'),
+                                ),
+                                ChoiceChip(
+                                  label: Text(l10n.directoryFilterClosestAge),
+                                  selected: _sort == 'SAME_AGE',
+                                  onSelected: (_) => setState(() => _sort = 'SAME_AGE'),
+                                ),
+                                ChoiceChip(
+                                  label: Text(l10n.directoryFilterSharedInterests),
+                                  selected: _sort == 'SHARED_INTEREST',
+                                  onSelected: (_) => setState(() => _sort = 'SHARED_INTEREST'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          DropdownButtonFormField<String?>(
+                            // ignore: deprecated_member_use
+                            value: _countryCode,
+                            isExpanded: true,
+                            decoration: InputDecoration(labelText: l10n.directoryFilterCountryLabel),
+                            items: [
+                              DropdownMenuItem<String?>(
+                                value: null,
+                                child: Text(l10n.directoryFilterAllCountries),
+                              ),
+                              ...bootstrap.countries.map(
+                                (c) => DropdownMenuItem<String?>(
+                                  value: c.code,
+                                  child: Text('${c.displayName(lang)} (${c.code})'),
+                                ),
+                              ),
+                            ],
+                            onChanged: (v) => setState(() => _countryCode = v),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(l10n.directoryFilterMinAge('$_minAge')),
+                          Slider(
+                            min: 45,
+                            max: 90,
+                            value: _minAge.toDouble(),
+                            divisions: 45,
+                            label: '$_minAge',
+                            onChanged: (v) => setState(() => _minAge = v.round()),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(l10n.directoryFilterMaxAge('$_maxAge')),
+                          Slider(
+                            min: 45,
+                            max: 100,
+                            value: _maxAge.toDouble(),
+                            divisions: 55,
+                            label: '$_maxAge',
+                            onChanged: (v) => setState(() => _maxAge = v.round()),
+                          ),
+                          const SizedBox(height: 8),
+                          if (tagOptions.isEmpty)
+                            Text(
+                              'No interest tags from server. Add tags in admin or try another language.',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            )
+                          else
+                            _chipsForOptions(tagOptions),
+                        ],
                       ),
                     ),
-                  ],
-                  onChanged: (v) => setState(() => _countryCode = v),
-                ),
-                const SizedBox(height: 14),
-                Text(l10n.directoryFilterMinAge('$_minAge')),
-                Slider(
-                  min: 45,
-                  max: 90,
-                  value: _minAge.toDouble(),
-                  divisions: 45,
-                  label: '$_minAge',
-                  onChanged: (v) => setState(() => _minAge = v.round()),
-                ),
-                const SizedBox(height: 8),
-                Text(l10n.directoryFilterMaxAge('$_maxAge')),
-                Slider(
-                  min: 45,
-                  max: 100,
-                  value: _maxAge.toDouble(),
-                  divisions: 55,
-                  label: '$_maxAge',
-                  onChanged: (v) => setState(() => _maxAge = v.round()),
-                ),
-                const SizedBox(height: 8),
-                if (tagOptions.isEmpty)
-                  Text(
-                    'No interest tags from server. Add tags in admin or try another language.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  )
-                else
-                  _chipsForOptions(tagOptions),
-                const SizedBox(height: 16),
-                PostalButton(
-                  label: 'Apply filters',
-                  onPressed: () {
-                    final min = _minAge <= _maxAge ? _minAge : _maxAge;
-                    final max = _maxAge >= _minAge ? _maxAge : _minAge;
-                    ref.read(directoryFilterProvider.notifier).state = DirectoryFilter(
-                          countryCode: _countryCode,
-                          minAge: min,
-                          maxAge: max,
-                          interests: _interests,
-                          sort: _sort,
-                        );
-                    ref.invalidate(directoryUsersProvider);
-                    Navigator.of(context).pop();
-                  },
-                ),
-                const SizedBox(height: 8),
-                PostalButton(
-                  label: 'Clear',
-                  variant: PostalButtonVariant.secondary,
-                  onPressed: () {
-                    ref.read(directoryFilterProvider.notifier).state = const DirectoryFilter();
-                    ref.invalidate(directoryUsersProvider);
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
+                  ),
+                  Material(
+                    color: sheetColor,
+                    elevation: 12,
+                    shadowColor: PostalTokens.inkNavy.withValues(alpha: 0.14),
+                    surfaceTintColor: Colors.transparent,
+                    child: SafeArea(
+                      top: false,
+                      minimum: EdgeInsets.zero,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              color: PostalTokens.perforationLine.withValues(alpha: 0.95),
+                            ),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              PostalButton(
+                                label: 'Apply filters',
+                                onPressed: () {
+                                  final min = _minAge <= _maxAge ? _minAge : _maxAge;
+                                  final max = _maxAge >= _minAge ? _maxAge : _minAge;
+                                  ref.read(directoryFilterProvider.notifier).state = DirectoryFilter(
+                                        countryCode: _countryCode,
+                                        minAge: min,
+                                        maxAge: max,
+                                        interests: _interests,
+                                        sort: _sort,
+                                      );
+                                  ref.invalidate(directoryUsersProvider);
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              const SizedBox(height: 8),
+                              PostalButton(
+                                label: 'Clear',
+                                variant: PostalButtonVariant.secondary,
+                                onPressed: () {
+                                  ref.read(directoryFilterProvider.notifier).state =
+                                      const DirectoryFilter();
+                                  ref.invalidate(directoryUsersProvider);
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
