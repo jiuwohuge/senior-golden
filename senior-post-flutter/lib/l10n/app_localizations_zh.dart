@@ -540,4 +540,26 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get legalPrivacyContent =>
       '1）我们会收集账号与设备信息用于安全风控与服务提供。\\n\\n2）我们依据适用隐私法规处理数据，并提供删除/导出路径。\\n\\n3）我们不会出售你的个人数据。\\n\\n4）部分数据处理用于实现核心消息与内容审核能力。\\n\\n5）你可联系支持申请账号删除与相关数据清理。';
+
+  @override
+  String get vipCenterUnlimitedRegisteredMail => '会员可无限寄送挂号信（以服务端规则为准）。';
+
+  @override
+  String vipCenterStandardPriorityHours(Object hours) {
+    return '普通邮件优先：约 $hours 小时（配置值）。';
+  }
+
+  @override
+  String get vipCenterFreeSpeedUpStandard => '会员普通邮件可免费加速（以服务端规则为准）。';
+
+  @override
+  String get vipCenterPurchaseDisabled => 'VIP 暂不可购买。';
+
+  @override
+  String get vipCenterCheckoutNotWired => '订阅结账尚未接入；权益以账号 VIP 状态为准。';
+
+  @override
+  String vipCenterLoadFailed(Object error) {
+    return '加载 VIP 信息失败：$error';
+  }
 }

@@ -32,7 +32,7 @@
 | **信件回信** | **已闭环** | `AppSendLetterInDto.parentLetterId`；`AppMailboxServiceImpl.sendLetter` 校验收信人并设 `toUserId`、落库 `parent_letter_id`。Flutter：`mailbox_remote.sendLetter` 传 `parentLetterId`；`letter_detail_page` 收信侧可发平邮/挂号回复。 |
 | **VIP 订阅收银台** | **仍不做** | 按产品决策：无支付链。调试：`POST /webapi/user/{id}/vip-debug` + 管理端用户列表「调试 VIP」；更新 `is_vip` / `vip_expire_at`（禁止改 `staff_role≠0` 账号）。 |
 | **腾讯 IM** | **部分改进** | `tim_facade` 对 `DioException` 与 TIM init/login 失败给出可读 `ApiBusinessException`；`chat_page` 历史加载失败展示 `PostalEmptyState` + 重试。 |
-| **登录页预填** | **已闭环** | 仅 `kDebugMode` 预填示例账号；Release 为空。 |
+| **登录页预填** | **已移除** | 邮箱与密码默认空，Debug/Release 均不预填。 |
 | **管理端 Mock** | **不适用** | `senior-post-manage` 无 MSW；用户列表已接真实 `/webapi`。 |
 
 ---

@@ -8,6 +8,7 @@ import 'package:tencent_cloud_chat_sdk/models/v2_tim_message.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../widgets/postal/postal.dart';
+import 'mailbox_remote.dart';
 import 'tim_facade.dart';
 
 /// C2C 聊天（自研气泡 + 邮政主题），消息走腾讯 IM SDK。
@@ -37,6 +38,19 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     if (text.isEmpty) return;
     setState(() => _busy = true);
     try {
+      final repo = ref.read(mailboxRemoteRepositoryProvider);
+      final canChat = await repo.isFriendshipActive(widget.peerUserId);
+      if (!canChat) {
+        if (mounted) {
+          PostalSnack.show(
+            context,
+            'Only postal friends in Connections can use live chat.',
+            tone: PostalSnackTone.error,
+          );
+        }
+        return;
+      }
+      await ref.read(seniorPostTimFacadeProvider).ensureLoggedIn();
       final tim = V2TIMManager();
       final created = await tim.v2TIMMessageManager.createTextMessage(
         text: text,
@@ -80,9 +94,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             color: PostalTokens.paperCream,
             child: Text(
               'Postal thread: letter history stays in Archive.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PostalTokens.inkSecondary,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: PostalTokens.inkSecondary),
             ),
           ),
           Expanded(
@@ -231,6 +245,18 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
       _loadError = null;
     });
     try {
+      final repo = ref.read(mailboxRemoteRepositoryProvider);
+      final canChat = await repo.isFriendshipActive(widget.peerUserId);
+      if (!canChat) {
+        if (!mounted) return;
+        setState(() {
+          _loading = false;
+          _loadError =
+              'Live chat is only for postal friends in Connections. Accept a delivered letter to add someone first.';
+          _items = const [];
+        });
+        return;
+      }
       await ref.read(seniorPostTimFacadeProvider).ensureLoggedIn();
       final tim = V2TIMManager();
       final me = await tim.getLoginUser();

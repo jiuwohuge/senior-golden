@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/bootstrap/app_bootstrap.dart';
 import '../../core/session/app_session.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 
 class VipCenterPage extends ConsumerWidget {
@@ -13,23 +14,23 @@ class VipCenterPage extends ConsumerWidget {
     final session = ref.watch(appSessionProvider);
     final lang = Localizations.localeOf(context).languageCode;
     final bootstrapAsync = ref.watch(appBootstrapProvider(lang));
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('VIP center')),
+      appBar: AppBar(title: Text(l10n.profileVipCenter)),
       body: SafeArea(
         child: bootstrapAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Text('Failed to load VIP info\n$e'),
+              child: Text(l10n.vipCenterLoadFailed(e.toString())),
             ),
           ),
           data: (bootstrap) {
             final v = bootstrap.vipProduct;
             final title = v.displayName;
             final subtitle = v.taglineForLanguage(lang);
-            final zh = lang.toLowerCase().startsWith('zh');
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
               children: [
@@ -48,37 +49,27 @@ class VipCenterPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 10),
                       if (v.unlimitedStampsBenefit)
-                        Text(
-                          zh
-                              ? '?????????????????????'
-                              : 'Unlimited registered mail for members (server rules apply).',
-                        ),
+                        Text(l10n.vipCenterUnlimitedRegisteredMail),
                       if (v.standardDeliveryHours > 0)
                         Text(
-                          zh
-                              ? '??????? ${v.standardDeliveryHours} ????????'
-                              : 'Standard mail priority: ~${v.standardDeliveryHours}h (configured).',
+                          l10n.vipCenterStandardPriorityHours(
+                            v.standardDeliveryHours,
+                          ),
                         )
                       else
-                        Text(
-                          zh
-                              ? '?????????????????????'
-                              : 'Free speed-up on standard mail for members (server rules apply).',
-                        ),
+                        Text(l10n.vipCenterFreeSpeedUpStandard),
                     ],
                   ),
                 ),
                 const SizedBox(height: 14),
                 if (!v.productEnabled)
                   Text(
-                    zh ? 'VIP ???????' : 'VIP purchase is currently disabled.',
+                    l10n.vipCenterPurchaseDisabled,
                     style: Theme.of(context).textTheme.bodyMedium,
                   )
                 else
                   Text(
-                    zh
-                        ? '??????????????? VIP ?????'
-                        : 'Subscription checkout is not wired yet; benefits follow your account VIP flag.',
+                    l10n.vipCenterCheckoutNotWired,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
               ],

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,22 +17,11 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  late final TextEditingController _email;
-  late final TextEditingController _password;
+  final _email = TextEditingController();
+  final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _agreed = false;
   bool _busy = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _email = TextEditingController(
-      text: kDebugMode ? 'edith@example.com' : '',
-    );
-    _password = TextEditingController(
-      text: kDebugMode ? '12345678' : '',
-    );
-  }
 
   @override
   void dispose() {

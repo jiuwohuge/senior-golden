@@ -227,5 +227,21 @@
   "settingsDeleteAccount": "Delete account",
   "legalEffectiveDate": "Effective date: 2026-05-01",
   "legalTermsContent": "1) This app provides interest-based social communication for adults aged 45+ only.\\n\\n2) The product does not provide dating or matchmaking services.\\n\\n3) You are responsible for the legality of your content and must not publish prohibited content.\\n\\n4) We may suspend accounts for abuse, harassment, spam, fraud, or policy violations.\\n\\n5) We provide moderation and reporting mechanisms to maintain a safe communication environment.",
-  "legalPrivacyContent": "1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal."
+  "legalPrivacyContent": "1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.",
+  "vipCenterUnlimitedRegisteredMail": "Unlimited registered mail for members (server rules apply).",
+  "vipCenterStandardPriorityHours": "Standard mail priority: ~{hours}h (configured).",
+  "@vipCenterStandardPriorityHours": {
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "vipCenterFreeSpeedUpStandard": "Free speed-up on standard mail for members (server rules apply).",
+  "vipCenterPurchaseDisabled": "VIP purchase is currently disabled.",
+  "vipCenterCheckoutNotWired": "Subscription checkout is not wired yet; benefits follow your account VIP flag.",
+  "vipCenterLoadFailed": "Failed to load VIP info: {error}",
+  "@vipCenterLoadFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  }
 }

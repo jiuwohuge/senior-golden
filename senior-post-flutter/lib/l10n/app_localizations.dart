@@ -1123,6 +1123,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.'**
   String get legalPrivacyContent;
+
+  /// No description provided for @vipCenterUnlimitedRegisteredMail.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited registered mail for members (server rules apply).'**
+  String get vipCenterUnlimitedRegisteredMail;
+
+  /// No description provided for @vipCenterStandardPriorityHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard mail priority: ~{hours}h (configured).'**
+  String vipCenterStandardPriorityHours(Object hours);
+
+  /// No description provided for @vipCenterFreeSpeedUpStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Free speed-up on standard mail for members (server rules apply).'**
+  String get vipCenterFreeSpeedUpStandard;
+
+  /// No description provided for @vipCenterPurchaseDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'VIP purchase is currently disabled.'**
+  String get vipCenterPurchaseDisabled;
+
+  /// No description provided for @vipCenterCheckoutNotWired.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription checkout is not wired yet; benefits follow your account VIP flag.'**
+  String get vipCenterCheckoutNotWired;
+
+  /// No description provided for @vipCenterLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load VIP info: {error}'**
+  String vipCenterLoadFailed(Object error);
 }
 
 class _AppLocalizationsDelegate

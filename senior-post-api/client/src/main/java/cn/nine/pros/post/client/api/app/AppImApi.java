@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Tag(name = "App-腾讯IM")
 public interface AppImApi {
 
-    @Operation(summary = "获取当前用户 UserSig（用于 TIM SDK 登录）")
+    @Operation(summary = "获取当前用户 UserSig（用于 TIM SDK 登录；须至少有一条活跃邮政好友关系，否则拒绝以节省 IM 席位）")
     @GetMapping(AppServiceDefine.SERVER_PREFIX + "/im/usersig")
     AppImUserSigVO userSig();
 }

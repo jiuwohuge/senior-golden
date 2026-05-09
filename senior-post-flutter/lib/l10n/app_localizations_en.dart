@@ -566,4 +566,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get legalPrivacyContent =>
       '1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.';
+
+  @override
+  String get vipCenterUnlimitedRegisteredMail =>
+      'Unlimited registered mail for members (server rules apply).';
+
+  @override
+  String vipCenterStandardPriorityHours(Object hours) {
+    return 'Standard mail priority: ~${hours}h (configured).';
+  }
+
+  @override
+  String get vipCenterFreeSpeedUpStandard =>
+      'Free speed-up on standard mail for members (server rules apply).';
+
+  @override
+  String get vipCenterPurchaseDisabled => 'VIP purchase is currently disabled.';
+
+  @override
+  String get vipCenterCheckoutNotWired =>
+      'Subscription checkout is not wired yet; benefits follow your account VIP flag.';
+
+  @override
+  String vipCenterLoadFailed(Object error) {
+    return 'Failed to load VIP info: $error';
+  }
 }
