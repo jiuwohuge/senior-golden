@@ -94,12 +94,15 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
     return ScaffoldMessenger(
       child: Builder(
         builder: (sheetContext) {
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
-              child: ListView(
-                shrinkWrap: true,
-                children: [
+          // SnackBar 要求本 Messenger 子树下至少有一个 Scaffold，否则会断言失败。
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
                   PostalSectionTitle(
                     title: 'Send letter to ${widget.peerNickname}',
                     subtitle: widget.countryLabel,
@@ -166,6 +169,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                 ],
               ),
             ),
+          ),
           );
         },
       ),
