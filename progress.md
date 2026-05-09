@@ -1,5 +1,20 @@
 # 会话进度日志
 
+## 2026-05-09 — Postal inbox 与 Connections 解耦 + 统一过滤
+
+- **需求**：邮政收件箱不得依赖好友/笔友关系；Postal = 收件未读（`recipient_read_at` 空）∪ 发件运输中；Archive 全量；已读仅 `getLetter`（已送达收件人）与 `earlyOpenLetter`。
+- **后端**：删除 `listPostalInbox` / `sync` 内 `areActiveFriends` 分支；新增 `includeInPostalInbox`；`listPostalInbox` 与 `sync` 共用同一规则；`getLetter` / `earlyOpenLetter` 行为保持与需求一致。
+- **文档**：`findings.md` §10、§14 与实现对齐。
+- **Flutter**：Postal 空态文案去掉「接受已送达信后才出现在 Connections」的耦合表述。
+- **验证**：`mvn -pl biz -am compile -DskipTests`；`dart analyze lib/features/mailbox`。
+
+## 2026-05-09 — 邮政收件箱：笔友已送达未读仍展示 + recipient_read_at
+
+- **梳理**：见 `findings.md` §14（Postal=待办/未读入口，Archive=全量时间线；「最近几条」不能替代未读语义）。
+- **后端**：`V16__letter_recipient_read_at.sql`；`LetterDomain.recipientReadAt`；`listPostalInbox` 笔友分支增加「收件+已送达+未读」；`getLetter` 收件人已送达首次打标已读；`earlyOpenLetter` 同步写入 `recipient_read_at`。
+- **Flutter**：`letter_detail_page` `dispose` 时 `invalidate(postalInboxLettersProvider)` 以便返回列表刷新。
+- **验证**：`mvn -pl biz -am compile -DskipTests`；`flutter analyze lib/features/mailbox/letter_detail_page.dart`。
+
 ## 2026-05-09 — 提前拆信：列表 status 与已读一致
 
 - **根因**：`earlyOpenLetter` 只写 `recipient_early_open_at`，`status` 仍为运输中，App 列表仍映射为 Delivering。

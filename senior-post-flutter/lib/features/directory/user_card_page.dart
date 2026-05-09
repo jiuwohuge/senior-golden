@@ -115,14 +115,11 @@ class UserCardPage extends ConsumerWidget {
                   PostalButton(
                     label: l10n.userCardSendLetter,
                     onPressed: () async {
-                      await showModalBottomSheet<void>(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (_) => SendLetterSheet(
-                          peerId: user.id,
-                          peerNickname: user.nickname,
-                          countryLabel: user.countryName,
-                        ),
+                      await showPostalSendLetterSheet(
+                        context,
+                        peerId: user.id,
+                        peerNickname: user.nickname,
+                        countryLabel: user.countryName,
                       );
                     },
                   ),

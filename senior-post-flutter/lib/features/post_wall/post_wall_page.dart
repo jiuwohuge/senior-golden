@@ -148,16 +148,13 @@ class _PostCard extends StatelessWidget {
           IconButton(
             tooltip: l10n.postWallSendLetterTooltip,
             onPressed: () {
-              showModalBottomSheet<void>(
-                context: context,
-                isScrollControlled: true,
-                builder: (ctx) => SendLetterSheet(
-                  peerId: post.author.id,
-                  peerNickname: post.author.nickname,
-                  countryLabel: post.author.countryName.isNotEmpty
-                      ? post.author.countryName
-                      : post.author.countryCode,
-                ),
+              showPostalSendLetterSheet(
+                context,
+                peerId: post.author.id,
+                peerNickname: post.author.nickname,
+                countryLabel: post.author.countryName.isNotEmpty
+                    ? post.author.countryName
+                    : post.author.countryCode,
               );
             },
             icon: const Icon(Icons.mail_outline),

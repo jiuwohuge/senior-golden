@@ -67,16 +67,11 @@ public class AppMailboxServiceImpl implements AppMailboxService {
 
     @Override
     public List<MailboxLetterItemVO> listPostalInbox(Long userId) {
-        List<LetterDomain> letters = loadLettersForUser(userId, null, 200);
+        List<LetterDomain> letters = loadLettersForUser(userId, null, 500);
         List<MailboxLetterItemVO> out = new ArrayList<>();
         for (LetterDomain l : letters) {
-            long peer = peerUserId(l, userId);
-            if (friendshipService.areActiveFriends(userId, peer)) {
-                // 已是笔友时：非「运输中」信件不再进入邮政收件箱（避免历史信占列表）；
-                // 「运输中」仍展示，发件人可看到在途，收件人侧继续走 toItem 的内容遮挡逻辑。
-                if (toInt(l.getStatus()) != STATUS_DELIVERING) {
-                    continue;
-                }
+            if (!includeInPostalInbox(l, userId)) {
+                continue;
             }
             out.add(toItem(l, userId, false));
         }
@@ -85,8 +80,9 @@ public class AppMailboxServiceImpl implements AppMailboxService {
 
     @Override
     public LetterSyncResultVO sync(Long userId, LocalDateTime since) {
-        List<LetterDomain> letters = loadLettersForUser(userId, since, 200);
+        List<LetterDomain> letters = loadLettersForUser(userId, since, 500);
         List<MailboxLetterItemVO> items = letters.stream()
+                .filter(l -> includeInPostalInbox(l, userId))
                 .map(l -> toItem(l, userId, false))
                 .collect(Collectors.toList());
         return LetterSyncResultVO.builder()
@@ -228,6 +224,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public MailboxLetterItemVO getLetter(long viewerUserId, long letterId) {
         LetterDomain l = letterMapper.selectById(letterId);
         if (l == null || l.isDelFlag()) {
@@ -235,6 +232,21 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         }
         if (l.getFromUserId() != viewerUserId && l.getToUserId() != viewerUserId) {
             throw new BadRequestException("无权查看该信件");
+        }
+        if (Objects.equals(l.getToUserId(), viewerUserId)
+                && l.getRecipientReadAt() == null
+                && toInt(l.getStatus()) == STATUS_DELIVERED) {
+            boolean marked = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
+                    .eq(LetterDomain::getId, letterId)
+                    .eq(LetterDomain::isDelFlag, false)
+                    .eq(LetterDomain::getToUserId, viewerUserId)
+                    .isNull(LetterDomain::getRecipientReadAt)
+                    .set(LetterDomain::getRecipientReadAt, LocalDateTime.now())
+                    .set(LetterDomain::getUpdatedAt, LocalDateTime.now())
+                    .set(LetterDomain::getUpdatedBy, viewerUserId));
+            if (marked) {
+                l = letterMapper.selectById(letterId);
+            }
         }
         return toItem(l, viewerUserId, true);
     }
@@ -327,6 +339,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 // 收件人已付费拆信：对双方列表/归档与「已送达」语义一致，避免仍显示运输中
                 .set(LetterDomain::getStatus, STATUS_DELIVERED)
                 .set(LetterDomain::getActualArrivalTime, now)
+                .set(LetterDomain::getRecipientReadAt, now)
                 .set(LetterDomain::getUpdatedAt, now)
                 .set(LetterDomain::getUpdatedBy, actorUserId));
         if (!letterPatched) {
@@ -428,6 +441,24 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             return l.getToUserId();
         }
         return l.getFromUserId();
+    }
+
+    /**
+     * Postal inbox：与 Connections/好友关系无关。
+     * - 收件：{@code recipient_read_at == null} 视为未读（含运输中加密件与已送达未打开）。
+     * - 发件：仅运输中（本人跟踪在途），已送达不再占收件箱。
+     */
+    private static boolean includeInPostalInbox(LetterDomain l, long userId) {
+        if (l == null || l.isDelFlag()) {
+            return false;
+        }
+        if (Objects.equals(l.getToUserId(), userId)) {
+            return l.getRecipientReadAt() == null;
+        }
+        if (Objects.equals(l.getFromUserId(), userId)) {
+            return toInt(l.getStatus()) == STATUS_DELIVERING;
+        }
+        return false;
     }
 
     private MailboxLetterItemVO toItem(LetterDomain l, long viewer, boolean includeFullContent) {

@@ -168,7 +168,7 @@ class _PostalInboxBody extends ConsumerWidget {
                         child: PostalEmptyState(
                           title: 'Postal inbox is clear',
                           subtitle:
-                              'No pending letters. Your postal friends appear in Connections after you accept a delivered letter.',
+                              'No letters need attention here. In-transit and unread items appear in this inbox.',
                         ),
                       ),
                     ],

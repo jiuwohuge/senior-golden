@@ -158,7 +158,7 @@
 
 | 事实 | 说明 |
 |------|------|
-| **后端 `listPostalInbox`**（`AppMailboxServiceImpl`）曾对所有「已与对方互为笔友」的信件 **整封跳过**，导致 **status=运输中** 的平邮在 Archive 全量接口可见，却在 `GET /mailbox/postal` 中消失。 | 已改为：笔友关系下 **仍返回运输中** 信件；非运输中且已是笔友则继续不进入邮政 Tab 列表（与「首封建联」语义一致）。 |
+| **后端 `listPostalInbox` / `sync`**（`AppMailboxServiceImpl`）曾按 `areActiveFriends` 分支处理笔友信，与「邮政收件箱与 Connections 完全独立」冲突。 | **已清除**：邮政列表 **不再** 查询好友关系；统一由 `includeInPostalInbox` 判定（见 §14）。 |
 | **收件人 B** 的平邮在途：`toItem` 中 `hideBody = !fromMe && delivering && standard && !openedEarly` 不变，列表/详情仍 **内容遮挡**。 | 与需求「B 与现在一样做信息遮挡」一致。 |
 | **Flutter 邮票** | 邮箱顶栏等曾独立请求 `/api/stamps/balance`，与 `appSessionProvider`（`/api/auth/me` 的 `stampsBalance`）不同步；扣费后只刷新前者时个人中心仍显示旧值。**已改**：统一以 `appSessionProvider` 展示；发信/加速成功后 `refreshSessionFromServer()`；回到前台时邮箱页顺带刷新 session。 |
 
@@ -169,6 +169,19 @@
 | 事实 | 说明 |
 |------|------|
 | **`earlyOpenLetter`** 仅写入 `recipient_early_open_at`，**未更新** `bu_letter.status`，VO 仍下发 `status=1`，Flutter 列表 chip 仍为 Delivering；`toItem` 已因 `openedEarly` 放开正文，造成「看得见正文却像未送达」。 | **代码**：提前拆信成功时同时 `status=2`、`actual_arrival_time=now()`。**数据**：`V15__letter_early_open_status_backfill.sql` 修正历史行。 |
+
+---
+
+## 14. 邮政收件箱 / 归档 / 在途 / 已读（2026-05-09，与 Connections 解耦）
+
+| 概念 | 口径 |
+|------|------|
+| **Connections** | 仅 `listFriends` / 接受请求建联等；**不参与** `listPostalInbox`、`sync`、`listArchive` 的过滤。 |
+| **归档（Archive）** | `GET /mailbox/archive` = 当前用户作为发件人或收件人关联的 **全部** 信件（与已读/未读无关）。 |
+| **邮政收件箱（Postal）** | `GET /mailbox/postal` 与 `sync`：**收件**且 `recipient_read_at` 为空（含运输中加密、已送达未打开）；**或发件**且 `status=运送中`。已送达发件信不再进入 Postal。实现：`AppMailboxServiceImpl#includeInPostalInbox`。 |
+| **在途横幅（App）** | Flutter：`postal` 列表内存在 `LetterStatus.delivering` 即显示「A post is on the way」；与后端 Postal 过滤一致。 |
+| **已读 `recipient_read_at` 仅两处写入** | （1）`getLetter`：仅当 **收件人** 且 **已送达** 且原为空时写入（运输中打开详情 **不写**）。（2）`earlyOpenLetter`：提前拆信成功时写入。 |
+| **Archive 压力** | 可做分页/截断；与 Postal 的 **未读 + 发件在途** 维度独立。 |
 
 ---
 

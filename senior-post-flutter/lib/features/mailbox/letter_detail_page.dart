@@ -2,6 +2,7 @@
 
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,11 +12,100 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import 'mailbox_providers.dart';
 import 'mailbox_remote.dart';
 import 'speed_up_sheet.dart';
+
+/// Dio 拦截器将业务失败封装为 [DioException.error]；统一取出可读文案。
+String? _postalApiUserMessage(Object error) {
+  if (error is ApiBusinessException) return error.message;
+  if (error is DioException && error.error is ApiBusinessException) {
+    return (error.error as ApiBusinessException).message;
+  }
+  if (error is DioException) return error.message;
+  return null;
+}
+
+/// 回信邮种：高对比选中态 + 副标题，避免主题 [ChoiceChip] 选中后字色不可读。
+Widget _replyMailKindChip({
+  required BuildContext context,
+  required String title,
+  required String subtitle,
+  required bool selected,
+  required VoidCallback onTap,
+}) {
+  final bg = selected ? PostalTokens.postboxGreen : PostalTokens.paperCard;
+  final border = selected
+      ? PostalTokens.postboxGreen
+      : PostalTokens.perforationLine;
+  final titleColor = selected ? Colors.white : PostalTokens.inkNavy;
+  final subColor = selected
+      ? Colors.white.withValues(alpha: 0.9)
+      : PostalTokens.inkSecondary;
+
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: PostalTokens.shapeSm,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: PostalTokens.shapeSm,
+          border: Border.all(color: border, width: selected ? 2 : 1.2),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: PostalTokens.postboxGreen.withValues(alpha: 0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: titleColor,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                if (selected)
+                  Icon(
+                    Icons.check_circle_rounded,
+                    size: 22,
+                    color: Colors.white.withValues(alpha: 0.95),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: subColor,
+                fontWeight: FontWeight.w600,
+                height: 1.3,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
 class LetterDetailPage extends ConsumerStatefulWidget {
   const LetterDetailPage({super.key, required this.letterId});
@@ -34,6 +124,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
 
   @override
   void dispose() {
+    ref.invalidate(postalInboxLettersProvider);
     _reply.dispose();
     super.dispose();
   }
@@ -75,13 +166,16 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
             }
             final isDelivering = letter.status == LetterStatus.delivering;
             final isRegistered = letter.status == LetterStatus.registered;
-            final friendsAsync = ref.watch(friendshipActiveProvider(letter.peer.id));
+            final friendsAsync = ref.watch(
+              friendshipActiveProvider(letter.peer.id),
+            );
             final isFriend = friendsAsync.valueOrNull ?? false;
             final canAccept =
                 !letter.outgoing &&
                 letter.status == LetterStatus.delivered &&
                 !isFriend;
-            final canReply = !letter.outgoing &&
+            final canReply =
+                !letter.outgoing &&
                 letter.status != LetterStatus.delivering &&
                 letter.peer.id.isNotEmpty;
 
@@ -131,15 +225,24 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                   style: Theme.of(context).textTheme.bodyLarge,
                                 ),
                                 BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                                  filter: ImageFilter.blur(
+                                    sigmaX: 14,
+                                    sigmaY: 14,
+                                  ),
                                   child: Container(
                                     alignment: Alignment.center,
-                                    color: PostalTokens.kraftBrownMuted.withValues(alpha: 0.42),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    color: PostalTokens.kraftBrownMuted
+                                        .withValues(alpha: 0.42),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
                                     child: Text(
                                       l10n.letterContentHiddenHint,
                                       textAlign: TextAlign.center,
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
                                             height: 1.45,
                                             color: PostalTokens.inkSecondary,
                                           ),
@@ -184,7 +287,9 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                               context: context,
                               builder: (_) => SpeedUpSheet(letterId: letter.id),
                             );
-                            ref.invalidate(letterDetailProvider(widget.letterId));
+                            ref.invalidate(
+                              letterDetailProvider(widget.letterId),
+                            );
                             ref.invalidate(mailboxLettersProvider);
                             ref.invalidate(postalInboxLettersProvider);
                           },
@@ -216,7 +321,9 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                     if (!context.mounted) {
                                       return;
                                     }
-                                    ref.invalidate(letterDetailProvider(widget.letterId));
+                                    ref.invalidate(
+                                      letterDetailProvider(widget.letterId),
+                                    );
                                     ref.invalidate(mailboxLettersProvider);
                                     ref.invalidate(postalInboxLettersProvider);
                                     ref.invalidate(mailboxArchiveProvider);
@@ -225,11 +332,12 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                       l10n.letterEarlyOpenSuccess,
                                       tone: PostalSnackTone.success,
                                     );
-                                  } on ApiBusinessException catch (e) {
-                                    if (context.mounted) {
+                                  } catch (e) {
+                                    final msg = _postalApiUserMessage(e);
+                                    if (context.mounted && msg != null) {
                                       PostalSnack.show(
                                         context,
-                                        e.message,
+                                        msg,
                                         tone: PostalSnackTone.error,
                                       );
                                     }
@@ -284,11 +392,12 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                 ref.invalidate(mailboxLettersProvider);
                                 ref.invalidate(postalInboxLettersProvider);
                                 ref.invalidate(mailboxFriendsProvider);
-                              } on ApiBusinessException catch (e) {
-                                if (context.mounted) {
+                              } catch (e) {
+                                final msg = _postalApiUserMessage(e);
+                                if (context.mounted && msg != null) {
                                   PostalSnack.show(
                                     context,
-                                    e.message,
+                                    msg,
                                     tone: PostalSnackTone.error,
                                   );
                                 }
@@ -304,28 +413,76 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                 const SizedBox(height: 16),
                 if (canReply) ...[
                   Text(
-                    'Reply (same send rules as new letter; postage may apply).',
+                    'Reply uses the same rules as sending a new letter.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: PostalTokens.inkSecondary,
-                        ),
+                      color: PostalTokens.inkSecondary,
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      ChoiceChip(
-                        label: const Text('Standard'),
-                        selected: _replyType == LetterType.standard,
-                        onSelected: (_) =>
-                            setState(() => _replyType = LetterType.standard),
-                      ),
-                      const SizedBox(width: 8),
-                      ChoiceChip(
-                        label: const Text('Registered'),
-                        selected: _replyType == LetterType.registered,
-                        onSelected: (_) =>
-                            setState(() => _replyType = LetterType.registered),
-                      ),
-                    ],
+                  const SizedBox(height: 10),
+                  Builder(
+                    builder: (context) {
+                      final session = ref.watch(appSessionProvider);
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: _replyMailKindChip(
+                                  context: context,
+                                  title: 'Standard',
+                                  subtitle: 'Free · delayed delivery',
+                                  selected: _replyType == LetterType.standard,
+                                  onTap: () => setState(
+                                    () => _replyType = LetterType.standard,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _replyMailKindChip(
+                                  context: context,
+                                  title: 'Registered',
+                                  subtitle: session.isVip
+                                      ? 'VIP · instant delivery'
+                                      : '1 stamp · instant delivery',
+                                  selected: _replyType == LetterType.registered,
+                                  onTap: () => setState(
+                                    () => _replyType = LetterType.registered,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _replyType == LetterType.standard
+                                ? 'Standard mail travels for a while; the recipient may see blurred text until it arrives.'
+                                : 'Registered mail is treated as delivered immediately so the full letter is readable at once.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: PostalTokens.inkTertiary,
+                                  height: 1.4,
+                                ),
+                          ),
+                          if (_replyType == LetterType.registered &&
+                              !session.isVip) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              'Your stamps: ${session.stampBalance}',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: session.stampBalance < 1
+                                        ? PostalTokens.stampVermilion
+                                        : PostalTokens.inkSecondary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ],
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 8),
                   PostalTextField(
@@ -351,6 +508,17 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                               );
                               return;
                             }
+                            final session = ref.read(appSessionProvider);
+                            if (_replyType == LetterType.registered &&
+                                !session.isVip &&
+                                session.stampBalance < 1) {
+                              PostalSnack.show(
+                                context,
+                                'Not enough stamps for registered mail.',
+                                tone: PostalSnackTone.warning,
+                              );
+                              return;
+                            }
                             setState(() => _replyBusy = true);
                             try {
                               await ref
@@ -368,14 +536,17 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                 tone: PostalSnackTone.success,
                               );
                               _reply.clear();
-                              ref.invalidate(letterDetailProvider(widget.letterId));
+                              ref.invalidate(
+                                letterDetailProvider(widget.letterId),
+                              );
                               ref.invalidate(mailboxLettersProvider);
                               ref.invalidate(postalInboxLettersProvider);
-                            } on ApiBusinessException catch (e) {
-                              if (context.mounted) {
+                            } catch (e) {
+                              final msg = _postalApiUserMessage(e);
+                              if (context.mounted && msg != null) {
                                 PostalSnack.show(
                                   context,
-                                  e.message,
+                                  msg,
                                   tone: PostalSnackTone.error,
                                 );
                               }
@@ -390,8 +561,8 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                   Text(
                     'Reply is available after the letter is received (not while delivering).',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: PostalTokens.inkSecondary,
-                        ),
+                      color: PostalTokens.inkSecondary,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   PostalTextField(
@@ -403,10 +574,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                     enabled: false,
                   ),
                   const SizedBox(height: 12),
-                  PostalButton(
-                    label: 'Send reply',
-                    onPressed: null,
-                  ),
+                  PostalButton(label: 'Send reply', onPressed: null),
                 ],
                 if (isFriend) ...[
                   const SizedBox(height: 12),

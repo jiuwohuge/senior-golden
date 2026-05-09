@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
@@ -8,6 +9,29 @@ import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../mailbox/mailbox_providers.dart';
 import '../mailbox/mailbox_remote.dart';
+
+/// 统一发信底部弹层：透明幕布 + 圆角信纸容器；内容见 [SendLetterSheet]。
+///
+/// SnackBar 由 sheet 内嵌套的 [ScaffoldMessenger] 承载，提示浮在弹层之上，不遮挡主页面操作。
+Future<void> showPostalSendLetterSheet(
+  BuildContext context, {
+  required String peerId,
+  required String peerNickname,
+  required String countryLabel,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: false,
+    backgroundColor: Colors.transparent,
+    barrierColor: PostalTokens.inkNavy.withValues(alpha: 0.34),
+    builder: (ctx) => SendLetterSheet(
+      peerId: peerId,
+      peerNickname: peerNickname,
+      countryLabel: countryLabel,
+    ),
+  );
+}
 
 class SendLetterSheet extends ConsumerStatefulWidget {
   const SendLetterSheet({
@@ -61,9 +85,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
     }
     setState(() => _busy = true);
     try {
-      await ref
-          .read(mailboxRemoteRepositoryProvider)
-          .sendLetter(
+      await ref.read(mailboxRemoteRepositoryProvider).sendLetter(
             toUserId: widget.peerId,
             content: _body.text.trim(),
             type: _type,
@@ -91,87 +113,161 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(appSessionProvider);
-    return ScaffoldMessenger(
-      child: Builder(
-        builder: (sheetContext) {
-          // SnackBar 要求本 Messenger 子树下至少有一个 Scaffold，否则会断言失败。
-          return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                  PostalSectionTitle(
-                    title: 'Send letter to ${widget.peerNickname}',
-                    subtitle: widget.countryLabel,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RadioListTile<LetterType>(
-                          // ignore: deprecated_member_use
-                          value: LetterType.registered,
-                          // ignore: deprecated_member_use
-                          groupValue: _type,
-                          // ignore: deprecated_member_use
-                          onChanged: _busy
-                              ? null
-                              : (v) => setState(() => _type = v!),
-                          title: const Text('Registered Mail'),
-                          subtitle: Text(
-                            session.isVip ? 'Free for VIP' : 'Consumes 1 stamp',
+    final mq = MediaQuery.of(context);
+    final viewH = mq.size.height;
+    final kb = mq.viewInsets.bottom;
+    final sheetH = ((viewH - kb) * 0.88).clamp(320.0, viewH * 0.92);
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: kb),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: SizedBox(
+          height: sheetH,
+          width: double.infinity,
+          child: Material(
+            color: PostalTokens.paperEnvelope,
+            elevation: 16,
+            shadowColor: PostalTokens.inkNavy.withValues(alpha: 0.2),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+            clipBehavior: Clip.antiAlias,
+            child: ScaffoldMessenger(
+              child: Builder(
+                builder: (sheetContext) {
+                  return Scaffold(
+                    backgroundColor: PostalTokens.paperEnvelope,
+                    resizeToAvoidBottomInset: false,
+                    body: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 10),
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: PostalTokens.inkTertiary
+                                  .withValues(alpha: 0.38),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RadioListTile<LetterType>(
-                          // ignore: deprecated_member_use
-                          value: LetterType.standard,
-                          // ignore: deprecated_member_use
-                          groupValue: _type,
-                          // ignore: deprecated_member_use
-                          onChanged: _busy
-                              ? null
-                              : (v) => setState(() => _type = v!),
-                          title: const Text('Standard Post'),
-                          subtitle: const Text('Free, delayed delivery'),
+                        const SizedBox(height: 8),
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: PostalTokens.kraftBrownMuted
+                              .withValues(alpha: 0.45),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  PostalStampBadge(
-                    balance: session.stampBalance,
-                    cap: session.dailyStampCap,
-                    isVip: session.isVip,
-                  ),
-                  const SizedBox(height: 12),
-                  PostalTextField(
-                    controller: _body,
-                    label: 'Letter content',
-                    maxLines: 7,
-                    minLines: 5,
-                    showClearButton: false,
-                  ),
-                  const SizedBox(height: 14),
-                  PostalButton(
-                    label: 'Send now',
-                    onPressed: _busy ? null : () => _send(sheetContext),
-                    busy: _busy,
-                  ),
-                ],
+                        Expanded(
+                          child: SafeArea(
+                            top: false,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(20, 14, 20, 18),
+                              child: ListView(
+                                physics: const ClampingScrollPhysics(),
+                                children: [
+                                  PostalSectionTitle(
+                                    title:
+                                        'Send letter to ${widget.peerNickname}',
+                                    subtitle: widget.countryLabel,
+                                    trailing: IconButton(
+                                      tooltip: MaterialLocalizations.of(
+                                        context,
+                                      ).closeButtonTooltip,
+                                      icon: Icon(
+                                        Icons.close,
+                                        color: PostalTokens.inkTertiary,
+                                      ),
+                                      onPressed: _busy
+                                          ? null
+                                          : () => Navigator.of(sheetContext)
+                                              .pop(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: RadioListTile<LetterType>(
+                                          // ignore: deprecated_member_use
+                                          value: LetterType.registered,
+                                          // ignore: deprecated_member_use
+                                          groupValue: _type,
+                                          // ignore: deprecated_member_use
+                                          onChanged: _busy
+                                              ? null
+                                              : (v) => setState(
+                                                    () => _type = v!,
+                                                  ),
+                                          title: const Text('Registered Mail'),
+                                          subtitle: Text(
+                                            session.isVip
+                                                ? 'Free for VIP'
+                                                : 'Consumes 1 stamp',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: RadioListTile<LetterType>(
+                                          // ignore: deprecated_member_use
+                                          value: LetterType.standard,
+                                          // ignore: deprecated_member_use
+                                          groupValue: _type,
+                                          // ignore: deprecated_member_use
+                                          onChanged: _busy
+                                              ? null
+                                              : (v) => setState(
+                                                    () => _type = v!,
+                                                  ),
+                                          title: const Text('Standard Post'),
+                                          subtitle: const Text(
+                                            'Free, delayed delivery',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  PostalStampBadge(
+                                    balance: session.stampBalance,
+                                    cap: session.dailyStampCap,
+                                    isVip: session.isVip,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  PostalTextField(
+                                    controller: _body,
+                                    label: 'Letter content',
+                                    maxLines: 7,
+                                    minLines: 5,
+                                    showClearButton: false,
+                                  ),
+                                  const SizedBox(height: 14),
+                                  PostalButton(
+                                    label: 'Send now',
+                                    onPressed: _busy
+                                        ? null
+                                        : () => _send(sheetContext),
+                                    busy: _busy,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ),
-          );
-        },
+        ),
       ),
     );
   }

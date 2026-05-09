@@ -4,6 +4,8 @@ import cn.nine.commons.data.dto.AbstractAuditableDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 /**
  * 信件表（挂号信/平邮） DTO
  *
@@ -78,5 +80,11 @@ public class LetterDTO extends AbstractAuditableDTO {
      */
     @Schema(description = "发送模式：1平邮路径 2挂号路径 3直发/VIP")
     private Integer sendMode;
+
+    @Schema(description = "收件人提前拆信时间")
+    private LocalDateTime recipientEarlyOpenAt;
+
+    @Schema(description = "收件人首次已读时间")
+    private LocalDateTime recipientReadAt;
 
 }

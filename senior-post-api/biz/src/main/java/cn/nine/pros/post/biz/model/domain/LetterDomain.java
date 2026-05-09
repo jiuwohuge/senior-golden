@@ -91,4 +91,11 @@ public class LetterDomain extends AbstractAuditableDomain {
     @TableField("recipient_early_open_at")
     private LocalDateTime recipientEarlyOpenAt;
 
+    /**
+     * 收件人首次已读（已送达且打开详情；或提前拆信成功时一并写入）
+     */
+    @Schema(description = "收件人首次已读时间")
+    @TableField("recipient_read_at")
+    private LocalDateTime recipientReadAt;
+
 }
