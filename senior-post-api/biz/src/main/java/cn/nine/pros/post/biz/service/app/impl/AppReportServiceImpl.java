@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.app.impl;
 
 import cn.nine.commons.basic.exception.BadRequestException;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.PostcardCommentDomain;
 import cn.nine.pros.post.biz.model.domain.PostcardDomain;
 import cn.nine.pros.post.biz.model.domain.ReportDomain;
@@ -27,20 +28,21 @@ public class AppReportServiceImpl implements AppReportService {
     private final ReportService reportService;
     private final PostcardService postcardService;
     private final PostcardCommentService postcardCommentService;
+    private final AppMessages appMessages;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void submit(long reporterUserId, AppReportCreateInDto body) {
         String rawType = body.getTargetType() == null ? "" : body.getTargetType().trim().toLowerCase();
         if (!TYPE_POSTCARD.equals(rawType) && !TYPE_COMMENT.equals(rawType)) {
-            throw new BadRequestException("targetType 须为 postcard 或 comment");
+            throw new BadRequestException(appMessages.get("app.error.report.targetType"));
         }
         String reason = body.getReason() == null ? "" : body.getReason().trim();
         if (!StringUtils.hasText(reason)) {
-            throw new BadRequestException("举报原因不能为空");
+            throw new BadRequestException(appMessages.get("app.error.report.reasonEmpty"));
         }
         if (body.getTargetId() == null) {
-            throw new BadRequestException("targetId 不能为空");
+            throw new BadRequestException(appMessages.get("app.error.report.targetIdEmpty"));
         }
         if (TYPE_POSTCARD.equals(rawType)) {
             validatePostcardTarget(reporterUserId, body.getTargetId());
@@ -55,7 +57,7 @@ public class AppReportServiceImpl implements AppReportService {
                 .eq(ReportDomain::getTargetId, body.getTargetId())
                 .apply("status = 0"));
         if (pending > 0) {
-            throw new BadRequestException("该对象已有您提交的待处理举报");
+            throw new BadRequestException(appMessages.get("app.error.report.pendingDuplicate"));
         }
 
         String storedReason = reason.length() > 255 ? reason.substring(0, 255) : reason;
@@ -72,20 +74,20 @@ public class AppReportServiceImpl implements AppReportService {
     private void validatePostcardTarget(long reporterUserId, long postcardId) {
         PostcardDomain p = postcardService.getById(postcardId);
         if (p == null || p.isDelFlag()) {
-            throw new BadRequestException("明信片不存在");
+            throw new BadRequestException(appMessages.get("app.error.report.postcardNotFound"));
         }
         if (Objects.equals(reporterUserId, p.getUserId())) {
-            throw new BadRequestException("不能举报自己的明信片");
+            throw new BadRequestException(appMessages.get("app.error.report.ownPostcard"));
         }
     }
 
     private void validateCommentTarget(long reporterUserId, long commentId) {
         PostcardCommentDomain c = postcardCommentService.getById(commentId);
         if (c == null || c.isDelFlag()) {
-            throw new BadRequestException("评论不存在");
+            throw new BadRequestException(appMessages.get("app.error.report.commentNotFound"));
         }
         if (Objects.equals(reporterUserId, c.getUserId())) {
-            throw new BadRequestException("不能举报自己的评论");
+            throw new BadRequestException(appMessages.get("app.error.report.ownComment"));
         }
     }
 }

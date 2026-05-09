@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.base;
 
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.OssProperties;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.LetterMapper;
 import cn.nine.pros.post.biz.mapper.PostcardMapper;
 import cn.nine.pros.post.biz.service.app.support.OssReadableKeyValidator;
@@ -24,6 +25,7 @@ import java.util.Set;
 public class OssReadAuthorizationService {
 
     private final OssProperties ossProperties;
+    private final AppMessages appMessages;
     private final PostcardMapper postcardMapper;
     private final LetterMapper letterMapper;
     private final UserService userService;
@@ -31,37 +33,37 @@ public class OssReadAuthorizationService {
     public void assertAppUserCanRead(long viewerUserId, String normalizedObjectKey, String originalRef) {
         String prefix = ossProperties.getKeyPrefix().replaceAll("^/+|/+$", "");
         OssReadableKeyValidator.ParsedOssKey p =
-                OssReadableKeyValidator.parseNormalizedKey(prefix, normalizedObjectKey);
+                OssReadableKeyValidator.parseNormalizedKey(prefix, normalizedObjectKey, appMessages);
         List<String> variants = buildLookupVariants(originalRef, normalizedObjectKey);
         switch (p.sceneLower()) {
             case "postcard" -> {
                 if (postcardMapper.countVisibleReferencingImage(viewerUserId, variants) < 1) {
-                    throw new BadRequestException("无权读取该图片");
+                    throw new BadRequestException(appMessages.get("app.error.oss.readForbidden"));
                 }
             }
             case "avatar" -> {
                 UserDTO owner = userService.findById(p.ownerUserId());
                 if (owner == null) {
-                    throw new BadRequestException("无权读取该图片");
+                    throw new BadRequestException(appMessages.get("app.error.oss.readForbidden"));
                 }
                 if (owner.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(owner.getStatus()))) {
-                    throw new BadRequestException("无权读取该图片");
+                    throw new BadRequestException(appMessages.get("app.error.oss.readForbidden"));
                 }
                 // 已登录用户可读「正常用户」头像（墙/名录展示）；objectKey 仍难枚举。
             }
             case "letter" -> {
                 if (letterMapper.countPeerLetterReferencingContent(viewerUserId, p.ownerUserId(), variants) < 1) {
-                    throw new BadRequestException("无权读取该图片");
+                    throw new BadRequestException(appMessages.get("app.error.oss.readForbidden"));
                 }
             }
-            default -> throw new BadRequestException("无权读取该图片");
+            default -> throw new BadRequestException(appMessages.get("app.error.oss.readForbidden"));
         }
     }
 
     /** 管理端：仅校验 key 形态（已在换签前由校验器保证），不做业务绑定。 */
     public void assertStaffCanRead(String normalizedObjectKey) {
         String prefix = ossProperties.getKeyPrefix().replaceAll("^/+|/+$", "");
-        OssReadableKeyValidator.parseNormalizedKey(prefix, normalizedObjectKey);
+        OssReadableKeyValidator.parseNormalizedKey(prefix, normalizedObjectKey, appMessages);
     }
 
     private List<String> buildLookupVariants(String originalRef, String normalizedKey) {

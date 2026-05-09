@@ -3,6 +3,7 @@ package cn.nine.pros.post.biz.controller.app;
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.service.app.AppStampsService;
 import cn.nine.pros.post.client.api.app.AppStampsApi;
 import cn.nine.pros.post.client.model.db.StampTransactionDTO;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AppStampsController implements AppStampsApi {
 
     private final AppStampsService appStampsService;
+    private final AppMessages appMessages;
 
     @Override
     public AppStampBalanceVO balance() {
@@ -32,10 +34,10 @@ public class AppStampsController implements AppStampsApi {
         return appStampsService.ledgerPage(uid, body.getPage());
     }
 
-    private static Long requireUserId() {
+    private Long requireUserId() {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
-            throw new BadRequestException("未登录");
+            throw new BadRequestException(appMessages.get("app.error.notLoggedIn"));
         }
         return uid;
     }

@@ -5,6 +5,7 @@ import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../mailbox/mailbox_providers.dart';
@@ -63,10 +64,11 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
   /// [sheetContext] 须为嵌套在 [ScaffoldMessenger] 之下的子树 context，
   /// 否则 SnackBar 会挂到父页 Scaffold，在 bottom sheet 背后不可见。
   Future<void> _send(BuildContext sheetContext) async {
+    final l10n = AppLocalizations.of(sheetContext)!;
     if (_body.text.trim().isEmpty) {
       PostalSnack.show(
         sheetContext,
-        'Please write letter content.',
+        l10n.sendLetterBodyRequired,
         tone: PostalSnackTone.warning,
       );
       return;
@@ -78,7 +80,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
         session.stampBalance < 1) {
       PostalSnack.show(
         sheetContext,
-        'Not enough stamps for registered mail.',
+        l10n.sendLetterRegisteredStampShort,
         tone: PostalSnackTone.warning,
       );
       return;
@@ -97,7 +99,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
       ref.invalidate(mailboxArchiveProvider);
       PostalSnack.show(
         sheetContext,
-        'Letter sent',
+        l10n.sendLetterSentSuccess,
         tone: PostalSnackTone.success,
       );
       Navigator.of(sheetContext).pop();
@@ -112,6 +114,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final session = ref.watch(appSessionProvider);
     final mq = MediaQuery.of(context);
     final viewH = mq.size.height;
@@ -169,8 +172,9 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                                 physics: const ClampingScrollPhysics(),
                                 children: [
                                   PostalSectionTitle(
-                                    title:
-                                        'Send letter to ${widget.peerNickname}',
+                                    title: l10n.sendLetterSheetTitle(
+                                      widget.peerNickname,
+                                    ),
                                     subtitle: widget.countryLabel,
                                     trailing: IconButton(
                                       tooltip: MaterialLocalizations.of(
@@ -201,11 +205,11 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                                               : (v) => setState(
                                                     () => _type = v!,
                                                   ),
-                                          title: const Text('Registered Mail'),
+                                          title: Text(l10n.sendLetterRegisteredMail),
                                           subtitle: Text(
                                             session.isVip
-                                                ? 'Free for VIP'
-                                                : 'Consumes 1 stamp',
+                                                ? l10n.sendLetterRegisteredSubVip
+                                                : l10n.sendLetterRegisteredSubPaid,
                                           ),
                                         ),
                                       ),
@@ -225,9 +229,9 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                                               : (v) => setState(
                                                     () => _type = v!,
                                                   ),
-                                          title: const Text('Standard Post'),
-                                          subtitle: const Text(
-                                            'Free, delayed delivery',
+                                          title: Text(l10n.sendLetterStandardPost),
+                                          subtitle: Text(
+                                            l10n.sendLetterStandardSub,
                                           ),
                                         ),
                                       ),
@@ -242,7 +246,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                                   const SizedBox(height: 12),
                                   PostalTextField(
                                     controller: _body,
-                                    label: 'Letter content',
+                                    label: l10n.sendLetterContentLabel,
                                     maxLines: 7,
                                     minLines: 5,
                                     showClearButton: false,

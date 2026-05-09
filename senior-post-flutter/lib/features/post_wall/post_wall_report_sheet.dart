@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 import 'post_wall_remote.dart';
 
@@ -33,16 +34,17 @@ class _PostWallReportSheetState extends ConsumerState<PostWallReportSheet> {
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context)!;
     final text = _reason.text.trim();
     if (text.isEmpty) {
-      PostalSnack.show(context, '请填写举报原因', tone: PostalSnackTone.warning);
+      PostalSnack.show(context, l10n.reportReasonRequired, tone: PostalSnackTone.warning);
       return;
     }
     setState(() => _busy = true);
     try {
       final id = int.tryParse(widget.objectId);
       if (id == null) {
-        throw ApiBusinessException(0, '无效的内容 ID');
+        throw ApiBusinessException(0, l10n.errorInvalidContentId);
       }
       await ref.read(postWallRemoteProvider).submitReport(
             targetType: widget.targetType,
@@ -50,7 +52,7 @@ class _PostWallReportSheetState extends ConsumerState<PostWallReportSheet> {
             reason: text,
           );
       if (!mounted) return;
-      PostalSnack.show(context, '举报已提交', tone: PostalSnackTone.success);
+      PostalSnack.show(context, l10n.reportSubmitted, tone: PostalSnackTone.success);
       Navigator.of(context).pop();
     } on ApiBusinessException catch (e) {
       if (mounted) PostalSnack.show(context, e.message, tone: PostalSnackTone.error);

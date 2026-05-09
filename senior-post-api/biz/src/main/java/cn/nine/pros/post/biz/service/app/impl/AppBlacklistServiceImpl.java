@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.app.impl;
 
 import cn.nine.commons.basic.exception.BadRequestException;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.UserBlacklistMapper;
 import cn.nine.pros.post.biz.model.domain.UserBlacklistDomain;
 import cn.nine.pros.post.biz.service.app.AppBlacklistService;
@@ -26,15 +27,16 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
     private final UserBlacklistMapper userBlacklistMapper;
     private final UserService userService;
     private final OssDisplayUrlService ossDisplayUrlService;
+    private final AppMessages appMessages;
 
     @Override
     public void block(long actorUserId, long blockedUserId, String reason) {
         if (actorUserId == blockedUserId) {
-            throw new BadRequestException("不能拉黑自己");
+            throw new BadRequestException(appMessages.get("app.error.block.cannotBlockSelf"));
         }
         UserDTO peer = userService.findById(blockedUserId);
         if (peer == null) {
-            throw new BadRequestException("用户不存在");
+            throw new BadRequestException(appMessages.get("app.error.block.userNotFound"));
         }
         UserBlacklistDomain row = userBlacklistMapper.selectOne(new LambdaQueryWrapper<UserBlacklistDomain>()
                 .eq(UserBlacklistDomain::getUserId, actorUserId)
@@ -51,7 +53,7 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
             return;
         }
         if (!row.isDelFlag()) {
-            throw new BadRequestException("已在黑名单中");
+            throw new BadRequestException(appMessages.get("app.error.block.alreadyBlocked"));
         }
         row.setDelFlag(false);
         row.setReason(r);
@@ -70,7 +72,7 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
                 .set(UserBlacklistDomain::getUpdatedAt, LocalDateTime.now())
                 .set(UserBlacklistDomain::getUpdatedBy, actorUserId));
         if (n == 0) {
-            throw new BadRequestException("未找到拉黑记录");
+            throw new BadRequestException(appMessages.get("app.error.block.recordNotFound"));
         }
     }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/bootstrap/app_bootstrap.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 import 'directory_providers.dart';
 import 'directory_remote.dart';
@@ -73,6 +74,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final lang = Localizations.localeOf(context).languageCode;
     final bootstrapAsync = ref.watch(appBootstrapProvider(lang));
     final tagsAsync = ref.watch(directoryFilterTagOptionsProvider(lang));
@@ -89,29 +91,29 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
             data: (tagOptions) => ListView(
               shrinkWrap: true,
               children: [
-                const PostalSectionTitle(
-                  title: 'Filter directory',
-                  subtitle: 'Country, age range, interests, and sort',
+                PostalSectionTitle(
+                  title: l10n.directoryFilterSectionTitle,
+                  subtitle: l10n.directoryFilterSectionSubtitle,
                 ),
                 const SizedBox(height: 8),
-                Text('Sort', style: Theme.of(context).textTheme.titleSmall),
+                Text(l10n.directoryFilterSort, style: Theme.of(context).textTheme.titleSmall),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
                     ChoiceChip(
-                      label: const Text('Newest'),
+                      label: Text(l10n.directoryFilterNewest),
                       selected: _sort == 'DEFAULT',
                       onSelected: (_) => setState(() => _sort = 'DEFAULT'),
                     ),
                     ChoiceChip(
-                      label: const Text('Closest age'),
+                      label: Text(l10n.directoryFilterClosestAge),
                       selected: _sort == 'SAME_AGE',
                       onSelected: (_) => setState(() => _sort = 'SAME_AGE'),
                     ),
                     ChoiceChip(
-                      label: const Text('Shared interests'),
+                      label: Text(l10n.directoryFilterSharedInterests),
                       selected: _sort == 'SHARED_INTEREST',
                       onSelected: (_) => setState(() => _sort = 'SHARED_INTEREST'),
                     ),
@@ -121,11 +123,11 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                 DropdownButtonFormField<String?>(
                   // ignore: deprecated_member_use
                   value: _countryCode,
-                  decoration: const InputDecoration(labelText: 'Country'),
+                  decoration: InputDecoration(labelText: l10n.directoryFilterCountryLabel),
                   items: [
-                    const DropdownMenuItem<String?>(
+                    DropdownMenuItem<String?>(
                       value: null,
-                      child: Text('All countries'),
+                      child: Text(l10n.directoryFilterAllCountries),
                     ),
                     ...bootstrap.countries.map(
                       (c) => DropdownMenuItem<String?>(
@@ -137,7 +139,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                   onChanged: (v) => setState(() => _countryCode = v),
                 ),
                 const SizedBox(height: 14),
-                Text('Min age: $_minAge'),
+                Text(l10n.directoryFilterMinAge('$_minAge')),
                 Slider(
                   min: 45,
                   max: 90,
@@ -147,7 +149,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                   onChanged: (v) => setState(() => _minAge = v.round()),
                 ),
                 const SizedBox(height: 8),
-                Text('Max age: $_maxAge'),
+                Text(l10n.directoryFilterMaxAge('$_maxAge')),
                 Slider(
                   min: 45,
                   max: 100,

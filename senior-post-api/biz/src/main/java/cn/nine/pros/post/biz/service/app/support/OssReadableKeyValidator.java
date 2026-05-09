@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.app.support;
 
 import cn.nine.commons.basic.exception.BadRequestException;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import org.springframework.util.StringUtils;
 
 import java.util.Locale;
@@ -29,47 +30,48 @@ public final class OssReadableKeyValidator {
     /**
      * @return 规范化后的 objectKey（无首尾 /、无非法片段）
      */
-    public static String normalizeAndValidate(String configuredKeyPrefix, String rawKey) {
+    public static String normalizeAndValidate(String configuredKeyPrefix, String rawKey, AppMessages msg) {
         if (!StringUtils.hasText(rawKey)) {
-            throw new BadRequestException("objectKey 不能为空");
+            throw new BadRequestException(msg.get("app.error.oss.objectKeyRequired"));
         }
         String key = rawKey.trim().replaceAll("^/+", "");
         if (key.contains("..") || key.contains("//")) {
-            throw new BadRequestException("非法 objectKey");
+            throw new BadRequestException(msg.get("app.error.oss.objectKeyInvalid"));
         }
         String prefix = configuredKeyPrefix.replaceAll("^/+|/+$", "");
         if (!StringUtils.hasText(prefix)) {
-            throw new BadRequestException("未配置 senior-post.oss.key-prefix");
+            throw new BadRequestException(msg.get("app.error.oss.keyPrefixUnset"));
         }
         if (!key.startsWith(prefix + "/")) {
-            throw new BadRequestException("objectKey 不在允许的前缀下");
+            throw new BadRequestException(msg.get("app.error.oss.keyPrefixMismatch"));
         }
-        parseNormalizedBody(prefix, key);
+        parseNormalizedBody(prefix, key, msg);
         return key;
     }
 
     /**
      * 对已通过 {@link #normalizeAndValidate} 的 key 解析 scene、上传者用户 ID、文件名。
      */
-    public static ParsedOssKey parseNormalizedKey(String configuredKeyPrefix, String normalizedKey) {
+    public static ParsedOssKey parseNormalizedKey(String configuredKeyPrefix, String normalizedKey,
+            AppMessages msg) {
         String prefix = configuredKeyPrefix.replaceAll("^/+|/+$", "");
-        return parseNormalizedBody(prefix, normalizedKey);
+        return parseNormalizedBody(prefix, normalizedKey, msg);
     }
 
-    private static ParsedOssKey parseNormalizedBody(String prefix, String key) {
+    private static ParsedOssKey parseNormalizedBody(String prefix, String key, AppMessages msg) {
         String rest = key.substring(prefix.length() + 1);
         String[] parts = rest.split("/");
         if (parts.length != 3) {
-            throw new BadRequestException("objectKey 路径格式无效");
+            throw new BadRequestException(msg.get("app.error.oss.objectKeyPathInvalid"));
         }
         if (!ALLOWED_SCENE.contains(parts[0].toLowerCase(Locale.ROOT))) {
-            throw new BadRequestException("objectKey scene 无效");
+            throw new BadRequestException(msg.get("app.error.oss.objectKeySceneInvalid"));
         }
         if (!StringUtils.hasText(parts[1]) || !parts[1].chars().allMatch(Character::isDigit)) {
-            throw new BadRequestException("objectKey 用户段无效");
+            throw new BadRequestException(msg.get("app.error.oss.objectKeyUserSegmentInvalid"));
         }
         if (!SAFE_FILENAME.matcher(parts[2]).matches()) {
-            throw new BadRequestException("objectKey 文件名无效");
+            throw new BadRequestException(msg.get("app.error.oss.objectKeyFilenameInvalid"));
         }
         return new ParsedOssKey(parts[0].toLowerCase(Locale.ROOT), Long.parseLong(parts[1]), parts[2]);
     }

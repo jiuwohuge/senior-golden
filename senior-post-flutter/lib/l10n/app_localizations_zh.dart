@@ -705,4 +705,141 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get letterDetailTitle => '信件详情';
+
+  @override
+  String get chatFriendsOnlySnack => '仅「邮政好友 / Connections」中的笔友可使用即时聊天。';
+
+  @override
+  String get chatEmojiPickerTitle => '友好表情';
+
+  @override
+  String get chatEmojiPickerSubtitle => '点选一个表情插入到消息中。';
+
+  @override
+  String get postDetailCommentRequired => '请输入评论内容。';
+
+  @override
+  String get postDetailCommentPosted => '评论已发送。';
+
+  @override
+  String get errorInvalidContentId => '无效的内容编号。';
+
+  @override
+  String get errorInvalidResponse => '服务器响应格式无效。';
+
+  @override
+  String get directoryFilterSectionTitle => '筛选名录';
+
+  @override
+  String get directoryFilterSectionSubtitle => '国家、年龄、兴趣与排序';
+
+  @override
+  String get directoryFilterCountryLabel => '国家';
+
+  @override
+  String get directoryFilterSort => '排序';
+
+  @override
+  String get directoryFilterNewest => '最新';
+
+  @override
+  String get directoryFilterClosestAge => '年龄最接近';
+
+  @override
+  String get directoryFilterSharedInterests => '共同兴趣';
+
+  @override
+  String get directoryFilterAllCountries => '全部国家';
+
+  @override
+  String directoryFilterMinAge(Object age) {
+    return '最小年龄：$age';
+  }
+
+  @override
+  String directoryFilterMaxAge(Object age) {
+    return '最大年龄：$age';
+  }
+
+  @override
+  String get mailboxArchiveTitle => '信件归档';
+
+  @override
+  String get mailboxOpenArchive => '归档';
+
+  @override
+  String get mailboxPostOnTheWay => '有明信片正在路上';
+
+  @override
+  String get shopTitleStampsVip => '邮票与会员';
+
+  @override
+  String get shopPlaceholderOrders => '订单与记录（占位）';
+
+  @override
+  String get shopPlaceholderBuy => '购买（占位）';
+
+  @override
+  String get shopOrdersSnackbar => '订单与支付记录将在商品系统接入后开放。';
+
+  @override
+  String get shopPricePlaceholder => '价格：—';
+
+  @override
+  String get shopCheckoutSnackbar => '收银台将在商品与支付网关接入后开放。';
+
+  @override
+  String shopSkuStampLine(Object count) {
+    return '×$count 枚邮票';
+  }
+
+  @override
+  String get interestsPickerSaved => '兴趣已保存。';
+
+  @override
+  String get reportReasonRequired => '请填写举报原因';
+
+  @override
+  String get reportSubmitted => '举报已提交';
+
+  @override
+  String get accountDeleteTitle => '注销账号';
+
+  @override
+  String get stampsLedgerTitle => '邮票流水';
+
+  @override
+  String get interestsPickerTitle => '兴趣标签';
+
+  @override
+  String get sendLetterRegisteredMail => '挂号信';
+
+  @override
+  String get sendLetterStandardPost => '平邮';
+
+  @override
+  String get sendLetterBodyRequired => '请填写信件正文。';
+
+  @override
+  String get sendLetterRegisteredStampShort => '挂号信需要邮票，当前余额不足。';
+
+  @override
+  String get sendLetterSentSuccess => '信件已寄出。';
+
+  @override
+  String sendLetterSheetTitle(Object name) {
+    return '寄信给 $name';
+  }
+
+  @override
+  String get sendLetterRegisteredSubVip => '会员免费';
+
+  @override
+  String get sendLetterRegisteredSubPaid => '消耗 1 枚邮票';
+
+  @override
+  String get sendLetterStandardSub => '免费，延迟送达';
+
+  @override
+  String get sendLetterContentLabel => '信件正文';
 }

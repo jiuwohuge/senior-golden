@@ -3,6 +3,7 @@ package cn.nine.pros.post.biz.service.app;
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.OssProperties;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.TagDomain;
 import cn.nine.pros.post.biz.model.domain.UserDeviceDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
@@ -61,17 +62,18 @@ public class AppAuthService {
     private final UserInterestAssembler userInterestAssembler;
     private final cn.nine.pros.post.biz.service.base.StampGrantService stampGrantService;
     private final FriendshipService friendshipService;
+    private final AppMessages appMessages;
 
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO register(AppRegisterInDto body) {
         String email = body.getEmail().trim().toLowerCase();
         if (userService.findByEmail(email) != null) {
-            throw new BadRequestException("该邮箱已注册");
+            throw new BadRequestException(appMessages.get("app.error.register.emailTaken"));
         }
         int currentYear = Year.now().getValue();
         int age = currentYear - body.getBirthYear();
         if (age < MIN_AGE) {
-            throw new BadRequestException("注册年龄需满 " + MIN_AGE + " 岁");
+            throw new BadRequestException(appMessages.get("app.error.register.minAge", MIN_AGE));
         }
         List<Integer> regTagIds = body.getInterestTagIds();
         assertInterestTagIdsValidForReplace(regTagIds);
@@ -114,18 +116,18 @@ public class AppAuthService {
         String email = body.getEmail().trim().toLowerCase();
         UserDTO dto = userService.findByEmail(email);
         if (dto == null) {
-            throw new BadRequestException("邮箱或密码错误");
+            throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         if (!passwordEncoder.matches(body.getPassword(), dto.getPasswordHash())) {
-            throw new BadRequestException("邮箱或密码错误");
+            throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         finalizeAccountDeletionIfCooldownElapsed(dto.getId());
         dto = userService.findById(dto.getId());
         if (dto == null) {
-            throw new BadRequestException("邮箱或密码错误");
+            throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         if (dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
-            throw new BadRequestException("账号不可用");
+            throw new BadRequestException(appMessages.get("app.error.account.unavailable"));
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -166,7 +168,7 @@ public class AppAuthService {
             return null;
         }
         if (dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
-            throw new BadRequestException("账号已注销或不可用");
+            throw new BadRequestException(appMessages.get("app.error.account.deleted"));
         }
         return toPublic(dto, dto.getId());
     }
@@ -175,14 +177,14 @@ public class AppAuthService {
     public void requestAccountDeletion() {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
-            throw new BadRequestException("未登录或登录已失效");
+            throw new BadRequestException(appMessages.get("app.error.session.invalid"));
         }
         UserDTO dto = userService.findById(uid);
         if (dto == null) {
-            throw new BadRequestException("用户不存在");
+            throw new BadRequestException(appMessages.get("app.error.user.notFound"));
         }
         if (dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
-            throw new BadRequestException("当前账号状态不可申请注销");
+            throw new BadRequestException(appMessages.get("app.error.account.deleteNotAllowed"));
         }
         LocalDateTime now = LocalDateTime.now();
         userService.update(new LambdaUpdateWrapper<UserDomain>()
@@ -197,11 +199,11 @@ public class AppAuthService {
     public AppPublicUserVO updateProfile(AppAuthProfilePatchInDto body) {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
-            throw new BadRequestException("未登录或登录已失效");
+            throw new BadRequestException(appMessages.get("app.error.session.invalid"));
         }
         UserDTO existing = userService.findById(uid);
         if (existing == null) {
-            throw new BadRequestException("用户不存在");
+            throw new BadRequestException(appMessages.get("app.error.user.notFound"));
         }
         boolean changed = false;
         boolean userRowChanged = false;
@@ -210,7 +212,7 @@ public class AppAuthService {
         if (body.getNickname() != null) {
             String n = body.getNickname().trim();
             if (n.isEmpty()) {
-                throw new BadRequestException("昵称不能为空");
+                throw new BadRequestException(appMessages.get("app.error.profile.nicknameRequired"));
             }
             uw.set(UserDomain::getNickname, n);
             changed = true;
@@ -233,11 +235,11 @@ public class AppAuthService {
                 uw.set(UserDomain::getAvatarUrl, null);
             } else {
                 String normalized =
-                        OssReadableKeyValidator.normalizeAndValidate(ossProperties.getKeyPrefix(), raw);
+                        OssReadableKeyValidator.normalizeAndValidate(ossProperties.getKeyPrefix(), raw, appMessages);
                 OssReadableKeyValidator.ParsedOssKey p =
-                        OssReadableKeyValidator.parseNormalizedKey(ossProperties.getKeyPrefix(), normalized);
+                        OssReadableKeyValidator.parseNormalizedKey(ossProperties.getKeyPrefix(), normalized, appMessages);
                 if (!"avatar".equals(p.sceneLower()) || p.ownerUserId() != uid) {
-                    throw new BadRequestException("头像路径无效或不属于当前用户");
+                    throw new BadRequestException(appMessages.get("app.error.profile.avatarInvalid"));
                 }
                 uw.set(UserDomain::getAvatarUrl, normalized);
             }
@@ -251,7 +253,7 @@ public class AppAuthService {
             changed = true;
         }
         if (!changed) {
-            throw new BadRequestException("请至少提交一项可更新字段");
+            throw new BadRequestException(appMessages.get("app.error.profile.nothingToUpdate"));
         }
         if (userRowChanged) {
             LocalDateTime now = LocalDateTime.now();
@@ -355,16 +357,16 @@ public class AppAuthService {
 
     private void assertInterestTagIdsValidForReplace(List<Integer> ids) {
         if (ids == null || ids.isEmpty()) {
-            throw new BadRequestException("兴趣标签无效");
+            throw new BadRequestException(appMessages.get("app.error.tag.invalid"));
         }
         Set<Integer> unique = new LinkedHashSet<>(ids);
         if (unique.size() != ids.size()) {
-            throw new BadRequestException("兴趣标签不可重复");
+            throw new BadRequestException(appMessages.get("app.error.tag.duplicate"));
         }
         for (Integer tid : unique) {
             TagDomain t = tagService.getById(tid);
             if (t == null || t.isDelFlag()) {
-                throw new BadRequestException("兴趣标签无效");
+                throw new BadRequestException(appMessages.get("app.error.tag.invalid"));
             }
         }
     }

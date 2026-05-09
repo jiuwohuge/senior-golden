@@ -290,9 +290,10 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
   }
 
   Future<void> _send() async {
+    final l10n = AppLocalizations.of(context)!;
     final text = _commentCtrl.text.trim();
     if (text.isEmpty) {
-      PostalSnack.show(context, 'Please enter a comment.', tone: PostalSnackTone.warning);
+      PostalSnack.show(context, l10n.postDetailCommentRequired, tone: PostalSnackTone.warning);
       return;
     }
     setState(() => _sending = true);
@@ -307,7 +308,7 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
       ref.invalidate(postDetailProvider(widget.postId));
       PostalSnack.show(
         context,
-        'Comment posted',
+        l10n.postDetailCommentPosted,
         tone: PostalSnackTone.success,
       );
     } on ApiBusinessException catch (e) {

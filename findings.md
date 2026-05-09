@@ -219,3 +219,35 @@
 - **本地**：`FriendshipService.deactivateAllFriendshipsForUser` 将涉及该用户的 **`bu_friendship.status` 1→0**。
 - **腾讯 IM**：`TencentImFriendshipNotifier.afterFriendshipRemoved` → `TencentImRestApiClient.friendDeleteBoth`（`Delete_Type_Both`），与建联时双向 `friend_add` 配对。
 
+---
+
+## 16. 用户端国际化（App / Flutter，排除管理后台）（2026-05-09）
+
+### 16.1 资源与契约
+
+| 层级 | 机制 | 说明 |
+|------|------|------|
+| **后端 App API** | `biz/src/main/resources/messages/app.properties`（英文默认）+ `app_zh_CN.properties`；`spring.messages.basename: messages/app` | 业务代码通过 `AppMessages.get("app.error.*", …)` 取文案；**无 `Accept-Language` 时语言以 commons-web `AcceptHeaderLocaleResolver#setDefaultLocale` 为准**（当前框架为 **ENGLISH**；需中文无头回退请改框架默认或在本工程单独声明 `LocaleResolver`）。 |
+| **语言解析** | `spring.web.locale-resolver` / `spring.web.locale` 与 Boot WebMvc 配置项；**与手写 `LocaleResolver` Bean 的 default 无必然绑定** | 客户端应随界面语言发送 `Accept-Language`（如 `en`、`zh-CN`）。 |
+| **Flutter** | `lib/l10n/app_en.arb` / `app_zh.arb` + `flutter gen-l10n` | 设置页已持久化覆盖；`SeniorPostApp` 用 `resolveSeniorPostLocale`；**Dio 请求头** `Accept-Language` 与有效界面语言一致（`effectiveAppLocaleProvider` + `acceptLanguageHeader`）。 |
+
+### 16.2 文案提取与翻译流程（建议）
+
+1. **后端**：新增错误 → 先在 `app.properties` / `app_zh_CN.properties` 增加同一 `app.error.*` 键，再在 Java 中只引用键名；禁止在 App 路径直接写中英文字符串。  
+2. **Flutter**：新增 UI 文案 → 同时编辑 `app_en.arb` 与 `app_zh.arb`（含 `@placeholder` 元数据），运行 `flutter gen-l10n`，页面使用 `AppLocalizations.of(context)!`。  
+3. **校验**：`mvn -pl biz -am compile`；`flutter analyze lib`；对关键接口用不同 `Accept-Language` 打桩断言 `message` 字段。
+
+### 16.3 兼容性测试标准（最低门禁）
+
+| 用例 | 期望 |
+|------|------|
+| Flutter 英语界面 + 后端 | 响应 `message` 为英文；无中文硬编码外露（抽样登录失败、邮票不足、OSS 校验失败）。 |
+| Flutter 中文界面 + 后端 | 响应 `message` 为简体中文。 |
+| 设置「跟随系统」 | 与系统语言列表一致；Dio 头与 Material `locale` 一致。 |
+| 管理后台 `/webapi` | **本迭代未改** Admin 控制器文案；默认仍中文；若浏览器仅发 `Accept-Language: en` 则会得到英文 bundle（可接受或后续为 webapi 单独策略）。 |
+
+### 16.4 已知缺口
+
+- Flutter 仍有部分页面/空态/占位文案未迁入 ARB（如商城静态卡片正文、`mailbox_page` 部分 English 空态）；需后续按模块扫 `Text('` / `PostalSnack.show` 硬编码。  
+- 邮件主题 `application.yml` 中 `password-reset-subject` 等仍为固定文案，若需多语言应接模板或 `MessageSource` 发信侧渲染。
+

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/biz_error_codes.dart';
 import '../../core/session/app_session.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 
 /// 商品聚合页（静态阶段）：邮票说明、VIP 入口、邮票 SKU 占位，预留 API 接入点。
@@ -16,6 +17,7 @@ class ShopPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final session = ref.watch(appSessionProvider);
     final mq = MediaQuery.sizeOf(context);
     final maxW = mq.width >= 600 ? 560.0 : double.infinity;
@@ -43,7 +45,7 @@ class ShopPage extends ConsumerWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('邮票与会员')),
+      appBar: AppBar(title: Text(l10n.shopTitleStampsVip)),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, c) {
@@ -138,11 +140,11 @@ class ShopPage extends ConsumerWidget {
                         // TODO: 对账 / 订单列表页
                         PostalSnack.show(
                           context,
-                          '订单与支付记录：待商品系统接入后开放',
+                          l10n.shopOrdersSnackbar,
                           tone: PostalSnackTone.info,
                         );
                       },
-                      child: const Text('订单与记录（占位）'),
+                      child: Text(l10n.shopPlaceholderOrders),
                     ),
                   ],
                 ),
@@ -262,6 +264,7 @@ class _StampSkuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: PostalTokens.paperCard,
@@ -298,7 +301,7 @@ class _StampSkuCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  '×${sku.stamps} 邮票',
+                  l10n.shopSkuStampLine('${sku.stamps}'),
                   style: Theme.of(
                     context,
                   ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
@@ -324,7 +327,7 @@ class _StampSkuCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  '价格：—',
+                  l10n.shopPricePlaceholder,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: PostalTokens.inkTertiary,
                     fontWeight: FontWeight.w600,
@@ -336,11 +339,11 @@ class _StampSkuCard extends StatelessWidget {
                     // TODO: POST /api/commerce/checkout 或唤起收银台
                     PostalSnack.show(
                       context,
-                      '收银台：待商品与支付网关接入',
+                      l10n.shopCheckoutSnackbar,
                       tone: PostalSnackTone.info,
                     );
                   },
-                  child: const Text('购买（占位）'),
+                  child: Text(l10n.shopPlaceholderBuy),
                 ),
               ],
             ),

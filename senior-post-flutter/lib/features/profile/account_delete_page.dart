@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api/api_exception.dart';
 import '../auth/auth_repository.dart';
 import '../auth/login_routes.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 
 class AccountDeletePage extends ConsumerWidget {
@@ -12,8 +13,9 @@ class AccountDeletePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Delete account')),
+      appBar: AppBar(title: Text(l10n.accountDeleteTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),

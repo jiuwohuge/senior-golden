@@ -10,6 +10,15 @@ info:
     server-port: ${server.port}
 
 spring:
+  # WebMvc 相关：Boot 仍会读取；实际请求级 Locale 以已注册的 LocaleResolver 为准。
+  # 当前 commons-web 为 AcceptHeaderLocaleResolver + 默认 ENGLISH 时，无 Accept-Language 回退英语。
+  web:
+    locale-resolver: accept_header
+    locale: zh_CN
+  messages:
+    basename: messages/app
+    encoding: UTF-8
+    fallback-to-system-locale: false
   flyway:
     enabled: true
     locations: classpath:db/migration

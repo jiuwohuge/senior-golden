@@ -3,6 +3,7 @@ package cn.nine.pros.post.biz.controller.app;
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.service.app.AppDirectoryService;
 import cn.nine.pros.post.client.api.app.AppDirectoryApi;
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
@@ -28,6 +29,7 @@ import java.util.List;
 public class AppDirectoryController implements AppDirectoryApi {
 
     private final AppDirectoryService appDirectoryService;
+    private final AppMessages appMessages;
 
     @Override
     @Operation(summary = "用户名录分页（排除本人；可按国家/年龄/兴趣筛选）")
@@ -35,7 +37,7 @@ public class AppDirectoryController implements AppDirectoryApi {
     public PageData<DirectoryUserItemVO> usersPaging(@RequestBody @Valid AppDirectoryPageInDto body) {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
-            throw new BadRequestException("未登录");
+            throw new BadRequestException(appMessages.get("app.error.notLoggedIn"));
         }
         return appDirectoryService.pageUsers(uid, body);
     }
@@ -46,7 +48,7 @@ public class AppDirectoryController implements AppDirectoryApi {
     public DirectoryUserItemVO getDirectoryUser(@PathVariable("userId") Long userId) {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
-            throw new BadRequestException("未登录");
+            throw new BadRequestException(appMessages.get("app.error.notLoggedIn"));
         }
         return appDirectoryService.getDirectoryUser(uid, userId);
     }
@@ -57,7 +59,7 @@ public class AppDirectoryController implements AppDirectoryApi {
     public List<String> listInterestTags(@RequestParam(value = "lang", required = false) String lang) {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
-            throw new BadRequestException("未登录");
+            throw new BadRequestException(appMessages.get("app.error.notLoggedIn"));
         }
         return appDirectoryService.listInterestTagNames(lang);
     }
@@ -68,7 +70,7 @@ public class AppDirectoryController implements AppDirectoryApi {
     public List<InterestTagOptionVO> listInterestTagOptions(@RequestParam(value = "lang", required = false) String lang) {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
-            throw new BadRequestException("未登录");
+            throw new BadRequestException(appMessages.get("app.error.notLoggedIn"));
         }
         return appDirectoryService.listInterestTagOptions(lang);
     }

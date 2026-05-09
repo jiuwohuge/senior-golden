@@ -6,6 +6,7 @@ import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.basic.model.TokenInfo;
 import cn.nine.commons.basic.util.TokenResolver;
 import cn.nine.commons.web.filter.adapter.RedisCacheAdapter;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.client.common.constant.RedisConstant;
 import com.alibaba.fastjson2.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,12 @@ public class AppJwtService {
     @Autowired
     private RedisCacheAdapter redisCacheAdapter;
 
+    @Autowired
+    private AppMessages appMessages;
+
     public String createToken(long userId) {
         if (userId <= 0) {
-            throw new BadRequestException("非法用户");
+            throw new BadRequestException(appMessages.get("app.error.jwt.invalidUser"));
         }
         return buildToken(userId);
     }

@@ -743,4 +743,147 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get letterDetailTitle => 'Letter';
+
+  @override
+  String get chatFriendsOnlySnack =>
+      'Only postal friends in Connections can use live chat.';
+
+  @override
+  String get chatEmojiPickerTitle => 'Friendly stamps';
+
+  @override
+  String get chatEmojiPickerSubtitle =>
+      'Tap an emoji to add it to your message.';
+
+  @override
+  String get postDetailCommentRequired => 'Please enter a comment.';
+
+  @override
+  String get postDetailCommentPosted => 'Comment posted.';
+
+  @override
+  String get errorInvalidContentId => 'Invalid content id.';
+
+  @override
+  String get errorInvalidResponse => 'Invalid response from server.';
+
+  @override
+  String get directoryFilterSectionTitle => 'Filter directory';
+
+  @override
+  String get directoryFilterSectionSubtitle =>
+      'Country, age range, interests, and sort';
+
+  @override
+  String get directoryFilterCountryLabel => 'Country';
+
+  @override
+  String get directoryFilterSort => 'Sort';
+
+  @override
+  String get directoryFilterNewest => 'Newest';
+
+  @override
+  String get directoryFilterClosestAge => 'Closest age';
+
+  @override
+  String get directoryFilterSharedInterests => 'Shared interests';
+
+  @override
+  String get directoryFilterAllCountries => 'All countries';
+
+  @override
+  String directoryFilterMinAge(Object age) {
+    return 'Min age: $age';
+  }
+
+  @override
+  String directoryFilterMaxAge(Object age) {
+    return 'Max age: $age';
+  }
+
+  @override
+  String get mailboxArchiveTitle => 'Letter archive';
+
+  @override
+  String get mailboxOpenArchive => 'Archive';
+
+  @override
+  String get mailboxPostOnTheWay => 'A post is on the way';
+
+  @override
+  String get shopTitleStampsVip => 'Stamps & membership';
+
+  @override
+  String get shopPlaceholderOrders => 'Orders & history (placeholder)';
+
+  @override
+  String get shopPlaceholderBuy => 'Buy (placeholder)';
+
+  @override
+  String get shopOrdersSnackbar =>
+      'Orders and payment history will open once the catalog is connected.';
+
+  @override
+  String get shopPricePlaceholder => 'Price: —';
+
+  @override
+  String get shopCheckoutSnackbar =>
+      'Checkout opens when payments are connected.';
+
+  @override
+  String shopSkuStampLine(Object count) {
+    return '×$count stamps';
+  }
+
+  @override
+  String get interestsPickerSaved => 'Interests saved.';
+
+  @override
+  String get reportReasonRequired => 'Please enter a report reason.';
+
+  @override
+  String get reportSubmitted => 'Report submitted.';
+
+  @override
+  String get accountDeleteTitle => 'Delete account';
+
+  @override
+  String get stampsLedgerTitle => 'Stamps ledger';
+
+  @override
+  String get interestsPickerTitle => 'Interest tags';
+
+  @override
+  String get sendLetterRegisteredMail => 'Registered Mail';
+
+  @override
+  String get sendLetterStandardPost => 'Standard Post';
+
+  @override
+  String get sendLetterBodyRequired => 'Please write the letter content.';
+
+  @override
+  String get sendLetterRegisteredStampShort =>
+      'Not enough stamps for registered mail.';
+
+  @override
+  String get sendLetterSentSuccess => 'Letter sent.';
+
+  @override
+  String sendLetterSheetTitle(Object name) {
+    return 'Send letter to $name';
+  }
+
+  @override
+  String get sendLetterRegisteredSubVip => 'Free for VIP';
+
+  @override
+  String get sendLetterRegisteredSubPaid => 'Consumes 1 stamp';
+
+  @override
+  String get sendLetterStandardSub => 'Free, delayed delivery';
+
+  @override
+  String get sendLetterContentLabel => 'Letter content';
 }

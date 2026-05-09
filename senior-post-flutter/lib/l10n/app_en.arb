@@ -299,5 +299,68 @@
   "letterEarlyOpenCta": "Open early (1 stamp)",
   "letterEarlyOpenSuccess": "Letter opened — full message is now visible.",
   "postDetailTitle": "Postcard",
-  "letterDetailTitle": "Letter"
+  "letterDetailTitle": "Letter",
+  "chatFriendsOnlySnack": "Only postal friends in Connections can use live chat.",
+  "chatEmojiPickerTitle": "Friendly stamps",
+  "chatEmojiPickerSubtitle": "Tap an emoji to add it to your message.",
+  "postDetailCommentRequired": "Please enter a comment.",
+  "postDetailCommentPosted": "Comment posted.",
+  "errorInvalidContentId": "Invalid content id.",
+  "errorInvalidResponse": "Invalid response from server.",
+  "directoryFilterSectionTitle": "Filter directory",
+  "directoryFilterSectionSubtitle": "Country, age range, interests, and sort",
+  "directoryFilterCountryLabel": "Country",
+  "directoryFilterSort": "Sort",
+  "directoryFilterNewest": "Newest",
+  "directoryFilterClosestAge": "Closest age",
+  "directoryFilterSharedInterests": "Shared interests",
+  "directoryFilterAllCountries": "All countries",
+  "directoryFilterMinAge": "Min age: {age}",
+  "@directoryFilterMinAge": {
+    "placeholders": {
+      "age": {}
+    }
+  },
+  "directoryFilterMaxAge": "Max age: {age}",
+  "@directoryFilterMaxAge": {
+    "placeholders": {
+      "age": {}
+    }
+  },
+  "mailboxArchiveTitle": "Letter archive",
+  "mailboxOpenArchive": "Archive",
+  "mailboxPostOnTheWay": "A post is on the way",
+  "shopTitleStampsVip": "Stamps & membership",
+  "shopPlaceholderOrders": "Orders & history (placeholder)",
+  "shopPlaceholderBuy": "Buy (placeholder)",
+  "shopOrdersSnackbar": "Orders and payment history will open once the catalog is connected.",
+  "shopPricePlaceholder": "Price: —",
+  "shopCheckoutSnackbar": "Checkout opens when payments are connected.",
+  "shopSkuStampLine": "×{count} stamps",
+  "@shopSkuStampLine": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "interestsPickerSaved": "Interests saved.",
+  "reportReasonRequired": "Please enter a report reason.",
+  "reportSubmitted": "Report submitted.",
+  "accountDeleteTitle": "Delete account",
+  "stampsLedgerTitle": "Stamps ledger",
+  "interestsPickerTitle": "Interest tags",
+  "sendLetterRegisteredMail": "Registered Mail",
+  "sendLetterStandardPost": "Standard Post",
+  "sendLetterBodyRequired": "Please write the letter content.",
+  "sendLetterRegisteredStampShort": "Not enough stamps for registered mail.",
+  "sendLetterSentSuccess": "Letter sent.",
+  "sendLetterSheetTitle": "Send letter to {name}",
+  "@sendLetterSheetTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "sendLetterRegisteredSubVip": "Free for VIP",
+  "sendLetterRegisteredSubPaid": "Consumes 1 stamp",
+  "sendLetterStandardSub": "Free, delayed delivery",
+  "sendLetterContentLabel": "Letter content"
 }

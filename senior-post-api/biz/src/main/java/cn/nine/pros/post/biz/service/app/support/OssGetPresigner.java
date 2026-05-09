@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.app.support;
 
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.OssProperties;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.client.model.out.OssGetSignItemVO;
 import com.aliyun.oss.HttpMethod;
 import com.aliyun.oss.OSS;
@@ -25,6 +26,7 @@ import java.util.List;
 public class OssGetPresigner {
 
     private final OssProperties ossProperties;
+    private final AppMessages appMessages;
 
     public List<OssGetSignItemVO> signGetUrls(List<String> normalizedObjectKeys) {
         ensureOssConfigured();
@@ -60,7 +62,7 @@ public class OssGetPresigner {
                 || !StringUtils.hasText(ossProperties.getAccessKeyId())
                 || !StringUtils.hasText(ossProperties.getAccessKeySecret())
                 || !StringUtils.hasText(ossProperties.getBucketName())) {
-            throw new BadRequestException("未配置 OSS（senior-post.oss.endpoint/accessKeyId/accessKeySecret/bucketName）");
+            throw new BadRequestException(appMessages.get("app.error.oss.notConfigured"));
         }
     }
 

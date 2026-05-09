@@ -14,6 +14,8 @@ import '../auth/auth_storage.dart';
 import '../auth/auth_token.dart';
 import '../config/api_base_url.dart';
 import '../device/device_ids.dart';
+import '../i18n/effective_app_locale_provider.dart';
+import '../i18n/locale_resolution.dart';
 import 'router_refresh.dart';
 
 /// 是否打印 Dio 请求/响应（默认：debug 模式开启；Release 可加 `--dart-define=API_LOG=true`）。
@@ -43,6 +45,8 @@ final dioProvider = Provider<Dio>((ref) {
         if (token != null && token.isNotEmpty) {
           options.headers['Token'] = token;
         }
+        final locale = ref.read(effectiveAppLocaleProvider);
+        options.headers['Accept-Language'] = acceptLanguageHeader(locale);
         options.headers['versionCode'] = '1';
         options.headers['deviceId'] = platformDeviceHeader();
         final equip = ref.read(deviceInstallIdStateProvider);

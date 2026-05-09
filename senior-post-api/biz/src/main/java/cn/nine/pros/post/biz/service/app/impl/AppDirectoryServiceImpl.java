@@ -4,6 +4,7 @@ import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.controller.app.AppPageHelper;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.TagDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.app.AppBlacklistService;
@@ -41,6 +42,7 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
     private final OssDisplayUrlService ossDisplayUrlService;
     private final UserInterestAssembler userInterestAssembler;
     private final AppBlacklistService appBlacklistService;
+    private final AppMessages appMessages;
 
     @Override
     public PageData<DirectoryUserItemVO> pageUsers(long viewerUserId, AppDirectoryPageInDto body) {
@@ -90,13 +92,13 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
     public DirectoryUserItemVO getDirectoryUser(long viewerUserId, long targetUserId) {
         UserDomain u = userService.getById(targetUserId);
         if (u == null || u.isDelFlag()) {
-            throw new BadRequestException("用户不存在");
+            throw new BadRequestException(appMessages.get("app.error.user.notFound"));
         }
         if (!isDirectoryListableUser(u)) {
-            throw new BadRequestException("该用户暂不可见");
+            throw new BadRequestException(appMessages.get("app.error.user.hidden"));
         }
         if (appBlacklistService.areMutuallyBlocked(viewerUserId, targetUserId)) {
-            throw new BadRequestException("该用户暂不可见");
+            throw new BadRequestException(appMessages.get("app.error.user.hidden"));
         }
         return toVo(viewerUserId, u);
     }

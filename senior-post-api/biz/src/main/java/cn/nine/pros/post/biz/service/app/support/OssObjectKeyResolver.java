@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.app.support;
 
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.OssProperties;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -18,25 +19,26 @@ import java.util.Optional;
 public class OssObjectKeyResolver {
 
     private final OssProperties ossProperties;
+    private final AppMessages appMessages;
 
     /**
      * App 换签接口：必须是合法 objectKey 或可信 OSS/CDN URL。
      */
     public String requireObjectKey(String raw) {
         if (!StringUtils.hasText(raw)) {
-            throw new BadRequestException("objectKey 不能为空");
+            throw new BadRequestException(appMessages.get("app.error.oss.objectKeyRequired"));
         }
         String t = raw.trim();
         String prefix = ossProperties.getKeyPrefix().replaceAll("^/+|/+$", "");
         try {
-            return OssReadableKeyValidator.normalizeAndValidate(prefix, t);
+            return OssReadableKeyValidator.normalizeAndValidate(prefix, t, appMessages);
         } catch (BadRequestException ignored) {
             // fall through
         }
         if (t.toLowerCase(Locale.ROOT).startsWith("http://") || t.toLowerCase(Locale.ROOT).startsWith("https://")) {
             return fromTrustedHttpUrl(t, prefix);
         }
-        throw new BadRequestException("无法解析 objectKey");
+        throw new BadRequestException(appMessages.get("app.error.oss.objectKeyUnparsable"));
     }
 
     /**
@@ -49,7 +51,7 @@ public class OssObjectKeyResolver {
         String t = stored.trim();
         String prefix = ossProperties.getKeyPrefix().replaceAll("^/+|/+$", "");
         try {
-            return Optional.of(OssReadableKeyValidator.normalizeAndValidate(prefix, t));
+            return Optional.of(OssReadableKeyValidator.normalizeAndValidate(prefix, t, appMessages));
         } catch (BadRequestException ignored) {
             // continue
         }
@@ -64,7 +66,7 @@ public class OssObjectKeyResolver {
                     return Optional.empty();
                 }
                 String noLeading = path.startsWith("/") ? path.substring(1) : path;
-                return Optional.of(OssReadableKeyValidator.normalizeAndValidate(prefix, noLeading));
+                return Optional.of(OssReadableKeyValidator.normalizeAndValidate(prefix, noLeading, appMessages));
             } catch (BadRequestException | IllegalArgumentException ignored) {
                 return Optional.empty();
             }
@@ -74,15 +76,15 @@ public class OssObjectKeyResolver {
 
     private String fromTrustedHttpUrl(String raw, String prefix) {
         if (!isTrustedHost(extractHost(raw))) {
-            throw new BadRequestException("不允许的 OSS 访问域名");
+            throw new BadRequestException(appMessages.get("app.error.oss.hostNotAllowed"));
         }
         URI uri = URI.create(raw.trim());
         String path = uri.getPath();
         if (path == null || path.isEmpty()) {
-            throw new BadRequestException("无法解析 objectKey");
+            throw new BadRequestException(appMessages.get("app.error.oss.objectKeyUnparsable"));
         }
         String noLeading = path.startsWith("/") ? path.substring(1) : path;
-        return OssReadableKeyValidator.normalizeAndValidate(prefix, noLeading);
+        return OssReadableKeyValidator.normalizeAndValidate(prefix, noLeading, appMessages);
     }
 
     private boolean isTrustedHost(String host) {

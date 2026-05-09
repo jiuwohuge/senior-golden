@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
 
@@ -11,9 +12,10 @@ class MailboxArchivePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final async = ref.watch(mailboxArchiveProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Letter archive')),
+      appBar: AppBar(title: Text(l10n.mailboxArchiveTitle)),
       body: async.when(
         loading: () => const PostalSkeletonList(itemCount: 6, itemHeight: 96),
         error: (e, _) => PostalEmptyState(

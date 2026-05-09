@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.controller.app;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.service.app.AppBlacklistService;
 import cn.nine.pros.post.client.api.app.AppSocialApi;
 import cn.nine.pros.post.client.model.input.app.AppBlacklistBlockInDto;
@@ -17,6 +18,7 @@ import java.util.List;
 public class AppSocialController implements AppSocialApi {
 
     private final AppBlacklistService appBlacklistService;
+    private final AppMessages appMessages;
 
     @Override
     public void block(@Valid AppBlacklistBlockInDto body) {
@@ -36,10 +38,10 @@ public class AppSocialController implements AppSocialApi {
         return appBlacklistService.listBlocks(uid);
     }
 
-    private static long requireUserId() {
+    private long requireUserId() {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
-            throw new BadRequestException("未登录");
+            throw new BadRequestException(appMessages.get("app.error.notLoggedIn"));
         }
         return uid;
     }

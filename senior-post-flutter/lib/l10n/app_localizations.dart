@@ -1435,6 +1435,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Letter'**
   String get letterDetailTitle;
+
+  /// No description provided for @chatFriendsOnlySnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Only postal friends in Connections can use live chat.'**
+  String get chatFriendsOnlySnack;
+
+  /// No description provided for @chatEmojiPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Friendly stamps'**
+  String get chatEmojiPickerTitle;
+
+  /// No description provided for @chatEmojiPickerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an emoji to add it to your message.'**
+  String get chatEmojiPickerSubtitle;
+
+  /// No description provided for @postDetailCommentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a comment.'**
+  String get postDetailCommentRequired;
+
+  /// No description provided for @postDetailCommentPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment posted.'**
+  String get postDetailCommentPosted;
+
+  /// No description provided for @errorInvalidContentId.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid content id.'**
+  String get errorInvalidContentId;
+
+  /// No description provided for @errorInvalidResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid response from server.'**
+  String get errorInvalidResponse;
+
+  /// No description provided for @directoryFilterSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter directory'**
+  String get directoryFilterSectionTitle;
+
+  /// No description provided for @directoryFilterSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Country, age range, interests, and sort'**
+  String get directoryFilterSectionSubtitle;
+
+  /// No description provided for @directoryFilterCountryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get directoryFilterCountryLabel;
+
+  /// No description provided for @directoryFilterSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get directoryFilterSort;
+
+  /// No description provided for @directoryFilterNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get directoryFilterNewest;
+
+  /// No description provided for @directoryFilterClosestAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Closest age'**
+  String get directoryFilterClosestAge;
+
+  /// No description provided for @directoryFilterSharedInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared interests'**
+  String get directoryFilterSharedInterests;
+
+  /// No description provided for @directoryFilterAllCountries.
+  ///
+  /// In en, this message translates to:
+  /// **'All countries'**
+  String get directoryFilterAllCountries;
+
+  /// No description provided for @directoryFilterMinAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Min age: {age}'**
+  String directoryFilterMinAge(Object age);
+
+  /// No description provided for @directoryFilterMaxAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Max age: {age}'**
+  String directoryFilterMaxAge(Object age);
+
+  /// No description provided for @mailboxArchiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter archive'**
+  String get mailboxArchiveTitle;
+
+  /// No description provided for @mailboxOpenArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get mailboxOpenArchive;
+
+  /// No description provided for @mailboxPostOnTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'A post is on the way'**
+  String get mailboxPostOnTheWay;
+
+  /// No description provided for @shopTitleStampsVip.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamps & membership'**
+  String get shopTitleStampsVip;
+
+  /// No description provided for @shopPlaceholderOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders & history (placeholder)'**
+  String get shopPlaceholderOrders;
+
+  /// No description provided for @shopPlaceholderBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy (placeholder)'**
+  String get shopPlaceholderBuy;
+
+  /// No description provided for @shopOrdersSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders and payment history will open once the catalog is connected.'**
+  String get shopOrdersSnackbar;
+
+  /// No description provided for @shopPricePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: —'**
+  String get shopPricePlaceholder;
+
+  /// No description provided for @shopCheckoutSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout opens when payments are connected.'**
+  String get shopCheckoutSnackbar;
+
+  /// No description provided for @shopSkuStampLine.
+  ///
+  /// In en, this message translates to:
+  /// **'×{count} stamps'**
+  String shopSkuStampLine(Object count);
+
+  /// No description provided for @interestsPickerSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests saved.'**
+  String get interestsPickerSaved;
+
+  /// No description provided for @reportReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a report reason.'**
+  String get reportReasonRequired;
+
+  /// No description provided for @reportSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submitted.'**
+  String get reportSubmitted;
+
+  /// No description provided for @accountDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get accountDeleteTitle;
+
+  /// No description provided for @stampsLedgerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamps ledger'**
+  String get stampsLedgerTitle;
+
+  /// No description provided for @interestsPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest tags'**
+  String get interestsPickerTitle;
+
+  /// No description provided for @sendLetterRegisteredMail.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered Mail'**
+  String get sendLetterRegisteredMail;
+
+  /// No description provided for @sendLetterStandardPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Post'**
+  String get sendLetterStandardPost;
+
+  /// No description provided for @sendLetterBodyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please write the letter content.'**
+  String get sendLetterBodyRequired;
+
+  /// No description provided for @sendLetterRegisteredStampShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough stamps for registered mail.'**
+  String get sendLetterRegisteredStampShort;
+
+  /// No description provided for @sendLetterSentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter sent.'**
+  String get sendLetterSentSuccess;
+
+  /// No description provided for @sendLetterSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send letter to {name}'**
+  String sendLetterSheetTitle(Object name);
+
+  /// No description provided for @sendLetterRegisteredSubVip.
+  ///
+  /// In en, this message translates to:
+  /// **'Free for VIP'**
+  String get sendLetterRegisteredSubVip;
+
+  /// No description provided for @sendLetterRegisteredSubPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumes 1 stamp'**
+  String get sendLetterRegisteredSubPaid;
+
+  /// No description provided for @sendLetterStandardSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Free, delayed delivery'**
+  String get sendLetterStandardSub;
+
+  /// No description provided for @sendLetterContentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter content'**
+  String get sendLetterContentLabel;
 }
 
 class _AppLocalizationsDelegate

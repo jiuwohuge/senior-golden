@@ -286,5 +286,68 @@
   "letterEarlyOpenCta": "提前拆信（1 枚邮票）",
   "letterEarlyOpenSuccess": "已提前拆信，可阅读全文。",
   "postDetailTitle": "明信片",
-  "letterDetailTitle": "信件详情"
+  "letterDetailTitle": "信件详情",
+  "chatFriendsOnlySnack": "仅「邮政好友 / Connections」中的笔友可使用即时聊天。",
+  "chatEmojiPickerTitle": "友好表情",
+  "chatEmojiPickerSubtitle": "点选一个表情插入到消息中。",
+  "postDetailCommentRequired": "请输入评论内容。",
+  "postDetailCommentPosted": "评论已发送。",
+  "errorInvalidContentId": "无效的内容编号。",
+  "errorInvalidResponse": "服务器响应格式无效。",
+  "directoryFilterSectionTitle": "筛选名录",
+  "directoryFilterSectionSubtitle": "国家、年龄、兴趣与排序",
+  "directoryFilterCountryLabel": "国家",
+  "directoryFilterSort": "排序",
+  "directoryFilterNewest": "最新",
+  "directoryFilterClosestAge": "年龄最接近",
+  "directoryFilterSharedInterests": "共同兴趣",
+  "directoryFilterAllCountries": "全部国家",
+  "directoryFilterMinAge": "最小年龄：{age}",
+  "@directoryFilterMinAge": {
+    "placeholders": {
+      "age": {}
+    }
+  },
+  "directoryFilterMaxAge": "最大年龄：{age}",
+  "@directoryFilterMaxAge": {
+    "placeholders": {
+      "age": {}
+    }
+  },
+  "mailboxArchiveTitle": "信件归档",
+  "mailboxOpenArchive": "归档",
+  "mailboxPostOnTheWay": "有明信片正在路上",
+  "shopTitleStampsVip": "邮票与会员",
+  "shopPlaceholderOrders": "订单与记录（占位）",
+  "shopPlaceholderBuy": "购买（占位）",
+  "shopOrdersSnackbar": "订单与支付记录将在商品系统接入后开放。",
+  "shopPricePlaceholder": "价格：—",
+  "shopCheckoutSnackbar": "收银台将在商品与支付网关接入后开放。",
+  "shopSkuStampLine": "×{count} 枚邮票",
+  "@shopSkuStampLine": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "interestsPickerSaved": "兴趣已保存。",
+  "reportReasonRequired": "请填写举报原因",
+  "reportSubmitted": "举报已提交",
+  "accountDeleteTitle": "注销账号",
+  "stampsLedgerTitle": "邮票流水",
+  "interestsPickerTitle": "兴趣标签",
+  "sendLetterRegisteredMail": "挂号信",
+  "sendLetterStandardPost": "平邮",
+  "sendLetterBodyRequired": "请填写信件正文。",
+  "sendLetterRegisteredStampShort": "挂号信需要邮票，当前余额不足。",
+  "sendLetterSentSuccess": "信件已寄出。",
+  "sendLetterSheetTitle": "寄信给 {name}",
+  "@sendLetterSheetTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "sendLetterRegisteredSubVip": "会员免费",
+  "sendLetterRegisteredSubPaid": "消耗 1 枚邮票",
+  "sendLetterStandardSub": "免费，延迟送达",
+  "sendLetterContentLabel": "信件正文"
 }

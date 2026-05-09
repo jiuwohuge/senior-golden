@@ -4,6 +4,7 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.SensitiveWordMapper;
 import cn.nine.pros.post.biz.model.domain.SensitiveWordDomain;
 import cn.nine.pros.post.biz.model.mapstruct.SensitiveWordMapstruct;
@@ -31,6 +32,9 @@ public class SensitiveWordServiceImpl extends ServiceImpl<SensitiveWordMapper, S
 
     @Autowired
     private SensitiveWordMapstruct sensitiveWordMapstruct;
+
+    @Autowired
+    private AppMessages appMessages;
 
     private volatile List<String> cachedActiveWords;
     private volatile long cachedActiveWordsAt;
@@ -83,7 +87,7 @@ public class SensitiveWordServiceImpl extends ServiceImpl<SensitiveWordMapper, S
                 continue;
             }
             if (haystack.contains(needle)) {
-                throw new BadRequestException("内容包含不当词汇，请修改后重试");
+                throw new BadRequestException(appMessages.get("app.error.sensitiveWord"));
             }
         }
     }

@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.app;
 
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.SeniorPostAuthProperties;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.PasswordResetTokenMapper;
 import cn.nine.pros.post.biz.model.domain.PasswordResetTokenDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
@@ -34,6 +35,7 @@ public class PasswordResetService {
     private final PasswordEncoder passwordEncoder;
     private final PasswordResetMailNotifier passwordResetMailNotifier;
     private final SeniorPostAuthProperties authProperties;
+    private final AppMessages appMessages;
 
     /**
      * 防枚举：邮箱不存在或账号不可用时与成功返回一致（无异常）。
@@ -57,7 +59,7 @@ public class PasswordResetService {
                         .eq(PasswordResetTokenDomain::getUserId, user.getId())
                         .ge(PasswordResetTokenDomain::getCreatedAt, hourAgo));
         if (recent >= authProperties.getPasswordResetMaxRequestsPerHour()) {
-            throw new BadRequestException("请求过于频繁，请稍后再试");
+            throw new BadRequestException(appMessages.get("app.error.passwordReset.rateLimit"));
         }
 
         PasswordResetTokenDomain last = passwordResetTokenMapper.selectOne(
@@ -68,7 +70,7 @@ public class PasswordResetService {
         if (last != null
                 && last.getCreatedAt() != null
                 && last.getCreatedAt().isAfter(now.minusSeconds(authProperties.getPasswordResetMinIntervalSeconds()))) {
-            throw new BadRequestException("请稍后再申请验证码");
+            throw new BadRequestException(appMessages.get("app.error.passwordReset.cooldown"));
         }
 
         int n = 100_000 + RANDOM.nextInt(900_000);
@@ -89,17 +91,17 @@ public class PasswordResetService {
     @Transactional(rollbackFor = Exception.class)
     public void completeReset(String rawEmail, String rawCode, String newPassword) {
         if (newPassword == null || newPassword.length() < 8) {
-            throw new BadRequestException("密码至少 8 位");
+            throw new BadRequestException(appMessages.get("app.error.password.tooShort"));
         }
         String email = rawEmail.trim().toLowerCase();
         String code = rawCode.trim();
         if (code.isEmpty()) {
-            throw new BadRequestException("验证码无效或已过期");
+            throw new BadRequestException(appMessages.get("app.error.code.invalid"));
         }
 
         UserDTO user = userService.findByEmail(email);
         if (user == null || !isLoginAllowed(user)) {
-            throw new BadRequestException("验证码无效或已过期");
+            throw new BadRequestException(appMessages.get("app.error.code.invalid"));
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -121,7 +123,7 @@ public class PasswordResetService {
             }
         }
         if (matched == null) {
-            throw new BadRequestException("验证码无效或已过期");
+            throw new BadRequestException(appMessages.get("app.error.code.invalid"));
         }
 
         userService.update(

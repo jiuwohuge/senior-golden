@@ -69,6 +69,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final session = ref.watch(appSessionProvider);
     final lettersAsync = ref.watch(postalInboxLettersProvider);
     return SafeArea(
@@ -88,7 +89,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
                 const Spacer(),
                 TextButton(
                   onPressed: () => context.push('/mailbox/archive'),
-                  child: const Text('Archive'),
+                  child: Text(l10n.mailboxOpenArchive),
                 ),
               ],
             ),
@@ -149,6 +150,7 @@ class _PostalInboxBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final delivering = letters
         .where((l) => l.status == LetterStatus.delivering)
         .toList();
@@ -164,11 +166,11 @@ class _PostalInboxBody extends ConsumerWidget {
               ).colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.local_shipping_outlined),
-                SizedBox(width: 8),
-                Expanded(child: Text('A post is on the way')),
+                const Icon(Icons.local_shipping_outlined),
+                const SizedBox(width: 8),
+                Expanded(child: Text(l10n.mailboxPostOnTheWay)),
               ],
             ),
           ),

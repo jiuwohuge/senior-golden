@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.app.impl;
 
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.OssProperties;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.service.app.AppOssService;
 import cn.nine.pros.post.biz.service.app.support.OssGetPresigner;
 import cn.nine.pros.post.biz.service.app.support.OssObjectKeyResolver;
@@ -38,16 +39,17 @@ public class AppOssServiceImpl implements AppOssService {
     private final OssObjectKeyResolver objectKeyResolver;
     private final OssReadAuthorizationService readAuthorizationService;
     private final OssGetPresigner ossGetPresigner;
+    private final AppMessages appMessages;
 
     @Override
     public OssPutSignResultVO signPut(long userId, String scene, String ext, String contentType) {
         ensureOssConfigured();
         if (!StringUtils.hasText(scene) || !ALLOWED_SCENE.contains(scene.toLowerCase(Locale.ROOT))) {
-            throw new BadRequestException("scene 须为 postcard、avatar 或 letter");
+            throw new BadRequestException(appMessages.get("app.error.oss.sceneInvalid"));
         }
         String normExt = StringUtils.hasText(ext) ? ext.toLowerCase(Locale.ROOT).replace(".", "") : "jpg";
         if (!ALLOWED_EXT.contains(normExt)) {
-            throw new BadRequestException("不支持的文件扩展名");
+            throw new BadRequestException(appMessages.get("app.error.oss.extInvalid"));
         }
         String resolvedCt = StringUtils.hasText(contentType)
                 ? contentType
@@ -97,7 +99,7 @@ public class AppOssServiceImpl implements AppOssService {
         Objects.requireNonNull(userId, "userId");
         ensureOssConfigured();
         if (objectKeys == null || objectKeys.isEmpty()) {
-            throw new BadRequestException("objectKeys 不能为空");
+            throw new BadRequestException(appMessages.get("app.error.oss.objectKeysEmpty"));
         }
         List<String> normalizedKeys = new ArrayList<>(objectKeys.size());
         for (String raw : objectKeys) {
@@ -113,7 +115,7 @@ public class AppOssServiceImpl implements AppOssService {
     public OssGetSignBatchResultVO signGetBatchStaff(List<String> objectKeys) {
         ensureOssConfigured();
         if (objectKeys == null || objectKeys.isEmpty()) {
-            throw new BadRequestException("objectKeys 不能为空");
+            throw new BadRequestException(appMessages.get("app.error.oss.objectKeysEmpty"));
         }
         List<String> normalizedKeys = new ArrayList<>(objectKeys.size());
         for (String raw : objectKeys) {
@@ -130,7 +132,7 @@ public class AppOssServiceImpl implements AppOssService {
                 || !StringUtils.hasText(ossProperties.getAccessKeyId())
                 || !StringUtils.hasText(ossProperties.getAccessKeySecret())
                 || !StringUtils.hasText(ossProperties.getBucketName())) {
-            throw new BadRequestException("未配置 OSS（senior-post.oss.endpoint/accessKeyId/accessKeySecret/bucketName）");
+            throw new BadRequestException(appMessages.get("app.error.oss.notConfigured"));
         }
     }
 

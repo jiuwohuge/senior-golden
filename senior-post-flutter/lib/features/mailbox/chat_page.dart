@@ -10,6 +10,7 @@ import 'package:tencent_cloud_chat_sdk/manager/v2_tim_manager.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_message.dart';
 
 import '../../app/theme/postal_tokens.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
@@ -63,9 +64,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       final canChat = await repo.isFriendshipActive(widget.peerUserId);
       if (!canChat) {
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           PostalSnack.show(
             context,
-            'Only postal friends in Connections can use live chat.',
+            l10n.chatFriendsOnlySnack,
             tone: PostalSnackTone.error,
           );
         }
@@ -105,6 +107,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   void _openEmojiPicker() {
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet<void>(
       context: context,
       useSafeArea: true,
@@ -121,7 +124,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Friendly stamps',
+                l10n.chatEmojiPickerTitle,
                 style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
                   color: PostalTokens.inkNavy,
                   fontWeight: FontWeight.w700,
@@ -129,7 +132,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Tap an emoji to add it to your message.',
+                l10n.chatEmojiPickerSubtitle,
                 style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                   color: PostalTokens.inkSecondary,
                 ),
@@ -410,8 +413,6 @@ class _BubbleTile extends StatelessWidget {
         alpha: bubble.incoming ? 0.25 : 0.0,
       ),
     );
-    final delivered =
-        bubble.sendStatus == MessageStatus.V2TIM_MSG_STATUS_SEND_SUCC;
     final sending = bubble.sendStatus == MessageStatus.V2TIM_MSG_STATUS_SENDING;
     final failed =
         bubble.sendStatus == MessageStatus.V2TIM_MSG_STATUS_SEND_FAIL;
@@ -433,17 +434,12 @@ class _BubbleTile extends StatelessWidget {
             bubble.text,
             style: TextStyle(color: fg, height: 1.4, fontSize: 16),
           ),
-          if (!bubble.incoming && (delivered || sending || failed)) ...[
+          // 暂不展示「已送达/已读」双勾，仅保留发送中与失败提示。
+          if (!bubble.incoming && (sending || failed)) ...[
             const SizedBox(height: 6),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (delivered)
-                  Icon(
-                    Icons.done_all_rounded,
-                    size: 17,
-                    color: Colors.white.withValues(alpha: 0.85),
-                  ),
                 if (sending)
                   SizedBox(
                     width: 14,

@@ -271,7 +271,7 @@ flowchart LR
 - [x] A7. VIP 权益（**`GET /api/bootstrap/init` 已返回 `vipProduct`（`AppVipProductConfigVO`，读 `sys_config` 与 Manage「VIP 配置」同源键）**；**Flutter `vip_center_page` 非 Mock 读 `appBootstrapProvider` 展示开关与文案**；**订阅/支付、到期校验全链、扣费规则与配置单一真源文档化仍待**，见 `01` **FP-A7-002 / FP-A7-003**）
 - [x] A8. 风控与合规（**敏感词、举报链路、Manage 设备拉黑已接**；仍待：**GDPR 注销**、**图片机审**、`user_device` 一致性核对）
 - [x] A9. 管理后台（**看板/用户/审核/举报/配置/国家/敏感词/版本/公告/日志、邮票流水、用户设备列表与封禁已接**；**UAT 清单仍待**）
-- [x] A10. 国际化（**ARB + 设置页运行时语言切换已接**；主流程文案扫尾与邮件模板双语仍待）
+- [~] A10. 国际化（**Flutter**：ARB + 设置持久化 + `Accept-Language`；**后端 App API**：`messages/app*.properties` + `AppMessages` + `Accept-Language`；**仍待**：全量 Flutter 硬编码扫尾、邮件主题/模板双语、可选 `/webapi` 独立默认语）
 
 ---
 

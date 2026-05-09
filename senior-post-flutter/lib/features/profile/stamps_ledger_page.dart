@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/models/domain_models.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 import 'stamps_remote.dart';
 
@@ -15,9 +16,10 @@ class StampsLedgerPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final async = ref.watch(stampsLedgerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Stamps ledger')),
+      appBar: AppBar(title: Text(l10n.stampsLedgerTitle)),
       body: SafeArea(
         child: async.when(
           loading: () => const PostalSkeletonList(itemCount: 5, itemHeight: 92),

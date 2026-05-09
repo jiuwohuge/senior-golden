@@ -4,6 +4,7 @@ import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.controller.app.AppPageHelper;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.PostcardCommentDomain;
 import cn.nine.pros.post.biz.model.domain.PostcardDomain;
 import cn.nine.pros.post.biz.service.app.AppBlacklistService;
@@ -51,6 +52,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     private final OssDisplayUrlService ossDisplayUrlService;
     private final StampGrantService stampGrantService;
     private final AppBlacklistService appBlacklistService;
+    private final AppMessages appMessages;
 
     @Override
     @SuppressWarnings("unused")
@@ -97,11 +99,11 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     public PostcardDetailVO getDetail(long viewerUserId, Long postcardId) {
         PostcardDomain p = postcardService.getById(postcardId);
         if (p == null || p.isDelFlag()) {
-            throw new BadRequestException("明信片不存在");
+            throw new BadRequestException(appMessages.get("app.error.postcard.notFound"));
         }
         if (isApprovedPublic(p)) {
             if (appBlacklistService.areMutuallyBlocked(viewerUserId, p.getUserId())) {
-                throw new BadRequestException("明信片不存在");
+                throw new BadRequestException(appMessages.get("app.error.postcard.notFound"));
             }
             UserDTO author = userService.findById(p.getUserId());
             int cc = countVisibleComments(p.getId());
@@ -116,7 +118,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
             ossDisplayUrlService.applyPostcardDetail(viewerUserId, vo);
             return vo;
         }
-        throw new BadRequestException("明信片不存在");
+        throw new BadRequestException(appMessages.get("app.error.postcard.notFound"));
     }
 
     @Override
@@ -124,10 +126,10 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     public PostcardDetailVO create(long userId, AppPostcardCreateInDto body) {
         String content = body.getContent() == null ? "" : body.getContent().trim();
         if (!StringUtils.hasText(content)) {
-            throw new BadRequestException("正文不能为空");
+            throw new BadRequestException(appMessages.get("app.error.postcard.bodyEmpty"));
         }
         if (content.length() > 2000) {
-            throw new BadRequestException("正文过长");
+            throw new BadRequestException(appMessages.get("app.error.postcard.bodyTooLong"));
         }
         sensitiveWordService.assertPlainTextAllowed(content);
         List<String> urls = new ArrayList<>();
@@ -192,10 +194,10 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         requireApprovedPostcardForComments(postcardId);
         String text = body.getContent() == null ? "" : body.getContent().trim();
         if (!StringUtils.hasText(text)) {
-            throw new BadRequestException("评论不能为空");
+            throw new BadRequestException(appMessages.get("app.error.comment.empty"));
         }
         if (text.length() > 1000) {
-            throw new BadRequestException("评论过长");
+            throw new BadRequestException(appMessages.get("app.error.comment.tooLong"));
         }
         sensitiveWordService.assertPlainTextAllowed(text);
         PostcardCommentDomain c = new PostcardCommentDomain();
@@ -218,10 +220,10 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     private PostcardDomain requireApprovedPostcardForComments(Long postcardId) {
         PostcardDomain pc = postcardService.getById(postcardId);
         if (pc == null || pc.isDelFlag()) {
-            throw new BadRequestException("明信片不存在");
+            throw new BadRequestException(appMessages.get("app.error.postcard.notFound"));
         }
         if (!isApprovedPublic(pc)) {
-            throw new BadRequestException("明信片未公开，暂不可评论");
+            throw new BadRequestException(appMessages.get("app.error.postcard.notPublicComment"));
         }
         return pc;
     }

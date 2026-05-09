@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/interest_tag_option.dart';
 import '../../core/session/app_session.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../directory/directory_remote.dart';
@@ -32,10 +33,11 @@ class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
   }
 
   Future<void> _save(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     if (_selected.length < 3) {
       PostalSnack.show(
         context,
-        'Please select at least 3 interests.',
+        l10n.authRegisterInterestsMin,
         tone: PostalSnackTone.warning,
       );
       return;
@@ -50,7 +52,7 @@ class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
       }
       PostalSnack.show(
         context,
-        'Interests saved',
+        l10n.interestsPickerSaved,
         tone: PostalSnackTone.success,
       );
       Navigator.of(context).pop();
@@ -71,11 +73,12 @@ class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final lang = Localizations.localeOf(context).languageCode;
     final asyncOpts = ref.watch(_pickerInterestOptionsProvider(lang));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Interest tags')),
+      appBar: AppBar(title: Text(l10n.interestsPickerTitle)),
       body: SafeArea(
         child: asyncOpts.when(
           loading: () => const Center(child: CircularProgressIndicator()),

@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.app.impl;
 
 import cn.nine.commons.basic.exception.unchecked.BusinessException;
 import cn.nine.pros.post.biz.error.PostAppErrorCodes;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.LetterMapper;
 import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
@@ -65,6 +66,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private final StampTransactionService stampTransactionService;
     private final OssDisplayUrlService ossDisplayUrlService;
     private final AppBlacklistService appBlacklistService;
+    private final AppMessages appMessages;
 
     @Override
     public List<MailboxLetterItemVO> listPostalInbox(Long userId) {
@@ -118,53 +120,53 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         if (parentLetterId != null) {
             LetterDomain parent = letterMapper.selectById(parentLetterId);
             if (parent == null || parent.isDelFlag()) {
-                throw new BusinessException("原信件不存在");
+                throw new BusinessException(appMessages.get("app.error.letter.originalMissing"));
             }
             if (!Objects.equals(parent.getToUserId(), fromUserId)) {
-                throw new BusinessException("仅收信人可回复该信件");
+                throw new BusinessException(appMessages.get("app.error.letter.replyRecipientOnly"));
             }
             long replyTo = parent.getFromUserId();
             if (body.getToUserId() != null && !body.getToUserId().equals(replyTo)) {
-                throw new BusinessException("回复收件人与原信件不一致");
+                throw new BusinessException(appMessages.get("app.error.letter.replyPeerMismatch"));
             }
             if (replyTo == fromUserId) {
-                throw new BusinessException("不能给自己寄信");
+                throw new BusinessException(appMessages.get("app.error.letter.cannotMailSelf"));
             }
             toUserId = replyTo;
         } else {
             if (body.getToUserId() == null || body.getToUserId().equals(fromUserId)) {
-                throw new BusinessException("不能给自己寄信");
+                throw new BusinessException(appMessages.get("app.error.letter.cannotMailSelf"));
             }
             toUserId = body.getToUserId();
         }
 
         String raw = body.getContent();
         if (!StringUtils.hasText(raw)) {
-            throw new BusinessException("信件内容不能为空");
+            throw new BusinessException(appMessages.get("app.error.letter.contentEmpty"));
         }
         String content = raw.trim();
         if (content.length() > 20000) {
-            throw new BusinessException("信件过长");
+            throw new BusinessException(appMessages.get("app.error.letter.contentTooLong"));
         }
         sensitiveWordService.assertPlainTextAllowed(content);
         int letterType = body.getLetterType();
         if (letterType != LETTER_TYPE_REGISTERED && letterType != LETTER_TYPE_STANDARD) {
-            throw new BusinessException("letterType 须为 1（挂号）或 2（平邮）");
+            throw new BusinessException(appMessages.get("app.error.letter.typeInvalid"));
         }
 
         UserDTO toUser = userService.findById(toUserId);
         if (toUser == null) {
-            throw new BusinessException("收件人不存在");
+            throw new BusinessException(appMessages.get("app.error.recipient.notFound"));
         }
         if (userStatus(toUser.getStatus()) != USER_STATUS_NORMAL) {
-            throw new BusinessException("收件人状态异常，无法寄信");
+            throw new BusinessException(appMessages.get("app.error.recipient.statusBad"));
         }
         UserDTO sender = userService.findById(fromUserId);
         if (sender == null || userStatus(sender.getStatus()) != USER_STATUS_NORMAL) {
-            throw new BusinessException("发件人状态异常");
+            throw new BusinessException(appMessages.get("app.error.sender.statusBad"));
         }
         if (appBlacklistService.areMutuallyBlocked(fromUserId, toUserId)) {
-            throw new BusinessException("无法向对方寄信");
+            throw new BusinessException(appMessages.get("app.error.mail.cannotSendToPeer"));
         }
 
         boolean vip = Boolean.TRUE.equals(sender.getIsVip());
@@ -192,7 +194,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             int balance = sender.getStampsBalance() != null ? sender.getStampsBalance() : 0;
             if (balance < REGISTERED_STAMP_COST) {
                 throw new BusinessException(
-                        PostAppErrorCodes.STAMP_INSUFFICIENT, "邮票不足，无法发送挂号信");
+                        PostAppErrorCodes.STAMP_INSUFFICIENT,
+                        appMessages.get("app.error.stamp.insufficientRegistered"));
             }
             letter.setLetterType(LETTER_TYPE_REGISTERED);
             letter.setStatus(STATUS_DELIVERED);
@@ -210,7 +213,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             boolean patched = stampAccountService.tryDecrementBalance(fromUserId, oldBal,
                     REGISTERED_STAMP_COST, now, fromUserId);
             if (!patched) {
-                throw new BusinessException("邮票扣减失败，请重试");
+                throw new BusinessException(appMessages.get("app.error.stamp.debitFailed"));
             }
             StampTransactionDTO tx = new StampTransactionDTO();
             tx.setUserId(fromUserId);
@@ -230,10 +233,10 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     public MailboxLetterItemVO getLetter(long viewerUserId, long letterId) {
         LetterDomain l = letterMapper.selectById(letterId);
         if (l == null || l.isDelFlag()) {
-            throw new BusinessException("信件不存在");
+            throw new BusinessException(appMessages.get("app.error.letter.notFound"));
         }
         if (l.getFromUserId() != viewerUserId && l.getToUserId() != viewerUserId) {
-            throw new BusinessException("无权查看该信件");
+            throw new BusinessException(appMessages.get("app.error.letter.noPermissionView"));
         }
         if (Objects.equals(l.getToUserId(), viewerUserId)
                 && l.getRecipientReadAt() == null
@@ -292,23 +295,23 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     public MailboxLetterItemVO earlyOpenLetter(long actorUserId, long letterId) {
         LetterDomain letter = letterMapper.selectById(letterId);
         if (letter == null || letter.isDelFlag()) {
-            throw new BusinessException("信件不存在");
+            throw new BusinessException(appMessages.get("app.error.letter.notFound"));
         }
         if (letter.getToUserId() == null || !Objects.equals(letter.getToUserId(), actorUserId)) {
-            throw new BusinessException("仅收件人可提前拆信");
+            throw new BusinessException(appMessages.get("app.error.letter.earlyOpenRecipientOnly"));
         }
         if (toInt(letter.getLetterType()) != LETTER_TYPE_STANDARD) {
-            throw new BusinessException("仅平邮信件可提前拆信");
+            throw new BusinessException(appMessages.get("app.error.letter.earlyOpenStandardOnly"));
         }
         if (toInt(letter.getStatus()) != STATUS_DELIVERING) {
-            throw new BusinessException("当前状态不可提前拆信");
+            throw new BusinessException(appMessages.get("app.error.letter.earlyOpenBadStatus"));
         }
         if (letter.getRecipientEarlyOpenAt() != null) {
-            throw new BusinessException("已提前拆信");
+            throw new BusinessException(appMessages.get("app.error.letter.earlyOpenAlready"));
         }
         UserDTO recipient = userService.findById(actorUserId);
         if (recipient == null || userStatus(recipient.getStatus()) != USER_STATUS_NORMAL) {
-            throw new BusinessException("账号状态异常");
+            throw new BusinessException(appMessages.get("app.error.account.statusAbnormal"));
         }
         boolean vip = Boolean.TRUE.equals(recipient.getIsVip());
         LocalDateTime now = LocalDateTime.now();
@@ -316,13 +319,14 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             int oldBal = recipient.getStampsBalance() != null ? recipient.getStampsBalance() : 0;
             if (oldBal < RECIPIENT_EARLY_OPEN_STAMP_COST) {
                 throw new BusinessException(
-                        PostAppErrorCodes.STAMP_INSUFFICIENT, "邮票不足，无法提前拆信");
+                        PostAppErrorCodes.STAMP_INSUFFICIENT,
+                        appMessages.get("app.error.stamp.insufficientEarlyOpen"));
             }
             int newBal = oldBal - RECIPIENT_EARLY_OPEN_STAMP_COST;
             boolean patched = stampAccountService.tryDecrementBalance(actorUserId, oldBal,
                     RECIPIENT_EARLY_OPEN_STAMP_COST, now, actorUserId);
             if (!patched) {
-                throw new BusinessException("邮票扣减失败，请重试");
+                throw new BusinessException(appMessages.get("app.error.stamp.debitFailed"));
             }
             StampTransactionDTO tx = new StampTransactionDTO();
             tx.setUserId(actorUserId);
@@ -346,7 +350,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .set(LetterDomain::getUpdatedAt, now)
                 .set(LetterDomain::getUpdatedBy, actorUserId));
         if (!letterPatched) {
-            throw new BusinessException("信件状态已变更，请刷新后重试");
+            throw new BusinessException(appMessages.get("app.error.letter.stateChanged"));
         }
         LetterDomain saved = letterService.getById(letterId);
         return toItem(saved, actorUserId, true);
@@ -357,24 +361,24 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     public MailboxLetterItemVO speedUpLetter(long actorUserId, long letterId) {
         LetterDomain letter = letterMapper.selectById(letterId);
         if (letter == null || letter.isDelFlag()) {
-            throw new BusinessException("信件不存在");
+            throw new BusinessException(appMessages.get("app.error.letter.notFound"));
         }
         if (letter.getFromUserId() != actorUserId) {
-            throw new BusinessException("仅发件人可加速平邮");
+            throw new BusinessException(appMessages.get("app.error.letter.speedUpSenderOnly"));
         }
         if (toInt(letter.getLetterType()) != LETTER_TYPE_STANDARD) {
-            throw new BusinessException("仅平邮信件可加速");
+            throw new BusinessException(appMessages.get("app.error.letter.speedUpStandardOnly"));
         }
         if (toInt(letter.getStatus()) != STATUS_DELIVERING) {
-            throw new BusinessException("当前状态不可加速");
+            throw new BusinessException(appMessages.get("app.error.letter.speedUpBadStatus"));
         }
         if (Boolean.TRUE.equals(letter.getIsAccelerated())) {
-            throw new BusinessException("该信件已加速");
+            throw new BusinessException(appMessages.get("app.error.letter.speedUpAlready"));
         }
 
         UserDTO sender = userService.findById(actorUserId);
         if (sender == null || userStatus(sender.getStatus()) != USER_STATUS_NORMAL) {
-            throw new BusinessException("账号状态异常");
+            throw new BusinessException(appMessages.get("app.error.account.statusAbnormal"));
         }
         boolean vip = Boolean.TRUE.equals(sender.getIsVip());
         LocalDateTime now = LocalDateTime.now();
@@ -383,13 +387,14 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             int oldBal = sender.getStampsBalance() != null ? sender.getStampsBalance() : 0;
             if (oldBal < SPEED_UP_STAMP_COST) {
                 throw new BusinessException(
-                        PostAppErrorCodes.STAMP_INSUFFICIENT, "邮票不足，无法加速");
+                        PostAppErrorCodes.STAMP_INSUFFICIENT,
+                        appMessages.get("app.error.stamp.insufficientSpeedUp"));
             }
             int newBal = oldBal - SPEED_UP_STAMP_COST;
             boolean patched = stampAccountService.tryDecrementBalance(actorUserId, oldBal,
                     SPEED_UP_STAMP_COST, now, actorUserId);
             if (!patched) {
-                throw new BusinessException("邮票扣减失败，请重试");
+                throw new BusinessException(appMessages.get("app.error.stamp.debitFailed"));
             }
             StampTransactionDTO tx = new StampTransactionDTO();
             tx.setUserId(actorUserId);
@@ -412,7 +417,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .set(LetterDomain::getUpdatedAt, now)
                 .set(LetterDomain::getUpdatedBy, actorUserId));
         if (!letterPatched) {
-            throw new BusinessException("信件状态已变更，请刷新后重试");
+            throw new BusinessException(appMessages.get("app.error.letter.stateChanged"));
         }
 
         LetterDomain saved = letterService.getById(letterId);

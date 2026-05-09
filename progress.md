@@ -1,5 +1,17 @@
 # 会话进度日志
 
+## 2026-05-09 — Locale：与 commons-web LocaleAutoConfiguration 对齐
+
+- **移除** `biz` 内 `AppI18nConfig`（避免与框架 `LocaleAutoConfiguration` 双注册 `LocaleResolver` / `@Primary` 顺序问题）。
+- **`application.yml`**：`spring.web.locale-resolver: accept_header`、`spring.web.locale: zh_CN`；与 `底层框架能力.md` §14.2 补充的框架对齐说明一致。
+- **验证**：`mvn -pl biz,server -am compile -DskipTests`。
+
+## 2026-05-09 — 用户端国际化基线（planning-with-files）
+
+- **后端**：`biz` 增加 `AppMessages`、`AppI18nConfig`（`Accept-Language` + 默认 `zh_CN`）、`messages/app.properties` / `app_zh_CN.properties`；`application.yml` 配置 `spring.messages.basename`；App 侧 Controller/Service 业务错误改为 `app.error.*` 键；`OssReadableKeyValidator` 等传入 `AppMessages`；**未改** `controller/admin` 与 `UserServiceImpl` 管理向提示。
+- **Flutter**：`locale_resolution.dart`、`effectiveAppLocaleProvider`、`dio` 注入 `Accept-Language`；扩展 ARB 并替换聊天/举报/筛选/信箱/商城/发信等硬编码；`flutter analyze lib` 无告警。
+- **验证**：`mvn -pl biz -am compile -DskipTests`；`mvn -pl biz -am test -Dtest=OssReadableKeyValidatorTest`；`flutter gen-l10n` + `flutter analyze lib`。
+
 ## 2026-05-09 — IM UserSig 缓存 + 聊天消息实时展示（planning-with-files）
 
 - **Flutter `tim_facade`**：在 `expireInSeconds` 有效期内且 `getLoginUser` 与缓存一致时 **跳过** `GET /api/im/usersig`；临近过期再拉签并 `logout`+`login` 应用新 UserSig；**登录 / 注册 / 登出** 均 `invalidate(seniorPostTimFacadeProvider)` 避免账号切换复用 TIM 状态。

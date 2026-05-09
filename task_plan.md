@@ -32,7 +32,7 @@
 | P1 | M2 主路径：发帖/评论/目录/写信/OSS/Flutter Mock→REST | [~] 核心 REST 已接；**总闸 Mock 策略文档化**、**E2E 冒烟自动化/录屏**、审核态 UX 加强仍待 |
 | P2 | M3：平邮延迟队列、邮票事务、信箱全 REST、Manage 邮票页 | [~] 平邮到期 Worker、加速、赠票、IM REST、Connections、**Manage 邮票流水页**、**用户设备拉黑 UI** 已落地；**平邮区间配置化**、**挂号事务边界复审** 仍待 |
 | P3 | M1/M4：邮件 outbox、AES、GDPR、版本强更、密码风控 | [ ] |
-| P4 | 体验债：B14 主题、B15 登录注册视觉、A10 扫尾 | [ ] |
+| P4 | 体验债：B14 主题、B15 登录注册视觉、A10 扫尾 | [~] **A10 i18n 基线**：后端 `messages/app*.properties` + `Accept-Language`；Flutter ARB + `Accept-Language`；**全量 UI 去硬编码**仍待迭代 |
 | P5 | 质量闸门：`flutter analyze`、后端冒烟、IM 双端、UAT 清单 | [~] 分析/单测常态绿；**双用户集成/E2E**、**生产 IM 配置验收** 仍待 |
 
 ---

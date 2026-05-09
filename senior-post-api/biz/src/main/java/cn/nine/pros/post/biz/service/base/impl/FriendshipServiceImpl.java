@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.base.impl;
 
 import cn.nine.commons.basic.exception.BadRequestException;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.FriendshipMapper;
 import cn.nine.pros.post.biz.mapper.LetterMapper;
 import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
@@ -21,6 +22,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final FriendshipMapper friendshipMapper;
     private final LetterMapper letterMapper;
     private final cn.nine.pros.post.biz.integration.tencent.TencentImFriendshipNotifier tencentImFriendshipNotifier;
+    private final AppMessages appMessages;
 
     @Override
     public boolean areActiveFriends(Long userIdA, Long userIdB) {
@@ -53,14 +55,14 @@ public class FriendshipServiceImpl implements FriendshipService {
     public FriendshipDomain ensureActiveFriendship(Long actorUserId, Long letterId) {
         LetterDomain letter = letterMapper.selectById(letterId);
         if (letter == null || Boolean.TRUE.equals(letter.isDelFlag())) {
-            throw new BadRequestException("信件不存在");
+            throw new BadRequestException(appMessages.get("app.error.friendship.letterNotFound"));
         }
         if (!actorUserId.equals(letter.getToUserId())) {
-            throw new BadRequestException("仅收件人可建立建联");
+            throw new BadRequestException(appMessages.get("app.error.friendship.recipientOnly"));
         }
         int st = statusToInt(letter.getStatus());
         if (st != LetterBizStatus.DELIVERED.getCode()) {
-            throw new BadRequestException("信件未送达，无法建联");
+            throw new BadRequestException(appMessages.get("app.error.friendship.letterNotDelivered"));
         }
         long low = Math.min(letter.getFromUserId(), letter.getToUserId());
         long high = Math.max(letter.getFromUserId(), letter.getToUserId());
