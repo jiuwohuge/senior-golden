@@ -25,6 +25,8 @@ class SeniorPostTimFacade {
   bool _sdkInited = false;
   int? _initSdkAppId;
   String? _loggedUserId;
+  /// 认为 UserSig 仍可用的截止时间（较服务端 TTL 提前刷新，避免临界过期）。
+  DateTime? _credentialUsableUntil;
 
   Future<void> disposeAsync() async {
     try {
@@ -33,6 +35,15 @@ class SeniorPostTimFacade {
     _sdkInited = false;
     _initSdkAppId = null;
     _loggedUserId = null;
+    _credentialUsableUntil = null;
+  }
+
+  static DateTime? _readUsableUntil(Map<String, dynamic> map) {
+    final sec = (map['expireInSeconds'] as num?)?.toInt() ??
+        (map['expire_in_seconds'] as num?)?.toInt();
+    if (sec == null) return null;
+    final skew = sec > 600 ? 120 : (sec ~/ 4).clamp(30, 120);
+    return DateTime.now().add(Duration(seconds: sec - skew));
   }
 
   Future<void> ensureLoggedIn() async {
@@ -42,6 +53,19 @@ class SeniorPostTimFacade {
     }
     final dio = _ref.read(dioProvider);
     try {
+      final now = DateTime.now();
+      if (_sdkInited &&
+          _loggedUserId != null &&
+          _credentialUsableUntil != null &&
+          now.isBefore(_credentialUsableUntil!)) {
+        final me = await _tim.getLoginUser();
+        if (me.code == 0 &&
+            (me.data != null && me.data!.isNotEmpty) &&
+            me.data == _loggedUserId) {
+          return;
+        }
+      }
+
       final res = await dio.get<Map<String, dynamic>>('/api/im/usersig');
       final map = unwrapData<Map<String, dynamic>>(res, (raw) {
         return Map<String, dynamic>.from(raw! as Map);
@@ -52,11 +76,13 @@ class SeniorPostTimFacade {
       if (userId.isEmpty || sig.isEmpty) {
         throw ApiBusinessException(400, 'IM UserSig missing: check server Tencent IM config');
       }
+      _credentialUsableUntil = _readUsableUntil(map);
       // UserSig 与 initSDK 的 sdkAppID 必须一致；配置变更后需重新 init。
       if (_sdkInited && _initSdkAppId != null && _initSdkAppId != sdk) {
         await _tim.unInitSDK();
         _sdkInited = false;
         _loggedUserId = null;
+        _credentialUsableUntil = null;
       }
       if (!_sdkInited) {
         final init = await _tim.initSDK(
@@ -73,12 +99,12 @@ class SeniorPostTimFacade {
         _sdkInited = true;
         _initSdkAppId = sdk;
       }
-      if (_loggedUserId == userId) {
-        return;
-      }
-      await _tim.logout();
+      try {
+        await _tim.logout();
+      } catch (_) {}
       final login = await _tim.login(userID: userId, userSig: sig);
       if (login.code != 0) {
+        _credentialUsableUntil = null;
         throw ApiBusinessException(
           login.code,
           'TIM login failed: ${login.desc}',

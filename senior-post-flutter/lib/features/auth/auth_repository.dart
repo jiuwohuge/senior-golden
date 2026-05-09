@@ -7,6 +7,7 @@ import '../../core/auth/auth_token.dart';
 import '../../core/device/device_ids.dart';
 import '../../core/network/dio_provider.dart';
 import '../../core/session/app_session.dart';
+import '../mailbox/tim_facade.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(ref);
@@ -36,6 +37,7 @@ class AuthRepository {
       final token = data['token']! as String;
       await AuthStorage.writeToken(token);
       _ref.read(authTokenProvider.notifier).state = token;
+      _ref.invalidate(seniorPostTimFacadeProvider);
       final userMap = data['user'] as Map<String, dynamic>?;
       if (userMap != null) {
         _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
@@ -81,6 +83,7 @@ class AuthRepository {
       final token = data['token']! as String;
       await AuthStorage.writeToken(token);
       _ref.read(authTokenProvider.notifier).state = token;
+      _ref.invalidate(seniorPostTimFacadeProvider);
       final userMap = data['user'] as Map<String, dynamic>?;
       if (userMap != null) {
         _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
@@ -126,6 +129,7 @@ class AuthRepository {
     await AuthStorage.clearToken();
     _ref.read(authTokenProvider.notifier).state = null;
     _ref.read(appSessionProvider.notifier).clear();
+    _ref.invalidate(seniorPostTimFacadeProvider);
   }
 
   /// 拉取 `/api/auth/me` 并写入 [appSessionProvider]。

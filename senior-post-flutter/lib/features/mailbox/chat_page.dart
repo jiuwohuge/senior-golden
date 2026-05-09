@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimAdvancedMsgListener.dart';
 import 'package:tencent_cloud_chat_sdk/enum/message_elem_type.dart';
 import 'package:tencent_cloud_chat_sdk/enum/message_priority_enum.dart';
 import 'package:tencent_cloud_chat_sdk/manager/v2_tim_manager.dart';
@@ -24,10 +25,18 @@ class ChatPage extends ConsumerStatefulWidget {
 class _ChatPageState extends ConsumerState<ChatPage> {
   final _scroll = ScrollController();
   final _input = TextEditingController();
+  late final ValueNotifier<V2TimMessage?> _sentMessageSink;
   bool _busy = false;
 
   @override
+  void initState() {
+    super.initState();
+    _sentMessageSink = ValueNotifier<V2TimMessage?>(null);
+  }
+
+  @override
   void dispose() {
+    _sentMessageSink.dispose();
     _scroll.dispose();
     _input.dispose();
     super.dispose();
@@ -68,6 +77,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (send.code != 0) {
         throw ApiBusinessException(send.code, send.desc);
       }
+      final delivered = send.data;
+      if (delivered != null) {
+        _sentMessageSink.value = delivered;
+      }
       _input.clear();
       if (mounted) {
         PostalSnack.show(context, 'Sent', tone: PostalSnackTone.success);
@@ -103,6 +116,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             child: _CloudChatBody(
               peerUserId: widget.peerUserId,
               scrollController: _scroll,
+              sentMessageSink: _sentMessageSink,
             ),
           ),
           SafeArea(
@@ -219,9 +233,11 @@ class _CloudChatBody extends ConsumerStatefulWidget {
   const _CloudChatBody({
     required this.peerUserId,
     required this.scrollController,
+    required this.sentMessageSink,
   });
   final String peerUserId;
   final ScrollController scrollController;
+  final ValueNotifier<V2TimMessage?> sentMessageSink;
 
   @override
   ConsumerState<_CloudChatBody> createState() => _CloudChatBodyState();
@@ -229,14 +245,92 @@ class _CloudChatBody extends ConsumerStatefulWidget {
 
 class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
   List<V2TimMessage> _items = const [];
+  final Set<String> _seenMsgIds = {};
   String _selfId = '';
   bool _loading = true;
   String? _loadError;
+  V2TimAdvancedMsgListener? _msgListener;
 
   @override
   void initState() {
     super.initState();
+    widget.sentMessageSink.addListener(_onSentFromComposer);
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  @override
+  void dispose() {
+    widget.sentMessageSink.removeListener(_onSentFromComposer);
+    final l = _msgListener;
+    _msgListener = null;
+    if (l != null) {
+      V2TIMManager().v2TIMMessageManager.removeAdvancedMsgListener(listener: l);
+    }
+    super.dispose();
+  }
+
+  void _onSentFromComposer() {
+    final m = widget.sentMessageSink.value;
+    if (m != null) {
+      _ingestLiveMessage(m);
+    }
+  }
+
+  bool _isPeerC2C(V2TimMessage m) {
+    final gid = m.groupID;
+    if (gid != null && gid.isNotEmpty) {
+      return false;
+    }
+    return m.userID == widget.peerUserId;
+  }
+
+  void _ingestLiveMessage(V2TimMessage m) {
+    if (!_isPeerC2C(m)) {
+      return;
+    }
+    final id = m.msgID;
+    if (id != null && id.isNotEmpty) {
+      if (_seenMsgIds.contains(id)) {
+        return;
+      }
+      _seenMsgIds.add(id);
+    }
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _loading = false;
+      _loadError = null;
+      _items = [..._items, m]
+        ..sort(
+          (a, b) => (a.timestamp ?? 0).compareTo(b.timestamp ?? 0),
+        );
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !widget.scrollController.hasClients) {
+        return;
+      }
+      widget.scrollController.jumpTo(
+        widget.scrollController.position.maxScrollExtent,
+      );
+    });
+  }
+
+  Future<void> _attachMsgListener() async {
+    if (_msgListener != null) {
+      return;
+    }
+    final listener = V2TimAdvancedMsgListener(
+      onRecvNewMessage: (msg) {
+        if (mounted) {
+          _ingestLiveMessage(msg);
+        }
+      },
+    );
+    _msgListener = listener;
+    await V2TIMManager().v2TIMMessageManager.addAdvancedMsgListener(
+      listener: listener,
+    );
   }
 
   Future<void> _load() async {
@@ -275,12 +369,27 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
         });
         return;
       }
+      final list = r.data != null
+          ? List<V2TimMessage>.from(r.data!)
+          : <V2TimMessage>[];
+      list.sort(
+        (a, b) => (a.timestamp ?? 0).compareTo(b.timestamp ?? 0),
+      );
+      _seenMsgIds
+        ..clear()
+        ..addAll(
+          list
+              .map((e) => e.msgID)
+              .whereType<String>()
+              .where((e) => e.isNotEmpty),
+        );
       setState(() {
         _loading = false;
         _loadError = null;
         _selfId = me.data ?? '';
-        _items = r.data != null ? List<V2TimMessage>.from(r.data!) : const [];
+        _items = list;
       });
+      await _attachMsgListener();
     } on ApiBusinessException catch (e) {
       if (mounted) {
         setState(() {

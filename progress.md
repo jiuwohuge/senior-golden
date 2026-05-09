@@ -1,5 +1,11 @@
 # 会话进度日志
 
+## 2026-05-09 — IM UserSig 缓存 + 聊天消息实时展示（planning-with-files）
+
+- **Flutter `tim_facade`**：在 `expireInSeconds` 有效期内且 `getLoginUser` 与缓存一致时 **跳过** `GET /api/im/usersig`；临近过期再拉签并 `logout`+`login` 应用新 UserSig；**登录 / 注册 / 登出** 均 `invalidate(seniorPostTimFacadeProvider)` 避免账号切换复用 TIM 状态。
+- **Flutter `chat_page`**：历史列表按时间排序；`V2TimAdvancedMsgListener.onRecvNewMessage` 合并当前 C2C 会话；发送成功用 `sendMessage` 返回值经 `ValueNotifier` 回灌列表；`msgID` 去重；新消息后滚动到底。
+- **验证**：`dart analyze`（`tim_facade.dart`、`chat_page.dart`、`auth_repository.dart`）无告警。
+
 ## 2026-05-09 — 注销解除好友 + Connections 进聊天空白排查（planning-with-files）
 
 - **后端**：冷静期结束正式注销前 `FriendshipService.deactivateAllFriendshipsForUser`；`TencentImRestApiClient.friendDeleteBoth`（`/v4/sns/friend_delete`，`Delete_Type_Both`）；`TencentImFriendshipNotifier.afterFriendshipRemoved`；`AppAuthService.finalizeAccountDeletionIfCooldownElapsed` 调用上述逻辑。
