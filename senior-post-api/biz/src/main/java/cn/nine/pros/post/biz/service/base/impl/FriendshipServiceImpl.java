@@ -92,6 +92,25 @@ public class FriendshipServiceImpl implements FriendshipService {
         return f;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deactivateAllFriendshipsForUser(long userId) {
+        List<FriendshipDomain> rows = friendshipMapper.selectList(new LambdaQueryWrapper<FriendshipDomain>()
+                .eq(FriendshipDomain::getStatus, 1)
+                .eq(FriendshipDomain::isDelFlag, false)
+                .and(w -> w.eq(FriendshipDomain::getUserLow, userId).or().eq(FriendshipDomain::getUserHigh, userId)));
+        for (FriendshipDomain f : rows) {
+            long low = f.getUserLow() != null ? f.getUserLow() : 0L;
+            long high = f.getUserHigh() != null ? f.getUserHigh() : 0L;
+            if (low > 0 && high > 0) {
+                tencentImFriendshipNotifier.afterFriendshipRemoved(low, high);
+            }
+            f.setStatus(0);
+            f.updateAudit(userId);
+            friendshipMapper.updateById(f);
+        }
+    }
+
     private static int statusToInt(Object status) {
         if (status instanceof Number n) {
             return n.intValue();

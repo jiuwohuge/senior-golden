@@ -124,6 +124,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   const SizedBox(width: 10),
                   PostalButton(
                     label: 'Send',
+                    expand: false,
                     busy: _busy,
                     onPressed: _busy ? null : _send,
                   ),

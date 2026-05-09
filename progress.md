@@ -1,5 +1,11 @@
 # 会话进度日志
 
+## 2026-05-09 — 注销解除好友 + Connections 进聊天空白排查（planning-with-files）
+
+- **后端**：冷静期结束正式注销前 `FriendshipService.deactivateAllFriendshipsForUser`；`TencentImRestApiClient.friendDeleteBoth`（`/v4/sns/friend_delete`，`Delete_Type_Both`）；`TencentImFriendshipNotifier.afterFriendshipRemoved`；`AppAuthService.finalizeAccountDeletionIfCooldownElapsed` 调用上述逻辑。
+- **Flutter**：`mailbox_remote` 宽松解析 `peerUserId` / `peer_user_id`；Connections 点击校验非 `0`；`go_router` `/chat/:userId` 支持 `extra` 昵称；`findings.md` §15 记录根因分析。
+- **验证**：`mvn -pl biz -am test -Dtest=TencentImFriendshipNotifierTest`；`mvn -pl biz,server -am compile -DskipTests`；`dart analyze`（变更文件）无告警。
+
 ## 2026-05-09 — Postal inbox 与 Connections 解耦 + 统一过滤
 
 - **需求**：邮政收件箱不得依赖好友/笔友关系；Postal = 收件未读（`recipient_read_at` 空）∪ 发件运输中；Archive 全量；已读仅 `getLetter`（已送达收件人）与 `earlyOpenLetter`。

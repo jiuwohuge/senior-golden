@@ -64,6 +64,21 @@ public class TencentImRestApiClient {
         return post("/v4/sns/friend_add", body);
     }
 
+    /**
+     * 双向删除 From_Account 与 To_Account 之间的好友关系（腾讯 REST Delete_Type_Both）。
+     */
+    public boolean friendDeleteBoth(String fromAccount, String toAccount) {
+        if (!StringUtils.hasText(fromAccount) || !StringUtils.hasText(toAccount)) {
+            return false;
+        }
+        String body = """
+                {"From_Account":"%s","To_Account":["%s"],"DeleteType":"Delete_Type_Both"}
+                """
+                .formatted(escapeJson(fromAccount), escapeJson(toAccount))
+                .trim();
+        return post("/v4/sns/friend_delete", body);
+    }
+
     private boolean post(String path, String jsonBody) {
         if (props.getSdkAppId() <= 0 || !StringUtils.hasText(props.getSecretKey())) {
             log.warn("Tencent IM REST skipped: sdk-app-id or secret-key missing");

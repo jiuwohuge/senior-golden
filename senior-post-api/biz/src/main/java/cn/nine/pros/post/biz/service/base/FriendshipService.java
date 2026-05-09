@@ -19,4 +19,9 @@ public interface FriendshipService {
      * @return 新建或已存在的好友关系
      */
     FriendshipDomain ensureActiveFriendship(Long actorUserId, Long letterId);
+
+    /**
+     * 账号正式注销（冷静期结束）时：将涉及该用户的本地好友关系置为失效，并尽力同步删除腾讯 IM 好友。
+     */
+    void deactivateAllFriendshipsForUser(long userId);
 }

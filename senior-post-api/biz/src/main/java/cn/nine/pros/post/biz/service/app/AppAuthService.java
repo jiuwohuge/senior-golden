@@ -8,6 +8,7 @@ import cn.nine.pros.post.biz.model.domain.UserDeviceDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.app.support.OssReadableKeyValidator;
 import cn.nine.pros.post.biz.service.app.support.UserInterestAssembler;
+import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.TagService;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
@@ -59,6 +60,7 @@ public class AppAuthService {
     private final TagService tagService;
     private final UserInterestAssembler userInterestAssembler;
     private final cn.nine.pros.post.biz.service.base.StampGrantService stampGrantService;
+    private final FriendshipService friendshipService;
 
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO register(AppRegisterInDto body) {
@@ -285,6 +287,7 @@ public class AppAuthService {
             return;
         }
         LocalDateTime now = LocalDateTime.now();
+        friendshipService.deactivateAllFriendshipsForUser(userId);
         userService.update(new LambdaUpdateWrapper<UserDomain>()
                 .eq(UserDomain::getId, userId)
                 .eq(UserDomain::isDelFlag, false)

@@ -117,8 +117,24 @@ Map<String, dynamic> _unwrapMapData(Response<dynamic> r) {
   return data;
 }
 
+int? _readIntLoose(Object? v) {
+  if (v == null) {
+    return null;
+  }
+  if (v is int) {
+    return v;
+  }
+  if (v is num) {
+    return v.toInt();
+  }
+  if (v is String) {
+    return int.tryParse(v.trim());
+  }
+  return null;
+}
+
 AppUser _peerToAppUser(Map<String, dynamic> p) {
-  final id = (p['id'] as num?)?.toInt() ?? 0;
+  final id = _readIntLoose(p['id']) ?? 0;
   final birthYear = (p['birthYear'] as num?)?.toInt() ?? 1970;
   return AppUser(
     id: '$id',
@@ -135,7 +151,7 @@ AppUser _peerToAppUser(Map<String, dynamic> p) {
 }
 
 FriendListRow _voToFriendRow(Map<String, dynamic> m) {
-  final peerId = (m['peerUserId'] as num?)?.toInt() ?? 0;
+  final peerId = _readIntLoose(m['peerUserId'] ?? m['peer_user_id']) ?? 0;
   final nick = (m['peerNickname'] as String?) ?? 'User';
   final cc = (m['peerCountryCode'] as String?) ?? '';
   final connected = _parseDate(m['connectedAt']) ?? DateTime.now();

@@ -34,18 +34,30 @@ class PostalButton extends StatelessWidget {
         ? _busyIndicator()
         : _labelRow(theme.textTheme.labelLarge);
 
-    final inner = SizedBox(
-      width: expand ? double.infinity : null,
-      height: minHeight,
-      child: switch (variant) {
-        PostalButtonVariant.primary => _primary(child),
-        PostalButtonVariant.secondary => _secondary(child),
-        PostalButtonVariant.ghost => _ghost(child),
-        PostalButtonVariant.danger => _danger(child),
+    final shell = switch (variant) {
+      PostalButtonVariant.primary => _primary(child),
+      PostalButtonVariant.secondary => _secondary(child),
+      PostalButtonVariant.ghost => _ghost(child),
+      PostalButtonVariant.danger => _danger(child),
+    };
+
+    final fixedHeight = SizedBox(height: minHeight, child: shell);
+
+    // 避免 `SizedBox(width: double.infinity)`：与部分父级（如 Row / Flexible）合并约束时会得到
+    // 非法的无限宽度。有界时用 LayoutBuilder 的 maxWidth 铺满；无界或非 expand 用 IntrinsicWidth。
+    if (!expand) {
+      return IntrinsicWidth(child: fixedHeight);
+    }
+
+    return LayoutBuilder(
+      builder: (context, c) {
+        final w = c.maxWidth;
+        if (w.isFinite && w > 0) {
+          return SizedBox(width: w, height: minHeight, child: shell);
+        }
+        return IntrinsicWidth(child: fixedHeight);
       },
     );
-
-    return inner;
   }
 
   Widget _busyIndicator() {

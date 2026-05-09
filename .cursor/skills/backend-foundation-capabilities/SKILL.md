@@ -60,7 +60,7 @@ Use `MyRequestContextHolder` per `底层框架能力.md` §2: 禁止在 Service/
 
 ### 3) Exception Convention
 
-异常体系以 `BaseRuntimeException` 为抽象基类；业务侧常用 `BusinessException`（包：`cn.nine.commons.basic.exception.unchecked`）、`BadRequestException`、`DataValidationException`、`CommonsScopeException`（包：`cn.nine.commons.basic.exception`）。Token 错误对齐 **`85xx`** 常量（8500–8505）。
+异常体系以 `BaseRuntimeException` 为抽象基类；业务侧常用 `BusinessException`（包：`cn.nine.commons.basic.exception.unchecked`）、`BadRequestException`、`DataValidationException`、`CommonsScopeException`（包：`cn.nine.commons.basic.exception`）。Token 错误对齐 **`85xx`** 常量（8500–8505）。BusinessException默认编码4501,作为提示信息显示
 
 ### 4) Pagination Convention
 

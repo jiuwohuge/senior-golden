@@ -48,4 +48,30 @@ public class TencentImFriendshipNotifier {
             log.info("Tencent IM friendship synced userLow={} userHigh={}", userLow, userHigh);
         }
     }
+
+    /**
+     * 业务侧好友关系失效/账号注销时，尽力同步删除腾讯 IM 双向好友（与 {@link #afterFriendshipActive} 配对）。
+     */
+    public void afterFriendshipRemoved(long userLow, long userHigh) {
+        if (!tencentImProperties.isFriendshipSyncEnabled()) {
+            log.debug("Tencent IM friendship sync disabled (skip friend_delete)");
+            return;
+        }
+        if (tencentImProperties.getSdkAppId() <= 0 || !StringUtils.hasText(tencentImProperties.getSecretKey())) {
+            log.debug("Tencent IM friend_delete skipped: IM not configured");
+            return;
+        }
+        if (!StringUtils.hasText(tencentImProperties.getRestApiIdentifier())) {
+            log.warn("Tencent IM friend_delete skipped: set senior-post.tencent-im.rest-api-identifier (App admin)");
+            return;
+        }
+        String a = String.valueOf(userLow);
+        String b = String.valueOf(userHigh);
+        boolean ok = restApiClient.friendDeleteBoth(a, b);
+        if (!ok) {
+            log.warn("Tencent IM friend_delete incomplete userLow={} userHigh={}", userLow, userHigh);
+        } else {
+            log.info("Tencent IM friendship removed userLow={} userHigh={}", userLow, userHigh);
+        }
+    }
 }

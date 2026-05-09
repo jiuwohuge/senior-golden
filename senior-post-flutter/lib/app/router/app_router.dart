@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_token.dart';
 import '../../core/network/router_refresh.dart';
+import '../../features/commerce/shop_page.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/auth/login_routes.dart';
 import '../../features/auth/onboarding_page.dart';
@@ -26,11 +27,14 @@ import '../../features/profile/settings_page.dart';
 import '../../features/profile/stamps_ledger_page.dart';
 import '../../features/profile/vip_center_page.dart';
 import '../../features/shell/main_shell.dart';
+import 'app_navigator_key.dart';
+import 'shop_routes.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refresh = ref.read(routerRefreshProvider);
 
   return GoRouter(
+    navigatorKey: appRootNavigatorKey,
     initialLocation: LoginRoutes.onboarding,
     refreshListenable: refresh,
     redirect: (context, state) {
@@ -123,8 +127,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/chat/:userId',
-        builder: (context, state) =>
-            ChatPage(peerUserId: state.pathParameters['userId']!),
+        builder: (context, state) {
+          final extra = state.extra;
+          final displayName = extra is String ? extra : null;
+          return ChatPage(
+            peerUserId: state.pathParameters['userId']!,
+            displayName: displayName,
+          );
+        },
       ),
       GoRoute(
         path: '/profile/edit',
@@ -141,6 +151,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile/vip',
         builder: (context, state) => const VipCenterPage(),
+      ),
+      GoRoute(
+        path: ShopRoutes.path,
+        builder: (context, state) {
+          final q = state.uri.queryParameters;
+          return ShopPage(
+            triggerBizCode: int.tryParse(q['bizCode'] ?? ''),
+            hint: q['hint'],
+          );
+        },
       ),
       GoRoute(
         path: '/profile/my-postcards',

@@ -27,6 +27,7 @@ class TencentImFriendshipNotifierTest {
         client = Mockito.mock(TencentImRestApiClient.class);
         when(client.accountImport(anyString())).thenReturn(true);
         when(client.friendAdd(anyString(), anyString())).thenReturn(true);
+        when(client.friendDeleteBoth(anyString(), anyString())).thenReturn(true);
         notifier = new TencentImFriendshipNotifier(props, client);
     }
 
@@ -52,5 +53,18 @@ class TencentImFriendshipNotifierTest {
         props.setRestApiIdentifier("");
         notifier.afterFriendshipActive(1L, 2L);
         verify(client, times(0)).friendAdd(anyString(), anyString());
+    }
+
+    @Test
+    void remove_calls_friend_delete_both() {
+        notifier.afterFriendshipRemoved(10L, 20L);
+        verify(client, times(1)).friendDeleteBoth("10", "20");
+    }
+
+    @Test
+    void remove_skipped_when_sync_disabled() {
+        props.setFriendshipSyncEnabled(false);
+        notifier.afterFriendshipRemoved(1L, 2L);
+        verify(client, times(0)).friendDeleteBoth(anyString(), anyString());
     }
 }

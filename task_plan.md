@@ -49,6 +49,7 @@
 | 2026-05-09 | 决策 | 文档真源：`01`+`05` 为功能与 Sprint；`PLAN` 为架构基线；新增 `doc/README.md`、`00-documentation-governance.md` |
 | 2026-05-09 | 决策 | **FP-A9-003**：`GET /webapi/user/{userId}/devices` + Manage `UserList`「设备拉黑」；`blockDevice` 请求体与后端 DTO 对齐 |
 | 2026-05-09 | 决策 | **PLAN A7**：**FP-A7-001** 以 **`bootstrap/init` → `vipProduct`** 交付；**FP-A7-002/003**（订阅全链、扣费真源）仍为缺口，见 `01` |
+| 2026-05-09 | 决策 | **注销生效**：冷静期结束 `finalizeAccountDeletion` 前 **`bu_friendship` → status=0** + 腾讯 REST **`sns/friend_delete`（Delete_Type_Both）**；细节见 `findings.md` §15 |
 
 ---
 

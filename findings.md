@@ -200,3 +200,22 @@
 |------|------|
 | **`AppPostcardServiceImpl.commentsPage`** 曾固定 `review_status = 1 AND status = 1`，导致 **待审核（0）** 评论不出现在 App，用户刚发的评论在详情里看不到。 | 已改为：`status = 1` 且 **`review_status IS DISTINCT FROM 2`**（排除驳回）；与 **`countVisibleComments`**（原 `countApprovedComments`）及墙/详情 **commentCount** 一致。 |
 
+---
+
+## 15. Connections 点进聊天「空白」与注销解除 IM 好友（2026-05-09）
+
+### 15.1 排查结论（代码级）
+
+| 可能原因 | 说明 |
+|----------|------|
+| **好友列表 `peerUserId` 解析为 0** | Flutter 曾仅用 `(m['peerUserId'] as num?)`；若 JSON 为 **String** 或键为 **snake_case**（`peer_user_id`），会得到 **0**，路由变为 `/chat/0`，业务好友校验与 TIM 对端 ID 均异常，界面表现为不可用或异常空态。**已加固**：宽松 `_readIntLoose` + 兼容 `peer_user_id`；入口对 `0`/空 **SnackBar** 提示。 |
+| **仅历史消息为空** | `_CloudChatBody` 在 `getC2CHistoryMessageList` 成功且列表空时展示 **「No messages yet」**，并保留输入框；若用户描述为「空白」，需区分是全屏无 Scaffold 还是仅消息区无气泡。 |
+| **长时间 Loading** | `ensureLoggedIn()` / `getC2CHistoryMessageList` 阻塞时一直 **CircularProgressIndicator**；若主题对比度或机型问题可能被误认为白屏。 |
+| **`/api/im/usersig` 业务失败** | 无好友时服务端拒签（见 `AppImService`）；与 Connections 列表数据源均为 `bu_friendship`，正常应一致；若仍失败应抓 **Dio 业务 message** 与 `Chat unavailable` 副标题。 |
+
+### 15.2 注销与好友关系
+
+- **触发点**：`AppAuthService.finalizeAccountDeletionIfCooldownElapsed`（冷静期满、登录路径触发的最终注销），**非**仅「提交注销申请」当日。
+- **本地**：`FriendshipService.deactivateAllFriendshipsForUser` 将涉及该用户的 **`bu_friendship.status` 1→0**。
+- **腾讯 IM**：`TencentImFriendshipNotifier.afterFriendshipRemoved` → `TencentImRestApiClient.friendDeleteBoth`（`Delete_Type_Both`），与建联时双向 `friend_add` 配对。
+

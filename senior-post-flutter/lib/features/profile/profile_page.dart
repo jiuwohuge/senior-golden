@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
+import '../../app/router/shop_routes.dart';
 import '../../core/auth/auth_token.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
@@ -109,6 +110,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   icon: Icons.receipt_long_outlined,
                   title: l10n.profileStampsLedger,
                   onTap: () => context.push('/profile/stamps'),
+                ),
+                _ProfileItem(
+                  icon: Icons.local_post_office_outlined,
+                  title: '邮票与商品',
+                  onTap: () => context.push(ShopRoutes.path),
                 ),
                 _ProfileItem(
                   icon: Icons.workspace_premium_outlined,

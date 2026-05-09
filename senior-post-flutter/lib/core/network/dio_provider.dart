@@ -2,9 +2,14 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/router/app_navigator_key.dart';
+import '../../app/router/shop_routes.dart';
+import '../../widgets/postal/postal_snack.dart';
 import '../api/api_exception.dart';
+import '../api/biz_error_codes.dart';
 import '../auth/auth_storage.dart';
 import '../auth/auth_token.dart';
 import '../config/api_base_url.dart';
@@ -12,7 +17,10 @@ import '../device/device_ids.dart';
 import 'router_refresh.dart';
 
 /// 是否打印 Dio 请求/响应（默认：debug 模式开启；Release 可加 `--dart-define=API_LOG=true`）。
-const bool _kApiVerboseLog = bool.fromEnvironment('API_LOG', defaultValue: false);
+const bool _kApiVerboseLog = bool.fromEnvironment(
+  'API_LOG',
+  defaultValue: false,
+);
 
 /// 业务 HTTP 客户端。真机勿依赖默认 127.0.0.1，见 [kApiBaseUrl]。
 final dioProvider = Provider<Dio>((ref) {
@@ -72,6 +80,23 @@ final dioProvider = Provider<Dio>((ref) {
               return;
             }
             if (!success) {
+              if (BizErrorCodes.shouldOpenCommerceHub(code)) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ShopRoutes.pushFromRoot(bizCode: code, message: message);
+                });
+              } else if (code == BizErrorCodes.defaultBusiness &&
+                  message.isNotEmpty) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  final ctx = appRootNavigatorKey.currentContext;
+                  if (ctx != null && ctx.mounted) {
+                    PostalSnack.show(
+                      ctx,
+                      message,
+                      tone: PostalSnackTone.warning,
+                    );
+                  }
+                });
+              }
               handler.reject(
                 DioException(
                   requestOptions: response.requestOptions,

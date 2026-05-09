@@ -168,7 +168,7 @@ class _PostalInboxBody extends ConsumerWidget {
                         child: PostalEmptyState(
                           title: 'Postal inbox is clear',
                           subtitle:
-                              'No letters need attention here. In-transit and unread items appear in this inbox.',
+                              'No letters need attention here. Items you sent or received stay here until the recipient has read them (including registered mail).',
                         ),
                       ),
                     ],
@@ -223,7 +223,18 @@ class _ConnectionsTab extends ConsumerWidget {
               subtitle: r.lastMessage,
               time: r.lastTime,
               avatarUrl: r.peer.avatarUrl,
-              onTap: () => context.push('/chat/${r.peer.id}'),
+              onTap: () {
+                final id = r.peer.id.trim();
+                if (id.isEmpty || id == '0') {
+                  PostalSnack.show(
+                    context,
+                    'Cannot open chat: invalid friend id from server.',
+                    tone: PostalSnackTone.error,
+                  );
+                  return;
+                }
+                context.push('/chat/$id', extra: r.peer.nickname);
+              },
             );
           },
         );

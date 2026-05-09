@@ -530,17 +530,27 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                     parentLetterId: letter.id,
                                   );
                               if (!context.mounted) return;
-                              PostalSnack.show(
-                                context,
-                                'Reply sent',
-                                tone: PostalSnackTone.success,
-                              );
+                              try {
+                                await ref
+                                    .read(authRepositoryProvider)
+                                    .refreshSessionFromServer();
+                              } catch (_) {}
+                              if (!context.mounted) return;
                               _reply.clear();
                               ref.invalidate(
                                 letterDetailProvider(widget.letterId),
                               );
                               ref.invalidate(mailboxLettersProvider);
+                              ref.invalidate(mailboxArchiveProvider);
                               ref.invalidate(postalInboxLettersProvider);
+                              PostalSnack.show(
+                                context,
+                                'Reply sent',
+                                tone: PostalSnackTone.success,
+                              );
+                              if (context.canPop()) {
+                                context.pop();
+                              }
                             } catch (e) {
                               final msg = _postalApiUserMessage(e);
                               if (context.mounted && msg != null) {
