@@ -322,7 +322,7 @@ class MockMailboxRepository {
     return _activeFriendPairs.contains(_pairKey(a, b));
   }
 
-  /// 是否与对端已建联（可进入 TIM Connections）。
+  /// 是否与对端已建联（邮政 **Connections 好友列表** 展示前提之一）。
   bool friendsWithPeer(String peerId) {
     final me = _ref.read(mockSessionProvider).user.id;
     return _friends(me, peerId);
@@ -434,7 +434,7 @@ class MockMailboxRepository {
     return l;
   }
 
-  /// 收件方建立建联（Mock：写入好友对，便于 Connections / TIM 分流）。
+  /// 收件方建立建联（Mock：写入好友对，供 **Connections 好友列表** 与真机 `/mailbox/friends` 语义一致）。
   Future<void> acceptPostalConnection(String letterId) async {
     await MockDelay.network();
     final me = _ref.read(mockSessionProvider).user.id;
@@ -463,7 +463,7 @@ class MockMailboxRepository {
     return send(peer: original.peer, body: body, type: LetterType.standard);
   }
 
-  /// 已建联会话摘要（Mock）；与某 peer 有信件且已 accept 时出现。
+  /// 好友列表行 Mock（每 peer 取最近一封信作预览；**非** TIM 会话列表 API）。
   Future<List<MockImConnectionRow>> listMockConnections() async {
     await MockDelay.network();
     _advanceRegistered();

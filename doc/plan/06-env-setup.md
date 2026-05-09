@@ -1,5 +1,8 @@
 # 06 — 开发环境、工具与资源清单
 
+> **文档元信息**  
+> **版本**：1.1 · **更新**：2026-05-09 · **维护人**：AI + Owner
+
 勾选表示**本机已就绪**；未勾为启动开发前需补齐。
 
 ---
@@ -20,10 +23,10 @@
 |----|------|------|
 | JDK 17 | [ ] | 与 `pom` 一致 |
 | Maven | [ ] | 可构建 `commons-framework` 依赖（见 PLAN：本地仓库） |
-| PostgreSQL | [ ] | `application-local.yml` 指向实例；Flyway 自动迁移 `V1`–`V4` |
+| PostgreSQL | [ ] | `application-local.yml` 指向实例；Flyway 自动迁移（含 `V10` 邮票赠送幂等表） |
 | Redis | [ ] | 与 `application-local.yml` 一致；P1 延迟队列依赖 |
 | 环境 Profile | [ ] | `local` 启动；`/api/**` 明文联调策略与 `jh.security` 白名单已读 |
-| 腾讯 IM | [ ] | `senior-post.tencent-im` 配 SDKAppId、密钥；测 `/api/im/usersig` |
+| 腾讯 IM | [ ] | `senior-post.tencent-im`：`TENCENT_IM_SDK_APP_ID`、`TENCENT_IM_SECRET_KEY`；测 `/api/im/usersig`。**好友同步（FP-A5d-004）**：控制台创建 **App 管理员**账号，设置环境变量 `TENCENT_IM_REST_IDENTIFIER`（与管理员 UserID 一致）；海外地域时可配 `TENCENT_IM_REST_HOST`（默认 `console.tim.qq.com`） |
 | 阿里云 OSS | [ ] | 环境变量：`ALIYUN_OSS_ENDPOINT`、`ALIYUN_OSS_ACCESS_KEY_ID`、`ALIYUN_OSS_ACCESS_KEY_SECRET`、`ALIYUN_OSS_BUCKET`；可选 `ALIYUN_OSS_PUBLIC_BASE_URL`（CDN）；Bucket CORS 允许 App 源站 **PUT**；对应 `senior-post.oss.*` |
 | SMTP / 邮件 | [ ] | 本地可用 MailHog / 企业测试邮箱；**FP-X-001 前必配** |
 

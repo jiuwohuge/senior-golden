@@ -1,23 +1,19 @@
-# 研究发现（规划会话 · 2026-05-02）
+# 研究发现（规划会话）
 
-本文档记录**从仓库内可验证事实**归纳的「未实现 / 部分实现」结论，供 `task_plan.md` 引用。
+> **文档元信息**  
+> **版本**：1.3 · **更新**：2026-05-09 · **维护人**：AI + Owner
+
+本文档记录**从仓库内可验证事实**归纳的约束、缺口与勘误，供 `task_plan.md` 与 `doc/plan/*` 引用。
 
 ---
 
-## 1. PLAN.md 中仍为未勾选的功能清单
+## 1. 文档真源与 `PLAN.md` 的关系（2026-05-09）
 
-| 编号 | 摘要 | 备注 |
-|------|------|------|
-| A1 | 账号注册登录全流程 | 部分已做：bootstrap、注册、me、85xx；资料完善/忘记密码等见 M1/M4 |
-| A2 | 用户资料中心 | Profile 已有真实 bootstrap/me 联调痕迹；编辑资料等未在清单勾完成 |
-| A3 | Post Wall | 未勾选 |
-| A4 | Post Directory | 未勾选 |
-| A5 | Post Box 发信/拉信全量 REST | **明确写「仍待联调」**；A5-IM 已勾选 |
-| A6 | Chat Stamp 账本与规则 | 未勾选 |
-| A7 | VIP 权益 | 未勾选 |
-| A8 | 风控与合规 | 未勾选 |
-| A9 | 管理后台 | 未勾选（工程已有大量页面，与「全量验收」有别） |
-| A10 | 国际化 | 未勾选 |
+| 说明 | 内容 |
+|------|------|
+| **功能完成度真源** | **`doc/plan/01-feature-list.md`** + **`doc/plan/05-task-tracker.md`**（FP 行状态与交付物）。 |
+| **`PLAN.md`** | 架构、技术栈、里程碑叙述；**[功能清单]、[状态] S9/S11** 已于 **2026-05-09** 与代码对齐（见 `progress.md` 同日条目）。 |
+| **本文件** | 代码证据与横切约束（OSS、IM、设备 UI 等）；**不替代** `01` 的 FP 勾选。 |
 
 ---
 
@@ -29,17 +25,17 @@
 
 - `POST .../mailbox/letters/send`、`GET .../mailbox/letters/{letterId}`、加速等扩展。
 
-**仍待验收的**是双用户场景下 **postal/sync 一致性**（见 `doc/plan/07` FP-A5-002），而非「缺发信契约」。
+**仍建议**双机场景回归 **postal/sync** 与业务预期（`05` FP-A5-002 已标 DONE），而非「缺发信契约」。
 
 ### 2.2 Flutter 信箱数据
 
-- `mailbox_providers.dart`：在 `AppEnv.useMock` 为真时使用 `MockMailboxRepository`；非 Mock 路径需接真实 API（与 A5 一致）。
-- `mailbox_page.dart`：Connections 在非 Mock 下走 TIM 会话列表。
+- `mailbox_providers.dart`：在 `AppEnv.useMock` 为真时使用 `MockMailboxRepository`；**`USE_MOCK=false` 时已接** `mailbox_remote` REST。
+- `mailbox_page.dart`：**Connections** = **邮政好友列表**（`GET /api/mailbox/friends`，数据源 `bu_friendship`），**不是** TIM `getConversationList` 会话列表；点击进入聊天仍用 TIM C2C。
 
-### 2.3 状态位
+### 2.3 状态位（文档侧）
 
-- `PLAN.md` **S9**：M2 帖子/目录/写信主链路 — **未勾选**。
-- **B14 / B15**：视觉与登录规范 — **未勾选**。
+- **`PLAN.md` S9**：已于 **2026-05-09** 勾选为完成（M2 REST 主链路已落地）；**E2E/UAT（FP-A9-004）** 仍待。
+- **B14 / B15**：视觉与登录规范 — **未勾选**（仍为产品/设计债）。
 
 ---
 
@@ -54,7 +50,7 @@
 ## 4. 待用户/产品确认（非代码可解）
 
 - 忘记密码是否在首发范围（PLAN 邮件能力已规划密码重置）。
-- IM 好友同步占位替换为正式策略的时间点（与发信/建联顺序）。
+- **腾讯 IM 好友同步**：业务侧 **`TencentImFriendshipNotifier`（FP-A5d-004）** 已接 REST；生产需配置 **`TENCENT_IM_REST_IDENTIFIER`**（控制台 App 管理员 UserID）及可达 **`rest-api-host`**；与发信/建联顺序相关的仅为运维窗口与观测告警策略。
 
 ---
 
@@ -73,6 +69,7 @@
 | POST | `/api/mailbox/letters/{letterId}/accept-postal` |
 | POST | `/api/mailbox/letters/send`（body：`AppSendLetterInDto`：`toUserId`、`content`、`letterType` 1=挂号 2=平邮） |
 | GET | `/api/mailbox/letters/{letterId}`（详情，含 `content` 正文） |
+| GET | `/api/mailbox/friends`（**Connections**：活跃好友/笔友列表，非会话列表） |
 | GET | `/api/mailbox/peers/{peerUserId}/friendship-active`（是否已建联） |
 | GET | `/api/im/usersig` |
 | GET | `/api/oss/put-sign`（需登录；`scene=postcard|avatar|letter`，`ext` 可选） |
@@ -96,7 +93,7 @@
 | `auth` | Mock 或真实 `dio` 二轨；**FP-A1-003** 已接 `forgot-password` / `reset-password`；**FP-X-001** 全量 outbox 仍可选 |
 | `post_wall` | `USE_MOCK=false` 时走 `post_wall_remote` 等真实 API（多图/举报等迭代见 `01`）；Mock 分支仍保留 |
 | `directory` | `USE_MOCK=false` 时走名录分页等真实 API；发信已接真实 API |
-| `mailbox`（信件） | **`USE_MOCK=false` 时**：`mailbox_remote` 接 postal/archive/详情/发信/建联/好友判断/`speed-up`；顶栏邮票接 `/api/stamps/balance`；**回信**仍待产品化（见 `07`） |
+| `mailbox`（信件） | **`USE_MOCK=false`**：`mailbox_remote` 接 postal/archive/详情/发信/建联/好友判断/`speed-up`；**Connections** 接 **`GET /api/mailbox/friends`**（好友列表）；顶栏邮票 `/api/stamps/balance`；聊天页仍用 TIM SDK（UserSig）；**回信**仍待产品化（见 `07`） |
 | `profile` | `USE_MOCK=false` 时 bootstrap/me/PATCH profile 已有多处接线；头像 OSS 写回等见 **FP-A2-002** |
 
 ### 5.4 Manage 小缺口（再次确认）
@@ -114,8 +111,43 @@
 
 **已存在事实**：仅 [`AppOssServiceImpl`](senior-post-api/biz/src/main/java/cn/nine/pros/post/biz/service/app/impl/AppOssServiceImpl.java) 签发 **PUT** 预签名；`OssPutSignResultVO.readUrl` 依赖 `senior-post.oss.public-read-base-url`，**私有桶下应为空**，否则客户端误用不可匿名访问的拼接 URL。
 
-**缺口**：无 **GET** 预签名接口；`PostcardWallItemVO` / `avatarUrl` 等若落库为不可读 URL，则 App `Image.network` 与后续 Web 审核台均无法稳定展示。
+**缺口（2026-05-08 后已收口）**：已具备 **`POST /api/oss/get-sign`**、`OssDisplayUrlService` 出站换签、Manage **`/webapi/oss/get-sign`**；App 侧 **`PostalOssNetworkImage`** 在预签名过期导致首帧失败时，从 URL 路径解析 objectKey 并 **单次** 调用换签自愈（`OSS_KEY_PREFIX` 须与后端 `keyPrefix` 一致）。
 
 **改造原则（与产品对齐）**：首发 **不做** 匿名公共前缀；读链路由服务端换签 + 短 TTL + objectKey 白名单与业务权限校验。
 
 **执行跟踪**：`task_plan.md`「OSS 私有读改造」子阶段 O1–O7；FP **FP-X-005**（`05-task-tracker.md`）。
+
+---
+
+## 7. IM 好友同步与 Connections 语义（2026-05-08～09）
+
+- **FP-A5d-004**：服务端在建联成功后调用腾讯 REST 双向 `friend_add`；需 **`TENCENT_IM_REST_IDENTIFIER`** 指向控制台 **App 管理员** UserID；可选 **`TENCENT_IM_REST_HOST`**（地域差异）。
+- **FP-A6-003**：登录/注册与发帖创建路径写入 **`bu_stamp_daily_grant`** + **`log_stamp_transaction`**；默认 **`senior-post.stamps-grant`**；日期为 **UTC**。
+- **E2E 人工冒烟**：见 `senior-post-api/doc/e2e-smoke.http`（自动化需启用测试库或 Testcontainers，未在本迭代交付）。
+- **Connections（产品语义）**：邮政 Tab 第二分段 **等同于 IM 语境下的「好友列表」**：数据来自 **`bu_friendship`**（`GET /api/mailbox/friends`），**不等同于** SDK **会话列表**（`getConversationList`）。会话仅在实际发过/收过聊天消息后出现在 TIM 会话存储；好友列表在 Accept 建联后即可展示。
+
+---
+
+## 8. 文档与事实勘误（2026-05-09 全面梳理）
+
+- **`doc/plan/01-feature-list.md`**：`FP-A2-002`（头像 OSS+PATCH）与 `FP-A8-006`（App 举报闭环）曾标为「缺」，与 `progress.md`（2026-05-08～09）及 Flutter `PostWallReportSheet` / `profile_edit_page` 实现不一致，**已回写为已有**。
+- **`doc/plan/07-gap-analysis-and-roadmap.md`**：已增 **§2.0 与代码对齐表**（2026-05-09 v1.1）；§2 历史表前增加「以 §2.0 为准」注脚。
+- **`PLAN.md` [功能清单]、[状态] S9/S11`**：已于 **2026-05-09** 与 `01` / 代码对齐更新；后续发版前仍建议 diff 核对 `01`。
+- **文档治理**：新增 [`doc/plan/00-documentation-governance.md`](doc/plan/00-documentation-governance.md)、[`doc/README.md`](doc/README.md)，明确 **真源层级** 与淘汰规则。
+
+---
+
+## 9. 文档与代码差异清点（2026-05-09 · 已在本会话修正）
+
+| 位置 | 原问题 | 修正动作 |
+|------|--------|----------|
+| `PLAN.md` [功能清单] | A1 写「忘记密码仍待后端」、A5 写 Worker 仍待、A6 赠票仍待等 | 按 `01`/`progress` 更新勾选与表述 |
+| `PLAN.md` S9 / S11 | S9 未勾；S11 写 IM REST「仍为占位」 | S9 已勾并注明 E2E 债；S11 改为 REST 已接 |
+| `findings.md` §1 / §2.3 | 旧表暗示 A1–A10 均未勾、`S9` 未勾 | 改为「真源层级」说明并更新 S9/B14 表述 |
+| `doc/feature-overview.md` | 头像/赠票/语言/IM Notifier/速览滞后 | 与实现同步 |
+| `doc/plan/01-feature-list.md` | A5d-001 误写「缺调度」；A4-004 未反映 `GET users/{id}`；A10-002 仍写缺 | 改为「部分/已有」准确表述 |
+| `doc/plan/07-gap-analysis-and-roadmap.md` | §2 将已交付项读成仍缺 | 增 §2.0 对齐表 + §2 注脚 |
+| `doc/plan/02-requirements.md` A1-003 | 依赖写死为 X-001 阻断叙事 | 改为「已实现；outbox 为增强」 |
+| `findings.md` §2.1～2.2 | 信箱「仍待验收/需接 API」措辞过时 | 改为 DONE + 建议回归 |
+
+**未物理删除的文档**：`.cursor/skills/*` 为工具链技能非本业务维护范围；`doc/1、需求文档.md` **保留为产品归档**（已加定位块，不淘汰）。

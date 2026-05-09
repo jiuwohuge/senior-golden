@@ -1,5 +1,8 @@
 # PLAN
 
+> **文档元信息**（**功能完成度**以 [`doc/plan/01-feature-list.md`](doc/plan/01-feature-list.md) + [`doc/plan/05-task-tracker.md`](doc/plan/05-task-tracker.md) 为准；本文为架构与决策基线）  
+> **版本**：2.2 · **更新**：2026-05-09 · **维护**：项目 Owner · **治理说明**：[`doc/plan/00-documentation-governance.md`](doc/plan/00-documentation-governance.md)
+
 ## [当前栈]（仓库实测 + 决策基线）
 
 | 层级 | 选型 | 版本 / 说明 |
@@ -101,9 +104,9 @@
 | `features/auth/` | 注册、登录、资料完善、协议与年龄门槛 UI |
 | `features/post_wall/` | Tab1 列表/详情、发布、评论、举报 |
 | `features/directory/` | Tab2 信件架网格、筛选、用户卡、Send Letter 入口 |
-| `features/mailbox/` | Tab3：**Postal inbox / Connections** 分段、归档、`tim_facade`（TIM 登录与会话）、`chat_page`、信件详情建联 |
+| `features/mailbox/` | Tab3：**Postal inbox** + **Connections（好友/笔友列表，**`GET /api/mailbox/friends`**，非 TIM 会话列表）**、归档、`tim_facade`（TIM 登录与 C2C）、`chat_page`、信件详情建联 |
 | `features/profile/` | Tab4 个人中心、编辑资料、设置、注销/GDPR 入口（M4） |
-| `features/im/` | **已并入 `features/mailbox/`**（TIM 初始化与会话列表）；若后续引入 TUIKit 再拆独立目录 |
+| `features/im/` | **已并入 `features/mailbox/`**（TIM 初始化与 **C2C 聊天页**；**Connections 数据源为业务好友表，非 SDK 会话列表**）；若后续引入 TUIKit 再拆独立目录 |
 | `shared/` | 通用 Widget、分页组件、图片/OSS 上传封装、国家与标签选择器 |
 
 ### 与需求文档的页面对照
@@ -113,11 +116,11 @@
 | 注册与资料（§四） | 邮箱注册、密码、协议勾选、出生年/年龄（读配置门槛）、昵称/国家/标签(≥3)/简介/头像；完成后进 Tab1 |
 | Tab1 Post Wall（§五） | 信息流、发帖（文+图）、评论（纯文本）、无 Like、Send Letter、举报 |
 | Tab2 Directory（§六） | 邮局架 UI、国家/年龄/兴趣筛选、同龄/同兴趣排序由后端；用户卡 + Send Letter |
-| Tab3 Post Box（§七~九） | 邮票 `x/3` 或 VIP Unlimited、运输中横幅、**Postal / Connections 双列表**、归档、信件状态（含已挂号）、平邮加速、**收件 Accept 建联 → IM** |
+| Tab3 Post Box（§七~九） | 邮票 `x/3` 或 VIP Unlimited、运输中横幅、**Postal / Connections（好友列表）** 双分段、归档、信件状态（含已挂号）、平邮加速、**收件 Accept 建联 → 好友列表出现对端 → IM 聊天** |
 | 邮票与 VIP（§十~十一） | 余额与上限展示、挂号消耗提示、VIP 权益由配置驱动展示（开关） |
 | 设备 ID（§十二） | 启动/登录链路采集合规设备标识并随请求或专用接口上报（契约以后端为准） |
 | 国际化（§十六） | `intl` + ARB：英文默认 + 中文 |
-| IM（§十七） | **userId = 业务用户 ID**；**UserSig 后端签发**（`/api/im/usersig`）；客户端 **`tencent_cloud_chat_sdk`** 登录 + 会话列表 + 自研聊天页（TUIKit 可选） |
+| IM（§十七） | **userId = 业务用户 ID**；**UserSig 后端签发**（`/api/im/usersig`）；客户端 **`tencent_cloud_chat_sdk`** 登录 + **C2C 聊天页**（Connections 为好友列表，不等同 TIM `getConversationList`）（TUIKit 可选） |
 
 ### 按 M1~M4 的 App 侧任务（与本文「开发计划」对齐）
 
@@ -134,7 +137,7 @@
 - **Shell**：底部四 Tab（Post Wall / Directory / Post Box / My Post）。
 - Tab1：明信片列表分页、详情、发布页（OSS 直传：`get_sign` → PUT）、审核中/仅己可见等状态展示。
 - Tab2：名录网格、筛选表单、用户详情底部表或全屏卡、**Send Letter** 弹层（挂号/平邮二选一 UI）。
-- Tab3：**Postal inbox / Connections 分段**、归档、Mock 建联与 **TIM SDK**；后端已备 **`/api/mailbox/*` + `/api/im/usersig`**；Flutter 真联调信件列表仍可与 Mock 并行切换。
+- Tab3：**Postal inbox / Connections（好友列表）** 分段、归档、Mock 建联与 **TIM SDK**；后端 **`/api/mailbox/*`（含 `/friends`）+ `/api/im/usersig`**；Flutter 真联调信件列表仍可与 Mock 并行切换。
 - 评论、举报入口与错误提示（敏感词等由后端返回）。
 
 **M3 — 信箱与资产闭环**
@@ -256,17 +259,19 @@ flowchart LR
 
 ## [功能清单]
 
-- [ ] A1. 账号注册登录（邮箱注册、年龄门槛、协议同意；**忘记密码/重置仍待后端**）
-- [ ] A2. 用户资料中心（**`me` + `PATCH /api/auth/profile` + 流水页已接 REST**；头像 URL 写回、兴趣写回仍待办）
-- [ ] A3. Post Wall（**列表/详情/发帖/评论 + OSS 配图已接 REST**；举报入口、敏感词写入、审核态作者侧 UX 仍待办）
-- [ ] A4. Post Directory（**名录分页与筛选 + 同龄/同兴趣排序 + 写信联动 + 用户公开卡 `GET /api/directory/users/{id}` 已接 REST（Flutter `UserCardPage` 非 Mock 走远程）**；名录 VO 展示兴趣标签仍待扩展）
-- [ ] A5. Post Box（**发信/收件/归档/详情/Accept/IM sig、平邮加速 `speed-up` 已接 REST**；平邮到期 Worker 仍待办）
+> 与代码对齐日期：**2026-05-09**。细粒度以 `doc/plan/01-feature-list.md` 为准。
+
+- [x] A1. 账号注册登录（邮箱、年龄、协议、JWT/`85xx`；**忘记密码/重置已接**；**AES、登录频控/弱密码策略仍待**）
+- [x] A2. 用户资料中心（**`me` + PATCH + 兴趣标签 + 头像 OSS 写回已接**；冷启动仅 Token 时提前拉 `me` 仍可优化）
+- [x] A3. Post Wall（**列表/详情/发帖/评论/OSS/举报/敏感词已接**；**审核中/驳回作者侧 UX 仍可加强**）
+- [x] A4. Post Directory（**分页/筛选/排序/用户卡 API/写信已接**）
+- [x] A5. Post Box（**发信/收/归档/详情/Accept/好友列表/加速/平邮到期 Worker 已接**；**回信产品化、平邮延迟完全配置化仍待**）
 - [x] A5-IM. 邮政信箱 × 腾讯 IM 双轨：**后端** `V4`（`bu_friendship` + `send_mode`）、`GET/POST /api/mailbox/*`、`GET /api/im/usersig`（`tls-sig-api-v2` + `senior-post.tencent-im`）；**Flutter** Tab 分段、归档、`tim_facade`、`chat_page`、`tencent_cloud_chat_sdk:8.8.7373`、Mock 建联与单元测试 `test/mailbox_models_test.dart`（2026-05-02）
-- [ ] A6. Chat Stamp（**余额 + 流水分页（App + Flutter 流水页）已接**；登录赠送/日上限、加速专用接口、管理流水页仍待办）
-- [ ] A7. VIP 权益（无限邮票、免费加速、访客、无痕、推荐权重）
-- [ ] A8. 风控与合规（设备标识、敏感词、图片审核、GDPR 删除与注销）
-- [ ] A9. 管理后台（用户、内容、举报、配置中心、日志、看板）
-- [ ] A10. 国际化（英文/中文）
+- [x] A6. Chat Stamp（**余额/流水/CAS/登录·发帖赠票与加速扣减已接**；**Manage 用户流水查询页仍待**）
+- [ ] A7. VIP 权益（App 可读权益模型与订阅/扣费全链仍待）
+- [x] A8. 风控与合规（**敏感词、举报链路已接**；仍待：**GDPR 注销**、**图片机审**、**Manage 设备拉黑 UI**、`user_device` 一致性核对）
+- [x] A9. 管理后台（**看板/用户/审核/举报/配置/国家/敏感词/版本/公告/日志已接**；**邮票流水页、设备封禁按钮、UAT 清单仍待**）
+- [x] A10. 国际化（**ARB + 设置页运行时语言切换已接**；主流程文案扫尾与邮件模板双语仍待）
 
 ---
 
@@ -284,12 +289,14 @@ flowchart LR
 - **本次新增（2026-05-01，设计沟通）**：确认 UI 方向从“邮政蓝主导”调整为 **浅灰复古主导**。设计关键词：**可靠、成熟、全球化、低刺激**；目标人群 45+ 优先可读性与可操作性。登录/注册页面要求：中部卡片式布局、协议勾选必选、补齐忘记密码、按钮禁用/加载/错误反馈完整。
 - **本次新增（2026-05-02，邮政 × IM）**：
   - **后端**：Flyway **`V4__mailbox_im_friendship.sql`**（`bu_friendship`、`bu_letter.send_mode`）；`LetterDTO`/`LetterDomain` 补 `sendMode`；`AppMailboxApi`（`/api/mailbox/postal`、`/sync`、`/archive`、`/letters/{id}/accept-postal`）、`AppImApi`（`/api/im/usersig`）；`AppImService`（`com.github.tencentyun:tls-sig-api-v2:2.0`）；`TencentImFriendshipNotifier` 占位；`application.yml` 增加 **`senior-post.tencent-im`** 与 **`/api/mailbox/**`、`/api/im/**`** 加解密白名单。
-  - **Flutter**：`pubspec` 引入 **`tencent_cloud_chat_sdk:8.8.7373`**；`mailbox_page` **Postal / Connections**、`mailbox_archive_page`、`chat_page`（邮政主题气泡 + C2C 历史）、`tim_facade`、`mailbox_providers`；Mock 扩展 **`LetterStatus.registered` / `LetterSendMode` / 建联集合**；路由 **`/mailbox/archive`、`/chat/:userId`**。
+  - **Flutter**：`pubspec` 引入 **`tencent_cloud_chat_sdk:8.8.7373`**；`mailbox_page` **Postal / Connections（好友列表；后续对齐 `/mailbox/friends`）**、`mailbox_archive_page`、`chat_page`（邮政主题气泡 + C2C 历史）、`tim_facade`、`mailbox_providers`；Mock 扩展 **`LetterStatus.registered` / `LetterSendMode` / 建联集合**；路由 **`/mailbox/archive`、`/chat/:userId`**。
   - **验证**：`mvn compile -DskipTests`（`senior-post-api`）；`flutter analyze`；`flutter test test/mailbox_models_test.dart`。
 - **本次新增（2026-05-02，资料写回 FP-A2-001）**：后端 **`PATCH /api/auth/profile`**（`AppAuthProfilePatchInDto`，昵称/国家/简介部分更新）；Flutter **`AuthRepository.refreshSessionFromServer`**（`GET /api/auth/me`）、**登录/注册响应 `user` 写入 `mockSessionProvider`**、**`ProfileEditPage` / `ProfilePage` 非 Mock 联调**；兴趣标签与头像 URL 写回仍待后续项。
 - **本次新增（2026-05-02，文档对齐 + 邮票流水 Flutter）**：`doc/plan/01-feature-list.md` 与 **`PLAN.md` [功能清单]** 回写 **A3/A4/A5/A6** 与仓库一致（明信片墙、名录、Accept、OSS 发帖图、**`stamps_remote` + 个人中心流水页** 非 Mock 走 **`POST /api/stamps/ledger/paging`**）。
 - **本次新增（2026-05-06，FP-A5-005）**：**`POST /api/mailbox/letters/{letterId}/speed-up`**（发件人、平邮运输中、VIP 免扣票、非 VIP CAS 扣 1 + 流水）；Flutter **`mailbox_remote.speedUp`**、**`speed_up_sheet`** / **`letter_detail_page`** 真联调。
 - **规划文档（2026-05-07）**：新增 **`doc/plan/07-gap-analysis-and-roadmap.md`** — 遗漏功能系统化清单（描述、预期行为、优先级、与现有模块关联）与四阶段开发路线图（顺序、技术方案、资源粗估）；执行时与 **`doc/plan/05-task-tracker.md`** 联动勾选 FP。
+- **FP-X-005 客户端收口（2026-05-08）**：在已有服务端出站换签与 `POST /api/oss/get-sign` 基础上，Flutter 增加 **`PostalOssNetworkImage`**（预签名失效导致首帧加载失败时，从 URL 路径解析 objectKey 并单次调用换签）；**`AppEnv.ossKeyPrefix`** 与后端 `senior-post.oss.keyPrefix` 对齐；单元测试 **`test/oss_object_key_hint_test.dart`**。
+- **IM 好友同步 + 赠票（2026-05-08）**：**FP-A5d-004** `TencentImRestApiClient` + 双向 `friend_add`；**FP-A6-003** `StampGrantService` + Flyway `V10` + `senior-post.stamps-grant`；E2E 步骤见 **`senior-post-api/doc/e2e-smoke.http`**；`biz` 模块 Surefire 默认不继承父级跳过测试。
 
 ---
 
@@ -298,7 +305,7 @@ flowchart LR
 - **需求澄清阶段**：关键决策清单闭合；产出 API + 事件 + 状态流契约草案。
 - **开发阶段**：
   - Backend：单元测试 + 集成测试 + HTTP 冒烟；Knife4j `/doc.html` 契约可视。
-  - Flutter：`flutter analyze`、Widget/Integration 测试、真机联调、`85xx` 链路；**邮政 Tab：Accept → Connections → Chat（Mock）**；**配置 `TENCENT_IM_*` 后验证 `/api/im/usersig` + TIM 会话列表**。
+  - Flutter：`flutter analyze`、Widget/Integration 测试、真机联调、`85xx` 链路；**邮政 Tab：Accept → Connections（好友列表）→ Chat**；**配置 `TENCENT_IM_*` 后验证 `/api/im/usersig` + C2C 聊天**。
   - IM：双端消息、离线、重连、未读数。
   - 数据：邮票账本与信件状态事务一致。
 
@@ -373,7 +380,7 @@ flowchart LR
 - M3（信箱与资产系统）
   - 目标：Post Box、平邮延迟投递、加速、邮票账本全部闭环
   - 后端：Redis+DB 延迟队列、信件状态机、邮票余额与流水、加速扣减原子事务；**建联表 + UserSig 已落地（2026-05-02）**，信件写接口与队列投递仍按原计划推进
-  - Flutter：信箱列表状态（Delivering/Delivered/**Registered**）、加速按钮、邮票余额展示；**Postal/Connections/Archive、TIM 登录与自研聊天页已落地（2026-05-02）**
+  - Flutter：信箱列表状态（Delivering/Delivered/**Registered**）、加速按钮、邮票余额展示；**Postal / Connections（好友列表）/ Archive、TIM 登录与自研聊天页已落地（2026-05-02；Connections 数据源 2026-05-09 对齐 `/mailbox/friends`）**
   - 管理后台：邮票配置中心、用户邮票流水查询、封禁/设备拉黑
   - 验收：平邮延迟与加速行为正确；账本可追溯且余额一致
 - M4（风控合规与上线准备）
@@ -414,6 +421,6 @@ flowchart LR
 - [x] S6. 已输出技术栈全景与模块交互说明（本文档 2026-05-01）
 - [x] S7. Flyway + `/webapi` 基线与文档对齐（2026-05-01）
 - [x] S8. M1 表结构与认证/配置接口落地
-- [ ] S9. M2 帖子/目录/写信主链路落地
-- [x] S11. 邮政信箱 × 腾讯 IM 双轨契约与 Flutter 分段 UI + TIM 登录链路（2026-05-02；腾讯 REST 好友同步仍为占位）
+- [x] S9. M2 帖子/目录/写信主链路 REST 已落地（2026-05-09）；**E2E 自动化 / UAT 清单（FP-A9-004）仍待**
+- [x] S11. 邮政信箱 × 腾讯 IM 双轨契约与 Flutter 分段 UI + TIM 登录链路（2026-05-02；**腾讯 REST 好友同步已接** FP-A5d-004，生产依赖 `TENCENT_IM_REST_IDENTIFIER` 等配置）
 - [x] S10. 管理后台：`senior-post-manage` 修复配置页 UTF-8 乱码源码、侧边栏二级分组菜单；`UserServiceImpl.delByIds` 禁止删除 `staff_role != 0` 的可登录后台账号（2026-05-01）

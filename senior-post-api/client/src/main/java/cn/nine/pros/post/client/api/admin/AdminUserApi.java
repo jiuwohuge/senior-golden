@@ -3,13 +3,15 @@ package cn.nine.pros.post.client.api.admin;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.db.UserDTO;
-import cn.nine.pros.post.client.model.db.UserDTO;
+import cn.nine.pros.post.client.model.db.UserDeviceDTO;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
 import cn.nine.pros.post.client.model.input.admin.UserQueryInDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "管理后台-用户")
 public interface AdminUserApi {
@@ -25,6 +27,10 @@ public interface AdminUserApi {
     @Operation(summary = "设备拉黑")
     @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/device/block")
     void blockDevice(@RequestBody @Valid DeviceBlockInDto body);
+
+    @Operation(summary = "用户名下设备列表（运营选设备拉黑）")
+    @GetMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/{userId}/devices")
+    List<UserDeviceDTO> listUserDevices(@PathVariable("userId") Long userId);
 
     @Operation(summary = "获取当前管理员")
     @GetMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/current-admin")

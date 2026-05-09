@@ -15,6 +15,7 @@ import ActionLogList from './log/ActionLogList'
 import LoginLogList from './log/LoginLogList'
 import ReportList from './report/List'
 import UserList from './user/List'
+import StampLedgerList from './stamps/StampLedgerList'
 import CountryList from './config/CountryList'
 import { api } from '../services/api'
 
@@ -52,7 +53,10 @@ export default function AdminLayout() {
       {
         key: 'grp-user',
         label: '用户管理',
-        children: [{ key: '/user', label: <Link to="/user">用户列表</Link> }],
+        children: [
+          { key: '/user', label: <Link to="/user">用户列表</Link> },
+          { key: '/stamps/ledger', label: <Link to="/stamps/ledger">邮票流水</Link> },
+        ],
       },
       {
         key: 'grp-content',
@@ -143,6 +147,7 @@ export default function AdminLayout() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/user" element={<UserList />} />
+            <Route path="/stamps/ledger" element={<StampLedgerList />} />
             <Route path="/content/postcard" element={<PostcardList />} />
             <Route path="/content/comment" element={<CommentList />} />
             <Route path="/report" element={<ReportList />} />

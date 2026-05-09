@@ -1,0 +1,74 @@
+### Senior Post — E2E 冒烟检查清单（HTTP 客户端：VS Code REST Client / IntelliJ）
+### 替换变量：@host @token @adminToken @postcardId @letterId @peerUserId
+### 前置：PostgreSQL + Redis + Flyway 已迁移；可选：OSS / 腾讯 IM 密钥
+
+@host = http://localhost:8080
+@adminToken = REPLACE_WITH_WEBAPI_JWT
+@token = REPLACE_WITH_APP_JWT
+@postcardId = 1
+
+### 1) App：注册（返回 token；触发 FP-A6-003 每日登录赠票首登）
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "e2e-{{$timestamp}}@example.com",
+  "password": "TestPass123!",
+  "nickname": "E2E User",
+  "birthYear": 1975,
+  "countryCode": "US",
+  "deviceUuid": "e2e-device",
+  "deviceType": "android",
+  "interestTagIds": [1, 2, 3]
+}
+
+### 2) App：登录（同日第二次应不再叠加登录赠票）
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "same-as-register@example.com",
+  "password": "TestPass123!",
+  "deviceUuid": "e2e-device",
+  "deviceType": "android"
+}
+
+### 3) App：发帖（触发发帖奖励；受 postcard-daily-stamp-cap）
+POST {{host}}/api/postcards
+Content-Type: application/json
+Token: {{token}}
+
+{
+  "content": "E2E postcard smoke",
+  "imageUrls": []
+}
+
+### 4) App：明信片墙（审核通过后可见；作者可在审核前见自己的帖）
+POST {{host}}/api/postcards/paging
+Content-Type: application/json
+Token: {{token}}
+
+{
+  "page": { "page": 1, "size": 20 }
+}
+
+### 5) Manage：审核通过明信片（staff JWT；见 AdminContentApi）
+POST {{host}}/webapi/content/postcard/{{postcardId}}/approve
+Token: {{adminToken}}
+
+
+### 6) App：邮政好友列表（Connections = **`bu_friendship`**，非 TIM `getConversationList`）
+GET {{host}}/api/mailbox/friends
+Token: {{token}}
+
+### 7) App：发信 → 收件 Accept → IM 好友同步（FP-A5d-004，需配置 TENCENT_IM_REST_IDENTIFIER）
+###    见业务邮箱 API 与信件状态；此处略去详细 JSON，按 Knife4j 填写
+
+### 8) App：邮票流水（验证赠票入账）
+POST {{host}}/api/stamps/ledger/paging
+Content-Type: application/json
+Token: {{token}}
+
+{
+  "page": { "page": 1, "size": 20 }
+}

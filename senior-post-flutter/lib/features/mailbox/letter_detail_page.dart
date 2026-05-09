@@ -195,7 +195,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                 if (!context.mounted) return;
                                 PostalSnack.show(
                                   context,
-                                  'You can now chat in Connections.',
+                                  'You can open chat from Connections (your postal friends).',
                                   tone: PostalSnackTone.success,
                                 );
                                 ref.invalidate(
@@ -203,11 +203,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                 );
                                 ref.invalidate(mailboxLettersProvider);
                                 ref.invalidate(postalInboxLettersProvider);
-                                ref.invalidate(mockConnectionsProvider);
-                                ref.invalidate(
-                                  friendshipActiveProvider(letter.peer.id),
-                                );
-                                ref.invalidate(timConversationsProvider);
+                                ref.invalidate(mailboxFriendsProvider);
                               } on ApiBusinessException catch (e) {
                                 if (context.mounted) {
                                   PostalSnack.show(

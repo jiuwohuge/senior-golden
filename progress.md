@@ -1,5 +1,37 @@
 # 会话进度日志
 
+## 2026-05-09 — FP-A9-002：管理端邮票流水 API + Manage 页（planning-with-files）
+
+- **后端**：`AdminStampsApi` / `AdminStampsController`；`POST /webapi/stamps/ledger/paging`；入参 `AdminStampLedgerPageInDto`（`page`、`userId?`、`reasonKeyword?`）；分页 `log_stamp_transaction`。
+- **Manage**：`api.stampLedgerPaging`、`pages/stamps/StampLedgerList.tsx`；侧栏「用户管理 → 邮票流水」；表格分页与筛选。
+- **顺带修复**：`FriendshipService`/`Impl` 补 `java.util.List` import；`AppMailboxServiceImpl` 补 `LetterSyncResultVO` import（原编译失败）。
+- **验证**：`mvn -pl biz,client -am compile -DskipTests`；`npm run build`（`senior-post-manage`）成功。
+
+## 2026-05-09 — FP-A7-001：bootstrap 返回 VIP 产品配置 + Flutter VIP 中心（planning-with-files）
+
+- **后端**：`AppVipProductConfigVO`；`AppBootstrapVO.vipProduct`；`AppBootstrapService` 批量读 `sys_config` vip 键（与 V9 seed / Manage VipConfig 一致）。
+- **Flutter**：`AppVipProductConfig` + `AppBootstrapData.vipProduct`；`vip_center_page` 非 Mock 读 `appBootstrapProvider` 展示文案，`productEnabled=false` 时提示关闭；Mock 仍保留切换按钮。
+- **文档**：`doc/plan/01-feature-list.md` FP-A7-001 状态更新。
+- **验证**：`mvn -pl biz,client -am compile -DskipTests`；`dart analyze`（上述两文件）无告警。
+
+## 2026-05-09 — 文档与进度一致性治理（planning-with-files）
+
+- **动作**：对照 `client`/`biz`/Flutter/Manage 实现，勘误并统一 **`PLAN.md`**（功能清单、S9、S11）、**`findings.md`** §1/§2.3、**`doc/plan/01-feature-list.md`**（A4-004、A5d-001、A10-002）、**`doc/plan/07-gap-analysis-and-roadmap.md`**（§2.0 对齐表 + 历史 §2 注脚）、**`doc/feature-overview.md`**（资料/赠票/IM/语言/速览）；新增 **`doc/plan/00-documentation-governance.md`**、**`doc/README.md`**；**`task_plan.md`** 增补元信息与导航；**`02`/`03`/`04`/`05`/`06`** 增补元信息；**`doc/1、需求文档.md`** 增加归档定位说明；**`senior-post-api/底层框架能力.md`** 增补元信息。
+- **session-catchup.py**：本机路径不可用则跳过（与历史一致）。
+- **结论**：功能完成度 **真源** = **`doc/plan/01-feature-list.md` + `05-task-tracker.md`**；路线图读 **`07` §2.0** 再读 §3 波次。
+
+## 2026-05-09 — 功能进度全面梳理 + 持续开发计划（planning-with-files）
+
+- **动作**：对照 `PLAN.md` A1–A10、`doc/plan/01-feature-list.md`、`05-task-tracker.md`、`07-gap-analysis-and-roadmap.md`、`findings.md` 与 `progress.md` 近期交付，产出**未闭环模块清单**与**波次计划**（优先级/时间表/技术方案/资源/验收）；勘误 `01` 中 **FP-A2-002**、**FP-A8-006** 与代码现状不一致处；更新 `task_plan.md` Phase 勾选。
+- **结论摘要**：M2 主链路与 M3 信箱/邮票/IM 同步主体已可用；缺口集中在 **VIP 全链**、**合规横切**（邮件 outbox、AES、注销、强更）、**运营工具**（Manage 流水/设备封禁 UI）、**质量与体验债**（Mock 总闸、E2E、B14/B15、A10）。
+- **下一步**：按本文用户回复中的「波次 1–4」在 `05` 将下一批 FP 标 `DOING`；`07` §2 中已交付项建议在后续修订中标注「已完成」避免执行歧义。
+
+## 2026-05-09 — Connections 文档口径 + 规划文件扫尾（planning-with-files）
+
+- **动作**：全库文档将 **Connections** 统一为 **IM「好友列表」**（`GET /api/mailbox/friends` / `bu_friendship`），与 TIM **`getConversationList` 会话列表** 解耦；更新 `PLAN.md`、`doc/plan/01-feature-list.md`、`02-requirements.md`、`doc/feature-overview.md`、`findings.md` §4、`e2e-smoke.http`、Mock 仓库注释；`task_plan.md` 决策表已含 2026-05-09 行。
+- **验证**：`flutter analyze`：**Analyzing senior-post-flutter... No issues found!**
+- **session-catchup.py**：与历史一致，本机路径常不可用则跳过，以 `git diff` + 规划文件为准。
+
 ## 2026-05-02 — planning-with-files：未实现功能规划
 
 - **动作**：读取 `PLAN.md`（功能清单、M1–M4、状态 S9、阻塞 B14/B15）；检索 `AppMailboxApi`、Flutter `useMock` 引用。
@@ -110,3 +142,19 @@
 - **后端**：`AppRegisterInDto.interestTagIds`（`@NotNull` + `@Size(min=3,max=30)`）；注册后 `replaceUserTags`；`DirectoryUserItemVO` 增加 `interestTagIds`/`interestTagNames`，`UserInterestAssembler` 供资料与名录复用；`AppBootstrapVO.interestTagOptions` + `GET /api/bootstrap/init?lang=`（匿名）拉选项。
 - **Flutter**：`appBootstrapProvider(lang)`；注册页兴趣 chips；`AuthRepository.register` 提交 `interestTagIds` / Mock `seedNewMockAccount`；`directory_remote` 映射名录兴趣字段。
 - **验证**：`mvn -pl biz,client -am compile -DskipTests`；`dart analyze`（相关文件）通过。
+
+## 2026-05-08 — FP-X-005 收口：Flutter 私有图过期自愈（planning-with-files）
+
+- **背景**：后端已有出站换签与 `POST /api/oss/get-sign`；客户端长时间停留后预签名过期会导致 `Image.network` 失败。
+- **动作**：新增 `oss_object_key_hint`（从 URL 路径解析 key）、`oss_get_sign_service`、`PostalOssNetworkImage`（首帧失败时单次换签）；`PostalAvatar` 改为 `ConsumerWidget` 以使用 Riverpod；明信片墙/详情配图改用该组件；`AppEnv.ossKeyPrefix`（`--dart-define=OSS_KEY_PREFIX`，默认 `app/uploads`）；`test/oss_object_key_hint_test.dart`。
+- **文档**：`task_plan.md` OSS 子阶段 O1–O7 勾选、`05-task-tracker.md` FP-X-005 DONE、`findings.md` §6 更新。
+- **验证**：`flutter test test/oss_object_key_hint_test.dart`；`flutter analyze` 全工程无告警。
+- **已知**：若后端 `keyPrefix` 非默认，须同步 Flutter `OSS_KEY_PREFIX`；换签仍受 `OssReadAuthorizationService` 约束，越权 key 不会自愈。
+
+## 2026-05-08 — FP-A5d-004 / FP-A6-003 / E2E 冒烟交付（planning-with-files）
+
+- **FP-A5d-004**：`TencentImRestApiClient`（Java 11+ HttpClient）调用腾讯 IM REST：`im_open_login_svc/account_import`、`sns/friend_add`（双向）；`TencentImFriendshipNotifier` 在建联成功后执行；`TencentImProperties` 增加 `friendship-sync-enabled`、`rest-api-host`、`rest-api-identifier`、`rest-api-max-retries` 等；`application.yml` 与环境变量对齐。
+- **FP-A6-003**：Flyway **`V10__stamp_daily_grant.sql`**；`StampGrantService` 在 **注册/登录**（`afterLogin`）与 **发帖创建**（`afterPostcardCreated`）触发；`StampAccountService.addBalance`；配置 **`senior-post.stamps-grant.*`**（UTC 日切、发帖日累计邮票上限）。
+- **测试**：`TencentImFriendshipNotifierTest`、`StampGrantServiceImplTest`；`biz/pom.xml` 显式 `surefire.skipTests=false` 以便父 POM 跳过测试时仍能跑 biz 单测。
+- **E2E**：`senior-post-api/doc/e2e-smoke.http`（注册→发帖→墙分页→管理端审核路径占位→流水）。
+- **验证**：`mvn -pl biz -am test "-Dtest=TencentImFriendshipNotifierTest,StampGrantServiceImplTest"` **Tests run: 7, Failures: 0**；`mvn -pl biz,server -am compile -DskipTests` **SUCCESS**。

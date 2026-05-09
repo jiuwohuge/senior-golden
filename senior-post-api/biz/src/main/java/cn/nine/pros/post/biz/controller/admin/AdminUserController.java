@@ -7,10 +7,12 @@ import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.model.domain.UserDeviceDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
+import cn.nine.pros.post.biz.model.mapstruct.UserDeviceMapstruct;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.api.admin.AdminUserApi;
 import cn.nine.pros.post.client.model.db.UserDTO;
+import cn.nine.pros.post.client.model.db.UserDeviceDTO;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
 import cn.nine.pros.post.client.model.input.admin.UserQueryInDto;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -39,6 +41,7 @@ public class AdminUserController implements AdminUserApi {
     private final UserService userService;
     private final UserMapstruct userMapstruct;
     private final UserDeviceService userDeviceService;
+    private final UserDeviceMapstruct userDeviceMapstruct;
 
     @Override
     public PageData<UserDTO> paging(UserQueryInDto body) {
@@ -80,6 +83,19 @@ public class AdminUserController implements AdminUserApi {
                 .set(UserDeviceDomain::getStatus, 2)
                 .set(UserDeviceDomain::getUpdatedBy, auditUserId())
                 .set(UserDeviceDomain::getUpdatedAt, java.time.LocalDateTime.now()));
+    }
+
+    @Override
+    public List<UserDeviceDTO> listUserDevices(Long userId) {
+        if (userId == null) {
+            throw new BadRequestException("非法用户 ID");
+        }
+        List<UserDeviceDomain> list = userDeviceService.list(
+                new LambdaQueryWrapper<UserDeviceDomain>()
+                        .eq(UserDeviceDomain::getUserId, userId)
+                        .eq(UserDeviceDomain::isDelFlag, false)
+                        .orderByDesc(UserDeviceDomain::getUpdatedAt));
+        return list.stream().map(userDeviceMapstruct::toDTO).collect(Collectors.toList());
     }
 
     @Override

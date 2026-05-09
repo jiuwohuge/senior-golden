@@ -18,6 +18,7 @@ import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
+import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -202,6 +203,35 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             throw new BadRequestException("无权查看该信件");
         }
         return toItem(l, viewerUserId, true);
+    }
+
+    @Override
+    public List<MailboxFriendItemVO> listFriends(Long userId) {
+        List<FriendshipDomain> rows = friendshipService.listActiveFriendshipsForUser(userId);
+        List<MailboxFriendItemVO> out = new ArrayList<>();
+        for (FriendshipDomain f : rows) {
+            long low = f.getUserLow() != null ? f.getUserLow() : 0L;
+            long high = f.getUserHigh() != null ? f.getUserHigh() : 0L;
+            long peer = low == userId ? high : low;
+            UserDTO peerDto = userService.findById(peer);
+            if (peerDto == null) {
+                continue;
+            }
+            String avatar = peerDto.getAvatarUrl();
+            if (StringUtils.hasText(avatar)) {
+                avatar = ossDisplayUrlService.signAvatarForViewer(userId, avatar.trim());
+            }
+            LocalDateTime connected = f.getUpdatedAt() != null ? f.getUpdatedAt() : f.getCreatedAt();
+            out.add(MailboxFriendItemVO.builder()
+                    .friendshipId(f.getId())
+                    .peerUserId(peer)
+                    .peerNickname(peerDto.getNickname())
+                    .peerAvatarUrl(avatar)
+                    .peerCountryCode(peerDto.getCountryCode())
+                    .connectedAt(connected)
+                    .build());
+        }
+        return out;
     }
 
     @Override

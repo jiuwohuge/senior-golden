@@ -55,6 +55,7 @@ public class AppAuthService {
     private final UserTagService userTagService;
     private final TagService tagService;
     private final UserInterestAssembler userInterestAssembler;
+    private final cn.nine.pros.post.biz.service.base.StampGrantService stampGrantService;
 
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO register(AppRegisterInDto body) {
@@ -95,6 +96,7 @@ public class AppAuthService {
         touchDevice(user.getId(), body.getDeviceUuid(), body.getDeviceType());
 
         String token = appJwtService.createToken(user.getId());
+        stampGrantService.afterLogin(user.getId());
         UserDTO regFresh = userService.findById(user.getId());
         return AppAuthResultVO.builder()
                 .token(token)
@@ -123,6 +125,7 @@ public class AppAuthService {
         touchDevice(dto.getId(), body.getDeviceUuid(), body.getDeviceType());
 
         String token = appJwtService.createToken(dto.getId());
+        stampGrantService.afterLogin(dto.getId());
         UserDTO fresh = userService.findById(dto.getId());
         return AppAuthResultVO.builder()
                 .token(token)

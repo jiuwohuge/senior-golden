@@ -2,6 +2,7 @@
 library;
 
 export 'postal_avatar.dart';
+export 'postal_oss_network_image.dart';
 export 'postal_brand_header.dart';
 export 'postal_button.dart';
 export 'postal_card_envelope.dart';

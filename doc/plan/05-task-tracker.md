@@ -1,5 +1,8 @@
 # 05 — 功能开发任务跟踪表
 
+> **文档元信息**  
+> **版本**：1.2 · **更新**：2026-05-09 · **维护人**：AI + Owner
+
 **负责人**：默认 `AI + Owner`（替换 `Owner` 为实际姓名即可）。  
 **周期**：`WnDx` = 第 n 周第 x 个工作日（相对，非自然日）。  
 **状态**：`TODO` | `DOING` | `BLOCK` | `DONE`。
@@ -37,7 +40,7 @@
 | FP-A5-* UI | AI + Owner | S2 | W2D2 | W2D4 | DONE | 发信后列表刷新 | `mailbox_providers` + sheet（见 FP-A5-Fl） |
 | FP-A2/A4 UI | AI + Owner | S2 | W2D4 | W2D5 | DONE | 编辑保存成功 | profile/directory |
 | E2E 冒烟 | AI + Owner | S2 | W2D5 | W2D5 | TODO | 脚本或录屏通过 | `doc/plan/` 或 `tests/` 记录 |
-| FP-X-005 | AI + Owner | S2 | W2D5 | W2D6 | TODO | 私有桶：`objectKey` 经服务端换 **GET** 签后浏览器/`Image.network` 200；非法 key / 越权 4xx；生产不依赖 `public-read-base-url` | `AppOssApi` 扩展、`AppOssServiceImpl.signGet`、VO 或批量 DTO、Flutter 过期重试、可选 `/webapi` 审核读图 |
+| FP-X-005 | AI + Owner | S2 | W2D5 | W2D6 | DONE | 私有桶：出站 `OssDisplayUrlService` + `POST /api/oss/get-sign`；Manage `/webapi/oss/get-sign`；Flutter `PostalOssNetworkImage` 首帧失败解析 key 单次换签；`OSS_KEY_PREFIX` 与后端 `keyPrefix` 对齐 | 同上 + `postal_oss_network_image`、`oss_get_sign_service`、`oss_object_key_hint_test` |
 
 ---
 
@@ -47,8 +50,8 @@
 |----|--------|--------|----|----|------|----------|--------|
 | FP-A5d-002 | AI + Owner | S3 | W3D1 | W3D3 | DONE | 平邮到期自动送达 | `StandardLetterDeliveryService`、`StandardLetterDeliveryScheduler`、`V7` 索引、`StandardLetterDeliveryServiceTest` |
 | FP-A5-005 | AI + Owner | S3 | W3D2 | W3D3 | DONE | 扣邮票后变已送达 | `POST .../speed-up`、`AppMailboxServiceImpl.speedUpLetter`、`mailbox_remote` |
-| FP-A5d-004 | AI + Owner | S3 | W3D3 | W3D4 | TODO | 腾讯返回成功或可观测失败 | Notifier 实现 + 配置 |
-| FP-A6-002/003 | AI + Owner | S3 | W3D4 | W3D5 | TODO | 流水页与管理配置一致 | API + Flutter 页 |
+| FP-A5d-004 | AI + Owner | S3 | W3D3 | W3D4 | DONE | REST `account_import`+`friend_add` 双向；可配置关闭；重试与日志 | `TencentImRestApiClient`、`TencentImFriendshipNotifier`、`TencentImProperties` 扩展、单测 |
+| FP-A6-003 | AI + Owner | S3 | W3D4 | W3D5 | DONE | 登录/注册/发帖赠票；UTC 日切与日上限；`bu_stamp_daily_grant` 幂等 | `StampGrantService`、`V10`、`senior-post.stamps-grant`、单测 |
 | FP-A7-* | AI + Owner | S3 | W3D4 | W3D6 | TODO | VIP 开关影响扣费 | VO + Flutter |
 | FP-A3-005 | AI + Owner | S3 | W3D5 | W3D5 | DONE | 举报单进后台；工单列表可看举报人 | `AppReport*` + Manage `report/List.tsx` |
 | FP-A4-002~004 | AI + Owner | S3 | W3D5 | W3D6 | DONE | 筛选 + 排序（`sort`）全链；独立公开页 API 仍属 FP-A4-004 | `AppDirectoryPageInDto`、`AppDirectoryServiceImpl`、`directory_remote`、筛选 Sheet |
@@ -64,7 +67,8 @@
 | FP-A1-007 | AI + Owner | S4 | W4D3 | W4D5 | TODO | 加解密与后端互通 | Flutter 拦截器 + 配置说明 |
 | FP-A8-005 | AI + Owner | S4 | W4D4 | W4D5 | TODO | 注销策略可演示 | API + Job + Flutter |
 | FP-X-003 | AI + Owner | S4 | W4D5 | W4D5 | TODO | 低版本拦截 | bootstrap 或 version API |
-| FP-A9-002/003 | AI + Owner | S4 | W4D5 | W4D6 | TODO | 管理端可操作 | Manage 页面 PR |
+| FP-A9-002 | AI + Owner | S4 | W4D5 | W4D6 | DONE | 管理端分页查 `log_stamp_transaction`；可选 userId、reason 过滤 | `AdminStampsApi`、`AdminStampsController`、`StampLedgerList.tsx` |
+| FP-A9-003 | AI + Owner | S4 | W4D5 | W4D6 | TODO | 用户列表接通 `blockDevice` | `UserList` + `api.blockDevice` |
 | FP-B14/B15 | AI + Owner | S4 | W4D6 | W4D7 | TODO | 设计走查通过 | 主题 PR + 截图 |
 
 ---
@@ -85,5 +89,5 @@
 | 2026-05-02 | FP-A2-001：`PATCH /api/auth/profile`、Flutter `refreshSessionFromServer` / `updateProfileOnServer`、资料页拉 `me` |
 | 2026-05-02 | 文档回写 A3/A4/A5/A6；Sprint1 标 DONE：FP-A3-001~004、FP-A4-001；修正重复 FP 编号为 FP-A5-002；FP-A6-002-Fl 流水页 |
 | 2026-05-08 | FP-A6-004：`StampAccountService` 统一 CAS；`StampBalanceCasConcurrencyJdbcTest`（H2 100/200 线程）；`StampAccountServiceImplTest` |
-| 2026-05-09 | FP-A4-003 / Sprint3 `FP-A4-002~004`：`AppDirectoryPageInDto.sort`、`SAME_AGE`/`SHARED_INTEREST` SQL 排序；Flutter 筛选 Sheet + `directory_remote`；Mock `list` 对齐 |
+| 2026-05-09 | FP-A9-002 DONE；`05` Sprint4 拆分 A9-002/003 行；`01` FP-A6-005 同步 |
 | 2026-05-09 | FP-A3-005/007 + FP-A5-002：敏感词发帖/评/信 + 词库缓存失效；`sync` COALESCE；邮箱页下拉刷新与 `resumed` 刷新；举报列表 `reporterUserId` + `records`/`list` |

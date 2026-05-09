@@ -8,21 +8,78 @@ import '../mock/mock_delay.dart';
 import '../models/interest_tag_option.dart';
 import '../network/dio_provider.dart';
 
-/// 与后端 `AppBootstrapVO` / `AppCountryVO` 对齐。
+/// 与后端 `AppBootstrapVO` / `AppCountryVO` / `AppVipProductConfigVO` 对齐。
+class AppVipProductConfig {
+  const AppVipProductConfig({
+    required this.productEnabled,
+    required this.displayName,
+    required this.tagline,
+    required this.taglineZh,
+    required this.unlimitedStampsBenefit,
+    required this.standardDeliveryHours,
+  });
+
+  final bool productEnabled;
+  final String displayName;
+  final String tagline;
+  final String taglineZh;
+  final bool unlimitedStampsBenefit;
+  final int standardDeliveryHours;
+
+  factory AppVipProductConfig.fromJson(Map<String, dynamic>? json) {
+    if (json == null || json.isEmpty) {
+      return AppVipProductConfig.defaults;
+    }
+    return AppVipProductConfig(
+      productEnabled: json['productEnabled'] as bool? ?? true,
+      displayName: (json['displayName'] as String?)?.trim().isNotEmpty == true
+          ? (json['displayName'] as String).trim()
+          : 'VIP',
+      tagline: (json['tagline'] as String?)?.trim().isNotEmpty == true
+          ? (json['tagline'] as String).trim()
+          : 'Unlimited stamps · Priority delivery · Ad-free',
+      taglineZh: (json['taglineZh'] as String?)?.trim().isNotEmpty == true
+          ? (json['taglineZh'] as String).trim()
+          : '无限邮票 · 优先送达 · 无广告干扰',
+      unlimitedStampsBenefit: json['unlimitedStampsBenefit'] as bool? ?? true,
+      standardDeliveryHours: (json['standardDeliveryHours'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  static const AppVipProductConfig defaults = AppVipProductConfig(
+    productEnabled: true,
+    displayName: 'VIP',
+    tagline: 'Unlimited stamps · Priority delivery · Ad-free',
+    taglineZh: '无限邮票 · 优先送达 · 无广告干扰',
+    unlimitedStampsBenefit: true,
+    standardDeliveryHours: 0,
+  );
+
+  String taglineForLanguage(String languageCode) {
+    if (languageCode.toLowerCase().startsWith('zh') && taglineZh.isNotEmpty) {
+      return taglineZh;
+    }
+    return tagline;
+  }
+}
+
 class AppBootstrapData {
   const AppBootstrapData({
     required this.minRegisterAge,
     required this.countries,
     this.interestTagOptions = const [],
+    this.vipProduct = AppVipProductConfig.defaults,
   });
 
   final int minRegisterAge;
   final List<CountryItem> countries;
   final List<InterestTagOption> interestTagOptions;
+  final AppVipProductConfig vipProduct;
 
   factory AppBootstrapData.fromJson(Map<String, dynamic> json) {
     final countriesRaw = json['countries'] as List<dynamic>? ?? const [];
     final tagsRaw = json['interestTagOptions'] as List<dynamic>? ?? const [];
+    final vipRaw = json['vipProduct'];
     return AppBootstrapData(
       minRegisterAge: (json['minRegisterAge'] as num?)?.toInt() ?? 45,
       countries: countriesRaw
@@ -34,6 +91,9 @@ class AppBootstrapData {
           .map(InterestTagOption.fromJson)
           .where((e) => e.id > 0 && e.tagName.isNotEmpty)
           .toList(),
+      vipProduct: vipRaw is Map<String, dynamic>
+          ? AppVipProductConfig.fromJson(vipRaw)
+          : AppVipProductConfig.defaults,
     );
   }
 }
@@ -85,6 +145,7 @@ final appBootstrapProvider = FutureProvider.family<AppBootstrapData, String>((re
           )
           .toList(),
       interestTagOptions: const [],
+      vipProduct: AppVipProductConfig.defaults,
     );
   }
   final dio = ref.read(dioProvider);

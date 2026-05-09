@@ -4,6 +4,7 @@ import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
+import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,6 +46,10 @@ public interface AppMailboxApi {
     @Operation(summary = "信件详情（参与方可读，含正文）")
     @GetMapping(AppServiceDefine.SERVER_PREFIX + "/mailbox/letters/{letterId}")
     MailboxLetterItemVO getLetter(@PathVariable("letterId") Long letterId);
+
+    @Operation(summary = "邮政好友列表（Connections）：基于 bu_friendship 活跃关系，非 TIM 会话列表")
+    @GetMapping(AppServiceDefine.SERVER_PREFIX + "/mailbox/friends")
+    List<MailboxFriendItemVO> listFriends();
 
     @Operation(summary = "是否与指定用户已邮政建联（活跃好友）")
     @GetMapping(AppServiceDefine.SERVER_PREFIX + "/mailbox/peers/{peerUserId}/friendship-active")

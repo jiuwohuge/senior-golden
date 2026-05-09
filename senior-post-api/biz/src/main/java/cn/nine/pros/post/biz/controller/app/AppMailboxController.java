@@ -7,6 +7,7 @@ import cn.nine.pros.post.client.api.app.AppMailboxApi;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
+import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,6 +55,12 @@ public class AppMailboxController implements AppMailboxApi {
     public MailboxLetterItemVO getLetter(Long letterId) {
         Long uid = requireUserId();
         return appMailboxService.getLetter(uid, letterId);
+    }
+
+    @Override
+    public List<MailboxFriendItemVO> listFriends() {
+        Long uid = requireUserId();
+        return appMailboxService.listFriends(uid);
     }
 
     @Override

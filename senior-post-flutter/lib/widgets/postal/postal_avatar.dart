@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/postal_tokens.dart';
+import 'postal_oss_network_image.dart';
 
 /// 复古头像：占位采用首字母 + 邮票框 + 牛皮纸边。
-class PostalAvatar extends StatelessWidget {
+class PostalAvatar extends ConsumerWidget {
   const PostalAvatar({
     super.key,
     this.imageUrl,
@@ -18,7 +20,7 @@ class PostalAvatar extends StatelessWidget {
   final bool framed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef _) {
     final initial = (name == null || name!.trim().isEmpty)
         ? '?'
         : name!.trim().characters.first.toUpperCase();
@@ -41,12 +43,12 @@ class PostalAvatar extends StatelessWidget {
       alignment: Alignment.center,
       child: imageUrl != null && imageUrl!.isNotEmpty
           ? ClipOval(
-              child: Image.network(
-                imageUrl!,
+              child: PostalOssNetworkImage(
+                imageUrl: imageUrl!,
                 fit: BoxFit.cover,
                 width: size,
                 height: size,
-                errorBuilder: (_, _, _) => _initialText(initial),
+                errorBuilder: (_) => _initialText(initial),
               ),
             )
           : _initialText(initial),

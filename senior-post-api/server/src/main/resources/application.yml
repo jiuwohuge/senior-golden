@@ -52,6 +52,19 @@ senior-post:
     sdk-app-id: ${TENCENT_IM_SDK_APP_ID:0}
     secret-key: ${TENCENT_IM_SECRET_KEY:}
     user-sig-expire-seconds: 604800
+    # FP-A5d-004：REST 同步双向好友（需在控制台创建 App 管理员账号并将 Identifier 填于此）
+    friendship-sync-enabled: ${TENCENT_IM_FRIENDSHIP_SYNC:true}
+    rest-api-host: ${TENCENT_IM_REST_HOST:console.tim.qq.com}
+    rest-api-identifier: ${TENCENT_IM_REST_IDENTIFIER:}
+    rest-api-user-sig-expire-seconds: 120
+    account-import-before-friend-add: true
+    rest-api-max-retries: 2
+  stamps-grant:
+    login-enabled: true
+    login-daily-amount: 1
+    postcard-enabled: true
+    postcard-reward-per-post: 1
+    postcard-daily-stamp-cap: 5
   # 阿里云 OSS：未配置完整四项时 /api/oss/put-sign 返回业务错误提示
   oss:
     endpoint: ${ALIYUN_OSS_ENDPOINT:}

@@ -11,6 +11,7 @@ import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.PostcardCommentService;
 import cn.nine.pros.post.biz.service.base.PostcardService;
 import cn.nine.pros.post.biz.service.base.SensitiveWordService;
+import cn.nine.pros.post.biz.service.base.StampGrantService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.app.AppPostcardCommentCreateInDto;
@@ -25,6 +26,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -46,6 +48,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     private final UserService userService;
     private final SensitiveWordService sensitiveWordService;
     private final OssDisplayUrlService ossDisplayUrlService;
+    private final StampGrantService stampGrantService;
 
     @Override
     @SuppressWarnings("unused")
@@ -91,6 +94,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public PostcardDetailVO create(long userId, AppPostcardCreateInDto body) {
         String content = body.getContent() == null ? "" : body.getContent().trim();
         if (!StringUtils.hasText(content)) {
@@ -123,6 +127,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         }
         d.initAudit(userId);
         postcardService.save(d);
+        stampGrantService.afterPostcardCreated(userId, d.getId());
         PostcardDomain fresh = postcardService.getById(d.getId());
         UserDTO author = userService.findById(userId);
         PostcardDetailVO vo = toDetail(fresh, author, 0, userId);

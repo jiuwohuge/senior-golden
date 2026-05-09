@@ -1,8 +1,11 @@
 # 功能总览（模块 → 功能）
 
+> **文档元信息**  
+> **版本**：1.2 · **更新**：2026-05-09 · **维护人**：AI + Owner
+
 **用途**：快速把握各模块能力边界与完成度。  
 **状态取值**：`已完成` | `进行中` | `未开始`（以 App + `senior-post-api` + Manage 可联调闭环为准）。  
-**维护**：迭代后请同步 [`doc/plan/01-feature-list.md`](plan/01-feature-list.md)；任务排期见 [`doc/plan/05-task-tracker.md`](plan/05-task-tracker.md)。
+**维护**：迭代后须与 [`doc/plan/01-feature-list.md`](plan/01-feature-list.md) 同步；任务排期见 [`doc/plan/05-task-tracker.md`](plan/05-task-tracker.md)；**治理标准**见 [`doc/plan/00-documentation-governance.md`](plan/00-documentation-governance.md)。
 
 ---
 
@@ -25,8 +28,8 @@
 | 功能 | 状态 | 预期行为 | 验收标准 |
 |------|------|----------|----------|
 | 个人中心展示 | 已完成 | Tab 展示与 `me` 一致 | 非 Mock 下资料字段正确 |
-| 兴趣标签写回与校验 | 进行中 | 注册/编辑 ≥3 兴趣并持久化 | 后端持久化 + 名录筛选一致 |
-| 头像 OSS 上传与写回 | 未开始 | 选图 → 直传 OSS → 头像 URL 更新 | `put-sign` + `PATCH profile` 写 `avatarUrl` |
+| 兴趣标签写回与校验 | 已完成 | 注册/编辑 ≥3 兴趣并持久化 | `interestTagIds`、名录筛选与 VO 一致 |
+| 头像 OSS 上传与写回 | 已完成 | 选图 → 直传 OSS → 头像 URL 更新 | `put-sign`（`avatar`）+ `PATCH profile.avatarUrl` |
 | 冷启动仅 Token 时资料新鲜度 | 进行中 | 进入 Shell 即刷新 `me`，不依赖先进 Profile Tab | 杀进程重开后面板数据已更新 |
 
 ---
@@ -52,7 +55,7 @@
 | 分页与公开字段 | 已完成 | 条件分页返回用户卡所需字段 | `POST /api/directory/users/paging` |
 | 筛选（国家/年龄/兴趣） | 已完成 | 筛选参数生效 | Flutter 筛选与 total 正确 |
 | 同龄/同兴趣排序 | 已完成 | `DEFAULT`/`SAME_AGE`/`SHARED_INTEREST`；同龄按出生年差升序，同兴趣按共同标签数降序 | 筛选 Sheet 选择排序；`POST .../directory/users/paging` 带 `sort` |
-| 用户卡 / 公开页 | 进行中 | 卡页数据与名录一致；可选独立公开接口 | 用户卡无空白关键字段 |
+| 用户卡 / 公开页 | 已完成 | 卡页数据与名录一致 | `GET /api/directory/users/{userId}` + Flutter 远程用户卡 |
 | 名录内发起写信 | 已完成 | 从名录进入写信并发信 | `send_letter_sheet` + `POST .../letters/send` |
 
 ---
@@ -66,8 +69,9 @@
 | 平邮到期自动送达 | 已完成 | 预计到达后状态变为已送达 | Worker 执行；DB `actual_arrival_time` 正确 |
 | 平邮加速（扣票） | 已完成 | 发件人可对运输中平邮加速 | `speed-up` + UI；VIP 免扣与流水正确 |
 | Accept 建联 | 已完成 | 收信方可 Accept 进入 IM 路径 | `accept-postal` + TIM 侧一致 |
+| **Connections（好友列表）** | 已完成 | 邮政 Tab 第二分段展示 **活跃笔友/好友**，与 TIM **会话列表**区分 | **`GET /api/mailbox/friends`**（`bu_friendship`）；**不等同** `getConversationList` |
 | 信件详情 | 已完成 | 单封正文与元数据 | `GET .../letters/{id}` |
-| IM UserSig 与聊天 | 已完成 | 可进会话发消息 | `/api/im/usersig` + TIM SDK |
+| IM UserSig 与聊天 | 已完成 | 登录后可与好友发起 **C2C 聊天**并发消息 | `/api/im/usersig` + TIM SDK（聊天页；列表仍以 `/friends` 为准） |
 | 双用户 postal/sync 一致性 | 已完成（拉取侧） | 收件方及时看到依赖刷新；增量 `sync` 用 `COALESCE(updated_at,created_at)` | 下拉刷新 + App `resumed` 自动刷新 postal/archive；双机仍建议人工点刷新或后续推送 |
 | 从信件上下文「回信」 | 未开始 | 一键带入对端并发新信 | 产品定交互后接 API |
 
@@ -79,7 +83,7 @@
 |------|------|----------|----------|
 | 平邮延迟区间配置化 | 未开始 | min/max 来自配置非硬编码 | `sys_config` + 发信逻辑读配置 |
 | 挂号送达与事务边界 | 进行中 | 失败无脏信件/错扣票 | 异常路径单测或集成测 |
-| 腾讯 IM 好友 Notifier | 进行中 | 业务建联后调官方 REST，可重试可观测 | 占位替换为真实调用；日志/告警清晰 |
+| 腾讯 IM 好友 Notifier | 已完成 | 业务建联后调官方 REST，可重试可观测 | `TencentImRestApiClient`、`TencentImFriendshipNotifier`；需 `TENCENT_IM_REST_IDENTIFIER` |
 
 ---
 
@@ -89,9 +93,9 @@
 |------|------|----------|----------|
 | 余额查询 | 已完成 | App 展示与 `bu_user` 一致 | `GET /api/stamps/balance` |
 | 流水分页 | 已完成 | 用户可查交易历史 | `POST /api/stamps/ledger/paging` + 流水页 |
-| 登录赠票 / 发帖奖 / 日上限 | 未开始 | 规则可配置、幂等记账 | 流水与余额无重复发放 |
+| 登录赠票 / 发帖奖 / 日上限 | 已完成 | 规则可配置、幂等记账 | `StampGrantService`、`bu_stamp_daily_grant`、`senior-post.stamps-grant.*` |
 | 并发扣票安全 | 已完成 | CAS 扣减统一在 `StampAccountService`；并发下余额不为负 | `StampBalanceCasConcurrencyJdbcTest` + `mvn -pl biz test`；寄信/加速走同一 CAS |
-| Manage 用户邮票流水页 | 未开始 | 运营可查用户账本 | `/webapi` + 列表页 |
+| Manage 用户邮票流水页 | 已完成 | 运营分页查询流水 | `POST /webapi/stamps/ledger/paging` + `StampLedgerList` |
 
 ---
 
@@ -99,7 +103,7 @@
 
 | 功能 | 状态 | 预期行为 | 验收标准 |
 |------|------|----------|----------|
-| 权益查询与展示 | 未开始 | App 可知是否 VIP 及权益项 | 专用接口或并入 bootstrap |
+| 权益查询与展示 | 进行中 | App 从 bootstrap 读 `vipProduct` 展示；`me`/余额仍带 `isVip` | `GET /api/bootstrap/init` 含 `vipProduct`；VIP 中心页非 Mock 展示 |
 | 订阅与到期 | 进行中 | 后端可判 VIP 有效期 | 与扣费点一致 |
 | VIP 与扣票/加速规则 | 进行中 | VIP 挂号/加速按配置减免 | 与 `VipConfig` 一致 |
 
@@ -122,7 +126,7 @@
 | 功能 | 状态 | 预期行为 | 验收标准 |
 |------|------|----------|----------|
 | 看板 / 用户 / 内容审核 / 举报 / 配置 / 国家 / 敏感词 / 版本 / 公告 / 日志 | 已完成 | 各页可完成日常运营 | `/webapi` 与页面可用 |
-| 邮票流水管理 | 未开始 | 查询用户邮票流水 | 与 §7 管理页一致 |
+| 邮票流水管理 | 已完成 | 查询用户邮票流水 | `stampLedgerPaging` + 邮票流水页 |
 | 设备封禁 UI | 未开始 | 用户列表可操作 `blockDevice` | 调用已有 API |
 | 权限与 85xx 验收清单 | 未开始 | 角色与错误码文档化 | `doc` 用例表 |
 
@@ -133,7 +137,7 @@
 | 功能 | 状态 | 预期行为 | 验收标准 |
 |------|------|----------|----------|
 | ARB 主流程覆盖 | 进行中 | 中英关键路径无硬编码漏网 | 走查 Tab 与写信发帖 |
-| 运行时切换语言 | 未开始 | 设置内切换立即生效 | 与 `intl` 一致 |
+| 运行时切换语言 | 已完成（待走查） | 设置内切换立即生效 | `appLocaleProvider` + `shared_preferences` + `settings_page` |
 | 邮件模板双语 | 未开始 | 依赖邮件服务 | 重置密码等邮件中英可选 |
 
 ---
@@ -162,13 +166,13 @@
 
 | 模块 | 已完成（概览） | 主要缺口 |
 |------|----------------|----------|
-| 1–2 | 注册登录、bootstrap、资料 PATCH | 重置密码、AES、头像、兴趣闭环 |
-| 3–4 | 墙/名录主链路、写信入口 | 敏感词、排序、举报验收 |
-| 5–6 | 发收信、归档、Worker、加速、IM 聊天 | 双用户一致性、回信、延迟配置、Notifier |
-| 7–8 | 余额与流水 | 赠票规则、并发单测、VIP 全链 |
-| 9–10 | 审核与用户管理主体 | 设备 UI、注销、流水页 |
-| 11–13 | 部分 i18n | 语言切换、邮件、主题与登录规范 |
+| 1–2 | 注册登录、bootstrap、资料 PATCH、忘记密码、兴趣、头像 | AES、冷启动拉 `me`、弱密码频控 |
+| 3–4 | 墙/名录主链路、写信入口、举报、敏感词、排序 | 审核态 UX、名录 ARB 扫尾 |
+| 5–6 | 发收信、归档、Worker、加速、IM 聊天、好友 REST 同步 | 回信、延迟完全配置化、挂号事务边界复审 |
+| 7–8 | 余额、流水、赠票、CAS | Manage 流水页、VIP App 模型全链 |
+| 9–10 | 审核与用户管理主体 | 设备封禁 UI、注销、UAT 清单 |
+| 11–13 | 部分 i18n、设置页语言切换 | 邮件 outbox、强更、主题 B14/B15 |
 
 ---
 
-*文档版本：与仓库实现同步；细粒度 FP 编号以 `01-feature-list` 为准。*
+*文档版本：1.2 · 与 `01-feature-list` 对齐日期 2026-05-09；细粒度 FP 以 `01` 为准。*

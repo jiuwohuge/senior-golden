@@ -1,11 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation.dart';
 
 import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
 import '../../core/mock/mock_repository.dart';
 import 'mailbox_remote.dart';
-import 'tim_facade.dart';
 
 /// 信件归档列表。
 final mailboxArchiveProvider = FutureProvider<List<MockLetter>>((ref) async {
@@ -33,21 +31,13 @@ final postalInboxLettersProvider = FutureProvider<List<MockLetter>>((
   return ref.read(mailboxRemoteRepositoryProvider).listPostalInbox();
 });
 
-/// Mock 下 Connections 数据源；非 Mock 走 [timConversationsProvider]。
-final mockConnectionsProvider = FutureProvider<List<MockImConnectionRow>>((
-  ref,
-) async {
-  return ref.read(mockMailboxRepositoryProvider).listMockConnections();
-});
-
-/// 腾讯 IM 会话第一页（需后端签发 UserSig 且控制台已配置）。
-final timConversationsProvider = FutureProvider<List<V2TimConversation>>((
+/// 邮政 Tab「Connections」：**好友（笔友）列表**，数据来源 `bu_friendship` / `GET /api/mailbox/friends`，
+/// **不是** TIM `getConversationList` 会话列表。点击进入聊天仍走 TIM C2C。
+final mailboxFriendsProvider = FutureProvider<List<MockImConnectionRow>>((
   ref,
 ) async {
   if (AppEnv.useMock) {
-    return const [];
+    return ref.read(mockMailboxRepositoryProvider).listMockConnections();
   }
-  final facade = ref.read(seniorPostTimFacadeProvider);
-  await facade.ensureLoggedIn();
-  return facade.conversationFirstPage();
+  return ref.read(mailboxRemoteRepositoryProvider).listMailboxFriends();
 });

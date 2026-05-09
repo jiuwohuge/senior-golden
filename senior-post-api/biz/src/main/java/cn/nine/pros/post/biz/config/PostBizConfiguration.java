@@ -4,6 +4,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties({TencentImProperties.class, OssProperties.class, SeniorPostAuthProperties.class})
+@EnableConfigurationProperties({
+        TencentImProperties.class,
+        OssProperties.class,
+        SeniorPostAuthProperties.class,
+        StampGrantProperties.class
+})
 public class PostBizConfiguration {
 }

@@ -3,10 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation.dart';
-
 import '../../app/theme/postal_tokens.dart';
-import '../../core/env/app_env.dart';
 import '../../core/mock/mock_models.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
@@ -45,6 +42,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
         ref.invalidate(postalInboxLettersProvider);
         ref.invalidate(mailboxArchiveProvider);
         ref.invalidate(mailboxLettersProvider);
+        ref.invalidate(mailboxFriendsProvider);
       });
     }
   }
@@ -120,6 +118,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
                       ref.invalidate(postalInboxLettersProvider);
                       ref.invalidate(mailboxArchiveProvider);
                       ref.invalidate(mailboxLettersProvider);
+                      ref.invalidate(mailboxFriendsProvider);
                       await ref.read(postalInboxLettersProvider.future);
                     },
                   ),
@@ -181,7 +180,7 @@ class _PostalInboxBody extends ConsumerWidget {
                         child: PostalEmptyState(
                           title: 'Postal inbox is clear',
                           subtitle:
-                              'No pending letters. Connections appear after you accept a delivered letter.',
+                              'No pending letters. Your postal friends appear in Connections after you accept a delivered letter.',
                         ),
                       ),
                     ],
@@ -205,104 +204,42 @@ class _ConnectionsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (AppEnv.useMock) {
-      final async = ref.watch(mockConnectionsProvider);
-      return async.when(
-        loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 72),
-        error: (e, _) => PostalEmptyState(
-          title: 'Unable to load connections',
-          subtitle: '$e',
-          tone: PostalEmptyTone.error,
-          actionLabel: 'Retry',
-          onAction: () => ref.invalidate(mockConnectionsProvider),
-        ),
-        data: (rows) {
-          if (rows.isEmpty) {
-            return PostalEmptyState(
-              title: 'No connections yet',
-              subtitle:
-                  'When you accept a delivered letter from someone, they appear here for instant chat.',
-              actionLabel: 'Refresh',
-              onAction: () => ref.invalidate(mockConnectionsProvider),
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-            itemCount: rows.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (_, i) {
-              final r = rows[i];
-              return _ImStyleRow(
-                title: r.peer.nickname,
-                subtitle: r.lastMessage,
-                time: r.lastTime,
-                onTap: () => context.push('/chat/${r.peer.id}'),
-              );
-            },
-          );
-        },
-      );
-    }
-
-    final timAsync = ref.watch(timConversationsProvider);
-    return timAsync.when(
+    final async = ref.watch(mailboxFriendsProvider);
+    return async.when(
       loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 72),
       error: (e, _) => PostalEmptyState(
-        title: 'IM unavailable',
-        subtitle:
-            '$e\nConfigure senior-post.tencent-im and ensure you are logged in.',
-        tone: PostalEmptyTone.calm,
+        title: 'Unable to load friends',
+        subtitle: '$e',
+        tone: PostalEmptyTone.error,
         actionLabel: 'Retry',
-        onAction: () => ref.invalidate(timConversationsProvider),
+        onAction: () => ref.invalidate(mailboxFriendsProvider),
       ),
-      data: (convs) {
-        if (convs.isEmpty) {
+      data: (rows) {
+        if (rows.isEmpty) {
           return PostalEmptyState(
-            title: 'No conversations',
+            title: 'No postal friends yet',
             subtitle:
-                'Start from Postal inbox: accept a delivered letter first.',
+                'Accept a delivered letter to add someone here. This list is your friend list (not recent chats).',
             actionLabel: 'Refresh',
-            onAction: () => ref.invalidate(timConversationsProvider),
+            onAction: () => ref.invalidate(mailboxFriendsProvider),
           );
         }
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-          itemCount: convs.length,
+          itemCount: rows.length,
           separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (_, i) {
-            final c = convs[i];
-            return _TimConversationTile(conversation: c);
+            final r = rows[i];
+            return _ImStyleRow(
+              title: r.peer.nickname,
+              subtitle: r.lastMessage,
+              time: r.lastTime,
+              avatarUrl: r.peer.avatarUrl,
+              onTap: () => context.push('/chat/${r.peer.id}'),
+            );
           },
         );
       },
-    );
-  }
-}
-
-class _TimConversationTile extends StatelessWidget {
-  const _TimConversationTile({required this.conversation});
-  final V2TimConversation conversation;
-
-  @override
-  Widget build(BuildContext context) {
-    final uid = conversation.userID ?? '';
-    final title =
-        (conversation.showName != null && conversation.showName!.isNotEmpty)
-        ? conversation.showName!
-        : uid;
-    final last = conversation.lastMessage;
-    String subtitle = '';
-    if (last != null && last.textElem != null) {
-      subtitle = last.textElem!.text ?? '';
-    }
-    final ts = last?.timestamp != null
-        ? DateTime.fromMillisecondsSinceEpoch((last!.timestamp!) * 1000)
-        : DateTime.now();
-    return _ImStyleRow(
-      title: title,
-      subtitle: subtitle.isEmpty ? '—' : subtitle,
-      time: ts,
-      onTap: () => context.push('/chat/$uid'),
     );
   }
 }
@@ -313,12 +250,14 @@ class _ImStyleRow extends StatelessWidget {
     required this.subtitle,
     required this.time,
     required this.onTap,
+    this.avatarUrl,
   });
 
   final String title;
   final String subtitle;
   final DateTime time;
   final VoidCallback onTap;
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +269,7 @@ class _ImStyleRow extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            PostalAvatar(name: title, size: 44),
+            PostalAvatar(name: title, size: 44, imageUrl: avatarUrl),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

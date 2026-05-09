@@ -14,4 +14,9 @@ public interface StampAccountService {
      */
     boolean tryDecrementBalance(long userId, int expectedOldBalance, int delta,
                                 LocalDateTime now, long updatedBy);
+
+    /**
+     * 增加邮票余额（用于赠送；delta 必须为正）。
+     */
+    void addBalance(long userId, int delta, LocalDateTime now, long updatedBy);
 }

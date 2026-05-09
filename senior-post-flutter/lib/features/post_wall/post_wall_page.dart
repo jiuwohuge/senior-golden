@@ -176,13 +176,9 @@ class _PostCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.network(
-                      post.resolvedImageUrls.first,
+                    PostalOssNetworkImage(
+                      imageUrl: post.resolvedImageUrls.first,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const ColoredBox(
-                        color: Color(0xFFE8E4DC),
-                        child: Icon(Icons.broken_image_outlined),
-                      ),
                     ),
                     if (post.resolvedImageUrls.length > 1)
                       Positioned(

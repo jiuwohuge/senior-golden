@@ -62,6 +62,13 @@ class MailboxRemoteRepository {
     return _voToMockLetter(map);
   }
 
+  /// `GET /api/mailbox/friends` — Connections = 好友列表（bu_friendship），非会话列表。
+  Future<List<MockImConnectionRow>> listMailboxFriends() async {
+    final r = await _dio.get<dynamic>('/api/mailbox/friends');
+    final rows = _unwrapListData(r);
+    return rows.map(_voToFriendRow).toList();
+  }
+
   Future<bool> isFriendshipActive(String peerUserId) async {
     final r = await _dio.get<dynamic>(
       '/api/mailbox/peers/${int.parse(peerUserId)}/friendship-active',
@@ -133,6 +140,31 @@ MockUser _peerToMockUser(Map<String, dynamic> p) {
     interests: const [],
     avatarUrl: p['avatarUrl'] as String?,
     isVip: p['isVip'] as bool? ?? false,
+  );
+}
+
+MockImConnectionRow _voToFriendRow(Map<String, dynamic> m) {
+  final peerId = (m['peerUserId'] as num?)?.toInt() ?? 0;
+  final nick = (m['peerNickname'] as String?) ?? 'User';
+  final cc = (m['peerCountryCode'] as String?) ?? '';
+  final connected = _parseDate(m['connectedAt']) ?? DateTime.now();
+  final peer = MockUser(
+    id: '$peerId',
+    nickname: nick,
+    email: '',
+    countryCode: cc,
+    countryName: cc,
+    birthYear: 1970,
+    bio: '',
+    interests: const [],
+    avatarUrl: m['peerAvatarUrl'] as String?,
+    isVip: false,
+  );
+  final sub = cc.isNotEmpty ? cc : 'Postal friend · tap to chat';
+  return MockImConnectionRow(
+    peer: peer,
+    lastMessage: sub,
+    lastTime: connected,
   );
 }
 

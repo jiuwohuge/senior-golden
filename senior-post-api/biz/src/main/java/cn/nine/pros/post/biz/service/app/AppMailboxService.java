@@ -3,6 +3,7 @@ package cn.nine.pros.post.biz.service.app;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
+import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,8 @@ public interface AppMailboxService {
     MailboxLetterItemVO sendLetter(long fromUserId, AppSendLetterInDto body);
 
     MailboxLetterItemVO getLetter(long viewerUserId, long letterId);
+
+    List<MailboxFriendItemVO> listFriends(Long userId);
 
     boolean isFriendshipActive(long viewerUserId, long peerUserId);
 

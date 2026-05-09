@@ -139,7 +139,8 @@ class MockLetter {
   final LetterSendMode sendMode;
 }
 
-/// Mock-only：已建联会话行（真实环境由 TIM getConversationList 提供）。
+/// 邮政 Tab「Connections」列表行 UI 模型：表示 **好友（笔友）关系**，不是 TIM 会话列表。
+/// Mock 下带预览文案；非 Mock 由 `GET /api/mailbox/friends` 映射，`lastMessage` 可为副标题占位。
 class MockImConnectionRow {
   const MockImConnectionRow({
     required this.peer,

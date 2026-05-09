@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Tag(name = "App-启动配置")
 public interface AppBootstrapApi {
 
-    @Operation(summary = "启动配置（注册门槛、国家列表、可选兴趣标签选项）")
+    @Operation(summary = "启动配置（注册门槛、国家、兴趣标签选项、VIP 产品展示配置）")
     @GetMapping(AppServiceDefine.SERVER_PREFIX + "/bootstrap/init")
     AppBootstrapVO init(@RequestParam(value = "lang", required = false) String lang);
 }

@@ -133,13 +133,9 @@ class PostDetailPage extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(10),
                                 child: AspectRatio(
                                   aspectRatio: 16 / 9,
-                                  child: Image.network(
-                                    u,
+                                  child: PostalOssNetworkImage(
+                                    imageUrl: u,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => const ColoredBox(
-                                      color: Color(0xFFE8E4DC),
-                                      child: Icon(Icons.broken_image_outlined),
-                                    ),
                                   ),
                                 ),
                               ),

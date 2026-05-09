@@ -14,4 +14,10 @@ abstract final class AppEnv {
     'SHOW_MOCK_BADGE',
     defaultValue: true,
   );
+
+  /// 与后端 `senior-post.oss.keyPrefix` 对齐，用于从 GET 预签名 URL 中解析 objectKey 以便过期换签。
+  static const String ossKeyPrefix = String.fromEnvironment(
+    'OSS_KEY_PREFIX',
+    defaultValue: 'app/uploads',
+  );
 }

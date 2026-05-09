@@ -123,4 +123,18 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- 父工程可能全局跳过测试；biz 模块默认执行单元测试 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>false</skipTests>
+                    <trimStackTrace>false</trimStackTrace>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

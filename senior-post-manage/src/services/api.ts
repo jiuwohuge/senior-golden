@@ -7,7 +7,8 @@ export const api = {
 
   users: (params: any) => request.post('/webapi/user/paging', params),
   userStatus: (id: number, status: number) => request.post(`/webapi/user/${id}/status?status=${status}`),
-  blockDevice: (deviceUuid: string, reason?: string) => request.post('/webapi/user/device/block', { deviceUuid, reason }),
+  userDevices: (userId: number) => request.get(`/webapi/user/${userId}/devices`),
+  blockDevice: (body: { deviceUuid: string; reason?: string }) => request.post('/webapi/user/device/block', body),
 
   postcards: (params: any) => request.post('/webapi/content/postcard/paging', params),
   postcardDetail: (id: number) => request.get(`/webapi/content/postcard/${id}`),
@@ -45,4 +46,5 @@ export const api = {
 
   actionLogs: (params: any) => request.post('/webapi/log/action/paging', params),
   loginLogs: (params: any) => request.post('/webapi/log/login/paging', params),
+  stampLedgerPaging: (params: any) => request.post('/webapi/stamps/ledger/paging', params),
 }

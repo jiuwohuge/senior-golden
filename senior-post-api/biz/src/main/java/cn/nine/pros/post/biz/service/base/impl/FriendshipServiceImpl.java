@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class FriendshipServiceImpl implements FriendshipService {
@@ -35,6 +37,15 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .eq(FriendshipDomain::getUserHigh, high)
                 .eq(FriendshipDomain::getStatus, 1)
                 .eq(FriendshipDomain::isDelFlag, false)) > 0;
+    }
+
+    @Override
+    public List<FriendshipDomain> listActiveFriendshipsForUser(long userId) {
+        return friendshipMapper.selectList(new LambdaQueryWrapper<FriendshipDomain>()
+                .eq(FriendshipDomain::getStatus, 1)
+                .eq(FriendshipDomain::isDelFlag, false)
+                .and(w -> w.eq(FriendshipDomain::getUserLow, userId).or().eq(FriendshipDomain::getUserHigh, userId))
+                .orderByDesc(FriendshipDomain::getUpdatedAt));
     }
 
     @Override
