@@ -1,6 +1,6 @@
 # 08 — Mock 移除后的功能缺口与验证记录
 
-> **版本**：1.1 · **更新**：2026-05-09 · **范围**：`senior-post-flutter`（客户端 Mock 层已删）；后端单元测试中的 Mockito **未**纳入本次「业务 Mock 数据」移除范围。
+> **版本**：1.2 · **更新**：2026-05-09 · **范围**：`senior-post-flutter`（客户端 Mock 层已删）；后端单元测试中的 Mockito **未**纳入本次「业务 Mock 数据」移除范围。**与 `01` v1.8 对齐**：**真订阅/支付**与 **FP-A7-002** 不做；国际化 backlog **仅**跟踪 **FP-A10-001**（邮件模板 i18n，依赖 **FP-X-001**）。
 
 ---
 
@@ -20,7 +20,7 @@
 | `flutter analyze`（`senior-post-flutter` 根目录） | 交付前执行（见本轮 CI 日志） |
 | `flutter test` | 交付前执行 |
 
-**说明**：`test/widget_test.dart` 在已登录场景下会触发对配置中 `API_BASE_URL` 的真实 HTTP 请求；若 Token 无效或服务端返回 400，日志中会出现 Dio 异常，但当前用例仍判定通过（仅校验 Widget 树挂载）。完整业务回归需在可用后端 + 合法 JWT 下做人工或 E2E。
+**说明**：`test/widget_test.dart` 在已登录场景下会触发对配置中 `API_BASE_URL` 的真实 HTTP 请求；若 Token 无效或服务端返回 400，日志中会出现 Dio 异常，但当前用例仍判定通过（仅校验 Widget 树挂载）。完整业务回归需在可用后端 + 合法 JWT 下做**人工**回归（不设 E2E 专项 FP）。
 
 ---
 

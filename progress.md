@@ -1,5 +1,12 @@
 # 会话进度日志
 
+## 2026-05-09 — 产品裁剪：backlog 删除 + 下一波次（A1-006 / X-001 / A1-007）（planning-with-files）
+
+- **Owner 输入**：真订阅不做；B14/B15 不作为任务；平邮仅用 PG 定时；删 A7-002、A3-008、A9-004、E2E、UAT、A1-004、A8 增强、X-004、A8-004、OSS 批量迁移等；**FP-X-003** 改为可关闭公告 + Manage 富文本；**A10** 仅保留邮件模板 i18n（**FP-A10-001**）。
+- **文档**：`01` v1.8、`05` v1.4、`07` v1.5、`03` v1.3、`04` v1.3、`02` v1.3、`PLAN` 2.3、`feature-overview` 1.6、`task_plan` 1.6、`findings` §17～§18。
+- **澄清写入**：`findings.md` **§17**（原 A5d-003 事务含义）、**§18**（X-003 公告非强更）。
+- **session-catchup.py**：9009，跳过。
+
 ## 2026-05-09 — 文档：功能完成度再对齐（注销 MVP / 回信 / 优先级摘要）
 
 - **动作**：对照 `08-mock-removal-gaps.md` 与代码，回写 **`doc/plan/01-feature-list.md`**（`FP-A8-005` 由「缺」→ **部分 MVP**；`FP-A5-001` 注明 **`parentLetterId` 回信**）；**`doc/plan/07-gap-analysis-and-roadmap.md`** §2.0 增 **注销 MVP**、**回信已交付** 行并修正 §2.0 后「下一步」措辞；**`PLAN.md`** A5/A8 功能清单表述；**`findings.md`** §5.3 信箱行去掉过时「回信仍待」；**`task_plan.md`** P3 与 `08` 一致。

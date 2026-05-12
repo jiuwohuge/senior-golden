@@ -1,10 +1,12 @@
 # 04 — 开发计划（技术方案摘要 + 人日 + 风险）
 
 > **文档元信息**  
-> **版本**：1.2 · **更新**：2026-05-09 · **维护人**：AI + Owner
+> **版本**：1.3 · **更新**：2026-05-09 · **维护人**：AI + Owner
 
 **人日（D）**：单人全职粗估，含自测与文档；并行可压缩日历时间。  
 **资源**：默认 `AI + Owner`；若拆角色，后端/Flutter/Manage 列在「协作」列。
+
+> **2026-05-09**：与 Owner 裁剪对齐——删除 E2E 独立人日、B14/B15、强更叙事；平邮送达以 **PG 定时**为准；Sprint 4 优先 **A1-006 / X-001 / A1-007 / X-003 / A10-001**。
 
 ---
 
@@ -31,11 +33,10 @@
 
 | FP | 方案摘要 | D | 风险 |
 |----|----------|---|------|
-| 接线总闸 | `USE_MOCK=false` 默认或文档强制；各 feature Repository 抽象接口 | 1 | 回归面大 |
+| 接线与远程默认 | Mock 层已删；各 feature 固定 `dio` + TIM | 0.5 | 回归面 |
 | FP-A3-* UI | `post_wall` / `post_detail` / `post_compose` 全接；空态/审核态 | 3 | 图片压缩与内存 |
 | FP-A5-* UI | `mailbox_providers` 接 postal/sync/archive；`letter_detail` 接详情 | 2 | DTO 与 Mock 模型映射 |
 | FP-A2 / A4 UI | profile、directory 接 REST | 2 | 表单校验一致 |
-| E2E 冒烟 | 注册→发帖→审过→可见→发信 | 2 | 环境数据脏 |
 
 ---
 
@@ -43,11 +44,11 @@
 
 | FP | 后端方案摘要 | 前端 | D | 风险 |
 |----|----------------|------|---|------|
-| FP-A5d-002 | Redis ZSet score=投递时间；Worker `@Scheduled` 或独立进程扫；到期更新 `bu_letter` | 列表「运输中」轮询或 sync | 3 | 重复投递幂等 |
+| FP-A5d-002 | **`@Scheduled` + PG** 条件更新到期平邮；**不**使用 Redis ZSET（已定案） | 列表 sync / 刷新 | 1.5 | 幂等与索引 |
 | FP-A5-005 | `POST .../letters/{id}/speed-up` | Speed Up Sheet | 1 | 与 VIP 分支 |
 | FP-A5d-004 | `TencentImFriendshipNotifier` 调官方 REST；重试与降级 | — | 2 | 密钥与限频 |
 | FP-A6-002/003 | 流水分页；登录/发帖 Hook 赠邮票 | `stamps_ledger` | 2 | 日上限边界 |
-| FP-A7-* | 读 `vip` 配置 + 用户 VIP 表组装 VO；**权益展示已并入 `bootstrap/init` → `vipProduct`** | `vip_center` | 2 | 配置缓存一致性；**A7-002/003** 仍待 |
+| FP-A7-* | **A7-001** 已并入 `vipProduct`；**A7-003** 扣费与配置/`me`/调试 VIP 一致；**真订阅不做** | `vip_center` | 1 | 与 `vip-debug` 一致 |
 | FP-A4-002~004 | Query 扩展 | Filter sheet | 1.5 | — |
 | FP-A3-005 | `POST /api/report` | 举报入口 | 1 | 防刷 |
 
@@ -57,13 +58,14 @@
 
 | FP | 方案摘要 | D | 风险 |
 |----|----------|---|------|
-| FP-X-001 | `EmailService` 接口 + SMTP 实现 + `email_outbox` 表 | 3 | 垃圾邮件信誉 |
+| FP-X-001 | `EmailService` + outbox 表；与重置密码、后续通知共用 | 3 | 垃圾邮件信誉 |
 | FP-A1-003 | forgot token 表 + 邮件模板 + reset | 2 | 令牌泄露 |
+| FP-A1-006 | 设备写入路径与 `user_device` 一致性核对 + 修正 | 1.5 | 与挤下线/拉黑联动 |
 | FP-A1-007 | Flutter 加解密拦截器对齐 `jh.security` | 2 | 调试困难 |
-| FP-A8-005 | 注销 API + 冷静期 Job | 2 | 法务文案 |
-| FP-X-003 | bootstrap 或独立版本接口 + Flutter 对话框 | 1 | 误杀版本 |
-| FP-A9-002/003 | `/webapi/stamp-transaction/paging` + 页面；UserList 接 blockDevice | 2 | 权限 |
-| FP-B14/B15 | 主题令牌 + 登录注册布局 | 3 | 设计返工 |
+| FP-A8-005 | 注销 MVP（已交付，见 `08`） | — | — |
+| FP-X-003 | **可关闭**公告弹层 + Manage **结构化表单**（标题、版本号展示、纯文本多行正文）；**非**强更拦截 | 2 | 字段校验；正文禁止 HTML |
+| FP-A10-001 | 邮件模板 `MessageSource` + Locale（依赖 X-001） | 1 | 与 `app.properties` 键对齐 |
+| FP-A9-002/003 | 邮票流水页；设备列表与拉黑 | DONE | — |
 
 ---
 

@@ -1,7 +1,7 @@
 # PLAN
 
 > **文档元信息**（**功能完成度**以 [`doc/plan/01-feature-list.md`](doc/plan/01-feature-list.md) + [`doc/plan/05-task-tracker.md`](doc/plan/05-task-tracker.md) 为准；本文为架构与决策基线）  
-> **版本**：2.2 · **更新**：2026-05-09 · **维护**：项目 Owner · **治理说明**：[`doc/plan/00-documentation-governance.md`](doc/plan/00-documentation-governance.md)
+> **版本**：2.3 · **更新**：2026-05-09 · **维护**：项目 Owner · **治理说明**：[`doc/plan/00-documentation-governance.md`](doc/plan/00-documentation-governance.md)
 
 ## [当前栈]（仓库实测 + 决策基线）
 
@@ -19,7 +19,7 @@
 | 内部集成 | commons-* 体系 | `commons-web`、`commons-security`、`commons-basic`、`commons-data`、`commons-redis-starter`、`feign-bridge-mybatis` 等 |
 | 父工程 | `commons-framework` | **本地工程**并已安装至本机 Maven 仓库；他机/CI 需同等可解析 |
 | 数据库 | PostgreSQL | **JDBC** `jdbc:postgresql://...`（`application-local.yml`）；驱动由 BOM 管理 |
-| 缓存 / 队列载体 | Redis | **Spring Data Redis + Lettuce** 连接池（本地配置于 `application-local.yml`）；延迟队列等业务由后端在 PG + Redis 上实现（见决策 B3） |
+| 缓存 / 队列载体 | Redis | **Spring Data Redis + Lettuce** 连接池；**平邮到期送达仅用 PG + `@Scheduled`**（见 B3），**不**用 Redis ZSET 做平邮延迟队列 |
 | 对象存储 | 阿里云 OSS | 全球化媒体（B8）；**`get_sign` 签发上传参数 + 客户端 HTTP PUT 直传**（接口由你实现） |
 | 即时通讯 | 腾讯云 Chat（IM） | **IM userId 与业务用户 ID 统一**；会话与 UI 走腾讯方案；UserSig 等由后端签发 |
 | 移动端 | Flutter | **3.x**；状态管理已拍板 **Riverpod**（见 B11） |
@@ -44,7 +44,7 @@
 - **Spring Web MVC** + **Jackson**（`yyyy-MM-dd HH:mm:ss`，`GMT+8`，`locale: zh_CN`）。
 - **MyBatis-Plus**：`mapper-locations: classpath*:/mapper/**/*.xml`。
 - **Flyway**：版本化 DDL；**以迁移脚本为库表唯一可信源**（详见「库表规划」）。
-- **Redis**：缓存、分布式能力、与 PostgreSQL 配合的延迟投递等（按业务设计）。
+- **Redis**：缓存、分布式能力；**平邮到期扫描**以 **PostgreSQL + 定时任务**为准（B3）。
 - **PostgreSQL**：主事务库。
 
 ### API 设计规范（与框架一致）
@@ -261,17 +261,17 @@ flowchart LR
 
 > 与代码对齐日期：**2026-05-09**（**A7**：`bootstrap` **`vipProduct`** 与 **FP-A7-001** 对齐）。细粒度以 `doc/plan/01-feature-list.md` 为准。
 
-- [x] A1. 账号注册登录（邮箱、年龄、协议、JWT/`85xx`；**忘记密码/重置已接**；**AES、登录频控/弱密码策略仍待**）
+- [x] A1. 账号注册登录（邮箱、年龄、协议、JWT/`85xx`；**忘记密码/重置已接**；**AES 仍待（FP-A1-007）**；**设备落库一致性仍待（FP-A1-006）**）
 - [x] A2. 用户资料中心（**`me` + PATCH + 兴趣标签 + 头像 OSS 写回已接**；冷启动仅 Token 时提前拉 `me` 仍可优化）
-- [x] A3. Post Wall（**列表/详情/发帖/评论/OSS/举报/敏感词已接**；**审核中/驳回作者侧 UX 仍可加强**）
+- [x] A3. Post Wall（**列表/详情/发帖/评论/OSS/举报/敏感词已接**；作者侧审核态专项优化**不设 FP**，体验后按需提）
 - [x] A4. Post Directory（**分页/筛选/排序/用户卡 API/写信已接**）
 - [x] A5. Post Box（**发信/收/归档/详情/Accept/好友列表/加速/平邮到期 Worker、`parentLetterId` 回信已接**；**平邮延迟完全配置化仍待**）
 - [x] A5-IM. 邮政信箱 × 腾讯 IM 双轨：**后端** `V4`（`bu_friendship` + `send_mode`）、`GET/POST /api/mailbox/*`、`GET /api/im/usersig`（`tls-sig-api-v2` + `senior-post.tencent-im`）；**Flutter** Tab 分段、归档、`tim_facade`、`chat_page`、`tencent_cloud_chat_sdk:8.8.7373`、Mock 建联与单元测试 `test/mailbox_models_test.dart`（2026-05-02）
 - [x] A6. Chat Stamp（**余额/流水/CAS/登录·发帖赠票与加速扣减已接**；**Manage 邮票流水页已接**）
-- [x] A7. VIP 权益（**`GET /api/bootstrap/init` 已返回 `vipProduct`（`AppVipProductConfigVO`，读 `sys_config` 与 Manage「VIP 配置」同源键）**；**Flutter `vip_center_page` 非 Mock 读 `appBootstrapProvider` 展示开关与文案**；**订阅/支付、到期校验全链、扣费规则与配置单一真源文档化仍待**，见 `01` **FP-A7-002 / FP-A7-003**）
-- [x] A8. 风控与合规（**敏感词、举报链路、Manage 设备拉黑已接**；**注销申请 + 冷静期 MVP 已接**（见 `doc/plan/08-mock-removal-gaps.md`）；仍待：**注销邮件/审计增强**、**图片机审**、`user_device` 一致性核对）
-- [x] A9. 管理后台（**看板/用户/审核/举报/配置/国家/敏感词/版本/公告/日志、邮票流水、用户设备列表与封禁已接**；**UAT 清单仍待**）
-- [~] A10. 国际化（**Flutter**：ARB + 设置持久化 + `Accept-Language`；**后端 App API**：`messages/app*.properties` + `AppMessages` + `Accept-Language`；**仍待**：全量 Flutter 硬编码扫尾、邮件主题/模板双语、可选 `/webapi` 独立默认语）
+- [x] A7. VIP 权益（**`bootstrap` → `vipProduct` + VIP 中心 + Manage 配置 + `vip-debug` 已接**；**真订阅/支付不做**；**FP-A7-002 已移除**；**FP-A7-003** 规则对齐仍见 `01`）
+- [x] A8. 风控与合规（**敏感词、举报链路、Manage 设备拉黑已接**；**注销 MVP 已接**；**`user_device` 一致性见 FP-A1-006**）
+- [x] A9. 管理后台（**看板/用户/审核/举报/配置/国家/敏感词/版本/公告/日志、邮票流水、用户设备列表与封禁已接**）
+- [~] A10. 国际化（**App**：ARB + 设置 + `Accept-Language`；**后端 App API**：`messages/app*.properties` + `AppMessages`；**本期仅规划「邮件模板 i18n」FP-A10-001**（依赖 FP-X-001），不设全量 ARB 专项）
 
 ---
 
@@ -316,7 +316,7 @@ flowchart LR
 
 - [x] B1. 登录认证方式：JWT（禁止多端同时在线）
 - [x] B2. 腾讯云 Chat 方案：会话与 UI 均采用腾讯云 Chat 能力（仅 Chat，不做语音/群组/视频）
-- [x] B3. 平邮延迟实现：后端队列延迟投递（PostgreSQL + Redis）
+- [x] B3. 平邮延迟实现：**PostgreSQL + 后端定时任务（`@Scheduled`）扫描到期**；**不**引入 Redis ZSET 队列（2026-05-09 已定案）
 - [x] B4. 设备标识策略：优先设备安装唯一凭证，平台受限时可合规降级
 - [x] B5. 内容审核策略：所有用户内容先审后发（后台审核通过后才可见）
 - [x] B6. 账本模型：邮票资产采用流水账本模型
@@ -327,8 +327,8 @@ flowchart LR
 - [x] B11. Flutter 状态管理最终拍板：Riverpod
 - [x] B12. 管理后台技术栈确认：React
 - [x] B13. 国家编码策略：ISO 3166-1 alpha-2 + Locale 自动获取 + 前后端共用常量
-- [ ] B14. 视觉主色最终确认：浅灰复古方案（废弃高占比蓝色）
-- [ ] B15. 登录/注册视觉规范确认：中部卡片布局 + 协议勾选 + 忘记密码 + 完整状态反馈
+- [x] B14. ~~视觉主色最终确认~~（**已从 backlog 移除**，不作为交付项）
+- [x] B15. ~~登录/注册视觉规范确认~~（**已从 backlog 移除**，不作为交付项）
 
 ---
 
@@ -339,7 +339,7 @@ flowchart LR
 - 年龄输入由出生年月改为年龄选择器（45~110）
 - 后端以单体架构推进（业务框架细节由你自行控制）
 - IM 仅做 Tencent Chat 能力，聊天 UI 采用腾讯方案
-- 平邮延迟由业务侧实现（PostgreSQL + Redis 队列）
+- 平邮延迟由业务侧实现（**PostgreSQL + 定时任务扫描**；不用 Redis ZSET 延迟队列）
 - 邮票采用余额+流水账本，所有扣增均可追踪
 - 内容发布采用先审后发，全量后台审核
 - 设备标识按平台合规优先获取安装唯一凭证，必要时降级
@@ -380,7 +380,7 @@ flowchart LR
   - 验收：从浏览用户到发信完整可走通；未审核内容对前台不可见
 - M3（信箱与资产系统）
   - 目标：Post Box、平邮延迟投递、加速、邮票账本全部闭环
-  - 后端：Redis+DB 延迟队列、信件状态机、邮票余额与流水、加速扣减原子事务；**建联表 + UserSig 已落地（2026-05-02）**，信件写接口与队列投递仍按原计划推进
+  - 后端：**PG 定时任务**推进平邮到期、信件状态机、邮票余额与流水、加速扣减原子事务；**建联表 + UserSig 已落地（2026-05-02）**
   - Flutter：信箱列表状态（Delivering/Delivered/**Registered**）、加速按钮、邮票余额展示；**Postal / Connections（好友列表）/ Archive、TIM 登录与自研聊天页已落地（2026-05-02；Connections 数据源 2026-05-09 对齐 `/mailbox/friends`）**
   - 管理后台：邮票配置中心、用户邮票流水查询、封禁/设备拉黑
   - 验收：平邮延迟与加速行为正确；账本可追溯且余额一致
@@ -422,7 +422,7 @@ flowchart LR
 - [x] S6. 已输出技术栈全景与模块交互说明（本文档 2026-05-01）
 - [x] S7. Flyway + `/webapi` 基线与文档对齐（2026-05-01）
 - [x] S8. M1 表结构与认证/配置接口落地
-- [x] S9. M2 帖子/目录/写信主链路 REST 已落地（2026-05-09）；**E2E 自动化 / UAT 清单（FP-A9-004）仍待**
+- [x] S9. M2 帖子/目录/写信主链路 REST 已落地（2026-05-09）
 - [x] S11. 邮政信箱 × 腾讯 IM 双轨契约与 Flutter 分段 UI + TIM 登录链路（2026-05-02；**腾讯 REST 好友同步已接** FP-A5d-004，生产依赖 `TENCENT_IM_REST_IDENTIFIER` 等配置）
 - [x] S10. 管理后台：`senior-post-manage` 修复配置页 UTF-8 乱码源码、侧边栏二级分组菜单；`UserServiceImpl.delByIds` 禁止删除 `staff_role != 0` 的可登录后台账号（2026-05-01）
 - [x] S12. Flutter **客户端 Mock 层已移除**（2026-05-09）：删除 `lib/core/mock`、`AppEnv.useMock`；名录 Provider 拆文件解循环依赖；缺口与验证见 **`doc/plan/08-mock-removal-gaps.md`**

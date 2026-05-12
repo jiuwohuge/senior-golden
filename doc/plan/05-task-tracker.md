@@ -1,7 +1,7 @@
 # 05 — 功能开发任务跟踪表
 
 > **文档元信息**  
-> **版本**：1.3 · **更新**：2026-05-09 · **维护人**：AI + Owner
+> **版本**：1.4 · **更新**：2026-05-09 · **维护人**：AI + Owner
 
 **负责人**：默认 `AI + Owner`（替换 `Owner` 为实际姓名即可）。  
 **周期**：`WnDx` = 第 n 周第 x 个工作日（相对，非自然日）。  
@@ -39,7 +39,6 @@
 | FP-A3-* UI | AI + Owner | S2 | W2D1 | W2D4 | DONE | Tab1 全真数据 | `post_wall_remote`、compose/detail |
 | FP-A5-* UI | AI + Owner | S2 | W2D2 | W2D4 | DONE | 发信后列表刷新 | `mailbox_providers` + sheet（见 FP-A5-Fl） |
 | FP-A2/A4 UI | AI + Owner | S2 | W2D4 | W2D5 | DONE | 编辑保存成功 | profile/directory |
-| E2E 冒烟 | AI + Owner | S2 | W2D5 | W2D5 | TODO | 脚本或录屏通过 | `doc/plan/` 或 `tests/` 记录 |
 | FP-X-005 | AI + Owner | S2 | W2D5 | W2D6 | DONE | 私有桶：出站 `OssDisplayUrlService` + `POST /api/oss/get-sign`；Manage `/webapi/oss/get-sign`；Flutter `PostalOssNetworkImage` 首帧失败解析 key 单次换签；`OSS_KEY_PREFIX` 与后端 `keyPrefix` 对齐 | 同上 + `postal_oss_network_image`、`oss_get_sign_service`、`oss_object_key_hint_test` |
 
 ---
@@ -53,8 +52,7 @@
 | FP-A5d-004 | AI + Owner | S3 | W3D3 | W3D4 | DONE | REST `account_import`+`friend_add` 双向；可配置关闭；重试与日志 | `TencentImRestApiClient`、`TencentImFriendshipNotifier`、`TencentImProperties` 扩展、单测 |
 | FP-A6-003 | AI + Owner | S3 | W3D4 | W3D5 | DONE | 登录/注册/发帖赠票；UTC 日切与日上限；`bu_stamp_daily_grant` 幂等 | `StampGrantService`、`V10`、`senior-post.stamps-grant`、单测 |
 | FP-A7-001 | AI + Owner | S3 | W3D4 | W3D6 | DONE | `bootstrap/init` 含 `vipProduct`；Flutter VIP 中心读 bootstrap；与 Manage `VipConfig` 同源键 | `AppBootstrapVO`、`AppVipProductConfigVO`、`AppBootstrapService`、`vip_center_page` |
-| FP-A7-002 | AI + Owner | S3 | W3D4 | W3D6 | TODO | 订阅/到期与支付或手工策略可演示 | `vip_subscription`、校验 Job |
-| FP-A7-003 | AI + Owner | S3 | W3D4 | W3D6 | TODO | 扣费点与 `vipProduct` 配置单一真源、集成测试 | 与 `sendLetter` / `speedUp` 对齐 |
+| FP-A7-003 | AI + Owner | S3 | — | — | TODO | 扣费点与 `vipProduct` / `me` / 调试 VIP 一致（**真订阅/支付不做**，原 FP-A7-002 已移除） | 与 `sendLetter` / `speedUp` 对齐 |
 | FP-A3-005 | AI + Owner | S3 | W3D5 | W3D5 | DONE | 举报单进后台；工单列表可看举报人 | `AppReport*` + Manage `report/List.tsx` |
 | FP-A4-002~004 | AI + Owner | S3 | W3D5 | W3D6 | DONE | 筛选 + 排序（`sort`）全链；独立公开页 API 仍属 FP-A4-004 | `AppDirectoryPageInDto`、`AppDirectoryServiceImpl`、`directory_remote`、筛选 Sheet |
 
@@ -64,14 +62,15 @@
 
 | FP | 负责人 | Sprint | 起 | 止 | 状态 | 验收标准 | 交付物 |
 |----|--------|--------|----|----|------|----------|--------|
-| FP-X-001 | AI + Owner | S4 | W4D1 | W4D3 | TODO | 本地收到测试邮件 | EmailService + 表 |
+| FP-A1-006 | AI + Owner | S4 | W4D1 | W4D3 | TODO | 注册/登录携带设备与 `user_device` 一致；拉黑/挤下线可解释 | `UserService` / 设备写入路径核对 + 必要迁移 |
+| FP-X-001 | AI + Owner | S4 | W4D2 | W4D4 | TODO | Outbox 可重试；测试环境收到邮件 | `EmailService` + outbox 表 + 与重置密码串联 |
+| FP-A1-007 | AI + Owner | S4 | W4D4 | W4D6 | TODO | 加解密与 `jh.security` 互通 | Flutter 拦截器 + 配置说明 |
 | FP-A1-003 | AI + Owner | S4 | W4D2 | W4D3 | DONE | 重置后可用新密码登录 | Flyway V8 + Auth API + 可选 SMTP / 本地日志 |
-| FP-A1-007 | AI + Owner | S4 | W4D3 | W4D5 | TODO | 加解密与后端互通 | Flutter 拦截器 + 配置说明 |
-| FP-A8-005 | AI + Owner | S4 | W4D4 | W4D5 | TODO | 注销策略可演示 | API + Job + Flutter |
-| FP-X-003 | AI + Owner | S4 | W4D5 | W4D5 | TODO | 低版本拦截 | bootstrap 或 version API |
+| FP-A8-005 | AI + Owner | S4 | W4D4 | W4D5 | DONE | 注销申请 + 冷静期 + 期满冻结；IM/好友清理 | 见 `08-mock-removal-gaps.md` |
+| FP-X-003 | AI + Owner | S4 | W4D5 | W4D7 | TODO | **非强更**、可关弹层；**标题+版本号+纯文本更新说明**；Manage 表单+预览与 App 模板一致 | DTO/Flyway + `Announcement` 扩展 + Manage 表单 + Flutter 弹层 |
+| FP-A10-001 | AI + Owner | S4 | W4D6 | W4D7 | TODO | 邮件模板按 Locale 取文案（依赖 FP-X-001） | `MessageSource` 键 + `app.properties` / `app_zh_CN.properties` |
 | FP-A9-002 | AI + Owner | S4 | W4D5 | W4D6 | DONE | 管理端分页查 `log_stamp_transaction`；可选 userId、reason 过滤 | `AdminStampsApi`、`AdminStampsController`、`StampLedgerList.tsx` |
 | FP-A9-003 | AI + Owner | S4 | W4D5 | W4D6 | DONE | 用户列表展示设备并拉黑；`GET /webapi/user/{userId}/devices` + `POST /webapi/user/device/block` | `AdminUserApi`、`AdminUserController`、`api.userDevices`、`UserList` Modal |
-| FP-B14/B15 | AI + Owner | S4 | W4D6 | W4D7 | TODO | 设计走查通过 | 主题 PR + 截图 |
 
 ---
 
@@ -94,4 +93,4 @@
 | 2026-05-09 | FP-A9-002 DONE；`05` Sprint4 拆分 A9-002/003 行；`01` FP-A6-005 同步 |
 | 2026-05-09 | FP-A3-005/007 + FP-A5-002：敏感词发帖/评/信 + 词库缓存失效；`sync` COALESCE；邮箱页下拉刷新与 `resumed` 刷新；举报列表 `reporterUserId` + `records`/`list` |
 | 2026-05-09 | FP-A9-003 DONE：`GET /webapi/user/{userId}/devices`；Manage 用户列表「设备拉黑」Modal；`api.blockDevice` body 与后端 DTO 对齐 |
-| 2026-05-09 | PLAN/07/05 对齐 **FP-A7-001**：bootstrap `vipProduct` 已交付；Sprint3 拆分 **FP-A7-002/003** 仍为 TODO |
+| 2026-05-09 | **产品裁剪**：`vipProduct` 已交付；移除 Sprint3 **FP-A7-002** 与 E2E/B14/B15 行；**FP-A8-005** DONE；**FP-X-003** 改为可关闭公告 + Manage 富文本；新增 **FP-A1-006**、**FP-A10-001**；平邮 **不做 Redis ZSET**（见 `01` / `task_plan`） |
