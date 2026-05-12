@@ -1,22 +1,85 @@
-import { Button, Form, Input, Space, Table } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import { Button, Form, Input, Modal, Popconfirm, Space, Table, message } from 'antd'
 import { useEffect, useState } from 'react'
 import { api } from '../../services/api'
 
 export default function SensitiveWordList() {
   const [rows, setRows] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
-  const load = () => api.sensitiveWords({ page:{page:1,size:50} }).then((d:any)=>setRows(d.records||[]))
+
+  const load = () => {
+    setLoading(true)
+    api.sensitiveWords({ page: { page: 1, size: 50 } })
+      .then((d: any) => setRows(d.records || []))
+      .catch((e: any) => message.error(e.message))
+      .finally(() => setLoading(false))
+  }
   useEffect(() => { void load() }, [])
 
-  return <>
-    <Form form={form} layout="inline" onFinish={async(v)=>{await api.saveSensitiveWord(v);form.resetFields();load()}} style={{ marginBottom:16 }}>
-      <Form.Item name="word" rules={[{required:true}]}><Input placeholder="敏感词" /></Form.Item>
-      <Form.Item name="langCode" rules={[{required:true}]}><Input placeholder="语言代码，如 zh、en" /></Form.Item>
-      <Button type="primary" htmlType="submit">保存</Button>
-    </Form>
-    <Table rowKey="id" dataSource={rows} columns={[
-      { title: '敏感词', dataIndex: 'word' }, { title: '语言', dataIndex: 'langCode' },
-      { title: '操作', render: (_, r) => <Space><Button danger size="small" onClick={async () => { await api.deleteSensitiveWord(r.id); load() }}>删除</Button></Space> },
-    ]} />
-  </>
+  const handleOk = async () => {
+    try {
+      const v = await form.validateFields()
+      setSaving(true)
+      await api.saveSensitiveWord(v)
+      setModalOpen(false)
+      form.resetFields()
+      load()
+    } catch (e: any) {
+      if (e?.errorFields) return
+      message.error(e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <>
+      <div className="page-header">
+        <h2 className="page-title">敏感词管理</h2>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true) }}>
+          新增敏感词
+        </Button>
+      </div>
+      <Table
+        rowKey="id"
+        loading={loading}
+        dataSource={rows}
+        size="middle"
+        columns={[
+          { title: '敏感词', dataIndex: 'word' },
+          { title: '语言', dataIndex: 'langCode', width: 120 },
+          {
+            title: '操作',
+            width: 100,
+            render: (_, r) => (
+              <Popconfirm title="确认删除？" onConfirm={async () => { await api.deleteSensitiveWord(r.id); load() }}>
+                <Button danger size="small">删除</Button>
+              </Popconfirm>
+            ),
+          },
+        ]}
+      />
+      <Modal
+        title="新增敏感词"
+        open={modalOpen}
+        onOk={handleOk}
+        onCancel={() => { setModalOpen(false); form.resetFields() }}
+        confirmLoading={saving}
+        destroyOnClose
+        width={400}
+      >
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item name="word" label="敏感词" rules={[{ required: true, message: '请输入敏感词' }]}>
+            <Input placeholder="敏感词内容" />
+          </Form.Item>
+          <Form.Item name="langCode" label="语言代码" rules={[{ required: true, message: '请输入语言代码' }]}>
+            <Input placeholder="如 zh、en、ja" />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
+  )
 }

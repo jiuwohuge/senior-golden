@@ -1,6 +1,6 @@
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
+import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
-import { Button, Layout, Menu, Space, Typography, theme } from 'antd'
+import { Avatar, Button, Layout, Menu, Space, Typography, theme } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import Dashboard from './Dashboard'
@@ -115,27 +115,66 @@ export default function AdminLayout() {
 
   return (
     <Layout style={{ minHeight: '100%' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed}>
-        <div style={{ color: '#fff', textAlign: 'center', lineHeight: '48px', fontWeight: 600 }}>Senior Post</div>
+      <Sider trigger={null} collapsible collapsed={collapsed} style={{ boxShadow: '2px 0 8px rgba(0,21,41,0.15)' }}>
+        <div style={{
+          height: 64,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          padding: collapsed ? 0 : '0 20px',
+          overflow: 'hidden',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          <div style={{
+            width: 32, height: 32,
+            borderRadius: 8,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+            fontSize: 15, color: '#fff', fontWeight: 700,
+          }}>S</div>
+          {!collapsed && (
+            <Typography.Text style={{ color: '#fff', fontWeight: 600, marginLeft: 10, fontSize: 15, whiteSpace: 'nowrap' }}>
+              Senior Post
+            </Typography.Text>
+          )}
+        </div>
         <Menu
           theme="dark"
           mode="inline"
           selectedKeys={[selected]}
           defaultOpenKeys={defaultOpenKeys}
           items={menuItems}
+          style={{ borderRight: 0 }}
         />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Header style={{
+          padding: '0 16px 0 0',
+          background: colorBgContainer,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: '0 1px 4px rgba(0,21,41,0.08)',
+          zIndex: 10,
+          position: 'sticky',
+          top: 0,
+        }}>
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
             style={{ fontSize: 16, width: 64, height: 64 }}
           />
-          <Space style={{ marginRight: 16 }}>
-            {adminLabel ? <Typography.Text type="secondary">{adminLabel}</Typography.Text> : null}
+          <Space size={12}>
+            {adminLabel ? (
+              <Space size={8}>
+                <Avatar size={28} icon={<UserOutlined />} style={{ background: '#1677ff' }} />
+                <Typography.Text style={{ fontSize: 13 }}>{adminLabel}</Typography.Text>
+              </Space>
+            ) : null}
             <Button
+              size="small"
               onClick={() => {
                 localStorage.removeItem('admin_token')
                 nav('/login')
@@ -145,7 +184,7 @@ export default function AdminLayout() {
             </Button>
           </Space>
         </Header>
-        <Content style={{ margin: '16px', padding: 16, minHeight: 280, background: colorBgContainer, borderRadius: borderRadiusLG }}>
+        <Content style={{ margin: '16px', padding: 24, minHeight: 280, background: colorBgContainer, borderRadius: borderRadiusLG }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/user" element={<UserList />} />

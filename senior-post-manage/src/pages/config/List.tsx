@@ -1,49 +1,90 @@
-import { Button, Form, Input, Space, Table, message } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import { Button, Form, Input, Modal, Popconfirm, Space, Table, message } from 'antd'
 import { useEffect, useState } from 'react'
 import { api } from '../../services/api'
 
 export default function ConfigList() {
   const [rows, setRows] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
+
   const load = () => {
+    setLoading(true)
     api.configs({ page: { page: 1, size: 500 } })
       .then((d: any) => setRows(d.records || []))
       .catch((e: any) => message.error(e.message))
+      .finally(() => setLoading(false))
   }
   useEffect(() => { load() }, [])
 
-  const onFinish = async (v: any) => {
-    await api.saveConfig(v)
-    form.resetFields()
-    load()
+  const handleOk = async () => {
+    try {
+      const v = await form.validateFields()
+      setSaving(true)
+      await api.saveConfig(v)
+      setModalOpen(false)
+      form.resetFields()
+      load()
+    } catch (e: any) {
+      if (e?.errorFields) return
+      message.error(e.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
     <>
-      <Form form={form} layout="inline" onFinish={onFinish} style={{ marginBottom: 16 }}>
-        <Form.Item name="configKey" rules={[{ required: true }]}><Input placeholder="key" /></Form.Item>
-        <Form.Item name="configValue" rules={[{ required: true }]}><Input placeholder="value" /></Form.Item>
-        <Form.Item name="configGroup" rules={[{ required: true }]}><Input placeholder="group" /></Form.Item>
-        <Button type="primary" htmlType="submit">Save</Button>
-      </Form>
+      <div className="page-header">
+        <h2 className="page-title">参数配置</h2>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true) }}>
+          新增配置
+        </Button>
+      </div>
       <Table
         rowKey="id"
+        loading={loading}
         dataSource={rows}
+        size="middle"
         columns={[
-          { title: 'ID', dataIndex: 'id' },
+          { title: 'ID', dataIndex: 'id', width: 72 },
           { title: 'Key', dataIndex: 'configKey' },
-          { title: 'Value', dataIndex: 'configValue' },
-          { title: 'Group', dataIndex: 'configGroup' },
+          { title: 'Value', dataIndex: 'configValue', ellipsis: true },
+          { title: 'Group', dataIndex: 'configGroup', width: 120 },
           {
-            title: 'Actions',
+            title: '操作',
+            width: 100,
             render: (_, r) => (
-              <Space>
-                <Button danger size="small" onClick={async () => { await api.deleteConfig(r.id); load() }}>Delete</Button>
-              </Space>
+              <Popconfirm title="确认删除？" onConfirm={async () => { await api.deleteConfig(r.id); load() }}>
+                <Button danger size="small">删除</Button>
+              </Popconfirm>
             ),
           },
         ]}
       />
+      <Modal
+        title="新增配置"
+        open={modalOpen}
+        onOk={handleOk}
+        onCancel={() => { setModalOpen(false); form.resetFields() }}
+        confirmLoading={saving}
+        destroyOnClose
+        width={480}
+      >
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item name="configKey" label="Key" rules={[{ required: true, message: '请输入配置键' }]}>
+            <Input placeholder="配置键" />
+          </Form.Item>
+          <Form.Item name="configValue" label="Value" rules={[{ required: true, message: '请输入配置值' }]}>
+            <Input.TextArea placeholder="配置值" rows={3} />
+          </Form.Item>
+          <Form.Item name="configGroup" label="Group" rules={[{ required: true, message: '请输入分组' }]}>
+            <Input placeholder="分组，如 sys、vip" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </>
   )
 }
