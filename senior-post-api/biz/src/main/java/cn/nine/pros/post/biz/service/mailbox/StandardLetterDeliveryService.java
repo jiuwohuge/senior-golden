@@ -3,6 +3,8 @@ package cn.nine.pros.post.biz.service.mailbox;
 import cn.nine.pros.post.biz.mapper.LetterMapper;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.service.base.LetterService;
+import cn.nine.pros.post.client.common.enums.LetterBizStatus;
+import cn.nine.pros.post.client.common.enums.LetterPhysicalType;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StandardLetterDeliveryService {
 
-    private static final int STATUS_DELIVERED = 2;
     /** 系统任务更新人（与业务用户 ID 区分） */
     private static final long SYSTEM_UPDATED_BY = 0L;
 
@@ -40,8 +41,8 @@ public class StandardLetterDeliveryService {
     public int deliverDueStandardLetters(LocalDateTime now, int maxBatch) {
         List<LetterDomain> due = letterMapper.selectList(new LambdaQueryWrapper<LetterDomain>()
                 .eq(LetterDomain::isDelFlag, false)
-                .apply("letter_type = 2")
-                .apply("status = 1")
+                .eq(LetterDomain::getLetterType, LetterPhysicalType.STANDARD.getCode())
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
                 .isNotNull(LetterDomain::getExpectedArrivalTime)
                 .le(LetterDomain::getExpectedArrivalTime, now)
                 .orderByAsc(LetterDomain::getExpectedArrivalTime)
@@ -55,9 +56,9 @@ public class StandardLetterDeliveryService {
             boolean ok = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
                     .eq(LetterDomain::getId, row.getId())
                     .eq(LetterDomain::isDelFlag, false)
-                    .apply("letter_type = 2")
-                    .apply("status = 1")
-                    .set(LetterDomain::getStatus, STATUS_DELIVERED)
+                    .eq(LetterDomain::getLetterType, LetterPhysicalType.STANDARD.getCode())
+                    .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
+                    .set(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
                     .set(LetterDomain::getActualArrivalTime, now)
                     .set(LetterDomain::getUpdatedAt, now)
                     .set(LetterDomain::getUpdatedBy, SYSTEM_UPDATED_BY));

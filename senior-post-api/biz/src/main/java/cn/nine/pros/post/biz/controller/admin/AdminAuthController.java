@@ -4,6 +4,7 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.basic.util.TokenResolver;
 import cn.nine.commons.web.filter.adapter.RedisCacheAdapter;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
 import cn.nine.pros.post.biz.service.app.AppJwtService;
@@ -30,6 +31,7 @@ public class AdminAuthController implements AdminAuthApi {
     private final PasswordEncoder passwordEncoder;
     private final AppJwtService appJwtService;
     private final RedisCacheAdapter redisCacheAdapter;
+    private final AppMessages appMessages;
 
     /** 管理端登录框可为完整邮箱，或短名（自动补全 {@code @staff.local}）。 */
     private static String resolveConsoleLoginEmail(String usernameOrEmail) {
@@ -55,16 +57,16 @@ public class AdminAuthController implements AdminAuthApi {
                 .eq(UserDomain::getEmail, email)
                 .eq(UserDomain::isDelFlag, false));
         if (!canLoginConsole(user)) {
-            throw new BadRequestException("用户名或密码错误");
+            throw new BadRequestException(appMessages.get("admin.error.auth.badCredential"));
         }
         if (user.getStatus() != null && !"1".equals(String.valueOf(user.getStatus()))) {
-            throw new BadRequestException("账号已被禁用");
+            throw new BadRequestException(appMessages.get("admin.error.auth.accountDisabled"));
         }
         String raw = loginReq.getPassword();
         String pwdHash = user.getPasswordHash();
         boolean ok = raw != null && (raw.equals(pwdHash) || passwordEncoder.matches(raw, pwdHash));
         if (!ok) {
-            throw new BadRequestException("用户名或密码错误");
+            throw new BadRequestException(appMessages.get("admin.error.auth.badCredential"));
         }
 
         userService.update(new LambdaUpdateWrapper<UserDomain>()
@@ -74,7 +76,7 @@ public class AdminAuthController implements AdminAuthApi {
 
         Long userPk = user.getId();
         if (userPk == null) {
-            throw new BadRequestException("用户数据异常");
+            throw new BadRequestException(appMessages.get("admin.error.auth.userDataCorrupt"));
         }
         Map<String, Object> result = new HashMap<>();
         result.put("token", appJwtService.createToken(userPk));

@@ -11,17 +11,18 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "管理后台-公告")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/announcement")
 public interface AdminAnnouncementApi {
 
     @Operation(summary = "公告分页")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/announcement/paging")
+    @PostMapping("/paging")
     PageData<AnnouncementDTO> paging(@RequestBody @Valid AnnouncementQueryInDto body);
 
     @Operation(summary = "保存公告")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/announcement/save")
+    @PostMapping("/save")
     void save(@RequestBody @Valid AnnouncementInDto body);
 
     @Operation(summary = "删除公告")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/announcement/{id}/delete")
+    @PostMapping("/{id}/delete")
     void delete(@PathVariable("id") Integer id);
 }

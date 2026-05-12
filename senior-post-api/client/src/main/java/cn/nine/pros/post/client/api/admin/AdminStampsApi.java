@@ -9,11 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Tag(name = "管理后台-邮票")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/stamps")
 public interface AdminStampsApi {
 
     @Operation(summary = "邮票流水分页（全量或按用户/原因筛选）")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/stamps/ledger/paging")
+    @PostMapping("/ledger/paging")
     PageData<StampTransactionDTO> ledgerPaging(@RequestBody @Valid AdminStampLedgerPageInDto body);
 }

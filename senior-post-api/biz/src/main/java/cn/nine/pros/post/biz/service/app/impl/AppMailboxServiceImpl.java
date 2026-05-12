@@ -15,6 +15,9 @@ import cn.nine.pros.post.biz.service.base.StampAccountService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.StampTransactionService;
 import cn.nine.pros.post.biz.service.base.UserService;
+import cn.nine.pros.post.client.common.enums.LetterBizStatus;
+import cn.nine.pros.post.client.common.enums.LetterPhysicalType;
+import cn.nine.pros.post.client.common.enums.LetterSendMode;
 import cn.nine.pros.post.client.model.db.StampTransactionDTO;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
@@ -41,14 +44,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AppMailboxServiceImpl implements AppMailboxService {
 
-    /** 1=运输中 2=已送达 3=已挂号（预留） */
-    private static final int STATUS_DELIVERING = 1;
-    private static final int STATUS_DELIVERED = 2;
-    private static final int LETTER_TYPE_REGISTERED = 1;
-    private static final int LETTER_TYPE_STANDARD = 2;
-    private static final int SEND_MODE_STANDARD = 1;
-    private static final int SEND_MODE_REGISTERED = 2;
-    private static final int SEND_MODE_VIP_DIRECT = 3;
     /** 非 VIP 发送挂号信消耗的邮票数（后续可接配置中心） */
     private static final int REGISTERED_STAMP_COST = 1;
     /** 非 VIP 平邮加速消耗的邮票数 */
@@ -149,8 +144,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             throw new BusinessException(appMessages.get("app.error.letter.contentTooLong"));
         }
         sensitiveWordService.assertPlainTextAllowed(content);
-        int letterType = body.getLetterType();
-        if (letterType != LETTER_TYPE_REGISTERED && letterType != LETTER_TYPE_STANDARD) {
+        LetterPhysicalType physicalType = LetterPhysicalType.fromCode(body.getLetterType());
+        if (physicalType == null) {
             throw new BusinessException(appMessages.get("app.error.letter.typeInvalid"));
         }
 
@@ -178,16 +173,16 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         letter.setIsAccelerated(false);
         letter.setParentLetterId(parentLetterId);
 
-        if (letterType == LETTER_TYPE_STANDARD) {
-            letter.setLetterType(LETTER_TYPE_STANDARD);
-            letter.setStatus(STATUS_DELIVERING);
-            letter.setSendMode(SEND_MODE_STANDARD);
+        if (physicalType == LetterPhysicalType.STANDARD) {
+            letter.setLetterType(LetterPhysicalType.STANDARD.getCode());
+            letter.setStatus(LetterBizStatus.DELIVERING.getCode());
+            letter.setSendMode(LetterSendMode.STANDARD_POST.getCode());
             letter.setExpectedArrivalTime(now.plusMinutes(ThreadLocalRandom.current().nextInt(10, 121)));
             letter.setActualArrivalTime(null);
         } else if (vip) {
-            letter.setLetterType(LETTER_TYPE_REGISTERED);
-            letter.setStatus(STATUS_DELIVERED);
-            letter.setSendMode(SEND_MODE_VIP_DIRECT);
+            letter.setLetterType(LetterPhysicalType.REGISTERED.getCode());
+            letter.setStatus(LetterBizStatus.DELIVERED.getCode());
+            letter.setSendMode(LetterSendMode.DIRECT_VIP.getCode());
             letter.setExpectedArrivalTime(null);
             letter.setActualArrivalTime(now);
         } else {
@@ -197,9 +192,9 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                         PostAppErrorCodes.STAMP_INSUFFICIENT,
                         appMessages.get("app.error.stamp.insufficientRegistered"));
             }
-            letter.setLetterType(LETTER_TYPE_REGISTERED);
-            letter.setStatus(STATUS_DELIVERED);
-            letter.setSendMode(SEND_MODE_REGISTERED);
+            letter.setLetterType(LetterPhysicalType.REGISTERED.getCode());
+            letter.setStatus(LetterBizStatus.DELIVERED.getCode());
+            letter.setSendMode(LetterSendMode.REGISTERED_MAIL.getCode());
             letter.setExpectedArrivalTime(null);
             letter.setActualArrivalTime(now);
         }
@@ -207,7 +202,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         letter.initAudit(fromUserId);
         letterService.save(letter);
 
-        if (letterType == LETTER_TYPE_REGISTERED && !vip) {
+        if (physicalType == LetterPhysicalType.REGISTERED && !vip) {
             int oldBal = sender.getStampsBalance() != null ? sender.getStampsBalance() : 0;
             int newBal = oldBal - REGISTERED_STAMP_COST;
             boolean patched = stampAccountService.tryDecrementBalance(fromUserId, oldBal,
@@ -219,7 +214,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             tx.setUserId(fromUserId);
             tx.setChangeAmount(-REGISTERED_STAMP_COST);
             tx.setBalanceAfter(newBal);
-            tx.setReason("挂号信消耗");
+            tx.setReason(appMessages.get("app.stamp.reason.registeredMailDebit"));
             tx.setRefId(letter.getId());
             stampTransactionService.upsert(tx);
         }
@@ -240,7 +235,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         }
         if (Objects.equals(l.getToUserId(), viewerUserId)
                 && l.getRecipientReadAt() == null
-                && toInt(l.getStatus()) == STATUS_DELIVERED) {
+                && toInt(l.getStatus()) == LetterBizStatus.DELIVERED.getCode()) {
             boolean marked = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
                     .eq(LetterDomain::getId, letterId)
                     .eq(LetterDomain::isDelFlag, false)
@@ -300,10 +295,10 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         if (letter.getToUserId() == null || !Objects.equals(letter.getToUserId(), actorUserId)) {
             throw new BusinessException(appMessages.get("app.error.letter.earlyOpenRecipientOnly"));
         }
-        if (toInt(letter.getLetterType()) != LETTER_TYPE_STANDARD) {
+        if (toInt(letter.getLetterType()) != LetterPhysicalType.STANDARD.getCode()) {
             throw new BusinessException(appMessages.get("app.error.letter.earlyOpenStandardOnly"));
         }
-        if (toInt(letter.getStatus()) != STATUS_DELIVERING) {
+        if (toInt(letter.getStatus()) != LetterBizStatus.DELIVERING.getCode()) {
             throw new BusinessException(appMessages.get("app.error.letter.earlyOpenBadStatus"));
         }
         if (letter.getRecipientEarlyOpenAt() != null) {
@@ -332,19 +327,19 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             tx.setUserId(actorUserId);
             tx.setChangeAmount(-RECIPIENT_EARLY_OPEN_STAMP_COST);
             tx.setBalanceAfter(newBal);
-            tx.setReason("平邮提前拆信消耗");
+            tx.setReason(appMessages.get("app.stamp.reason.standardEarlyOpenDebit"));
             tx.setRefId(letterId);
             stampTransactionService.upsert(tx);
         }
         boolean letterPatched = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
                 .eq(LetterDomain::getId, letterId)
                 .eq(LetterDomain::isDelFlag, false)
-                .eq(LetterDomain::getStatus, STATUS_DELIVERING)
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
                 .eq(LetterDomain::getToUserId, actorUserId)
                 .isNull(LetterDomain::getRecipientEarlyOpenAt)
                 .set(LetterDomain::getRecipientEarlyOpenAt, now)
                 // 收件人已付费拆信：对双方列表/归档与「已送达」语义一致，避免仍显示运输中
-                .set(LetterDomain::getStatus, STATUS_DELIVERED)
+                .set(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
                 .set(LetterDomain::getActualArrivalTime, now)
                 .set(LetterDomain::getRecipientReadAt, now)
                 .set(LetterDomain::getUpdatedAt, now)
@@ -366,10 +361,10 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         if (letter.getFromUserId() != actorUserId) {
             throw new BusinessException(appMessages.get("app.error.letter.speedUpSenderOnly"));
         }
-        if (toInt(letter.getLetterType()) != LETTER_TYPE_STANDARD) {
+        if (toInt(letter.getLetterType()) != LetterPhysicalType.STANDARD.getCode()) {
             throw new BusinessException(appMessages.get("app.error.letter.speedUpStandardOnly"));
         }
-        if (toInt(letter.getStatus()) != STATUS_DELIVERING) {
+        if (toInt(letter.getStatus()) != LetterBizStatus.DELIVERING.getCode()) {
             throw new BusinessException(appMessages.get("app.error.letter.speedUpBadStatus"));
         }
         if (Boolean.TRUE.equals(letter.getIsAccelerated())) {
@@ -400,7 +395,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             tx.setUserId(actorUserId);
             tx.setChangeAmount(-SPEED_UP_STAMP_COST);
             tx.setBalanceAfter(newBal);
-            tx.setReason("平邮加速消耗");
+            tx.setReason(appMessages.get("app.stamp.reason.standardSpeedUpDebit"));
             tx.setRefId(letterId);
             stampTransactionService.upsert(tx);
         }
@@ -408,9 +403,9 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         boolean letterPatched = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
                 .eq(LetterDomain::getId, letterId)
                 .eq(LetterDomain::isDelFlag, false)
-                .eq(LetterDomain::getStatus, STATUS_DELIVERING)
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
                 .eq(LetterDomain::getFromUserId, actorUserId)
-                .set(LetterDomain::getStatus, STATUS_DELIVERED)
+                .set(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
                 .set(LetterDomain::getIsAccelerated, true)
                 .set(LetterDomain::getAcceleratedAt, now)
                 .set(LetterDomain::getActualArrivalTime, now)
@@ -472,8 +467,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         long peerId = peerUserId(l, viewer);
         UserDTO peer = userService.findById(peerId);
         boolean fromMe = Objects.equals(l.getFromUserId(), viewer);
-        boolean delivering = toInt(l.getStatus()) == STATUS_DELIVERING;
-        boolean standard = toInt(l.getLetterType()) == LETTER_TYPE_STANDARD;
+        boolean delivering = toInt(l.getStatus()) == LetterBizStatus.DELIVERING.getCode();
+        boolean standard = toInt(l.getLetterType()) == LetterPhysicalType.STANDARD.getCode();
         boolean openedEarly = l.getRecipientEarlyOpenAt() != null;
         boolean hideBody = !fromMe && delivering && standard && !openedEarly;
 
@@ -501,7 +496,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .letterId(l.getId())
                 .peer(peerVo)
                 .letterType(toInt(l.getLetterType()))
-                .sendMode(l.getSendMode() != null ? l.getSendMode() : 1)
+                .sendMode(l.getSendMode() != null ? l.getSendMode() : LetterSendMode.STANDARD_POST.getCode())
                 .status(toInt(l.getStatus()))
                 .preview(preview)
                 .content(contentOut)

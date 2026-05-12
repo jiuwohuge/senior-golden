@@ -18,11 +18,11 @@ public class MailboxLetterItemVO {
     private Long letterId;
     @Schema(description = "对端用户")
     private AppPublicUserVO peer;
-    @Schema(description = "1挂号 2平邮")
+    @Schema(description = "信件载体类型，整型同 LetterPhysicalType：1=REGISTERED（挂号）2=STANDARD（平邮）")
     private Integer letterType;
-    @Schema(description = "发送模式：1平邮路径 2挂号路径 3直发")
+    @Schema(description = "发送模式，整型同 LetterSendMode：1=STANDARD_POST 2=REGISTERED_MAIL 3=DIRECT_VIP")
     private Integer sendMode;
-    @Schema(description = "1运输中 2已送达 3已挂号")
+    @Schema(description = "业务状态，整型同 LetterBizStatus：1=DELIVERING 2=DELIVERED 3=REGISTERED（预留）")
     private Integer status;
     @Schema(description = "列表摘要")
     private String preview;

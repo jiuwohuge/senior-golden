@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.base.impl;
 
 import cn.nine.pros.post.biz.config.StampGrantProperties;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.StampDailyGrantMapper;
 import cn.nine.pros.post.biz.mapper.StampTransactionMapper;
 import cn.nine.pros.post.biz.model.domain.StampDailyGrantDomain;
@@ -30,6 +31,7 @@ public class StampGrantServiceImpl implements StampGrantService {
     private final StampAccountService stampAccountService;
     private final cn.nine.pros.post.biz.service.base.UserService userService;
     private final StampTransactionMapper stampTransactionMapper;
+    private final AppMessages appMessages;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -52,7 +54,7 @@ public class StampGrantServiceImpl implements StampGrantService {
             log.debug("Daily login stamp grant skipped (already granted): userId={}", userId);
             return;
         }
-        credit(userId, amt, "每日登录赠送", null);
+        credit(userId, amt, appMessages.get("app.stamp.reason.dailyLoginCredit"), null);
     }
 
     @Override
@@ -94,7 +96,7 @@ public class StampGrantServiceImpl implements StampGrantService {
                     userId, postcardId);
             return;
         }
-        credit(userId, reward, "发布明信片奖励", postcardId);
+        credit(userId, reward, appMessages.get("app.stamp.reason.postcardPublishCredit"), postcardId);
     }
 
     private boolean existsPostcardGrant(long userId, long postcardId) {

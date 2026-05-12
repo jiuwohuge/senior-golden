@@ -15,29 +15,30 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Tag(name = "管理后台-用户")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/user")
 public interface AdminUserApi {
 
     @Operation(summary = "分页查询用户")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/paging")
+    @PostMapping("/paging")
     PageData<UserDTO> paging(@RequestBody @Valid UserQueryInDto body);
 
     @Operation(summary = "设置用户状态")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/{id}/status")
+    @PostMapping("/{id}/status")
     void updateStatus(@PathVariable("id") Long id, @RequestParam("status") Integer status);
 
     @Operation(summary = "设备拉黑")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/device/block")
+    @PostMapping("/device/block")
     void blockDevice(@RequestBody @Valid DeviceBlockInDto body);
 
     @Operation(summary = "用户名下设备列表（运营选设备拉黑）")
-    @GetMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/{userId}/devices")
+    @GetMapping("/{userId}/devices")
     List<UserDeviceDTO> listUserDevices(@PathVariable("userId") Long userId);
 
     @Operation(summary = "获取当前管理员")
-    @GetMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/current-admin")
+    @GetMapping("/current-admin")
     UserDTO currentAdmin();
 
     @Operation(summary = "调试：设置用户 VIP 状态与过期时间")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/user/{id}/vip-debug")
+    @PostMapping("/{id}/vip-debug")
     void updateVipDebug(@PathVariable("id") Long id, @RequestBody @Valid AdminUserVipDebugInDto body);
 }

@@ -13,33 +13,34 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "管理后台-内容")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/content")
 public interface AdminContentApi {
 
     @Operation(summary = "明信片详情（审核预览，含配图列表）")
-    @GetMapping(AppServiceDefine.WEBAPI_PREFIX + "/content/postcard/{id}")
+    @GetMapping("/postcard/{id}")
     PostcardDTO getPostcard(@PathVariable("id") Long id);
 
     @Operation(summary = "分页查询明信片")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/content/postcard/paging")
+    @PostMapping("/postcard/paging")
     PageData<PostcardDTO> pagingPostcards(@RequestBody @Valid PostcardQueryInDto body);
 
     @Operation(summary = "分页查询评论")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/content/comment/paging")
+    @PostMapping("/comment/paging")
     PageData<PostcardCommentDTO> pagingComments(@RequestBody @Valid CommentQueryInDto body);
 
     @Operation(summary = "审核通过明信片")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/content/postcard/{id}/approve")
+    @PostMapping("/postcard/{id}/approve")
     void approvePostcard(@PathVariable("id") Long id);
 
     @Operation(summary = "驳回明信片")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/content/postcard/{id}/reject")
+    @PostMapping("/postcard/{id}/reject")
     void rejectPostcard(@PathVariable("id") Long id, @RequestBody @Valid ContentRejectInDto body);
 
     @Operation(summary = "审核通过评论")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/content/comment/{id}/approve")
+    @PostMapping("/comment/{id}/approve")
     void approveComment(@PathVariable("id") Long id);
 
     @Operation(summary = "驳回评论")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/content/comment/{id}/reject")
+    @PostMapping("/comment/{id}/reject")
     void rejectComment(@PathVariable("id") Long id, @RequestBody @Valid ContentRejectInDto body);
 }

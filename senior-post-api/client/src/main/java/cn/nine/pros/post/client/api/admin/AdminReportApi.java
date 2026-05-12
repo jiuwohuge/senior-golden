@@ -11,17 +11,18 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "管理后台-举报")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/report")
 public interface AdminReportApi {
 
     @Operation(summary = "分页查询举报")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/report/paging")
+    @PostMapping("/paging")
     PageData<ReportDTO> paging(@RequestBody @Valid ReportQueryInDto body);
 
     @Operation(summary = "处理举报")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/report/{id}/handle")
+    @PostMapping("/{id}/handle")
     void handle(@PathVariable("id") Long id, @RequestBody @Valid ReportHandleInDto body);
 
     @Operation(summary = "驳回举报")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/report/{id}/reject")
+    @PostMapping("/{id}/reject")
     void reject(@PathVariable("id") Long id, @RequestBody @Valid ReportHandleInDto body);
 }

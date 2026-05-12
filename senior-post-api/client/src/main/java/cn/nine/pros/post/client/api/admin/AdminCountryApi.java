@@ -11,17 +11,18 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "管理后台-国家/地区")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/country")
 public interface AdminCountryApi {
 
     @Operation(summary = "分页查询国家/地区")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/country/paging")
+    @PostMapping("/paging")
     PageData<CountryDTO> paging(@RequestBody @Valid CountryQueryInDto body);
 
     @Operation(summary = "保存国家/地区")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/country/save")
+    @PostMapping("/save")
     void save(@RequestBody @Valid CountryInDto body);
 
     @Operation(summary = "删除国家/地区")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/country/{id}/delete")
+    @PostMapping("/{id}/delete")
     void delete(@PathVariable("id") Integer id);
 }

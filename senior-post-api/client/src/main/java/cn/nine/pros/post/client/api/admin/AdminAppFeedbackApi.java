@@ -9,11 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Tag(name = "管理后台-APP 反馈")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/feedback")
 public interface AdminAppFeedbackApi {
 
     @Operation(summary = "分页查询 APP 反馈")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/feedback/paging")
+    @PostMapping("/paging")
     PageData<AppFeedbackAdminItemVO> paging(@RequestBody @Valid AppFeedbackAdminQueryInDto body);
 }

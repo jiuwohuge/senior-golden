@@ -8,11 +8,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Tag(name = "管理后台-OSS")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/oss")
 public interface AdminOssApi {
 
     @Operation(summary = "批量获取私有对象 GET 预签名 URL（审核看图；仅校验 key 形态）")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/oss/get-sign")
+    @PostMapping("/get-sign")
     OssGetSignBatchResultVO getSignBatch(@RequestBody @Valid AppOssGetSignInDto body);
 }

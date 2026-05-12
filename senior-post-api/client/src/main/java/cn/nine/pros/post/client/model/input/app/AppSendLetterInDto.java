@@ -1,5 +1,6 @@
 package cn.nine.pros.post.client.model.input.app;
 
+import cn.nine.pros.post.client.common.enums.LetterPhysicalType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,10 +24,10 @@ public class AppSendLetterInDto {
     private String content;
 
     /**
-     * 1=挂号信（即时）；2=平邮（慢信）。
+     * 见 {@link LetterPhysicalType}：{@link LetterPhysicalType#REGISTERED} 或 {@link LetterPhysicalType#STANDARD}。
      */
     @NotNull
-    @Schema(description = "1挂号信 2平邮", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "LetterPhysicalType.code：1=REGISTERED（挂号信）2=STANDARD（平邮）", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer letterType;
 
     @Schema(description = "回复的原信件 ID；若填写则仅收信人可发，且收件人自动为原发件人")

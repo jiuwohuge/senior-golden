@@ -11,17 +11,18 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "管理后台-敏感词")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/sensitive-word")
 public interface AdminSensitiveWordApi {
 
     @Operation(summary = "敏感词分页")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/sensitive-word/paging")
+    @PostMapping("/paging")
     PageData<SensitiveWordDTO> paging(@RequestBody @Valid SensitiveWordQueryInDto body);
 
     @Operation(summary = "保存敏感词")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/sensitive-word/save")
+    @PostMapping("/save")
     void save(@RequestBody @Valid SensitiveWordInDto body);
 
     @Operation(summary = "删除敏感词")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/sensitive-word/{id}/delete")
+    @PostMapping("/{id}/delete")
     void delete(@PathVariable("id") Integer id);
 }

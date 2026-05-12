@@ -4,6 +4,7 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.UserMapper;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
@@ -26,6 +27,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
 
     @Autowired
     private UserMapstruct userMapstruct;
+
+    @Autowired
+    private AppMessages appMessages;
 
     @Override
     public void upsert(UserDTO userDTO) {
@@ -59,7 +63,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
                 .isNotNull(UserDomain::getStaffRole)
                 .ne(UserDomain::getStaffRole, 0));
         if (staffCount > 0) {
-            throw new BadRequestException("不可删除可登录管理后台的账号");
+            throw new BadRequestException(appMessages.get("admin.error.user.cannotDeleteStaff"));
         }
         UserDomain userDomain = new UserDomain();
         userDomain.setDelFlag(true);

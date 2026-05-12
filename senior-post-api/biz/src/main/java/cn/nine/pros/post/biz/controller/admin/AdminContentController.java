@@ -3,6 +3,7 @@ package cn.nine.pros.post.biz.controller.admin;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.PostcardCommentDomain;
 import cn.nine.pros.post.biz.model.domain.PostcardDomain;
 import cn.nine.pros.post.biz.model.mapstruct.PostcardCommentMapstruct;
@@ -39,12 +40,13 @@ public class AdminContentController implements AdminContentApi {
     private final PostcardCommentService postcardCommentService;
     private final PostcardCommentMapstruct postcardCommentMapstruct;
     private final OssDisplayUrlService ossDisplayUrlService;
+    private final AppMessages appMessages;
 
     @Override
     public PostcardDTO getPostcard(Long id) {
         PostcardDomain row = postcardService.getById(id);
         if (row == null || row.isDelFlag()) {
-            throw new BadRequestException("明信片不存在");
+            throw new BadRequestException(appMessages.get("admin.error.content.postcardNotFound"));
         }
         PostcardDTO dto = postcardMapstruct.toDTO(row);
         applyStaffPostcardImages(dto);

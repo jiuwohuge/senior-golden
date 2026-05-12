@@ -4,6 +4,7 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.UserDeviceDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
@@ -44,6 +45,7 @@ public class AdminUserController implements AdminUserApi {
     private final UserMapstruct userMapstruct;
     private final UserDeviceService userDeviceService;
     private final UserDeviceMapstruct userDeviceMapstruct;
+    private final AppMessages appMessages;
 
     @Override
     public PageData<UserDTO> paging(UserQueryInDto body) {
@@ -68,7 +70,7 @@ public class AdminUserController implements AdminUserApi {
     @Override
     public void updateStatus(Long id, Integer status) {
         if (status == null || (status != 1 && status != 2 && status != 3)) {
-            throw new BadRequestException("非法状态值");
+            throw new BadRequestException(appMessages.get("admin.error.user.badStatus"));
         }
         userService.update(new LambdaUpdateWrapper<UserDomain>()
                 .eq(UserDomain::getId, id)
@@ -80,14 +82,14 @@ public class AdminUserController implements AdminUserApi {
     @Override
     public void updateVipDebug(Long id, AdminUserVipDebugInDto body) {
         if (id == null) {
-            throw new BadRequestException("非法用户 ID");
+            throw new BadRequestException(appMessages.get("admin.error.user.badId"));
         }
         UserDomain u = userService.getById(id);
         if (u == null || u.isDelFlag()) {
-            throw new BadRequestException("用户不存在");
+            throw new BadRequestException(appMessages.get("admin.error.user.notFound"));
         }
         if (u.getStaffRole() != null && u.getStaffRole() != 0) {
-            throw new BadRequestException("不可修改可登录管理后台账号的 VIP");
+            throw new BadRequestException(appMessages.get("admin.error.user.cannotEditStaffVip"));
         }
         LocalDateTime now = LocalDateTime.now();
         LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>()
@@ -116,7 +118,7 @@ public class AdminUserController implements AdminUserApi {
     @Override
     public List<UserDeviceDTO> listUserDevices(Long userId) {
         if (userId == null) {
-            throw new BadRequestException("非法用户 ID");
+            throw new BadRequestException(appMessages.get("admin.error.user.badId"));
         }
         List<UserDeviceDomain> list = userDeviceService.list(
                 new LambdaQueryWrapper<UserDeviceDomain>()

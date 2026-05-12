@@ -1,5 +1,6 @@
 package cn.nine.pros.post.biz.service.app;
 
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.ConfigDomain;
 import cn.nine.pros.post.biz.model.domain.CountryDomain;
 import cn.nine.pros.post.biz.service.base.ConfigService;
@@ -33,14 +34,17 @@ public class AppBootstrapService {
     private final ConfigService configService;
     private final CountryService countryService;
     private final AppDirectoryService appDirectoryService;
+    private final AppMessages appMessages;
 
     public AppBootstrapService(
             ConfigService configService,
             CountryService countryService,
-            AppDirectoryService appDirectoryService) {
+            AppDirectoryService appDirectoryService,
+            AppMessages appMessages) {
         this.configService = configService;
         this.countryService = countryService;
         this.appDirectoryService = appDirectoryService;
+        this.appMessages = appMessages;
     }
 
     public AppBootstrapVO init(String langCode) {
@@ -79,13 +83,14 @@ public class AppBootstrapService {
         }
         return AppVipProductConfigVO.builder()
                 .productEnabled(parseBoolean(map.get("vip.product.enabled"), true))
-                .displayName(firstNonBlank(map.get("vip.product.display_name"), "VIP"))
+                .displayName(firstNonBlank(map.get("vip.product.display_name"),
+                        appMessages.get("app.bootstrap.vip.displayNameDefault")))
                 .tagline(firstNonBlank(
                         map.get("vip.product.tagline"),
-                        "Unlimited stamps · Priority delivery · Ad-free"))
+                        appMessages.get("app.bootstrap.vip.taglineDefault")))
                 .taglineZh(firstNonBlank(
                         map.get("vip.product.tagline_zh"),
-                        "无限邮票 · 优先送达 · 无广告干扰"))
+                        appMessages.get("app.bootstrap.vip.taglineZhDefault")))
                 .unlimitedStampsBenefit(parseBoolean(map.get("vip.benefit.unlimited_stamps"), true))
                 .standardDeliveryHours(parseInt(map.get("vip.benefit.standard_delivery_hours"), 0))
                 .build();

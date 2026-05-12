@@ -11,17 +11,18 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "管理后台-配置")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/config")
 public interface AdminConfigApi {
 
     @Operation(summary = "分页查询配置")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/config/paging")
+    @PostMapping("/paging")
     PageData<ConfigDTO> paging(@RequestBody @Valid ConfigQueryInDto body);
 
     @Operation(summary = "保存配置")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/config/save")
+    @PostMapping("/save")
     void save(@RequestBody @Valid ConfigInDto body);
 
     @Operation(summary = "删除配置")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/config/{id}/delete")
+    @PostMapping("/{id}/delete")
     void delete(@PathVariable("id") Integer id);
 }

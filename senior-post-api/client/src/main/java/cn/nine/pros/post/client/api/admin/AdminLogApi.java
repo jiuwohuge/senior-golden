@@ -11,15 +11,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Tag(name = "管理后台-日志")
+@RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/log")
 public interface AdminLogApi {
 
     @Operation(summary = "行为日志分页")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/log/action/paging")
+    @PostMapping("/action/paging")
     PageData<ActionDTO> pagingActions(@RequestBody @Valid ActionLogQueryInDto body);
 
     @Operation(summary = "登录日志分页")
-    @PostMapping(AppServiceDefine.WEBAPI_PREFIX + "/log/login/paging")
+    @PostMapping("/login/paging")
     PageData<LoginDTO> pagingLogins(@RequestBody @Valid LoginLogQueryInDto body);
 }
