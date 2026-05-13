@@ -1,7 +1,24 @@
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Form, Input, Modal, Popconfirm, Space, Switch, Table, Tag, message } from 'antd'
+import { Button, Form, Input, InputNumber, Modal, Popconfirm, Space, Switch, Table, Tag, Typography, message } from 'antd'
 import { useEffect, useState } from 'react'
 import { api } from '../../services/api'
+
+const { Text } = Typography
+
+function ReleasePreview(props: { title?: string; versionLabel?: string; releaseNotes?: string }) {
+  const t = props.title?.trim() || '（标题）'
+  const v = props.versionLabel?.trim() || '（版本号）'
+  const body = props.releaseNotes ?? ''
+  return (
+    <div style={{ border: '1px solid #f0f0f0', borderRadius: 8, padding: 12, background: '#fafafa' }}>
+      <Text strong style={{ fontSize: 16 }}>{t}</Text>
+      <div style={{ marginTop: 8 }}>
+        <Text type="secondary">{v}</Text>
+      </div>
+      <pre style={{ marginTop: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}>{body}</pre>
+    </div>
+  )
+}
 
 export default function AnnouncementList() {
   const [rows, setRows] = useState<any[]>([])
@@ -9,6 +26,9 @@ export default function AnnouncementList() {
   const [modalOpen, setModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
+  const titleW = Form.useWatch('title', form)
+  const versionW = Form.useWatch('versionLabel', form)
+  const contentW = Form.useWatch('content', form)
 
   const load = () => {
     setLoading(true)
@@ -22,6 +42,13 @@ export default function AnnouncementList() {
   const handleOk = async () => {
     try {
       const v = await form.validateFields()
+      if (v.content && String(v.content).includes('<')) {
+        message.error('更新说明不可包含「<」（禁止 HTML）')
+        return
+      }
+      if (v.id === '' || v.id === undefined || v.id === null) {
+        delete (v as any).id
+      }
       setSaving(true)
       await api.saveAnnouncement(v)
       setModalOpen(false)
@@ -50,42 +77,96 @@ export default function AnnouncementList() {
         size="middle"
         columns={[
           { title: '标题', dataIndex: 'title' },
+          { title: '版本号', dataIndex: 'versionLabel', width: 120, render: (v: string) => v || '—' },
+          {
+            title: '版本区间',
+            width: 140,
+            render: (_: unknown, r: any) => {
+              const lo = r.minVersionCode
+              const hi = r.maxVersionCode
+              if (lo == null && hi == null) return '—'
+              return `${lo ?? '—'} ~ ${hi ?? '—'}`
+            },
+          },
           {
             title: '状态',
             dataIndex: 'isActive',
             width: 88,
-            render: (v) => v ? <Tag color="green">启用</Tag> : <Tag color="default">停用</Tag>,
+            render: (v: boolean) => v ? <Tag color="green">启用</Tag> : <Tag color="default">停用</Tag>,
           },
           {
             title: '操作',
             width: 100,
             render: (_, r) => (
-              <Popconfirm title="确认删除？" onConfirm={async () => { await api.deleteAnnouncement(r.id); load() }}>
-                <Button danger size="small">删除</Button>
-              </Popconfirm>
+              <Space>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    form.setFieldsValue({
+                      ...r,
+                      startAt: r.startAt ?? undefined,
+                      endAt: r.endAt ?? undefined,
+                    })
+                    setModalOpen(true)
+                  }}
+                >
+                  编辑
+                </Button>
+                <Popconfirm title="确认删除？" onConfirm={async () => { await api.deleteAnnouncement(r.id); load() }}>
+                  <Button danger size="small">删除</Button>
+                </Popconfirm>
+              </Space>
             ),
           },
         ]}
       />
       <Modal
-        title="新增公告"
+        title="新增 / 编辑公告（版本说明）"
         open={modalOpen}
         onOk={handleOk}
         onCancel={() => { setModalOpen(false); form.resetFields() }}
         confirmLoading={saving}
         destroyOnClose
-        width={520}
+        width={720}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-          <Form.Item name="title" label="标题" rules={[{ required: true, message: '请输入标题' }]}>
-            <Input placeholder="公告标题" />
+          <Form.Item name="id" hidden>
+            <Input />
           </Form.Item>
-          <Form.Item name="content" label="正文内容" rules={[{ required: true, message: '请输入正文内容' }]}>
-            <Input.TextArea placeholder="公告正文，支持多行文本" rows={5} showCount maxLength={2000} />
+          <Form.Item name="title" label="标题" rules={[{ required: true, message: '请输入标题' }]}>
+            <Input placeholder="如：本次更新" />
+          </Form.Item>
+          <Form.Item name="versionLabel" label="版本号（展示）" rules={[{ required: true, message: '请输入版本号' }]}>
+            <Input placeholder="如：1.2.0" />
+          </Form.Item>
+          <Form.Item name="content" label="更新说明（纯文本多行）" rules={[{ required: true, message: '请输入更新说明' }]}>
+            <Input.TextArea placeholder="一段一条，可用换行分段；禁止 HTML" rows={8} showCount maxLength={8000} />
+          </Form.Item>
+          <Space size="large" wrap>
+            <Form.Item name="minVersionCode" label="可见最小 versionCode（含）">
+              <InputNumber min={0} placeholder="留空不限制" style={{ width: 200 }} />
+            </Form.Item>
+            <Form.Item name="maxVersionCode" label="可见最大 versionCode（含）">
+              <InputNumber min={0} placeholder="留空不限制" style={{ width: 200 }} />
+            </Form.Item>
+          </Space>
+          <Form.Item name="startAt" label="生效开始（可选）">
+            <Input placeholder="ISO 8601，如 2026-05-01T00:00:00" />
+          </Form.Item>
+          <Form.Item name="endAt" label="生效结束（可选）">
+            <Input placeholder="ISO 8601" />
           </Form.Item>
           <Form.Item name="isActive" label="状态" valuePropName="checked" initialValue={true}>
             <Switch checkedChildren="启用" unCheckedChildren="停用" />
           </Form.Item>
+          <Text type="secondary">与 App 弹层结构一致的预览（非 Markdown）</Text>
+          <div style={{ marginTop: 8 }}>
+            <ReleasePreview
+              title={titleW}
+              versionLabel={versionW}
+              releaseNotes={contentW}
+            />
+          </div>
         </Form>
       </Modal>
     </>

@@ -46,6 +46,9 @@ public class AdminAnnouncementController implements AdminAnnouncementApi {
         dto.setStartAt(body.getStartAt());
         dto.setEndAt(body.getEndAt());
         dto.setIsActive(body.getIsActive());
+        dto.setVersionLabel(body.getVersionLabel());
+        dto.setMinVersionCode(body.getMinVersionCode());
+        dto.setMaxVersionCode(body.getMaxVersionCode());
         announcementService.upsert(dto);
     }
 

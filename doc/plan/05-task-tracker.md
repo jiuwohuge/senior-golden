@@ -62,13 +62,13 @@
 
 | FP | 负责人 | Sprint | 起 | 止 | 状态 | 验收标准 | 交付物 |
 |----|--------|--------|----|----|------|----------|--------|
-| FP-A1-006 | AI + Owner | S4 | W4D1 | W4D3 | TODO | 注册/登录携带设备与 `user_device` 一致；拉黑/挤下线可解释 | `UserService` / 设备写入路径核对 + 必要迁移 |
-| FP-X-001 | AI + Owner | S4 | W4D2 | W4D4 | TODO | Outbox 可重试；测试环境收到邮件 | `EmailService` + outbox 表 + 与重置密码串联 |
-| FP-A1-007 | AI + Owner | S4 | W4D4 | W4D6 | TODO | 加解密与 `jh.security` 互通 | Flutter 拦截器 + 配置说明 |
+| FP-A1-006 | AI + Owner | S4 | W4D1 | W4D3 | DONE | 注册/登录携带设备与 `user_device` 一致；拉黑/挤下线可解释 | `AppAuthService` 头体校验 + Flutter 安装 ID 兜底 |
+| FP-X-001 | AI + Owner | S4 | W4D2 | W4D4 | DONE | Outbox 可重试；测试环境收到邮件 | `V17` + `MailOutboxService` + 调度 + 忘记密码入队 |
+| FP-A1-007 | AI + Owner | S4 | W4D4 | W4D6 | DONE | 加解密与 `jh.security` 互通 | `application.yml` 收窄明文 URI + `jh_api_crypto` + Dio |
 | FP-A1-003 | AI + Owner | S4 | W4D2 | W4D3 | DONE | 重置后可用新密码登录 | Flyway V8 + Auth API + 可选 SMTP / 本地日志 |
 | FP-A8-005 | AI + Owner | S4 | W4D4 | W4D5 | DONE | 注销申请 + 冷静期 + 期满冻结；IM/好友清理 | 见 `08-mock-removal-gaps.md` |
-| FP-X-003 | AI + Owner | S4 | W4D5 | W4D7 | TODO | **非强更**、可关弹层；**标题+版本号+纯文本更新说明**；Manage 表单+预览与 App 模板一致 | DTO/Flyway + `Announcement` 扩展 + Manage 表单 + Flutter 弹层 |
-| FP-A10-001 | AI + Owner | S4 | W4D6 | W4D7 | TODO | 邮件模板按 Locale 取文案（依赖 FP-X-001） | `MessageSource` 键 + `app.properties` / `app_zh_CN.properties` |
+| FP-X-003 | AI + Owner | S4 | W4D5 | W4D7 | DONE | **非强更**、可关弹层；**标题+版本号+纯文本更新说明**；Manage 表单+预览与 App 模板一致 | `V18` + `GET /api/bootstrap/release-note` + Manage + Flutter 弹层 |
+| FP-A10-001 | AI + Owner | S4 | W4D6 | W4D7 | DONE | 邮件模板按 Locale 取文案（依赖 FP-X-001） | `app.mail.passwordReset.*` + `MessageSource` + Outbox locale |
 | FP-A9-002 | AI + Owner | S4 | W4D5 | W4D6 | DONE | 管理端分页查 `log_stamp_transaction`；可选 userId、reason 过滤 | `AdminStampsApi`、`AdminStampsController`、`StampLedgerList.tsx` |
 | FP-A9-003 | AI + Owner | S4 | W4D5 | W4D6 | DONE | 用户列表展示设备并拉黑；`GET /webapi/user/{userId}/devices` + `POST /webapi/user/device/block` | `AdminUserApi`、`AdminUserController`、`api.userDevices`、`UserList` Modal |
 

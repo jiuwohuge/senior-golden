@@ -5,6 +5,7 @@ import '../../core/api/api_exception.dart';
 import '../../core/auth/auth_storage.dart';
 import '../../core/auth/auth_token.dart';
 import '../../core/device/device_ids.dart';
+import '../../core/device/device_install_id.dart';
 import '../../core/network/dio_provider.dart';
 import '../../core/session/app_session.dart';
 import '../mailbox/tim_facade.dart';
@@ -20,7 +21,11 @@ class AuthRepository {
 
   Future<void> login({required String email, required String password}) async {
     final dio = _ref.read(dioProvider);
-    final deviceUuid = _ref.read(deviceInstallIdStateProvider);
+    String deviceUuid = _ref.read(deviceInstallIdStateProvider);
+    if (deviceUuid.isEmpty) {
+      deviceUuid = await DeviceInstallId.getOrCreate();
+      _ref.read(deviceInstallIdStateProvider.notifier).state = deviceUuid;
+    }
     try {
       final res = await dio.post<Map<String, dynamic>>(
         '/api/auth/login',
@@ -60,7 +65,11 @@ class AuthRepository {
       throw ApiBusinessException(400, 'Please select at least 3 interests.');
     }
     final dio = _ref.read(dioProvider);
-    final deviceUuid = _ref.read(deviceInstallIdStateProvider);
+    String deviceUuid = _ref.read(deviceInstallIdStateProvider);
+    if (deviceUuid.isEmpty) {
+      deviceUuid = await DeviceInstallId.getOrCreate();
+      _ref.read(deviceInstallIdStateProvider.notifier).state = deviceUuid;
+    }
     try {
       final res = await dio.post<Map<String, dynamic>>(
         '/api/auth/register',

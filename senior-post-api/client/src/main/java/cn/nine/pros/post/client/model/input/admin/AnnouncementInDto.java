@@ -38,4 +38,13 @@ public class AnnouncementInDto extends AbstractDTO {
 
     @Schema(description = "是否激活")
     private Boolean isActive;
+
+    @Schema(description = "版本号（展示）")
+    private String versionLabel;
+
+    @Schema(description = "可见最小客户端 versionCode（含）")
+    private Integer minVersionCode;
+
+    @Schema(description = "可见最大客户端 versionCode（含）")
+    private Integer maxVersionCode;
 }

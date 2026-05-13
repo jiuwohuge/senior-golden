@@ -25,10 +25,10 @@
 | Maven | [ ] | 可构建 `commons-framework` 依赖（见 PLAN：本地仓库） |
 | PostgreSQL | [ ] | `application-local.yml` 指向实例；Flyway 自动迁移（含 `V10` 邮票赠送幂等表） |
 | Redis | [ ] | 与 `application-local.yml` 一致；P1 延迟队列依赖 |
-| 环境 Profile | [ ] | `local` 启动；`/api/**` 明文联调策略与 `jh.security` 白名单已读 |
+| 环境 Profile | [ ] | `local` 启动；`application-local.yml` 默认 **全 `/api/**` 明文** 便于后端单测；生产形态见根 `application.yml` 的 `jh.security` 白名单与 `android-version`/`ios-version` |
 | 腾讯 IM | [ ] | `senior-post.tencent-im`：`TENCENT_IM_SDK_APP_ID`、`TENCENT_IM_SECRET_KEY`；测 `/api/im/usersig`。**好友同步（FP-A5d-004）**：控制台创建 **App 管理员**账号，设置环境变量 `TENCENT_IM_REST_IDENTIFIER`（与管理员 UserID 一致）；海外地域时可配 `TENCENT_IM_REST_HOST`（默认 `console.tim.qq.com`） |
 | 阿里云 OSS | [ ] | 环境变量：`ALIYUN_OSS_ENDPOINT`、`ALIYUN_OSS_ACCESS_KEY_ID`、`ALIYUN_OSS_ACCESS_KEY_SECRET`、`ALIYUN_OSS_BUCKET`；可选 `ALIYUN_OSS_PUBLIC_BASE_URL`（CDN）；Bucket CORS 允许 App 源站 **PUT**；对应 `senior-post.oss.*` |
-| SMTP / 邮件 | [ ] | 本地可用 MailHog / 企业测试邮箱；**FP-X-001 前必配** |
+| SMTP / 邮件 | [ ] | `spring.mail.*` + `SENIOR_POST_MAIL_FROM`；本地 MailHog；**Outbox** 由 `MailOutboxDispatchScheduler` 轮询 `sys_mail_outbox`（`senior-post.mail.outbox.*`） |
 
 ---
 
@@ -38,7 +38,7 @@
 |----|------|------|
 | Dart SDK | [ ] | `pubspec`：`>=3.9.0 <4.0.0`；对齐 `tool/flutter_sdk_version.txt` 推荐 |
 | `flutter pub get` | [ ] | 无报错 |
-| `--dart-define` | [ ] | `API_BASE_URL=http(s)://...`（见 PLAN 真机说明）；客户端已移除 Mock 层，联调须指向真实后端 |
+| `--dart-define` | [ ] | `API_BASE_URL=http(s)://...`（见 PLAN 真机说明）；**`JH_AES_KEY`**（32 位 hex，须与后端 `jh.security.key` 一致）；**`API_VERSION_CODE`**（与后端 `android-version`/`ios-version` 门槛一致）；客户端已移除 Mock 层，联调须指向真实后端 |
 | Android/iOS 网络 | [ ] | Debug 明文 HTTP、iOS `NSAllowsLocalNetworking`（见 PLAN 历史记录） |
 | 腾讯 IM 真机 | [ ] | `TENCENT_IM_*` 与后端一致 |
 

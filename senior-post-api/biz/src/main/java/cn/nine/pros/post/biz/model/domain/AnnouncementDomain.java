@@ -61,4 +61,22 @@ public class AnnouncementDomain extends AbstractAuditableDomain {
     @Schema(description = "是否激活")
     private Boolean isActive;
 
+    /**
+     * 版本号（展示）
+     */
+    @Schema(description = "版本号（展示），如 1.2.0")
+    private String versionLabel;
+
+    /**
+     * 可见最小客户端 versionCode（含）；空不限制
+     */
+    @Schema(description = "可见最小客户端 versionCode（含），空表示不限制")
+    private Integer minVersionCode;
+
+    /**
+     * 可见最大客户端 versionCode（含）；空不限制
+     */
+    @Schema(description = "可见最大客户端 versionCode（含），空表示不限制")
+    private Integer maxVersionCode;
+
 }

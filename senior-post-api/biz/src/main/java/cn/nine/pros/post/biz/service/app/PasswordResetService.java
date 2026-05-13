@@ -11,8 +11,10 @@ import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import cn.nine.pros.post.biz.service.app.mail.MailOutboxService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -33,13 +36,14 @@ public class PasswordResetService {
     private final UserService userService;
     private final PasswordResetTokenMapper passwordResetTokenMapper;
     private final PasswordEncoder passwordEncoder;
-    private final PasswordResetMailNotifier passwordResetMailNotifier;
+    private final MailOutboxService mailOutboxService;
     private final SeniorPostAuthProperties authProperties;
     private final AppMessages appMessages;
 
     /**
      * 防枚举：邮箱不存在或账号不可用时与成功返回一致（无异常）。
      */
+    @Transactional(rollbackFor = Exception.class)
     public void requestForgotPassword(String rawEmail) {
         String email = rawEmail.trim().toLowerCase();
         UserDTO user = userService.findByEmail(email);
@@ -84,8 +88,10 @@ public class PasswordResetService {
         row.setCreatedAt(now);
         passwordResetTokenMapper.insert(row);
 
-        passwordResetMailNotifier.sendSixDigitCode(
-                email, code, authProperties.getPasswordResetExpireMinutes());
+        Locale loc = LocaleContextHolder.getLocale();
+        String localeTag = loc != null ? loc.toLanguageTag() : "en";
+        mailOutboxService.enqueuePasswordReset(
+                email, localeTag, code, authProperties.getPasswordResetExpireMinutes());
     }
 
     @Transactional(rollbackFor = Exception.class)

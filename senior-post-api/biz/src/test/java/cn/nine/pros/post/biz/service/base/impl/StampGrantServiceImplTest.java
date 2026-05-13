@@ -5,6 +5,7 @@ import cn.nine.pros.post.biz.mapper.StampDailyGrantMapper;
 import cn.nine.pros.post.biz.mapper.StampTransactionMapper;
 import cn.nine.pros.post.biz.model.domain.StampDailyGrantDomain;
 import cn.nine.pros.post.biz.model.domain.StampTransactionDomain;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.service.base.StampAccountService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
@@ -31,6 +32,7 @@ class StampGrantServiceImplTest {
     private StampAccountService stampAccountService;
     private UserService userService;
     private StampTransactionMapper stampTransactionMapper;
+    private AppMessages appMessages;
     private StampGrantServiceImpl svc;
 
     @BeforeEach
@@ -40,7 +42,8 @@ class StampGrantServiceImplTest {
         stampAccountService = org.mockito.Mockito.mock(StampAccountService.class);
         userService = org.mockito.Mockito.mock(UserService.class);
         stampTransactionMapper = org.mockito.Mockito.mock(StampTransactionMapper.class);
-        svc = new StampGrantServiceImpl(props, dailyGrantMapper, stampAccountService, userService, stampTransactionMapper);
+        appMessages = org.mockito.Mockito.mock(AppMessages.class);
+        svc = new StampGrantServiceImpl(props, dailyGrantMapper, stampAccountService, userService, stampTransactionMapper, appMessages);
     }
 
     @Test

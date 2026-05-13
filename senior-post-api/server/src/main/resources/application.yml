@@ -54,7 +54,11 @@ senior-post:
   mail:
     # 配置 spring.mail.host 后发送真实邮件；未配置时验证码仅写入服务端日志（WARN）
     from: ${SENIOR_POST_MAIL_FROM:}
-    password-reset-subject: Senior Post 密码重置验证码
+    outbox:
+      poll-delay-ms: 10000
+      batch-size: 20
+      max-attempts: 8
+      initial-backoff-seconds: 30
   # 腾讯 IM：控制台「同一应用」的 SDKAppID + 密钥（须配对；错配会 IM 70009 UserSig verification failed）
   # sdk-app-id=0 时 /api/im/usersig 返回业务错误；密钥禁止写入仓库，用环境变量或本地 profile（见 doc/plan/06-env-setup.md）
   tencent-im:
@@ -97,6 +101,7 @@ jh:
       "/api/auth/forgot-password",
       "/api/auth/reset-password",
       "/api/bootstrap/init",
+      "/api/bootstrap/release-note",
       "/webapi/auth/login",
     ]
     interceptor-pattern: [ "/api/**", "/webapi/**" ]
@@ -108,13 +113,15 @@ jh:
   security:
     debug: false
     key: 8e32de3646dc4c02ae2507511202c7ca
+    android-version: 1
+    ios-version: 1
     # 需要对返回值加密的接口路径
     resEncryptUris:
       - /api/**
     # 需要对请求参数解密的接口
     reqDecryptUris:
       - /api/**
-    # 忽略返回值加密的接口（管理端 /webapp 与 /webapi 明文；App 未接 AES 前的公开接口明文）
+    # 忽略返回值加密的接口（管理端 /webapp 与 /webapi 明文；App 匿名明文入口）
     resIgnoreEncryptUris:
       - /webapp/**
       - /webapi/**
@@ -123,13 +130,7 @@ jh:
       - /api/auth/forgot-password
       - /api/auth/reset-password
       - /api/bootstrap/init
-      - /api/mailbox/**
-      - /api/im/**
-      - /api/oss/**
-      - /api/stamps/**
-      - /api/postcards/**
-      - /api/reports/**
-      - /api/directory/**
+      - /api/bootstrap/release-note
     # 忽略参数解密的接口
     reqIgnoreDecryptUris:
       - /webapp/**
@@ -139,13 +140,7 @@ jh:
       - /api/auth/forgot-password
       - /api/auth/reset-password
       - /api/bootstrap/init
-      - /api/mailbox/**
-      - /api/im/**
-      - /api/oss/**
-      - /api/stamps/**
-      - /api/postcards/**
-      - /api/reports/**
-      - /api/directory/**
+      - /api/bootstrap/release-note
 
 knife4j:
   enable: true  # 启用 Knife4j 增强（必须，否则仅启用 springdoc 默认 UI）

@@ -11,6 +11,7 @@
 ### 1) App：注册（返回 token；触发 FP-A6-003 每日登录赠票首登）
 POST {{host}}/api/auth/register
 Content-Type: application/json
+equipmentId: e2e-device
 
 {
   "email": "e2e-{{$timestamp}}@example.com",
@@ -26,6 +27,7 @@ Content-Type: application/json
 ### 2) App：登录（同日第二次应不再叠加登录赠票）
 POST {{host}}/api/auth/login
 Content-Type: application/json
+equipmentId: e2e-device
 
 {
   "email": "same-as-register@example.com",

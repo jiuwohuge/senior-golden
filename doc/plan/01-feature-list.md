@@ -18,8 +18,8 @@
 | FP-A1-002 | Bootstrap（年龄门槛、国家列表） | 已有 `/api/bootstrap/init` | 已有 `appBootstrapProvider` | |
 | FP-A1-003 | 忘记密码 / 重置密码 | **已有**：`POST /api/auth/forgot-password`、`POST /api/auth/reset-password`；`bu_password_reset_token`；SMTP 可选（未配则日志 WARN 出码） | Flutter 三步流 + 6 位码校验 | 生产配 `spring.mail.*` + `PASSWORD_RESET_PEPPER`；可靠投递见 **FP-X-001** |
 | FP-A1-005 | JWT、`85xx`、单端登录 | 已有框架能力 | 已有拦截器清 Token | 见底层框架文档 |
-| FP-A1-006 | 设备 `deviceUuid` / `deviceId` 上报与 **`user_device` 落库一致** | 部分：头/body 可带 | `dio` 头已写 | **规划中**：核对注册/登录写库、挤下线与拉黑一致性 |
-| FP-A1-007 | App 请求/响应 AES | 配置预留 | **缺** Flutter 拦截器 | 与 `jh.security` 对齐；规划中 |
+| FP-A1-006 | 设备 `deviceUuid` / `equipmentId` 与 **`user_device` 落库一致** | **已有**：`equipmentId` 非空时须与体 `deviceUuid` 一致；`deviceType` 规范 ios/android | `dio` 头体一致 + 安装 ID 兜底 | 见 `AppAuthService.assertDeviceUuidMatchesHeaderOrBody` |
+| FP-A1-007 | App 请求/响应 AES | **已有**：`jh.security` 收窄明文 URI；`android-version`/`ios-version`；Flutter `jh_api_crypto` + Dio 包装 `data` | `--dart-define=JH_AES_KEY` / `API_VERSION_CODE` | 与 `application.yml` 白名单同步维护 |
 
 ---
 
@@ -133,7 +133,7 @@
 
 | FP ID | 功能点 | 说明 |
 |-------|--------|------|
-| FP-A10-001 | **邮件模板国际化** | 发信侧（重置密码等）按 **`MessageSource` + Locale** 或等价键值配置中英（依赖 **FP-X-001** Outbox 落地后串联）；**不含**全 App ARB 扫尾、Manage 全局 i18n（已从 backlog 删除） |
+| FP-A10-001 | **邮件模板国际化** | **已有**：`app.mail.passwordReset.*` + `MessageSource`；Outbox 存 `locale_tag`；worker 按行渲染 | 依赖 **FP-X-001** Outbox | 与 `Accept-Language` / `LocaleContextHolder` 对齐 |
 
 > App 端 UI 已有 ARB + `Accept-Language` 基线；**不设**单独 FP 跟踪「ARB 全量扫尾 / 运行时语言专项」。
 
@@ -143,9 +143,9 @@
 
 | FP ID | 功能点 | 状态 |
 |-------|--------|------|
-| FP-X-001 | `EmailService` + **outbox**（重置密码、通知可重试） | **缺** · **规划中** |
+| FP-X-001 | `EmailService` + **outbox**（重置密码、通知可重试） | **已有**：`sys_mail_outbox` + 调度重试；忘记密码入队；见 `V17__mail_outbox.sql` |
 | FP-X-002 | OSS PUT 预签名（`/api/oss/put-sign`） | **已有**（需配置 `senior-post.oss` 或环境变量） |
-| FP-X-003 | **版本公告（非强更）**：固定字段 **标题 + 版本号（展示）+ 更新内容（纯文本多行）**；Manage **表单 + 与 App 同结构预览**；App **模板化排版** + **可关闭**弹层；可选 `versionCode` 区间定向 | **缺** | 细则见 [`findings.md`](../../findings.md) **§18** |
+| FP-X-003 | **版本公告（非强更）**：固定字段 **标题 + 版本号（展示）+ 更新内容（纯文本多行）**；Manage **表单 + 与 App 同结构预览**；App **可关闭**弹层；可选 `versionCode` 区间定向 | **已有**：`V18` + `GET /api/bootstrap/release-note` + Manage + Flutter；细则见 [`findings.md`](../../findings.md) **§18** |
 | FP-X-005 | OSS 私有桶 **GET** 预签名 | **已有** 出站换签 + `POST /api/oss/get-sign` + Flutter `PostalOssNetworkImage` |
 
 ---
@@ -156,6 +156,6 @@
 |------|------|
 | 已有 / 可演示 | 主路径 FP 已 majority |
 | 部分 | A5d-001、A7-003、A8-005 等 |
-| 缺（本期规划优先） | **FP-A1-006**、**FP-X-001**、**FP-A1-007**；其次 **FP-X-003**、**FP-A10-001**（依赖 X-001） |
+| 缺（本期规划优先） | Sprint 4 五项 FP（A1-006 / X-001 / A1-007 / X-003 / A10-001）已在代码侧闭环；后续以线上观测为主 |
 
 *精确数以迭代后回写为准。*

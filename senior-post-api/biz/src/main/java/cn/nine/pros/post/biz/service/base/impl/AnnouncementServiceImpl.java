@@ -1,6 +1,8 @@
 package cn.nine.pros.post.biz.service.base.impl;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
+import cn.nine.commons.basic.exception.BadRequestException;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.nine.pros.post.biz.mapper.AnnouncementMapper;
@@ -26,8 +28,13 @@ public class AnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper, Ann
     @Autowired
     private AnnouncementMapstruct announcementMapstruct;
 
+    @Autowired
+    private AppMessages appMessages;
+
     @Override
     public void upsert(AnnouncementDTO announcementDTO) {
+        assertReleaseNoteContent(announcementDTO.getContent());
+        assertVersionRange(announcementDTO.getMinVersionCode(), announcementDTO.getMaxVersionCode());
         Integer id = announcementDTO.getId();
         if (id == null) {
             AnnouncementDomain domain = announcementMapstruct.toDomain(announcementDTO);
@@ -54,6 +61,18 @@ public class AnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper, Ann
         announcementDomain.setUpdatedAt(LocalDateTime.now());
         update(announcementDomain, new LambdaQueryWrapper<AnnouncementDomain>()
                 .in(AnnouncementDomain::getId, ids));
+    }
+
+    private void assertReleaseNoteContent(String content) {
+        if (content != null && content.contains("<")) {
+            throw new BadRequestException(appMessages.get("admin.error.announcement.noHtml"));
+        }
+    }
+
+    private void assertVersionRange(Integer min, Integer max) {
+        if (min != null && max != null && min > max) {
+            throw new BadRequestException(appMessages.get("admin.error.announcement.badVersionRange"));
+        }
     }
 
 }

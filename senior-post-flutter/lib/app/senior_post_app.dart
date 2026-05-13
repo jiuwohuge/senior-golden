@@ -8,6 +8,7 @@ import '../core/i18n/app_locale_provider.dart';
 import '../core/i18n/locale_resolution.dart';
 import '../core/network/router_refresh.dart';
 import '../features/auth/auth_repository.dart';
+import '../features/startup/release_note_layer.dart';
 import 'router/app_router.dart';
 import 'theme/postal_theme.dart';
 
@@ -31,17 +32,22 @@ class SeniorPostApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
     final localeOverride = ref.watch(appLocaleProvider);
 
-    return MaterialApp.router(
-      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
-      theme: PostalTheme.light(),
-      routerConfig: router,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: localeOverride,
-      localeListResolutionCallback: localeOverride != null
-          ? null
-          : (deviceLocales, supported) =>
-                resolveSeniorPostLocale(deviceLocales ?? const [], supported),
+    return Stack(
+      children: [
+        MaterialApp.router(
+          onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+          theme: PostalTheme.light(),
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: localeOverride,
+          localeListResolutionCallback: localeOverride != null
+              ? null
+              : (deviceLocales, supported) =>
+                    resolveSeniorPostLocale(deviceLocales ?? const [], supported),
+        ),
+        const ReleaseNoteLayer(),
+      ],
     );
   }
 }

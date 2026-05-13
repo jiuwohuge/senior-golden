@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.app;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
+import cn.nine.commons.basic.context.RequestContext;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.OssProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
@@ -100,7 +101,8 @@ public class AppAuthService {
         user.setRegisterIp(MyRequestContextHolder.ipAddress());
         userService.save(user);
         userTagService.replaceUserTags(user.getId(), user.getId(), new ArrayList<>(new LinkedHashSet<>(regTagIds)));
-        touchDevice(user.getId(), body.getDeviceUuid(), body.getDeviceType());
+        String deviceUuid = assertDeviceUuidMatchesHeaderOrBody(body.getDeviceUuid());
+        touchDevice(user.getId(), deviceUuid, normalizeDeviceType(body.getDeviceType()));
 
         String token = appJwtService.createToken(user.getId());
         stampGrantService.afterLogin(user.getId());
@@ -138,7 +140,8 @@ public class AppAuthService {
                 .set(UserDomain::getUpdatedAt, now)
                 .set(UserDomain::getUpdatedBy, dto.getId()));
 
-        touchDevice(dto.getId(), body.getDeviceUuid(), body.getDeviceType());
+        String deviceUuid = assertDeviceUuidMatchesHeaderOrBody(body.getDeviceUuid());
+        touchDevice(dto.getId(), deviceUuid, normalizeDeviceType(body.getDeviceType()));
 
         String token = appJwtService.createToken(dto.getId());
         stampGrantService.afterLogin(dto.getId());
@@ -297,6 +300,38 @@ public class AppAuthService {
                 .set(UserDomain::getDeletionRequestedAt, null)
                 .set(UserDomain::getUpdatedAt, now)
                 .set(UserDomain::getUpdatedBy, userId));
+    }
+
+    /**
+     * 请求头 {@code equipmentId}（若网关/过滤器已填充）须与体 {@code deviceUuid} 一致，避免审计与 {@code bu_user_device} 分裂。
+     */
+    private String assertDeviceUuidMatchesHeaderOrBody(String bodyDeviceUuid) {
+        String uuid = bodyDeviceUuid.trim();
+        RequestContext ctx = MyRequestContextHolder.getContext();
+        if (ctx != null) {
+            String headerEq = ctx.getEquipmentId();
+            if (StringUtils.hasText(headerEq) && !headerEq.trim().equals(uuid)) {
+                throw new BadRequestException(appMessages.get("app.error.device.headerBodyMismatch"));
+            }
+        }
+        return uuid;
+    }
+
+    private static String normalizeDeviceType(String raw) {
+        if (raw == null) {
+            return "";
+        }
+        String t = raw.trim().toLowerCase();
+        if (t.isEmpty()) {
+            return "";
+        }
+        if (t.equals("ios") || t.equals("iphone") || t.equals("ipad")) {
+            return "ios";
+        }
+        if (t.equals("android")) {
+            return "android";
+        }
+        return t;
     }
 
     private void touchDevice(long userId, String deviceUuid, String deviceType) {

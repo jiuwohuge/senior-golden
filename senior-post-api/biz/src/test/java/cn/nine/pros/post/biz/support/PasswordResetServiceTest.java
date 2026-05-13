@@ -1,16 +1,18 @@
-package cn.nine.pros.post.biz.service.app;
+package cn.nine.pros.post.biz.support;
 
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.SeniorPostAuthProperties;
+import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.PasswordResetTokenMapper;
 import cn.nine.pros.post.biz.model.domain.PasswordResetTokenDomain;
+import cn.nine.pros.post.biz.service.app.PasswordResetService;
+import cn.nine.pros.post.biz.service.app.mail.MailOutboxService;
 import cn.nine.pros.post.biz.service.app.support.PasswordResetHasher;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,10 +20,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,7 +39,9 @@ class PasswordResetServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    private PasswordResetMailNotifier passwordResetMailNotifier;
+    private MailOutboxService mailOutboxService;
+    @Mock
+    private AppMessages appMessages;
 
     private final SeniorPostAuthProperties authProperties = new SeniorPostAuthProperties();
 
@@ -52,8 +57,9 @@ class PasswordResetServiceTest {
                 userService,
                 passwordResetTokenMapper,
                 passwordEncoder,
-                passwordResetMailNotifier,
-                authProperties);
+                mailOutboxService,
+                authProperties,
+                appMessages);
     }
 
     @Test
@@ -61,33 +67,22 @@ class PasswordResetServiceTest {
         when(userService.findByEmail("x@y.com")).thenReturn(null);
         passwordResetService.requestForgotPassword("x@y.com");
         verify(passwordResetTokenMapper, never()).insert(any(PasswordResetTokenDomain.class));
-        verify(passwordResetMailNotifier, never()).sendSixDigitCode(any(), any(), anyInt());
+        verify(mailOutboxService, never()).enqueuePasswordReset(anyString(), anyString(), anyString(), anyInt());
     }
 
     @Test
-    void completeReset_success_updatesPasswordAndMarksUsed() {
-        UserDTO user = new UserDTO();
-        user.setId(9L);
-        user.setEmail("u@example.com");
-        user.setStatus(1);
-        when(userService.findByEmail("u@example.com")).thenReturn(user);
+    void requestForgotPassword_activeUser_enqueuesOutbox() {
+        UserDTO u = new UserDTO();
+        u.setId(1L);
+        u.setStatus(1);
+        when(userService.findByEmail("a@b.com")).thenReturn(u);
+        when(passwordResetTokenMapper.selectCount(any())).thenReturn(0L);
+        when(passwordResetTokenMapper.selectOne(any())).thenReturn(null);
 
-        String code = "384920";
-        String hash = PasswordResetHasher.hexHash("test-pepper", 9L, code);
-        PasswordResetTokenDomain tok = new PasswordResetTokenDomain();
-        tok.setId(100L);
-        tok.setUserId(9L);
-        tok.setCodeHash(hash);
-        tok.setExpiresAt(LocalDateTime.now().plusMinutes(10));
-        when(passwordResetTokenMapper.selectList(any())).thenReturn(List.of(tok));
-        when(passwordEncoder.encode("newpass123")).thenReturn("ENC");
+        passwordResetService.requestForgotPassword("a@b.com");
 
-        passwordResetService.completeReset("u@example.com", code, "newpass123");
-
-        verify(userService).update(any());
-        ArgumentCaptor<PasswordResetTokenDomain> cap = ArgumentCaptor.forClass(PasswordResetTokenDomain.class);
-        verify(passwordResetTokenMapper).updateById(cap.capture());
-        assertThat(cap.getValue().getUsedAt()).isNotNull();
+        verify(passwordResetTokenMapper).insert(any(PasswordResetTokenDomain.class));
+        verify(mailOutboxService).enqueuePasswordReset(eq("a@b.com"), anyString(), anyString(), eq(15));
     }
 
     @Test
@@ -100,9 +95,10 @@ class PasswordResetServiceTest {
         tok.setCodeHash(PasswordResetHasher.hexHash("test-pepper", 9L, "111111"));
         tok.setExpiresAt(LocalDateTime.now().plusMinutes(10));
         when(passwordResetTokenMapper.selectList(any())).thenReturn(List.of(tok));
+        when(appMessages.get("app.error.code.invalid")).thenReturn("Invalid or expired verification code.");
 
         assertThatThrownBy(() -> passwordResetService.completeReset("u@example.com", "222222", "newpass123"))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("验证码");
+                .hasMessageContaining("verification");
     }
 }

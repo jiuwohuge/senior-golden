@@ -1,5 +1,12 @@
 # 会话进度日志
 
+## 2026-05-12 — Sprint 4 五项 FP 代码闭环（A1-006 / X-001 / A1-007 / X-003 / A10-001）
+
+- **后端**：`AppAuthService` 设备头体校验；`V17` 邮件 Outbox + `MailOutboxDispatchScheduler`；忘记密码改入队 + `LocaleContextHolder` locale；`PasswordResetMailNotifier` 使用 `MessageSource`（`app.mail.passwordReset.*`）；`V18` 公告列 + `AppReleaseNoteService` + `GET /api/bootstrap/release-note`；`AnnouncementServiceImpl` 禁止 `<` 与版本区间校验；`jh.security` 收窄明文 URI 并设 `android-version`/`ios-version`；`application.yml` outbox 配置。
+- **Flutter**：`encrypt` + `jh_api_crypto` + `dio_provider` 请求/响应加解密；`API_VERSION_CODE`；`ReleaseNoteLayer` + `release_note_fetch`；`SeniorPostApp` Stack 挂载。
+- **Manage**：公告页三字段 + 预览 + 编辑。
+- **文档**：`01` / `05` / `06` 回写；`mvn -pl biz -am compile`；`dart analyze lib`；`PasswordResetServiceTest` 迁至 `biz.support` 包避免与生产类同包冲突。
+
 ## 2026-05-09 — 产品裁剪：backlog 删除 + 下一波次（A1-006 / X-001 / A1-007）（planning-with-files）
 
 - **Owner 输入**：真订阅不做；B14/B15 不作为任务；平邮仅用 PG 定时；删 A7-002、A3-008、A9-004、E2E、UAT、A1-004、A8 增强、X-004、A8-004、OSS 批量迁移等；**FP-X-003** 改为可关闭公告 + Manage 富文本；**A10** 仅保留邮件模板 i18n（**FP-A10-001**）。

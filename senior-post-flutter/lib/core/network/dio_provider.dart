@@ -16,7 +16,13 @@ import '../config/api_base_url.dart';
 import '../device/device_ids.dart';
 import '../i18n/effective_app_locale_provider.dart';
 import '../i18n/locale_resolution.dart';
+import 'jh_api_crypto.dart';
 import 'router_refresh.dart';
+
+const String _kApiVersionCode = String.fromEnvironment(
+  'API_VERSION_CODE',
+  defaultValue: '1',
+);
 
 /// 是否打印 Dio 请求/响应（默认：debug 模式开启；Release 可加 `--dart-define=API_LOG=true`）。
 const bool _kApiVerboseLog = bool.fromEnvironment(
@@ -47,11 +53,16 @@ final dioProvider = Provider<Dio>((ref) {
         }
         final locale = ref.read(effectiveAppLocaleProvider);
         options.headers['Accept-Language'] = acceptLanguageHeader(locale);
-        options.headers['versionCode'] = '1';
+        options.headers['versionCode'] = _kApiVersionCode;
         options.headers['deviceId'] = platformDeviceHeader();
         final equip = ref.read(deviceInstallIdStateProvider);
         if (equip.isNotEmpty) {
           options.headers['equipmentId'] = equip;
+        }
+        final path = options.uri.path;
+        final wrapped = JhApiCrypto.wrapJsonBodyIfNeeded(path, options.data);
+        if (wrapped != null) {
+          options.data = wrapped;
         }
         handler.next(options);
       },
@@ -67,6 +78,15 @@ final dioProvider = Provider<Dio>((ref) {
         }
         if (response.data is Map<String, dynamic>) {
           final map = response.data as Map<String, dynamic>;
+          final path = response.requestOptions.uri.path;
+          final dec = JhApiCrypto.tryDecryptResponseDataField(path, map['data']);
+          if (dec != null) {
+            try {
+              map['data'] = jsonDecode(dec) as Object?;
+            } catch (_) {
+              map['data'] = dec;
+            }
+          }
           if (map.containsKey('code') && map.containsKey('success')) {
             final code = map['code'] as int? ?? 0;
             final success = map['success'] as bool? ?? false;
