@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Senior Post</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Georgia&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #f5f0e8;
+      color: #2c3e6b;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    nav {
+      background-color: #2c3e6b;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .nav-brand {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.5rem;
+      color: #c9a84c;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+
+    .nav-links a {
+      color: #f5f0e8;
+      text-decoration: none;
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a[aria-current="page"] { color: #c9a84c; }
+
+    .page-wrapper {
+      max-width: 860px;
+      margin: 48px auto 80px;
+      padding: 0 24px;
+    }
+
+    .page-header { text-align: center; margin-bottom: 48px; }
+
+    .page-header h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.6rem;
+      color: #2c3e6b;
+      margin-bottom: 10px;
+    }
+
+    .page-header .subtitle {
+      color: #7a6a4a;
+      font-size: 1rem;
+      font-style: italic;
+    }
+
+    .gold-rule {
+      border: none;
+      border-top: 2px solid #c9a84c;
+      width: 80px;
+      margin: 16px auto 0;
+    }
+
+    .stamp-section {
+      background: #fff9f0;
+      border: 2px solid #c9a84c;
+      border-radius: 4px;
+      padding: 36px 40px;
+      margin-bottom: 32px;
+      position: relative;
+      background-image:
+        radial-gradient(circle, #f5f0e8 4px, transparent 4px),
+        radial-gradient(circle, #f5f0e8 4px, transparent 4px);
+      background-size: 18px 18px, 18px 18px;
+      background-position: top center, bottom center;
+      background-repeat: repeat-x, repeat-x;
+    }
+
+    .stamp-section::before,
+    .stamp-section::after { content: ''; display: block; height: 10px; }
+
+    .stamp-section h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.45rem;
+      color: #2c3e6b;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed #c9a84c;
+    }
+
+    .stamp-section h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.1rem;
+      color: #7a6a4a;
+      margin: 20px 0 8px;
+    }
+
+    .stamp-section p { margin-bottom: 14px; }
+    .stamp-section p:last-child { margin-bottom: 0; }
+    .stamp-section ul, .stamp-section ol { padding-left: 28px; margin-bottom: 14px; }
+    .stamp-section li { margin-bottom: 8px; }
+    .stamp-section ul li::marker { color: #c9a84c; }
+    .stamp-section strong { color: #2c3e6b; }
+    .stamp-section a { color: #c9a84c; text-decoration: underline; }
+    .stamp-section a:hover { color: #2c3e6b; }
+
+    .highlight-box {
+      background: #fdf6e3;
+      border-left: 4px solid #c9a84c;
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.97rem;
+    }
+
+    .rights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .right-card {
+      background: #f5f0e8;
+      border: 1px solid #c9a84c;
+      border-radius: 4px;
+      padding: 14px 16px;
+      font-size: 0.95rem;
+    }
+
+    .right-card .right-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700;
+      color: #2c3e6b;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    footer {
+      background-color: #2c3e6b;
+      color: #c9a84c;
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 0.9rem;
+      letter-spacing: 0.03em;
+    }
+
+    footer a { color: #f5f0e8; text-decoration: none; }
+    footer a:hover { color: #c9a84c; }
+
+    @media (max-width: 600px) {
+      body { font-size: 16px; }
+      .page-header h1 { font-size: 2rem; }
+      .stamp-section { padding: 24px 20px; }
+      nav { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-brand" href="index.html">&#9993; Senior Post</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="terms.html">Terms of Service</a></li>
+      <li><a href="privacy.html" aria-current="page">Privacy Policy</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-wrapper">
+
+    <header class="page-header">
+      <h1>Privacy Policy</h1>
+      <p class="subtitle">Last updated: May 2026</p>
+      <hr class="gold-rule" />
+    </header>
+
+    <!-- 1. Introduction -->
+    <section class="stamp-section" aria-labelledby="sec-intro">
+      <h2 id="sec-intro">1. Introduction</h2>
+      <p>Senior Post ("we", "us", "our") is committed to protecting your privacy and handling your personal data with care and transparency. This Privacy Policy explains what information we collect, how we use it, and the rights you have over your data.</p>
+      <p>Senior Post is a global postal-themed social platform designed for adults aged 45 and older. By using our service, you agree to the practices described in this policy.</p>
+      <div class="highlight-box">
+        Questions about this policy? Contact us at <a href="mailto:privacy@seniorpost.app">privacy@seniorpost.app</a>.
+      </div>
+    </section>
+
+    <!-- 2. Data Controller -->
+    <section class="stamp-section" aria-labelledby="sec-controller">
+      <h2 id="sec-controller">2. Data Controller</h2>
+      <p>Senior Post is the data controller responsible for your personal data collected through this application and related services.</p>
+      <p><strong>Contact:</strong> <a href="mailto:privacy@seniorpost.app">privacy@seniorpost.app</a></p>
+      <p>For EU/EEA users, Senior Post acts as the data controller under the General Data Protection Regulation (GDPR).</p>
+    </section>
+
+    <!-- 3. Information We Collect -->
+    <section class="stamp-section" aria-labelledby="sec-collect">
+      <h2 id="sec-collect">3. Information We Collect</h2>
+      <h3>Account Data</h3>
+      <ul>
+        <li>Email address</li>
+        <li>Password (stored as a one-way cryptographic hash — never in plain text)</li>
+        <li>Date of birth (used for age verification)</li>
+        <li>Nickname / display name</li>
+        <li>Country or region</li>
+      </ul>
+      <h3>Profile Data</h3>
+      <ul>
+        <li>Biography and personal description</li>
+        <li>Interests and topic tags</li>
+        <li>Profile photo</li>
+      </ul>
+      <h3>Content You Create</h3>
+      <ul>
+        <li>Postcards and letters you send and receive</li>
+        <li>Comments and replies</li>
+      </ul>
+      <h3>Device Data</h3>
+      <ul>
+        <li>Device identifier (IDFA / IDFV on iOS; Android ID on Android)</li>
+        <li>Device name and model</li>
+        <li>Operating system version</li>
+        <li>App version</li>
+      </ul>
+      <p>Device data is used exclusively for security, fraud prevention, and account protection — including device blacklisting for abusive accounts. It is not used for advertising.</p>
+      <h3>Usage Data</h3>
+      <ul>
+        <li>Login timestamps and session logs</li>
+        <li>In-app action logs (e.g., postcard sent, profile viewed)</li>
+        <li>IP address</li>
+      </ul>
+      <h3>Communications</h3>
+      <ul>
+        <li>Letters and messages sent through the Senior Post platform</li>
+      </ul>
+    </section>
+
+    <!-- 4. How We Use Your Information -->
+    <section class="stamp-section" aria-labelledby="sec-use">
+      <h2 id="sec-use">4. How We Use Your Information</h2>
+      <ul>
+        <li><strong>Provide and operate</strong> the Senior Post service</li>
+        <li><strong>Verify age</strong> — confirm that users meet the 45+ requirement</li>
+        <li><strong>Moderate content</strong> and maintain a safe, respectful community</li>
+        <li><strong>Prevent fraud and protect security</strong> — including device ID blacklisting for policy-violating accounts</li>
+        <li><strong>Send service notifications</strong> — password resets, account alerts, and important updates</li>
+        <li><strong>Improve the platform</strong> — analyse usage patterns to enhance features and performance</li>
+        <li><strong>Comply with legal obligations</strong> — respond to lawful requests from authorities</li>
+        <li><strong>Send marketing communications</strong> — only where you have given explicit consent; you may withdraw at any time</li>
+      </ul>
+    </section>
+
+    <!-- 5. Legal Basis (GDPR) -->
+    <section class="stamp-section" aria-labelledby="sec-legal-basis">
+      <h2 id="sec-legal-basis">5. Legal Basis for Processing (GDPR)</h2>
+      <p>For users in the EU/EEA, we process your personal data under the following legal bases:</p>
+      <ul>
+        <li><strong>Contract performance</strong> — processing necessary to provide the service you signed up for (Art. 6(1)(b))</li>
+        <li><strong>Legitimate interests</strong> — security monitoring, fraud prevention, and platform integrity, where our interests do not override your rights (Art. 6(1)(f))</li>
+        <li><strong>Legal obligation</strong> — compliance with applicable laws and content moderation requirements (Art. 6(1)(c))</li>
+        <li><strong>Consent</strong> — marketing communications and any optional processing where we have obtained your explicit consent (Art. 6(1)(a)). You may withdraw consent at any time without affecting the lawfulness of prior processing.</li>
+      </ul>
+    </section>
+
+    <!-- 6. Information Sharing -->
+    <section class="stamp-section" aria-labelledby="sec-sharing">
+      <h2 id="sec-sharing">6. Information Sharing</h2>
+      <p><strong>We do not sell your personal data.</strong> We share data only in the limited circumstances described below.</p>
+      <h3>Third-Party Service Providers</h3>
+      <ul>
+        <li><strong>Tencent Cloud IM</strong> — powers instant messaging features. Messages are processed in accordance with Tencent Cloud's privacy policy and data processing terms.</li>
+        <li><strong>Alibaba Cloud OSS</strong> — stores profile photos and images securely. Data is held under Alibaba Cloud's security and compliance framework.</li>
+        <li><strong>Email service provider</strong> — used to deliver password-reset emails and service notifications. Only your email address is shared for this purpose.</li>
+      </ul>
+      <p>All third-party providers are contractually required to process your data only as instructed by us and to maintain appropriate security measures.</p>
+      <h3>Legal Requirements</h3>
+      <p>We may disclose your personal data if required to do so by law, court order, or governmental authority, or where we believe disclosure is necessary to protect the rights, property, or safety of Senior Post, our users, or the public.</p>
+      <h3>Business Transfers</h3>
+      <p>In the event of a merger, acquisition, or sale of assets, your data may be transferred to the successor entity. We will notify you before your data is transferred and becomes subject to a different privacy policy.</p>
+    </section>
+
+    <!-- 7. Data Retention -->
+    <section class="stamp-section" aria-labelledby="sec-retention">
+      <h2 id="sec-retention">7. Data Retention</h2>
+      <ul>
+        <li><strong>Active accounts:</strong> personal data is retained for as long as your account remains active.</li>
+        <li><strong>Deleted accounts:</strong> a 7-day cooling-off period applies after you request deletion. After that period, your data is permanently deleted within 30 days, unless a legal hold applies.</li>
+        <li><strong>Security and usage logs:</strong> retained for up to 12 months for fraud prevention and security purposes, then deleted.</li>
+        <li><strong>Legal holds:</strong> where required by applicable law, we may retain certain data for longer periods.</li>
+      </ul>
+    </section>
+
+    <!-- 8. Your Rights (GDPR) -->
+    <section class="stamp-section" aria-labelledby="sec-rights">
+      <h2 id="sec-rights">8. Your Rights</h2>
+      <p>If you are located in the EU/EEA, or in other jurisdictions with applicable privacy laws, you have the following rights regarding your personal data:</p>
+      <div class="rights-grid">
+        <div class="right-card">
+          <span class="right-title">Right to Access</span>
+          Request a copy of the personal data we hold about you.
+        </div>
+        <div class="right-card">
+          <span class="right-title">Right to Rectification</span>
+          Ask us to correct inaccurate or incomplete data.
+        </div>
+        <div class="right-card">
+          <span class="right-title">Right to Erasure</span>
+          Request deletion of your data ("right to be forgotten"). Use the in-app account deletion feature or email us.
+        </div>
+        <div class="right-card">
+          <span class="right-title">Right to Portability</span>
+          Receive your data in a structured, machine-readable format.
+        </div>
+        <div class="right-card">
+          <span class="right-title">Right to Restrict Processing</span>
+          Ask us to limit how we use your data in certain circumstances.
+        </div>
+        <div class="right-card">
+          <span class="right-title">Right to Object</span>
+          Object to processing based on legitimate interests or for direct marketing.
+        </div>
+        <div class="right-card">
+          <span class="right-title">Right to Withdraw Consent</span>
+          Withdraw consent at any time where processing is based on consent.
+        </div>
+        <div class="right-card">
+          <span class="right-title">Right to Complain</span>
+          Lodge a complaint with your local data protection authority (e.g., the ICO in the UK, or your national supervisory authority in the EU).
+        </div>
+      </div>
+      <div class="highlight-box" style="margin-top:20px;">
+        To exercise any of these rights, contact us at <a href="mailto:privacy@seniorpost.app">privacy@seniorpost.app</a>. We will respond within 30 days.
+      </div>
+    </section>
+
+    <!-- 9. Data Security -->
+    <section class="stamp-section" aria-labelledby="sec-security">
+      <h2 id="sec-security">9. Data Security</h2>
+      <p>We implement industry-standard security measures to protect your personal data, including:</p>
+      <ul>
+        <li>HTTPS/TLS encryption for all data in transit</li>
+        <li>One-way cryptographic hashing for passwords</li>
+        <li>Role-based access controls limiting who can access personal data</li>
+        <li>Regular security reviews and monitoring</li>
+      </ul>
+      <p>While we take every reasonable precaution, no system is 100% secure. We cannot guarantee the absolute security of your data. In the event of a data breach that affects your rights and freedoms, we will notify you and the relevant authorities as required by law.</p>
+    </section>
+
+    <!-- 10. Children's Privacy -->
+    <section class="stamp-section" aria-labelledby="sec-children">
+      <h2 id="sec-children">10. Children's Privacy</h2>
+      <p>Senior Post is strictly intended for users aged <strong>45 and older</strong>. We do not knowingly collect personal data from anyone under the age of 45.</p>
+      <p>If we become aware that we have inadvertently collected data from a person under 45, we will delete that data immediately and terminate the associated account. If you believe we may have collected data from an underage user, please contact us at <a href="mailto:privacy@seniorpost.app">privacy@seniorpost.app</a>.</p>
+    </section>
+
+    <!-- 11. International Data Transfers -->
+    <section class="stamp-section" aria-labelledby="sec-transfers">
+      <h2 id="sec-transfers">11. International Data Transfers</h2>
+      <p>Senior Post operates globally. Your personal data may be transferred to and processed in countries other than your country of residence, including countries that may not provide the same level of data protection as your home country.</p>
+      <p>For transfers of personal data from the EU/EEA to third countries, we rely on appropriate safeguards such as:</p>
+      <ul>
+        <li><strong>Standard Contractual Clauses (SCCs)</strong> approved by the European Commission</li>
+        <li>Adequacy decisions where applicable</li>
+      </ul>
+      <p>You may request a copy of the relevant transfer safeguards by contacting <a href="mailto:privacy@seniorpost.app">privacy@seniorpost.app</a>.</p>
+    </section>
+
+    <!-- 12. Cookies -->
+    <section class="stamp-section" aria-labelledby="sec-cookies">
+      <h2 id="sec-cookies">12. Cookies and Device Identifiers</h2>
+      <p>Our mobile application does not use browser cookies.</p>
+      <p>We use <strong>device identifiers</strong> (IDFA/IDFV on iOS; Android ID on Android) for security and fraud prevention purposes as described in Section 3. These identifiers are not used for advertising or cross-app tracking.</p>
+      <p>If you access Senior Post through a web browser in the future, we will update this policy to describe any cookies used at that time.</p>
+    </section>
+
+    <!-- 13. Changes to This Policy -->
+    <section class="stamp-section" aria-labelledby="sec-changes">
+      <h2 id="sec-changes">13. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time to reflect changes in our practices, technology, or legal requirements. When we make material changes, we will notify you via an in-app notification before the changes take effect.</p>
+      <p>The "Last updated" date at the top of this page indicates when the policy was most recently revised. Your continued use of Senior Post after the effective date of any changes constitutes your acceptance of the updated policy.</p>
+      <p>We encourage you to review this policy periodically to stay informed about how we protect your data.</p>
+    </section>
+
+    <!-- 14. Contact Us -->
+    <section class="stamp-section" aria-labelledby="sec-contact">
+      <h2 id="sec-contact">14. Contact Us</h2>
+      <p>If you have any questions, concerns, or requests regarding this Privacy Policy or the way we handle your personal data, please reach out to us:</p>
+      <ul>
+        <li><strong>Privacy enquiries:</strong> <a href="mailto:privacy@seniorpost.app">privacy@seniorpost.app</a></li>
+        <li><strong>Account deletion:</strong> use the in-app account deletion feature (Settings &rarr; Account &rarr; Delete Account), or email <a href="mailto:privacy@seniorpost.app">privacy@seniorpost.app</a></li>
+      </ul>
+      <p>We aim to respond to all privacy-related requests within <strong>30 days</strong>. If you are not satisfied with our response, you have the right to lodge a complaint with your local data protection authority.</p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Senior Post &mdash; Connecting generations, one letter at a time.</p>
+    <p style="margin-top:8px;">
+      <a href="index.html">Home</a> &nbsp;|&nbsp;
+      <a href="terms.html">Terms of Service</a> &nbsp;|&nbsp;
+      <a href="privacy.html">Privacy Policy</a>
+    </p>
+  </footer>
+
+</body>
+</html>
