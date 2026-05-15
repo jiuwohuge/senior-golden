@@ -1,0 +1,17 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+ARG VITE_API_BASE_URL=http://localhost:9011
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
+RUN npm run build
+
+EXPOSE 80
+
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "80"]

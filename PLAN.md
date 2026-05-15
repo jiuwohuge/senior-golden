@@ -277,6 +277,17 @@ flowchart LR
 
 ## [改动预测]
 
+- **本次新增（2026-05-15，Docker 化交付）**：
+  - 目标：将 **`senior-post-manage`** 与 **`senior-post-api`** 产出可复用 Docker 镜像，并提供一键编排启动。
+  - 预计改动：
+    - `senior-post-manage/Dockerfile` + `senior-post-manage/.dockerignore`
+    - `senior-post-api/Dockerfile` + `senior-post-api/.dockerignore`
+    - 根目录 `docker-compose.yml`
+  - 验证：`docker compose config` 通过，`docker build` 可产出两端镜像（后端镜像基于本机构建出的 JAR 打包，避免 `commons-framework` 本地 SNAPSHOT 依赖在容器内不可解析）。
+  - 编排增强：将 **`nginx` + `postgresql` + `redis`** 纳入同一 compose 网络，后端默认改为容器服务名互联（`postgresql` / `redis`），减少宿主机依赖。
+  - 开发体验增强：管理端 compose 服务切换为 **Vite dev server + 代码目录挂载 + polling**，并让 Nginx 反向代理到 `5174`，支持前端改动即时生效。
+  - Nginx 配置挂载策略：恢复为 **Windows 宿主机目录 `D:/06_docker_workplace/nginx/conf.d` 挂载到 `/etc/nginx/conf.d/`**，支持多 `server` 配置并行管理。
+
 - **FP-A4-004（2026-05-08）**：名录详情阻塞修复——后端新增 **`GET /api/directory/users/{userId}`**；Flutter **`directoryUserProvider`** 走 **`DirectoryRemoteRepository.getDirectoryUser`**，避免列表为真实 ID、详情仍查 Mock 导致的「Profile not found」。
 - **名录 Mock 剥离（2026-05-08 续）**：后端 **`GET /api/directory/interest-tags?lang=`**（`sys_tag`，与筛选 `interestNames` 一致）；Flutter 筛选国家改 **`appBootstrapProvider`**，兴趣选项走 **`directoryFilterTagOptionsProvider`**；**Tab2 列表 / 用户卡 / Send Letter** 固定远程，**`MockDirectoryRepository` 不再参与 directory 流程**（`AppEnv` 注释已说明）。
 - **已完成（2026-05-01）**：接入 **Flyway**（`server` 依赖 + `db/migration` 基线脚本）；**`/webapi`** 与 **`AppServiceDefine.WEBAPI_PREFIX`**；`application.yml` 拦截器/加解密忽略列表；**PLAN / 底层框架能力 / backend skill** 与本次决策对齐。

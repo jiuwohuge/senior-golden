@@ -1,0 +1,10 @@
+.git
+.idea
+target
+biz/target
+client/target
+server/target/classes
+server/target/generated-sources
+server/target/generated-test-sources
+server/target/maven-status
+server/target/test-classes

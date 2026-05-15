@@ -4,12 +4,12 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/senior_post?useunicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:postgresql://host.docker.internal:5432/senior_post?useunicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: postgres
     password: postgres
   data:
     redis:
-      host: localhost
+      host: host.docker.internal
       port: 6379
       password:
       timeout: 30000
