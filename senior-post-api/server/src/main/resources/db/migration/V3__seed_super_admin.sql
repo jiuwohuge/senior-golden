@@ -1,5 +1,5 @@
 -- 可登录管理端的种子用户：staff_role 非 0 即可（暂不分角色）；登录邮箱 admin@staff.local（用户名填 admin 会自动补全）
--- 密码与 BCryptPasswordEncoder 一致
+-- 密码与 BCryptPasswordEncoder 一致  admin/Admin@123456
 INSERT INTO bu_user (
     email,
     password_hash,

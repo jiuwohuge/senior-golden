@@ -277,6 +277,14 @@ flowchart LR
 
 ## [改动预测]
 
+- **本次新增（2026-05-16，官网静态页视觉优化）**：
+  - 目标：优化 `senior-post-manage/static/index.html` 的视觉层次、交互反馈与移动端可用性。
+  - 预计改动：
+    - `senior-post-manage/static/index.html`
+  - 验证：
+    - 本地构建 `senior-post-manage`（`npm run build`）通过。
+    - 手工走查：锚点导航高亮、移动端折叠菜单、按钮/卡片悬停反馈、分区滚动动效可用。
+
 - **本次新增（2026-05-15，Docker 化交付）**：
   - 目标：将 **`senior-post-manage`** 与 **`senior-post-api`** 产出可复用 Docker 镜像，并提供一键编排启动。
   - 预计改动：
@@ -287,6 +295,7 @@ flowchart LR
   - 编排增强：将 **`nginx` + `postgresql` + `redis`** 纳入同一 compose 网络，后端默认改为容器服务名互联（`postgresql` / `redis`），减少宿主机依赖。
   - 开发体验增强：管理端 compose 服务切换为 **Vite dev server + 代码目录挂载 + polling**，并让 Nginx 反向代理到 `5174`，支持前端改动即时生效。
   - Nginx 配置挂载策略：恢复为 **Windows 宿主机目录 `D:/06_docker_workplace/nginx/conf.d` 挂载到 `/etc/nginx/conf.d/`**，支持多 `server` 配置并行管理。
+  - 路由策略收敛：域名根路径回官网静态页；`/privacy`、`/terms` 独立协议页；管理后台迁移到 `/manage/` basePath；后端继续保持 `/api` 与 `/webapi`。
 
 - **FP-A4-004（2026-05-08）**：名录详情阻塞修复——后端新增 **`GET /api/directory/users/{userId}`**；Flutter **`directoryUserProvider`** 走 **`DirectoryRemoteRepository.getDirectoryUser`**，避免列表为真实 ID、详情仍查 Mock 导致的「Profile not found」。
 - **名录 Mock 剥离（2026-05-08 续）**：后端 **`GET /api/directory/interest-tags?lang=`**（`sys_tag`，与筛选 `interestNames` 一致）；Flutter 筛选国家改 **`appBootstrapProvider`**，兴趣选项走 **`directoryFilterTagOptionsProvider`**；**Tab2 列表 / 用户卡 / Send Letter** 固定远程，**`MockDirectoryRepository` 不再参与 directory 流程**（`AppEnv` 注释已说明）。

@@ -5,6 +5,7 @@ services:
       - "${NGINX_PORT:-80}:80"
     volumes:
       - "${NGINX_CONFIG_DIR:-D:/06_docker_workplace/nginx/conf.d}:/etc/nginx/conf.d/"
+      - "D:/06_docker_workplace/nginx/html:/usr/share/nginx/html"
     depends_on:
       - senior-post-manage
       - senior-post-api
@@ -81,6 +82,7 @@ services:
       ]
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:${NGINX_PORT:-80}}
+      VITE_BASE_PATH: ${VITE_BASE_PATH:-/manage/}
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
     volumes:
