@@ -39,6 +39,8 @@ spring:
       preferred-json-mapper: jackson
 
 server:
+  servlet:
+    context-path: ${SERVER_SERVLET_CONTEXT_PATH:/backend}
   tomcat:
     threads:
       max: 200

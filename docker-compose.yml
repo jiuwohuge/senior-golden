@@ -51,6 +51,7 @@ services:
       - "5005:5005"
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SERVER_SERVLET_CONTEXT_PATH: ${SERVER_SERVLET_CONTEXT_PATH:-/backend}
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgresql:5432/senior_post?useunicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgres}
@@ -78,7 +79,7 @@ services:
       [
         "sh",
         "-c",
-        "rm -rf node_modules/* && npm install --include=optional && npm run dev -- --host 0.0.0.0 --port 5174",
+        "if [ ! -x node_modules/.bin/vite ]; then npm install --include=optional; fi && npm run dev -- --host 0.0.0.0 --port 5174",
       ]
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:${NGINX_PORT:-80}}
