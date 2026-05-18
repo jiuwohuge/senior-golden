@@ -68,10 +68,10 @@ final dioProvider = Provider<Dio>((ref) {
             debugPrint('[AES-REQ] plain: $plainBeforeEncrypt');
             debugPrint('[AES-REQ] cipher: $wrapped');
           }
-          // WHY: 当 Content-Type 为 application/json 且 body 是 String 时，
-          // Dio 可能将其再次 JSON 编码（外层加引号），导致后端把带引号密文参与 Base64 解码而失败。
+          // WHY: 保持 application/json 与后端接口约定一致，同时用原始字节发送密文，
+          // 避免 String 在 JSON 编码链路里被再次包一层引号。
           options.data = utf8.encode(wrapped);
-          options.contentType = Headers.textPlainContentType;
+          options.contentType = Headers.jsonContentType;
         }
         handler.next(options);
       },

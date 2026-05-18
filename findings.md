@@ -302,3 +302,13 @@
 - 仍可用于**服务端筛选**向哪些客户端推这条公告；**不作为**全屏拦截强更。
 
 > **修订说明**：曾考虑 Markdown/富文本；按 Owner 意见改为 **结构化表单 + 纯文本「更新内容」**（与常见应用商店「更新说明」版式一致）。
+
+---
+
+## 19. 明信片墙/名录排查：为何日志频繁出现 `/api/auth/me`（2026-05-18）
+
+| 发现 | 说明 |
+|------|------|
+| 终端日志中 `auth/me` 与 `im/usersig` 成对高频出现 | 与业务墙/名录接口无直接映射，属于会话刷新 + IM 预热触发链。 |
+| 根因在导航壳重建 | `MainShell` 底部 Tab 使用 `context.go(...)` 切路径，导致 `MainShell` 重建；`ProfilePage.initState` 每次重建都会调用 `refreshSessionFromServer -> /api/auth/me`。 |
+| 业务接口本身未被改写 | 墙与名录仓储仍指向 `/api/postcards/*`、`/api/directory/*`；高频 `auth/me` 是副作用噪声。 |

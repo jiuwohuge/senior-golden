@@ -1,5 +1,12 @@
 # 会话进度日志
 
+## 2026-05-18 — 排查 `auth/me` 高频调用淹没业务接口日志（planning-with-files）
+
+- **现象**：运行日志中出现大量 `GET /backend/api/auth/me`，用户怀疑明信片墙/通信名录未调用正确接口。
+- **定位**：`MainShell` 底部导航点击时调用 `context.go` 切换 `/`、`/directory`、`/mailbox`、`/profile`，导致 `MainShell` 反复重建；`ProfilePage.initState` 每次都会触发 `refreshSessionFromServer()`。
+- **修复**：`main_shell.dart` `_goBranch` 改为仅更新 `_index`（壳内 `IndexedStack` 切页），不再每次 `go` 重建。
+- **验证**：`flutter analyze` 通过。
+
 ## 2026-05-12 — Sprint 4 五项 FP 代码闭环（A1-006 / X-001 / A1-007 / X-003 / A10-001）
 
 - **后端**：`AppAuthService` 设备头体校验；`V17` 邮件 Outbox + `MailOutboxDispatchScheduler`；忘记密码改入队 + `LocaleContextHolder` locale；`PasswordResetMailNotifier` 使用 `MessageSource`（`app.mail.passwordReset.*`）；`V18` 公告列 + `AppReleaseNoteService` + `GET /api/bootstrap/release-note`；`AnnouncementServiceImpl` 禁止 `<` 与版本区间校验；`jh.security` 收窄明文 URI 并设 `android-version`/`ios-version`；`application.yml` outbox 配置。

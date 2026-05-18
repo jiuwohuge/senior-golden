@@ -53,9 +53,15 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
       await ref.read(authRepositoryProvider).forgotPassword(email: _email.text);
       if (!mounted) return;
       setState(() => _step = 1);
-      PostalSnack.show(context, l10n.authForgotMailSent, tone: PostalSnackTone.success);
+      PostalSnack.show(
+        context,
+        l10n.authForgotMailSent,
+        tone: PostalSnackTone.success,
+      );
     } on ApiBusinessException catch (e) {
-      if (mounted) PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -65,17 +71,25 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
     if (!(_formKey2.currentState?.validate() ?? false)) return;
     setState(() => _busy = true);
     try {
-      await ref.read(authRepositoryProvider).resetPassword(
+      await ref
+          .read(authRepositoryProvider)
+          .resetPassword(
             email: _email.text,
             code: _code.text,
             newPassword: _newPwd.text,
           );
       if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
-      PostalSnack.show(context, l10n.authForgotResetSuccess, tone: PostalSnackTone.success);
+      PostalSnack.show(
+        context,
+        l10n.authForgotResetSuccess,
+        tone: PostalSnackTone.success,
+      );
       setState(() => _step = 2);
     } on ApiBusinessException catch (e) {
-      if (mounted) PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -86,7 +100,14 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.authForgotPassword)),
+      appBar: AppBar(
+        leading: IconButton(
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _onBackPressed,
+        ),
+        title: Text(l10n.authForgotPassword),
+      ),
       body: PaperTextureBackground(
         child: SafeArea(
           child: ListView(
@@ -117,8 +138,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
                   child: _step == 0
                       ? _stepEmail(context, l10n)
                       : _step == 1
-                          ? _stepReset(context, l10n)
-                          : _stepDone(context, l10n),
+                      ? _stepReset(context, l10n)
+                      : _stepDone(context, l10n),
                 ),
               ),
             ],
@@ -128,7 +149,30 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
     );
   }
 
-  Widget _vintageHeader(BuildContext context, AppLocalizations l10n, ColorScheme cs) {
+  void _onBackPressed() {
+    if (Navigator.of(context).canPop()) {
+      context.pop();
+      return;
+    }
+    context.go(LoginRoutes.login);
+  }
+
+  String _sanitizeIntroText(String raw) {
+    return raw
+        .replaceAll('或（开发环境）服务端日志中查看', '在邮箱中查看')
+        .replaceAll('（开发环境）', '')
+        .replaceAll(
+          'In local dev, check server logs if SMTP is not configured.',
+          'Please check your email inbox.',
+        )
+        .trim();
+  }
+
+  Widget _vintageHeader(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
     return AnimatedBuilder(
       animation: _inkCtrl,
       builder: (context, _) {
@@ -139,7 +183,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
             decoration: BoxDecoration(
               color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.6)),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.6),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: cs.shadow.withValues(alpha: 0.08),
@@ -156,18 +202,18 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
                   Text(
                     'POSTAL · RECOVERY',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          letterSpacing: 3.2,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurfaceVariant,
-                        ),
+                      letterSpacing: 3.2,
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n.authForgotIntro,
+                    _sanitizeIntroText(l10n.authForgotIntro),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          height: 1.45,
-                          color: cs.onSurface.withValues(alpha: 0.88),
-                        ),
+                      height: 1.45,
+                      color: cs.onSurface.withValues(alpha: 0.88),
+                    ),
                   ),
                 ],
               ),
@@ -189,7 +235,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
               height: 30,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: active ? Theme.of(context).colorScheme.primary : Colors.transparent,
+                color: active
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.transparent,
                 border: Border.all(
                   color: active
                       ? Theme.of(context).colorScheme.primary
@@ -200,13 +248,19 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
               child: Text(
                 '${i + 1}',
                 style: TextStyle(
-                  color: active ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: active
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ),
             const SizedBox(height: 6),
-            Text(label, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       );
@@ -236,7 +290,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
               validator: (v) {
                 final value = v?.trim() ?? '';
                 if (value.isEmpty) return l10n.authFieldRequired;
-                if (!value.contains('@') || !value.contains('.')) return l10n.authEmailInvalid;
+                if (!value.contains('@') || !value.contains('.')) {
+                  return l10n.authEmailInvalid;
+                }
                 return null;
               },
             ),
@@ -267,7 +323,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
               validator: (v) {
                 final s = v?.trim() ?? '';
                 if (s.isEmpty) return l10n.authFieldRequired;
-                if (!RegExp(r'^\d{6}$').hasMatch(s)) return l10n.authForgotCodeInvalid;
+                if (!RegExp(r'^\d{6}$').hasMatch(s)) {
+                  return l10n.authForgotCodeInvalid;
+                }
                 return null;
               },
             ),

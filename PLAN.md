@@ -277,6 +277,62 @@ flowchart LR
 
 ## [改动预测]
 
+- **本次新增（2026-05-18，按用户要求回滚 Tab 导航优化）**：
+  - 目标：恢复“切换 Tab 即走路由跳转并触发相关刷新请求”的既有行为。
+  - 实际处理：
+    - `senior-post-flutter/lib/features/shell/main_shell.dart`
+      - 回滚 `_goBranch` 为 `context.go(...)` 路由跳转逻辑；
+      - 恢复 `go_router` import。
+  - 验证：
+    - `flutter analyze` 通过。
+
+- **本次新增（2026-05-18，App 忘记/重置密码页 UI 清理）**：
+  - 目标：
+    - 忘记/重置密码页面新增明确「返回」按钮，避免部分路由栈场景无可见返回入口。
+    - 移除该页面向用户展示的“开发环境/调试”提示文案，保持生产文案一致性。
+    - 全量排查 `senior-post-flutter/lib` 中 UI 文案是否含“开发/调试”相关表述。
+  - 预计改动（控制在 3 个文件内）：
+    - `senior-post-flutter/lib/features/auth/forgot_password_page.dart`
+    - `PLAN.md`
+  - 验证：
+    - `flutter analyze` 通过。
+    - 手工验证忘记密码页顶部可返回；引导文案不再出现“开发环境/调试”字样。
+
+- **本次新增（2026-05-18，Tab 切换导致 `auth/me` 高频调用排查）**：
+  - 目标：修复明信片墙/通信名录排查时日志被 `/backend/api/auth/me` 大量刷屏，误判为接口路由错误。
+  - 根因：
+    - `MainShell` 底部导航点击会 `context.go(...)` 到不同 path（`/`、`/directory`、`/mailbox`、`/profile`）；
+    - 每次 `go` 都会新建 `MainShell`，从而重复触发 `ProfilePage.initState -> refreshSessionFromServer (/api/auth/me)` 与 `Mailbox` IM 预热（`/api/im/usersig`）。
+  - 实际处理：
+    - `senior-post-flutter/lib/features/shell/main_shell.dart`
+      - Tab 切换改为仅更新本地 `_index`（`IndexedStack` 内切页），不再每次执行路由跳转重建 Shell。
+  - 验证：
+    - `flutter analyze` 通过；
+    - 切换 Tab 时不再出现成对重复的 `/api/auth/me` + `/api/im/usersig`。
+
+- **本次新增（2026-05-18，AES 请求 Content-Type 修正）**：
+  - 目标：修复登录时报错 `Content-Type 'text/plain;charset=UTF-8' is not supported`。
+  - 根因：
+    - 上一版将 AES 请求 `Content-Type` 改为 `text/plain`，与后端接口 `application/json` 约束冲突。
+  - 实际处理：
+    - `senior-post-flutter/lib/core/network/dio_provider.dart`
+      - AES 请求保持 `application/json`；
+      - 仍发送 `utf8` 原始字节密文，避免 String 被 JSON 二次包引号。
+  - 验证：
+    - `flutter analyze` 通过；
+    - 登录接口不再返回 `text/plain not supported`。
+
+- **本次新增（2026-05-18，Docker 内网数据库端口修复）**：
+  - 目标：修复 `senior-post-api` 启动时报 `Connection to postgresql:65432 refused`。
+  - 根因：
+    - `.env` 将 `SPRING_DATASOURCE_URL` 配置为 `postgresql:65432`；
+    - `65432` 是宿主机映射端口，不是容器网络中的 PostgreSQL 监听端口；
+    - Compose 服务间应始终通过 `postgresql:5432` 通信。
+  - 实际处理：
+    - `/.env`：`SPRING_DATASOURCE_URL` 从 `postgresql:65432` 调整为 `postgresql:5432`。
+  - 验证：
+    - 重新 `docker compose up -d --build senior-post-api`，观察后端日志不再出现 `Connection refused`（若随后出现认证失败，则转入密码一致性问题排查）。
+
 - **本次新增（2026-05-18，Flutter AES 入参调试日志增强）**：
   - 目标：排查“Flutter 已加密但后端解密失败”时，直观看到同一请求的加密前后参数。
   - 实际处理：
