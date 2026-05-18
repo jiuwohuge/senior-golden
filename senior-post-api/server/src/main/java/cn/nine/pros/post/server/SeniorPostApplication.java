@@ -25,7 +25,7 @@ public class SeniorPostApplication {
         String ip = InetAddress.getLocalHost().getHostAddress();
         String port = env.getProperty("server.port");
         String contextPath = env.getProperty("server.servlet.context-path");
-        String prefix = port +"/"+ (contextPath != null ? contextPath : "");
+        String prefix = port+ (contextPath != null ? contextPath : "");
         log.info("\n----------------------------------------------------------\n\t" +
                 "Application Senior Post API is running! Access URLs:\n\t" +
                 "Local: \t\thttp://localhost:" + prefix + "\n\t" +

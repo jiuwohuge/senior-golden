@@ -277,6 +277,29 @@ flowchart LR
 
 ## [改动预测]
 
+- **本次新增（2026-05-18，Flutter AES 入参调试日志增强）**：
+  - 目标：排查“Flutter 已加密但后端解密失败”时，直观看到同一请求的加密前后参数。
+  - 实际处理：
+    - `senior-post-flutter/lib/core/network/dio_provider.dart`
+      - 在请求拦截器 AES 分支新增调试日志：
+        - `plain`：加密前明文入参（JSON 字符串化）
+        - `cipher`：加密后 Base64 密文
+      - 仅在 `kDebugMode || API_LOG=true` 时打印，避免默认污染发布日志。
+  - 验证：
+    - `flutter analyze` 通过。
+
+- **本次新增（2026-05-18，Flutter AES 请求体格式修复，仅改 Dart）**：
+  - 目标：修复 Flutter 端加密后，后端 `AesEncryptUtils.decrypt` 失败（`decrypt error`）。
+  - 根因：
+    - 加密请求体是纯密文字符串，但请求头仍是 `Content-Type: application/json`；
+    - Dio 在该组合下可能对字符串再次 JSON 编码（外层加双引号），后端按原始 Base64 密文解密时失败。
+  - 实际处理：
+    - `senior-post-flutter/lib/core/network/dio_provider.dart`
+      - 对启用 AES 的请求，发送 `utf8` 原始字节并将 `contentType` 明确设为 `text/plain`，避免 JSON 二次包裹。
+    - 回退 `commons-security` 的临时改动，保持 Java 端无变更。
+  - 验证：
+    - 已完成 Flutter 静态检查（见下方本次终端实测日志）。
+
 - **本次新增（2026-05-18，按用户要求恢复 `/api` 全量 AES）**：
   - 目标：纠正“把 `/api/auth/*` 放入明文白名单”的错误改动，保证“仅免 Token 拦截，不免加解密”。
   - 实际处理：

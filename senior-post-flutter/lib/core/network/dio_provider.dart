@@ -60,9 +60,18 @@ final dioProvider = Provider<Dio>((ref) {
           options.headers['equipmentId'] = equip;
         }
         final path = options.uri.path;
+        final plainBeforeEncrypt = _requestPayloadToDebugString(options.data);
         final wrapped = JhApiCrypto.wrapJsonBodyIfNeeded(path, options.data);
         if (wrapped != null) {
-          options.data = wrapped;
+          if (kDebugMode || _kApiVerboseLog) {
+            debugPrint('[AES-REQ] path: $path');
+            debugPrint('[AES-REQ] plain: $plainBeforeEncrypt');
+            debugPrint('[AES-REQ] cipher: $wrapped');
+          }
+          // WHY: 当 Content-Type 为 application/json 且 body 是 String 时，
+          // Dio 可能将其再次 JSON 编码（外层加引号），导致后端把带引号密文参与 Base64 解码而失败。
+          options.data = utf8.encode(wrapped);
+          options.contentType = Headers.textPlainContentType;
         }
         handler.next(options);
       },
@@ -167,4 +176,21 @@ T unwrapData<T>(Response<dynamic> response, T Function(Object? raw) parse) {
     throw ApiBusinessException(0, 'Invalid response shape');
   }
   return parse(raw['data']);
+}
+
+String _requestPayloadToDebugString(Object? payload) {
+  if (payload == null) {
+    return 'null';
+  }
+  if (payload is List<int>) {
+    return utf8.decode(payload, allowMalformed: true);
+  }
+  if (payload is String) {
+    return payload;
+  }
+  try {
+    return jsonEncode(payload);
+  } catch (_) {
+    return payload.toString();
+  }
 }
