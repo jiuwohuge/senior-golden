@@ -349,7 +349,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get postComposeUploadNeedRealApi => '图片上传需要服务端签发地址，请检查网络后重试。';
 
   @override
-  String get postComposePickerChannelError => '相册插件未连接。请完全停止应用后重新运行；仍失败请执行 flutter clean。';
+  String get postComposePickerChannelError =>
+      '相册插件未连接。请完全停止应用后重新运行；仍失败请执行 flutter clean。';
 
   @override
   String get postComposeImageUploaded => '图片已上传';
@@ -554,7 +555,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileAvatarCropHelp => '拖动、缩放，将头像对准圆内。取消则不保存。';
 
   @override
-  String get profileAvatarPreviewHint => '拖动缩放选区后点「确认裁剪」。回到本页后点「确认上传」保存头像，或点「放弃」取消。';
+  String get profileAvatarPreviewHint =>
+      '拖动缩放选区后点「确认裁剪」。回到本页后点「确认上传」保存头像，或点「放弃」取消。';
 
   @override
   String get profileAvatarConfirmUpload => '确认上传';
@@ -635,10 +637,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get legalEffectiveDate => '生效日期：2026-05-01';
 
   @override
-  String get legalTermsContent => '1）本应用面向 45+ 成年用户提供兴趣陪伴社交服务。\\n\\n2）本产品不提供婚恋与匹配服务。\\n\\n3）你需对发布内容负责，不得发布违法违规内容。\\n\\n4）对于骚扰、刷屏、欺诈等行为，平台可限制或封禁账号。\\n\\n5）平台提供举报和审核机制以维护安全交流环境。';
+  String get legalTermsContent =>
+      '1）本应用面向 45+ 成年用户提供兴趣陪伴社交服务。\\n\\n2）本产品不提供婚恋与匹配服务。\\n\\n3）你需对发布内容负责，不得发布违法违规内容。\\n\\n4）对于骚扰、刷屏、欺诈等行为，平台可限制或封禁账号。\\n\\n5）平台提供举报和审核机制以维护安全交流环境。';
 
   @override
-  String get legalPrivacyContent => '1）我们会收集账号与设备信息用于安全风控与服务提供。\\n\\n2）我们依据适用隐私法规处理数据，并提供删除/导出路径。\\n\\n3）我们不会出售你的个人数据。\\n\\n4）部分数据处理用于实现核心消息与内容审核能力。\\n\\n5）你可联系支持申请账号删除与相关数据清理。';
+  String get legalPrivacyContent =>
+      '1）我们会收集账号与设备信息用于安全风控与服务提供。\\n\\n2）我们依据适用隐私法规处理数据，并提供删除/导出路径。\\n\\n3）我们不会出售你的个人数据。\\n\\n4）部分数据处理用于实现核心消息与内容审核能力。\\n\\n5）你可联系支持申请账号删除与相关数据清理。';
 
   @override
   String get vipCenterUnlimitedRegisteredMail => '会员可无限寄送挂号信（以服务端规则为准）。';
@@ -699,7 +703,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterMailboxSealedPreview => '信件密封递送中';
 
   @override
-  String get letterContentHiddenHint => '平邮运输中，正文已密封。自然送达后将自动展示，或使用 1 枚邮票提前拆信（VIP 免扣）。';
+  String get letterContentHiddenHint =>
+      '平邮运输中，正文已密封。自然送达后将自动展示，或使用 1 枚邮票提前拆信（VIP 免扣）。';
 
   @override
   String get letterEarlyOpenCta => '提前拆信（1 枚邮票）';

@@ -2,7 +2,7 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-ARG JAR_FILE=server/target/senior-post-server-*.jar
+ARG JAR_FILE=dist/senior-post-server-*.jar
 COPY ${JAR_FILE} app.jar
 
 EXPOSE 9011

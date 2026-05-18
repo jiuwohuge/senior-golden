@@ -37,55 +37,108 @@ class _PostWallPageState extends ConsumerState<PostWallPage> {
     final postsAsync = ref.watch(postWallListProvider);
     return SafeArea(
       top: false,
-      child: Column(
+      child: Stack(
         children: [
-          const PostalPerforationStrip(),
-          Expanded(
-            child: postsAsync.when(
-              loading: () => const PostalSkeletonList(),
-              error: (error, _) => PostalEmptyState(
-                title: l10n.postWallUnavailable,
-                subtitle: '$error',
-                actionLabel: l10n.commonRetry,
-                onAction: () => ref.invalidate(postWallListProvider),
-                tone: PostalEmptyTone.error,
-              ),
-              data: (posts) {
-                if (posts.isEmpty) {
-                  return PostalEmptyState(
-                    title: l10n.postWallEmptyTitle,
-                    subtitle: l10n.postWallEmptySubtitle,
-                    actionLabel: l10n.postWallWriteAction,
-                    onAction: () => context.push('/post/new'),
-                  );
-                }
-                return Stack(
-                  children: [
-                    RefreshIndicator(
+          Column(
+            children: [
+              const PostalPerforationStrip(),
+              Expanded(
+                child: postsAsync.when(
+                  loading: () => const PostalSkeletonList(),
+                  error: (error, _) => PostalEmptyState(
+                    title: l10n.postWallUnavailable,
+                    subtitle: '$error',
+                    actionLabel: l10n.commonRetry,
+                    onAction: () => ref.invalidate(postWallListProvider),
+                    tone: PostalEmptyTone.error,
+                  ),
+                  data: (posts) {
+                    if (posts.isEmpty) {
+                      return PostalEmptyState(
+                        title: l10n.postWallEmptyTitle,
+                        subtitle: l10n.postWallEmptySubtitle,
+                      );
+                    }
+                    return RefreshIndicator(
                       onRefresh: _onRefresh,
                       child: ListView.separated(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 90),
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
                         itemCount: posts.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 12),
                         itemBuilder: (_, i) => _PostCard(post: posts[i]),
                       ),
-                    ),
-                    Positioned(
-                      right: 20,
-                      bottom: 18,
-                      child: FloatingActionButton.extended(
-                        onPressed: () => context.push('/post/new'),
-                        icon: const Icon(Icons.edit_note),
-                        label: Text(l10n.postWallFAB),
-                      ),
-                    ),
-                  ],
-                );
-              },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          if (postsAsync.hasValue)
+            Positioned(
+              right: 18,
+              bottom: 16,
+              child: _PostWallComposeFab(
+                label: l10n.postWallFAB,
+                onPressed: () => context.push('/post/new'),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PostWallComposeFab extends StatelessWidget {
+  const _PostWallComposeFab({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [PostalTokens.postboxGreen, PostalTokens.postboxGreenMuted],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: PostalTokens.postboxGreen.withValues(alpha: 0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          heroTag: 'post-wall-compose-fab',
+          onPressed: onPressed,
+          icon: const Icon(Icons.edit_square, size: 19, color: Colors.white),
+          label: Text(
+            label,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.2,
             ),
           ),
-        ],
+          elevation: 0,
+          highlightElevation: 0,
+          backgroundColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
+            side: BorderSide(
+              color: Colors.white.withValues(alpha: 0.2),
+              width: 1.1,
+            ),
+          ),
+        ),
       ),
     );
   }

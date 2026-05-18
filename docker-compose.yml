@@ -45,7 +45,7 @@ services:
       context: ./senior-post-api
       dockerfile: Dockerfile
       args:
-        JAR_FILE: server/target/senior-post-server-*.jar
+        JAR_FILE: dist/senior-post-server-*.jar
     ports:
       - "9011:9011"
       - "5005:5005"

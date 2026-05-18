@@ -277,6 +277,121 @@ flowchart LR
 
 ## [改动预测]
 
+- **本次新增（2026-05-18，按用户要求恢复 `/api` 全量 AES）**：
+  - 目标：纠正“把 `/api/auth/*` 放入明文白名单”的错误改动，保证“仅免 Token 拦截，不免加解密”。
+  - 实际处理：
+    - `senior-post-api/server/src/main/resources/application.yml`
+      - 从 `resIgnoreEncryptUris/reqIgnoreDecryptUris` 移除 `/api/auth/*` 与 `/api/bootstrap/*`，保留管理端 `/webapp/**`、`/webapi/**` 明文策略。
+    - `senior-post-api/server/src/main/resources/application-local.yml`
+      - 同步移除 `/api/auth/*` 与 `/api/bootstrap/*` 明文白名单，确保 local 与主配置一致。
+    - `senior-post-flutter/lib/core/network/jh_api_crypto.dart`
+      - 客户端明文路径判定改为仅 `'/webapi/'`，`/api/**` 默认全量 AES 请求加密/响应解密。
+  - 验证：
+    - 配置文件已恢复为“Token 拦截例外与 AES 策略分离”。
+    - Flutter 侧静态检查通过（无新增错误）。
+
+- **本次新增（2026-05-18，登录解密失败前后端策略对齐）**：
+  - 目标：修复 Flutter 登录命中后端 `request data decode failed`（请求体被当密文解密失败）。
+  - 根因：
+    - `application-local.yml` 的 `jh.security.reqIgnoreDecryptUris/resIgnoreEncryptUris` 仅保留了 `/webapi/**`，覆盖了 `application.yml` 中登录/注册等匿名明文白名单；
+    - Flutter 仍按匿名接口明文发送登录请求，导致后端错误进入解密流程。
+  - 实际处理：
+    - `senior-post-api/server/src/main/resources/application-local.yml`
+      - 补齐与主配置一致的匿名明文白名单（`/api/auth/login`、`/api/auth/register`、`/api/auth/forgot-password`、`/api/auth/reset-password`、`/api/bootstrap/init`、`/api/bootstrap/release-note`）。
+    - `senior-post-flutter/lib/core/network/jh_api_crypto.dart`
+      - 默认 AES key 调整为 `8e32de3646dc4c02ae2507511202c7ca`，与后端当前配置值对齐，避免后续需加密接口再次出现密钥不一致。
+  - 验证：
+    - 后端重建后，登录请求不再报 `request data decode failed`。
+    - Flutter 登录链路返回业务响应（非解密异常）。
+
+- **本次新增（2026-05-18，Docker 后端端口变更不生效修复）**：
+  - 目标：修复已将 `application-local.yml` 改为 `server.port=9011` 后，容器仍以 `9012` 启动的问题。
+  - 根因：`docker compose up --build` 过程中 `COPY server/target/... app.jar` 长期命中缓存，同时 `senior-post-api/.dockerignore` 包含 `target`，导致镜像未纳入最新后端 JAR。
+  - 实际处理：
+    - 修改 `senior-post-api/Dockerfile`：`JAR_FILE` 默认路径从 `server/target/...` 调整为 `server/dist/...`（构建产物稳定且不受 `.dockerignore` 的 `target` 规则影响）。
+  - 验证：
+    - `docker compose build --no-cache senior-post-api` 后 `COPY` 步骤不再复用旧层。
+    - 容器启动日志 `Local:` 端口与 `application-local.yml` 配置一致（9011）。
+
+- **本次新增（2026-05-16，登录事务中断 `25P02` 修复）**：
+  - 目标：修复登录后偶发/重复登录时事务被中断，随后 `selectById` 报 `current transaction is aborted`。
+  - 根因：`StampGrantServiceImpl.afterLogin` 在同一事务中直接 `insert` 每日赠票记录；命中唯一索引 `uk_stamp_daily_login` 后 SQL 异常将 PostgreSQL 事务置为 aborted，后续查询全部失败。
+  - 实际处理：
+    - `senior-post-api/biz/src/main/java/cn/nine/pros/post/biz/mapper/StampDailyGrantMapper.java`
+      - 新增登录/发帖赠票的幂等写入 SQL，统一使用 `ON CONFLICT ... DO NOTHING`。
+    - `senior-post-api/biz/src/main/java/cn/nine/pros/post/biz/service/base/impl/StampGrantServiceImpl.java`
+      - 改为根据插入行数判断是否已赠送，移除依赖异常分支的幂等逻辑。
+  - 验证：
+    - `senior-post-api` 编译通过。
+    - 重复登录同一账号不再触发 `uk_stamp_daily_login` 异常，登录接口不再因该冲突中断事务。
+
+- **本次新增（2026-05-16，AES 密钥与 commons-security 默认值对齐）**：
+  - 目标：修复开启加解密后登录/发帖请求在后端 `request data decode failed`。
+  - 根因：Flutter 默认 `JH_AES_KEY` 与 `commons-security` 实际生效 key 不一致（后端未命中自定义 key 配置时使用 `EncryptionProperties` 默认值）。
+  - 实际处理：
+    - `senior-post-flutter/lib/core/network/jh_api_crypto.dart` 默认 key 调整为 `d86d7bab3d6ac01ad9dc6a897652f2d2`（与组件默认一致）。
+    - 保留 `--dart-define=JH_AES_KEY=...` 覆盖能力，便于后端后续切换配置。
+  - 验证：
+    - 使用容器内网地址对 `/backend/api/auth/login` 发起 AES 加密请求，返回 `code=200`（加密 `data`）。
+
+- **本次新增（2026-05-16，AES 请求体协议与 commons-security 对齐）**：
+  - 目标：修复开启 AES 后后端解析请求体为空（如发帖 `content:must not be blank`）的问题。
+  - 根因：Flutter 之前将加密请求体封装为 `{\"data\":\"...\"}`；而 `commons-security` 的 `EncryptionReqestWrapper` + `EncryptionFilter#processDecryption` 会直接把“整个请求体字符串”当作密文解密，协议不一致导致解密失败/空体。
+  - 实际处理：
+    - `senior-post-flutter/lib/core/network/jh_api_crypto.dart`：加密请求改为发送“纯密文字符串”。
+    - `senior-post-flutter/lib/core/network/dio_provider.dart`：默认 `versionCode` 调整为 `2`，与 `androidVersion=1` 的加解密门槛策略对齐（避免被后端直接跳过加解密过滤）。
+  - 验证：
+    - `flutter analyze` 通过。
+    - 按 `commons-security` 同算法（AES/ECB/PKCS5Padding + Base64）构造请求，`POST /backend/api/postcards` 返回成功，证明 Flutter 与后端加解密协议一致。
+
+- **本次新增（2026-05-16，Post Wall 发布 content 为空排障）**：
+  - 目标：修复发布明信片返回 `content:must not be blank`。
+  - 根因：Flutter 仍对 `/api/postcards` 请求体执行 AES 包装为 `{data:...}`，而当前后端 local/docker 配置按明文处理（`reqIgnoreDecryptUris` 覆盖 `/api/**`），导致 DTO 无法解析 `content`。
+  - 实际处理：
+    - 在 `senior-post-flutter/lib/core/network/jh_api_crypto.dart` 增加 `API_AES_ENABLED` 编译开关，默认 `false`（本地明文）。
+    - 仅当显式传入 `--dart-define=API_AES_ENABLED=true` 时才启用请求加密/响应解密。
+  - 验证：
+    - `flutter analyze` 通过。
+    - 发布请求日志 `data` 为明文 JSON（含 `content`），接口不再报 `content:must not be blank`。
+
+- **本次新增（2026-05-16，Post Wall 发布入口视觉改造）**：
+  - 目标：将 Post Wall 空状态中的“Write postcard”普通按钮改为统一悬浮发布按钮，提升入口可见性与触达效率。
+  - 实际处理：
+    - 修改 `senior-post-flutter/lib/features/post_wall/post_wall_page.dart`。
+    - 空状态移除中部 CTA，改为右下角统一悬浮入口（列表态与空态共用）。
+    - 新增邮政风悬浮按钮样式（渐变、阴影、圆角胶囊、强化文字权重）。
+  - 验证：
+    - `flutter analyze` 通过。
+    - 运行后 Post Wall 空态和列表态均可通过右下角悬浮按钮进入 `/post/new`。
+
+- **本次新增（2026-05-16，注册 device 字段校验失败排障）**：
+  - 目标：修复 Flutter 注册/登录在 Docker `context-path=/backend` 场景下被误加密，导致后端校验 `deviceUid/deviceType` 类字段空值错误。
+  - 根因：`senior-post-flutter/lib/core/network/jh_api_crypto.dart` 的明文白名单仅匹配 `/api/...`，未处理实际请求路径 `/backend/api/...`，从而把本应明文的 `/api/auth/register`、`/api/auth/login` 包成 `{data: ...}`。
+  - 实际处理：
+    - 在 `isPlaintextApiPath` 增加路径归一化（去除 `/backend` 前缀）后再进行白名单判断。
+    - 保持后端 AES 策略不变，修复客户端路径判断逻辑。
+  - 验证：
+    - `flutter analyze` 通过。
+    - 观察 Dio 日志中 `/backend/api/auth/register` 请求体由 `{data: ...}` 变为明文 JSON。
+    - 注册/登录不再返回设备字段为空的校验错误。
+
+- **本次新增（2026-05-16，Flutter 启动 Directionality 崩溃修复）**：
+  - 目标：修复启动后首帧报错 `No Directionality widget found` 导致页面无法渲染。
+  - 根因：`SeniorPostApp` 在 `MaterialApp.router` 外层直接返回 `Stack`，`Stack` 默认依赖 `AlignmentDirectional`，在 `Directionality` 尚未建立时触发断言。
+  - 实际处理：
+    - 将 `senior-post-flutter/lib/app/senior_post_app.dart` 改为直接返回 `MaterialApp.router`。
+    - 通过 `builder` 在应用内部叠加 `ReleaseNoteLayer`，保留原浮层能力并复用 `MaterialApp` 提供的 `Directionality`。
+  - 验证：`flutter analyze` 通过；`flutter run` 启动后不再出现该断言。
+
+- **本次新增（2026-05-16，Flutter 启动故障修复）**：
+  - 目标：修复 `flutter run` 因 `dart format` 失败导致的 Android Debug 构建中断。
+  - 现象：`PathNotFoundException` 指向本机 Pub 缓存缺失 `flutter_lints-5.0.0/lib/flutter.yaml`。
+  - 实际处理：
+    - 在 `senior-post-flutter` 执行 `flutter pub get`，补齐缺失依赖缓存。
+    - 执行 `dart format lib/l10n/*.dart`，确认格式化链路恢复。
+    - 执行 `flutter analyze` 与 `flutter build apk --debug`，确认工程可编译。
+  - 回滚策略：若后续再次出现同类缓存损坏，优先重跑 `flutter pub get`；无效时清理 `C:\Users\Administrator\AppData\Local\Pub\Cache\hosted\pub.flutter-io.cn\flutter_lints-5.0.0` 后重拉依赖。
+
 - **本次新增（2026-05-16，官网静态页视觉优化）**：
   - 目标：优化 `senior-post-manage/static/index.html` 的视觉层次、交互反馈与移动端可用性。
   - 预计改动：

@@ -21,7 +21,7 @@ import 'router_refresh.dart';
 
 const String _kApiVersionCode = String.fromEnvironment(
   'API_VERSION_CODE',
-  defaultValue: '1',
+  defaultValue: '2',
 );
 
 /// 是否打印 Dio 请求/响应（默认：debug 模式开启；Release 可加 `--dart-define=API_LOG=true`）。

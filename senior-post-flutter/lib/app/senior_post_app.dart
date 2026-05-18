@@ -32,22 +32,25 @@ class SeniorPostApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
     final localeOverride = ref.watch(appLocaleProvider);
 
-    return Stack(
-      children: [
-        MaterialApp.router(
-          onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
-          theme: PostalTheme.light(),
-          routerConfig: router,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: localeOverride,
-          localeListResolutionCallback: localeOverride != null
-              ? null
-              : (deviceLocales, supported) =>
-                    resolveSeniorPostLocale(deviceLocales ?? const [], supported),
-        ),
-        const ReleaseNoteLayer(),
-      ],
+    return MaterialApp.router(
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+      theme: PostalTheme.light(),
+      routerConfig: router,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: localeOverride,
+      localeListResolutionCallback: localeOverride != null
+          ? null
+          : (deviceLocales, supported) =>
+                resolveSeniorPostLocale(deviceLocales ?? const [], supported),
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const ReleaseNoteLayer(),
+          ],
+        );
+      },
     );
   }
 }

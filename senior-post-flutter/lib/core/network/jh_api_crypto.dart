@@ -2,17 +2,22 @@ import 'dart:convert';
 
 import 'package:encrypt/encrypt.dart' as enc;
 
-/// 与后端 `jh.security.key`（32 位 hex → 16 字节 AES-128）及 ECB/PKCS7 约定对齐；若与网关实现不一致可 `--dart-define=JH_AES_KEY=...` 覆盖。
+/// 与 commons-security `wj.security.key`（32 位 hex → 16 字节 AES-128）及
+/// AES/ECB/PKCS5(PKCS7) 约定对齐；可通过 `--dart-define=JH_AES_KEY=...` 覆盖。
 class JhApiCrypto {
   JhApiCrypto._();
 
-  static const String _defaultKeyHex =
-      '8e32de3646dc4c02ae2507511202c7ca';
+  /// 与当前后端 `application*.yml` 中 `jh.security.key` 默认配置保持一致。
+  static const String _defaultKeyHex = '8e32de3646dc4c02ae2507511202c7ca';
 
-  static String get _keyHex => const String.fromEnvironment(
-        'JH_AES_KEY',
-        defaultValue: _defaultKeyHex,
-      );
+  static String get _keyHex =>
+      const String.fromEnvironment('JH_AES_KEY', defaultValue: _defaultKeyHex);
+
+  /// 默认开启，与 `commons-security` 生产链路对齐；若本地需要明文联调可手动关闭。
+  static const bool _aesEnabled = bool.fromEnvironment(
+    'API_AES_ENABLED',
+    defaultValue: true,
+  );
 
   static final enc.Encrypter _encrypter = enc.Encrypter(
     enc.AES(
@@ -22,22 +27,20 @@ class JhApiCrypto {
     ),
   );
 
-  /// 与 [application.yml] 中 `resIgnoreEncryptUris` / `reqIgnoreDecryptUris` 明文列表保持一致。
+  /// 与后端 `resIgnoreEncryptUris` / `reqIgnoreDecryptUris` 明文列表保持一致。
+  /// 当前仅 `/webapi/**` 明文，App `/api/**` 默认全量走 AES。
   static bool isPlaintextApiPath(String path) {
-    const plain = <String>[
-      '/api/auth/register',
-      '/api/auth/login',
-      '/api/auth/forgot-password',
-      '/api/auth/reset-password',
-      '/api/bootstrap/init',
-      '/api/bootstrap/release-note',
-    ];
-    for (final p in plain) {
-      if (path == p || path.startsWith('$p?')) {
-        return true;
-      }
+    final normalizedPath = _normalizeGatewayPath(path);
+    return normalizedPath.startsWith('/webapi/');
+  }
+
+  // WHY: Docker/Nginx 场景下常启用 `/backend` context-path，客户端看到的请求路径会变成
+  // `/backend/api/...`；若不去掉该前缀，明文白名单匹配失效，注册/登录会被误加密。
+  static String _normalizeGatewayPath(String path) {
+    if (path.startsWith('/backend/')) {
+      return path.substring('/backend'.length);
     }
-    return false;
+    return path;
   }
 
   static String encryptUtf8ToDataField(String plainUtf8) {
@@ -50,6 +53,9 @@ class JhApiCrypto {
   }
 
   static String? tryDecryptResponseDataField(String path, Object? dataField) {
+    if (!_aesEnabled) {
+      return null;
+    }
     if (isPlaintextApiPath(path)) {
       return null;
     }
@@ -63,7 +69,10 @@ class JhApiCrypto {
     }
   }
 
-  static Map<String, dynamic>? wrapJsonBodyIfNeeded(String path, Object? body) {
+  static String? wrapJsonBodyIfNeeded(String path, Object? body) {
+    if (!_aesEnabled) {
+      return null;
+    }
     if (isPlaintextApiPath(path)) {
       return null;
     }
@@ -71,6 +80,8 @@ class JhApiCrypto {
       return null;
     }
     final inner = jsonEncode(body);
-    return <String, dynamic>{'data': encryptUtf8ToDataField(inner)};
+    // commons-security 的请求解密入口直接对整个请求体做 Base64 AES 解密，
+    // 因此请求体需为“纯密文字符串”，不能再包一层 {"data": "..."}。
+    return encryptUtf8ToDataField(inner);
   }
 }

@@ -4,12 +4,12 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://host.docker.internal:5432/senior_post?useunicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:postgresql://127.0.0.1:5432/senior_post1?useunicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: postgres
     password: postgres
   data:
     redis:
-      host: host.docker.internal
+      host: 127.0.0.1
       port: 6379
       password:
       timeout: 30000
@@ -40,13 +40,9 @@ jh:
     reqDecryptUris:
       - /api/**
     resIgnoreEncryptUris:
-      - /webapp/**
       - /webapi/**
-      - /api/**
     reqIgnoreDecryptUris:
-      - /webapp/**
       - /webapi/**
-      - /api/**
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

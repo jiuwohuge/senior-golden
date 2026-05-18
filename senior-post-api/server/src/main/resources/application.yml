@@ -127,22 +127,10 @@ jh:
     resIgnoreEncryptUris:
       - /webapp/**
       - /webapi/**
-      - /api/auth/login
-      - /api/auth/register
-      - /api/auth/forgot-password
-      - /api/auth/reset-password
-      - /api/bootstrap/init
-      - /api/bootstrap/release-note
     # 忽略参数解密的接口
     reqIgnoreDecryptUris:
       - /webapp/**
       - /webapi/**
-      - /api/auth/login
-      - /api/auth/register
-      - /api/auth/forgot-password
-      - /api/auth/reset-password
-      - /api/bootstrap/init
-      - /api/bootstrap/release-note
 
 knife4j:
   enable: true  # 启用 Knife4j 增强（必须，否则仅启用 springdoc 默认 UI）

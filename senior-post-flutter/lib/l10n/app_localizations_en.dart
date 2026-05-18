@@ -27,10 +27,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabProfile => 'My Post';
 
   @override
-  String get a11yTabPostWall => 'Post Wall: browse postcards from members worldwide';
+  String get a11yTabPostWall =>
+      'Post Wall: browse postcards from members worldwide';
 
   @override
-  String get a11yTabDirectory => 'Directory: find members by country and interests';
+  String get a11yTabDirectory =>
+      'Directory: find members by country and interests';
 
   @override
   String get a11yTabMailbox => 'Post Box: your letters and conversations';
@@ -45,13 +47,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get placeholderWelcomeTitle => 'This area is being prepared';
 
   @override
-  String get placeholderWelcomeBody => 'We are finishing this screen. Your postcards, letters, and friends will appear here soon. Thank you for your patience.';
+  String get placeholderWelcomeBody =>
+      'We are finishing this screen. Your postcards, letters, and friends will appear here soon. Thank you for your patience.';
 
   @override
-  String get placeholderHint => 'Tip: use the bar below to switch between Post Wall, Directory, Post Box, and My Post.';
+  String get placeholderHint =>
+      'Tip: use the bar below to switch between Post Wall, Directory, Post Box, and My Post.';
 
   @override
-  String get postalMotifContentDescription => 'Decorative postmark in the header';
+  String get postalMotifContentDescription =>
+      'Decorative postmark in the header';
 
   @override
   String get authLoginTitle => 'Sign in';
@@ -105,19 +110,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authCountrySkip => 'Skip';
 
   @override
-  String get authBootstrapLoadFailed => 'Could not load signup options. Check your network and try again.';
+  String get authBootstrapLoadFailed =>
+      'Could not load signup options. Check your network and try again.';
 
   @override
   String get authRetry => 'Retry';
 
   @override
-  String get authBirthYearRangeError => 'Birth year list is empty. Check server config for minimum age.';
+  String get authBirthYearRangeError =>
+      'Birth year list is empty. Check server config for minimum age.';
 
   @override
   String get authWelcomeBack => 'Welcome back to your global post office.';
 
   @override
-  String get authMockTip => 'Sign in with your registered email to use all features.';
+  String get authMockTip =>
+      'Sign in with your registered email to use all features.';
 
   @override
   String authAgreeTpl(Object privacy, Object terms) {
@@ -134,7 +142,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authForgotPassword => 'Forgot password';
 
   @override
-  String get authForgotIntro => 'We\'ll email a 6-digit code to your registered address. In local dev, check server logs if SMTP is not configured.';
+  String get authForgotIntro =>
+      'We\'ll email a 6-digit code to your registered address. In local dev, check server logs if SMTP is not configured.';
 
   @override
   String get authForgotCodeHint => '6-digit code';
@@ -152,10 +161,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authEmailInvalid => 'Please enter a valid email address';
 
   @override
-  String get authRegisterSubtitle => 'Create your postal social account in one minute.';
+  String get authRegisterSubtitle =>
+      'Create your postal social account in one minute.';
 
   @override
-  String get authRegisterWizardHint => 'Tap any step below to jump — your entries stay until you submit.';
+  String get authRegisterWizardHint =>
+      'Tap any step below to jump — your entries stay until you submit.';
 
   @override
   String get authRegisterTabAccount => 'Account';
@@ -178,25 +189,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authRegisterStepAccountTitle => 'Sign-in details';
 
   @override
-  String get authRegisterStepAccountSubtitle => 'We’ll use your email to reach you about letters and security.';
+  String get authRegisterStepAccountSubtitle =>
+      'We’ll use your email to reach you about letters and security.';
 
   @override
   String get authRegisterStepProfileTitle => 'About you';
 
   @override
-  String get authRegisterStepProfileSubtitle => 'This is how you appear on postcards, letters, and the directory.';
+  String get authRegisterStepProfileSubtitle =>
+      'This is how you appear on postcards, letters, and the directory.';
 
   @override
   String get authRegisterStepInterestsTitle => 'Interests';
 
   @override
-  String get authRegisterStepInterestsSubtitle => 'Choose at least three tags — they power better pen-pal matches.';
+  String get authRegisterStepInterestsSubtitle =>
+      'Choose at least three tags — they power better pen-pal matches.';
 
   @override
   String get authRegisterStepReviewTitle => 'Review & terms';
 
   @override
-  String get authRegisterStepReviewSubtitle => 'Check your details, then accept the policies to open your account.';
+  String get authRegisterStepReviewSubtitle =>
+      'Check your details, then accept the policies to open your account.';
 
   @override
   String get authRegisterNext => 'Continue';
@@ -220,10 +235,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authRegisterSummaryInterests => 'Interests';
 
   @override
-  String get authRegisterInterestsMin => 'Please select at least three interests.';
+  String get authRegisterInterestsMin =>
+      'Please select at least three interests.';
 
   @override
-  String get authRegisterInterestsServerEmpty => 'No interest tags from the server. Try another language or ask an admin to add tags.';
+  String get authRegisterInterestsServerEmpty =>
+      'No interest tags from the server. Try another language or ask an admin to add tags.';
 
   @override
   String get authConfirmPasswordLabel => 'Confirm password';
@@ -262,7 +279,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authForgotDoneTitle => 'Password reset complete';
 
   @override
-  String get authForgotDoneBody => 'You can now return to login and sign in with your new password.';
+  String get authForgotDoneBody =>
+      'You can now return to login and sign in with your new password.';
 
   @override
   String get authBackToLogin => 'Back to login';
@@ -271,19 +289,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardTitle1 => 'A global postal social network';
 
   @override
-  String get onboardBody1 => 'Meet peers worldwide in a calm, respectful, non-dating environment.';
+  String get onboardBody1 =>
+      'Meet peers worldwide in a calm, respectful, non-dating environment.';
 
   @override
   String get onboardTitle2 => 'Slow letters, real companionship';
 
   @override
-  String get onboardBody2 => 'Send postcards and letters at your own pace. No like-count pressure.';
+  String get onboardBody2 =>
+      'Send postcards and letters at your own pace. No like-count pressure.';
 
   @override
   String get onboardTitle3 => 'Trusted and age-friendly';
 
   @override
-  String get onboardBody3 => 'Designed for 45+ users with clear typography, calm colors and privacy-first defaults.';
+  String get onboardBody3 =>
+      'Designed for 45+ users with clear typography, calm colors and privacy-first defaults.';
 
   @override
   String get onboardSkip => 'Skip';
@@ -338,7 +359,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postComposeContentLabel => 'Postcard content';
 
   @override
-  String get postComposeContentHint => 'Write your day, thoughts, or greetings…';
+  String get postComposeContentHint =>
+      'Write your day, thoughts, or greetings…';
 
   @override
   String postComposeMaxImages(Object max) {
@@ -346,10 +368,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get postComposeUploadNeedRealApi => 'Image upload needs a server-issued URL. Check your network and try again.';
+  String get postComposeUploadNeedRealApi =>
+      'Image upload needs a server-issued URL. Check your network and try again.';
 
   @override
-  String get postComposePickerChannelError => 'Gallery channel not connected. Fully stop the app and run again; if it persists run flutter clean.';
+  String get postComposePickerChannelError =>
+      'Gallery channel not connected. Fully stop the app and run again; if it persists run flutter clean.';
 
   @override
   String get postComposeImageUploaded => 'Image uploaded';
@@ -361,7 +385,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postComposePublishedMock => 'Postcard submitted.';
 
   @override
-  String get postComposePublishedReal => 'Submitted for review. It will appear after approval.';
+  String get postComposePublishedReal =>
+      'Submitted for review. It will appear after approval.';
 
   @override
   String get postComposeUploading => 'Uploading…';
@@ -381,7 +406,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postcardImageCropTitle => 'Crop image (4:3)';
 
   @override
-  String get postcardImageCropHelp => 'Pan and zoom, then confirm to crop to 4:3 and upload.';
+  String get postcardImageCropHelp =>
+      'Pan and zoom, then confirm to crop to 4:3 and upload.';
 
   @override
   String get profileBlacklist => 'Blocked users';
@@ -399,7 +425,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get socialBlockConfirmTitle => 'Block this user?';
 
   @override
-  String get socialBlockConfirmMessage => 'They won\'t be able to send you letters, and you won\'t see each other on the wall or directory.';
+  String get socialBlockConfirmMessage =>
+      'They won\'t be able to send you letters, and you won\'t see each other on the wall or directory.';
 
   @override
   String get socialBlockSuccess => 'User blocked';
@@ -419,7 +446,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get socialBlacklistTitle => 'Blocked users';
 
   @override
-  String get socialBlacklistSubtitle => 'Blocked users won\'t appear on the wall or directory and can\'t send you letters.';
+  String get socialBlacklistSubtitle =>
+      'Blocked users won\'t appear on the wall or directory and can\'t send you letters.';
 
   @override
   String get socialBlacklistEmpty => 'No blocked users';
@@ -436,7 +464,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedbackBodyLabel => 'Your message (required)';
 
   @override
-  String get feedbackBodyHint => 'Describe steps, what you expected, and what happened.';
+  String get feedbackBodyHint =>
+      'Describe steps, what you expected, and what happened.';
 
   @override
   String get feedbackSubmit => 'Submit';
@@ -478,7 +507,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userCardNotFoundTitle => 'Profile not found';
 
   @override
-  String get userCardNotFoundSubtitle => 'This member may be unavailable or restricted for you.';
+  String get userCardNotFoundSubtitle =>
+      'This member may be unavailable or restricted for you.';
 
   @override
   String get directoryTitle => 'Post Directory';
@@ -493,7 +523,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get directoryEmptyTitle => 'No matching members';
 
   @override
-  String get directoryEmptySubtitle => 'Try clearing filters or changing age range.';
+  String get directoryEmptySubtitle =>
+      'Try clearing filters or changing age range.';
 
   @override
   String directoryAgeYears(Object age) {
@@ -551,10 +582,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileAvatarCropConfirm => 'Confirm crop';
 
   @override
-  String get profileAvatarCropHelp => 'Drag and pinch to fit your face in the circle. Cancel returns without saving.';
+  String get profileAvatarCropHelp =>
+      'Drag and pinch to fit your face in the circle. Cancel returns without saving.';
 
   @override
-  String get profileAvatarPreviewHint => 'Adjust the circle, then confirm crop. On the previous screen, tap Upload photo to save, or Discard to cancel.';
+  String get profileAvatarPreviewHint =>
+      'Adjust the circle, then confirm crop. On the previous screen, tap Upload photo to save, or Discard to cancel.';
 
   @override
   String get profileAvatarConfirmUpload => 'Upload photo';
@@ -635,13 +668,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get legalEffectiveDate => 'Effective date: 2026-05-01';
 
   @override
-  String get legalTermsContent => '1) This app provides interest-based social communication for adults aged 45+ only.\\n\\n2) The product does not provide dating or matchmaking services.\\n\\n3) You are responsible for the legality of your content and must not publish prohibited content.\\n\\n4) We may suspend accounts for abuse, harassment, spam, fraud, or policy violations.\\n\\n5) We provide moderation and reporting mechanisms to maintain a safe communication environment.';
+  String get legalTermsContent =>
+      '1) This app provides interest-based social communication for adults aged 45+ only.\\n\\n2) The product does not provide dating or matchmaking services.\\n\\n3) You are responsible for the legality of your content and must not publish prohibited content.\\n\\n4) We may suspend accounts for abuse, harassment, spam, fraud, or policy violations.\\n\\n5) We provide moderation and reporting mechanisms to maintain a safe communication environment.';
 
   @override
-  String get legalPrivacyContent => '1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.';
+  String get legalPrivacyContent =>
+      '1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.';
 
   @override
-  String get vipCenterUnlimitedRegisteredMail => 'Unlimited registered mail for members (server rules apply).';
+  String get vipCenterUnlimitedRegisteredMail =>
+      'Unlimited registered mail for members (server rules apply).';
 
   @override
   String vipCenterStandardPriorityHours(Object hours) {
@@ -649,13 +685,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get vipCenterFreeSpeedUpStandard => 'Free speed-up on standard mail for members (server rules apply).';
+  String get vipCenterFreeSpeedUpStandard =>
+      'Free speed-up on standard mail for members (server rules apply).';
 
   @override
   String get vipCenterPurchaseDisabled => 'VIP purchase is currently disabled.';
 
   @override
-  String get vipCenterCheckoutNotWired => 'Subscription checkout is not wired yet; benefits follow your account VIP flag.';
+  String get vipCenterCheckoutNotWired =>
+      'Subscription checkout is not wired yet; benefits follow your account VIP flag.';
 
   @override
   String vipCenterLoadFailed(Object error) {
@@ -669,7 +707,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myPostcardsEmptyTitle => 'No postcards yet';
 
   @override
-  String get myPostcardsEmptySubtitle => 'Write one from the Post Wall tab — it will appear here with review status.';
+  String get myPostcardsEmptySubtitle =>
+      'Write one from the Post Wall tab — it will appear here with review status.';
 
   @override
   String get myPostcardsLoadFailedTitle => 'Could not load postcards';
@@ -690,22 +729,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postcardPostRemovedBadge => 'Removed';
 
   @override
-  String get postcardReviewPendingBanner => 'This postcard is pending review. Only you can see it here.';
+  String get postcardReviewPendingBanner =>
+      'This postcard is pending review. Only you can see it here.';
 
   @override
-  String get postcardReviewRejectedBanner => 'This postcard was not approved for the public wall. You can still view it from your list.';
+  String get postcardReviewRejectedBanner =>
+      'This postcard was not approved for the public wall. You can still view it from your list.';
 
   @override
   String get letterMailboxSealedPreview => 'Letter sealed until arrival';
 
   @override
-  String get letterContentHiddenHint => 'This letter is still on its way. The message is hidden until it arrives, or you can open it early with one stamp (VIP free).';
+  String get letterContentHiddenHint =>
+      'This letter is still on its way. The message is hidden until it arrives, or you can open it early with one stamp (VIP free).';
 
   @override
   String get letterEarlyOpenCta => 'Open early (1 stamp)';
 
   @override
-  String get letterEarlyOpenSuccess => 'Letter opened — full message is now visible.';
+  String get letterEarlyOpenSuccess =>
+      'Letter opened — full message is now visible.';
 
   @override
   String get postDetailTitle => 'Postcard';
@@ -714,13 +757,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letterDetailTitle => 'Letter';
 
   @override
-  String get chatFriendsOnlySnack => 'Only postal friends in Connections can use live chat.';
+  String get chatFriendsOnlySnack =>
+      'Only postal friends in Connections can use live chat.';
 
   @override
   String get chatEmojiPickerTitle => 'Friendly stamps';
 
   @override
-  String get chatEmojiPickerSubtitle => 'Tap an emoji to add it to your message.';
+  String get chatEmojiPickerSubtitle =>
+      'Tap an emoji to add it to your message.';
 
   @override
   String get postDetailCommentRequired => 'Please enter a comment.';
@@ -738,7 +783,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get directoryFilterSectionTitle => 'Filter directory';
 
   @override
-  String get directoryFilterSectionSubtitle => 'Country, age range, interests, and sort';
+  String get directoryFilterSectionSubtitle =>
+      'Country, age range, interests, and sort';
 
   @override
   String get directoryFilterCountryLabel => 'Country';
@@ -787,13 +833,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shopPlaceholderBuy => 'Buy (placeholder)';
 
   @override
-  String get shopOrdersSnackbar => 'Orders and payment history will open once the catalog is connected.';
+  String get shopOrdersSnackbar =>
+      'Orders and payment history will open once the catalog is connected.';
 
   @override
   String get shopPricePlaceholder => 'Price: —';
 
   @override
-  String get shopCheckoutSnackbar => 'Checkout opens when payments are connected.';
+  String get shopCheckoutSnackbar =>
+      'Checkout opens when payments are connected.';
 
   @override
   String shopSkuStampLine(Object count) {
@@ -828,7 +876,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendLetterBodyRequired => 'Please write the letter content.';
 
   @override
-  String get sendLetterRegisteredStampShort => 'Not enough stamps for registered mail.';
+  String get sendLetterRegisteredStampShort =>
+      'Not enough stamps for registered mail.';
 
   @override
   String get sendLetterSentSuccess => 'Letter sent.';

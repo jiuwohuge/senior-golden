@@ -12,7 +12,6 @@ import cn.nine.pros.post.client.model.db.UserDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,9 +47,8 @@ public class StampGrantServiceImpl implements StampGrantService {
         row.setRefId(null);
         row.setAmount(amt);
         row.setCreatedAt(LocalDateTime.now());
-        try {
-            stampDailyGrantMapper.insert(row);
-        } catch (DataIntegrityViolationException e) {
+        int inserted = stampDailyGrantMapper.insertLoginGrantIgnoreConflict(row);
+        if (inserted <= 0) {
             log.debug("Daily login stamp grant skipped (already granted): userId={}", userId);
             return;
         }
@@ -89,9 +87,8 @@ public class StampGrantServiceImpl implements StampGrantService {
         row.setRefId(postcardId);
         row.setAmount(reward);
         row.setCreatedAt(LocalDateTime.now());
-        try {
-            stampDailyGrantMapper.insert(row);
-        } catch (DataIntegrityViolationException e) {
+        int inserted = stampDailyGrantMapper.insertPostcardGrantIgnoreConflict(row);
+        if (inserted <= 0) {
             log.debug("Postcard stamp grant skipped (duplicate postcard): userId={} postcardId={}",
                     userId, postcardId);
             return;
