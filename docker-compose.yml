@@ -13,11 +13,11 @@ services:
   postgresql:
     image: bitnami/postgresql:latest
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-65432}:5432"
     environment:
       POSTGRESQL_DATABASE: ${POSTGRES_DB:-senior_post}
       POSTGRESQL_USERNAME: ${POSTGRES_USER:-postgres}
-      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:-myppost@2026}
     volumes:
       - "${POSTGRES_DATA_DIR:-D:/06_docker_workplace/postgresql}:/bitnami/postgresql"
     healthcheck:
@@ -73,7 +73,10 @@ services:
         condition: service_healthy
 
   senior-post-manage:
-    image: node:20
+    image: senior-post-manage
+    build:
+      context: ./senior-post-manage
+      dockerfile: Dockerfile
     working_dir: /app
     command:
       [
