@@ -277,6 +277,15 @@ flowchart LR
 
 ## [改动预测]
 
+- **本次新增（2026-05-18，后端镜像一键重建脚本）**：
+  - 目标：避免手工执行 Maven + Docker Compose 多步骤时遗漏，确保 Java 改动能稳定进入容器镜像。
+  - 实际处理：
+    - 新增 `scripts/rebuild-senior-post-api.ps1`
+      - 默认执行：`mvn clean package -DskipTests` → `docker compose build --no-cache senior-post-api` → `docker compose up -d --force-recreate --no-deps senior-post-api` → `logs -f`
+      - 支持参数：`-SkipMaven`、`-UseBuildCache`、`-NoLogFollow`
+  - 验证：
+    - PowerShell 语法解析检查通过（`Parser::ParseFile` 返回 `OK`）。
+
 - **本次新增（2026-05-18，忘记密码完成态按钮 + 管理端用户编辑删除）**：
   - 目标：
     - 优化 Flutter 忘记密码流程完成态“返回登录”按钮视觉表现与可点击感。

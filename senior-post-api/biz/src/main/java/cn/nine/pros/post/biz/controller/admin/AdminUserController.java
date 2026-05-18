@@ -37,9 +37,8 @@ public class AdminUserController implements AdminUserApi {
         return u != null && u.getStaffRole() != null && u.getStaffRole() != 0;
     }
 
-    private static String auditUserId() {
-        Long uid = MyRequestContextHolder.userId();
-        return uid == null ? "0" : String.valueOf(uid);
+    private static Long auditUserId() {
+        return MyRequestContextHolder.userId();
     }
 
     private final UserService userService;
