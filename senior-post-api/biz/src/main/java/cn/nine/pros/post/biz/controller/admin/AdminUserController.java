@@ -14,6 +14,7 @@ import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.api.admin.AdminUserApi;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.db.UserDeviceDTO;
+import cn.nine.pros.post.client.model.input.admin.AdminUserSaveInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserVipDebugInDto;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
 import cn.nine.pros.post.client.model.input.admin.UserQueryInDto;
@@ -80,6 +81,51 @@ public class AdminUserController implements AdminUserApi {
     }
 
     @Override
+    public void save(AdminUserSaveInDto body) {
+        Long id = body.getId();
+        if (id == null) {
+            throw new BadRequestException(appMessages.get("admin.error.user.badId"));
+        }
+        UserDomain user = userService.getById(id);
+        if (user == null || user.isDelFlag()) {
+            throw new BadRequestException(appMessages.get("admin.error.user.notFound"));
+        }
+        Integer status = body.getStatus();
+        if (status != null && status != 1 && status != 2 && status != 3) {
+            throw new BadRequestException(appMessages.get("admin.error.user.badStatus"));
+        }
+        String nickname = trimToNull(body.getNickname());
+        String countryCode = trimToNull(body.getCountryCode());
+        String bio = trimToNull(body.getBio());
+        Integer birthYear = body.getBirthYear();
+        boolean hasEditable = status != null
+                || birthYear != null
+                || nickname != null
+                || countryCode != null
+                || bio != null;
+        if (!hasEditable) {
+            throw new BadRequestException(appMessages.get("admin.error.user.emptyUpdate"));
+        }
+        userService.update(new LambdaUpdateWrapper<UserDomain>()
+                .eq(UserDomain::getId, id)
+                .set(status != null, UserDomain::getStatus, status)
+                .set(birthYear != null, UserDomain::getBirthYear, birthYear)
+                .set(nickname != null, UserDomain::getNickname, nickname)
+                .set(countryCode != null, UserDomain::getCountryCode, countryCode)
+                .set(bio != null, UserDomain::getBio, bio)
+                .set(UserDomain::getUpdatedBy, auditUserId())
+                .set(UserDomain::getUpdatedAt, LocalDateTime.now()));
+    }
+
+    @Override
+    public void delete(Long id) {
+        if (id == null) {
+            throw new BadRequestException(appMessages.get("admin.error.user.badId"));
+        }
+        userService.delByIds(List.of(id));
+    }
+
+    @Override
     public void updateVipDebug(Long id, AdminUserVipDebugInDto body) {
         if (id == null) {
             throw new BadRequestException(appMessages.get("admin.error.user.badId"));
@@ -143,5 +189,13 @@ public class AdminUserController implements AdminUserApi {
             dto.setPasswordHash(null);
         }
         return dto;
+    }
+
+    private static String trimToNull(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String value = raw.trim();
+        return value.isEmpty() ? null : value;
     }
 }

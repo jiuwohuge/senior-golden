@@ -277,6 +277,32 @@ flowchart LR
 
 ## [改动预测]
 
+- **本次新增（2026-05-18，忘记密码完成态按钮 + 管理端用户编辑删除）**：
+  - 目标：
+    - 优化 Flutter 忘记密码流程完成态“返回登录”按钮视觉表现与可点击感。
+    - 管理后台用户管理页移除无效行操作，新增用户编辑与删除能力。
+  - 实际处理：
+    - `senior-post-flutter/lib/features/auth/forgot_password_page.dart`
+      - 完成态改为定制卡片（成功图标 + 强化标题文案 + 高对比渐变按钮），提升主 CTA 识别度。
+    - `senior-post-api/client/src/main/java/cn/nine/pros/post/client/model/input/admin/AdminUserSaveInDto.java`
+      - 新增管理端编辑用户入参 DTO（`id`、`nickname`、`birthYear`、`countryCode`、`bio`、`status`）。
+    - `senior-post-api/client/src/main/java/cn/nine/pros/post/client/api/admin/AdminUserApi.java`
+      - 新增 `POST /webapi/user/save`、`POST /webapi/user/{id}/delete`。
+    - `senior-post-api/biz/src/main/java/cn/nine/pros/post/biz/controller/admin/AdminUserController.java`
+      - 实现用户编辑保存与删除逻辑（状态校验、空更新拦截、软删除复用 `UserService.delByIds`）。
+    - `senior-post-api/biz/src/main/resources/messages/app*.properties`
+      - 新增 `admin.error.user.emptyUpdate` 多语言文案。
+    - `senior-post-manage/src/services/api.ts`
+      - 新增 `saveUser`、`deleteUser` 调用封装。
+    - `senior-post-manage/src/pages/user/List.tsx`
+      - 去除“调试 VIP / Enable / Ban”行按钮；
+      - 新增“编辑”弹窗（昵称/出生年/国家/简介/状态）与“删除”确认按钮；
+      - 保留“设备拉黑”操作。
+  - 验证：
+    - `mvn -pl biz,client -am compile -DskipTests` 通过。
+    - `npm run build`（`senior-post-manage`）通过。
+    - `flutter analyze` 通过。
+
 - **本次新增（2026-05-18，按用户要求回滚 Tab 导航优化）**：
   - 目标：恢复“切换 Tab 即走路由跳转并触发相关刷新请求”的既有行为。
   - 实际处理：

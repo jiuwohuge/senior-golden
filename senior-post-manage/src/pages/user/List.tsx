@@ -1,20 +1,19 @@
-import { Button, Input, Modal, Space, Switch, Table, message } from 'antd'
+import { Button, Form, Input, Modal, Popconfirm, Select, Space, Table, message } from 'antd'
 import { useEffect, useState } from 'react'
 import { api } from '../../services/api'
 
 export default function UserList() {
   const [rows, setRows] = useState<any[]>([])
+  const [userModalOpen, setUserModalOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState<any>(null)
+  const [savingUser, setSavingUser] = useState(false)
   const [deviceModalOpen, setDeviceModalOpen] = useState(false)
   const [deviceUser, setDeviceUser] = useState<any>(null)
   const [devices, setDevices] = useState<any[]>([])
   const [devicesLoading, setDevicesLoading] = useState(false)
   const [manualUuid, setManualUuid] = useState('')
   const [manualReason, setManualReason] = useState('')
-  const [vipModalOpen, setVipModalOpen] = useState(false)
-  const [vipUser, setVipUser] = useState<any>(null)
-  const [vipOn, setVipOn] = useState(false)
-  const [vipExpireLocal, setVipExpireLocal] = useState('')
-  const [vipClearExpire, setVipClearExpire] = useState(false)
+  const [userForm] = Form.useForm()
 
   const load = () => {
     api
@@ -65,37 +64,60 @@ export default function UserList() {
     }
   }
 
-  const openVipModal = (user: any) => {
-    setVipUser(user)
-    setVipOn(!!user?.isVip)
-    setVipExpireLocal('')
-    setVipClearExpire(false)
-    setVipModalOpen(true)
+  const openUserEditModal = (user: any) => {
+    setEditingUser(user)
+    userForm.setFieldsValue({
+      id: user.id,
+      email: user.email,
+      nickname: user.nickname ?? '',
+      birthYear: user.birthYear ?? undefined,
+      countryCode: user.countryCode ?? '',
+      bio: user.bio ?? '',
+      status: Number(user.status ?? 1),
+    })
+    setUserModalOpen(true)
   }
 
-  const submitVipDebug = async () => {
-    if (!vipUser) return
+  const submitUserSave = async () => {
     try {
-      const body: { isVip: boolean; vipExpireAt?: string | null; clearVipExpireAt?: boolean } = {
-        isVip: vipOn,
+      const v = await userForm.validateFields()
+      setSavingUser(true)
+      const body: {
+        id: number
+        nickname?: string
+        birthYear?: number
+        countryCode?: string
+        bio?: string
+        status?: number
+      } = {
+        id: Number(v.id),
       }
-      if (vipClearExpire) {
-        body.clearVipExpireAt = true
-      } else if (vipExpireLocal.trim()) {
-        const d = new Date(vipExpireLocal)
-        if (Number.isNaN(d.getTime())) {
-          message.error('过期时间格式无效')
-          return
-        }
-        body.vipExpireAt = d.toISOString().slice(0, 19)
+      if (typeof v.nickname === 'string' && v.nickname.trim()) {
+        body.nickname = v.nickname.trim()
       }
-      await api.userVipDebug(vipUser.id, body)
-      message.success('VIP 已更新')
-      setVipModalOpen(false)
-      setVipUser(null)
+      if (v.birthYear !== undefined && v.birthYear !== null && `${v.birthYear}`.trim() !== '') {
+        body.birthYear = Number(v.birthYear)
+      }
+      if (typeof v.countryCode === 'string' && v.countryCode.trim()) {
+        body.countryCode = v.countryCode.trim().toUpperCase()
+      }
+      if (typeof v.bio === 'string' && v.bio.trim()) {
+        body.bio = v.bio.trim()
+      }
+      if (v.status !== undefined && v.status !== null) {
+        body.status = Number(v.status)
+      }
+      await api.saveUser(body)
+      message.success('用户已更新')
+      setUserModalOpen(false)
+      setEditingUser(null)
+      userForm.resetFields()
       load()
     } catch (e: any) {
-      message.error(e.message)
+      if (e?.errorFields) return
+      message.error(e.message || '保存失败')
+    } finally {
+      setSavingUser(false)
     }
   }
 
@@ -126,33 +148,27 @@ export default function UserList() {
               <Space wrap>
                 <Button
                   size="small"
-                  disabled={r.staffRole != null && r.staffRole !== 0}
-                  onClick={() => openVipModal(r)}
+                  onClick={() => openUserEditModal(r)}
                 >
-                  调试 VIP
-                </Button>
-                <Button
-                  size="small"
-                  onClick={async () => {
-                    await api.userStatus(r.id, 1)
-                    load()
-                  }}
-                >
-                  Enable
-                </Button>
-                <Button
-                  size="small"
-                  danger
-                  onClick={async () => {
-                    await api.userStatus(r.id, 2)
-                    load()
-                  }}
-                >
-                  Ban
+                  编辑
                 </Button>
                 <Button size="small" onClick={() => openDeviceModal(r)}>
                   设备拉黑
                 </Button>
+                <Popconfirm
+                  title="确认删除该用户？"
+                  description="删除后该账号将被软删除，不可登录。"
+                  onConfirm={async () => {
+                    await api.deleteUser(r.id)
+                    message.success('用户已删除')
+                    load()
+                  }}
+                  okButtonProps={{ danger: true }}
+                >
+                  <Button size="small" danger>
+                    删除
+                  </Button>
+                </Popconfirm>
               </Space>
             ),
           },
@@ -215,38 +231,54 @@ export default function UserList() {
         </div>
       </Modal>
       <Modal
-        title={vipUser ? `调试 VIP — 用户 #${vipUser.id}` : 'VIP'}
-        open={vipModalOpen}
-        onOk={() => void submitVipDebug()}
+        title={editingUser ? `编辑用户 #${editingUser.id}` : '编辑用户'}
+        open={userModalOpen}
+        onOk={() => void submitUserSave()}
         onCancel={() => {
-          setVipModalOpen(false)
-          setVipUser(null)
+          setUserModalOpen(false)
+          setEditingUser(null)
+          userForm.resetFields()
         }}
+        confirmLoading={savingUser}
         okText="保存"
         destroyOnClose
+        width={560}
       >
-        <p style={{ marginBottom: 12, color: '#666' }}>
-          直接写库调试，非订阅支付。后台账号不可改。
-        </p>
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Space>
-            <span>VIP</span>
-            <Switch checked={vipOn} onChange={setVipOn} />
-          </Space>
-          <Space align="start">
-            <Switch checked={vipClearExpire} onChange={setVipClearExpire} />
-            <span>清空过期时间（长期有效）</span>
-          </Space>
-          <div>
-            <div style={{ marginBottom: 4 }}>过期时间（datetime-local，可选）</div>
+        <Form form={userForm} layout="vertical" style={{ marginTop: 12 }}>
+          <Form.Item name="id" hidden>
             <Input
-              type="datetime-local"
-              disabled={vipClearExpire}
-              value={vipExpireLocal}
-              onChange={(e) => setVipExpireLocal(e.target.value)}
+              readOnly
             />
-          </div>
-        </Space>
+          </Form.Item>
+          <Form.Item label="邮箱" name="email">
+            <Input disabled />
+          </Form.Item>
+          <Form.Item
+            label="昵称"
+            name="nickname"
+            rules={[{ required: true, message: '请输入昵称' }]}
+          >
+            <Input maxLength={32} />
+          </Form.Item>
+          <Form.Item label="出生年份" name="birthYear">
+            <Input type="number" placeholder="例如 1980" />
+          </Form.Item>
+          <Form.Item label="国家代码" name="countryCode">
+            <Input maxLength={2} placeholder="CN / US / JP" />
+          </Form.Item>
+          <Form.Item label="个人简介" name="bio">
+            <Input.TextArea maxLength={300} rows={3} />
+          </Form.Item>
+          <Form.Item label="状态" name="status">
+            <Select
+              options={[
+                { label: '正常', value: 1 },
+                { label: '封禁', value: 2 },
+                { label: '注销', value: 3 },
+              ]}
+            />
+          </Form.Item>
+        </Form>
       </Modal>
     </>
   )

@@ -1,5 +1,12 @@
 # 会话进度日志
 
+## 2026-05-18 — 忘记密码完成态按钮优化 + 管理端用户编辑/删除（frontend-design）
+
+- **Flutter**：`forgot_password_page.dart` 完成态由通用空态改为定制成功卡片，强化“返回登录”主按钮（渐变、阴影、高对比）。
+- **后端**：`AdminUserApi` 新增 `/webapi/user/save` 与 `/{id}/delete`；新增 `AdminUserSaveInDto`；`AdminUserController` 落地编辑/删除逻辑；`messages/app*.properties` 新增 `admin.error.user.emptyUpdate`。
+- **管理端**：`user/List.tsx` 移除无效行按钮（调试 VIP / Enable / Ban），新增编辑弹窗与删除确认；`api.ts` 新增 `saveUser`、`deleteUser`。
+- **验证**：`mvn -pl biz,client -am compile -DskipTests`、`npm run build`、`flutter analyze` 全部通过。
+
 ## 2026-05-18 — 排查 `auth/me` 高频调用淹没业务接口日志（planning-with-files）
 
 - **现象**：运行日志中出现大量 `GET /backend/api/auth/me`，用户怀疑明信片墙/通信名录未调用正确接口。

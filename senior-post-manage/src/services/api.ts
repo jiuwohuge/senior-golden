@@ -6,6 +6,15 @@ export const api = {
   dashboard: () => request.get('/webapi/dashboard/summary'),
 
   users: (params: any) => request.post('/webapi/user/paging', params),
+  saveUser: (body: {
+    id: number
+    nickname?: string
+    birthYear?: number
+    countryCode?: string
+    bio?: string
+    status?: number
+  }) => request.post('/webapi/user/save', body),
+  deleteUser: (id: number) => request.post(`/webapi/user/${id}/delete`),
   userStatus: (id: number, status: number) => request.post(`/webapi/user/${id}/status?status=${status}`),
   userVipDebug: (id: number, body: { isVip: boolean; vipExpireAt?: string | null; clearVipExpireAt?: boolean }) =>
     request.post(`/webapi/user/${id}/vip-debug`, body),

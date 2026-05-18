@@ -354,12 +354,58 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
   }
 
   Widget _stepDone(BuildContext context, AppLocalizations l10n) {
-    return PostalEmptyState(
-      title: l10n.authForgotDoneTitle,
-      subtitle: l10n.authForgotDoneBody,
-      tone: PostalEmptyTone.success,
-      actionLabel: l10n.authBackToLogin,
-      onAction: () => context.go(LoginRoutes.login),
+    final cs = Theme.of(context).colorScheme;
+    return PostalCardEnvelope(
+      child: Column(
+        children: [
+          Icon(
+            Icons.task_alt_rounded,
+            size: 56,
+            color: cs.primary,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.authForgotDoneTitle,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            l10n.authForgotDoneBody,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              height: 1.45,
+              color: cs.onSurface.withValues(alpha: 0.86),
+            ),
+          ),
+          const SizedBox(height: 18),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              gradient: LinearGradient(
+                colors: [
+                  cs.primary,
+                  cs.primary.withValues(alpha: 0.82),
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: cs.primary.withValues(alpha: 0.28),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: PostalButton(
+              label: l10n.authBackToLogin,
+              onPressed: () => context.go(LoginRoutes.login),
+              variant: PostalButtonVariant.primary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

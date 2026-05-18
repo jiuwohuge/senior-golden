@@ -4,6 +4,7 @@ import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.db.UserDeviceDTO;
+import cn.nine.pros.post.client.model.input.admin.AdminUserSaveInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserVipDebugInDto;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
 import cn.nine.pros.post.client.model.input.admin.UserQueryInDto;
@@ -25,6 +26,14 @@ public interface AdminUserApi {
     @Operation(summary = "设置用户状态")
     @PostMapping("/{id}/status")
     void updateStatus(@PathVariable("id") Long id, @RequestParam("status") Integer status);
+
+    @Operation(summary = "编辑用户")
+    @PostMapping("/save")
+    void save(@RequestBody @Valid AdminUserSaveInDto body);
+
+    @Operation(summary = "删除用户")
+    @PostMapping("/{id}/delete")
+    void delete(@PathVariable("id") Long id);
 
     @Operation(summary = "设备拉黑")
     @PostMapping("/device/block")
