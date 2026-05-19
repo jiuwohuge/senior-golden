@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../core/api/api_exception.dart';
+import '../../core/config/debug_api_base_url_dialog.dart';
 import '../../widgets/postal/postal.dart';
 import '../shell/main_shell.dart';
 import 'auth_repository.dart';
@@ -171,12 +173,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               variant: PostalButtonVariant.secondary,
                             ),
                             const SizedBox(height: 8),
-                            PostalButton(
-                              label: l10n.authOnboardingAgain,
-                              onPressed: _busy
-                                  ? null
-                                  : () => context.go(LoginRoutes.onboarding),
-                              variant: PostalButtonVariant.ghost,
+                            GestureDetector(
+                              onLongPress: kDebugMode && !_busy
+                                  ? () => showDebugApiBaseUrlDialog(context, ref)
+                                  : null,
+                              child: PostalButton(
+                                label: l10n.authOnboardingAgain,
+                                onPressed: _busy
+                                    ? null
+                                    : () => context.go(LoginRoutes.onboarding),
+                                variant: PostalButtonVariant.ghost,
+                              ),
                             ),
                           ],
                         ),

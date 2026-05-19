@@ -154,8 +154,9 @@ String bootstrapDebugErrorHint(Object error) {
     if (error.type == DioExceptionType.connectionError ||
         error.type == DioExceptionType.connectionTimeout) {
       buf.writeln(
-        '真机/模拟器请检查：同一 Wi‑Fi、后端已启动、'
-        'flutter run --dart-define=API_BASE_URL=http://<电脑IP>:9011',
+        '真机/模拟器请检查：同一 Wi‑Fi、后端已启动；'
+        'Debug 下可在登录页长按「查看功能引导」配置 Base URL，'
+        '或使用 --dart-define=API_BASE_URL=...',
       );
     }
     return buf.toString();

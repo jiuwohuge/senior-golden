@@ -12,7 +12,7 @@ import '../api/api_exception.dart';
 import '../api/biz_error_codes.dart';
 import '../auth/auth_storage.dart';
 import '../auth/auth_token.dart';
-import '../config/api_base_url.dart';
+import '../config/api_base_url_provider.dart';
 import '../device/device_ids.dart';
 import '../i18n/effective_app_locale_provider.dart';
 import '../i18n/locale_resolution.dart';
@@ -30,11 +30,12 @@ const bool _kApiVerboseLog = bool.fromEnvironment(
   defaultValue: false,
 );
 
-/// 业务 HTTP 客户端。真机勿依赖默认 127.0.0.1，见 [kApiBaseUrl]。
+/// 业务 HTTP 客户端。真机勿依赖默认 127.0.0.1，见 [apiBaseUrlProvider]。
 final dioProvider = Provider<Dio>((ref) {
+  final baseUrl = ref.watch(apiBaseUrlProvider);
   final dio = Dio(
     BaseOptions(
-      baseUrl: kApiBaseUrl,
+      baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       headers: {
