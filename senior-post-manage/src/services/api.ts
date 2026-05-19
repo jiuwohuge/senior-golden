@@ -13,8 +13,11 @@ export const api = {
     countryCode?: string
     bio?: string
     status?: number
+    avatarUrl?: string
   }) => request.post('/webapi/user/save', body),
   deleteUser: (id: number) => request.post(`/webapi/user/${id}/delete`),
+  approveUserAvatar: (id: number) => request.post(`/webapi/user/${id}/avatar/approve`),
+  rejectUserAvatar: (id: number) => request.post(`/webapi/user/${id}/avatar/reject`),
   userStatus: (id: number, status: number) => request.post(`/webapi/user/${id}/status?status=${status}`),
   userVipDebug: (id: number, body: { isVip: boolean; vipExpireAt?: string | null; clearVipExpireAt?: boolean }) =>
     request.post(`/webapi/user/${id}/vip-debug`, body),
@@ -25,6 +28,12 @@ export const api = {
   postcardDetail: (id: number) => request.get(`/webapi/content/postcard/${id}`),
   /** 私有桶看图：列表/详情已服务端换签；此接口供扩展场景批量换签 */
   ossGetSign: (body: { objectKeys: string[] }) => request.post('/webapi/oss/get-sign', body),
+  ossPutSign: (params: {
+    userId: number
+    scene: string
+    ext?: string
+    contentType?: string
+  }) => request.get('/webapi/oss/put-sign', { params }),
   comments: (params: any) => request.post('/webapi/content/comment/paging', params),
   approvePostcard: (id: number) => request.post(`/webapi/content/postcard/${id}/approve`),
   rejectPostcard: (id: number, reason: string) => request.post(`/webapi/content/postcard/${id}/reject`, { reason }),

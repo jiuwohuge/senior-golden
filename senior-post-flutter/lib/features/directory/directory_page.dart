@@ -73,9 +73,25 @@ class _DirectoryPageState extends ConsumerState<DirectoryPage> {
               ),
               data: (users) {
                 if (users.isEmpty) {
-                  return PostalEmptyState(
-                    title: l10n.directoryEmptyTitle,
-                    subtitle: l10n.directoryEmptySubtitle,
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      return RefreshIndicator(
+                        onRefresh: _onRefresh,
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                          children: [
+                            SizedBox(
+                              height: constraints.maxHeight,
+                              child: PostalEmptyState(
+                                title: l10n.directoryEmptyTitle,
+                                subtitle: l10n.directoryEmptySubtitle,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   );
                 }
                 return RefreshIndicator(

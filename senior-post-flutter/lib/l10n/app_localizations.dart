@@ -1184,6 +1184,30 @@ abstract class AppLocalizations {
   /// **'Uploading photo…'**
   String get profileAvatarUploading;
 
+  /// No description provided for @profileAvatarAuditPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get profileAvatarAuditPending;
+
+  /// No description provided for @profileAvatarAuditRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get profileAvatarAuditRejected;
+
+  /// No description provided for @profileAvatarUploadPendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo submitted for review'**
+  String get profileAvatarUploadPendingReview;
+
+  /// No description provided for @profileAvatarRejectedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo was not approved. Please upload again.'**
+  String get profileAvatarRejectedHint;
+
   /// No description provided for @profileEditCancel.
   ///
   /// In en, this message translates to:

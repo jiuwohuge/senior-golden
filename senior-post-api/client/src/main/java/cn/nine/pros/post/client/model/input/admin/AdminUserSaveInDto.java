@@ -29,4 +29,7 @@ public class AdminUserSaveInDto extends AbstractDTO {
 
     @Schema(description = "状态：1正常 2封禁 3注销")
     private Integer status;
+
+    @Schema(description = "头像对象存储引用；非 null 时更新，空串表示清空（管理端保存即视为已通过）")
+    private String avatarUrl;
 }

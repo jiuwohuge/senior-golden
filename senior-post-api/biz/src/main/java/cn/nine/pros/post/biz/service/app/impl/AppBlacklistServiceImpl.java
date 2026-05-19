@@ -6,6 +6,7 @@ import cn.nine.pros.post.biz.mapper.UserBlacklistMapper;
 import cn.nine.pros.post.biz.model.domain.UserBlacklistDomain;
 import cn.nine.pros.post.biz.service.app.AppBlacklistService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
+import cn.nine.pros.post.biz.service.app.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.out.AppBlockedUserItemVO;
@@ -89,8 +90,11 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
                 continue;
             }
             AppPublicUserVO peer = toPublic(u);
-            if (StringUtils.hasText(peer.getAvatarUrl())) {
-                peer.setAvatarUrl(ossDisplayUrlService.signAvatarForViewer(actorUserId, peer.getAvatarUrl()));
+            String avatarRef = UserAvatarAuditSupport.publicStoredRef(u);
+            if (StringUtils.hasText(avatarRef)) {
+                peer.setAvatarUrl(ossDisplayUrlService.signAvatarForViewer(actorUserId, avatarRef));
+            } else {
+                peer.setAvatarUrl(null);
             }
             out.add(AppBlockedUserItemVO.builder()
                     .blockedUserId(row.getBlockedUserId())
@@ -142,7 +146,7 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
                 .birthYear(u.getBirthYear())
                 .countryCode(cc)
                 .bio(u.getBio())
-                .avatarUrl(u.getAvatarUrl())
+                .avatarUrl(UserAvatarAuditSupport.publicStoredRef(u))
                 .stampsBalance(u.getStampsBalance())
                 .isVip(u.getIsVip())
                 .build();

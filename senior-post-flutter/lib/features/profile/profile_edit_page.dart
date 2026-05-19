@@ -140,7 +140,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
         setState(() => _avatarPendingBytes = null);
         PostalSnack.show(
           context,
-          l10n.profileAvatarUploadSuccess,
+          l10n.profileAvatarUploadPendingReview,
           tone: PostalSnackTone.success,
         );
       }

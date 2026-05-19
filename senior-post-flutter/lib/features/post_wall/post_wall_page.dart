@@ -54,9 +54,25 @@ class _PostWallPageState extends ConsumerState<PostWallPage> {
                   ),
                   data: (posts) {
                     if (posts.isEmpty) {
-                      return PostalEmptyState(
-                        title: l10n.postWallEmptyTitle,
-                        subtitle: l10n.postWallEmptySubtitle,
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          return RefreshIndicator(
+                            onRefresh: _onRefresh,
+                            child: ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
+                              children: [
+                                SizedBox(
+                                  height: constraints.maxHeight,
+                                  child: PostalEmptyState(
+                                    title: l10n.postWallEmptyTitle,
+                                    subtitle: l10n.postWallEmptySubtitle,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       );
                     }
                     return RefreshIndicator(

@@ -8,6 +8,7 @@ import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.PostcardCommentDomain;
 import cn.nine.pros.post.biz.model.domain.PostcardDomain;
 import cn.nine.pros.post.biz.service.app.AppBlacklistService;
+import cn.nine.pros.post.biz.service.app.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.app.AppPostcardService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.PostcardCommentService;
@@ -351,7 +352,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
                 .nickname(u.getNickname() == null ? "User" : u.getNickname())
                 .countryCode(cc)
                 .countryName(cc)
-                .avatarUrl(u.getAvatarUrl())
+                .avatarUrl(UserAvatarAuditSupport.publicStoredRef(u))
                 .build();
     }
 

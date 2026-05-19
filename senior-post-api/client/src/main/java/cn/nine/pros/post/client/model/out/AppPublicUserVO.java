@@ -32,6 +32,8 @@ public class AppPublicUserVO {
     private String bio;
     @Schema(description = "头像 URL")
     private String avatarUrl;
+    @Schema(description = "头像审核：0待审核 1通过 2驳回（仅本人资料接口返回）")
+    private Integer avatarAuditStatus;
     @Schema(description = "邮票余额")
     private Integer stampsBalance;
     @Schema(description = "是否 VIP")

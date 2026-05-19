@@ -125,17 +125,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
                             Align(
                               alignment: Alignment.centerRight,
-                              child: PostalButton(
+                              child: PostalInlineLink(
                                 label: l10n.authForgotPassword,
+                                enabled: !_busy,
                                 onPressed: _busy
                                     ? null
                                     : () => context.go(LoginRoutes.forgotPassword),
-                                variant: PostalButtonVariant.ghost,
-                                expand: false,
-                                minHeight: 40,
                               ),
                             ),
                             PostalCheckboxField(

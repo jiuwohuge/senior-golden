@@ -24,4 +24,7 @@ public class UserQueryInDto extends AbstractDTO {
 
     @Schema(description = "状态：1正常 2封禁")
     private Integer status;
+
+    @Schema(description = "头像审核：0待审核 1通过 2驳回")
+    private Integer avatarAuditStatus;
 }

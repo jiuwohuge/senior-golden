@@ -9,6 +9,7 @@ import cn.nine.pros.post.biz.model.domain.TagDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.app.AppBlacklistService;
 import cn.nine.pros.post.biz.service.app.AppDirectoryService;
+import cn.nine.pros.post.biz.service.app.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.app.support.UserInterestAssembler;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.TagService;
@@ -187,7 +188,7 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
     }
 
     private DirectoryUserItemVO toVo(long viewerUserId, UserDomain u) {
-        String av = u.getAvatarUrl();
+        String av = UserAvatarAuditSupport.publicStoredRef(u);
         if (StringUtils.hasText(av)) {
             av = ossDisplayUrlService.signAvatarForViewer(viewerUserId, av.trim());
         }

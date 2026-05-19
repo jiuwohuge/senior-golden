@@ -5,7 +5,7 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <application
-        android:label="senior_post_flutter"
+        android:label="Senior Post"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

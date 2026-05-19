@@ -13,6 +13,7 @@ class AppUser {
     required this.interests,
     this.interestTagIds = const [],
     this.avatarUrl,
+    this.avatarAuditStatus,
     this.isVip = false,
     this.deletionRequestedAt,
     this.deletionEffectiveAt,
@@ -28,7 +29,14 @@ class AppUser {
   final List<String> interests;
   final List<int> interestTagIds;
   final String? avatarUrl;
+  /// 0 待审核 1 通过 2 驳回（仅本人资料接口返回）
+  final int? avatarAuditStatus;
   final bool isVip;
+
+  bool get isAvatarAuditPending => avatarAuditStatus == 0;
+  bool get isAvatarAuditRejected => avatarAuditStatus == 2;
+  bool get isAvatarAuditApproved =>
+      avatarAuditStatus == null || avatarAuditStatus == 1;
   final DateTime? deletionRequestedAt;
   final DateTime? deletionEffectiveAt;
 
@@ -77,6 +85,7 @@ class AppUser {
       interests: interestNames,
       interestTagIds: interestIds,
       avatarUrl: m['avatarUrl'] as String?,
+      avatarAuditStatus: (m['avatarAuditStatus'] as num?)?.toInt(),
       isVip: m['isVip'] as bool? ?? false,
       deletionRequestedAt: delReq,
       deletionEffectiveAt: delEff,
@@ -91,6 +100,7 @@ class AppUser {
     List<String>? interests,
     List<int>? interestTagIds,
     String? avatarUrl,
+    int? avatarAuditStatus,
     bool? isVip,
     DateTime? deletionRequestedAt,
     DateTime? deletionEffectiveAt,
@@ -106,6 +116,7 @@ class AppUser {
       interests: interests ?? this.interests,
       interestTagIds: interestTagIds ?? this.interestTagIds,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      avatarAuditStatus: avatarAuditStatus ?? this.avatarAuditStatus,
       isVip: isVip ?? this.isVip,
       deletionRequestedAt: deletionRequestedAt ?? this.deletionRequestedAt,
       deletionEffectiveAt: deletionEffectiveAt ?? this.deletionEffectiveAt,

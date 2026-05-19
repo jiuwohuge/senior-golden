@@ -35,6 +35,14 @@ public interface AdminUserApi {
     @PostMapping("/{id}/delete")
     void delete(@PathVariable("id") Long id);
 
+    @Operation(summary = "头像审核通过")
+    @PostMapping("/{id}/avatar/approve")
+    void approveAvatar(@PathVariable("id") Long id);
+
+    @Operation(summary = "头像审核驳回")
+    @PostMapping("/{id}/avatar/reject")
+    void rejectAvatar(@PathVariable("id") Long id);
+
     @Operation(summary = "设备拉黑")
     @PostMapping("/device/block")
     void blockDevice(@RequestBody @Valid DeviceBlockInDto body);

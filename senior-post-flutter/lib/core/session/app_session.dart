@@ -70,6 +70,7 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
     List<String>? interests,
     List<int>? interestTagIds,
     String? avatarUrl,
+    int? avatarAuditStatus,
   }) {
     state = state.copyWith(
       user: state.user.copyWith(
@@ -80,6 +81,7 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
         interests: interests,
         interestTagIds: interestTagIds,
         avatarUrl: avatarUrl,
+        avatarAuditStatus: avatarAuditStatus,
       ),
     );
   }
@@ -155,6 +157,7 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
         interests: interests,
         interestTagIds: interestTagIds,
         avatarUrl: m['avatarUrl'] as String?,
+        avatarAuditStatus: (m['avatarAuditStatus'] as num?)?.toInt(),
         isVip: m['isVip'] as bool? ?? state.user.isVip,
         deletionRequestedAt: delReq,
         deletionEffectiveAt: delEff,

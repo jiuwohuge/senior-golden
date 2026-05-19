@@ -5,6 +5,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/router/shop_routes.dart';
 import '../../core/auth/auth_token.dart';
+import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
@@ -55,11 +56,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           PostalCardEnvelope(
             child: Column(
               children: [
-                PostalAvatar(
-                  name: user.nickname,
-                  size: 80,
-                  imageUrl: user.avatarUrl,
-                ),
+                _ProfileAvatarWithAudit(user: user, l10n: l10n),
+                if (user.isAvatarAuditRejected) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.profileAvatarRejectedHint,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFFB83A2A),
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
                 const SizedBox(height: 10),
                 Text(
                   user.nickname.isEmpty ? '?' : user.nickname,
@@ -163,6 +171,88 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 个人中心头像：待审角标、驳回遮罩与占位。
+class _ProfileAvatarWithAudit extends StatelessWidget {
+  const _ProfileAvatarWithAudit({required this.user, required this.l10n});
+
+  final AppUser user;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final rejected = user.isAvatarAuditRejected;
+    final pending = user.isAvatarAuditPending;
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        PostalAvatar(
+          name: user.nickname,
+          size: 80,
+          imageUrl: rejected ? null : user.avatarUrl,
+        ),
+        if (rejected)
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black.withValues(alpha: 0.42),
+              border: Border.all(color: const Color(0xFFB83A2A), width: 2),
+            ),
+            child: const Icon(Icons.block, color: Colors.white, size: 34),
+          ),
+        if (pending)
+          Positioned(
+            bottom: -6,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFC9A227),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                l10n.profileAvatarAuditPending,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+          ),
+        if (rejected)
+          Positioned(
+            bottom: -6,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFB83A2A),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                l10n.profileAvatarAuditRejected,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

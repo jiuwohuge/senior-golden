@@ -605,6 +605,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileAvatarUploading => 'Uploading photo…';
 
   @override
+  String get profileAvatarAuditPending => 'Under review';
+
+  @override
+  String get profileAvatarAuditRejected => 'Rejected';
+
+  @override
+  String get profileAvatarUploadPendingReview => 'Photo submitted for review';
+
+  @override
+  String get profileAvatarRejectedHint =>
+      'Photo was not approved. Please upload again.';
+
+  @override
   String get profileEditCancel => 'Close';
 
   @override

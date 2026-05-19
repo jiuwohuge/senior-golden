@@ -9,9 +9,12 @@ import cn.nine.pros.post.biz.mapper.UserMapper;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
 import cn.nine.pros.post.biz.service.base.UserService;
+import cn.nine.pros.post.biz.service.base.support.DeletedUserEmailSupport;
 import cn.nine.pros.post.client.model.db.UserDTO;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -65,11 +68,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
         if (staffCount > 0) {
             throw new BadRequestException(appMessages.get("admin.error.user.cannotDeleteStaff"));
         }
-        UserDomain userDomain = new UserDomain();
-        userDomain.setDelFlag(true);
-        userDomain.setUpdatedAt(LocalDateTime.now());
-        update(userDomain, new LambdaQueryWrapper<UserDomain>()
-                .in(UserDomain::getId, ids));
+        List<UserDomain> targets = list(new LambdaQueryWrapper<UserDomain>()
+                .in(UserDomain::getId, ids)
+                .eq(UserDomain::isDelFlag, false));
+        LocalDateTime now = LocalDateTime.now();
+        Long operatorId = MyRequestContextHolder.userId();
+        long updatedBy = operatorId != null ? operatorId : 0L;
+        for (UserDomain user : targets) {
+            LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>()
+                    .eq(UserDomain::getId, user.getId())
+                    .set(UserDomain::isDelFlag, true)
+                    .set(UserDomain::getUpdatedAt, now)
+                    .set(UserDomain::getUpdatedBy, updatedBy);
+            if (StringUtils.hasText(user.getEmail())) {
+                uw.set(UserDomain::getEmail, DeletedUserEmailSupport.archive(user.getEmail(), now));
+            }
+            update(uw);
+        }
     }
 
     @Override

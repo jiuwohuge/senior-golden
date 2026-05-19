@@ -574,6 +574,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileAvatarUploading => '正在上传头像…';
 
   @override
+  String get profileAvatarAuditPending => '审核中';
+
+  @override
+  String get profileAvatarAuditRejected => '已驳回';
+
+  @override
+  String get profileAvatarUploadPendingReview => '头像已提交，等待审核';
+
+  @override
+  String get profileAvatarRejectedHint => '头像未通过审核，请重新上传';
+
+  @override
   String get profileEditCancel => '关闭';
 
   @override

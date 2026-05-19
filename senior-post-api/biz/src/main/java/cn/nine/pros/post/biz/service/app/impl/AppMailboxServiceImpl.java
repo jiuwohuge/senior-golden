@@ -14,6 +14,7 @@ import cn.nine.pros.post.biz.service.base.SensitiveWordService;
 import cn.nine.pros.post.biz.service.base.StampAccountService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.StampTransactionService;
+import cn.nine.pros.post.biz.service.app.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.common.enums.LetterBizStatus;
 import cn.nine.pros.post.client.common.enums.LetterPhysicalType;
@@ -263,7 +264,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             if (peerDto == null) {
                 continue;
             }
-            String avatar = peerDto.getAvatarUrl();
+            String avatar = UserAvatarAuditSupport.publicStoredRef(peerDto);
             if (StringUtils.hasText(avatar)) {
                 avatar = ossDisplayUrlService.signAvatarForViewer(userId, avatar.trim());
             }
@@ -487,8 +488,11 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             }
         }
         AppPublicUserVO peerVo = toPublic(peer);
-        if (StringUtils.hasText(peerVo.getAvatarUrl())) {
-            peerVo.setAvatarUrl(ossDisplayUrlService.signAvatarForViewer(viewer, peerVo.getAvatarUrl()));
+        String peerAvatarRef = UserAvatarAuditSupport.publicStoredRef(peer);
+        if (StringUtils.hasText(peerAvatarRef)) {
+            peerVo.setAvatarUrl(ossDisplayUrlService.signAvatarForViewer(viewer, peerAvatarRef));
+        } else {
+            peerVo.setAvatarUrl(null);
         }
         LocalDateTime expected = toLocalDateTimeField(l.getExpectedArrivalTime());
         LocalDateTime actual = toLocalDateTimeField(l.getActualArrivalTime());
@@ -533,7 +537,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .birthYear(dto.getBirthYear())
                 .countryCode(dto.getCountryCode())
                 .bio(dto.getBio())
-                .avatarUrl(dto.getAvatarUrl())
+                .avatarUrl(UserAvatarAuditSupport.publicStoredRef(dto))
                 .stampsBalance(dto.getStampsBalance())
                 .isVip(dto.getIsVip())
                 .build();

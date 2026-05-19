@@ -9,6 +9,7 @@ import cn.nine.pros.post.biz.model.domain.TagDomain;
 import cn.nine.pros.post.biz.model.domain.UserDeviceDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.app.support.OssReadableKeyValidator;
+import cn.nine.pros.post.biz.service.app.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.app.support.UserInterestAssembler;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
@@ -16,6 +17,7 @@ import cn.nine.pros.post.biz.service.base.TagService;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.base.UserTagService;
+import cn.nine.pros.post.biz.service.base.support.DeletedUserEmailSupport;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
 import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
@@ -236,6 +238,7 @@ public class AppAuthService {
             String raw = body.getAvatarUrl().trim();
             if (raw.isEmpty()) {
                 uw.set(UserDomain::getAvatarUrl, null);
+                uw.set(UserDomain::getAvatarAuditStatus, UserAvatarAuditSupport.PENDING);
             } else {
                 String normalized =
                         OssReadableKeyValidator.normalizeAndValidate(ossProperties.getKeyPrefix(), raw, appMessages);
@@ -245,6 +248,7 @@ public class AppAuthService {
                     throw new BadRequestException(appMessages.get("app.error.profile.avatarInvalid"));
                 }
                 uw.set(UserDomain::getAvatarUrl, normalized);
+                uw.set(UserDomain::getAvatarAuditStatus, UserAvatarAuditSupport.PENDING);
             }
             changed = true;
             userRowChanged = true;
@@ -293,13 +297,17 @@ public class AppAuthService {
         }
         LocalDateTime now = LocalDateTime.now();
         friendshipService.deactivateAllFriendshipsForUser(userId);
-        userService.update(new LambdaUpdateWrapper<UserDomain>()
+        LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>()
                 .eq(UserDomain::getId, userId)
                 .eq(UserDomain::isDelFlag, false)
                 .set(UserDomain::getStatus, 3)
                 .set(UserDomain::getDeletionRequestedAt, null)
                 .set(UserDomain::getUpdatedAt, now)
-                .set(UserDomain::getUpdatedBy, userId));
+                .set(UserDomain::getUpdatedBy, userId);
+        if (StringUtils.hasText(u.getEmail())) {
+            uw.set(UserDomain::getEmail, DeletedUserEmailSupport.archive(u.getEmail(), now));
+        }
+        userService.update(uw);
     }
 
     /**
@@ -364,7 +372,12 @@ public class AppAuthService {
         if (dto == null) {
             return null;
         }
-        String av = dto.getAvatarUrl();
+        boolean self = viewerUserId != null && Objects.equals(viewerUserId, dto.getId());
+        int auditStatus = UserAvatarAuditSupport.statusOf(dto);
+        String storedRef = self
+                ? UserAvatarAuditSupport.ownerVisibleStoredRef(dto)
+                : UserAvatarAuditSupport.publicStoredRef(dto);
+        String av = storedRef;
         if (viewerUserId != null && StringUtils.hasText(av)) {
             av = ossDisplayUrlService.signAvatarForViewer(viewerUserId, av.trim());
         }
@@ -379,6 +392,9 @@ public class AppAuthService {
                 .stampsBalance(dto.getStampsBalance())
                 .isVip(dto.getIsVip())
                 .build();
+        if (self) {
+            vo.setAvatarAuditStatus(auditStatus);
+        }
         LocalDateTime reqAt = dto.getDeletionRequestedAt();
         if (reqAt != null) {
             vo.setDeletionRequestedAt(reqAt);

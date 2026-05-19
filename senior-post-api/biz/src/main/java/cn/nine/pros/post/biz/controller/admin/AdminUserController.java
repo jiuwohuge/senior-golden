@@ -4,13 +4,17 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
+import cn.nine.pros.post.biz.config.OssProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.UserDeviceDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
-import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
 import cn.nine.pros.post.biz.model.mapstruct.UserDeviceMapstruct;
+import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
+import cn.nine.pros.post.biz.service.app.support.OssReadableKeyValidator;
+import cn.nine.pros.post.biz.service.app.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.base.UserService;
+import cn.nine.pros.post.biz.service.base.support.DeletedUserEmailSupport;
 import cn.nine.pros.post.client.api.admin.AdminUserApi;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.db.UserDeviceDTO;
@@ -46,6 +50,7 @@ public class AdminUserController implements AdminUserApi {
     private final UserDeviceService userDeviceService;
     private final UserDeviceMapstruct userDeviceMapstruct;
     private final AppMessages appMessages;
+    private final OssProperties ossProperties;
 
     @Override
     public PageData<UserDTO> paging(UserQueryInDto body) {
@@ -62,6 +67,9 @@ public class AdminUserController implements AdminUserApi {
         if (body.getStatus() != null) {
             qw.eq(UserDomain::getStatus, body.getStatus());
         }
+        if (body.getAvatarAuditStatus() != null) {
+            qw.eq(UserDomain::getAvatarAuditStatus, body.getAvatarAuditStatus());
+        }
         Page<UserDomain> p = userService.page(AdminPageHelper.mpPage(pageQuery), qw);
         List<UserDTO> list = p.getRecords().stream().map(userMapstruct::toDTO).collect(Collectors.toList());
         return AdminPageHelper.pageData(pageQuery, p, list);
@@ -72,11 +80,19 @@ public class AdminUserController implements AdminUserApi {
         if (status == null || (status != 1 && status != 2 && status != 3)) {
             throw new BadRequestException(appMessages.get("admin.error.user.badStatus"));
         }
-        userService.update(new LambdaUpdateWrapper<UserDomain>()
+        LocalDateTime now = LocalDateTime.now();
+        LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>()
                 .eq(UserDomain::getId, id)
                 .set(UserDomain::getStatus, status)
                 .set(UserDomain::getUpdatedBy, auditUserId())
-                .set(UserDomain::getUpdatedAt, java.time.LocalDateTime.now()));
+                .set(UserDomain::getUpdatedAt, now);
+        if (status == 3) {
+            UserDomain user = userService.getById(id);
+            if (user != null && StringUtils.isNotBlank(user.getEmail())) {
+                uw.set(UserDomain::getEmail, DeletedUserEmailSupport.archive(user.getEmail(), now));
+            }
+        }
+        userService.update(uw);
     }
 
     @Override
@@ -97,15 +113,17 @@ public class AdminUserController implements AdminUserApi {
         String countryCode = trimToNull(body.getCountryCode());
         String bio = trimToNull(body.getBio());
         Integer birthYear = body.getBirthYear();
+        boolean avatarTouched = body.getAvatarUrl() != null;
         boolean hasEditable = status != null
                 || birthYear != null
                 || nickname != null
                 || countryCode != null
-                || bio != null;
+                || bio != null
+                || avatarTouched;
         if (!hasEditable) {
             throw new BadRequestException(appMessages.get("admin.error.user.emptyUpdate"));
         }
-        userService.update(new LambdaUpdateWrapper<UserDomain>()
+        LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>()
                 .eq(UserDomain::getId, id)
                 .set(status != null, UserDomain::getStatus, status)
                 .set(birthYear != null, UserDomain::getBirthYear, birthYear)
@@ -113,7 +131,29 @@ public class AdminUserController implements AdminUserApi {
                 .set(countryCode != null, UserDomain::getCountryCode, countryCode)
                 .set(bio != null, UserDomain::getBio, bio)
                 .set(UserDomain::getUpdatedBy, auditUserId())
-                .set(UserDomain::getUpdatedAt, LocalDateTime.now()));
+                .set(UserDomain::getUpdatedAt, LocalDateTime.now());
+        if (avatarTouched) {
+            applyAdminAvatarUpdate(uw, id, body.getAvatarUrl());
+        }
+        userService.update(uw);
+    }
+
+    private void applyAdminAvatarUpdate(LambdaUpdateWrapper<UserDomain> uw, long userId, String rawAvatar) {
+        String raw = rawAvatar == null ? "" : rawAvatar.trim();
+        if (raw.isEmpty()) {
+            uw.set(UserDomain::getAvatarUrl, null);
+            uw.set(UserDomain::getAvatarAuditStatus, UserAvatarAuditSupport.PENDING);
+            return;
+        }
+        String normalized =
+                OssReadableKeyValidator.normalizeAndValidate(ossProperties.getKeyPrefix(), raw, appMessages);
+        OssReadableKeyValidator.ParsedOssKey p =
+                OssReadableKeyValidator.parseNormalizedKey(ossProperties.getKeyPrefix(), normalized, appMessages);
+        if (!"avatar".equals(p.sceneLower()) || p.ownerUserId() != userId) {
+            throw new BadRequestException(appMessages.get("admin.error.user.avatarInvalid"));
+        }
+        uw.set(UserDomain::getAvatarUrl, normalized);
+        uw.set(UserDomain::getAvatarAuditStatus, UserAvatarAuditSupport.APPROVED);
     }
 
     @Override
@@ -121,7 +161,43 @@ public class AdminUserController implements AdminUserApi {
         if (id == null) {
             throw new BadRequestException(appMessages.get("admin.error.user.badId"));
         }
+        UserDomain user = userService.getById(id);
+        if (user != null && canLoginConsole(user)) {
+            throw new BadRequestException(appMessages.get("admin.error.user.cannotDeleteStaff"));
+        }
         userService.delByIds(List.of(id));
+    }
+
+    @Override
+    public void approveAvatar(Long id) {
+        updateAvatarAudit(id, UserAvatarAuditSupport.APPROVED);
+    }
+
+    @Override
+    public void rejectAvatar(Long id) {
+        updateAvatarAudit(id, UserAvatarAuditSupport.REJECTED);
+    }
+
+    private void updateAvatarAudit(Long id, int targetStatus) {
+        if (id == null) {
+            throw new BadRequestException(appMessages.get("admin.error.user.badId"));
+        }
+        UserDomain user = userService.getById(id);
+        if (user == null || user.isDelFlag()) {
+            throw new BadRequestException(appMessages.get("admin.error.user.notFound"));
+        }
+        if (!UserAvatarAuditSupport.hasStoredAvatar(user)) {
+            throw new BadRequestException(appMessages.get("admin.error.user.avatarNotFound"));
+        }
+        int current = UserAvatarAuditSupport.statusOf(user);
+        if (current == targetStatus) {
+            return;
+        }
+        userService.update(new LambdaUpdateWrapper<UserDomain>()
+                .eq(UserDomain::getId, id)
+                .set(UserDomain::getAvatarAuditStatus, targetStatus)
+                .set(UserDomain::getUpdatedBy, auditUserId())
+                .set(UserDomain::getUpdatedAt, LocalDateTime.now()));
     }
 
     @Override
