@@ -3,6 +3,8 @@ package cn.nine.pros.post.client.api.app;
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
 import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
+import cn.nine.pros.post.client.model.input.AppGoogleCompleteInDto;
+import cn.nine.pros.post.client.model.input.AppGoogleLoginInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
 import cn.nine.pros.post.client.model.input.AppResetPasswordInDto;
@@ -28,6 +30,14 @@ public interface AppAuthApi {
     @Operation(summary = "登录")
     @PostMapping("/login")
     AppAuthResultVO login(@RequestBody @Valid AppLoginInDto body);
+
+    @Operation(summary = "Google 登录（Android / Web idToken）")
+    @PostMapping("/google")
+    AppAuthResultVO loginWithGoogle(@RequestBody @Valid AppGoogleLoginInDto body);
+
+    @Operation(summary = "Google 新用户资料补全")
+    @PostMapping("/google/complete")
+    AppAuthResultVO completeGoogleProfile(@RequestBody @Valid AppGoogleCompleteInDto body);
 
     @Operation(summary = "忘记密码：发送邮件验证码（防枚举：未注册邮箱也返回成功）")
     @PostMapping("/forgot-password")

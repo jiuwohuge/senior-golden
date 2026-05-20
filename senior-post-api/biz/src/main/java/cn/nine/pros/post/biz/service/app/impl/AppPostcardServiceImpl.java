@@ -355,6 +355,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         return PostcardAuthorVO.builder()
                 .userId(u.getId())
                 .nickname(u.getNickname() == null ? "User" : u.getNickname())
+                .gender(u.getGender())
                 .countryCode(cc)
                 .countryName(cc)
                 .avatarUrl(UserAvatarAuditSupport.publicStoredRef(u))

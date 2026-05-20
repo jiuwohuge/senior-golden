@@ -532,8 +532,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         }
         return AppPublicUserVO.builder()
                 .id(dto.getId())
-                .email(dto.getEmail())
                 .nickname(dto.getNickname())
+                .gender(dto.getGender())
                 .birthYear(dto.getBirthYear())
                 .countryCode(dto.getCountryCode())
                 .bio(dto.getBio())

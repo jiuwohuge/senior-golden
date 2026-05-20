@@ -71,6 +71,149 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authLoginSubmit => 'Sign in';
 
   @override
+  String get authWelcomeRegister => 'Create account';
+
+  @override
+  String get authWelcomeLogin => 'Sign in';
+
+  @override
+  String get authWelcomeHaveAccount => 'Already have an account?';
+
+  @override
+  String get authWelcomeHighlightLetters =>
+      'Write and receive real letters at a calm pace';
+
+  @override
+  String get authWelcomeHighlightDirectory =>
+      'Meet pen pals worldwide in the directory';
+
+  @override
+  String get authWelcomeHighlightPace => 'Designed for adults 45 and over';
+
+  @override
+  String get authWelcomeTagline => 'Letters at your pace — for adults 45+';
+
+  @override
+  String authWelcomeLegalFooter(Object privacy, Object terms) {
+    return 'By signing up, you accept our $terms and $privacy.';
+  }
+
+  @override
+  String get authRegisterWizardEmailTitle => 'What\'s your email?';
+
+  @override
+  String get authRegisterWizardEmailSubtitle =>
+      'We\'ll use it for sign-in and important notices about your post.';
+
+  @override
+  String get authRegisterWizardPasswordTitle => 'Choose a password';
+
+  @override
+  String get authRegisterWizardPasswordSubtitle =>
+      'At least 8 characters. Keep it somewhere safe.';
+
+  @override
+  String get authRegisterWizardNameTitle => 'What should we call you?';
+
+  @override
+  String get authRegisterWizardNameSubtitle =>
+      'This name appears on postcards, letters, and the directory.';
+
+  @override
+  String get authRegisterWizardGenderTitle => 'How do you identify?';
+
+  @override
+  String get authRegisterWizardGenderSubtitle =>
+      'Helps us show you the right people in the directory.';
+
+  @override
+  String get authRegisterWizardAgeTitle => 'How old are you?';
+
+  @override
+  String get authRegisterWizardAgeSubtitle =>
+      'Your birth year helps us tailor the community for 45+.';
+
+  @override
+  String get authRegisterProfileHint => 'This info shows on your profile.';
+
+  @override
+  String authRegisterAgePreview(Object age) {
+    return 'I\'m $age';
+  }
+
+  @override
+  String get authRegisterSummaryGender => 'Gender';
+
+  @override
+  String get authContinueWithGoogle => 'Continue with Google';
+
+  @override
+  String get authOrContinueWithEmail => 'or sign in with email';
+
+  @override
+  String get authGoogleNotConfigured => 'Google sign-in is not configured yet';
+
+  @override
+  String get authGenderLabel => 'Gender';
+
+  @override
+  String get authGenderMale => 'Male';
+
+  @override
+  String get authGenderFemale => 'Female';
+
+  @override
+  String get authGenderOther => 'Other';
+
+  @override
+  String get authRegisterAvatarOptional => 'Profile photo (optional)';
+
+  @override
+  String get authRegisterAvatarSkipHint =>
+      'You can skip and add a photo later in My Post.';
+
+  @override
+  String get authRegisterWizardAvatarTitle => 'Show us your smile';
+
+  @override
+  String get authRegisterWizardAvatarSubtitle =>
+      'Add a friendly photo of yourself — a smile goes a long way.';
+
+  @override
+  String get authRegisterAvatarTapToAdd => 'Tap to add a photo';
+
+  @override
+  String get authRegisterAvatarAgreeFirst =>
+      'Please accept the terms below before uploading a photo';
+
+  @override
+  String get authRegisterAvatarUploading => 'Uploading photo…';
+
+  @override
+  String get authRegisterAvatarUploaded => 'Uploaded';
+
+  @override
+  String get authRegisterSummaryAvatarPending => 'Selected, pending upload';
+
+  @override
+  String get authRegisterSummaryAvatar => 'Photo';
+
+  @override
+  String get authRegisterSummaryAvatarSet => 'Selected — uploads after sign-up';
+
+  @override
+  String get authRegisterSummaryAvatarSkipped => 'Skipped';
+
+  @override
+  String get authSocialCompleteTitle => 'Complete your profile';
+
+  @override
+  String get directoryFilterGender => 'Gender';
+
+  @override
+  String get directoryFilterGenderAll => 'All';
+
+  @override
   String get authGoRegister => 'Create an account';
 
   @override

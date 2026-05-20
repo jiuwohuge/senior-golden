@@ -15,18 +15,23 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(ref);
 });
 
+class AuthSignInResult {
+  const AuthSignInResult({required this.profileComplete});
+
+  final bool profileComplete;
+}
+
 class AuthRepository {
   AuthRepository(this._ref);
 
   final Ref _ref;
 
-  Future<void> login({required String email, required String password}) async {
+  Future<AuthSignInResult> login({
+    required String email,
+    required String password,
+  }) async {
     final dio = _ref.read(dioProvider);
-    String deviceUuid = _ref.read(deviceInstallIdStateProvider);
-    if (deviceUuid.isEmpty) {
-      deviceUuid = await DeviceInstallId.getOrCreate();
-      _ref.read(deviceInstallIdStateProvider.notifier).state = deviceUuid;
-    }
+    final deviceUuid = await _ensureDeviceUuid();
     try {
       final res = await dio.post<Map<String, dynamic>>(
         '/api/auth/login',
@@ -37,41 +42,78 @@ class AuthRepository {
           'deviceType': _deviceTypeBody(),
         },
       );
-      final data = unwrapData<Map<String, dynamic>>(res, (raw) {
-        return raw! as Map<String, dynamic>;
-      });
-      final token = data['token']! as String;
-      await AuthStorage.writeToken(token);
-      _ref.read(authTokenProvider.notifier).state = token;
-      _ref.invalidate(seniorPostTimFacadeProvider);
-      final userMap = data['user'] as Map<String, dynamic>?;
-      if (userMap != null) {
-        _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
-      }
-      _ref.read(invalidateAuthDataProvider)();
+      return _applyAuthResponse(res);
     } on DioException catch (e) {
       _throwMappedDio(e);
     }
   }
 
-  Future<void> register({
-    required String email,
-    required String password,
-    required String nickname,
+  Future<AuthSignInResult> signInWithGoogle({required String idToken}) async {
+    final dio = _ref.read(dioProvider);
+    final deviceUuid = await _ensureDeviceUuid();
+    try {
+      final res = await dio.post<Map<String, dynamic>>(
+        '/api/auth/google',
+        data: <String, dynamic>{
+          'idToken': idToken,
+          'agreedTerms': true,
+          'deviceUuid': deviceUuid,
+          'deviceType': _deviceTypeBody(),
+        },
+      );
+      return _applyAuthResponse(res);
+    } on DioException catch (e) {
+      _throwMappedDio(e);
+    }
+  }
+
+  Future<AuthSignInResult> completeGoogleProfile({
+    required int gender,
     required int birthYear,
+    required String nickname,
     String? countryCode,
-    required bool agreedTerms,
-    List<int> interestTagIds = const [],
+    required List<int> interestTagIds,
+    String? avatarUrl,
   }) async {
     if (interestTagIds.length < 3) {
       throw ApiBusinessException(400, 'Please select at least 3 interests.');
     }
     final dio = _ref.read(dioProvider);
-    String deviceUuid = _ref.read(deviceInstallIdStateProvider);
-    if (deviceUuid.isEmpty) {
-      deviceUuid = await DeviceInstallId.getOrCreate();
-      _ref.read(deviceInstallIdStateProvider.notifier).state = deviceUuid;
+    try {
+      final res = await dio.post<Map<String, dynamic>>(
+        '/api/auth/google/complete',
+        data: <String, dynamic>{
+          'gender': gender,
+          'birthYear': birthYear,
+          'nickname': nickname.trim(),
+          if (countryCode != null && countryCode.isNotEmpty)
+            'countryCode': countryCode.trim(),
+          'interestTagIds': interestTagIds,
+          if (avatarUrl != null && avatarUrl.isNotEmpty) 'avatarUrl': avatarUrl,
+        },
+      );
+      return _applyAuthResponse(res);
+    } on DioException catch (e) {
+      _throwMappedDio(e);
     }
+  }
+
+  Future<AuthSignInResult> register({
+    required String email,
+    required String password,
+    required String nickname,
+    required int gender,
+    required int birthYear,
+    String? countryCode,
+    required bool agreedTerms,
+    List<int> interestTagIds = const [],
+    String? avatarUrl,
+  }) async {
+    if (interestTagIds.length < 3) {
+      throw ApiBusinessException(400, 'Please select at least 3 interests.');
+    }
+    final dio = _ref.read(dioProvider);
+    final deviceUuid = await _ensureDeviceUuid();
     try {
       final res = await dio.post<Map<String, dynamic>>(
         '/api/auth/register',
@@ -79,27 +121,18 @@ class AuthRepository {
           'email': email.trim(),
           'password': password,
           'nickname': nickname.trim(),
+          'gender': gender,
           'birthYear': birthYear,
           if (countryCode != null && countryCode.isNotEmpty)
             'countryCode': countryCode.trim(),
           'agreedTerms': agreedTerms,
           'interestTagIds': interestTagIds,
+          if (avatarUrl != null && avatarUrl.isNotEmpty) 'avatarUrl': avatarUrl,
           'deviceUuid': deviceUuid,
           'deviceType': _deviceTypeBody(),
         },
       );
-      final data = unwrapData<Map<String, dynamic>>(res, (raw) {
-        return raw! as Map<String, dynamic>;
-      });
-      final token = data['token']! as String;
-      await AuthStorage.writeToken(token);
-      _ref.read(authTokenProvider.notifier).state = token;
-      _ref.invalidate(seniorPostTimFacadeProvider);
-      final userMap = data['user'] as Map<String, dynamic>?;
-      if (userMap != null) {
-        _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
-      }
-      _ref.read(invalidateAuthDataProvider)();
+      return _applyAuthResponse(res);
     } on DioException catch (e) {
       _throwMappedDio(e);
     }
@@ -144,7 +177,6 @@ class AuthRepository {
     _ref.invalidate(seniorPostTimFacadeProvider);
   }
 
-  /// 拉取 `/api/auth/me` 并写入 [appSessionProvider]。
   Future<void> refreshSessionFromServer() async {
     final dio = _ref.read(dioProvider);
     try {
@@ -158,7 +190,6 @@ class AuthRepository {
     }
   }
 
-  /// 提交账号注销申请（7 日冷静期；期间再次登录将撤销）。
   Future<void> requestAccountDeletion() async {
     final dio = _ref.read(dioProvider);
     try {
@@ -168,32 +199,23 @@ class AuthRepository {
     }
   }
 
-  /// `PATCH /api/auth/profile`，成功后刷新本地会话展示态。
   Future<void> updateProfileOnServer({
     String? nickname,
     String? countryCode,
     String? bio,
     String? avatarUrl,
     List<int>? interestTagIds,
+    int? gender,
   }) async {
     final dio = _ref.read(dioProvider);
     try {
       final body = <String, dynamic>{};
-      if (nickname != null) {
-        body['nickname'] = nickname.trim();
-      }
-      if (countryCode != null) {
-        body['countryCode'] = countryCode.trim();
-      }
-      if (bio != null) {
-        body['bio'] = bio.trim();
-      }
-      if (avatarUrl != null) {
-        body['avatarUrl'] = avatarUrl;
-      }
-      if (interestTagIds != null) {
-        body['interestTagIds'] = interestTagIds;
-      }
+      if (gender != null) body['gender'] = gender;
+      if (nickname != null) body['nickname'] = nickname.trim();
+      if (countryCode != null) body['countryCode'] = countryCode.trim();
+      if (bio != null) body['bio'] = bio.trim();
+      if (avatarUrl != null) body['avatarUrl'] = avatarUrl;
+      if (interestTagIds != null) body['interestTagIds'] = interestTagIds;
       if (body.isEmpty) {
         throw StateError('updateProfileOnServer: at least one field required');
       }
@@ -208,6 +230,34 @@ class AuthRepository {
     } on DioException catch (e) {
       _throwMappedDio(e);
     }
+  }
+
+  Future<AuthSignInResult> _applyAuthResponse(
+    Response<Map<String, dynamic>> res,
+  ) async {
+    final data = unwrapData<Map<String, dynamic>>(res, (raw) {
+      return raw! as Map<String, dynamic>;
+    });
+    final token = data['token']! as String;
+    await AuthStorage.writeToken(token);
+    _ref.read(authTokenProvider.notifier).state = token;
+    _ref.invalidate(seniorPostTimFacadeProvider);
+    final userMap = data['user'] as Map<String, dynamic>?;
+    if (userMap != null) {
+      _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
+    }
+    _ref.read(invalidateAuthDataProvider)();
+    final complete = data['profileComplete'] as bool? ?? true;
+    return AuthSignInResult(profileComplete: complete);
+  }
+
+  Future<String> _ensureDeviceUuid() async {
+    String deviceUuid = _ref.read(deviceInstallIdStateProvider);
+    if (deviceUuid.isEmpty) {
+      deviceUuid = await DeviceInstallId.getOrCreate();
+      _ref.read(deviceInstallIdStateProvider.notifier).state = deviceUuid;
+    }
+    return deviceUuid;
   }
 
   String _deviceTypeBody() {

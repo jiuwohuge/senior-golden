@@ -1,7 +1,13 @@
 # PLAN
 
 > **文档元信息**（**功能完成度**以 [`doc/plan/01-feature-list.md`](doc/plan/01-feature-list.md) + [`doc/plan/05-task-tracker.md`](doc/plan/05-task-tracker.md) 为准；本文为架构与决策基线）  
-> **版本**：2.3 · **更新**：2026-05-09 · **维护**：项目 Owner · **治理说明**：[`doc/plan/00-documentation-governance.md`](doc/plan/00-documentation-governance.md)
+> **版本**：2.3 · **更新**：2026-05-20 · **维护**：项目 Owner · **治理说明**：[`doc/plan/00-documentation-governance.md`](doc/plan/00-documentation-governance.md)
+
+### 认证首页 + Identity + 性别（2026-05-20 · 已交付）
+
+- **Flutter**：`AuthWelcomePage` 单屏入口；`LoginPage` 邮箱 + Google（Android）；`SocialProfileCompletePage`；注册性别必选 + 复核步可选头像；名录性别筛选 + `PostalGenderIcon`。
+- **后端**：`V22__user_identity_gender.sql`；`POST /api/auth/google` / `google/complete`；`countActiveAppUsers` 看板；`DeletedUniqueKeySupport` + `releaseAllForUser`。
+- **配置**：Google OAuth `senior-post.oauth.google.client-id`（部署填）；详见 [`findings.md` §21](findings.md)。
 
 ## [当前栈]（仓库实测 + 决策基线）
 

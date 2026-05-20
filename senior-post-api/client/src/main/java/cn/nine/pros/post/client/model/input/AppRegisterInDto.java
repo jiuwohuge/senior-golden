@@ -29,10 +29,20 @@ public class AppRegisterInDto {
     private String nickname;
 
     @NotNull
+    @Min(1)
+    @Max(3)
+    @Schema(description = "性别：1男 2女 3其他")
+    private Integer gender;
+
+    @NotNull
     @Min(1900)
     @Max(2100)
     @Schema(description = "出生年份（用于年龄门槛校验）")
     private Integer birthYear;
+
+    @Size(max = 512)
+    @Schema(description = "可选头像 objectKey")
+    private String avatarUrl;
 
     @Size(max = 10)
     @Schema(description = "国家代码 ISO 3166-1 alpha-2，可空")

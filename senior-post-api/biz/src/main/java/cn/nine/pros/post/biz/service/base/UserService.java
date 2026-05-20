@@ -8,8 +8,6 @@ import java.util.List;
 
 /**
  * 用户主表 Service
- *
- * @author Administrator
  */
 public interface UserService extends IService<UserDomain> {
 
@@ -20,8 +18,12 @@ public interface UserService extends IService<UserDomain> {
     void delByIds(List<Long> ids);
 
     /**
-     * 按邮箱查询未删除用户；不存在返回 null。
+     * 按邮箱 identity 查询未删除用户；不存在返回 null。
      */
     UserDTO findByEmail(String email);
 
+    /**
+     * 与名录可列出 App 用户口径一致：del_flag=false, status=1, staff_role=0。
+     */
+    long countActiveAppUsers();
 }

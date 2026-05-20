@@ -13,6 +13,9 @@ public class AppDirectoryPageInDto {
     @Schema(description = "分页参数")
     private PageQuery page;
 
+    @Schema(description = "性别筛选：1男 2女 3其他（可空，多选 OR）")
+    private List<Integer> genders;
+
     @Schema(description = "国家代码（可空）")
     private String countryCode;
 

@@ -55,6 +55,7 @@
 | 2026-05-09 | 决策 | **B14/B15** 不作为交付项，**PLAN 阻塞表**标为已移除 |
 | 2026-05-09 | 决策 | **下一开发波次**：**FP-A1-006** → **FP-X-001** → **FP-A1-007** → **FP-X-003** → **FP-A10-001**（见 `05` Sprint 4、`07` §3） |
 | 2026-05-09 | 决策 | **注销生效**：冷静期结束 `finalizeAccountDeletion` 前 **`bu_friendship` → status=0** + 腾讯 REST **`sns/friend_delete`（Delete_Type_Both）**；细节见 `findings.md` §15 |
+| 2026-05-20 | 决策 | **删号释放 UNIQUE**：邮箱/openId 等登录标识删除时追加 `+deleted.{epochMillis}`；identity 表落地后统一 `releaseAllForUser`；见 `findings.md` §20、认证首页计划 §十二 |
 
 ---
 

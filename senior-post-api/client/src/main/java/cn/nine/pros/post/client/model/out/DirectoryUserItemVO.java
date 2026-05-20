@@ -21,6 +21,9 @@ public class DirectoryUserItemVO {
     @Schema(description = "昵称")
     private String nickname;
 
+    @Schema(description = "性别：0未设置 1男 2女 3其他")
+    private Integer gender;
+
     @Schema(description = "国家代码")
     private String countryCode;
 

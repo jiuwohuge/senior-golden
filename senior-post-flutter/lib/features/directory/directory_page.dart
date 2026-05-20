@@ -5,6 +5,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal.dart';
+import '../../widgets/postal/postal_gender_icon.dart';
 import 'directory_filter_sheet.dart';
 import 'directory_providers.dart';
 
@@ -131,12 +132,23 @@ class _DirectoryCard extends StatelessWidget {
         children: [
           PostalAvatar(name: user.nickname, size: 54, imageUrl: user.avatarUrl),
           const SizedBox(height: 10),
-          Text(
-            user.nickname,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleSmall,
-            textAlign: TextAlign.center,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  user.nickname,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              if (user.gender >= 1) ...[
+                const SizedBox(width: 4),
+                PostalGenderIcon(gender: user.gender, size: 14),
+              ],
+            ],
           ),
           const SizedBox(height: 6),
           PostalCountrySeal(

@@ -32,6 +32,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   late final TextEditingController _nickname;
   late final TextEditingController _bio;
   String? _countryCode;
+  int? _gender;
   bool _loadingMe = false;
   bool _saving = false;
   bool _avatarBusy = false;
@@ -47,6 +48,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     _countryCode = _normalizeCountryCode(
       user.countryCode.isEmpty ? null : user.countryCode,
     );
+    _gender = user.gender >= 1 ? user.gender : null;
     _loadingMe = true;
     WidgetsBinding.instance.addPostFrameCallback((_) => _pullMe());
   }
@@ -405,6 +407,29 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                     const SizedBox(height: 20),
                     PostalTextField(controller: _nickname, label: l10n.profileNickname),
                     const SizedBox(height: 12),
+                    Text(l10n.authGenderLabel, style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        FilterChip(
+                          label: Text(l10n.authGenderMale),
+                          selected: _gender == 1,
+                          onSelected: _saving ? null : (_) => setState(() => _gender = 1),
+                        ),
+                        FilterChip(
+                          label: Text(l10n.authGenderFemale),
+                          selected: _gender == 2,
+                          onSelected: _saving ? null : (_) => setState(() => _gender = 2),
+                        ),
+                        FilterChip(
+                          label: Text(l10n.authGenderOther),
+                          selected: _gender == 3,
+                          onSelected: _saving ? null : (_) => setState(() => _gender = 3),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       // ignore: deprecated_member_use
                       value: _countryCode == null || _countryCode!.isEmpty ? null : _countryCode,
@@ -453,6 +478,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
             nickname: _nickname.text.trim(),
             countryCode: _countryCode,
             bio: _bio.text,
+            gender: _gender,
           );
       if (context.mounted) {
         PostalSnack.show(

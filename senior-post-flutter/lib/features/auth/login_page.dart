@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,9 +7,11 @@ import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../core/api/api_exception.dart';
+import '../../core/auth/google_sign_in_facade.dart';
 import '../../core/config/debug_api_base_url_dialog.dart';
 import '../../widgets/postal/postal.dart';
 import '../shell/main_shell.dart';
+import 'auth_consent_provider.dart';
 import 'auth_repository.dart';
 import 'login_routes.dart';
 
@@ -26,31 +30,43 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _busy = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (ref.read(authConsentProvider)) {
+      _agreed = true;
+    }
+  }
+
+  @override
   void dispose() {
     _email.dispose();
     _password.dispose();
     super.dispose();
   }
 
+  Future<void> _afterAuth(AuthSignInResult result) async {
+    if (!mounted) return;
+    if (result.profileComplete == false) {
+      context.go(LoginRoutes.socialComplete);
+      return;
+    }
+    context.go(MainShellRoute.pathPostWall);
+  }
+
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context)!;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (!_agreed) {
-      PostalSnack.show(
-        context,
-        l10n.authAgreeRequired,
-        tone: PostalSnackTone.warning,
-      );
+      PostalSnack.show(context, l10n.authAgreeRequired, tone: PostalSnackTone.warning);
       return;
     }
     setState(() => _busy = true);
     try {
-      await ref
-          .read(authRepositoryProvider)
-          .login(email: _email.text, password: _password.text);
-      if (mounted) {
-        context.go(MainShellRoute.pathPostWall);
-      }
+      final result = await ref.read(authRepositoryProvider).login(
+            email: _email.text,
+            password: _password.text,
+          );
+      await _afterAuth(result);
     } on ApiBusinessException catch (e) {
       if (mounted) {
         PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
@@ -59,6 +75,36 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (mounted) setState(() => _busy = false);
     }
   }
+
+  Future<void> _signInWithGoogle() async {
+    final l10n = AppLocalizations.of(context)!;
+    if (!_agreed) {
+      PostalSnack.show(context, l10n.authAgreeRequired, tone: PostalSnackTone.warning);
+      return;
+    }
+    if (!GoogleSignInFacade.isConfigured) {
+      PostalSnack.show(context, l10n.authGoogleNotConfigured, tone: PostalSnackTone.warning);
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      final idToken = await GoogleSignInFacade.signIn();
+      if (idToken == null || idToken.isEmpty) {
+        if (mounted) setState(() => _busy = false);
+        return;
+      }
+      final result = await ref.read(authRepositoryProvider).signInWithGoogle(idToken: idToken);
+      await _afterAuth(result);
+    } on ApiBusinessException catch (e) {
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  bool get _showGoogle => !kIsWeb && Platform.isAndroid;
 
   @override
   Widget build(BuildContext context) {
@@ -74,13 +120,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_rounded),
+                        onPressed: _busy ? null : () => context.go(LoginRoutes.welcome),
+                      ),
+                    ),
                     PostalBrandHeader(
                       title: l10n.appTitle,
-                      tagline: l10n.appTagline,
+                      tagline: l10n.authWelcomeBack,
                       year: '2026',
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
                     PostalCardEnvelope(
                       header: PostalSectionTitle(
                         title: l10n.authLoginTitle,
@@ -91,6 +143,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            if (_showGoogle) ...[
+                              PostalButton(
+                                label: l10n.authContinueWithGoogle,
+                                icon: Icons.g_mobiledata_rounded,
+                                onPressed: _busy ? null : _signInWithGoogle,
+                                variant: PostalButtonVariant.secondary,
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  const Expanded(child: Divider()),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    child: Text(
+                                      l10n.authOrContinueWithEmail,
+                                      style: Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  ),
+                                  const Expanded(child: Divider()),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                            ],
                             PostalTextField(
                               controller: _email,
                               label: l10n.authEmailLabel,
@@ -140,9 +215,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                             PostalCheckboxField(
                               value: _agreed,
-                              onChanged: _busy
-                                  ? null
-                                  : (v) => setState(() => _agreed = v),
+                              onChanged: _busy ? null : (v) => setState(() => _agreed = v),
                               label: l10n.authAgreeTpl('{terms}', '{privacy}'),
                               linkSegments: [
                                 PostalLinkSegment(
@@ -153,36 +226,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 PostalLinkSegment(
                                   key: 'privacy',
                                   text: l10n.authPrivacyTitle,
-                                  onTap: () =>
-                                      context.go(LoginRoutes.legalPrivacy),
+                                  onTap: () => context.go(LoginRoutes.legalPrivacy),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 14),
-                            PostalButton(
-                              label: l10n.authLoginSubmit,
-                              onPressed: _busy ? null : _submit,
-                              busy: _busy,
-                            ),
-                            const SizedBox(height: 12),
-                            PostalButton(
-                              label: l10n.authGoRegister,
-                              onPressed: _busy
-                                  ? null
-                                  : () => context.go(LoginRoutes.register),
-                              variant: PostalButtonVariant.secondary,
-                            ),
-                            const SizedBox(height: 8),
                             GestureDetector(
                               onLongPress: kDebugMode && !_busy
                                   ? () => showDebugApiBaseUrlDialog(context, ref)
                                   : null,
                               child: PostalButton(
-                                label: l10n.authOnboardingAgain,
-                                onPressed: _busy
-                                    ? null
-                                    : () => context.go(LoginRoutes.onboarding),
-                                variant: PostalButtonVariant.ghost,
+                                label: l10n.authLoginSubmit,
+                                onPressed: _busy ? null : _submit,
+                                busy: _busy,
                               ),
                             ),
                           ],

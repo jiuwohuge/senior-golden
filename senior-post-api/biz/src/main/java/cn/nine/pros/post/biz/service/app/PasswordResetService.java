@@ -5,8 +5,10 @@ import cn.nine.pros.post.biz.config.SeniorPostAuthProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.PasswordResetTokenMapper;
 import cn.nine.pros.post.biz.model.domain.PasswordResetTokenDomain;
+import cn.nine.pros.post.biz.model.domain.UserIdentityDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.app.support.PasswordResetHasher;
+import cn.nine.pros.post.biz.service.base.UserIdentityService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -34,6 +36,7 @@ public class PasswordResetService {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final UserService userService;
+    private final UserIdentityService userIdentityService;
     private final PasswordResetTokenMapper passwordResetTokenMapper;
     private final PasswordEncoder passwordEncoder;
     private final MailOutboxService mailOutboxService;
@@ -132,10 +135,19 @@ public class PasswordResetService {
             throw new BadRequestException(appMessages.get("app.error.code.invalid"));
         }
 
+        UserIdentityDomain emailIdent = userIdentityService.findActiveEmailIdentity(user.getId());
+        if (emailIdent == null) {
+            throw new BadRequestException(appMessages.get("app.error.code.invalid"));
+        }
+        userIdentityService.update(
+                new LambdaUpdateWrapper<UserIdentityDomain>()
+                        .eq(UserIdentityDomain::getId, emailIdent.getId())
+                        .set(UserIdentityDomain::getPasswordHash, passwordEncoder.encode(newPassword))
+                        .set(UserIdentityDomain::getUpdatedAt, now)
+                        .set(UserIdentityDomain::getUpdatedBy, user.getId()));
         userService.update(
                 new LambdaUpdateWrapper<UserDomain>()
                         .eq(UserDomain::getId, user.getId())
-                        .set(UserDomain::getPasswordHash, passwordEncoder.encode(newPassword))
                         .set(UserDomain::getUpdatedAt, now)
                         .set(UserDomain::getUpdatedBy, user.getId()));
 

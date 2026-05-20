@@ -305,6 +305,32 @@
 
 ---
 
+## 21. Google 登录与 `bu_user_identity`（2026-05-20）
+
+| 项 | 说明 |
+|------|------|
+| **Flyway** | `V22__user_identity_gender.sql`：建 `bu_user_identity`，迁移 `bu_user.email/password_hash`，加 `bu_user.gender`，DROP 资料表邮箱列 |
+| **后端 API** | `POST /api/auth/google`（`idToken` + `agreedTerms` + device）；`POST /api/auth/google/complete`（gender、birthYear、nickname、interests、可选 avatarUrl） |
+| **配置** | `senior-post.oauth.google.client-id`（`application.yml` 占位，部署填 Google Cloud OAuth Web Client ID） |
+| **Flutter** | `google_sign_in` + `GoogleSignInFacade`；Android 需在 Google Cloud 配置 SHA-1 与 OAuth 客户端；未配置时登录页 Snack 提示，邮箱路径可独立验收 |
+| **同邮箱绑定** | Google `email` 已存在 email identity 且未绑 google 行时，同一 `user_id` 新增 google identity |
+| **看板用户数** | `AdminDashboard` 使用 `UserService.countActiveAppUsers()`（`del_flag=false AND status=1 AND staff_role=0`） |
+
+---
+
+## 20. 用户删除后释放 UNIQUE 标识（2026-05-20 · 已确认）
+
+| 说明 | 内容 |
+|------|------|
+| **背景** | `bu_user.email` UNIQUE；迁表后 `bu_user_identity UNIQUE(provider, provider_uid)`。删号若不改写标识，同邮箱 / 同 Google openId 无法再次注册或绑定。 |
+| **规则** | 后缀 `+deleted.{epochMillis}`；邮箱在 `@` 前插入；openId 等在末尾追加；幂等；最长 255。 |
+| **工具类** | `DeletedUniqueKeySupport.archiveEmail` / `archiveProviderUid`（`DeletedUserEmailSupport` 委托前者） |
+| **删除入口** | App 冷静期注销、Manage status=3、Manage 软删 — 须在 V22 改为 `UserIdentityService.releaseAllForUser`，对该用户**所有** identity 行归档 |
+| **历史数据** | 已有 `V20` 回填邮箱；V22 需对 identity 中 google/apple 行做同类回填 |
+| **注册查询** | `findByEmail` / `findByProviderUid` 仅匹配未含 `+deleted.` 的有效标识 |
+
+---
+
 ## 19. 明信片墙/名录排查：为何日志频繁出现 `/api/auth/me`（2026-05-18）
 
 | 发现 | 说明 |

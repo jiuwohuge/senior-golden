@@ -25,16 +25,13 @@ public class UserDomain extends AbstractAuditableDomain {
     @TableId(type = IdType.AUTO)
     @Schema(description = "用户ID")
     private Long id;
+
     /**
-     * 邮箱（登录账号）
+     * 性别：0 未设置，1 男，2 女，3 其他/不愿透露
      */
-    @Schema(description = "邮箱（登录账号）")
-    private String email;
-    /**
-     * 密码哈希
-     */
-    @Schema(description = "密码哈希")
-    private String passwordHash;
+    @Schema(description = "性别")
+    private Integer gender;
+
     /**
      * 昵称
      */

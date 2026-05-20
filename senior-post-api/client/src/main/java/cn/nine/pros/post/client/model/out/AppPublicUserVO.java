@@ -24,6 +24,9 @@ public class AppPublicUserVO {
     private String email;
     @Schema(description = "昵称")
     private String nickname;
+
+    @Schema(description = "性别：0未设置 1男 2女 3其他")
+    private Integer gender;
     @Schema(description = "出生年份")
     private Integer birthYear;
     @Schema(description = "国家代码")

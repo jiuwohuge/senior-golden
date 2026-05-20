@@ -150,6 +150,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
   }
 
   void _onBackPressed() {
+    if (_step == 0) {
+      context.go(LoginRoutes.welcome);
+      return;
+    }
     if (Navigator.of(context).canPop()) {
       context.pop();
       return;

@@ -21,7 +21,7 @@ public class AdminDashboardController implements AdminDashboardApi {
     @Override
     public Map<String, Object> summary() {
         Map<String, Object> m = new HashMap<>();
-        m.put("users", userService.count());
+        m.put("users", userService.countActiveAppUsers());
         m.put("postcards", postcardService.count());
         m.put("letters", letterService.count());
         m.put("reportsPending", reportService.lambdaQuery().eq(cn.nine.pros.post.biz.model.domain.ReportDomain::getStatus, 0).count());

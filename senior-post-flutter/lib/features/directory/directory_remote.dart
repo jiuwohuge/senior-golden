@@ -18,6 +18,7 @@ class DirectoryRemoteRepository {
     int? minAge,
     int? maxAge,
     List<String> interestNames = const [],
+    List<int> genders = const [],
     String sort = 'DEFAULT',
   }) async {
     final r = await _dio.post<dynamic>(
@@ -29,6 +30,7 @@ class DirectoryRemoteRepository {
         if (minAge != null) 'minAge': minAge,
         if (maxAge != null) 'maxAge': maxAge,
         if (interestNames.isNotEmpty) 'interestNames': interestNames,
+        if (genders.isNotEmpty) 'genders': genders,
         if (sort.isNotEmpty) 'sort': sort,
       },
     );

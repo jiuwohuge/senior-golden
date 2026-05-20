@@ -4,6 +4,8 @@ import cn.nine.pros.post.biz.service.app.AppAuthService;
 import cn.nine.pros.post.client.api.app.AppAuthApi;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
 import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
+import cn.nine.pros.post.client.model.input.AppGoogleCompleteInDto;
+import cn.nine.pros.post.client.model.input.AppGoogleLoginInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
 import cn.nine.pros.post.client.model.input.AppResetPasswordInDto;
@@ -28,6 +30,16 @@ public class AppAuthController implements AppAuthApi {
     @Override
     public AppAuthResultVO login(AppLoginInDto body) {
         return appAuthService.login(body);
+    }
+
+    @Override
+    public AppAuthResultVO loginWithGoogle(AppGoogleLoginInDto body) {
+        return appAuthService.loginWithGoogle(body);
+    }
+
+    @Override
+    public AppAuthResultVO completeGoogleProfile(AppGoogleCompleteInDto body) {
+        return appAuthService.completeGoogleProfile(body);
     }
 
     @Override

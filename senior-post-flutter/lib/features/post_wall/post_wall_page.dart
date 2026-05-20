@@ -8,6 +8,7 @@ import '../../app/theme/postal_tokens.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
+import '../../widgets/postal/postal_gender_icon.dart';
 import '../directory/send_letter_sheet.dart';
 import 'post_providers.dart';
 
@@ -193,9 +194,20 @@ class _PostCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  post.author.nickname,
-                  style: Theme.of(context).textTheme.titleMedium,
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        post.author.nickname,
+                        style: Theme.of(context).textTheme.titleMedium,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (post.author.gender >= 1) ...[
+                      const SizedBox(width: 4),
+                      PostalGenderIcon(gender: post.author.gender, size: 14),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 3),
                 PostalCountrySeal(

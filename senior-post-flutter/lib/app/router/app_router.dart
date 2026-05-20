@@ -6,7 +6,9 @@ import '../../core/network/router_refresh.dart';
 import '../../features/commerce/shop_page.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/auth/login_routes.dart';
+import '../../features/auth/auth_welcome_page.dart';
 import '../../features/auth/onboarding_page.dart';
+import '../../features/auth/social_profile_complete_page.dart';
 import '../../features/auth/register_page.dart';
 import '../../features/auth/forgot_password_page.dart';
 import '../../features/auth/legal_page.dart';
@@ -35,29 +37,33 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: appRootNavigatorKey,
-    initialLocation: LoginRoutes.onboarding,
+    initialLocation: LoginRoutes.welcome,
     refreshListenable: refresh,
     redirect: (context, state) {
       final token = ref.read(authTokenProvider);
       final loc = state.matchedLocation;
       final authPaths = {
+        LoginRoutes.welcome,
         LoginRoutes.onboarding,
         LoginRoutes.login,
         LoginRoutes.register,
         LoginRoutes.forgotPassword,
+        LoginRoutes.socialComplete,
         LoginRoutes.legalTerms,
         LoginRoutes.legalPrivacy,
       };
       final loggedIn = token != null && token.isNotEmpty;
       if (!loggedIn && !authPaths.contains(loc)) {
-        return LoginRoutes.login;
+        return LoginRoutes.welcome;
       }
       // 登录/注册页允许在本地仍有旧 Token 时停留，避免未重新登录就进主页命中 8502 缓存。
       if (loggedIn &&
           authPaths.contains(loc) &&
+          loc != LoginRoutes.welcome &&
           loc != LoginRoutes.login &&
           loc != LoginRoutes.register &&
           loc != LoginRoutes.forgotPassword &&
+          loc != LoginRoutes.socialComplete &&
           loc != LoginRoutes.legalTerms &&
           loc != LoginRoutes.legalPrivacy) {
         return MainShellRoute.pathPostWall;
@@ -66,8 +72,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(
+        path: LoginRoutes.welcome,
+        builder: (context, state) => const AuthWelcomePage(),
+      ),
+      GoRoute(
         path: LoginRoutes.onboarding,
         builder: (context, state) => const OnboardingPage(),
+      ),
+      GoRoute(
+        path: LoginRoutes.socialComplete,
+        builder: (context, state) => const SocialProfileCompletePage(),
       ),
       GoRoute(
         path: LoginRoutes.login,

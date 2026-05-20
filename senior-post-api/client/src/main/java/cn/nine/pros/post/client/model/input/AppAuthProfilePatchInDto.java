@@ -1,8 +1,7 @@
 package cn.nine.pros.post.client.model.input;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.List;
@@ -13,6 +12,11 @@ import java.util.List;
 @Data
 @Schema(description = "App 资料 PATCH 入参")
 public class AppAuthProfilePatchInDto {
+
+    @Min(1)
+    @Max(3)
+    @Schema(description = "性别；非 null 时更新")
+    private Integer gender;
 
     @Size(max = 100)
     @Schema(description = "昵称；非 null 时更新且去首尾空格后不可为空")

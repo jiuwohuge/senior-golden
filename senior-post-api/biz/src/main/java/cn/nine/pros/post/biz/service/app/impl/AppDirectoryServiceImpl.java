@@ -59,6 +59,15 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
 
         applySort(qw, viewerUserId, body);
 
+        if (body != null && body.getGenders() != null && !body.getGenders().isEmpty()) {
+            List<Integer> genders = body.getGenders().stream()
+                    .filter(g -> g != null && g >= 1 && g <= 3)
+                    .distinct()
+                    .collect(Collectors.toList());
+            if (!genders.isEmpty()) {
+                qw.in(UserDomain::getGender, genders);
+            }
+        }
         if (body != null && StringUtils.hasText(body.getCountryCode())) {
             qw.eq(UserDomain::getCountryCode, body.getCountryCode().trim());
         }
@@ -196,6 +205,7 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
         return DirectoryUserItemVO.builder()
                 .id(u.getId())
                 .nickname(u.getNickname())
+                .gender(u.getGender())
                 .countryCode(u.getCountryCode())
                 .bio(u.getBio())
                 .birthYear(u.getBirthYear())

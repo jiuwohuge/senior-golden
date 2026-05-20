@@ -9,6 +9,7 @@ class AppUser {
     required this.countryCode,
     required this.countryName,
     required this.birthYear,
+    this.gender = 0,
     required this.bio,
     required this.interests,
     this.interestTagIds = const [],
@@ -25,6 +26,7 @@ class AppUser {
   final String countryCode;
   final String countryName;
   final int birthYear;
+  final int gender;
   final String bio;
   final List<String> interests;
   final List<int> interestTagIds;
@@ -83,6 +85,7 @@ class AppUser {
       countryCode: cc,
       countryName: countryName,
       birthYear: birthYear,
+      gender: (m['gender'] as num?)?.toInt() ?? 0,
       bio: (m['bio'] as String?) ?? '',
       interests: interestNames,
       interestTagIds: interestIds,

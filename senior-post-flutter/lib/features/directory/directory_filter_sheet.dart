@@ -36,6 +36,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
   int _minAge = 45;
   int _maxAge = 80;
   final Set<String> _interests = {};
+  final Set<int> _genders = {};
   String _sort = 'DEFAULT';
 
   @override
@@ -46,6 +47,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
     _minAge = f.minAge;
     _maxAge = f.maxAge;
     _interests.addAll(f.interests);
+    _genders.addAll(f.genders);
     _sort = f.sort;
   }
 
@@ -203,6 +205,52 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                             onChanged: (v) => setState(() => _maxAge = v.round()),
                           ),
                           const SizedBox(height: 8),
+                          Text(l10n.directoryFilterGender, style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              FilterChip(
+                                label: Text(l10n.directoryFilterGenderAll),
+                                selected: _genders.isEmpty,
+                                onSelected: (_) => setState(() => _genders.clear()),
+                              ),
+                              FilterChip(
+                                label: Text(l10n.authGenderMale),
+                                selected: _genders.contains(1),
+                                onSelected: (v) => setState(() {
+                                  if (v) {
+                                    _genders.add(1);
+                                  } else {
+                                    _genders.remove(1);
+                                  }
+                                }),
+                              ),
+                              FilterChip(
+                                label: Text(l10n.authGenderFemale),
+                                selected: _genders.contains(2),
+                                onSelected: (v) => setState(() {
+                                  if (v) {
+                                    _genders.add(2);
+                                  } else {
+                                    _genders.remove(2);
+                                  }
+                                }),
+                              ),
+                              FilterChip(
+                                label: Text(l10n.authGenderOther),
+                                selected: _genders.contains(3),
+                                onSelected: (v) => setState(() {
+                                  if (v) {
+                                    _genders.add(3);
+                                  } else {
+                                    _genders.remove(3);
+                                  }
+                                }),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
                           if (tagOptions.isEmpty)
                             Text(
                               'No interest tags from server. Add tags in admin or try another language.',
@@ -246,6 +294,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                                         minAge: min,
                                         maxAge: max,
                                         interests: _interests,
+                                        genders: _genders,
                                         sort: _sort,
                                       );
                                   ref.invalidate(directoryUsersProvider);

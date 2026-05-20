@@ -13,8 +13,8 @@ import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
 import cn.nine.pros.post.biz.service.app.support.OssReadableKeyValidator;
 import cn.nine.pros.post.biz.service.app.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
+import cn.nine.pros.post.biz.service.base.UserIdentityService;
 import cn.nine.pros.post.biz.service.base.UserService;
-import cn.nine.pros.post.biz.service.base.support.DeletedUserEmailSupport;
 import cn.nine.pros.post.client.api.admin.AdminUserApi;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.db.UserDeviceDTO;
@@ -46,6 +46,7 @@ public class AdminUserController implements AdminUserApi {
     }
 
     private final UserService userService;
+    private final UserIdentityService userIdentityService;
     private final UserMapstruct userMapstruct;
     private final UserDeviceService userDeviceService;
     private final UserDeviceMapstruct userDeviceMapstruct;
@@ -59,7 +60,12 @@ public class AdminUserController implements AdminUserApi {
                 .eq(UserDomain::isDelFlag, false)
                 .orderByDesc(UserDomain::getCreatedAt);
         if (StringUtils.isNotBlank(body.getEmail())) {
-            qw.like(UserDomain::getEmail, body.getEmail().trim());
+            String emailLike = "%" + body.getEmail().trim().toLowerCase() + "%";
+            qw.apply(
+                    "EXISTS (SELECT 1 FROM bu_user_identity i WHERE i.user_id = bu_user.id "
+                            + "AND i.del_flag = FALSE AND i.provider = 'email' "
+                            + "AND i.provider_uid LIKE {0} AND i.provider_uid NOT LIKE '%+deleted.%')",
+                    emailLike);
         }
         if (StringUtils.isNotBlank(body.getNickname())) {
             qw.like(UserDomain::getNickname, body.getNickname().trim());
@@ -71,7 +77,10 @@ public class AdminUserController implements AdminUserApi {
             qw.eq(UserDomain::getAvatarAuditStatus, body.getAvatarAuditStatus());
         }
         Page<UserDomain> p = userService.page(AdminPageHelper.mpPage(pageQuery), qw);
-        List<UserDTO> list = p.getRecords().stream().map(userMapstruct::toDTO).collect(Collectors.toList());
+        List<UserDTO> list = p.getRecords().stream()
+                .map(u -> userService.findById(u.getId()))
+                .filter(dto -> dto != null)
+                .collect(Collectors.toList());
         return AdminPageHelper.pageData(pageQuery, p, list);
     }
 
@@ -87,10 +96,7 @@ public class AdminUserController implements AdminUserApi {
                 .set(UserDomain::getUpdatedBy, auditUserId())
                 .set(UserDomain::getUpdatedAt, now);
         if (status == 3) {
-            UserDomain user = userService.getById(id);
-            if (user != null && StringUtils.isNotBlank(user.getEmail())) {
-                uw.set(UserDomain::getEmail, DeletedUserEmailSupport.archive(user.getEmail(), now));
-            }
+            userIdentityService.releaseAllForUser(id, now);
         }
         userService.update(uw);
     }

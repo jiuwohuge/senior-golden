@@ -8,6 +8,7 @@ import cn.nine.pros.post.biz.model.domain.PasswordResetTokenDomain;
 import cn.nine.pros.post.biz.service.app.PasswordResetService;
 import cn.nine.pros.post.biz.service.app.mail.MailOutboxService;
 import cn.nine.pros.post.biz.service.app.support.PasswordResetHasher;
+import cn.nine.pros.post.biz.service.base.UserIdentityService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +36,8 @@ class PasswordResetServiceTest {
     @Mock
     private UserService userService;
     @Mock
+    private UserIdentityService userIdentityService;
+    @Mock
     private PasswordResetTokenMapper passwordResetTokenMapper;
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -55,6 +58,7 @@ class PasswordResetServiceTest {
         authProperties.setPasswordResetMinIntervalSeconds(0);
         passwordResetService = new PasswordResetService(
                 userService,
+                userIdentityService,
                 passwordResetTokenMapper,
                 passwordEncoder,
                 mailOutboxService,

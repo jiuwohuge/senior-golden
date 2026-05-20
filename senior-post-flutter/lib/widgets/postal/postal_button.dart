@@ -15,6 +15,7 @@ class PostalButton extends StatelessWidget {
     this.busy = false,
     this.expand = true,
     this.minHeight = 52,
+    this.pill = false,
   });
 
   final String label;
@@ -24,8 +25,13 @@ class PostalButton extends StatelessWidget {
   final bool busy;
   final bool expand;
   final double minHeight;
+  /// 胶囊圆角（欢迎页等），否则使用 [PostalTokens.shapeMd]。
+  final bool pill;
 
   bool get _disabled => onPressed == null || busy;
+
+  BorderRadius get _shape =>
+      pill ? BorderRadius.circular(minHeight / 2) : PostalTokens.shapeMd;
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +101,7 @@ class PostalButton extends StatelessWidget {
   Widget _primary(Widget child) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: PostalTokens.shapeMd,
+        borderRadius: _shape,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -125,9 +131,7 @@ class PostalButton extends StatelessWidget {
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
           disabledBackgroundColor: Colors.transparent,
-          shape: const RoundedRectangleBorder(
-            borderRadius: PostalTokens.shapeMd,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: _shape),
           padding: const EdgeInsets.symmetric(horizontal: 20),
         ),
         child: child,
@@ -146,9 +150,7 @@ class PostalButton extends StatelessWidget {
               : PostalTokens.postboxGreen,
           width: 1.4,
         ),
-        shape: const RoundedRectangleBorder(
-          borderRadius: PostalTokens.shapeMd,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: _shape),
         padding: EdgeInsets.zero,
       ),
       child: child,
@@ -162,9 +164,7 @@ class PostalButton extends StatelessWidget {
         foregroundColor: PostalTokens.postboxGreen,
         backgroundColor: PostalTokens.paperCard.withValues(alpha: 0.92),
         padding: EdgeInsets.zero,
-        shape: const RoundedRectangleBorder(
-          borderRadius: PostalTokens.shapeMd,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: _shape),
       ),
       child: child,
     );
@@ -177,9 +177,7 @@ class PostalButton extends StatelessWidget {
         backgroundColor: PostalTokens.stampVermilion,
         disabledBackgroundColor:
             PostalTokens.stampVermilion.withValues(alpha: 0.4),
-        shape: const RoundedRectangleBorder(
-          borderRadius: PostalTokens.shapeMd,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: _shape),
         padding: EdgeInsets.zero,
       ),
       child: child,

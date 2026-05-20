@@ -66,6 +66,139 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authLoginSubmit => '登录';
 
   @override
+  String get authWelcomeRegister => '注册';
+
+  @override
+  String get authWelcomeLogin => '登录';
+
+  @override
+  String get authWelcomeHaveAccount => '已有账号？';
+
+  @override
+  String get authWelcomeHighlightLetters => '以从容的节奏写信、收信';
+
+  @override
+  String get authWelcomeHighlightDirectory => '在名录结识世界各地的笔友';
+
+  @override
+  String get authWelcomeHighlightPace => '为 45 岁及以上成年人设计';
+
+  @override
+  String get authWelcomeTagline => '慢节奏书信，面向 45+ 成年人';
+
+  @override
+  String authWelcomeLegalFooter(Object privacy, Object terms) {
+    return '注册即表示同意$terms与$privacy。';
+  }
+
+  @override
+  String get authRegisterWizardEmailTitle => '您的邮箱是？';
+
+  @override
+  String get authRegisterWizardEmailSubtitle => '用于登录及明信片、信件相关的重要通知。';
+
+  @override
+  String get authRegisterWizardPasswordTitle => '设置密码';
+
+  @override
+  String get authRegisterWizardPasswordSubtitle => '至少 8 位，请妥善保管。';
+
+  @override
+  String get authRegisterWizardNameTitle => '怎么称呼您？';
+
+  @override
+  String get authRegisterWizardNameSubtitle => '将显示在明信片、信件与名录中。';
+
+  @override
+  String get authRegisterWizardGenderTitle => '您的性别是？';
+
+  @override
+  String get authRegisterWizardGenderSubtitle => '便于在名录中为您匹配合适的笔友。';
+
+  @override
+  String get authRegisterWizardAgeTitle => '您的年龄？';
+
+  @override
+  String get authRegisterWizardAgeSubtitle => '出生年份帮助我们为 45+ 用户优化体验。';
+
+  @override
+  String get authRegisterProfileHint => '这些信息会显示在您的资料中。';
+
+  @override
+  String authRegisterAgePreview(Object age) {
+    return '我今年 $age 岁';
+  }
+
+  @override
+  String get authRegisterSummaryGender => '性别';
+
+  @override
+  String get authContinueWithGoogle => '使用 Google 登录';
+
+  @override
+  String get authOrContinueWithEmail => '或使用邮箱登录';
+
+  @override
+  String get authGoogleNotConfigured => 'Google 登录尚未配置';
+
+  @override
+  String get authGenderLabel => '性别';
+
+  @override
+  String get authGenderMale => '男';
+
+  @override
+  String get authGenderFemale => '女';
+
+  @override
+  String get authGenderOther => '其他';
+
+  @override
+  String get authRegisterAvatarOptional => '头像（可选）';
+
+  @override
+  String get authRegisterAvatarSkipHint => '可跳过，稍后在「我的邮政」中上传';
+
+  @override
+  String get authRegisterWizardAvatarTitle => '展示您的笑容';
+
+  @override
+  String get authRegisterWizardAvatarSubtitle => '添加一张亲切的照片，微笑最有感染力。';
+
+  @override
+  String get authRegisterAvatarTapToAdd => '点击添加照片';
+
+  @override
+  String get authRegisterAvatarAgreeFirst => '请先勾选下方协议，再上传头像';
+
+  @override
+  String get authRegisterAvatarUploading => '正在上传头像…';
+
+  @override
+  String get authRegisterAvatarUploaded => '已上传';
+
+  @override
+  String get authRegisterSummaryAvatarPending => '已选，待上传';
+
+  @override
+  String get authRegisterSummaryAvatar => '头像';
+
+  @override
+  String get authRegisterSummaryAvatarSet => '已选择，注册后上传';
+
+  @override
+  String get authRegisterSummaryAvatarSkipped => '未上传';
+
+  @override
+  String get authSocialCompleteTitle => '完善资料';
+
+  @override
+  String get directoryFilterGender => '性别';
+
+  @override
+  String get directoryFilterGenderAll => '全部';
+
+  @override
   String get authGoRegister => '注册新账号';
 
   @override

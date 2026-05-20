@@ -212,6 +212,264 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get authLoginSubmit;
 
+  /// No description provided for @authWelcomeRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get authWelcomeRegister;
+
+  /// No description provided for @authWelcomeLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authWelcomeLogin;
+
+  /// No description provided for @authWelcomeHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get authWelcomeHaveAccount;
+
+  /// No description provided for @authWelcomeHighlightLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'Write and receive real letters at a calm pace'**
+  String get authWelcomeHighlightLetters;
+
+  /// No description provided for @authWelcomeHighlightDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet pen pals worldwide in the directory'**
+  String get authWelcomeHighlightDirectory;
+
+  /// No description provided for @authWelcomeHighlightPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Designed for adults 45 and over'**
+  String get authWelcomeHighlightPace;
+
+  /// No description provided for @authWelcomeTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters at your pace — for adults 45+'**
+  String get authWelcomeTagline;
+
+  /// No description provided for @authWelcomeLegalFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'By signing up, you accept our {terms} and {privacy}.'**
+  String authWelcomeLegalFooter(Object privacy, Object terms);
+
+  /// No description provided for @authRegisterWizardEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s your email?'**
+  String get authRegisterWizardEmailTitle;
+
+  /// No description provided for @authRegisterWizardEmailSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll use it for sign-in and important notices about your post.'**
+  String get authRegisterWizardEmailSubtitle;
+
+  /// No description provided for @authRegisterWizardPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password'**
+  String get authRegisterWizardPasswordTitle;
+
+  /// No description provided for @authRegisterWizardPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters. Keep it somewhere safe.'**
+  String get authRegisterWizardPasswordSubtitle;
+
+  /// No description provided for @authRegisterWizardNameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What should we call you?'**
+  String get authRegisterWizardNameTitle;
+
+  /// No description provided for @authRegisterWizardNameSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This name appears on postcards, letters, and the directory.'**
+  String get authRegisterWizardNameSubtitle;
+
+  /// No description provided for @authRegisterWizardGenderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you identify?'**
+  String get authRegisterWizardGenderTitle;
+
+  /// No description provided for @authRegisterWizardGenderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Helps us show you the right people in the directory.'**
+  String get authRegisterWizardGenderSubtitle;
+
+  /// No description provided for @authRegisterWizardAgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How old are you?'**
+  String get authRegisterWizardAgeTitle;
+
+  /// No description provided for @authRegisterWizardAgeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your birth year helps us tailor the community for 45+.'**
+  String get authRegisterWizardAgeSubtitle;
+
+  /// No description provided for @authRegisterProfileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This info shows on your profile.'**
+  String get authRegisterProfileHint;
+
+  /// No description provided for @authRegisterAgePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m {age}'**
+  String authRegisterAgePreview(Object age);
+
+  /// No description provided for @authRegisterSummaryGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get authRegisterSummaryGender;
+
+  /// No description provided for @authContinueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get authContinueWithGoogle;
+
+  /// No description provided for @authOrContinueWithEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'or sign in with email'**
+  String get authOrContinueWithEmail;
+
+  /// No description provided for @authGoogleNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in is not configured yet'**
+  String get authGoogleNotConfigured;
+
+  /// No description provided for @authGenderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get authGenderLabel;
+
+  /// No description provided for @authGenderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get authGenderMale;
+
+  /// No description provided for @authGenderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get authGenderFemale;
+
+  /// No description provided for @authGenderOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get authGenderOther;
+
+  /// No description provided for @authRegisterAvatarOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo (optional)'**
+  String get authRegisterAvatarOptional;
+
+  /// No description provided for @authRegisterAvatarSkipHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can skip and add a photo later in My Post.'**
+  String get authRegisterAvatarSkipHint;
+
+  /// No description provided for @authRegisterWizardAvatarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show us your smile'**
+  String get authRegisterWizardAvatarTitle;
+
+  /// No description provided for @authRegisterWizardAvatarSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a friendly photo of yourself — a smile goes a long way.'**
+  String get authRegisterWizardAvatarSubtitle;
+
+  /// No description provided for @authRegisterAvatarTapToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to add a photo'**
+  String get authRegisterAvatarTapToAdd;
+
+  /// No description provided for @authRegisterAvatarAgreeFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please accept the terms below before uploading a photo'**
+  String get authRegisterAvatarAgreeFirst;
+
+  /// No description provided for @authRegisterAvatarUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading photo…'**
+  String get authRegisterAvatarUploading;
+
+  /// No description provided for @authRegisterAvatarUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get authRegisterAvatarUploaded;
+
+  /// No description provided for @authRegisterSummaryAvatarPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected, pending upload'**
+  String get authRegisterSummaryAvatarPending;
+
+  /// No description provided for @authRegisterSummaryAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get authRegisterSummaryAvatar;
+
+  /// No description provided for @authRegisterSummaryAvatarSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected — uploads after sign-up'**
+  String get authRegisterSummaryAvatarSet;
+
+  /// No description provided for @authRegisterSummaryAvatarSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get authRegisterSummaryAvatarSkipped;
+
+  /// No description provided for @authSocialCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile'**
+  String get authSocialCompleteTitle;
+
+  /// No description provided for @directoryFilterGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get directoryFilterGender;
+
+  /// No description provided for @directoryFilterGenderAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get directoryFilterGenderAll;
+
   /// No description provided for @authGoRegister.
   ///
   /// In en, this message translates to:

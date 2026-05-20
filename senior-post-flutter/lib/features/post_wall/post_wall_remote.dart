@@ -143,6 +143,7 @@ AppUser _authorFromMap(Map<String, dynamic> a) {
         ? (a['countryName'] as String)
         : cc,
     birthYear: 1970,
+    gender: (a['gender'] as num?)?.toInt() ?? 0,
     bio: '',
     interests: const [],
     avatarUrl: a['avatarUrl'] as String?,

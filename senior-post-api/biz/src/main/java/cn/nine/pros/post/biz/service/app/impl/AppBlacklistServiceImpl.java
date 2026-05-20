@@ -141,8 +141,8 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
         String cc = u.getCountryCode() == null ? "" : u.getCountryCode();
         return AppPublicUserVO.builder()
                 .id(u.getId())
-                .email(u.getEmail())
                 .nickname(u.getNickname() == null ? "User" : u.getNickname())
+                .gender(u.getGender())
                 .birthYear(u.getBirthYear())
                 .countryCode(cc)
                 .bio(u.getBio())

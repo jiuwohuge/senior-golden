@@ -1,19 +1,26 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/bootstrap/app_bootstrap.dart';
 import '../../core/i18n/country_from_locale.dart';
+import '../../core/oss/oss_upload_service.dart';
 import '../../widgets/postal/postal.dart';
+import '../profile/avatar_crop_page.dart';
 import '../shell/main_shell.dart';
 import 'auth_repository.dart';
 import 'login_routes.dart';
+import 'register_wizard_scaffold.dart';
 
 const int _kMaxRegisterAgeYears = 110;
-const int _kRegisterSteps = 4;
+/// 邮箱 → 密码 → 姓名 → 性别 → 年龄 → 兴趣 → 头像(可选) → 预览
+const int _kRegisterSteps = 8;
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -27,13 +34,35 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _password = TextEditingController();
   final _confirmPassword = TextEditingController();
   final _nickname = TextEditingController();
-  final _formAccountKey = GlobalKey<FormState>();
-  final _formProfileKey = GlobalKey<FormState>();
+  final _formEmailKey = GlobalKey<FormState>();
+  final _formPasswordKey = GlobalKey<FormState>();
+  final _formNameKey = GlobalKey<FormState>();
+
   int _step = 0;
   int? _birthYear;
+  int? _gender;
+  Uint8List? _avatarPendingBytes;
+  String? _avatarObjectKey;
+  bool _avatarUploading = false;
+  bool _accountRegistered = false;
   bool _agreed = false;
   bool _busy = false;
   final Set<int> _interestTagIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    void invalidateRegistration() {
+      if (!_accountRegistered) return;
+      setState(() {
+        _accountRegistered = false;
+        _avatarObjectKey = null;
+      });
+      ref.read(authRepositoryProvider).logout();
+    }
+    _email.addListener(invalidateRegistration);
+    _password.addListener(invalidateRegistration);
+  }
 
   @override
   void dispose() {
@@ -52,229 +81,93 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return [for (var i = maxY; i >= minY; i--) i];
   }
 
-  String _maskedEmail(String raw) {
-    final t = raw.trim();
-    final at = t.indexOf('@');
-    if (at <= 0 || at >= t.length - 1) return t.isEmpty ? '—' : t;
-    final local = t.substring(0, at);
-    final domain = t.substring(at + 1);
-    final head = local.length <= 2 ? local : '${local.substring(0, 2)}…';
-    return '$head@$domain';
+  String _genderLabel(AppLocalizations l10n) {
+    return switch (_gender) {
+      1 => l10n.authGenderMale,
+      2 => l10n.authGenderFemale,
+      _ => '—',
+    };
   }
 
-  int _interestCount() => _interestTagIds.length;
+  void _back() {
+    if (_busy) return;
+    FocusScope.of(context).unfocus();
+    if (_step <= 0) {
+      context.go(LoginRoutes.welcome);
+    } else {
+      setState(() => _step -= 1);
+    }
+  }
 
-  void _goToStep(int index) {
-    if (_busy || index < 0 || index >= _kRegisterSteps || index == _step) {
+  Future<void> _next(
+    AppLocalizations l10n,
+    String? autoCc,
+    List<int> years,
+    AppBootstrapData bootstrap,
+  ) async {
+    if (_busy || _avatarUploading) return;
+    FocusScope.of(context).unfocus();
+    if (_step < _kRegisterSteps - 1) {
+      if (!_validateStep(l10n, years, bootstrap)) return;
+      if (_step == 6) {
+        setState(() => _busy = true);
+        try {
+          await _ensureAccountReady(l10n, autoCc);
+        } on ApiBusinessException catch (e) {
+          if (mounted) {
+            PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+          }
+          return;
+        } finally {
+          if (mounted) setState(() => _busy = false);
+        }
+      }
+      if (!mounted) return;
+      setState(() => _step += 1);
       return;
     }
-    FocusScope.of(context).unfocus();
-    setState(() => _step = index);
+    await _submit(l10n, autoCc);
   }
 
-  List<String> _stepTabLabels(AppLocalizations l10n) {
-    return [
-      l10n.authRegisterTabAccount,
-      l10n.authRegisterTabProfile,
-      l10n.authRegisterTabInterests,
-      l10n.authRegisterTabReview,
-    ];
-  }
-
-  Widget _buildClickableStepTabs(BuildContext context, AppLocalizations l10n) {
-    final theme = Theme.of(context);
-    final labels = _stepTabLabels(l10n);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          child: Row(
-            children: List.generate(_kRegisterSteps, (i) {
-              final active = i == _step;
-              final label = labels[i];
-              return Padding(
-                padding: EdgeInsets.only(right: i < _kRegisterSteps - 1 ? 8 : 0),
-                child: Semantics(
-                  button: true,
-                  selected: active,
-                  label: '$label, ${l10n.authRegisterStepProgress('${i + 1}', '$_kRegisterSteps')}',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _busy ? null : () => _goToStep(i),
-                      borderRadius: BorderRadius.circular(10),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeOutCubic,
-                        constraints: const BoxConstraints(minWidth: 76, minHeight: 48),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: active
-                                ? PostalTokens.postboxGreen
-                                : PostalTokens.perforationLine.withValues(alpha: 0.95),
-                            width: active ? 2 : 1,
-                          ),
-                          color: active
-                              ? PostalTokens.paperEnvelope
-                              : PostalTokens.paperCard.withValues(alpha: 0.35),
-                          boxShadow: active
-                              ? [
-                                  BoxShadow(
-                                    color: PostalTokens.postboxGreen.withValues(alpha: 0.12),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '${i + 1}',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: active ? PostalTokens.postboxGreen : PostalTokens.inkTertiary,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              label,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: active ? PostalTokens.inkNavy : PostalTokens.inkSecondary,
-                                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProgressHeader(BuildContext context, AppLocalizations l10n) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
-              color: PostalTokens.inkNavy,
-              visualDensity: VisualDensity.compact,
-              onPressed: _busy
-                  ? null
-                  : () {
-                      if (_step <= 0) {
-                        context.go(LoginRoutes.login);
-                      } else {
-                        FocusScope.of(context).unfocus();
-                        setState(() => _step -= 1);
-                      }
-                    },
-            ),
-            Expanded(
-              child: Text(
-                l10n.authRegisterStepProgress('${_step + 1}', '$_kRegisterSteps'),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: PostalTokens.inkNavy,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ),
-            const SizedBox(width: 48),
-          ],
-        ),
-        const SizedBox(height: PostalTokens.s8),
-        _buildClickableStepTabs(context, l10n),
-        const SizedBox(height: PostalTokens.s4),
-        Text(
-          l10n.authRegisterWizardHint,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: PostalTokens.inkTertiary,
-            height: 1.25,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInterestChips(BuildContext context, AppBootstrapData bootstrap, AppLocalizations l10n) {
-    if (bootstrap.interestTagOptions.isEmpty) {
-      return Text(
-        l10n.authRegisterInterestsServerEmpty,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: PostalTokens.inkSecondary,
-            ),
-      );
+  bool _validateStep(AppLocalizations l10n, List<int> years, AppBootstrapData bootstrap) {
+    switch (_step) {
+      case 0:
+        return _formEmailKey.currentState?.validate() ?? false;
+      case 1:
+        return _formPasswordKey.currentState?.validate() ?? false;
+      case 2:
+        return _formNameKey.currentState?.validate() ?? false;
+      case 3:
+        if (_gender == 1 || _gender == 2) return true;
+        PostalSnack.show(context, l10n.authGenderLabel, tone: PostalSnackTone.warning);
+        return false;
+      case 4:
+        if (_birthYear != null && years.isNotEmpty) return true;
+        PostalSnack.show(
+          context,
+          _birthYear == null ? l10n.authBirthYearRequired : l10n.authBirthYearRangeError,
+          tone: PostalSnackTone.warning,
+        );
+        return false;
+      case 5:
+        if (_interestTagIds.length >= 3 && bootstrap.interestTagOptions.isNotEmpty) {
+          return true;
+        }
+        if (bootstrap.interestTagOptions.isEmpty) {
+          PostalSnack.show(context, l10n.authRegisterInterestsServerEmpty, tone: PostalSnackTone.warning);
+        } else {
+          PostalSnack.show(context, l10n.authRegisterInterestsMin, tone: PostalSnackTone.warning);
+        }
+        return false;
+      case 6:
+        if (_agreed) return true;
+        PostalSnack.show(context, l10n.authAgreeRequired, tone: PostalSnackTone.warning);
+        return false;
+      case 7:
+        return true;
+      default:
+        return false;
     }
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: bootstrap.interestTagOptions
-          .map(
-            (o) => FilterChip(
-              label: Text(o.tagName),
-              selected: _interestTagIds.contains(o.id),
-              onSelected: _busy
-                  ? null
-                  : (v) {
-                      setState(() {
-                        if (v) {
-                          _interestTagIds.add(o.id);
-                        } else {
-                          _interestTagIds.remove(o.id);
-                        }
-                      });
-                    },
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _summaryRow(BuildContext context, String label, String value) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: PostalTokens.inkSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: theme.textTheme.bodyMedium?.copyWith(color: PostalTokens.inkNavy),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _pickBirthYear(List<int> years) async {
@@ -323,141 +216,110 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         );
       },
     );
-    if (picked != null) {
-      setState(() => _birthYear = picked);
-    }
+    if (picked != null) setState(() => _birthYear = picked);
   }
 
-  bool _validateCurrentStep(AppLocalizations l10n, List<int> years, AppBootstrapData bootstrap) {
-    switch (_step) {
-      case 0:
-        return _formAccountKey.currentState?.validate() ?? false;
-      case 1:
-        final ok = _formProfileKey.currentState?.validate() ?? false;
-        if (!ok) return false;
-        if (_birthYear == null) {
-          PostalSnack.show(context, l10n.authBirthYearRequired, tone: PostalSnackTone.warning);
-          return false;
-        }
-        if (years.isEmpty) {
-          PostalSnack.show(context, l10n.authBirthYearRangeError, tone: PostalSnackTone.warning);
-          return false;
-        }
-        return true;
-      case 2:
-        if (_interestCount() < 3) {
-          PostalSnack.show(context, l10n.authRegisterInterestsMin, tone: PostalSnackTone.warning);
-          return false;
-        }
-        if (bootstrap.interestTagOptions.isEmpty) {
-          PostalSnack.show(context, l10n.authRegisterInterestsServerEmpty, tone: PostalSnackTone.warning);
-          return false;
-        }
-        return true;
-      case 3:
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  void _onPrimaryAction(
-    AppLocalizations l10n,
-    String? autoCountryCode,
-    List<int> years,
-    AppBootstrapData bootstrap,
-  ) {
-    if (_busy) return;
-    FocusScope.of(context).unfocus();
-    if (_step < _kRegisterSteps - 1) {
-      if (!_validateCurrentStep(l10n, years, bootstrap)) return;
-      setState(() => _step += 1);
-      return;
-    }
-    _submit(l10n, autoCountryCode);
-  }
-
-  /// 仅当前步挂载了 [Form] 时 [FormState] 才非空；最后一步点「注册」时必须不依赖 [FormState]。
-  bool _validateAccountFieldsForSubmit(AppLocalizations l10n) {
-    final value = _email.text.trim();
-    if (value.isEmpty) {
-      PostalSnack.show(context, l10n.authFieldRequired, tone: PostalSnackTone.warning);
-      return false;
-    }
-    if (!value.contains('@') || !value.contains('.')) {
-      PostalSnack.show(context, l10n.authEmailInvalid, tone: PostalSnackTone.warning);
-      return false;
-    }
-    final p = _password.text;
-    if (p.isEmpty) {
-      PostalSnack.show(context, l10n.authFieldRequired, tone: PostalSnackTone.warning);
-      return false;
-    }
-    if (p.length < 8) {
-      PostalSnack.show(context, l10n.authPasswordTooShort, tone: PostalSnackTone.warning);
-      return false;
-    }
-    final c = _confirmPassword.text;
-    if (c.isEmpty) {
-      PostalSnack.show(context, l10n.authFieldRequired, tone: PostalSnackTone.warning);
-      return false;
-    }
-    if (c != p) {
-      PostalSnack.show(context, l10n.authPasswordNotMatch, tone: PostalSnackTone.warning);
-      return false;
-    }
-    return true;
-  }
-
-  bool _validateProfileFieldsForSubmit(AppLocalizations l10n) {
-    if (_nickname.text.trim().isEmpty) {
-      PostalSnack.show(context, l10n.authFieldRequired, tone: PostalSnackTone.warning);
-      return false;
-    }
-    return true;
-  }
-
-  void _scheduleFormValidate(GlobalKey<FormState> key) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      key.currentState?.validate();
+  Future<void> _pickRegisterAvatar() async {
+    final l10n = AppLocalizations.of(context)!;
+    final x = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 2048,
+      maxHeight: 2048,
+      imageQuality: 92,
+    );
+    if (x == null || !mounted) return;
+    final raw = await x.readAsBytes();
+    if (!mounted) return;
+    final cropped = await Navigator.of(context).push<Uint8List>(
+      MaterialPageRoute(builder: (_) => AvatarCropPage(imageBytes: raw)),
+    );
+    if (cropped == null || !mounted) return;
+    setState(() {
+      _avatarPendingBytes = cropped;
+      _avatarObjectKey = null;
     });
+    if (_agreed) {
+      final locale = Localizations.localeOf(context);
+      final bootstrap = await ref.read(appBootstrapProvider(locale.languageCode).future);
+      final autoCc = countryCodeForAppLocale(locale, bootstrap.countries);
+      await _uploadAvatarIfPossible(l10n, autoCc);
+    } else {
+      PostalSnack.show(
+        context,
+        l10n.authRegisterAvatarAgreeFirst,
+        tone: PostalSnackTone.warning,
+      );
+    }
+  }
+
+  Future<void> _registerIfNeeded(AppLocalizations l10n, String? autoCountryCode) async {
+    if (_accountRegistered) return;
+    if (!_validateRegistrationFields(l10n)) {
+      throw ApiBusinessException(400, l10n.authFieldRequired);
+    }
+    await ref.read(authRepositoryProvider).register(
+          email: _email.text,
+          password: _password.text,
+          nickname: _nickname.text,
+          gender: _gender!,
+          birthYear: _birthYear!,
+          countryCode: autoCountryCode,
+          agreedTerms: true,
+          interestTagIds: _interestTagIds.toList(),
+          avatarUrl: _avatarObjectKey,
+        );
+    _accountRegistered = true;
+  }
+
+  Future<void> _uploadAvatarIfPossible(AppLocalizations l10n, String? autoCountryCode) async {
+    final bytes = _avatarPendingBytes;
+    if (bytes == null || _avatarObjectKey != null) return;
+    if (!_agreed || !_validateRegistrationFields(l10n)) return;
+
+    setState(() => _avatarUploading = true);
+    try {
+      await _registerIfNeeded(l10n, autoCountryCode);
+      final key = await ref.read(ossUploadServiceProvider).uploadAvatarImage(
+            bytes: bytes,
+            ext: 'jpg',
+            contentType: 'image/jpeg',
+          );
+      await ref.read(authRepositoryProvider).updateProfileOnServer(avatarUrl: key);
+      if (mounted) setState(() => _avatarObjectKey = key);
+    } on ApiBusinessException catch (e) {
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
+      rethrow;
+    } finally {
+      if (mounted) setState(() => _avatarUploading = false);
+    }
+  }
+
+  Future<void> _ensureAccountReady(AppLocalizations l10n, String? autoCountryCode) async {
+    if (!_agreed) {
+      PostalSnack.show(context, l10n.authAgreeRequired, tone: PostalSnackTone.warning);
+      throw ApiBusinessException(400, l10n.authAgreeRequired);
+    }
+    if (!_validateRegistrationFields(l10n)) {
+      throw ApiBusinessException(400, l10n.authFieldRequired);
+    }
+    await _registerIfNeeded(l10n, autoCountryCode);
+    if (_avatarPendingBytes != null && _avatarObjectKey == null) {
+      await _uploadAvatarIfPossible(l10n, autoCountryCode);
+    }
   }
 
   Future<void> _submit(AppLocalizations l10n, String? autoCountryCode) async {
-    if (!_validateAccountFieldsForSubmit(l10n)) {
-      setState(() => _step = 0);
-      _scheduleFormValidate(_formAccountKey);
-      return;
-    }
-    if (!_validateProfileFieldsForSubmit(l10n) || _birthYear == null) {
-      setState(() => _step = 1);
-      _scheduleFormValidate(_formProfileKey);
-      if (_birthYear == null) {
-        PostalSnack.show(context, l10n.authBirthYearRequired, tone: PostalSnackTone.warning);
-      }
-      return;
-    }
-    if (_interestCount() < 3) {
-      setState(() => _step = 2);
-      PostalSnack.show(context, l10n.authRegisterInterestsMin, tone: PostalSnackTone.warning);
-      return;
-    }
-    if (!_agreed) {
-      PostalSnack.show(context, l10n.authAgreeRequired, tone: PostalSnackTone.warning);
-      return;
-    }
+    if (!_validateAllForSubmit(l10n)) return;
     setState(() => _busy = true);
     try {
-      await ref.read(authRepositoryProvider).register(
-            email: _email.text,
-            password: _password.text,
-            nickname: _nickname.text,
-            birthYear: _birthYear!,
-            countryCode: autoCountryCode,
-            agreedTerms: _agreed,
-            interestTagIds: _interestTagIds.toList(),
-          );
+      if (!_accountRegistered) {
+        await _registerIfNeeded(l10n, autoCountryCode);
+        if (_avatarPendingBytes != null && _avatarObjectKey == null) {
+          await _uploadAvatarIfPossible(l10n, autoCountryCode);
+        }
+      }
       if (mounted) context.go(MainShellRoute.pathPostWall);
     } on ApiBusinessException catch (e) {
       if (mounted) {
@@ -466,6 +328,491 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  bool _validateRegistrationFields(AppLocalizations l10n) {
+    final email = _email.text.trim();
+    if (email.isEmpty || !email.contains('@') || !email.contains('.')) return false;
+    final pwd = _password.text;
+    if (pwd.isEmpty || pwd.length < 8 || _confirmPassword.text != pwd) return false;
+    if (_nickname.text.trim().isEmpty) return false;
+    if (_gender != 1 && _gender != 2) return false;
+    if (_birthYear == null) return false;
+    if (_interestTagIds.length < 3) return false;
+    return true;
+  }
+
+  /// 最后一步提交时前几步 Form 已卸载，不能依赖 [FormState.validate]。
+  bool _validateAllForSubmit(AppLocalizations l10n) {
+    final email = _email.text.trim();
+    if (email.isEmpty || !email.contains('@') || !email.contains('.')) {
+      setState(() => _step = 0);
+      PostalSnack.show(
+        context,
+        email.isEmpty ? l10n.authFieldRequired : l10n.authEmailInvalid,
+        tone: PostalSnackTone.warning,
+      );
+      return false;
+    }
+    final pwd = _password.text;
+    if (pwd.isEmpty || pwd.length < 8) {
+      setState(() => _step = 1);
+      PostalSnack.show(
+        context,
+        pwd.isEmpty ? l10n.authFieldRequired : l10n.authPasswordTooShort,
+        tone: PostalSnackTone.warning,
+      );
+      return false;
+    }
+    if (_confirmPassword.text != pwd) {
+      setState(() => _step = 1);
+      PostalSnack.show(context, l10n.authPasswordNotMatch, tone: PostalSnackTone.warning);
+      return false;
+    }
+    if (_nickname.text.trim().isEmpty) {
+      setState(() => _step = 2);
+      PostalSnack.show(context, l10n.authFieldRequired, tone: PostalSnackTone.warning);
+      return false;
+    }
+    if (_gender != 1 && _gender != 2) {
+      setState(() => _step = 3);
+      PostalSnack.show(context, l10n.authGenderLabel, tone: PostalSnackTone.warning);
+      return false;
+    }
+    if (_birthYear == null) {
+      setState(() => _step = 4);
+      PostalSnack.show(context, l10n.authBirthYearRequired, tone: PostalSnackTone.warning);
+      return false;
+    }
+    if (_interestTagIds.length < 3) {
+      setState(() => _step = 5);
+      PostalSnack.show(context, l10n.authRegisterInterestsMin, tone: PostalSnackTone.warning);
+      return false;
+    }
+    if (!_agreed) {
+      setState(() => _step = 7);
+      PostalSnack.show(context, l10n.authAgreeRequired, tone: PostalSnackTone.warning);
+      return false;
+    }
+    return true;
+  }
+
+  Widget _stepContent(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<int> years,
+    AppBootstrapData bootstrap,
+    String countryLabel,
+    String? autoCountryCode,
+  ) {
+    switch (_step) {
+      case 0:
+        return Form(
+          key: _formEmailKey,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: PostalTextField(
+              controller: _email,
+              label: l10n.authEmailLabel,
+              hint: l10n.authEmailHint,
+              prefixIcon: Icons.alternate_email,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              autofocus: true,
+              validator: (v) {
+                final value = v?.trim() ?? '';
+                if (value.isEmpty) return l10n.authFieldRequired;
+                if (!value.contains('@') || !value.contains('.')) {
+                  return l10n.authEmailInvalid;
+                }
+                return null;
+              },
+            ),
+          ),
+        );
+      case 1:
+        return Form(
+          key: _formPasswordKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              PostalTextField(
+                controller: _password,
+                label: l10n.authPasswordLabel,
+                prefixIcon: Icons.lock_outline,
+                obscure: true,
+                textInputAction: TextInputAction.next,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return l10n.authFieldRequired;
+                  if (v.length < 8) return l10n.authPasswordTooShort;
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              PostalTextField(
+                controller: _confirmPassword,
+                label: l10n.authConfirmPasswordLabel,
+                prefixIcon: Icons.lock_reset_outlined,
+                obscure: true,
+                textInputAction: TextInputAction.done,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return l10n.authFieldRequired;
+                  if (v != _password.text) return l10n.authPasswordNotMatch;
+                  return null;
+                },
+              ),
+            ],
+          ),
+        );
+      case 2:
+        return Form(
+          key: _formNameKey,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: PostalTextField(
+              controller: _nickname,
+              label: l10n.authNicknameLabel,
+              prefixIcon: Icons.person_outline,
+              textInputAction: TextInputAction.done,
+              autofocus: true,
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return l10n.authFieldRequired;
+                return null;
+              },
+            ),
+          ),
+        );
+      case 3:
+        return Column(
+          children: [
+            RegisterWizardChoiceTile(
+              label: l10n.authGenderMale,
+              selected: _gender == 1,
+              enabled: !_busy,
+              onTap: () => setState(() => _gender = 1),
+            ),
+            const SizedBox(height: 12),
+            RegisterWizardChoiceTile(
+              label: l10n.authGenderFemale,
+              selected: _gender == 2,
+              enabled: !_busy,
+              onTap: () => setState(() => _gender = 2),
+            ),
+          ],
+        );
+      case 4:
+        if (years.isEmpty) {
+          return Text(
+            l10n.authBirthYearRangeError,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: PostalTokens.error),
+          );
+        }
+        final age = _birthYear == null ? null : DateTime.now().year - _birthYear!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (age != null)
+              Text(
+                l10n.authRegisterAgePreview('$age'),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: PostalTokens.postboxGreen,
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+            const SizedBox(height: 16),
+            Material(
+              color: PostalTokens.paperCard.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(14),
+              child: InkWell(
+                onTap: _busy ? null : () => _pickBirthYear(years),
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: PostalTokens.perforationLine),
+                  ),
+                  child: Text(
+                    _birthYear == null
+                        ? l10n.authBirthYearLabel
+                        : l10n.authBirthYearFormat(
+                            '$_birthYear',
+                            '${DateTime.now().year - _birthYear!}',
+                          ),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: PostalTokens.inkNavy,
+                        ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      case 5:
+        return SingleChildScrollView(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: bootstrap.interestTagOptions
+                .map(
+                  (o) => FilterChip(
+                    label: Text(o.tagName),
+                    selected: _interestTagIds.contains(o.id),
+                    onSelected: _busy
+                        ? null
+                        : (v) => setState(() {
+                              if (v) {
+                                _interestTagIds.add(o.id);
+                              } else {
+                                _interestTagIds.remove(o.id);
+                              }
+                            }),
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      case 6:
+        return _stepAvatar(context, l10n, autoCountryCode: autoCountryCode);
+      case 7:
+        return SingleChildScrollView(
+          child: _reviewCard(context, l10n, countryLabel),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _reviewCard(BuildContext context, AppLocalizations l10n, String countryLabel) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      decoration: BoxDecoration(
+        color: PostalTokens.paperEnvelope.withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PostalTokens.kraftBrownMuted.withValues(alpha: 0.65)),
+      ),
+      child: Column(
+        children: [
+          _summaryRow(
+            context,
+            l10n.authRegisterSummaryEmail,
+            _email.text.trim().isEmpty ? '—' : _email.text.trim(),
+            valueMaxLines: 3,
+          ),
+          _summaryRow(context, l10n.authRegisterSummaryNickname, _nickname.text.trim()),
+          _summaryRow(context, l10n.authRegisterSummaryGender, _genderLabel(l10n)),
+          _summaryRow(
+            context,
+            l10n.authRegisterSummaryBirth,
+            _birthYear == null
+                ? '—'
+                : l10n.authBirthYearFormat(
+                    '$_birthYear',
+                    '${DateTime.now().year - _birthYear!}',
+                  ),
+          ),
+          _summaryRow(context, l10n.authRegisterSummaryCountry, countryLabel),
+          _summaryRow(context, l10n.authRegisterSummaryInterests, '${_interestTagIds.length}'),
+          _summaryRow(context, l10n.authRegisterSummaryAvatar, _avatarSummaryLabel(l10n)),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepAvatar(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required String? autoCountryCode,
+  }) {
+    final pending = _avatarPendingBytes;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 320),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Material(
+                color: PostalTokens.paperCard.withValues(alpha: 0.55),
+                borderRadius: BorderRadius.circular(18),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: (_busy || _avatarUploading) ? null : _pickRegisterAvatar,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (pending != null)
+                        Image.memory(pending, fit: BoxFit.cover)
+                      else
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add_rounded,
+                              size: 56,
+                              color: PostalTokens.inkTertiary.withValues(alpha: 0.85),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              l10n.authRegisterAvatarTapToAdd,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: PostalTokens.inkTertiary,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      if (pending != null && !_avatarUploading)
+                        Positioned(
+                          right: 10,
+                          bottom: 10,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: PostalTokens.inkNavy.withValues(alpha: 0.72),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Icon(Icons.edit_outlined, color: Colors.white, size: 22),
+                            ),
+                          ),
+                        ),
+                      if (_avatarUploading)
+                        ColoredBox(
+                          color: PostalTokens.inkNavy.withValues(alpha: 0.35),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const CircularProgressIndicator(color: Colors.white),
+                                const SizedBox(height: 12),
+                                Text(
+                                  l10n.authRegisterAvatarUploading,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: Colors.white,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      if (_avatarObjectKey != null && !_avatarUploading)
+                        Positioned(
+                          left: 10,
+                          top: 10,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: PostalTokens.postboxGreen.withValues(alpha: 0.92),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              child: Text(
+                                l10n.authRegisterAvatarUploaded,
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        PostalCheckboxField(
+          value: _agreed,
+          onChanged: (_busy || _avatarUploading)
+              ? null
+              : (v) async {
+                  setState(() => _agreed = v);
+                  if (v && _avatarPendingBytes != null) {
+                    await _uploadAvatarIfPossible(l10n, autoCountryCode);
+                  }
+                },
+          label: l10n.authAgreeTpl('{terms}', '{privacy}'),
+          linkSegments: [
+            PostalLinkSegment(
+              key: 'terms',
+              text: l10n.authTermsTitle,
+              onTap: () => context.go(LoginRoutes.legalTerms),
+            ),
+            PostalLinkSegment(
+              key: 'privacy',
+              text: l10n.authPrivacyTitle,
+              onTap: () => context.go(LoginRoutes.legalPrivacy),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  String _avatarSummaryLabel(AppLocalizations l10n) {
+    if (_avatarUploading) return l10n.authRegisterAvatarUploading;
+    if (_avatarObjectKey != null) return l10n.authRegisterSummaryAvatarSet;
+    if (_avatarPendingBytes != null) return l10n.authRegisterSummaryAvatarPending;
+    return l10n.authRegisterSummaryAvatarSkipped;
+  }
+
+  Widget _summaryRow(
+    BuildContext context,
+    String label,
+    String value, {
+    int valueMaxLines = 2,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 96,
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PostalTokens.inkSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              maxLines: valueMaxLines,
+              softWrap: true,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: PostalTokens.inkNavy,
+                    height: 1.35,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  (String title, String subtitle) _stepCopy(AppLocalizations l10n) {
+    return switch (_step) {
+      0 => (l10n.authRegisterWizardEmailTitle, l10n.authRegisterWizardEmailSubtitle),
+      1 => (l10n.authRegisterWizardPasswordTitle, l10n.authRegisterWizardPasswordSubtitle),
+      2 => (l10n.authRegisterWizardNameTitle, l10n.authRegisterWizardNameSubtitle),
+      3 => (l10n.authRegisterWizardGenderTitle, l10n.authRegisterWizardGenderSubtitle),
+      4 => (l10n.authRegisterWizardAgeTitle, l10n.authRegisterWizardAgeSubtitle),
+      5 => (l10n.authRegisterStepInterestsTitle, l10n.authRegisterStepInterestsSubtitle),
+      6 => (l10n.authRegisterWizardAvatarTitle, l10n.authRegisterWizardAvatarSubtitle),
+      7 => (l10n.authRegisterStepReviewTitle, l10n.authRegisterStepReviewSubtitle),
+      _ => ('', ''),
+    };
   }
 
   @override
@@ -486,13 +833,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       });
     });
 
-    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
-
     return Scaffold(
       body: PaperTextureBackground(
         child: SafeArea(
           child: bootstrapAsync.when(
-            loading: () => const PostalSkeletonList(itemCount: 3),
+            loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => PostalEmptyState(
               title: l10n.authBootstrapLoadFailed,
               subtitle: bootstrapDebugErrorHint(error),
@@ -512,336 +857,40 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               }
               final countryLabel =
                   countryItem?.displayName(locale.languageCode) ?? autoCc ?? '—';
+              final copy = _stepCopy(l10n);
+              final canNext = switch (_step) {
+                3 => _gender == 1 || _gender == 2,
+                4 => _birthYear != null && years.isNotEmpty,
+                5 => _interestTagIds.length >= 3,
+                6 => _agreed && !_avatarUploading,
+                _ => true,
+              };
+              final footerHint = switch (_step) {
+                6 => l10n.authRegisterAvatarSkipHint,
+                7 => null,
+                _ => l10n.authRegisterProfileHint,
+              };
 
-              return SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20, 8, 20, 16 + bottomInset),
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 560),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        PostalBrandHeader(
-                          title: l10n.authRegisterTitle,
-                          tagline: l10n.authRegisterSubtitle,
-                        ),
-                        const SizedBox(height: PostalTokens.s8),
-                        _buildProgressHeader(context, l10n),
-                        const SizedBox(height: PostalTokens.s12),
-                        PostalCardEnvelope(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildStepBody(context, l10n, years, bootstrap, countryLabel),
-                              const SizedBox(height: PostalTokens.s16),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (_step > 0)
-                                    Expanded(
-                                      child: PostalButton(
-                                        label: l10n.authRegisterBack,
-                                        variant: PostalButtonVariant.secondary,
-                                        expand: true,
-                                        onPressed: _busy
-                                            ? null
-                                            : () {
-                                                FocusScope.of(context).unfocus();
-                                                setState(() => _step -= 1);
-                                              },
-                                      ),
-                                    ),
-                                  if (_step > 0) const SizedBox(width: 12),
-                                  Expanded(
-                                    child: PostalButton(
-                                      label: _step == _kRegisterSteps - 1
-                                          ? l10n.authRegisterSubmit
-                                          : l10n.authRegisterNext,
-                                      busy: _busy,
-                                      expand: true,
-                                      onPressed: (_busy || (_step == 1 && years.isEmpty))
-                                          ? null
-                                          : () => _onPrimaryAction(
-                                                l10n,
-                                                autoCc,
-                                                years,
-                                                bootstrap,
-                                              ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: PostalTokens.s8),
-                              PostalButton(
-                                label: l10n.authGoLogin,
-                                onPressed: _busy ? null : () => context.go(LoginRoutes.login),
-                                variant: PostalButtonVariant.ghost,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: RegisterWizardScaffold(
+                  stepIndex: _step,
+                  stepCount: _kRegisterSteps,
+                  title: copy.$1,
+                  subtitle: copy.$2,
+                  footerHint: footerHint,
+                  onBack: _busy ? null : _back,
+                  onNext: () => _next(l10n, autoCc, years, bootstrap),
+                  nextEnabled: canNext && !(_step == 4 && years.isEmpty),
+                  nextBusy: _busy || _avatarUploading,
+                  isLastStep: _step == _kRegisterSteps - 1,
+                  child: _stepContent(context, l10n, years, bootstrap, countryLabel, autoCc),
                 ),
               );
             },
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildStepBody(
-    BuildContext context,
-    AppLocalizations l10n,
-    List<int> years,
-    AppBootstrapData bootstrap,
-    String countryLabel,
-  ) {
-    switch (_step) {
-      case 0:
-        return _stepAccount(context, l10n);
-      case 1:
-        return _stepProfile(context, l10n, years);
-      case 2:
-        return _stepInterests(context, l10n, bootstrap);
-      case 3:
-        return _stepReview(context, l10n, countryLabel);
-      default:
-        return const SizedBox.shrink();
-    }
-  }
-
-  Widget _stepAccount(BuildContext context, AppLocalizations l10n) {
-    return Form(
-      key: _formAccountKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          PostalSectionTitle(
-            title: l10n.authRegisterStepAccountTitle,
-            subtitle: l10n.authRegisterStepAccountSubtitle,
-          ),
-          const SizedBox(height: PostalTokens.s12),
-          PostalTextField(
-            controller: _email,
-            label: l10n.authEmailLabel,
-            hint: l10n.authEmailHint,
-            prefixIcon: Icons.alternate_email,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            validator: (v) {
-              final value = v?.trim() ?? '';
-              if (value.isEmpty) return l10n.authFieldRequired;
-              if (!value.contains('@') || !value.contains('.')) {
-                return l10n.authEmailInvalid;
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 10),
-          PostalTextField(
-            controller: _password,
-            label: l10n.authPasswordLabel,
-            prefixIcon: Icons.lock_outline,
-            obscure: true,
-            textInputAction: TextInputAction.next,
-            validator: (v) {
-              if (v == null || v.isEmpty) {
-                return l10n.authFieldRequired;
-              }
-              if (v.length < 8) {
-                return l10n.authPasswordTooShort;
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 10),
-          PostalTextField(
-            controller: _confirmPassword,
-            label: l10n.authConfirmPasswordLabel,
-            prefixIcon: Icons.lock_reset_outlined,
-            obscure: true,
-            textInputAction: TextInputAction.done,
-            validator: (v) {
-              if (v == null || v.isEmpty) {
-                return l10n.authFieldRequired;
-              }
-              if (v != _password.text) {
-                return l10n.authPasswordNotMatch;
-              }
-              return null;
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _stepProfile(BuildContext context, AppLocalizations l10n, List<int> years) {
-    return Form(
-      key: _formProfileKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          PostalSectionTitle(
-            title: l10n.authRegisterStepProfileTitle,
-            subtitle: l10n.authRegisterStepProfileSubtitle,
-          ),
-          const SizedBox(height: PostalTokens.s12),
-          PostalTextField(
-            controller: _nickname,
-            label: l10n.authNicknameLabel,
-            prefixIcon: Icons.person_outline,
-            textInputAction: TextInputAction.next,
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) {
-                return l10n.authFieldRequired;
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 10),
-          if (years.isEmpty)
-            Text(
-              l10n.authBirthYearRangeError,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-            )
-          else
-            InkWell(
-              onTap: _busy ? null : () => _pickBirthYear(years),
-              borderRadius: BorderRadius.circular(8),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: l10n.authBirthYearLabel,
-                  suffixIcon: const Icon(Icons.expand_more),
-                  errorText: null,
-                ),
-                child: Text(
-                  _birthYear == null
-                      ? '—'
-                      : l10n.authBirthYearFormat(
-                          '$_birthYear',
-                          '${DateTime.now().year - _birthYear!}',
-                        ),
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _stepInterests(BuildContext context, AppLocalizations l10n, AppBootstrapData bootstrap) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        PostalSectionTitle(
-          title: l10n.authRegisterStepInterestsTitle,
-          subtitle: l10n.authRegisterStepInterestsSubtitle,
-        ),
-        const SizedBox(height: PostalTokens.s8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            color: PostalTokens.stampVermilionMuted.withValues(alpha: 0.35),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: PostalTokens.perforationLine.withValues(alpha: 0.9)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.info_outline_rounded, size: 20, color: PostalTokens.stampVermilion),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.authRegisterInterestsMin,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: PostalTokens.inkSecondary,
-                        height: 1.3,
-                      ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: PostalTokens.s12),
-        _buildInterestChips(context, bootstrap, l10n),
-      ],
-    );
-  }
-
-  Widget _stepReview(BuildContext context, AppLocalizations l10n, String countryLabel) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        PostalSectionTitle(
-          title: l10n.authRegisterStepReviewTitle,
-          subtitle: l10n.authRegisterStepReviewSubtitle,
-        ),
-        const SizedBox(height: PostalTokens.s12),
-        Container(
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-          decoration: BoxDecoration(
-            color: PostalTokens.paperEnvelope.withValues(alpha: 0.65),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: PostalTokens.kraftBrownMuted.withValues(alpha: 0.65)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _summaryRow(context, l10n.authRegisterSummaryEmail, _maskedEmail(_email.text)),
-              Divider(height: 20, color: PostalTokens.perforationLine.withValues(alpha: 0.85)),
-              _summaryRow(context, l10n.authRegisterSummaryNickname, _nickname.text.trim().isEmpty ? '—' : _nickname.text.trim()),
-              _summaryRow(
-                context,
-                l10n.authRegisterSummaryBirth,
-                _birthYear == null
-                    ? '—'
-                    : l10n.authBirthYearFormat(
-                        '$_birthYear',
-                        '${DateTime.now().year - _birthYear!}',
-                      ),
-              ),
-              _summaryRow(context, l10n.authRegisterSummaryCountry, countryLabel),
-              _summaryRow(
-                context,
-                l10n.authRegisterSummaryInterests,
-                '${_interestCount()}',
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: PostalTokens.s16),
-        Text(
-          l10n.authRegisterStepReviewSubtitle,
-          style: theme.textTheme.bodySmall?.copyWith(color: PostalTokens.inkTertiary),
-        ),
-        const SizedBox(height: PostalTokens.s12),
-        PostalCheckboxField(
-          value: _agreed,
-          onChanged: _busy ? null : (v) => setState(() => _agreed = v),
-          label: l10n.authAgreeTpl('{terms}', '{privacy}'),
-          linkSegments: [
-            PostalLinkSegment(
-              key: 'terms',
-              text: l10n.authTermsTitle,
-              onTap: () => context.go(LoginRoutes.legalTerms),
-            ),
-            PostalLinkSegment(
-              key: 'privacy',
-              text: l10n.authPrivacyTitle,
-              onTap: () => context.go(LoginRoutes.legalPrivacy),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }

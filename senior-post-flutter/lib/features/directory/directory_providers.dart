@@ -18,6 +18,7 @@ final directoryUsersProvider = FutureProvider<List<AppUser>>((ref) async {
         minAge: filter.minAge,
         maxAge: filter.maxAge,
         interestNames: filter.interests.toList(),
+        genders: filter.genders.toList(),
         sort: filter.sort,
       );
 });
@@ -28,6 +29,7 @@ class DirectoryFilter {
     this.minAge = 45,
     this.maxAge = 80,
     this.interests = const {},
+    this.genders = const {},
     this.sort = 'DEFAULT',
   });
 
@@ -35,6 +37,7 @@ class DirectoryFilter {
   final int minAge;
   final int maxAge;
   final Set<String> interests;
+  final Set<int> genders;
   final String sort;
 
   DirectoryFilter copyWith({
@@ -42,6 +45,7 @@ class DirectoryFilter {
     int? minAge,
     int? maxAge,
     Set<String>? interests,
+    Set<int>? genders,
     String? sort,
   }) {
     return DirectoryFilter(
@@ -49,6 +53,7 @@ class DirectoryFilter {
       minAge: minAge ?? this.minAge,
       maxAge: maxAge ?? this.maxAge,
       interests: interests ?? this.interests,
+      genders: genders ?? this.genders,
       sort: sort ?? this.sort,
     );
   }

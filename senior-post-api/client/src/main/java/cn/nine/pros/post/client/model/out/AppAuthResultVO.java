@@ -18,4 +18,7 @@ public class AppAuthResultVO {
 
     @Schema(description = "用户信息")
     private AppPublicUserVO user;
+
+    @Schema(description = "资料是否已满足 45+、性别、兴趣≥3 等必填项")
+    private Boolean profileComplete;
 }

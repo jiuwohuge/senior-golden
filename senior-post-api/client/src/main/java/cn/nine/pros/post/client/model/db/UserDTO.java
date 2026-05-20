@@ -39,7 +39,13 @@ public class UserDTO extends AbstractAuditableDTO {
     @Schema(description = "昵称")
     private String nickname;
     /**
-     * 出生年份（用于年龄验证）
+     * 性别：0 未设置，1 男，2 女，3 其他
+     */
+    @Schema(description = "性别")
+    private Integer gender;
+
+    /**
+     * 出生年份（用于 age 验证）
      */
     @Schema(description = "出生年份（用于年龄验证）")
     private Integer birthYear;

@@ -8,6 +8,7 @@ import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
+import '../../widgets/postal/postal_gender_icon.dart';
 import '../social/social_remote.dart';
 import 'directory_remote.dart';
 import 'send_letter_sheet.dart';
@@ -261,15 +262,26 @@ class UserCardPage extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      Text(
-                        user.nickname,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.2,
-                          height: 1.15,
-                          color: PostalTokens.inkNavy,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              user.nickname,
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.2,
+                                height: 1.15,
+                                color: PostalTokens.inkNavy,
+                              ),
+                            ),
+                          ),
+                          if (user.gender >= 1) ...[
+                            const SizedBox(width: 6),
+                            PostalGenderIcon(gender: user.gender, size: 18),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 10),
                       Center(
