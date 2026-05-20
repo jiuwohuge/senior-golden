@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/auth/auth_token.dart';
 import '../../core/models/domain_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 import 'stamps_remote.dart';
 
 final stampsLedgerProvider = FutureProvider<List<StampLedgerLine>>((ref) async {
+  ref.watch(authTokenProvider);
   return ref.read(stampsRemoteProvider).ledgerPage();
 });
 

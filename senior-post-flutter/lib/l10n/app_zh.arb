@@ -348,6 +348,8 @@
   "sendLetterBodyRequired": "请填写信件正文。",
   "sendLetterRegisteredStampShort": "挂号信需要邮票，当前余额不足。",
   "sendLetterSentSuccess": "信件已寄出。",
+  "sendLetterSentSuccessTitle": "寄信成功",
+  "sendLetterSentSuccessMessage": "您的信件已寄出，对方将在邮政信箱中收到。",
   "sendLetterSheetTitle": "寄信给 {name}",
   "@sendLetterSheetTitle": {
     "placeholders": {

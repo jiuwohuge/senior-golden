@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/auth/auth_token.dart';
 import '../../core/models/domain_models.dart';
 import 'directory_remote.dart';
 
@@ -8,6 +9,7 @@ final directoryFilterProvider =
 
 /// 名录列表走 `/api/directory/users/paging`（排序与筛选由服务端计算）。
 final directoryUsersProvider = FutureProvider<List<AppUser>>((ref) async {
+  ref.watch(authTokenProvider);
   final filter = ref.watch(directoryFilterProvider);
   return ref.read(directoryRemoteProvider).pageUsers(
         page: 1,

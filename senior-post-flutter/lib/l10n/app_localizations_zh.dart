@@ -851,6 +851,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sendLetterSentSuccess => '信件已寄出。';
 
   @override
+  String get sendLetterSentSuccessTitle => '寄信成功';
+
+  @override
+  String get sendLetterSentSuccessMessage => '您的信件已寄出，对方将在邮政信箱中收到。';
+
+  @override
   String sendLetterSheetTitle(Object name) {
     return '寄信给 $name';
   }

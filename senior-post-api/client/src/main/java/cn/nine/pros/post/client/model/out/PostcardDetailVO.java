@@ -42,4 +42,7 @@ public class PostcardDetailVO {
 
     @Schema(description = "当前用户是否为作者")
     private boolean owner;
+
+    @Schema(description = "当前登录用户是否可向作者寄信（本人帖子为 false）")
+    private Boolean canSendLetter;
 }

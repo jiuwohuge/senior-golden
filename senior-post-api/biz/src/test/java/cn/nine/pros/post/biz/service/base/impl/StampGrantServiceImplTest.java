@@ -85,10 +85,8 @@ class StampGrantServiceImplTest {
         u.setStampsBalance(0);
         when(userService.findById(1L)).thenReturn(u);
 
-        StampDailyGrantDomain prior = new StampDailyGrantDomain();
-        prior.setAmount(2);
         when(dailyGrantMapper.selectCount(any())).thenReturn(0L);
-        when(dailyGrantMapper.selectList(any())).thenReturn(java.util.List.of(prior));
+        when(dailyGrantMapper.sumPostcardAmountForDay(eq(1L), any())).thenReturn(2);
 
         svc.afterPostcardCreated(1L, 100L);
 
@@ -105,13 +103,14 @@ class StampGrantServiceImplTest {
         u.setStampsBalance(4);
         when(userService.findById(7L)).thenReturn(u);
         when(dailyGrantMapper.selectCount(any())).thenReturn(0L);
-        when(dailyGrantMapper.selectList(any())).thenReturn(java.util.List.of());
-        when(dailyGrantMapper.insert(ArgumentMatchers.<StampDailyGrantDomain>any())).thenReturn(1);
+        when(dailyGrantMapper.sumPostcardAmountForDay(eq(7L), any())).thenReturn(0);
+        when(dailyGrantMapper.insertPostcardGrantIgnoreConflict(ArgumentMatchers.<StampDailyGrantDomain>any()))
+                .thenReturn(1);
 
         svc.afterPostcardCreated(7L, 200L);
 
         ArgumentCaptor<StampDailyGrantDomain> cap = ArgumentCaptor.forClass(StampDailyGrantDomain.class);
-        verify(dailyGrantMapper, times(1)).insert(cap.capture());
+        verify(dailyGrantMapper, times(1)).insertPostcardGrantIgnoreConflict(cap.capture());
         assertEquals(StampDailyGrantDomain.KIND_POSTCARD, cap.getValue().getGrantKind());
         assertEquals(200L, cap.getValue().getRefId());
         verify(stampAccountService, times(1)).addBalance(eq(7L), eq(1), any(), eq(7L));

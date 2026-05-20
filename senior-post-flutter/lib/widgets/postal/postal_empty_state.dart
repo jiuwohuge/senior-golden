@@ -76,8 +76,11 @@ class PostalEmptyState extends StatelessWidget {
                   PostalButton(
                     label: actionLabel!,
                     onPressed: onAction,
-                    variant: PostalButtonVariant.secondary,
-                    expand: false,
+                    icon: switch (tone) {
+                      PostalEmptyTone.success => null,
+                      _ => Icons.refresh_rounded,
+                    },
+                    expand: true,
                     minHeight: 48,
                   ),
                 ],

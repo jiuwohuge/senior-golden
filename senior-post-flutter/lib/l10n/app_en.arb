@@ -361,6 +361,8 @@
   "sendLetterBodyRequired": "Please write the letter content.",
   "sendLetterRegisteredStampShort": "Not enough stamps for registered mail.",
   "sendLetterSentSuccess": "Letter sent.",
+  "sendLetterSentSuccessTitle": "Letter sent",
+  "sendLetterSentSuccessMessage": "Your letter is on its way. They will find it in their Post Box.",
   "sendLetterSheetTitle": "Send letter to {name}",
   "@sendLetterSheetTitle": {
     "placeholders": {

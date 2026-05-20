@@ -373,7 +373,6 @@ public class AppAuthService {
             return null;
         }
         boolean self = viewerUserId != null && Objects.equals(viewerUserId, dto.getId());
-        int auditStatus = UserAvatarAuditSupport.statusOf(dto);
         String storedRef = self
                 ? UserAvatarAuditSupport.ownerVisibleStoredRef(dto)
                 : UserAvatarAuditSupport.publicStoredRef(dto);
@@ -392,8 +391,8 @@ public class AppAuthService {
                 .stampsBalance(dto.getStampsBalance())
                 .isVip(dto.getIsVip())
                 .build();
-        if (self) {
-            vo.setAvatarAuditStatus(auditStatus);
+        if (self && UserAvatarAuditSupport.hasStoredAvatar(dto)) {
+            vo.setAvatarAuditStatus(UserAvatarAuditSupport.statusOf(dto));
         }
         LocalDateTime reqAt = dto.getDeletionRequestedAt();
         if (reqAt != null) {

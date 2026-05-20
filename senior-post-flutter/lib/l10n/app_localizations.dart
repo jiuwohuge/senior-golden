@@ -1712,6 +1712,18 @@ abstract class AppLocalizations {
   /// **'Letter sent.'**
   String get sendLetterSentSuccess;
 
+  /// No description provided for @sendLetterSentSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter sent'**
+  String get sendLetterSentSuccessTitle;
+
+  /// No description provided for @sendLetterSentSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your letter is on its way. They will find it in their Post Box.'**
+  String get sendLetterSentSuccessMessage;
+
   /// No description provided for @sendLetterSheetTitle.
   ///
   /// In en, this message translates to:

@@ -143,10 +143,18 @@ export default function AnnouncementList() {
             <Input.TextArea placeholder="一段一条，可用换行分段；禁止 HTML" rows={8} showCount maxLength={8000} />
           </Form.Item>
           <Space size="large" wrap>
-            <Form.Item name="minVersionCode" label="可见最小 versionCode（含）">
+            <Form.Item
+              name="minVersionCode"
+              label="可见最小 versionCode（含）"
+              extra="当前 App 默认 versionCode=2；留空表示不限制"
+            >
               <InputNumber min={0} placeholder="留空不限制" style={{ width: 200 }} />
             </Form.Item>
-            <Form.Item name="maxVersionCode" label="可见最大 versionCode（含）">
+            <Form.Item
+              name="maxVersionCode"
+              label="可见最大 versionCode（含）"
+              extra="若最小值大于最大值，保存将失败"
+            >
               <InputNumber min={0} placeholder="留空不限制" style={{ width: 200 }} />
             </Form.Item>
           </Space>

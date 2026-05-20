@@ -164,6 +164,8 @@ WallPost _voToWallPost(Map<String, dynamic> m) {
     }
   }
   final single = m['imageUrl'] as String?;
+  final isOwner = m['owner'] as bool? ?? false;
+  final canSendLetter = m['canSendLetter'] as bool? ?? !isOwner;
   return WallPost(
     id: id,
     author: _authorFromMap(authorMap),
@@ -174,6 +176,8 @@ WallPost _voToWallPost(Map<String, dynamic> m) {
     imageUrls: urls,
     reviewStatus: (m['reviewStatus'] as num?)?.toInt(),
     postStatus: (m['postStatus'] as num?)?.toInt(),
+    canSendLetter: canSendLetter,
+    isOwner: isOwner,
   );
 }
 

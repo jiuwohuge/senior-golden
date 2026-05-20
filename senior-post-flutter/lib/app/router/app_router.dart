@@ -52,8 +52,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (!loggedIn && !authPaths.contains(loc)) {
         return LoginRoutes.login;
       }
+      // 登录/注册页允许在本地仍有旧 Token 时停留，避免未重新登录就进主页命中 8502 缓存。
       if (loggedIn &&
           authPaths.contains(loc) &&
+          loc != LoginRoutes.login &&
+          loc != LoginRoutes.register &&
+          loc != LoginRoutes.forgotPassword &&
           loc != LoginRoutes.legalTerms &&
           loc != LoginRoutes.legalPrivacy) {
         return MainShellRoute.pathPostWall;

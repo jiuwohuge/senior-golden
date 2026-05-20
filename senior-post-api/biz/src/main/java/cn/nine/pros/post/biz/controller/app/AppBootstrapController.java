@@ -1,5 +1,6 @@
 package cn.nine.pros.post.biz.controller.app;
 
+import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.pros.post.biz.service.app.AppBootstrapService;
 import cn.nine.pros.post.biz.service.app.AppReleaseNoteService;
 import cn.nine.pros.post.client.api.app.AppBootstrapApi;
@@ -22,7 +23,22 @@ public class AppBootstrapController implements AppBootstrapApi {
     }
 
     @Override
-    public AppReleaseNoteVO releaseNote(@RequestParam("versionCode") int versionCode) {
-        return appReleaseNoteService.findForApp(versionCode);
+    public AppReleaseNoteVO releaseNote(
+            @RequestParam(value = "versionCode", required = false) Integer versionCode) {
+        return appReleaseNoteService.findForApp(resolveClientVersionCode(versionCode));
+    }
+
+    /**
+     * 优先使用请求头 versionCode（与 Dio 一致），避免 query 与 header 不一致导致公告筛不到。
+     */
+    private static int resolveClientVersionCode(Integer queryVersionCode) {
+        Long header = MyRequestContextHolder.version();
+        if (header != null && header > 0) {
+            return header.intValue();
+        }
+        if (queryVersionCode != null && queryVersionCode >= 0) {
+            return queryVersionCode;
+        }
+        return 0;
     }
 }

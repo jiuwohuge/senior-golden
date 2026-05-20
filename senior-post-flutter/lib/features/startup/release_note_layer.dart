@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../app/router/app_navigator_key.dart';
+import '../../core/auth/auth_token.dart';
+import '../../core/network/api_version.dart';
 import '../../core/network/dio_provider.dart';
-
 class AppReleaseNote {
   const AppReleaseNote({
     required this.id,
@@ -30,8 +32,7 @@ class AppReleaseNote {
 
 final releaseNoteFetchProvider = FutureProvider<AppReleaseNote?>((ref) async {
   final dio = ref.watch(dioProvider);
-  final vcStr = const String.fromEnvironment('API_VERSION_CODE', defaultValue: '1');
-  final vc = int.tryParse(vcStr) ?? 1;
+  final vc = apiVersionCodeInt();
   try {
     final res = await dio.get<Map<String, dynamic>>(
       '/api/bootstrap/release-note',
@@ -49,7 +50,8 @@ final releaseNoteFetchProvider = FutureProvider<AppReleaseNote?>((ref) async {
       return null;
     }
     return AppReleaseNote.fromJson(inner);
-  } on DioException {
+  } on DioException catch (e, st) {
+    debugPrint('[ReleaseNote] fetch failed: $e\n$st');
     return null;
   }
 });
@@ -63,22 +65,38 @@ class ReleaseNoteLayer extends ConsumerStatefulWidget {
 }
 
 class _ReleaseNoteLayerState extends ConsumerState<ReleaseNoteLayer> {
-  bool _presented = false;
+  int? _shownForId;
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(authTokenProvider, (prev, next) {
+      if (next != null && next.isNotEmpty && next != prev) {
+        ref.invalidate(releaseNoteFetchProvider);
+      }
+    });
+
     ref.listen<AsyncValue<AppReleaseNote?>>(releaseNoteFetchProvider, (prev, next) {
       next.whenData((note) {
-        if (note != null && !_presented && mounted) {
-          _maybeShow(note);
+        if (note == null || !mounted) {
+          return;
         }
+        if (_shownForId == note.id) {
+          return;
+        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _maybeShow(note);
+          }
+        });
       });
     });
+
+    ref.watch(releaseNoteFetchProvider);
     return const SizedBox.shrink();
   }
 
   Future<void> _maybeShow(AppReleaseNote note) async {
-    if (_presented || !mounted) {
+    if (_shownForId == note.id || !mounted) {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
@@ -86,13 +104,17 @@ class _ReleaseNoteLayerState extends ConsumerState<ReleaseNoteLayer> {
     if (prefs.getBool(key) == true) {
       return;
     }
-    _presented = true;
-    if (!mounted) {
+
+    final navContext = appRootNavigatorKey.currentContext;
+    if (navContext == null || !navContext.mounted) {
       return;
     }
+
+    _shownForId = note.id;
     await showDialog<void>(
-      context: context,
+      context: navContext,
       barrierDismissible: true,
+      useRootNavigator: true,
       builder: (ctx) {
         return AlertDialog(
           title: Text(note.title.isEmpty ? 'Update' : note.title),
@@ -117,7 +139,7 @@ class _ReleaseNoteLayerState extends ConsumerState<ReleaseNoteLayer> {
             ),
           ),
           actions: [
-            TextButton(
+            FilledButton(
               onPressed: () async {
                 await prefs.setBool(key, true);
                 if (ctx.mounted) {

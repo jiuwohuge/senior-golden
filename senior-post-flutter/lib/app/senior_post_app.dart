@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
+import '../core/auth/auth_data_refresh.dart';
 import '../core/auth/auth_token.dart';
 import '../core/i18n/app_locale_provider.dart';
 import '../core/i18n/locale_resolution.dart';
@@ -20,11 +21,15 @@ class SeniorPostApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<String?>(authTokenProvider, (previous, next) {
       ref.read(routerRefreshProvider).value++;
+      if (previous != next) {
+        ref.read(invalidateAuthDataProvider)();
+      }
       if (next != null && next.isNotEmpty) {
         Future.microtask(() async {
           try {
             await ref.read(authRepositoryProvider).refreshSessionFromServer();
           } catch (_) {}
+          ref.invalidate(releaseNoteFetchProvider);
         });
       }
     });

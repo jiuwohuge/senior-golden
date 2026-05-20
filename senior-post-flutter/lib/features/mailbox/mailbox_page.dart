@@ -31,10 +31,39 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_onTabSelected);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       unawaited(_primeImForUnread());
     });
+  }
+
+  void _onTabSelected() {
+    if (_tabController.indexIsChanging) {
+      return;
+    }
+    _reloadTab(_tabController.index);
+  }
+
+  void _reloadTab(int index) {
+    switch (index) {
+      case 0:
+        ref.invalidate(postalInboxLettersProvider);
+      case 1:
+        ref.invalidate(mailboxFriendsProvider);
+    }
+  }
+
+  Future<void> _refreshPostalInbox() async {
+    ref.invalidate(postalInboxLettersProvider);
+    ref.invalidate(mailboxArchiveProvider);
+    ref.invalidate(mailboxLettersProvider);
+    await ref.read(postalInboxLettersProvider.future);
+  }
+
+  Future<void> _refreshConnections() async {
+    ref.invalidate(mailboxFriendsProvider);
+    await ref.read(mailboxFriendsProvider.future);
   }
 
   Future<void> _primeImForUnread() async {
@@ -47,6 +76,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabSelected);
     WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     super.dispose();
@@ -57,10 +87,9 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
     if (state == AppLifecycleState.resumed) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ref.invalidate(postalInboxLettersProvider);
+        _reloadTab(_tabController.index);
         ref.invalidate(mailboxArchiveProvider);
         ref.invalidate(mailboxLettersProvider);
-        ref.invalidate(mailboxFriendsProvider);
         ref.read(authRepositoryProvider).refreshSessionFromServer();
         ref.read(seniorPostTimFacadeProvider).refreshC2cUnreadIfLoggedIn();
       });
@@ -71,7 +100,6 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final session = ref.watch(appSessionProvider);
-    final lettersAsync = ref.watch(postalInboxLettersProvider);
     return SafeArea(
       top: false,
       child: Column(
@@ -111,28 +139,8 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
             child: TabBarView(
               controller: _tabController,
               children: [
-                lettersAsync.when(
-                  loading: () =>
-                      const PostalSkeletonList(itemCount: 5, itemHeight: 120),
-                  error: (e, _) => PostalEmptyState(
-                    title: 'Unable to load mailbox',
-                    subtitle: '$e',
-                    tone: PostalEmptyTone.error,
-                    actionLabel: 'Retry',
-                    onAction: () => ref.invalidate(postalInboxLettersProvider),
-                  ),
-                  data: (letters) => _PostalInboxBody(
-                    letters: letters,
-                    onSyncMailbox: () async {
-                      ref.invalidate(postalInboxLettersProvider);
-                      ref.invalidate(mailboxArchiveProvider);
-                      ref.invalidate(mailboxLettersProvider);
-                      ref.invalidate(mailboxFriendsProvider);
-                      await ref.read(postalInboxLettersProvider.future);
-                    },
-                  ),
-                ),
-                const _ConnectionsTab(),
+                _PostalInboxTab(onRefresh: _refreshPostalInbox),
+                _ConnectionsTab(onRefresh: _refreshConnections),
               ],
             ),
           ),
@@ -142,11 +150,70 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
   }
 }
 
+/// 可下拉刷新的滚动容器（空态 / 错误态占满 Tab 高度）。
+class _MailboxRefreshBody extends StatelessWidget {
+  const _MailboxRefreshBody({
+    required this.onRefresh,
+    required this.child,
+  });
+
+  final Future<void> Function() onRefresh;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: child,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _PostalInboxTab extends ConsumerWidget {
+  const _PostalInboxTab({required this.onRefresh});
+
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lettersAsync = ref.watch(postalInboxLettersProvider);
+    return lettersAsync.when(
+      loading: () => const PostalSkeletonList(itemCount: 5, itemHeight: 120),
+      error: (e, _) => _MailboxRefreshBody(
+        onRefresh: onRefresh,
+        child: PostalEmptyState(
+          title: 'Unable to load mailbox',
+          subtitle: '$e',
+          tone: PostalEmptyTone.error,
+        ),
+      ),
+      data: (letters) => _PostalInboxBody(
+        letters: letters,
+        onRefresh: onRefresh,
+      ),
+    );
+  }
+}
+
 class _PostalInboxBody extends ConsumerWidget {
-  const _PostalInboxBody({required this.letters, required this.onSyncMailbox});
+  const _PostalInboxBody({
+    required this.letters,
+    required this.onRefresh,
+  });
 
   final List<MailboxLetter> letters;
-  final Future<void> Function() onSyncMailbox;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -176,21 +243,25 @@ class _PostalInboxBody extends ConsumerWidget {
           ),
         Expanded(
           child: RefreshIndicator(
-            onRefresh: onSyncMailbox,
+            onRefresh: onRefresh,
             child: letters.isEmpty
-                ? ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    children: const [
-                      SizedBox(
-                        height: 280,
-                        child: PostalEmptyState(
-                          title: 'Postal inbox is clear',
-                          subtitle:
-                              'No letters need attention here. Items you sent or received stay here until the recipient has read them (including registered mail).',
+                ? LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: const PostalEmptyState(
+                            title: 'Postal inbox is clear',
+                            subtitle:
+                                'No letters need attention here. Items you sent or received stay here until the recipient has read them (including registered mail).',
+                          ),
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   )
                 : ListView.separated(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -207,7 +278,9 @@ class _PostalInboxBody extends ConsumerWidget {
 }
 
 class _ConnectionsTab extends ConsumerWidget {
-  const _ConnectionsTab();
+  const _ConnectionsTab({required this.onRefresh});
+
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -215,56 +288,63 @@ class _ConnectionsTab extends ConsumerWidget {
     final unreadMap = ref.watch(imC2cUnreadProvider);
     return async.when(
       loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 72),
-      error: (e, _) => PostalEmptyState(
-        title: 'Unable to load friends',
-        subtitle: '$e',
-        tone: PostalEmptyTone.error,
-        actionLabel: 'Retry',
-        onAction: () => ref.invalidate(mailboxFriendsProvider),
+      error: (e, _) => _MailboxRefreshBody(
+        onRefresh: onRefresh,
+        child: PostalEmptyState(
+          title: 'Unable to load friends',
+          subtitle: '$e',
+          tone: PostalEmptyTone.error,
+        ),
       ),
       data: (rows) {
         if (rows.isEmpty) {
-          return PostalEmptyState(
-            title: 'No postal friends yet',
-            subtitle:
-                'Accept a delivered letter to add someone here. This list is your friend list (not recent chats).',
-            actionLabel: 'Refresh',
-            onAction: () => ref.invalidate(mailboxFriendsProvider),
+          return _MailboxRefreshBody(
+            onRefresh: onRefresh,
+            child: const PostalEmptyState(
+              title: 'No postal friends yet',
+              subtitle:
+                  'Accept a delivered letter to add someone here. This list is your friend list (not recent chats).',
+            ),
           );
         }
-        return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-          itemCount: rows.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (_, i) {
-            final r = rows[i];
-            final id = r.peer.id.trim();
-            final unread = (id.isEmpty || id == '0') ? 0 : (unreadMap[id] ?? 0);
-            return _ImStyleRow(
-              title: r.peer.nickname,
-              subtitle: r.lastMessage,
-              time: r.lastTime,
-              avatarUrl: r.peer.avatarUrl,
-              unreadCount: unread,
-              onTap: () {
-                if (id.isEmpty || id == '0') {
-                  PostalSnack.show(
-                    context,
-                    'Cannot open chat: invalid friend id from server.',
-                    tone: PostalSnackTone.error,
+        return RefreshIndicator(
+          onRefresh: onRefresh,
+          child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+            itemCount: rows.length,
+            separatorBuilder: (_, _) => const Divider(height: 1),
+            itemBuilder: (_, i) {
+              final r = rows[i];
+              final id = r.peer.id.trim();
+              final unread =
+                  (id.isEmpty || id == '0') ? 0 : (unreadMap[id] ?? 0);
+              return _ImStyleRow(
+                title: r.peer.nickname,
+                subtitle: r.lastMessage,
+                time: r.lastTime,
+                avatarUrl: r.peer.avatarUrl,
+                unreadCount: unread,
+                onTap: () {
+                  if (id.isEmpty || id == '0') {
+                    PostalSnack.show(
+                      context,
+                      'Cannot open chat: invalid friend id from server.',
+                      tone: PostalSnackTone.error,
+                    );
+                    return;
+                  }
+                  context.push(
+                    '/chat/$id',
+                    extra: <String, dynamic>{
+                      'name': r.peer.nickname,
+                      'avatarUrl': r.peer.avatarUrl,
+                    },
                   );
-                  return;
-                }
-                context.push(
-                  '/chat/$id',
-                  extra: <String, dynamic>{
-                    'name': r.peer.nickname,
-                    'avatarUrl': r.peer.avatarUrl,
-                  },
-                );
-              },
-            );
-          },
+                },
+              );
+            },
+          ),
         );
       },
     );

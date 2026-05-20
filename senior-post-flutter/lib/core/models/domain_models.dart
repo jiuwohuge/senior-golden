@@ -33,10 +33,12 @@ class AppUser {
   final int? avatarAuditStatus;
   final bool isVip;
 
-  bool get isAvatarAuditPending => avatarAuditStatus == 0;
-  bool get isAvatarAuditRejected => avatarAuditStatus == 2;
+  bool get hasAvatar => avatarUrl != null && avatarUrl!.trim().isNotEmpty;
+
+  bool get isAvatarAuditPending => hasAvatar && avatarAuditStatus == 0;
+  bool get isAvatarAuditRejected => hasAvatar && avatarAuditStatus == 2;
   bool get isAvatarAuditApproved =>
-      avatarAuditStatus == null || avatarAuditStatus == 1;
+      !hasAvatar || avatarAuditStatus == null || avatarAuditStatus == 1;
   final DateTime? deletionRequestedAt;
   final DateTime? deletionEffectiveAt;
 
@@ -135,6 +137,8 @@ class WallPost {
     this.imageUrls,
     this.reviewStatus,
     this.postStatus,
+    this.canSendLetter = true,
+    this.isOwner = false,
   });
 
   final String id;
@@ -148,6 +152,12 @@ class WallPost {
 
   /// 1 公开 2 隐藏 3 违规删除（「我的明信片」接口返回）
   final int? postStatus;
+
+  /// 是否可向作者寄信（本人帖子为 false，与后端 `canSendLetter` 对齐）
+  final bool canSendLetter;
+
+  /// 当前用户是否为作者（详情接口 `owner`）
+  final bool isOwner;
 
   List<String> get resolvedImageUrls {
     if (imageUrls != null && imageUrls!.isNotEmpty) {

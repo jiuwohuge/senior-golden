@@ -42,4 +42,7 @@ public class PostcardWallItemVO {
 
     @Schema(description = "内容状态：1公开 2隐藏 3违规删除（「我的明信片」流水返回；墙列表可为空）")
     private Integer postStatus;
+
+    @Schema(description = "当前登录用户是否可向作者寄信（本人帖子为 false）")
+    private Boolean canSendLetter;
 }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
+import '../../core/auth/auth_data_refresh.dart';
 import '../../core/auth/auth_storage.dart';
 import '../../core/auth/auth_token.dart';
 import '../../core/device/device_ids.dart';
@@ -47,6 +48,7 @@ class AuthRepository {
       if (userMap != null) {
         _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
       }
+      _ref.read(invalidateAuthDataProvider)();
     } on DioException catch (e) {
       _throwMappedDio(e);
     }
@@ -97,6 +99,7 @@ class AuthRepository {
       if (userMap != null) {
         _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
       }
+      _ref.read(invalidateAuthDataProvider)();
     } on DioException catch (e) {
       _throwMappedDio(e);
     }

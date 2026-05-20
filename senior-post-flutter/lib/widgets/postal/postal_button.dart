@@ -93,18 +93,45 @@ class PostalButton extends StatelessWidget {
   }
 
   Widget _primary(Widget child) {
-    return FilledButton(
-      onPressed: _disabled ? null : onPressed,
-      style: FilledButton.styleFrom(
-        backgroundColor: PostalTokens.postboxGreen,
-        disabledBackgroundColor:
-            PostalTokens.postboxGreen.withValues(alpha: 0.4),
-        shape: const RoundedRectangleBorder(
-          borderRadius: PostalTokens.shapeMd,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: PostalTokens.shapeMd,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: _disabled
+              ? [
+                  PostalTokens.postboxGreen.withValues(alpha: 0.45),
+                  PostalTokens.postboxGreenMuted.withValues(alpha: 0.45),
+                ]
+              : const [
+                  PostalTokens.postboxGreen,
+                  PostalTokens.postboxGreenMuted,
+                ],
         ),
-        padding: EdgeInsets.zero,
+        boxShadow: _disabled
+            ? null
+            : [
+                BoxShadow(
+                  color: PostalTokens.postboxGreen.withValues(alpha: 0.28),
+                  blurRadius: 12,
+                  offset: const Offset(0, 5),
+                ),
+              ],
       ),
-      child: child,
+      child: FilledButton(
+        onPressed: _disabled ? null : onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
+          shape: const RoundedRectangleBorder(
+            borderRadius: PostalTokens.shapeMd,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+        ),
+        child: child,
+      ),
     );
   }
 

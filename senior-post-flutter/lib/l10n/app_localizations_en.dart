@@ -896,6 +896,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendLetterSentSuccess => 'Letter sent.';
 
   @override
+  String get sendLetterSentSuccessTitle => 'Letter sent';
+
+  @override
+  String get sendLetterSentSuccessMessage =>
+      'Your letter is on its way. They will find it in their Post Box.';
+
+  @override
   String sendLetterSheetTitle(Object name) {
     return 'Send letter to $name';
   }

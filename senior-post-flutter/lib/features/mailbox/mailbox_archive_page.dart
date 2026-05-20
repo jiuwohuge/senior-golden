@@ -22,7 +22,7 @@ class MailboxArchivePage extends ConsumerWidget {
           title: 'Unable to load archive',
           subtitle: '$e',
           tone: PostalEmptyTone.error,
-          actionLabel: 'Retry',
+          actionLabel: l10n.commonRetry,
           onAction: () => ref.invalidate(mailboxArchiveProvider),
         ),
         data: (letters) {

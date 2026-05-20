@@ -699,7 +699,7 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
         title: 'Chat unavailable',
         subtitle: _loadError!,
         tone: PostalEmptyTone.error,
-        actionLabel: 'Retry',
+        actionLabel: AppLocalizations.of(context)!.commonRetry,
         onAction: _load,
       );
     }

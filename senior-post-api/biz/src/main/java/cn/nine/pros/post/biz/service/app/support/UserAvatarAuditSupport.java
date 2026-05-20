@@ -30,8 +30,11 @@ public final class UserAvatarAuditSupport {
     }
 
     private static int normalizeStatus(Integer raw, boolean hasAvatar) {
+        if (!hasAvatar) {
+            return APPROVED;
+        }
         if (raw == null) {
-            return hasAvatar ? APPROVED : PENDING;
+            return APPROVED;
         }
         return raw;
     }

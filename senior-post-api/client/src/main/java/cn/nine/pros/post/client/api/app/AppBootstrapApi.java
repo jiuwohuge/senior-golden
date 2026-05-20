@@ -19,5 +19,6 @@ public interface AppBootstrapApi {
 
     @Operation(summary = "当前生效的版本公告（非强更；按 versionCode 与时间窗筛选）")
     @GetMapping("/release-note")
-    AppReleaseNoteVO releaseNote(@RequestParam("versionCode") int versionCode);
+    AppReleaseNoteVO releaseNote(
+            @RequestParam(value = "versionCode", required = false) Integer versionCode);
 }

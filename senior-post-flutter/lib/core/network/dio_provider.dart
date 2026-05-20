@@ -10,19 +10,17 @@ import '../../app/router/shop_routes.dart';
 import '../../widgets/postal/postal_snack.dart';
 import '../api/api_exception.dart';
 import '../api/biz_error_codes.dart';
+import '../auth/auth_data_refresh.dart';
 import '../auth/auth_storage.dart';
 import '../auth/auth_token.dart';
+import 'api_path_auth.dart';
 import '../config/api_base_url_provider.dart';
 import '../device/device_ids.dart';
 import '../i18n/effective_app_locale_provider.dart';
 import '../i18n/locale_resolution.dart';
 import 'jh_api_crypto.dart';
+import 'api_version.dart';
 import 'router_refresh.dart';
-
-const String _kApiVersionCode = String.fromEnvironment(
-  'API_VERSION_CODE',
-  defaultValue: '2',
-);
 
 /// 是否打印 Dio 请求/响应（默认：debug 模式开启；Release 可加 `--dart-define=API_LOG=true`）。
 const bool _kApiVerboseLog = bool.fromEnvironment(
@@ -31,11 +29,13 @@ const bool _kApiVerboseLog = bool.fromEnvironment(
 );
 
 /// 业务 HTTP 客户端。真机勿依赖默认 127.0.0.1，见 [apiBaseUrlProvider]。
+///
+/// Base URL 变更时只更新 [Dio.options.baseUrl]，不重建实例，避免 Debug 改地址时
+/// 整棵 Provider 树在弹窗关闭帧内重建触发 `'_dependents.isEmpty'` 断言。
 final dioProvider = Provider<Dio>((ref) {
-  final baseUrl = ref.watch(apiBaseUrlProvider);
   final dio = Dio(
     BaseOptions(
-      baseUrl: baseUrl,
+      baseUrl: ref.read(apiBaseUrlProvider),
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       headers: {
@@ -48,19 +48,21 @@ final dioProvider = Provider<Dio>((ref) {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
+        final path = options.uri.path;
         final token = ref.read(authTokenProvider);
-        if (token != null && token.isNotEmpty) {
+        if (token != null &&
+            token.isNotEmpty &&
+            !isPublicApiPath(path)) {
           options.headers['Token'] = token;
         }
         final locale = ref.read(effectiveAppLocaleProvider);
         options.headers['Accept-Language'] = acceptLanguageHeader(locale);
-        options.headers['versionCode'] = _kApiVersionCode;
+        options.headers['versionCode'] = kApiVersionCode;
         options.headers['deviceId'] = platformDeviceHeader();
         final equip = ref.read(deviceInstallIdStateProvider);
         if (equip.isNotEmpty) {
           options.headers['equipmentId'] = equip;
         }
-        final path = options.uri.path;
         final plainBeforeEncrypt = _requestPayloadToDebugString(options.data);
         final wrapped = JhApiCrypto.wrapJsonBodyIfNeeded(path, options.data);
         if (wrapped != null) {
@@ -161,12 +163,19 @@ final dioProvider = Provider<Dio>((ref) {
     );
   }
 
+  ref.listen<String>(apiBaseUrlProvider, (previous, next) {
+    if (previous != next) {
+      dio.options.baseUrl = next;
+    }
+  });
+
   return dio;
 });
 
 void _clearAuth(Ref ref) {
   ref.read(authTokenProvider.notifier).state = null;
   AuthStorage.clearToken();
+  ref.read(invalidateAuthDataProvider)();
   ref.read(routerRefreshProvider).value++;
 }
 

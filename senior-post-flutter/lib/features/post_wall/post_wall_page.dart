@@ -6,6 +6,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/models/domain_models.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../directory/send_letter_sheet.dart';
 import 'post_providers.dart';
@@ -82,7 +83,10 @@ class _PostWallPageState extends ConsumerState<PostWallPage> {
                         padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
                         itemCount: posts.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 12),
-                        itemBuilder: (_, i) => _PostCard(post: posts[i]),
+                        itemBuilder: (_, i) => _PostCard(
+                          post: posts[i],
+                          meId: ref.watch(appSessionProvider).user.id,
+                        ),
                       ),
                     );
                   },
@@ -161,8 +165,15 @@ class _PostWallComposeFab extends StatelessWidget {
 }
 
 class _PostCard extends StatelessWidget {
-  const _PostCard({required this.post});
+  const _PostCard({required this.post, required this.meId});
   final WallPost post;
+  final String meId;
+
+  bool get _showSendLetter {
+    if (!post.canSendLetter) return false;
+    if (meId.isEmpty) return true;
+    return meId != post.author.id;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -214,21 +225,22 @@ class _PostCard extends StatelessWidget {
             icon: const Icon(Icons.mode_comment_outlined),
             color: PostalTokens.postboxGreen,
           ),
-          IconButton(
-            tooltip: l10n.postWallSendLetterTooltip,
-            onPressed: () {
-              showPostalSendLetterSheet(
-                context,
-                peerId: post.author.id,
-                peerNickname: post.author.nickname,
-                countryLabel: post.author.countryName.isNotEmpty
-                    ? post.author.countryName
-                    : post.author.countryCode,
-              );
-            },
-            icon: const Icon(Icons.mail_outline),
-            color: PostalTokens.stampVermilion,
-          ),
+          if (_showSendLetter)
+            IconButton(
+              tooltip: l10n.postWallSendLetterTooltip,
+              onPressed: () {
+                showPostalSendLetterSheet(
+                  context,
+                  peerId: post.author.id,
+                  peerNickname: post.author.nickname,
+                  countryLabel: post.author.countryName.isNotEmpty
+                      ? post.author.countryName
+                      : post.author.countryCode,
+                );
+              },
+              icon: const Icon(Icons.mail_outline),
+              color: PostalTokens.stampVermilion,
+            ),
         ],
       ),
       child: Column(

@@ -13,7 +13,33 @@ import '../mailbox/mailbox_remote.dart';
 
 /// 统一发信底部弹层：透明幕布 + 圆角信纸容器；内容见 [SendLetterSheet]。
 ///
-/// SnackBar 由 sheet 内嵌套的 [ScaffoldMessenger] 承载，提示浮在弹层之上，不遮挡主页面操作。
+/// 寄信成功：模态对话框，须用户点击确认后才关闭（避免 SnackBar 随 sheet 关闭一闪而过）。
+Future<void> showPostalSendLetterSuccessDialog(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    useRootNavigator: true,
+    builder: (dlgCtx) {
+      return AlertDialog(
+        icon: Icon(
+          Icons.mark_email_read_outlined,
+          color: PostalTokens.success,
+          size: 48,
+        ),
+        title: Text(l10n.sendLetterSentSuccessTitle),
+        content: Text(l10n.sendLetterSentSuccessMessage),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(dlgCtx).pop(),
+            child: Text(l10n.dialogConfirm),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 Future<void> showPostalSendLetterSheet(
   BuildContext context, {
   required String peerId,
@@ -97,11 +123,9 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
       ref.invalidate(mailboxLettersProvider);
       ref.invalidate(postalInboxLettersProvider);
       ref.invalidate(mailboxArchiveProvider);
-      PostalSnack.show(
-        sheetContext,
-        l10n.sendLetterSentSuccess,
-        tone: PostalSnackTone.success,
-      );
+      if (!sheetContext.mounted) return;
+      await showPostalSendLetterSuccessDialog(sheetContext);
+      if (!sheetContext.mounted) return;
       Navigator.of(sheetContext).pop();
     } on ApiBusinessException catch (e) {
       if (sheetContext.mounted) {

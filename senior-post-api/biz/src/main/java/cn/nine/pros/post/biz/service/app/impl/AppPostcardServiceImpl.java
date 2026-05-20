@@ -72,7 +72,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         List<PostcardWallItemVO> records = new ArrayList<>();
         for (PostcardDomain row : p.getRecords()) {
             int cc = countVisibleComments(row.getId());
-            records.add(toWallItem(row, authorMap.get(row.getUserId()), cc, false));
+            records.add(toWallItem(row, authorMap.get(row.getUserId()), cc, false, userId));
         }
         ossDisplayUrlService.applyPostcardWall(userId, records);
         return AppPageHelper.pageData(pq, p, records);
@@ -90,7 +90,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         List<PostcardWallItemVO> records = new ArrayList<>();
         for (PostcardDomain row : p.getRecords()) {
             int cc = countVisibleComments(row.getId());
-            records.add(toWallItem(row, authorMap.get(row.getUserId()), cc, true));
+            records.add(toWallItem(row, authorMap.get(row.getUserId()), cc, true, userId));
         }
         ossDisplayUrlService.applyPostcardWall(userId, records);
         return AppPageHelper.pageData(pq, p, records);
@@ -276,9 +276,11 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         return map;
     }
 
-    private static PostcardWallItemVO toWallItem(PostcardDomain row, UserDTO author, int commentCount, boolean includeAuditFields) {
+    private static PostcardWallItemVO toWallItem(
+            PostcardDomain row, UserDTO author, int commentCount, boolean includeAuditFields, long viewerUserId) {
         List<String> imgs = normalizeImageUrls(row);
         String first = imgs.isEmpty() ? null : imgs.get(0);
+        boolean canSendLetter = row.getUserId() != null && !Objects.equals(viewerUserId, row.getUserId());
         PostcardWallItemVO.PostcardWallItemVOBuilder b = PostcardWallItemVO.builder()
                 .id(row.getId())
                 .content(row.getContent())
@@ -286,7 +288,8 @@ public class AppPostcardServiceImpl implements AppPostcardService {
                 .imageUrls(imgs.isEmpty() ? null : imgs)
                 .publishedAt(toLocalDateTime(row.getPublishedAt()))
                 .commentCount(commentCount)
-                .author(toAuthor(author));
+                .author(toAuthor(author))
+                .canSendLetter(canSendLetter);
         if (includeAuditFields) {
             b.reviewStatus(intVal(row.getReviewStatus()))
                     .postStatus(intVal(row.getStatus()));
@@ -297,6 +300,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     private PostcardDetailVO toDetail(PostcardDomain row, UserDTO author, int commentCount, long viewerUserId) {
         List<String> imgs = normalizeImageUrls(row);
         String first = imgs.isEmpty() ? null : imgs.get(0);
+        boolean owner = Objects.equals(viewerUserId, row.getUserId());
         return PostcardDetailVO.builder()
                 .id(row.getId())
                 .content(row.getContent())
@@ -306,7 +310,8 @@ public class AppPostcardServiceImpl implements AppPostcardService {
                 .commentCount(commentCount)
                 .author(toAuthor(author))
                 .reviewStatus(intVal(row.getReviewStatus()))
-                .owner(Objects.equals(viewerUserId, row.getUserId()))
+                .owner(owner)
+                .canSendLetter(!owner)
                 .build();
     }
 

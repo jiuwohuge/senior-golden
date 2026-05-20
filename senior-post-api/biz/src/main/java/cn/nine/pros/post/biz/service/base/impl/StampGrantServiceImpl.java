@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -104,18 +103,7 @@ public class StampGrantServiceImpl implements StampGrantService {
     }
 
     private int sumPostcardRewardsForDay(long userId, LocalDate day) {
-        List<StampDailyGrantDomain> rows = stampDailyGrantMapper.selectList(
-                new LambdaQueryWrapper<StampDailyGrantDomain>()
-                        .eq(StampDailyGrantDomain::getUserId, userId)
-                        .eq(StampDailyGrantDomain::getGrantDay, day)
-                        .eq(StampDailyGrantDomain::getGrantKind, StampDailyGrantDomain.KIND_POSTCARD));
-        int sum = 0;
-        for (StampDailyGrantDomain r : rows) {
-            if (r.getAmount() != null) {
-                sum += r.getAmount();
-            }
-        }
-        return sum;
+        return stampDailyGrantMapper.sumPostcardAmountForDay(userId, day);
     }
 
     private void credit(long userId, int delta, String reason, Long refId) {
