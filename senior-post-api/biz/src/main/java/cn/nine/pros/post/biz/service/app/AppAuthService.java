@@ -164,6 +164,13 @@ public class AppAuthService {
         return finishAuth(dto.getId(), complete);
     }
 
+    public void validateRegisterEmail(String rawEmail) {
+        String email = rawEmail.trim().toLowerCase();
+        if (userIdentityService.findActiveEmailByUid(email) != null) {
+            throw new BadRequestException(appMessages.get("app.error.register.emailTaken"));
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO loginWithGoogle(AppGoogleLoginInDto body) {
         VerifiedGoogleIdentity google = googleIdTokenVerifierService.verify(body.getIdToken());

@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -68,19 +70,46 @@ public class UserTagServiceImpl extends ServiceImpl<UserTagMapper, UserTagDomain
                 }
             }
         }
-        UserTagDomain soft = new UserTagDomain();
-        soft.setDelFlag(true);
-        soft.setUpdatedAt(LocalDateTime.now());
-        soft.setUpdatedBy(actorUserId);
-        update(soft, new LambdaQueryWrapper<UserTagDomain>()
-                .eq(UserTagDomain::getUserId, userId)
-                .eq(UserTagDomain::isDelFlag, false));
+
+        List<UserTagDomain> existingRows = list(new LambdaQueryWrapper<UserTagDomain>()
+                .eq(UserTagDomain::getUserId, userId));
+        Map<Integer, UserTagDomain> byTagId = new HashMap<>();
+        for (UserTagDomain row : existingRows) {
+            if (row.getTagId() != null && !byTagId.containsKey(row.getTagId())) {
+                byTagId.put(row.getTagId(), row);
+            }
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        for (UserTagDomain row : existingRows) {
+            Integer tagId = row.getTagId();
+            if (tagId == null || !Boolean.FALSE.equals(row.isDelFlag())) {
+                continue;
+            }
+            if (!unique.contains(tagId)) {
+                row.setDelFlag(true);
+                row.setUpdatedAt(now);
+                row.setUpdatedBy(actorUserId);
+                updateById(row);
+            }
+        }
+
         for (Integer tagId : unique) {
-            UserTagDomain row = new UserTagDomain();
-            row.setUserId(userId);
-            row.setTagId(tagId);
-            row.initAudit(actorUserId);
-            save(row);
+            UserTagDomain existing = byTagId.get(tagId);
+            if (existing != null) {
+                if (Boolean.TRUE.equals(existing.isDelFlag())) {
+                    existing.setDelFlag(false);
+                    existing.setUpdatedAt(now);
+                    existing.setUpdatedBy(actorUserId);
+                    updateById(existing);
+                }
+                continue;
+            }
+            UserTagDomain insertRow = new UserTagDomain();
+            insertRow.setUserId(userId);
+            insertRow.setTagId(tagId);
+            insertRow.initAudit(actorUserId);
+            save(insertRow);
         }
     }
 

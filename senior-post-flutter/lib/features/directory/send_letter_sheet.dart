@@ -77,7 +77,7 @@ class SendLetterSheet extends ConsumerStatefulWidget {
 }
 
 class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
-  LetterType _type = LetterType.registered;
+  LetterType _type = LetterType.standard;
   bool _busy = false;
   final _body = TextEditingController();
 
@@ -113,7 +113,9 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
     }
     setState(() => _busy = true);
     try {
-      await ref.read(mailboxRemoteRepositoryProvider).sendLetter(
+      await ref
+          .read(mailboxRemoteRepositoryProvider)
+          .sendLetter(
             toUserId: widget.peerId,
             content: _body.text.trim(),
             type: _type,
@@ -173,8 +175,9 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                             width: 40,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: PostalTokens.inkTertiary
-                                  .withValues(alpha: 0.38),
+                              color: PostalTokens.inkTertiary.withValues(
+                                alpha: 0.38,
+                              ),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -183,15 +186,20 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                         Divider(
                           height: 1,
                           thickness: 1,
-                          color: PostalTokens.kraftBrownMuted
-                              .withValues(alpha: 0.45),
+                          color: PostalTokens.kraftBrownMuted.withValues(
+                            alpha: 0.45,
+                          ),
                         ),
                         Expanded(
                           child: SafeArea(
                             top: false,
                             child: Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(20, 14, 20, 18),
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                14,
+                                20,
+                                18,
+                              ),
                               child: ListView(
                                 physics: const ClampingScrollPhysics(),
                                 children: [
@@ -210,35 +218,12 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                                       ),
                                       onPressed: _busy
                                           ? null
-                                          : () => Navigator.of(sheetContext)
-                                              .pop(),
+                                          : () => Navigator.of(
+                                              sheetContext,
+                                            ).pop(),
                                     ),
                                   ),
                                   const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: RadioListTile<LetterType>(
-                                          // ignore: deprecated_member_use
-                                          value: LetterType.registered,
-                                          // ignore: deprecated_member_use
-                                          groupValue: _type,
-                                          // ignore: deprecated_member_use
-                                          onChanged: _busy
-                                              ? null
-                                              : (v) => setState(
-                                                    () => _type = v!,
-                                                  ),
-                                          title: Text(l10n.sendLetterRegisteredMail),
-                                          subtitle: Text(
-                                            session.isVip
-                                                ? l10n.sendLetterRegisteredSubVip
-                                                : l10n.sendLetterRegisteredSubPaid,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
                                   Row(
                                     children: [
                                       Expanded(
@@ -250,12 +235,38 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                                           // ignore: deprecated_member_use
                                           onChanged: _busy
                                               ? null
-                                              : (v) => setState(
-                                                    () => _type = v!,
-                                                  ),
-                                          title: Text(l10n.sendLetterStandardPost),
+                                              : (v) =>
+                                                    setState(() => _type = v!),
+                                          title: Text(
+                                            l10n.sendLetterStandardPost,
+                                          ),
                                           subtitle: Text(
                                             l10n.sendLetterStandardSub,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: RadioListTile<LetterType>(
+                                          // ignore: deprecated_member_use
+                                          value: LetterType.registered,
+                                          // ignore: deprecated_member_use
+                                          groupValue: _type,
+                                          // ignore: deprecated_member_use
+                                          onChanged: _busy
+                                              ? null
+                                              : (v) =>
+                                                    setState(() => _type = v!),
+                                          title: Text(
+                                            l10n.sendLetterRegisteredMail,
+                                          ),
+                                          subtitle: Text(
+                                            session.isVip
+                                                ? l10n.sendLetterRegisteredSubVip
+                                                : l10n.sendLetterRegisteredSubPaid,
                                           ),
                                         ),
                                       ),

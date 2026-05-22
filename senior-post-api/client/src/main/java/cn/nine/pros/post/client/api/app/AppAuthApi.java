@@ -12,12 +12,15 @@ import cn.nine.pros.post.client.model.out.AppAuthResultVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "App-认证")
 @RequestMapping(AppServiceDefine.SERVER_PREFIX + "/auth")
@@ -30,6 +33,10 @@ public interface AppAuthApi {
     @Operation(summary = "登录")
     @PostMapping("/login")
     AppAuthResultVO login(@RequestBody @Valid AppLoginInDto body);
+
+    @Operation(summary = "注册邮箱可用性校验")
+    @GetMapping("/register/email-check")
+    void validateRegisterEmail(@RequestParam("email") @NotBlank @Email String email);
 
     @Operation(summary = "Google 登录（Android / Web idToken）")
     @PostMapping("/google")

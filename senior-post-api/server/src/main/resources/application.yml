@@ -102,6 +102,7 @@ jh:
   config:
     exclude-interceptor-pattern: [
       "/api/auth/register",
+      "/api/auth/register/email-check",
       "/api/auth/login",
       "/api/auth/google",
       "/api/auth/forgot-password",

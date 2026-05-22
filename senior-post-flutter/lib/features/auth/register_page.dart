@@ -17,8 +17,10 @@ import '../shell/main_shell.dart';
 import 'auth_repository.dart';
 import 'login_routes.dart';
 import 'register_wizard_scaffold.dart';
+import 'widgets/birth_year_picker_sheet.dart';
 
 const int _kMaxRegisterAgeYears = 110;
+
 /// 邮箱 → 密码 → 姓名 → 性别 → 年龄 → 兴趣 → 头像(可选) → 预览
 const int _kRegisterSteps = 8;
 
@@ -41,6 +43,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   int _step = 0;
   int? _birthYear;
   int? _gender;
+  bool _emailChecking = false;
+  String? _emailCheckedValue;
+  String? _emailAvailabilityError;
   Uint8List? _avatarPendingBytes;
   String? _avatarObjectKey;
   bool _avatarUploading = false;
@@ -60,7 +65,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       });
       ref.read(authRepositoryProvider).logout();
     }
+
+    void clearEmailAvailability() {
+      if (_emailCheckedValue == null && _emailAvailabilityError == null) {
+        return;
+      }
+      setState(() {
+        _emailCheckedValue = null;
+        _emailAvailabilityError = null;
+      });
+    }
+
     _email.addListener(invalidateRegistration);
+    _email.addListener(clearEmailAvailability);
     _password.addListener(invalidateRegistration);
   }
 
@@ -74,11 +91,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   List<int> _birthYearChoices(int minRegisterAge) {
-    final y = DateTime.now().year;
-    final minY = y - _kMaxRegisterAgeYears;
-    final maxY = y - minRegisterAge;
-    if (maxY < minY) return <int>[];
-    return [for (var i = maxY; i >= minY; i--) i];
+    return buildBirthYearChoices(
+      minRegisterAge: minRegisterAge,
+      maxRegisterAgeYears: _kMaxRegisterAgeYears,
+    );
   }
 
   String _genderLabel(AppLocalizations l10n) {
@@ -108,7 +124,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (_busy || _avatarUploading) return;
     FocusScope.of(context).unfocus();
     if (_step < _kRegisterSteps - 1) {
-      if (!_validateStep(l10n, years, bootstrap)) return;
+      if (_step == 0) {
+        if (!(_formEmailKey.currentState?.validate() ?? false)) return;
+        if (!await _validateRegisterEmailAvailable(showToast: true)) return;
+      } else if (!_validateStep(l10n, years, bootstrap)) {
+        return;
+      }
       if (_step == 6) {
         setState(() => _busy = true);
         try {
@@ -129,39 +150,62 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     await _submit(l10n, autoCc);
   }
 
-  bool _validateStep(AppLocalizations l10n, List<int> years, AppBootstrapData bootstrap) {
+  bool _validateStep(
+    AppLocalizations l10n,
+    List<int> years,
+    AppBootstrapData bootstrap,
+  ) {
     switch (_step) {
       case 0:
-        return _formEmailKey.currentState?.validate() ?? false;
+        return false;
       case 1:
         return _formPasswordKey.currentState?.validate() ?? false;
       case 2:
         return _formNameKey.currentState?.validate() ?? false;
       case 3:
         if (_gender == 1 || _gender == 2) return true;
-        PostalSnack.show(context, l10n.authGenderLabel, tone: PostalSnackTone.warning);
+        PostalSnack.show(
+          context,
+          l10n.authGenderLabel,
+          tone: PostalSnackTone.warning,
+        );
         return false;
       case 4:
         if (_birthYear != null && years.isNotEmpty) return true;
         PostalSnack.show(
           context,
-          _birthYear == null ? l10n.authBirthYearRequired : l10n.authBirthYearRangeError,
+          _birthYear == null
+              ? l10n.authBirthYearRequired
+              : l10n.authBirthYearRangeError,
           tone: PostalSnackTone.warning,
         );
         return false;
       case 5:
-        if (_interestTagIds.length >= 3 && bootstrap.interestTagOptions.isNotEmpty) {
+        if (_interestTagIds.length >= 3 &&
+            bootstrap.interestTagOptions.isNotEmpty) {
           return true;
         }
         if (bootstrap.interestTagOptions.isEmpty) {
-          PostalSnack.show(context, l10n.authRegisterInterestsServerEmpty, tone: PostalSnackTone.warning);
+          PostalSnack.show(
+            context,
+            l10n.authRegisterInterestsServerEmpty,
+            tone: PostalSnackTone.warning,
+          );
         } else {
-          PostalSnack.show(context, l10n.authRegisterInterestsMin, tone: PostalSnackTone.warning);
+          PostalSnack.show(
+            context,
+            l10n.authRegisterInterestsMin,
+            tone: PostalSnackTone.warning,
+          );
         }
         return false;
       case 6:
         if (_agreed) return true;
-        PostalSnack.show(context, l10n.authAgreeRequired, tone: PostalSnackTone.warning);
+        PostalSnack.show(
+          context,
+          l10n.authAgreeRequired,
+          tone: PostalSnackTone.warning,
+        );
         return false;
       case 7:
         return true;
@@ -173,50 +217,64 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Future<void> _pickBirthYear(List<int> years) async {
     if (years.isEmpty || _busy) return;
     final l10n = AppLocalizations.of(context)!;
-    final nowY = DateTime.now().year;
-    final picked = await showModalBottomSheet<int>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.55,
-          minChildSize: 0.35,
-          maxChildSize: 0.9,
-          builder: (context, scrollController) {
-            return SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                    child: Text(
-                      l10n.authBirthYearSheetTitle,
-                      style: Theme.of(ctx).textTheme.titleLarge,
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: years.length,
-                      itemBuilder: (_, i) {
-                        final y = years[i];
-                        final age = nowY - y;
-                        return ListTile(
-                          title: Text(l10n.authBirthYearFormat('$y', '$age')),
-                          onTap: () => Navigator.pop(ctx, y),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+    final picked = await showBirthYearPickerSheet(
+      context,
+      l10n: l10n,
+      years: years,
     );
     if (picked != null) setState(() => _birthYear = picked);
+  }
+
+  void _ensureDefaultBirthYear(List<int> years) {
+    if (!mounted || _birthYear != null || years.isEmpty) return;
+    final target = DateTime.now().year - 45;
+    final fallback = years.contains(target) ? target : years.first;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _birthYear != null) return;
+      setState(() => _birthYear = fallback);
+    });
+  }
+
+  Future<bool> _validateRegisterEmailAvailable({
+    required bool showToast,
+  }) async {
+    final email = _email.text.trim().toLowerCase();
+    if (email.isEmpty) {
+      return false;
+    }
+    if (_emailCheckedValue == email && _emailAvailabilityError == null) {
+      return true;
+    }
+    setState(() {
+      _emailChecking = true;
+      _emailAvailabilityError = null;
+    });
+    try {
+      await ref
+          .read(authRepositoryProvider)
+          .validateRegisterEmail(email: email);
+      if (!mounted) return true;
+      setState(() {
+        _emailCheckedValue = email;
+        _emailAvailabilityError = null;
+      });
+      return true;
+    } on ApiBusinessException catch (e) {
+      if (!mounted) return false;
+      setState(() {
+        _emailCheckedValue = null;
+        _emailAvailabilityError = e.message;
+      });
+      if (showToast) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.warning);
+      }
+      return false;
+    } finally {
+      if (mounted) {
+        setState(() => _emailChecking = false);
+        _formEmailKey.currentState?.validate();
+      }
+    }
   }
 
   Future<void> _pickRegisterAvatar() async {
@@ -240,7 +298,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
     if (_agreed) {
       final locale = Localizations.localeOf(context);
-      final bootstrap = await ref.read(appBootstrapProvider(locale.languageCode).future);
+      final bootstrap = await ref.read(
+        appBootstrapProvider(locale.languageCode).future,
+      );
       final autoCc = countryCodeForAppLocale(locale, bootstrap.countries);
       await _uploadAvatarIfPossible(l10n, autoCc);
     } else {
@@ -252,12 +312,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
   }
 
-  Future<void> _registerIfNeeded(AppLocalizations l10n, String? autoCountryCode) async {
+  Future<void> _registerIfNeeded(
+    AppLocalizations l10n,
+    String? autoCountryCode,
+  ) async {
     if (_accountRegistered) return;
     if (!_validateRegistrationFields(l10n)) {
       throw ApiBusinessException(400, l10n.authFieldRequired);
     }
-    await ref.read(authRepositoryProvider).register(
+    await ref
+        .read(authRepositoryProvider)
+        .register(
           email: _email.text,
           password: _password.text,
           nickname: _nickname.text,
@@ -271,7 +336,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     _accountRegistered = true;
   }
 
-  Future<void> _uploadAvatarIfPossible(AppLocalizations l10n, String? autoCountryCode) async {
+  Future<void> _uploadAvatarIfPossible(
+    AppLocalizations l10n,
+    String? autoCountryCode,
+  ) async {
     final bytes = _avatarPendingBytes;
     if (bytes == null || _avatarObjectKey != null) return;
     if (!_agreed || !_validateRegistrationFields(l10n)) return;
@@ -279,12 +347,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     setState(() => _avatarUploading = true);
     try {
       await _registerIfNeeded(l10n, autoCountryCode);
-      final key = await ref.read(ossUploadServiceProvider).uploadAvatarImage(
+      final key = await ref
+          .read(ossUploadServiceProvider)
+          .uploadAvatarImage(
             bytes: bytes,
             ext: 'jpg',
             contentType: 'image/jpeg',
           );
-      await ref.read(authRepositoryProvider).updateProfileOnServer(avatarUrl: key);
+      await ref
+          .read(authRepositoryProvider)
+          .updateProfileOnServer(avatarUrl: key);
       if (mounted) setState(() => _avatarObjectKey = key);
     } on ApiBusinessException catch (e) {
       if (mounted) {
@@ -296,9 +368,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
   }
 
-  Future<void> _ensureAccountReady(AppLocalizations l10n, String? autoCountryCode) async {
+  Future<void> _ensureAccountReady(
+    AppLocalizations l10n,
+    String? autoCountryCode,
+  ) async {
     if (!_agreed) {
-      PostalSnack.show(context, l10n.authAgreeRequired, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.authAgreeRequired,
+        tone: PostalSnackTone.warning,
+      );
       throw ApiBusinessException(400, l10n.authAgreeRequired);
     }
     if (!_validateRegistrationFields(l10n)) {
@@ -332,9 +411,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   bool _validateRegistrationFields(AppLocalizations l10n) {
     final email = _email.text.trim();
-    if (email.isEmpty || !email.contains('@') || !email.contains('.')) return false;
+    if (email.isEmpty || !email.contains('@') || !email.contains('.')) {
+      return false;
+    }
     final pwd = _password.text;
-    if (pwd.isEmpty || pwd.length < 8 || _confirmPassword.text != pwd) return false;
+    if (pwd.isEmpty || pwd.length < 8 || _confirmPassword.text != pwd) {
+      return false;
+    }
     if (_nickname.text.trim().isEmpty) return false;
     if (_gender != 1 && _gender != 2) return false;
     if (_birthYear == null) return false;
@@ -366,32 +449,56 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
     if (_confirmPassword.text != pwd) {
       setState(() => _step = 1);
-      PostalSnack.show(context, l10n.authPasswordNotMatch, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.authPasswordNotMatch,
+        tone: PostalSnackTone.warning,
+      );
       return false;
     }
     if (_nickname.text.trim().isEmpty) {
       setState(() => _step = 2);
-      PostalSnack.show(context, l10n.authFieldRequired, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.authFieldRequired,
+        tone: PostalSnackTone.warning,
+      );
       return false;
     }
     if (_gender != 1 && _gender != 2) {
       setState(() => _step = 3);
-      PostalSnack.show(context, l10n.authGenderLabel, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.authGenderLabel,
+        tone: PostalSnackTone.warning,
+      );
       return false;
     }
     if (_birthYear == null) {
       setState(() => _step = 4);
-      PostalSnack.show(context, l10n.authBirthYearRequired, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.authBirthYearRequired,
+        tone: PostalSnackTone.warning,
+      );
       return false;
     }
     if (_interestTagIds.length < 3) {
       setState(() => _step = 5);
-      PostalSnack.show(context, l10n.authRegisterInterestsMin, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.authRegisterInterestsMin,
+        tone: PostalSnackTone.warning,
+      );
       return false;
     }
     if (!_agreed) {
       setState(() => _step = 7);
-      PostalSnack.show(context, l10n.authAgreeRequired, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.authAgreeRequired,
+        tone: PostalSnackTone.warning,
+      );
       return false;
     }
     return true;
@@ -424,6 +531,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 if (value.isEmpty) return l10n.authFieldRequired;
                 if (!value.contains('@') || !value.contains('.')) {
                   return l10n.authEmailInvalid;
+                }
+                if (_emailAvailabilityError != null) {
+                  return _emailAvailabilityError;
                 }
                 return null;
               },
@@ -476,27 +586,36 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               textInputAction: TextInputAction.done,
               autofocus: true,
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return l10n.authFieldRequired;
+                if (v == null || v.trim().isEmpty) {
+                  return l10n.authFieldRequired;
+                }
                 return null;
               },
             ),
           ),
         );
       case 3:
-        return Column(
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            RegisterWizardChoiceTile(
-              label: l10n.authGenderMale,
-              selected: _gender == 1,
-              enabled: !_busy,
-              onTap: () => setState(() => _gender = 1),
+            Expanded(
+              child: RegisterWizardChoiceTile(
+                label: l10n.authGenderMale,
+                selected: _gender == 1,
+                enabled: !_busy,
+                compact: true,
+                onTap: () => setState(() => _gender = 1),
+              ),
             ),
-            const SizedBox(height: 12),
-            RegisterWizardChoiceTile(
-              label: l10n.authGenderFemale,
-              selected: _gender == 2,
-              enabled: !_busy,
-              onTap: () => setState(() => _gender = 2),
+            const SizedBox(width: 10),
+            Expanded(
+              child: RegisterWizardChoiceTile(
+                label: l10n.authGenderFemale,
+                selected: _gender == 2,
+                enabled: !_busy,
+                compact: true,
+                onTap: () => setState(() => _gender = 2),
+              ),
             ),
           ],
         );
@@ -504,10 +623,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         if (years.isEmpty) {
           return Text(
             l10n.authBirthYearRangeError,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: PostalTokens.error),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: PostalTokens.error),
           );
         }
-        final age = _birthYear == null ? null : DateTime.now().year - _birthYear!;
+        final age = _birthYear == null
+            ? null
+            : DateTime.now().year - _birthYear!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -516,9 +639,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 l10n.authRegisterAgePreview('$age'),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: PostalTokens.postboxGreen,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  color: PostalTokens.postboxGreen,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             const SizedBox(height: 16),
             Material(
@@ -529,7 +652,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 28,
+                    horizontal: 20,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: PostalTokens.perforationLine),
@@ -543,9 +669,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: PostalTokens.inkNavy,
-                        ),
+                      fontWeight: FontWeight.w700,
+                      color: PostalTokens.inkNavy,
+                    ),
                   ),
                 ),
               ),
@@ -565,12 +691,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     onSelected: _busy
                         ? null
                         : (v) => setState(() {
-                              if (v) {
-                                _interestTagIds.add(o.id);
-                              } else {
-                                _interestTagIds.remove(o.id);
-                              }
-                            }),
+                            if (v) {
+                              _interestTagIds.add(o.id);
+                            } else {
+                              _interestTagIds.remove(o.id);
+                            }
+                          }),
                   ),
                 )
                 .toList(),
@@ -587,13 +713,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
   }
 
-  Widget _reviewCard(BuildContext context, AppLocalizations l10n, String countryLabel) {
+  Widget _reviewCard(
+    BuildContext context,
+    AppLocalizations l10n,
+    String countryLabel,
+  ) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       decoration: BoxDecoration(
         color: PostalTokens.paperEnvelope.withValues(alpha: 0.75),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: PostalTokens.kraftBrownMuted.withValues(alpha: 0.65)),
+        border: Border.all(
+          color: PostalTokens.kraftBrownMuted.withValues(alpha: 0.65),
+        ),
       ),
       child: Column(
         children: [
@@ -603,8 +735,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             _email.text.trim().isEmpty ? '—' : _email.text.trim(),
             valueMaxLines: 3,
           ),
-          _summaryRow(context, l10n.authRegisterSummaryNickname, _nickname.text.trim()),
-          _summaryRow(context, l10n.authRegisterSummaryGender, _genderLabel(l10n)),
+          _summaryRow(
+            context,
+            l10n.authRegisterSummaryNickname,
+            _nickname.text.trim(),
+          ),
+          _summaryRow(
+            context,
+            l10n.authRegisterSummaryGender,
+            _genderLabel(l10n),
+          ),
           _summaryRow(
             context,
             l10n.authRegisterSummaryBirth,
@@ -616,8 +756,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
           ),
           _summaryRow(context, l10n.authRegisterSummaryCountry, countryLabel),
-          _summaryRow(context, l10n.authRegisterSummaryInterests, '${_interestTagIds.length}'),
-          _summaryRow(context, l10n.authRegisterSummaryAvatar, _avatarSummaryLabel(l10n)),
+          _summaryRow(
+            context,
+            l10n.authRegisterSummaryInterests,
+            '${_interestTagIds.length}',
+          ),
+          _summaryRow(
+            context,
+            l10n.authRegisterSummaryAvatar,
+            _avatarSummaryLabel(l10n),
+          ),
         ],
       ),
     );
@@ -642,7 +790,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 borderRadius: BorderRadius.circular(18),
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
-                  onTap: (_busy || _avatarUploading) ? null : _pickRegisterAvatar,
+                  onTap: (_busy || _avatarUploading)
+                      ? null
+                      : _pickRegisterAvatar,
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -655,14 +805,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             Icon(
                               Icons.add_rounded,
                               size: 56,
-                              color: PostalTokens.inkTertiary.withValues(alpha: 0.85),
+                              color: PostalTokens.inkTertiary.withValues(
+                                alpha: 0.85,
+                              ),
                             ),
                             const SizedBox(height: 12),
                             Text(
                               l10n.authRegisterAvatarTapToAdd,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: PostalTokens.inkTertiary,
-                                  ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: PostalTokens.inkTertiary),
                             ),
                           ],
                         ),
@@ -672,12 +823,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           bottom: 10,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: PostalTokens.inkNavy.withValues(alpha: 0.72),
+                              color: PostalTokens.inkNavy.withValues(
+                                alpha: 0.72,
+                              ),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Padding(
                               padding: EdgeInsets.all(8),
-                              child: Icon(Icons.edit_outlined, color: Colors.white, size: 22),
+                              child: Icon(
+                                Icons.edit_outlined,
+                                color: Colors.white,
+                                size: 22,
+                              ),
                             ),
                           ),
                         ),
@@ -688,13 +845,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const CircularProgressIndicator(color: Colors.white),
+                                const CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
                                 const SizedBox(height: 12),
                                 Text(
                                   l10n.authRegisterAvatarUploading,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: Colors.white,
-                                      ),
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(color: Colors.white),
                                 ),
                               ],
                             ),
@@ -706,14 +864,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           top: 10,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: PostalTokens.postboxGreen.withValues(alpha: 0.92),
+                              color: PostalTokens.postboxGreen.withValues(
+                                alpha: 0.92,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               child: Text(
                                 l10n.authRegisterAvatarUploaded,
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -760,7 +924,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   String _avatarSummaryLabel(AppLocalizations l10n) {
     if (_avatarUploading) return l10n.authRegisterAvatarUploading;
     if (_avatarObjectKey != null) return l10n.authRegisterSummaryAvatarSet;
-    if (_avatarPendingBytes != null) return l10n.authRegisterSummaryAvatarPending;
+    if (_avatarPendingBytes != null) {
+      return l10n.authRegisterSummaryAvatarPending;
+    }
     return l10n.authRegisterSummaryAvatarSkipped;
   }
 
@@ -780,9 +946,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PostalTokens.inkSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: PostalTokens.inkSecondary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           Expanded(
@@ -791,9 +957,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               maxLines: valueMaxLines,
               softWrap: true,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: PostalTokens.inkNavy,
-                    height: 1.35,
-                  ),
+                color: PostalTokens.inkNavy,
+                height: 1.35,
+              ),
             ),
           ),
         ],
@@ -803,14 +969,38 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   (String title, String subtitle) _stepCopy(AppLocalizations l10n) {
     return switch (_step) {
-      0 => (l10n.authRegisterWizardEmailTitle, l10n.authRegisterWizardEmailSubtitle),
-      1 => (l10n.authRegisterWizardPasswordTitle, l10n.authRegisterWizardPasswordSubtitle),
-      2 => (l10n.authRegisterWizardNameTitle, l10n.authRegisterWizardNameSubtitle),
-      3 => (l10n.authRegisterWizardGenderTitle, l10n.authRegisterWizardGenderSubtitle),
-      4 => (l10n.authRegisterWizardAgeTitle, l10n.authRegisterWizardAgeSubtitle),
-      5 => (l10n.authRegisterStepInterestsTitle, l10n.authRegisterStepInterestsSubtitle),
-      6 => (l10n.authRegisterWizardAvatarTitle, l10n.authRegisterWizardAvatarSubtitle),
-      7 => (l10n.authRegisterStepReviewTitle, l10n.authRegisterStepReviewSubtitle),
+      0 => (
+        l10n.authRegisterWizardEmailTitle,
+        l10n.authRegisterWizardEmailSubtitle,
+      ),
+      1 => (
+        l10n.authRegisterWizardPasswordTitle,
+        l10n.authRegisterWizardPasswordSubtitle,
+      ),
+      2 => (
+        l10n.authRegisterWizardNameTitle,
+        l10n.authRegisterWizardNameSubtitle,
+      ),
+      3 => (
+        l10n.authRegisterWizardGenderTitle,
+        l10n.authRegisterWizardGenderSubtitle,
+      ),
+      4 => (
+        l10n.authRegisterWizardAgeTitle,
+        l10n.authRegisterWizardAgeSubtitle,
+      ),
+      5 => (
+        l10n.authRegisterStepInterestsTitle,
+        l10n.authRegisterStepInterestsSubtitle,
+      ),
+      6 => (
+        l10n.authRegisterWizardAvatarTitle,
+        l10n.authRegisterWizardAvatarSubtitle,
+      ),
+      7 => (
+        l10n.authRegisterStepReviewTitle,
+        l10n.authRegisterStepReviewSubtitle,
+      ),
       _ => ('', ''),
     };
   }
@@ -821,17 +1011,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final locale = Localizations.localeOf(context);
     final lang = locale.languageCode;
     final bootstrapAsync = ref.watch(appBootstrapProvider(lang));
-
-    ref.listen<AsyncValue<AppBootstrapData>>(appBootstrapProvider(lang), (prev, next) {
-      next.whenData((b) {
-        final years = _birthYearChoices(b.minRegisterAge);
-        if (!mounted || years.isEmpty || _birthYear != null) return;
-        final target = DateTime.now().year - 45;
-        setState(() {
-          _birthYear = years.contains(target) ? target : years.first;
-        });
-      });
-    });
 
     return Scaffold(
       body: PaperTextureBackground(
@@ -847,7 +1026,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             ),
             data: (bootstrap) {
               final years = _birthYearChoices(bootstrap.minRegisterAge);
-              final autoCc = countryCodeForAppLocale(locale, bootstrap.countries);
+              _ensureDefaultBirthYear(years);
+              final autoCc = countryCodeForAppLocale(
+                locale,
+                bootstrap.countries,
+              );
               CountryItem? countryItem;
               for (final c in bootstrap.countries) {
                 if (c.code == autoCc) {
@@ -856,9 +1039,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 }
               }
               final countryLabel =
-                  countryItem?.displayName(locale.languageCode) ?? autoCc ?? '—';
+                  countryItem?.displayName(locale.languageCode) ??
+                  autoCc ??
+                  '—';
               final copy = _stepCopy(l10n);
               final canNext = switch (_step) {
+                0 => !_emailChecking,
                 3 => _gender == 1 || _gender == 2,
                 4 => _birthYear != null && years.isNotEmpty,
                 5 => _interestTagIds.length >= 3,
@@ -884,7 +1070,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   nextEnabled: canNext && !(_step == 4 && years.isEmpty),
                   nextBusy: _busy || _avatarUploading,
                   isLastStep: _step == _kRegisterSteps - 1,
-                  child: _stepContent(context, l10n, years, bootstrap, countryLabel, autoCc),
+                  child: _stepContent(
+                    context,
+                    l10n,
+                    years,
+                    bootstrap,
+                    countryLabel,
+                    autoCc,
+                  ),
                 ),
               );
             },

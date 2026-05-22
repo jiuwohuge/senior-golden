@@ -283,6 +283,87 @@ flowchart LR
 
 ## [改动预测]
 
+- **本次新增（2026-05-22，头像性别徽章样式优化）**：
+  - 目标：优化系统内性别图标可读性与美观度，替换当前低对比样式。
+  - 实际处理：
+    - `senior-post-flutter/lib/widgets/postal/postal_gender_icon.dart`
+      - 改为主流“高对比彩色圆形徽章 + 白色符号”视觉；
+      - 男/女/其他分别使用蓝/粉/石板灰主题色，并增加轻阴影提升层次。
+  - 验证：
+    - `flutter analyze` 通过。
+    - 头像角标场景（明信片/评论/名录/用户卡）均可读性提升。
+
+- **本次新增（2026-05-22，发信默认平邮 + 头像可点用户信息 + 去重国家码展示）**：
+  - 目标：
+    - 发信弹层交换“挂号信/平邮”顺序，并将默认类型改为免费平邮。
+    - 明信片列表/详情评论中，涉及用户头像位置支持点击进入用户信息页，并同步展示性别标识。
+    - 统一去除用户信息区重复国家码展示（红色邮戳已显示国家码时，不再重复黑色同码）。
+  - 预计改动：
+    - `senior-post-flutter/lib/features/directory/send_letter_sheet.dart`
+    - `senior-post-flutter/lib/features/post_wall/post_wall_page.dart`
+    - `senior-post-flutter/lib/features/post_wall/post_detail_page.dart`
+    - `senior-post-flutter/lib/widgets/postal/postal_country_seal.dart`
+  - 验证：
+    - `flutter analyze` 通过。
+    - 手工验证：发信弹层默认平邮；点击头像可跳 `/user/{id}`；国家码不再双重展示。
+
+- **本次新增（2026-05-22，注册邮箱预检 token not found 修复）**：
+  - 目标：修复注册邮箱唯一性预检接口返回 `token not found`，恢复未登录可用。
+  - 实际处理：
+    - `senior-post-api/server/src/main/resources/application.yml`
+      - `jh.config.exclude-interceptor-pattern` 增加 `/api/auth/register/email-check`，与注册/登录同级匿名放行。
+  - 验证：
+    - 配置检索确认白名单已包含该路径；
+    - 重启后端后，未登录调用 `/api/auth/register/email-check` 不再触发 token 拦截。
+
+- **本次新增（2026-05-22，邮箱登录误跳完善资料 + 兴趣标签唯一键冲突 + 年龄选择器统一）**：
+  - 目标：
+    - 修复邮箱登录后误跳到 OAuth 完善资料页的问题。
+    - 修复完善资料/兴趣更新时报 `bu_user_tag(user_id,tag_id)` 唯一键冲突。
+    - 统一完善资料页与注册页的出生年份选择器，避免维护多套类似组件。
+  - 预计改动（前后端联动）：
+    - `senior-post-flutter/lib/features/auth/login_page.dart`
+    - `senior-post-flutter/lib/features/auth/social_profile_complete_page.dart`
+    - `senior-post-flutter/lib/features/auth/register_page.dart`
+    - `senior-post-flutter/lib/features/auth/widgets/birth_year_picker_sheet.dart`（新增）
+    - `senior-post-api/biz/src/main/java/cn/nine/pros/post/biz/service/base/impl/UserTagServiceImpl.java`
+  - 验证：
+    - `mvn -pl biz -am compile -DskipTests` 通过。
+    - `flutter analyze lib/features/auth` 通过（若存在既有 warning，需确认非本次引入）。
+
+- **本次新增（2026-05-22，注册/登录体验缺陷修复）**：
+  - 目标：
+    - 修复“注册偶发出生年份未默认选中”问题（特别是退出登录后再次进入注册流程）。
+    - 优化注册性别单选 UI（由纵向长卡改为横向紧凑选择）。
+    - 注册第一步输入邮箱后提前做唯一性校验，避免用户填完整表单后才失败。
+    - 登录页移除与顶部重复的“欢迎回到你的全球邮政社交空间”文案。
+  - 预计改动（本次涉及前后端契约与前端交互，超过 3 文件属必要范围）：
+    - `senior-post-api/client/src/main/java/cn/nine/pros/post/client/api/app/AppAuthApi.java`
+    - `senior-post-api/biz/src/main/java/cn/nine/pros/post/biz/controller/app/AppAuthController.java`
+    - `senior-post-api/biz/src/main/java/cn/nine/pros/post/biz/service/app/AppAuthService.java`
+    - `senior-post-flutter/lib/features/auth/auth_repository.dart`
+    - `senior-post-flutter/lib/features/auth/register_page.dart`
+    - `senior-post-flutter/lib/features/auth/register_wizard_scaffold.dart`
+    - `senior-post-flutter/lib/features/auth/login_page.dart`
+  - 验证：
+    - `mvn -pl biz,client -am compile -DskipTests` 通过（后端新增接口契约编译校验）。
+    - `flutter analyze` 通过（注册/登录页面与仓库静态检查）。
+
+- **本次新增（2026-05-22，MuMu 模拟器 Flutter 设备发现排障）**：
+  - 目标：定位“MuMu 已启动但 `flutter devices` 无 Android 设备”的原因并形成可复用修复步骤。
+  - 根因：
+    - 当前终端环境中 `adb` 命令未加入 PATH（直接执行 `adb devices -l` 报 `CommandNotFoundException`）。
+    - MuMu 未被自动连接到 Android SDK 的 adb server，导致 `flutter devices` 仅显示 Windows/Web 设备。
+  - 实际处理：
+    - 使用 SDK 内置 adb（`D:/Android/android-sdk/platform-tools/adb.exe`）手动执行：
+      - `adb connect 127.0.0.1:7555`
+      - `adb connect 127.0.0.1:16384`
+      - `adb connect 127.0.0.1:5555`
+    - 再次执行 `flutter devices`，已出现 Android 设备（`PFTM10`）。
+  - 验证：
+    - `flutter devices` 从“仅 3 个（Windows/Chrome/Edge）”变为“6 个（含 3 个 Android 连接）”。
+    - 结论：问题属于 **adb 可达性/连接建立**，非 Flutter SDK 损坏。
+
 - **本次新增（2026-05-18，后端镜像一键重建脚本）**：
   - 目标：避免手工执行 Maven + Docker Compose 多步骤时遗漏，确保 Java 改动能稳定进入容器镜像。
   - 实际处理：

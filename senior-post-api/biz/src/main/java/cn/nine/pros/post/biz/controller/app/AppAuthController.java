@@ -33,6 +33,11 @@ public class AppAuthController implements AppAuthApi {
     }
 
     @Override
+    public void validateRegisterEmail(String email) {
+        appAuthService.validateRegisterEmail(email);
+    }
+
+    @Override
     public AppAuthResultVO loginWithGoogle(AppGoogleLoginInDto body) {
         return appAuthService.loginWithGoogle(body);
     }

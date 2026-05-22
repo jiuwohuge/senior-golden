@@ -48,6 +48,18 @@ class AuthRepository {
     }
   }
 
+  Future<void> validateRegisterEmail({required String email}) async {
+    final dio = _ref.read(dioProvider);
+    try {
+      await dio.get<Map<String, dynamic>>(
+        '/api/auth/register/email-check',
+        queryParameters: <String, dynamic>{'email': email.trim()},
+      );
+    } on DioException catch (e) {
+      _throwMappedDio(e);
+    }
+  }
+
   Future<AuthSignInResult> signInWithGoogle({required String idToken}) async {
     final dio = _ref.read(dioProvider);
     final deviceUuid = await _ensureDeviceUuid();
@@ -193,7 +205,9 @@ class AuthRepository {
   Future<void> requestAccountDeletion() async {
     final dio = _ref.read(dioProvider);
     try {
-      await dio.post<Map<String, dynamic>>('/api/auth/account/deletion-request');
+      await dio.post<Map<String, dynamic>>(
+        '/api/auth/account/deletion-request',
+      );
     } on DioException catch (e) {
       _throwMappedDio(e);
     }

@@ -47,7 +47,9 @@ class RegisterWizardScaffold extends StatelessWidget {
           child: LinearProgressIndicator(
             value: progress.clamp(0.05, 1.0),
             minHeight: 4,
-            backgroundColor: PostalTokens.perforationLine.withValues(alpha: 0.45),
+            backgroundColor: PostalTokens.perforationLine.withValues(
+              alpha: 0.45,
+            ),
             color: PostalTokens.postboxGreen,
           ),
         ),
@@ -97,7 +99,11 @@ class RegisterWizardScaffold extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.info_outline_rounded, size: 18, color: PostalTokens.inkTertiary),
+              Icon(
+                Icons.info_outline_rounded,
+                size: 18,
+                color: PostalTokens.inkTertiary,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -149,7 +155,9 @@ class _WizardNextFab extends StatelessWidget {
       button: true,
       label: label,
       child: Material(
-        color: enabled ? PostalTokens.postboxGreen : PostalTokens.perforationLine,
+        color: enabled
+            ? PostalTokens.postboxGreen
+            : PostalTokens.perforationLine,
         elevation: enabled ? 4 : 0,
         shadowColor: PostalTokens.inkNavy.withValues(alpha: 0.2),
         shape: const CircleBorder(),
@@ -187,12 +195,14 @@ class RegisterWizardChoiceTile extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.enabled = true,
+    this.compact = false,
   });
 
   final String label;
   final bool selected;
   final VoidCallback? onTap;
   final bool enabled;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +216,10 @@ class RegisterWizardChoiceTile extends StatelessWidget {
         onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 14 : 20,
+            vertical: compact ? 14 : 18,
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
@@ -224,6 +237,7 @@ class RegisterWizardChoiceTile extends StatelessWidget {
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: PostalTokens.inkNavy,
                     fontWeight: FontWeight.w600,
+                    fontSize: compact ? 17 : null,
                   ),
                 ),
               ),
@@ -231,7 +245,9 @@ class RegisterWizardChoiceTile extends StatelessWidget {
                 selected
                     ? Icons.radio_button_checked_rounded
                     : Icons.radio_button_off_rounded,
-                color: selected ? PostalTokens.postboxGreen : PostalTokens.inkTertiary,
+                color: selected
+                    ? PostalTokens.postboxGreen
+                    : PostalTokens.inkTertiary,
                 size: 26,
               ),
             ],

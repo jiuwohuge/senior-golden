@@ -22,6 +22,11 @@ class PostalCountrySeal extends StatelessWidget {
     final theme = Theme.of(context);
     final c = color ?? PostalTokens.stampVermilion;
     final ringSize = compact ? 26.0 : 32.0;
+    final normalizedCode = countryCode.trim().toUpperCase();
+    final normalizedName = (countryName ?? '').trim();
+    final showCountryName =
+        normalizedName.isNotEmpty &&
+        normalizedName.toUpperCase() != normalizedCode;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -36,7 +41,7 @@ class PostalCountrySeal extends StatelessWidget {
           ),
           alignment: Alignment.center,
           child: Text(
-            countryCode.toUpperCase(),
+            normalizedCode,
             style: theme.textTheme.bodySmall?.copyWith(
               color: c,
               fontWeight: FontWeight.w800,
@@ -46,11 +51,11 @@ class PostalCountrySeal extends StatelessWidget {
             ),
           ),
         ),
-        if (countryName != null && countryName!.isNotEmpty) ...[
+        if (showCountryName) ...[
           const SizedBox(width: 8),
           Flexible(
             child: Text(
-              countryName!,
+              normalizedName,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: PostalTokens.inkSecondary,

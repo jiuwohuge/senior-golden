@@ -62,7 +62,12 @@ class _PostWallPageState extends ConsumerState<PostWallPage> {
                             onRefresh: _onRefresh,
                             child: ListView(
                               physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                20,
+                                20,
+                                96,
+                              ),
                               children: [
                                 SizedBox(
                                   height: constraints.maxHeight,
@@ -184,11 +189,7 @@ class _PostCard extends StatelessWidget {
       onTap: () => context.push('/post/${post.id}'),
       header: Row(
         children: [
-          PostalAvatar(
-            name: post.author.nickname,
-            size: 44,
-            imageUrl: post.author.avatarUrl,
-          ),
+          _ClickableUserAvatar(user: post.author, size: 44),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -203,10 +204,6 @@ class _PostCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (post.author.gender >= 1) ...[
-                      const SizedBox(width: 4),
-                      PostalGenderIcon(gender: post.author.gender, size: 14),
-                    ],
                   ],
                 ),
                 const SizedBox(height: 3),
@@ -220,9 +217,9 @@ class _PostCard extends StatelessWidget {
           ),
           Text(
             dt,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PostalTokens.inkSecondary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: PostalTokens.inkSecondary),
           ),
         ],
       ),
@@ -280,12 +277,16 @@ class _PostCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             child: Text(
-                              l10n.postWallPhotosLabel('${post.resolvedImageUrls.length}'),
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Colors.white,
-                                  ),
+                              l10n.postWallPhotosLabel(
+                                '${post.resolvedImageUrls.length}',
+                              ),
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(color: Colors.white),
                             ),
                           ),
                         ),
@@ -298,8 +299,51 @@ class _PostCard extends StatelessWidget {
           ],
           Text(
             post.content,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.55),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(height: 1.55),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ClickableUserAvatar extends StatelessWidget {
+  const _ClickableUserAvatar({required this.user, required this.size});
+
+  final AppUser user;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      customBorder: const CircleBorder(),
+      onTap: () => context.push('/user/${user.id}'),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          PostalAvatar(
+            name: user.nickname,
+            size: size,
+            imageUrl: user.avatarUrl,
+          ),
+          if (user.gender >= 1)
+            Positioned(
+              right: -2,
+              bottom: -2,
+              child: Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: PostalTokens.perforationLine),
+                ),
+                alignment: Alignment.center,
+                child: PostalGenderIcon(gender: user.gender, size: 12),
+              ),
+            ),
         ],
       ),
     );

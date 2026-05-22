@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
+import '../../widgets/postal/postal_gender_icon.dart';
 import 'post_providers.dart';
 import 'post_wall_report_sheet.dart';
 import 'post_wall_remote.dart';
@@ -20,7 +23,8 @@ void _showContentReport(
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    builder: (ctx) => PostWallReportSheet(targetType: targetType, objectId: objectId),
+    builder: (ctx) =>
+        PostWallReportSheet(targetType: targetType, objectId: objectId),
   );
 }
 
@@ -32,7 +36,8 @@ class PostDetailPage extends ConsumerStatefulWidget {
   ConsumerState<PostDetailPage> createState() => _PostDetailPageState();
 }
 
-class _PostDetailPageState extends ConsumerState<PostDetailPage> with WidgetsBindingObserver {
+class _PostDetailPageState extends ConsumerState<PostDetailPage>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -80,7 +85,8 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> with WidgetsBin
       appBar: AppBar(
         title: Text(l10n.postDetailTitle),
         actions: [
-          if (postAsync.valueOrNull != null && meId != postAsync.valueOrNull!.author.id)
+          if (postAsync.valueOrNull != null &&
+              meId != postAsync.valueOrNull!.author.id)
             IconButton(
               tooltip: 'Report',
               icon: const Icon(Icons.flag_outlined),
@@ -94,7 +100,8 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> with WidgetsBin
       ),
       body: SafeArea(
         child: postAsync.when(
-          loading: () => const PostalSkeletonList(itemCount: 1, itemHeight: 220),
+          loading: () =>
+              const PostalSkeletonList(itemCount: 1, itemHeight: 220),
           error: (e, _) => PostalEmptyState(
             title: 'Unable to load postcard',
             subtitle: '$e',
@@ -122,150 +129,229 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> with WidgetsBin
                     onRefresh: _onRefresh,
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-                    children: [
-                      if (reviewLabel != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: PostalTokens.stampVermilionMuted,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: PostalTokens.stampVermilion.withValues(alpha: 0.35),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.info_outline, color: PostalTokens.stampVermilion, size: 20),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      reviewLabel,
-                                      style: Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      PostalCardEnvelope(
-                        header: Row(
-                          children: [
-                            PostalAvatar(
-                              name: post.author.nickname,
-                              size: 42,
-                              imageUrl: post.author.avatarUrl,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                post.author.nickname,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                            ),
-                            Text(DateFormat('MM-dd HH:mm').format(post.createdAt)),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (final u in post.resolvedImageUrls) ...[
-                              ClipRRect(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+                      children: [
+                        if (reviewLabel != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: PostalTokens.stampVermilionMuted,
                                 borderRadius: BorderRadius.circular(10),
-                                child: AspectRatio(
-                                  aspectRatio: 16 / 9,
-                                  child: PostalOssNetworkImage(
-                                    imageUrl: u,
-                                    fit: BoxFit.cover,
+                                border: Border.all(
+                                  color: PostalTokens.stampVermilion.withValues(
+                                    alpha: 0.35,
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 10),
-                            ],
-                            Text(
-                              post.content,
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.55),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      PostalSectionTitle(title: 'Comments'),
-                      const SizedBox(height: 10),
-                      commentsAsync.when(
-                        loading: () => const PostalSkeletonList(
-                          itemCount: 3,
-                          itemHeight: 86,
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                        ),
-                        error: (e, _) => PostalEmptyState(
-                          title: 'Failed to load comments',
-                          subtitle: '$e',
-                          tone: PostalEmptyTone.error,
-                        ),
-                        data: (items) {
-                          if (items.isEmpty) {
-                            return const PostalEmptyState(
-                              title: 'No comments yet',
-                              subtitle: 'Start the first kind reply.',
-                            );
-                          }
-                          return Column(
-                            children: items
-                                .map(
-                                  (c) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: PostalCardEnvelope(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              PostalAvatar(
-                                                name: c.author.nickname,
-                                                size: 34,
-                                                imageUrl: c.author.avatarUrl,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Expanded(child: Text(c.author.nickname)),
-                                              Text(DateFormat('MM-dd HH:mm').format(c.createdAt)),
-                                              if (meId != c.author.id)
-                                                IconButton(
-                                                  tooltip: 'Report comment',
-                                                  icon: const Icon(Icons.flag_outlined, size: 20),
-                                                  onPressed: () => _showContentReport(
-                                                    context,
-                                                    targetType: 'comment',
-                                                    objectId: c.id,
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(c.content),
-                                        ],
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: PostalTokens.stampVermilion,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        reviewLabel,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall,
                                       ),
                                     ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        PostalCardEnvelope(
+                          header: Row(
+                            children: [
+                              _ClickableUserAvatar(user: post.author, size: 42),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        post.author.nickname,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                DateFormat(
+                                  'MM-dd HH:mm',
+                                ).format(post.createdAt),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (final u in post.resolvedImageUrls) ...[
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: AspectRatio(
+                                    aspectRatio: 16 / 9,
+                                    child: PostalOssNetworkImage(
+                                      imageUrl: u,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
-                                )
-                                .toList(),
-                          );
-                        },
-                      ),
-                    ],
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                              Text(
+                                post.content,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyLarge?.copyWith(height: 1.55),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        PostalSectionTitle(title: 'Comments'),
+                        const SizedBox(height: 10),
+                        commentsAsync.when(
+                          loading: () => const PostalSkeletonList(
+                            itemCount: 3,
+                            itemHeight: 86,
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                          ),
+                          error: (e, _) => PostalEmptyState(
+                            title: 'Failed to load comments',
+                            subtitle: '$e',
+                            tone: PostalEmptyTone.error,
+                          ),
+                          data: (items) {
+                            if (items.isEmpty) {
+                              return const PostalEmptyState(
+                                title: 'No comments yet',
+                                subtitle: 'Start the first kind reply.',
+                              );
+                            }
+                            return Column(
+                              children: items
+                                  .map(
+                                    (c) => Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 10,
+                                      ),
+                                      child: PostalCardEnvelope(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                _ClickableUserAvatar(
+                                                  user: c.author,
+                                                  size: 34,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                    c.author.nickname,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  DateFormat(
+                                                    'MM-dd HH:mm',
+                                                  ).format(c.createdAt),
+                                                ),
+                                                if (meId != c.author.id)
+                                                  IconButton(
+                                                    tooltip: 'Report comment',
+                                                    icon: const Icon(
+                                                      Icons.flag_outlined,
+                                                      size: 20,
+                                                    ),
+                                                    onPressed: () =>
+                                                        _showContentReport(
+                                                          context,
+                                                          targetType: 'comment',
+                                                          objectId: c.id,
+                                                        ),
+                                                  ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(c.content),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
                 _CommentComposer(postId: postId),
               ],
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _ClickableUserAvatar extends StatelessWidget {
+  const _ClickableUserAvatar({required this.user, required this.size});
+
+  final AppUser user;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      customBorder: const CircleBorder(),
+      onTap: () => context.push('/user/${user.id}'),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          PostalAvatar(
+            name: user.nickname,
+            size: size,
+            imageUrl: user.avatarUrl,
+          ),
+          if (user.gender >= 1)
+            Positioned(
+              right: -2,
+              bottom: -2,
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: PostalTokens.perforationLine),
+                ),
+                alignment: Alignment.center,
+                child: PostalGenderIcon(gender: user.gender, size: 10),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -293,15 +379,18 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
     final l10n = AppLocalizations.of(context)!;
     final text = _commentCtrl.text.trim();
     if (text.isEmpty) {
-      PostalSnack.show(context, l10n.postDetailCommentRequired, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.postDetailCommentRequired,
+        tone: PostalSnackTone.warning,
+      );
       return;
     }
     setState(() => _sending = true);
     try {
-      await ref.read(postWallRemoteProvider).createComment(
-            postcardId: widget.postId,
-            content: text,
-          );
+      await ref
+          .read(postWallRemoteProvider)
+          .createComment(postcardId: widget.postId, content: text);
       if (!mounted) return;
       _commentCtrl.clear();
       ref.invalidate(postCommentsProvider(widget.postId));
@@ -312,7 +401,9 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
         tone: PostalSnackTone.success,
       );
     } on ApiBusinessException catch (e) {
-      if (mounted) PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -324,7 +415,9 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outline)),
+        border: Border(
+          top: BorderSide(color: Theme.of(context).colorScheme.outline),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
