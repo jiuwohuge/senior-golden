@@ -56,16 +56,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (!loggedIn && !authPaths.contains(loc)) {
         return LoginRoutes.welcome;
       }
-      // 登录/注册页允许在本地仍有旧 Token 时停留，避免未重新登录就进主页命中 8502 缓存。
+      // WHY: 移动端常见体验是“冷启动自动回到首页”，
+      // 仅保留资料补全页作为登录后仍可停留的例外路径。
       if (loggedIn &&
           authPaths.contains(loc) &&
-          loc != LoginRoutes.welcome &&
-          loc != LoginRoutes.login &&
-          loc != LoginRoutes.register &&
-          loc != LoginRoutes.forgotPassword &&
-          loc != LoginRoutes.socialComplete &&
-          loc != LoginRoutes.legalTerms &&
-          loc != LoginRoutes.legalPrivacy) {
+          loc != LoginRoutes.socialComplete) {
         return MainShellRoute.pathPostWall;
       }
       return null;

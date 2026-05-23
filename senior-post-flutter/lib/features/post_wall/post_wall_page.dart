@@ -255,6 +255,13 @@ class _PostCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text(
+            post.content,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(height: 1.55),
+          ),
+          if (post.resolvedImageUrls.isNotEmpty) const SizedBox(height: 10),
           if (post.resolvedImageUrls.isNotEmpty) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
@@ -295,14 +302,7 @@ class _PostCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
           ],
-          Text(
-            post.content,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(height: 1.55),
-          ),
         ],
       ),
     );

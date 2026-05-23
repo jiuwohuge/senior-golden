@@ -200,25 +200,23 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              for (final u in post.resolvedImageUrls) ...[
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: AspectRatio(
-                                    aspectRatio: 16 / 9,
-                                    child: PostalOssNetworkImage(
-                                      imageUrl: u,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
+                              _WeChatTextBlock(content: post.content),
+                              if (post.resolvedImageUrls.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                _WeChatPhotoGrid(
+                                  imageUrls: post.resolvedImageUrls,
+                                  onTapImage: (index) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => _PhotoViewerPage(
+                                          imageUrls: post.resolvedImageUrls,
+                                          initialIndex: index,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
-                                const SizedBox(height: 10),
                               ],
-                              Text(
-                                post.content,
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyLarge?.copyWith(height: 1.55),
-                              ),
                             ],
                           ),
                         ),
@@ -352,6 +350,381 @@ class _ClickableUserAvatar extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _WeChatTextBlock extends StatefulWidget {
+  const _WeChatTextBlock({required this.content});
+
+  final String content;
+
+  @override
+  State<_WeChatTextBlock> createState() => _WeChatTextBlockState();
+}
+
+class _WeChatTextBlockState extends State<_WeChatTextBlock> {
+  static const int _kCollapsedLines = 6;
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(
+      context,
+    ).textTheme.bodyLarge?.copyWith(height: 1.55, color: PostalTokens.inkNavy);
+    final isZh = Localizations.localeOf(context).languageCode.startsWith('zh');
+    final moreLabel = isZh ? '全文' : 'Read more';
+    final lessLabel = isZh ? '收起' : 'Collapse';
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final painter = TextPainter(
+          text: TextSpan(text: widget.content, style: style),
+          maxLines: _kCollapsedLines,
+          textDirection: Directionality.of(context),
+        )..layout(maxWidth: constraints.maxWidth);
+        final canExpand = painter.didExceedMaxLines;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              widget.content,
+              style: style,
+              maxLines: _expanded ? null : _kCollapsedLines,
+              overflow: _expanded
+                  ? TextOverflow.visible
+                  : TextOverflow.ellipsis,
+            ),
+            if (canExpand) ...[
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(0, 30),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () => setState(() => _expanded = !_expanded),
+                  child: Text(
+                    _expanded ? lessLabel : moreLabel,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: PostalTokens.postboxGreen,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _WeChatPhotoGrid extends StatelessWidget {
+  const _WeChatPhotoGrid({required this.imageUrls, required this.onTapImage});
+
+  final List<String> imageUrls;
+  final ValueChanged<int> onTapImage;
+
+  @override
+  Widget build(BuildContext context) {
+    final displayCount = imageUrls.length > 9 ? 9 : imageUrls.length;
+    if (displayCount <= 0) {
+      return const SizedBox.shrink();
+    }
+    if (displayCount == 1) {
+      return _buildSingle(context, 0);
+    }
+    final crossAxisCount = switch (displayCount) {
+      2 => 2,
+      4 => 2,
+      _ => 3,
+    };
+    const gap = 4.0;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tileSize =
+            (constraints.maxWidth - gap * (crossAxisCount - 1)) /
+            crossAxisCount;
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: List.generate(displayCount, (index) {
+            final showMoreMask =
+                imageUrls.length > 9 && index == displayCount - 1;
+            return SizedBox(
+              width: tileSize,
+              height: tileSize,
+              child: _buildTile(
+                context,
+                index,
+                radius: BorderRadius.circular(6),
+                showMoreMask: showMoreMask,
+                moreCount: imageUrls.length - 9,
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+
+  Widget _buildSingle(BuildContext context, int index) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: () => onTapImage(index),
+        child: AspectRatio(
+          aspectRatio: 4 / 3,
+          child: PostalOssNetworkImage(
+            imageUrl: imageUrls[index],
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTile(
+    BuildContext context,
+    int index, {
+    required BorderRadius radius,
+    required bool showMoreMask,
+    required int moreCount,
+  }) {
+    return ClipRRect(
+      borderRadius: radius,
+      child: InkWell(
+        onTap: () => onTapImage(index),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            PostalOssNetworkImage(
+              imageUrl: imageUrls[index],
+              fit: BoxFit.cover,
+            ),
+            if (showMoreMask)
+              ColoredBox(
+                color: Colors.black45,
+                child: Center(
+                  child: Text(
+                    '+$moreCount',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PhotoViewerPage extends StatefulWidget {
+  const _PhotoViewerPage({required this.imageUrls, required this.initialIndex});
+
+  final List<String> imageUrls;
+  final int initialIndex;
+
+  @override
+  State<_PhotoViewerPage> createState() => _PhotoViewerPageState();
+}
+
+class _PhotoViewerPageState extends State<_PhotoViewerPage> {
+  static const double _minScale = 1.0;
+  static const double _maxScale = 3.0;
+
+  late final PageController _pageController;
+  late int _index;
+
+  final Map<int, Offset> _activePointers = {};
+  double _scale = 1.0;
+  Offset _offset = Offset.zero;
+
+  double _baseScale = 1.0;
+  Offset _baseOffset = Offset.zero;
+  double? _initialPinchDistance;
+  Offset? _initialFocalPoint;
+
+  bool get _isMultiTouch => _activePointers.length >= 2;
+  bool get _isZoomed => _scale > 1.01;
+  bool get _shouldLockPageScroll =>
+      _isMultiTouch || (_isZoomed && _activePointers.isNotEmpty);
+
+  void _resetZoom() {
+    _scale = 1.0;
+    _offset = Offset.zero;
+    _initialPinchDistance = null;
+    _initialFocalPoint = null;
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    _activePointers[event.pointer] = event.position;
+    if (_activePointers.length == 2) {
+      _baseScale = _scale;
+      _baseOffset = _offset;
+      _initialPinchDistance = _computePinchDistance();
+      _initialFocalPoint = _computeFocalPoint();
+      setState(() {});
+      return;
+    }
+    if (_activePointers.length == 1 && _isZoomed) {
+      setState(() {});
+    }
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    if (!_activePointers.containsKey(event.pointer)) {
+      return;
+    }
+    _activePointers[event.pointer] = event.position;
+
+    if (_activePointers.length >= 2) {
+      final distance = _computePinchDistance();
+      if (_initialPinchDistance == null ||
+          _initialPinchDistance! < 1 ||
+          _initialFocalPoint == null) {
+        _initialPinchDistance = distance;
+        _initialFocalPoint = _computeFocalPoint();
+        _baseScale = _scale;
+        _baseOffset = _offset;
+        return;
+      }
+
+      final scaleFactor = distance / _initialPinchDistance!;
+      final newScale = (_baseScale * scaleFactor).clamp(_minScale, _maxScale);
+      final scaleChange = newScale / _baseScale;
+      final focalDelta = _computeFocalPoint() - _initialFocalPoint!;
+      final newOffset =
+          _baseOffset * scaleChange + focalDelta * (1 - scaleChange);
+
+      setState(() {
+        _scale = newScale;
+        _offset = newOffset;
+      });
+      return;
+    }
+
+    if (_activePointers.length == 1 && _isZoomed) {
+      setState(() {
+        _offset += event.delta;
+      });
+    }
+  }
+
+  void _handlePointerUp(PointerEvent event) {
+    _activePointers.remove(event.pointer);
+
+    if (_activePointers.isEmpty) {
+      if (_scale <= 1.05) {
+        _resetZoom();
+      }
+      setState(() {});
+      return;
+    }
+
+    if (_activePointers.length < 2) {
+      _initialPinchDistance = null;
+      _initialFocalPoint = null;
+      _baseScale = _scale;
+      _baseOffset = _offset;
+    }
+
+    if (_activePointers.length == 1 && !_isZoomed) {
+      setState(() {});
+    }
+  }
+
+  double _computePinchDistance() {
+    final points = _activePointers.values.toList(growable: false);
+    if (points.length < 2) {
+      return 0;
+    }
+    return (points[0] - points[1]).distance;
+  }
+
+  Offset _computeFocalPoint() {
+    final points = _activePointers.values.toList(growable: false);
+    if (points.isEmpty) {
+      return Offset.zero;
+    }
+    if (points.length == 1) {
+      return points[0];
+    }
+    return Offset(
+      (points[0].dx + points[1].dx) / 2,
+      (points[0].dy + points[1].dy) / 2,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        title: Text('${_index + 1}/${widget.imageUrls.length}'),
+      ),
+      body: Listener(
+        onPointerDown: _handlePointerDown,
+        onPointerMove: _handlePointerMove,
+        onPointerUp: _handlePointerUp,
+        onPointerCancel: _handlePointerUp,
+        behavior: HitTestBehavior.translucent,
+        child: PageView.builder(
+          controller: _pageController,
+          physics: _shouldLockPageScroll
+              ? const NeverScrollableScrollPhysics()
+              : const PageScrollPhysics(),
+          itemCount: widget.imageUrls.length,
+          onPageChanged: (value) {
+            setState(() {
+              _index = value;
+              _activePointers.clear();
+              _resetZoom();
+            });
+          },
+          itemBuilder: (_, i) {
+            final image = PostalOssNetworkImage(
+              imageUrl: widget.imageUrls[i],
+              fit: BoxFit.contain,
+            );
+            final applyTransform = i == _index && (_isZoomed || _isMultiTouch);
+            if (!applyTransform) {
+              return Center(child: image);
+            }
+            return Center(
+              child: Transform(
+                transform: Matrix4.identity()
+                  ..translateByDouble(_offset.dx, _offset.dy, 0, 1)
+                  ..scaleByDouble(_scale, _scale, _scale, 1),
+                alignment: Alignment.center,
+                child: image,
+              ),
+            );
+          },
+        ),
       ),
     );
   }

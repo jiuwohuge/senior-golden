@@ -283,6 +283,78 @@ flowchart LR
 
 ## [改动预测]
 
+- **本次新增（2026-05-23，全屏看图滑动+缩放一次性修复）**：
+  - 目标：彻底消除 `InteractiveViewer` 与 `PageView` 手势竞技场冲突，单指立即翻页、双指可靠缩放。
+  - 根因：`InteractiveViewer` 即使 `panEnabled: false` 仍会参与手势识别，导致单指滑动需等待竞技场裁决。
+  - 实际处理：
+    - `senior-post-flutter/lib/features/post_wall/post_detail_page.dart`
+      - 移除 `InteractiveViewer`；
+      - 用 `Listener` 追踪触点数量，单指时 `PageView` 直接接管横向滑图（子组件为纯图片，无缩放层）；
+      - 双指时用 `Transform` + 触点距离手动计算缩放，并锁定 `PageView`；
+      - 放大后单指可拖动查看细节，松手后 scale≤1.05 自动复位。
+  - 验证：
+    - `flutter analyze` 通过。
+    - 单指任意位置立即左右翻页；双指 pinch 可缩放；两者互不抢占。
+
+- **本次新增（2026-05-23，全屏看图缩放失效修复）**：
+  - 目标：修复“单指滑动丝滑但双指缩放失效”的问题。
+  - 实际处理：
+    - `senior-post-flutter/lib/features/post_wall/post_detail_page.dart`
+      - 调整为缩放层始终接收手势，避免双指开始阶段丢失缩放序列；
+      - 保留“单指翻页 / 双指禁翻页”策略（双指时 `PageView` 置为 `NeverScrollableScrollPhysics`）。
+  - 验证：
+    - `flutter analyze` 通过。
+    - 单指可立即左右翻页，双指可正常缩放。
+
+- **本次新增（2026-05-23，全屏看图手势分离优化）**：
+  - 目标：实现“单指只翻页、双指才缩放”的交互，避免两种手势互相抢占。
+  - 实际处理：
+    - `senior-post-flutter/lib/features/post_wall/post_detail_page.dart`
+      - 在全屏看图页监听触点数量；
+      - 单指时启用 `PageView` 横向滑图；
+      - 双指时临时禁用 `PageView`，启用图片缩放（`InteractiveViewer`）。
+      - 进一步优化为：单指时不挂载 `InteractiveViewer`，彻底消除单指滑图的触发延迟。
+  - 验证：
+    - `flutter analyze` 通过。
+
+- **本次新增（2026-05-23，全屏看图左右滑动手势修复）**：
+  - 目标：修复全屏看图时需要从边缘才能滑动切图的问题。
+  - 实际处理：
+    - `senior-post-flutter/lib/features/post_wall/post_detail_page.dart`
+      - 全屏图片查看页移除会抢占横向拖拽手势的缩放容器，改为直接由 `PageView` 接管手势。
+  - 验证：
+    - `flutter analyze` 通过。
+    - 全屏预览在图片区域中间左右滑动即可切图，无需贴边操作。
+
+- **本次新增（2026-05-23，朋友圈式详情迭代打磨 + 列表文案前置 + 图片滑动修复）**：
+  - 目标：
+    - Post Wall 列表保持原风格，仅将文案前置到图片前；
+    - 详情页补齐打磨（文案默认折叠行数、宫格间距/圆角）；
+    - 修复全屏看图左右滑动受阻问题。
+  - 实际处理：
+    - `senior-post-flutter/lib/features/post_wall/post_wall_page.dart`
+      - 列表卡片调整为先文案后图片。
+    - `senior-post-flutter/lib/features/post_wall/post_detail_page.dart`
+      - 文案折叠默认从 4 行调整为 6 行；
+      - 宫格间距/圆角细化（更接近朋友圈密度）；
+      - 全屏看图关闭图片平移手势抢占（`panEnabled: false`），恢复左右滑页。
+  - 验证：
+    - `flutter analyze` 通过。
+
+- **本次新增（2026-05-23，App Token 持久化冷启动恢复）**：
+  - 目标：
+    - 修复用户退出 App 后仍停留在欢迎/登录流，导致“看起来像必须重新登录”。
+    - 对齐移动端长期留存体验：本地有效 Token 冷启动自动恢复并直达主页。
+  - 实际处理：
+    - `senior-post-flutter/lib/main.dart`
+      - 启动读取 `secure_storage` Token 后，主动拉取 `/api/auth/me` 回填会话；
+      - 弱网/瞬时失败不阻断启动，避免卡死在启动阶段。
+    - `senior-post-flutter/lib/app/router/app_router.dart`
+      - 路由守卫调整为：存在有效 Token 时，访问欢迎/登录/注册等认证页自动跳转主页；
+      - 保留 `socialComplete` 作为资料补全例外路径。
+  - 验证：
+    - `flutter analyze` 通过。
+
 - **本次新增（2026-05-23，登录页窄屏无需滚动显示主按钮优化）**：
   - 目标：修复真机窄屏下登录页需滚动才能完整看到 Sign in 按钮的问题。
   - 实际处理：
