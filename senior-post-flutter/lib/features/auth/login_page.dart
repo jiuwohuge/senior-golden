@@ -118,11 +118,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final compactLayout = MediaQuery.sizeOf(context).height < 860;
     return Scaffold(
       body: PaperTextureBackground(
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              compactLayout ? 10 : 16,
+              20,
+              compactLayout ? 16 : 28,
+            ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 560),
               child: Center(
@@ -143,7 +149,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       tagline: l10n.authWelcomeBack,
                       year: '2026',
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: compactLayout ? 12 : 20),
                     PostalCardEnvelope(
                       header: PostalSectionTitle(title: l10n.authLoginTitle),
                       child: Form(
@@ -158,7 +164,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 onPressed: _busy ? null : _signInWithGoogle,
                                 variant: PostalButtonVariant.secondary,
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: compactLayout ? 12 : 16),
                               Row(
                                 children: [
                                   const Expanded(child: Divider()),
@@ -176,7 +182,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   const Expanded(child: Divider()),
                                 ],
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: compactLayout ? 12 : 16),
                             ],
                             PostalTextField(
                               controller: _email,
@@ -198,7 +204,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 14),
+                            SizedBox(height: compactLayout ? 10 : 14),
                             PostalTextField(
                               controller: _password,
                               label: l10n.authPasswordLabel,
@@ -217,7 +223,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: compactLayout ? 6 : 8),
                             Align(
                               alignment: Alignment.centerRight,
                               child: PostalInlineLink(
@@ -236,6 +242,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   ? null
                                   : (v) => setState(() => _agreed = v),
                               label: l10n.authAgreeTpl('{terms}', '{privacy}'),
+                              compact: compactLayout,
                               linkSegments: [
                                 PostalLinkSegment(
                                   key: 'terms',
@@ -251,7 +258,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 14),
+                            SizedBox(height: compactLayout ? 10 : 14),
                             GestureDetector(
                               onLongPress: kDebugMode && !_busy
                                   ? () =>

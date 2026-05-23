@@ -130,19 +130,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       } else if (!_validateStep(l10n, years, bootstrap)) {
         return;
       }
-      if (_step == 6) {
-        setState(() => _busy = true);
-        try {
-          await _ensureAccountReady(l10n, autoCc);
-        } on ApiBusinessException catch (e) {
-          if (mounted) {
-            PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
-          }
-          return;
-        } finally {
-          if (mounted) setState(() => _busy = false);
-        }
-      }
       if (!mounted) return;
       setState(() => _step += 1);
       return;
@@ -200,13 +187,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         }
         return false;
       case 6:
-        if (_agreed) return true;
-        PostalSnack.show(
-          context,
-          l10n.authAgreeRequired,
-          tone: PostalSnackTone.warning,
-        );
-        return false;
+        return true;
       case 7:
         return true;
       default:
@@ -278,7 +259,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Future<void> _pickRegisterAvatar() async {
-    final l10n = AppLocalizations.of(context)!;
     final x = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       maxWidth: 2048,
@@ -296,20 +276,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       _avatarPendingBytes = cropped;
       _avatarObjectKey = null;
     });
-    if (_agreed) {
-      final locale = Localizations.localeOf(context);
-      final bootstrap = await ref.read(
-        appBootstrapProvider(locale.languageCode).future,
-      );
-      final autoCc = countryCodeForAppLocale(locale, bootstrap.countries);
-      await _uploadAvatarIfPossible(l10n, autoCc);
-    } else {
-      PostalSnack.show(
-        context,
-        l10n.authRegisterAvatarAgreeFirst,
-        tone: PostalSnackTone.warning,
-      );
-    }
   }
 
   Future<void> _registerIfNeeded(
@@ -342,7 +308,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   ) async {
     final bytes = _avatarPendingBytes;
     if (bytes == null || _avatarObjectKey != null) return;
-    if (!_agreed || !_validateRegistrationFields(l10n)) return;
+    if (!_validateRegistrationFields(l10n)) return;
 
     setState(() => _avatarUploading = true);
     try {
@@ -365,27 +331,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       rethrow;
     } finally {
       if (mounted) setState(() => _avatarUploading = false);
-    }
-  }
-
-  Future<void> _ensureAccountReady(
-    AppLocalizations l10n,
-    String? autoCountryCode,
-  ) async {
-    if (!_agreed) {
-      PostalSnack.show(
-        context,
-        l10n.authAgreeRequired,
-        tone: PostalSnackTone.warning,
-      );
-      throw ApiBusinessException(400, l10n.authAgreeRequired);
-    }
-    if (!_validateRegistrationFields(l10n)) {
-      throw ApiBusinessException(400, l10n.authFieldRequired);
-    }
-    await _registerIfNeeded(l10n, autoCountryCode);
-    if (_avatarPendingBytes != null && _avatarObjectKey == null) {
-      await _uploadAvatarIfPossible(l10n, autoCountryCode);
     }
   }
 
@@ -703,10 +648,33 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
         );
       case 6:
-        return _stepAvatar(context, l10n, autoCountryCode: autoCountryCode);
+        return _stepAvatar(context, l10n);
       case 7:
         return SingleChildScrollView(
-          child: _reviewCard(context, l10n, countryLabel),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _reviewCard(context, l10n, countryLabel),
+              const SizedBox(height: 12),
+              PostalCheckboxField(
+                value: _agreed,
+                onChanged: _busy ? null : (v) => setState(() => _agreed = v),
+                label: l10n.authAgreeTpl('{terms}', '{privacy}'),
+                linkSegments: [
+                  PostalLinkSegment(
+                    key: 'terms',
+                    text: l10n.authTermsTitle,
+                    onTap: () => context.go(LoginRoutes.legalTerms),
+                  ),
+                  PostalLinkSegment(
+                    key: 'privacy',
+                    text: l10n.authPrivacyTitle,
+                    onTap: () => context.go(LoginRoutes.legalPrivacy),
+                  ),
+                ],
+              ),
+            ],
+          ),
         );
       default:
         return const SizedBox.shrink();
@@ -771,11 +739,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
-  Widget _stepAvatar(
-    BuildContext context,
-    AppLocalizations l10n, {
-    required String? autoCountryCode,
-  }) {
+  Widget _stepAvatar(BuildContext context, AppLocalizations l10n) {
     final pending = _avatarPendingBytes;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -893,29 +857,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
         ),
         const SizedBox(height: 20),
-        PostalCheckboxField(
-          value: _agreed,
-          onChanged: (_busy || _avatarUploading)
-              ? null
-              : (v) async {
-                  setState(() => _agreed = v);
-                  if (v && _avatarPendingBytes != null) {
-                    await _uploadAvatarIfPossible(l10n, autoCountryCode);
-                  }
-                },
-          label: l10n.authAgreeTpl('{terms}', '{privacy}'),
-          linkSegments: [
-            PostalLinkSegment(
-              key: 'terms',
-              text: l10n.authTermsTitle,
-              onTap: () => context.go(LoginRoutes.legalTerms),
-            ),
-            PostalLinkSegment(
-              key: 'privacy',
-              text: l10n.authPrivacyTitle,
-              onTap: () => context.go(LoginRoutes.legalPrivacy),
-            ),
-          ],
+        Text(
+          l10n.authRegisterAvatarSkipHint,
+          textAlign: TextAlign.center,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: PostalTokens.inkTertiary),
         ),
       ],
     );
@@ -1048,11 +995,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 3 => _gender == 1 || _gender == 2,
                 4 => _birthYear != null && years.isNotEmpty,
                 5 => _interestTagIds.length >= 3,
-                6 => _agreed && !_avatarUploading,
+                6 => !_avatarUploading,
                 _ => true,
               };
               final footerHint = switch (_step) {
-                6 => l10n.authRegisterAvatarSkipHint,
+                6 => null,
                 7 => null,
                 _ => l10n.authRegisterProfileHint,
               };

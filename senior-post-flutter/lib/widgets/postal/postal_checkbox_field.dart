@@ -12,6 +12,7 @@ class PostalCheckboxField extends StatelessWidget {
     required this.label,
     this.linkSegments = const [],
     this.error,
+    this.compact = false,
   });
 
   final bool value;
@@ -25,6 +26,7 @@ class PostalCheckboxField extends StatelessWidget {
   final List<PostalLinkSegment> linkSegments;
 
   final String? error;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -38,30 +40,27 @@ class PostalCheckboxField extends StatelessWidget {
           onTap: disabled ? null : () => onChanged!(!value),
           borderRadius: PostalTokens.shapeSm,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: PostalTokens.s8,
-              horizontal: PostalTokens.s4,
+            padding: EdgeInsets.symmetric(
+              vertical: compact ? PostalTokens.s4 : PostalTokens.s8,
+              horizontal: compact ? 0 : PostalTokens.s4,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: 24,
-                  height: 24,
+                  width: compact ? 20 : 24,
+                  height: compact ? 20 : 24,
                   child: Checkbox(
                     value: value,
-                    onChanged: disabled
-                        ? null
-                        : (v) => onChanged!(v ?? false),
-                    materialTapTargetSize:
-                        MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
+                    onChanged: disabled ? null : (v) => onChanged!(v ?? false),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: compact
+                        ? const VisualDensity(horizontal: -3, vertical: -3)
+                        : VisualDensity.compact,
                   ),
                 ),
-                const SizedBox(width: PostalTokens.s12),
-                Expanded(
-                  child: _buildRichText(theme, disabled),
-                ),
+                SizedBox(width: compact ? PostalTokens.s8 : PostalTokens.s12),
+                Expanded(child: _buildRichText(theme, disabled)),
               ],
             ),
           ),
@@ -86,8 +85,8 @@ class PostalCheckboxField extends StatelessWidget {
       color: disabled
           ? PostalTokens.inkSecondary.withValues(alpha: 0.5)
           : PostalTokens.inkNavy,
-      fontSize: 15,
-      height: 1.5,
+      fontSize: compact ? 14 : 15,
+      height: compact ? 1.35 : 1.5,
     );
     final linkStyle = baseStyle?.copyWith(
       color: PostalTokens.postboxGreen,
@@ -128,9 +127,7 @@ class PostalCheckboxField extends StatelessWidget {
       spans.add(TextSpan(text: label.substring(lastEnd)));
     }
 
-    return Text.rich(
-      TextSpan(style: baseStyle, children: spans),
-    );
+    return Text.rich(TextSpan(style: baseStyle, children: spans));
   }
 }
 
