@@ -13,4 +13,7 @@ public class AppPostcardCommentCreateInDto {
     @Size(max = 1000)
     @Schema(description = "评论正文")
     private String content;
+
+    @Schema(description = "回复的评论ID，顶级评论不传")
+    private Long parentCommentId;
 }

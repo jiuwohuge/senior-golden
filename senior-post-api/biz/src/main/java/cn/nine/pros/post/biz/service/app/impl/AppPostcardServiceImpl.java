@@ -6,11 +6,13 @@ import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.controller.app.AppPageHelper;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.PostcardCommentDomain;
+import cn.nine.pros.post.biz.model.domain.PostcardCommentLikeDomain;
 import cn.nine.pros.post.biz.model.domain.PostcardDomain;
 import cn.nine.pros.post.biz.service.app.AppBlacklistService;
 import cn.nine.pros.post.biz.service.app.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.app.AppPostcardService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
+import cn.nine.pros.post.biz.service.base.PostcardCommentLikeService;
 import cn.nine.pros.post.biz.service.base.PostcardCommentService;
 import cn.nine.pros.post.biz.service.base.PostcardService;
 import cn.nine.pros.post.biz.service.base.SensitiveWordService;
@@ -23,9 +25,11 @@ import cn.nine.pros.post.client.model.input.app.AppPostcardCreateInDto;
 import cn.nine.pros.post.client.model.input.app.AppPostcardPageInDto;
 import cn.nine.pros.post.client.model.out.PostcardAuthorVO;
 import cn.nine.pros.post.client.model.out.PostcardCommentItemVO;
+import cn.nine.pros.post.client.model.out.PostcardCommentLikeVO;
 import cn.nine.pros.post.client.model.out.PostcardDetailVO;
 import cn.nine.pros.post.client.model.out.PostcardWallItemVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -48,6 +52,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
 
     private final PostcardService postcardService;
     private final PostcardCommentService postcardCommentService;
+    private final PostcardCommentLikeService postcardCommentLikeService;
     private final UserService userService;
     private final SensitiveWordService sensitiveWordService;
     private final OssDisplayUrlService ossDisplayUrlService;
@@ -170,27 +175,45 @@ public class AppPostcardServiceImpl implements AppPostcardService {
             long viewerUserId, Long postcardId, AppPostcardCommentPageInDto body) {
         requireApprovedPostcardForComments(postcardId);
         PageQuery pq = AppPageHelper.normalize(body == null ? null : body.getPage());
-        LambdaQueryWrapper<PostcardCommentDomain> qw = new LambdaQueryWrapper<PostcardCommentDomain>()
-                .eq(PostcardCommentDomain::getPostcardId, postcardId)
-                .eq(PostcardCommentDomain::isDelFlag, false)
-                .eq(PostcardCommentDomain::getStatus, 1)
-                // 0=待审 1=通过：App 展示正文；2=驳回：不展示（与 DB 注释一致）
-                .apply("(review_status IS DISTINCT FROM 2)")
+        LambdaQueryWrapper<PostcardCommentDomain> rootQw = visibleCommentQuery(postcardId)
+                .isNull(PostcardCommentDomain::getParentId)
                 .orderByDesc(PostcardCommentDomain::getCreatedAt);
-        Page<PostcardCommentDomain> p = postcardCommentService.page(AppPageHelper.mpPage(pq), qw);
-        Map<Long, UserDTO> authors = loadAuthorsFromComments(p.getRecords());
-        List<PostcardCommentItemVO> list = p.getRecords().stream()
-                .map(c -> toCommentItem(c, authors.get(c.getUserId())))
-                .collect(Collectors.toList());
-        for (PostcardCommentItemVO c : list) {
-            if (c.getAuthor() != null) {
-                ossDisplayUrlService.applyAuthor(viewerUserId, c.getAuthor());
-            }
+        Page<PostcardCommentDomain> p = postcardCommentService.page(AppPageHelper.mpPage(pq), rootQw);
+        List<PostcardCommentDomain> roots = p.getRecords();
+        if (roots.isEmpty()) {
+            return AppPageHelper.pageData(pq, p, List.of());
         }
+        List<Long> rootIds = roots.stream().map(PostcardCommentDomain::getId).filter(Objects::nonNull).toList();
+        List<PostcardCommentDomain> replyRows = postcardCommentService.list(
+                visibleCommentQuery(postcardId)
+                        .isNotNull(PostcardCommentDomain::getParentId)
+                        .in(PostcardCommentDomain::getRootId, rootIds)
+                        .orderByAsc(PostcardCommentDomain::getCreatedAt));
+        List<PostcardCommentDomain> allRows = new ArrayList<>(roots);
+        allRows.addAll(replyRows);
+        Map<Long, UserDTO> authors = loadAuthorsFromComments(allRows);
+        Set<Long> likedIds = postcardCommentLikeService.findLikedCommentIds(
+                viewerUserId,
+                allRows.stream().map(PostcardCommentDomain::getId).filter(Objects::nonNull).collect(Collectors.toSet()));
+        Map<Long, List<PostcardCommentDomain>> repliesByRoot = replyRows.stream()
+                .collect(Collectors.groupingBy(PostcardCommentDomain::getRootId));
+        List<PostcardCommentItemVO> list = roots.stream()
+                .map(root -> {
+                    List<PostcardCommentDomain> reps = repliesByRoot.getOrDefault(root.getId(), List.of());
+                    List<PostcardCommentItemVO> replyVos = reps.stream()
+                            .map(r -> toCommentItem(r, authors, likedIds, false))
+                            .collect(Collectors.toList());
+                    PostcardCommentItemVO vo = toCommentItem(root, authors, likedIds, false);
+                    vo.setReplies(replyVos);
+                    return vo;
+                })
+                .collect(Collectors.toList());
+        applyAuthorOss(viewerUserId, list);
         return AppPageHelper.pageData(pq, p, list);
     }
 
     @Override
+    @Transactional
     public PostcardCommentItemVO createComment(long userId, Long postcardId, AppPostcardCommentCreateInDto body) {
         requireApprovedPostcardForComments(postcardId);
         String text = body.getContent() == null ? "" : body.getContent().trim();
@@ -207,15 +230,71 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         c.setContent(text);
         c.setStatus(1);
         c.setReviewStatus(0);
+        c.setLikeCount(0);
+        Long parentId = body.getParentCommentId();
+        if (parentId != null) {
+            PostcardCommentDomain parent = requireParentComment(postcardId, parentId);
+            c.setParentId(parent.getId());
+            Long rootId = parent.getRootId() != null ? parent.getRootId() : parent.getId();
+            c.setRootId(rootId);
+            c.setReplyToUserId(parent.getUserId());
+        }
         c.initAudit(userId);
         postcardCommentService.save(c);
-        PostcardCommentDomain fresh = postcardCommentService.getById(c.getId());
-        UserDTO author = userService.findById(userId);
-        PostcardCommentItemVO vo = toCommentItem(fresh, author);
-        if (vo.getAuthor() != null) {
-            ossDisplayUrlService.applyAuthor(userId, vo.getAuthor());
+        if (parentId == null) {
+            c.setRootId(c.getId());
+            postcardCommentService.updateById(c);
         }
+        PostcardCommentDomain fresh = postcardCommentService.getById(c.getId());
+        Map<Long, UserDTO> authors = loadAuthorsFromComments(List.of(fresh));
+        if (fresh.getReplyToUserId() != null && !authors.containsKey(fresh.getReplyToUserId())) {
+            UserDTO replyTo = userService.findById(fresh.getReplyToUserId());
+            if (replyTo != null) {
+                authors.put(replyTo.getId(), replyTo);
+            }
+        }
+        PostcardCommentItemVO vo = toCommentItem(fresh, authors, Set.of(), false);
+        applyAuthorOss(userId, List.of(vo));
         return vo;
+    }
+
+    @Override
+    @Transactional
+    public PostcardCommentLikeVO toggleCommentLike(long userId, Long postcardId, Long commentId) {
+        requireApprovedPostcardForComments(postcardId);
+        PostcardCommentDomain comment = requireVisibleComment(postcardId, commentId);
+        PostcardCommentLikeDomain existing = postcardCommentLikeService.getOne(
+                new LambdaQueryWrapper<PostcardCommentLikeDomain>()
+                        .eq(PostcardCommentLikeDomain::getCommentId, commentId)
+                        .eq(PostcardCommentLikeDomain::getUserId, userId)
+                        .eq(PostcardCommentLikeDomain::isDelFlag, false)
+                        .last("LIMIT 1"));
+        int likeCount = comment.getLikeCount() == null ? 0 : comment.getLikeCount();
+        boolean liked;
+        if (existing != null) {
+            existing.setDelFlag(true);
+            existing.setUpdatedAt(LocalDateTime.now());
+            existing.setUpdatedBy(userId);
+            postcardCommentLikeService.updateById(existing);
+            likeCount = Math.max(0, likeCount - 1);
+            liked = false;
+        } else {
+            PostcardCommentLikeDomain like = new PostcardCommentLikeDomain();
+            like.setCommentId(commentId);
+            like.setUserId(userId);
+            like.initAudit(userId);
+            postcardCommentLikeService.save(like);
+            likeCount = likeCount + 1;
+            liked = true;
+        }
+        postcardCommentService.update(new LambdaUpdateWrapper<PostcardCommentDomain>()
+                .eq(PostcardCommentDomain::getId, commentId)
+                .set(PostcardCommentDomain::getLikeCount, likeCount));
+        return PostcardCommentLikeVO.builder()
+                .commentId(commentId)
+                .likeCount(likeCount)
+                .likedByMe(liked)
+                .build();
     }
 
     private PostcardDomain requireApprovedPostcardForComments(Long postcardId) {
@@ -265,7 +344,10 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     }
 
     private Map<Long, UserDTO> loadAuthorsFromComments(List<PostcardCommentDomain> rows) {
-        Set<Long> ids = rows.stream().map(PostcardCommentDomain::getUserId).filter(Objects::nonNull).collect(Collectors.toSet());
+        Set<Long> ids = rows.stream()
+                .flatMap(r -> java.util.stream.Stream.of(r.getUserId(), r.getReplyToUserId()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
         Map<Long, UserDTO> map = new HashMap<>();
         for (Long id : ids) {
             UserDTO u = userService.findById(id);
@@ -332,13 +414,80 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         return List.of();
     }
 
-    private static PostcardCommentItemVO toCommentItem(PostcardCommentDomain c, UserDTO author) {
+    private LambdaQueryWrapper<PostcardCommentDomain> visibleCommentQuery(Long postcardId) {
+        return new LambdaQueryWrapper<PostcardCommentDomain>()
+                .eq(PostcardCommentDomain::getPostcardId, postcardId)
+                .eq(PostcardCommentDomain::isDelFlag, false)
+                .eq(PostcardCommentDomain::getStatus, 1)
+                .apply("(review_status IS DISTINCT FROM 2)");
+    }
+
+    private PostcardCommentDomain requireParentComment(Long postcardId, Long parentId) {
+        PostcardCommentDomain parent = postcardCommentService.getById(parentId);
+        if (parent == null
+                || parent.isDelFlag()
+                || !Objects.equals(parent.getPostcardId(), postcardId)
+                || intVal(parent.getStatus()) != 1
+                || intVal(parent.getReviewStatus()) == 2) {
+            throw new BadRequestException(appMessages.get("app.error.comment.parentNotFound"));
+        }
+        return parent;
+    }
+
+    private PostcardCommentDomain requireVisibleComment(Long postcardId, Long commentId) {
+        PostcardCommentDomain c = postcardCommentService.getById(commentId);
+        if (c == null
+                || c.isDelFlag()
+                || !Objects.equals(c.getPostcardId(), postcardId)
+                || intVal(c.getStatus()) != 1
+                || intVal(c.getReviewStatus()) == 2) {
+            throw new BadRequestException(appMessages.get("app.error.comment.notFound"));
+        }
+        return c;
+    }
+
+    private static PostcardCommentItemVO toCommentItem(
+            PostcardCommentDomain c,
+            Map<Long, UserDTO> authors,
+            Set<Long> likedIds,
+            boolean includeRepliesPlaceholder) {
+        UserDTO author = authors.get(c.getUserId());
+        PostcardAuthorVO replyTo = null;
+        if (c.getReplyToUserId() != null) {
+            replyTo = toAuthor(authors.get(c.getReplyToUserId()));
+        }
+        int likes = c.getLikeCount() == null ? 0 : c.getLikeCount();
         return PostcardCommentItemVO.builder()
                 .id(c.getId())
                 .content(c.getContent())
                 .createdAt(toLocalDateTime(c.getCreatedAt()))
                 .author(toAuthor(author))
+                .replyTo(replyTo)
+                .likeCount(likes)
+                .likedByMe(likedIds.contains(c.getId()))
+                .replies(includeRepliesPlaceholder ? List.of() : null)
                 .build();
+    }
+
+    private void applyAuthorOss(long viewerUserId, List<PostcardCommentItemVO> roots) {
+        for (PostcardCommentItemVO c : roots) {
+            if (c.getAuthor() != null) {
+                ossDisplayUrlService.applyAuthor(viewerUserId, c.getAuthor());
+            }
+            if (c.getReplyTo() != null) {
+                ossDisplayUrlService.applyAuthor(viewerUserId, c.getReplyTo());
+            }
+            if (c.getReplies() != null) {
+                for (PostcardCommentItemVO r : c.getReplies()) {
+                    if (r.getAuthor() != null) {
+                        ossDisplayUrlService.applyAuthor(viewerUserId, r.getAuthor());
+                    }
+                    if (r.getReplyTo() != null) {
+                        ossDisplayUrlService.applyAuthor(viewerUserId, r.getReplyTo());
+                    }
+                }
+            }
+        }
     }
 
     private static PostcardAuthorVO toAuthor(UserDTO u) {

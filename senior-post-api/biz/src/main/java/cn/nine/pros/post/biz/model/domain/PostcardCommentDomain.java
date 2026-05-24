@@ -51,4 +51,16 @@ public class PostcardCommentDomain extends AbstractAuditableDomain {
     @Schema(description = "审核状态：0待审核 1通过 2驳回")
     private Object reviewStatus;
 
+    @Schema(description = "父评论ID，顶级为 NULL")
+    private Long parentId;
+
+    @Schema(description = "所属顶级评论ID")
+    private Long rootId;
+
+    @Schema(description = "被回复用户ID")
+    private Long replyToUserId;
+
+    @Schema(description = "点赞数")
+    private Integer likeCount;
+
 }

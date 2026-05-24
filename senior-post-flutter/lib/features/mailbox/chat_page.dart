@@ -16,6 +16,7 @@ import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import 'chat_senior_emojis.dart';
 import 'im_unread_providers.dart';
+import 'im_user_id.dart';
 import 'mailbox_remote.dart';
 import 'tim_facade.dart';
 
@@ -41,6 +42,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   late final ValueNotifier<V2TimMessage?> _sentMessageSink;
   bool _busy = false;
 
+  String? get _imPeerId => normalizeImUserId(widget.peerUserId);
+
   @override
   void initState() {
     super.initState();
@@ -58,10 +61,21 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   Future<void> _send() async {
     final text = _input.text.trim();
     if (text.isEmpty) return;
+    final peerId = _imPeerId;
+    if (peerId == null) {
+      if (mounted) {
+        PostalSnack.show(
+          context,
+          'Cannot send: invalid friend user id.',
+          tone: PostalSnackTone.error,
+        );
+      }
+      return;
+    }
     setState(() => _busy = true);
     try {
       final repo = ref.read(mailboxRemoteRepositoryProvider);
-      final canChat = await repo.isFriendshipActive(widget.peerUserId);
+      final canChat = await repo.isFriendshipActive(peerId);
       if (!canChat) {
         if (mounted) {
           final l10n = AppLocalizations.of(context)!;
@@ -73,6 +87,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         }
         return;
       }
+      await repo.syncImPeer(peerId);
       await ref.read(seniorPostTimFacadeProvider).ensureLoggedIn();
       final tim = V2TIMManager();
       final created = await tim.v2TIMMessageManager.createTextMessage(
@@ -82,12 +97,22 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         throw ApiBusinessException(created.code, created.desc);
       }
       final msg = created.data?.messageInfo;
-      final send = await tim.v2TIMMessageManager.sendMessage(
+      var send = await tim.v2TIMMessageManager.sendMessage(
         message: msg,
-        receiver: widget.peerUserId,
+        receiver: peerId,
         groupID: '',
         priority: MessagePriorityEnum.V2TIM_PRIORITY_NORMAL,
       );
+      if (send.code != 0 && isImUserIdError(send.desc)) {
+        await repo.syncImPeer(peerId);
+        await Future<void>.delayed(const Duration(milliseconds: 400));
+        send = await tim.v2TIMMessageManager.sendMessage(
+          message: msg,
+          receiver: peerId,
+          groupID: '',
+          priority: MessagePriorityEnum.V2TIM_PRIORITY_NORMAL,
+        );
+      }
       if (send.code != 0) {
         throw ApiBusinessException(send.code, send.desc);
       }
@@ -181,6 +206,22 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   Widget build(BuildContext context) {
     final title = widget.displayName ?? widget.peerUserId;
     final textTheme = Theme.of(context).textTheme;
+    final imPeerId = _imPeerId;
+    if (imPeerId == null) {
+      return Scaffold(
+        backgroundColor: PostalTokens.paperCream,
+        appBar: AppBar(
+          title: Text(title),
+          backgroundColor: PostalTokens.postboxGreen,
+          foregroundColor: Colors.white,
+        ),
+        body: const PostalEmptyState(
+          title: 'Chat unavailable',
+          subtitle: 'Invalid friend user id from server.',
+          tone: PostalEmptyTone.error,
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: PostalTokens.paperCream,
       appBar: AppBar(
@@ -227,7 +268,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 ),
               ),
               child: _CloudChatBody(
-                peerUserId: widget.peerUserId,
+                imPeerId: imPeerId,
                 peerDisplayName: widget.displayName,
                 peerAvatarUrl: widget.peerAvatarUrl,
                 scrollController: _scroll,
@@ -490,13 +531,13 @@ class _BubbleTile extends StatelessWidget {
 
 class _CloudChatBody extends ConsumerStatefulWidget {
   const _CloudChatBody({
-    required this.peerUserId,
+    required this.imPeerId,
     required this.scrollController,
     required this.sentMessageSink,
     this.peerDisplayName,
     this.peerAvatarUrl,
   });
-  final String peerUserId;
+  final String imPeerId;
   final String? peerDisplayName;
   final String? peerAvatarUrl;
   final ScrollController scrollController;
@@ -544,7 +585,7 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
     if (gid != null && gid.isNotEmpty) {
       return false;
     }
-    return m.userID == widget.peerUserId;
+    return m.userID == widget.imPeerId;
   }
 
   void _ingestLiveMessage(V2TimMessage m) {
@@ -584,10 +625,10 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
     final tim = V2TIMManager();
     // ignore: deprecated_member_use
     final r = await tim.v2TIMMessageManager.markC2CMessageAsRead(
-      userID: widget.peerUserId,
+      userID: widget.imPeerId,
     );
     if (r.code == 0 && mounted) {
-      ref.read(imC2cUnreadProvider.notifier).clearPeer(widget.peerUserId);
+      ref.read(imC2cUnreadProvider.notifier).clearPeer(widget.imPeerId);
     }
   }
 
@@ -616,7 +657,7 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
     });
     try {
       final repo = ref.read(mailboxRemoteRepositoryProvider);
-      final canChat = await repo.isFriendshipActive(widget.peerUserId);
+      final canChat = await repo.isFriendshipActive(widget.imPeerId);
       if (!canChat) {
         if (!mounted) return;
         setState(() {
@@ -627,14 +668,24 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
         });
         return;
       }
+      await repo.syncImPeer(widget.imPeerId);
       await ref.read(seniorPostTimFacadeProvider).ensureLoggedIn();
       final tim = V2TIMManager();
       final me = await tim.getLoginUser();
-      final r = await tim.v2TIMMessageManager.getC2CHistoryMessageList(
-        userID: widget.peerUserId,
+      var r = await tim.v2TIMMessageManager.getC2CHistoryMessageList(
+        userID: widget.imPeerId,
         count: 30,
         lastMsg: null,
       );
+      if (r.code != 0 && isImUserIdError(r.desc)) {
+        await repo.syncImPeer(widget.imPeerId);
+        await Future<void>.delayed(const Duration(milliseconds: 400));
+        r = await tim.v2TIMMessageManager.getC2CHistoryMessageList(
+          userID: widget.imPeerId,
+          count: 30,
+          lastMsg: null,
+        );
+      }
       if (!mounted) return;
       if (r.code != 0) {
         setState(() {
@@ -665,10 +716,10 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
       await _attachMsgListener();
       // ignore: deprecated_member_use
       final read = await tim.v2TIMMessageManager.markC2CMessageAsRead(
-        userID: widget.peerUserId,
+        userID: widget.imPeerId,
       );
       if (read.code == 0 && mounted) {
-        ref.read(imC2cUnreadProvider.notifier).clearPeer(widget.peerUserId);
+        ref.read(imC2cUnreadProvider.notifier).clearPeer(widget.imPeerId);
       }
     } on ApiBusinessException catch (e) {
       if (mounted) {
@@ -743,7 +794,7 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
         ? 'Me'
         : session.user.nickname.trim();
     final selfAvatar = session.user.avatarUrl;
-    final peerName = (widget.peerDisplayName ?? widget.peerUserId).trim();
+    final peerName = (widget.peerDisplayName ?? widget.imPeerId).trim();
     return ListView.builder(
       controller: widget.scrollController,
       padding: const EdgeInsets.fromLTRB(14, 20, 14, 24),

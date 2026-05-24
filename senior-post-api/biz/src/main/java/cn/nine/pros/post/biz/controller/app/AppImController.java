@@ -16,4 +16,9 @@ public class AppImController implements AppImApi {
     public AppImUserSigVO userSig() {
         return appImService.currentUserSig();
     }
+
+    @Override
+    public void compensateChatPeer(Long peerUserId) {
+        appImService.compensateChatPeer(peerUserId);
+    }
 }

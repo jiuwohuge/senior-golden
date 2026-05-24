@@ -864,6 +864,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterDetailTitle => '信件详情';
 
   @override
+  String get letterAcceptContact => '接受邮政好友';
+
+  @override
+  String get letterAcceptContactDone => '已接受好友';
+
+  @override
+  String get letterAcceptContactSuccess => '已成为邮政好友，可在下方或 Connections 中打开即时聊天。';
+
+  @override
   String get chatFriendsOnlySnack => '仅「邮政好友 / Connections」中的笔友可使用即时聊天。';
 
   @override
@@ -877,6 +886,41 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get postDetailCommentPosted => '评论已发送。';
+
+  @override
+  String get postDetailReply => '回复';
+
+  @override
+  String postDetailReplyingTo(Object name) {
+    return '回复 @$name';
+  }
+
+  @override
+  String get postDetailCancelReply => '取消';
+
+  @override
+  String get postDetailLike => '赞';
+
+  @override
+  String get postDetailReportComment => '举报';
+
+  @override
+  String get postDetailCommentsSection => '评论';
+
+  @override
+  String get postDetailReplyPrefix => '回复';
+
+  @override
+  String get postDetailWriteComment => '写评论…';
+
+  @override
+  String get postDetailSendComment => '发送';
+
+  @override
+  String get postDetailNoCommentsTitle => '还没有评论';
+
+  @override
+  String get postDetailNoCommentsSubtitle => '来写下第一条友善留言吧。';
 
   @override
   String get errorInvalidContentId => '无效的内容编号。';

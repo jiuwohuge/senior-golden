@@ -3,6 +3,12 @@
 > **文档元信息**（**功能完成度**以 [`doc/plan/01-feature-list.md`](doc/plan/01-feature-list.md) + [`doc/plan/05-task-tracker.md`](doc/plan/05-task-tracker.md) 为准；本文为架构与决策基线）  
 > **版本**：2.3 · **更新**：2026-05-20 · **维护**：项目 Owner · **治理说明**：[`doc/plan/00-documentation-governance.md`](doc/plan/00-documentation-governance.md)
 
+### 明信片评论回复 + 点赞 + UI（2026-05-23 · 已交付）
+
+- **后端**：`V23__postcard_comment_reply_like.sql`；`parent_id` / `root_id` / `reply_to_user_id` / `like_count`；`bu_postcard_comment_like`；`POST .../comments/{id}/like`；`comments/paging` 顶级 + `replies` 两级树。
+- **Flutter**：`post_comment_tile.dart`（无 `PostalCardEnvelope` 红条）；详情页回复条 + 点赞；`post_wall_remote` 对接新契约。
+- **验证**：`mvn -pl biz,client compile`；`flutter analyze`（post_wall）通过。
+
 ### 认证首页 + Identity + 性别（2026-05-20 · 已交付）
 
 - **Flutter**：`AuthWelcomePage` 单屏入口；`LoginPage` 邮箱 + Google（Android）；`SocialProfileCompletePage`；注册性别必选 + 复核步可选头像；名录性别筛选 + `PostalGenderIcon`。
@@ -857,3 +863,4 @@ flowchart LR
 - [x] S11. 邮政信箱 × 腾讯 IM 双轨契约与 Flutter 分段 UI + TIM 登录链路（2026-05-02；**腾讯 REST 好友同步已接** FP-A5d-004，生产依赖 `TENCENT_IM_REST_IDENTIFIER` 等配置）
 - [x] S10. 管理后台：`senior-post-manage` 修复配置页 UTF-8 乱码源码、侧边栏二级分组菜单；`UserServiceImpl.delByIds` 禁止删除 `staff_role != 0` 的可登录后台账号（2026-05-01）
 - [x] S12. Flutter **客户端 Mock 层已移除**（2026-05-09）：删除 `lib/core/mock`、`AppEnv.useMock`；名录 Provider 拆文件解循环依赖；缺口与验证见 **`doc/plan/08-mock-removal-gaps.md`**
+- [x] IM 补偿同步（2026-05-24）：新加坡 REST `adminapisgp.im.qcloud.com`；`syncPair`（import + friend_add）；`POST /api/im/peers/{id}/sync`

@@ -70,9 +70,10 @@ senior-post:
     sdk-app-id: ${TENCENT_IM_SDK_APP_ID:0}
     secret-key: ${TENCENT_IM_SECRET_KEY:}
     user-sig-expire-seconds: 604800
-    # FP-A5d-004：REST 同步双向好友（需在控制台创建 App 管理员账号并将 Identifier 填于此）
+    # FP-A5d-004：建联/补偿时 account_import + friend_add（须 App 管理员 Identifier）
+    # REST 域名：新加坡数据中心（错配报 ErrorCode 60026）
     friendship-sync-enabled: ${TENCENT_IM_FRIENDSHIP_SYNC:true}
-    rest-api-host: ${TENCENT_IM_REST_HOST:console.tim.qq.com}
+    rest-api-host: ${TENCENT_IM_REST_HOST:adminapisgp.im.qcloud.com}
     rest-api-identifier: ${TENCENT_IM_REST_IDENTIFIER:}
     rest-api-user-sig-expire-seconds: 120
     account-import-before-friend-add: true

@@ -26,7 +26,7 @@
 | PostgreSQL | [ ] | `application-local.yml` 指向实例；Flyway 自动迁移（含 `V10` 邮票赠送幂等表） |
 | Redis | [ ] | 与 `application-local.yml` 一致；P1 延迟队列依赖 |
 | 环境 Profile | [ ] | `local` 启动；`application-local.yml` 默认 **全 `/api/**` 明文** 便于后端单测；生产形态见根 `application.yml` 的 `jh.security` 白名单与 `android-version`/`ios-version` |
-| 腾讯 IM | [ ] | `senior-post.tencent-im`：`TENCENT_IM_SDK_APP_ID`、`TENCENT_IM_SECRET_KEY`；测 `/api/im/usersig`。**好友同步（FP-A5d-004）**：控制台创建 **App 管理员**账号，设置环境变量 `TENCENT_IM_REST_IDENTIFIER`（与管理员 UserID 一致）；海外地域时可配 `TENCENT_IM_REST_HOST`（默认 `console.tim.qq.com`） |
+| 腾讯 IM | [ ] | **UserSig**：`TENCENT_IM_SDK_APP_ID` + `TENCENT_IM_SECRET_KEY`。**建联同步**：`TENCENT_IM_REST_IDENTIFIER`（App 管理员）；`TENCENT_IM_REST_HOST` 默认 **`adminapisgp.im.qcloud.com`**（新加坡，与控制台一致） |
 | 阿里云 OSS | [ ] | 环境变量：`ALIYUN_OSS_ENDPOINT`、`ALIYUN_OSS_ACCESS_KEY_ID`、`ALIYUN_OSS_ACCESS_KEY_SECRET`、`ALIYUN_OSS_BUCKET`；可选 `ALIYUN_OSS_PUBLIC_BASE_URL`（CDN）；Bucket CORS 允许 App 源站 **PUT**；对应 `senior-post.oss.*` |
 | SMTP / 邮件 | [ ] | `spring.mail.*` + `SENIOR_POST_MAIL_FROM`；本地 MailHog；**Outbox** 由 `MailOutboxDispatchScheduler` 轮询 `sys_mail_outbox`（`senior-post.mail.outbox.*`） |
 

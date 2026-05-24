@@ -29,7 +29,11 @@ class PostWallRemoteRepository {
     return _voToWallPost(map);
   }
 
-  Future<List<WallComment>> listComments(String postcardId, {int page = 1, int size = 50}) async {
+  Future<List<WallComment>> listComments(
+    String postcardId, {
+    int page = 1,
+    int size = 50,
+  }) async {
     final r = await _dio.post<dynamic>(
       '/api/postcards/$postcardId/comments/paging',
       data: <String, dynamic>{
@@ -38,7 +42,10 @@ class PostWallRemoteRepository {
     );
     final pd = _unwrapPageData(r);
     final rows = _recordsList(pd);
-    return rows.whereType<Map<String, dynamic>>().map(_voToWallComment).toList();
+    return rows
+        .whereType<Map<String, dynamic>>()
+        .map(_voToWallComment)
+        .toList();
   }
 
   Future<WallPost> createPost({
@@ -56,7 +63,10 @@ class PostWallRemoteRepository {
     return _voToWallPost(map);
   }
 
-  Future<List<WallPost>> listMinePostcards({int page = 1, int size = 50}) async {
+  Future<List<WallPost>> listMinePostcards({
+    int page = 1,
+    int size = 50,
+  }) async {
     final r = await _dio.post<dynamic>(
       '/api/postcards/mine/paging',
       data: <String, dynamic>{
@@ -71,10 +81,29 @@ class PostWallRemoteRepository {
   Future<void> createComment({
     required String postcardId,
     required String content,
+    String? parentCommentId,
   }) async {
     await _dio.post<dynamic>(
       '/api/postcards/$postcardId/comments',
-      data: <String, dynamic>{'content': content},
+      data: <String, dynamic>{
+        'content': content,
+        if (parentCommentId != null && parentCommentId.isNotEmpty)
+          'parentCommentId': int.tryParse(parentCommentId) ?? parentCommentId,
+      },
+    );
+  }
+
+  Future<({int likeCount, bool likedByMe})> toggleCommentLike({
+    required String postcardId,
+    required String commentId,
+  }) async {
+    final r = await _dio.post<dynamic>(
+      '/api/postcards/$postcardId/comments/$commentId/like',
+    );
+    final map = _unwrapMapData(r);
+    return (
+      likeCount: (map['likeCount'] as num?)?.toInt() ?? 0,
+      likedByMe: map['likedByMe'] == true,
     );
   }
 
@@ -153,13 +182,19 @@ AppUser _authorFromMap(Map<String, dynamic> a) {
 
 WallPost _voToWallPost(Map<String, dynamic> m) {
   final authorRaw = m['author'];
-  final authorMap = authorRaw is Map<String, dynamic> ? authorRaw : <String, dynamic>{};
+  final authorMap = authorRaw is Map<String, dynamic>
+      ? authorRaw
+      : <String, dynamic>{};
   final id = '${m['id'] ?? ''}';
   final published = _parseDate(m['publishedAt']) ?? DateTime.now();
   List<String>? urls;
   final rawUrls = m['imageUrls'];
   if (rawUrls is List<dynamic>) {
-    urls = rawUrls.whereType<String>().map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    urls = rawUrls
+        .whereType<String>()
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
     if (urls.isEmpty) {
       urls = null;
     }
@@ -184,12 +219,27 @@ WallPost _voToWallPost(Map<String, dynamic> m) {
 
 WallComment _voToWallComment(Map<String, dynamic> m) {
   final authorRaw = m['author'];
-  final authorMap = authorRaw is Map<String, dynamic> ? authorRaw : <String, dynamic>{};
+  final authorMap = authorRaw is Map<String, dynamic>
+      ? authorRaw
+      : <String, dynamic>{};
+  final replyRaw = m['replyTo'];
+  final replyMap = replyRaw is Map<String, dynamic> ? replyRaw : null;
+  final repliesRaw = m['replies'];
+  final replyList = repliesRaw is List
+      ? repliesRaw
+            .whereType<Map<String, dynamic>>()
+            .map(_voToWallComment)
+            .toList()
+      : const <WallComment>[];
   return WallComment(
     id: '${m['id'] ?? ''}',
     author: _authorFromMap(authorMap),
     content: (m['content'] as String?) ?? '',
     createdAt: _parseDate(m['createdAt']) ?? DateTime.now(),
+    replyTo: replyMap != null ? _authorFromMap(replyMap) : null,
+    likeCount: (m['likeCount'] as num?)?.toInt() ?? 0,
+    likedByMe: m['likedByMe'] == true,
+    replies: replyList,
   );
 }
 

@@ -1742,6 +1742,24 @@ abstract class AppLocalizations {
   /// **'Letter'**
   String get letterDetailTitle;
 
+  /// No description provided for @letterAcceptContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept postal contact'**
+  String get letterAcceptContact;
+
+  /// No description provided for @letterAcceptContactDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal contact accepted'**
+  String get letterAcceptContactDone;
+
+  /// No description provided for @letterAcceptContactSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now postal friends. Open instant chat below or from Connections.'**
+  String get letterAcceptContactSuccess;
+
   /// No description provided for @chatFriendsOnlySnack.
   ///
   /// In en, this message translates to:
@@ -1771,6 +1789,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Comment posted.'**
   String get postDetailCommentPosted;
+
+  /// No description provided for @postDetailReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get postDetailReply;
+
+  /// No description provided for @postDetailReplyingTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Replying to @{name}'**
+  String postDetailReplyingTo(Object name);
+
+  /// No description provided for @postDetailCancelReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get postDetailCancelReply;
+
+  /// No description provided for @postDetailLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get postDetailLike;
+
+  /// No description provided for @postDetailReportComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get postDetailReportComment;
+
+  /// No description provided for @postDetailCommentsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get postDetailCommentsSection;
+
+  /// No description provided for @postDetailReplyPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get postDetailReplyPrefix;
+
+  /// No description provided for @postDetailWriteComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a comment'**
+  String get postDetailWriteComment;
+
+  /// No description provided for @postDetailSendComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get postDetailSendComment;
+
+  /// No description provided for @postDetailNoCommentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet'**
+  String get postDetailNoCommentsTitle;
+
+  /// No description provided for @postDetailNoCommentsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the first kind reply.'**
+  String get postDetailNoCommentsSubtitle;
 
   /// No description provided for @errorInvalidContentId.
   ///

@@ -7,6 +7,7 @@ import cn.nine.pros.post.client.model.input.app.AppPostcardCommentPageInDto;
 import cn.nine.pros.post.client.model.input.app.AppPostcardCreateInDto;
 import cn.nine.pros.post.client.model.input.app.AppPostcardPageInDto;
 import cn.nine.pros.post.client.model.out.PostcardCommentItemVO;
+import cn.nine.pros.post.client.model.out.PostcardCommentLikeVO;
 import cn.nine.pros.post.client.model.out.PostcardDetailVO;
 import cn.nine.pros.post.client.model.out.PostcardWallItemVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,4 +50,10 @@ public interface AppPostcardApi {
     PostcardCommentItemVO createComment(
             @PathVariable("postcardId") Long postcardId,
             @RequestBody @Valid AppPostcardCommentCreateInDto body);
+
+    @Operation(summary = "切换评论点赞")
+    @PostMapping("/{postcardId}/comments/{commentId}/like")
+    PostcardCommentLikeVO toggleCommentLike(
+            @PathVariable("postcardId") Long postcardId,
+            @PathVariable("commentId") Long commentId);
 }

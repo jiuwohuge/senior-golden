@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -26,4 +27,16 @@ public class PostcardCommentItemVO {
 
     @Schema(description = "作者")
     private PostcardAuthorVO author;
+
+    @Schema(description = "被回复用户（楼中楼）")
+    private PostcardAuthorVO replyTo;
+
+    @Schema(description = "点赞数")
+    private Integer likeCount;
+
+    @Schema(description = "当前用户是否已点赞")
+    private Boolean likedByMe;
+
+    @Schema(description = "回复列表（仅顶级评论填充）")
+    private List<PostcardCommentItemVO> replies;
 }

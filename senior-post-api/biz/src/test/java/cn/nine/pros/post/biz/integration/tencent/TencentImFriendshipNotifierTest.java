@@ -5,15 +5,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class TencentImFriendshipNotifierTest {
 
-    private TencentImProperties props;
+    private TencentImPostalPeerSyncService peerSyncService;
     private TencentImRestApiClient client;
+    private TencentImProperties props;
     private TencentImFriendshipNotifier notifier;
 
     @BeforeEach
@@ -23,48 +26,23 @@ class TencentImFriendshipNotifierTest {
         props.setSecretKey("dummy-secret-for-test-only");
         props.setFriendshipSyncEnabled(true);
         props.setRestApiIdentifier("administrator");
-        props.setAccountImportBeforeFriendAdd(true);
+        peerSyncService = Mockito.mock(TencentImPostalPeerSyncService.class);
         client = Mockito.mock(TencentImRestApiClient.class);
-        when(client.accountImport(anyString())).thenReturn(true);
-        when(client.friendAdd(anyString(), anyString())).thenReturn(true);
+        when(client.isRestConfigured()).thenReturn(true);
         when(client.friendDeleteBoth(anyString(), anyString())).thenReturn(true);
-        notifier = new TencentImFriendshipNotifier(props, client);
+        notifier = new TencentImFriendshipNotifier(peerSyncService, client, props);
     }
 
     @Test
-    void sync_calls_import_and_bidirectional_friend_add() {
+    void active_delegates_to_peer_sync() {
         notifier.afterFriendshipActive(10L, 20L);
-
-        verify(client, times(1)).accountImport("10");
-        verify(client, times(1)).accountImport("20");
-        verify(client, times(1)).friendAdd("10", "20");
-        verify(client, times(1)).friendAdd("20", "10");
-    }
-
-    @Test
-    void skipped_when_sync_disabled() {
-        props.setFriendshipSyncEnabled(false);
-        notifier.afterFriendshipActive(1L, 2L);
-        verify(client, times(0)).friendAdd(anyString(), anyString());
-    }
-
-    @Test
-    void skipped_when_rest_identifier_blank() {
-        props.setRestApiIdentifier("");
-        notifier.afterFriendshipActive(1L, 2L);
-        verify(client, times(0)).friendAdd(anyString(), anyString());
+        verify(peerSyncService, times(1)).syncPair(10L, 20L);
     }
 
     @Test
     void remove_calls_friend_delete_both() {
         notifier.afterFriendshipRemoved(10L, 20L);
         verify(client, times(1)).friendDeleteBoth("10", "20");
-    }
-
-    @Test
-    void remove_skipped_when_sync_disabled() {
-        props.setFriendshipSyncEnabled(false);
-        notifier.afterFriendshipRemoved(1L, 2L);
-        verify(client, times(0)).friendDeleteBoth(anyString(), anyString());
+        verify(peerSyncService, never()).syncPair(anyLong(), anyLong());
     }
 }

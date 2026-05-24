@@ -32,9 +32,9 @@ public class TencentImProperties {
     private boolean friendshipSyncEnabled = true;
 
     /**
-     * REST API Host（中国大陆默认 console.tim.qq.com；海外常见 adminapisgp.im.qcloud.com 等，以控制台为准）。
+     * REST API Host（本项目 IM 应用为新加坡数据中心）。
      */
-    private String restApiHost = "console.tim.qq.com";
+    private String restApiHost = "adminapisgp.im.qcloud.com";
 
     /**
      * 调用 REST API 的管理员 Identifier（须与控制台「App 管理员」一致；用于签发 REST UserSig）。
@@ -47,9 +47,10 @@ public class TencentImProperties {
     private int restApiUserSigExpireSeconds = 120;
 
     /**
-     * 建联前是否调用 account_import，确保双方账号已在 IM 注册。
+     * 已废弃：不再使用 account_import，账号由 TIM SDK login 注册。
      */
-    private boolean accountImportBeforeFriendAdd = true;
+    @Deprecated
+    private boolean accountImportBeforeFriendAdd = false;
 
     /**
      * REST 调用失败时的最大重试次数（不含首次），间隔约 200ms。

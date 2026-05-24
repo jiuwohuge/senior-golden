@@ -118,6 +118,8 @@ class LetterDetailPage extends ConsumerStatefulWidget {
 class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
   final _reply = TextEditingController();
   bool _acceptBusy = false;
+  /// 接受成功后立即置灰按钮，不等待 friendship provider 二次请求。
+  bool _acceptedLocally = false;
   bool _replyBusy = false;
   bool _earlyOpenBusy = false;
   LetterType _replyType = LetterType.standard;
@@ -170,10 +172,9 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
               friendshipActiveProvider(letter.peer.id),
             );
             final isFriend = friendsAsync.valueOrNull ?? false;
-            final canAccept =
-                !letter.outgoing &&
-                letter.status == LetterStatus.delivered &&
-                !isFriend;
+            final connected = isFriend || _acceptedLocally;
+            final showAcceptSlot =
+                !letter.outgoing && letter.status == LetterStatus.delivered;
             final canReply =
                 !letter.outgoing &&
                 letter.status != LetterStatus.delivering &&
@@ -364,30 +365,56 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                     );
                   }(),
                 ),
-                if (canAccept) ...[
+                if (showAcceptSlot) ...[
                   const SizedBox(height: 14),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 320),
                     child: PostalButton(
-                      key: ValueKey('accept_${letter.id}'),
-                      label: 'Accept postal contact',
+                      key: ValueKey(
+                        connected
+                            ? 'accepted_${letter.id}'
+                            : 'accept_${letter.id}',
+                      ),
+                      label: connected
+                          ? l10n.letterAcceptContactDone
+                          : l10n.letterAcceptContact,
+                      variant: connected
+                          ? PostalButtonVariant.secondary
+                          : PostalButtonVariant.primary,
                       busy: _acceptBusy,
-                      onPressed: _acceptBusy
+                      onPressed: connected || _acceptBusy
                           ? null
                           : () async {
                               setState(() => _acceptBusy = true);
                               try {
-                                await ref
-                                    .read(mailboxRemoteRepositoryProvider)
-                                    .acceptPostalContact(letter.id);
+                                final remote = ref.read(
+                                  mailboxRemoteRepositoryProvider,
+                                );
+                                await remote.acceptPostalContact(letter.id);
+                                try {
+                                  await remote.syncImPeer(letter.peer.id);
+                                } catch (e) {
+                                  final imMsg = _postalApiUserMessage(e);
+                                  if (context.mounted && imMsg != null) {
+                                    PostalSnack.show(
+                                      context,
+                                      imMsg,
+                                      tone: PostalSnackTone.warning,
+                                    );
+                                  }
+                                }
                                 if (!context.mounted) return;
+                                setState(() => _acceptedLocally = true);
                                 PostalSnack.show(
                                   context,
-                                  'You can open chat from Connections (your postal friends).',
+                                  l10n.letterAcceptContactSuccess,
                                   tone: PostalSnackTone.success,
                                 );
                                 ref.invalidate(
                                   letterDetailProvider(widget.letterId),
+                                );
+                                ref.invalidate(
+                                  friendshipActiveProvider(letter.peer.id),
                                 );
                                 ref.invalidate(mailboxLettersProvider);
                                 ref.invalidate(postalInboxLettersProvider);
@@ -586,7 +613,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                   const SizedBox(height: 12),
                   PostalButton(label: 'Send reply', onPressed: null),
                 ],
-                if (isFriend) ...[
+                if (connected) ...[
                   const SizedBox(height: 12),
                   OutlinedButton(
                     onPressed: () => context.push(

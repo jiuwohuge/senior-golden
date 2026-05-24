@@ -11,6 +11,7 @@ import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../../widgets/postal/postal_gender_icon.dart';
+import 'post_comment_tile.dart';
 import 'post_providers.dart';
 import 'post_wall_report_sheet.dart';
 import 'post_wall_remote.dart';
@@ -38,6 +39,8 @@ class PostDetailPage extends ConsumerStatefulWidget {
 
 class _PostDetailPageState extends ConsumerState<PostDetailPage>
     with WidgetsBindingObserver {
+  WallComment? _replyTarget;
+  bool _likeBusy = false;
   @override
   void initState() {
     super.initState();
@@ -60,6 +63,24 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage>
         ref.invalidate(postDetailProvider(widget.postId));
         ref.invalidate(postCommentsProvider(widget.postId));
       });
+    }
+  }
+
+  Future<void> _onCommentLike(String postId, WallComment comment) async {
+    if (_likeBusy) return;
+    setState(() => _likeBusy = true);
+    try {
+      await ref
+          .read(postWallRemoteProvider)
+          .toggleCommentLike(postcardId: postId, commentId: comment.id);
+      if (!mounted) return;
+      ref.invalidate(postCommentsProvider(postId));
+    } on ApiBusinessException catch (e) {
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
+    } finally {
+      if (mounted) setState(() => _likeBusy = false);
     }
   }
 
@@ -221,7 +242,9 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage>
                           ),
                         ),
                         const SizedBox(height: 16),
-                        PostalSectionTitle(title: 'Comments'),
+                        PostalSectionTitle(
+                          title: l10n.postDetailCommentsSection,
+                        ),
                         const SizedBox(height: 10),
                         commentsAsync.when(
                           loading: () => const PostalSkeletonList(
@@ -237,66 +260,21 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage>
                           ),
                           data: (items) {
                             if (items.isEmpty) {
-                              return const PostalEmptyState(
-                                title: 'No comments yet',
-                                subtitle: 'Start the first kind reply.',
+                              return PostalEmptyState(
+                                title: l10n.postDetailNoCommentsTitle,
+                                subtitle: l10n.postDetailNoCommentsSubtitle,
                               );
                             }
-                            return Column(
-                              children: items
-                                  .map(
-                                    (c) => Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 10,
-                                      ),
-                                      child: PostalCardEnvelope(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                _ClickableUserAvatar(
-                                                  user: c.author,
-                                                  size: 34,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Expanded(
-                                                  child: Text(
-                                                    c.author.nickname,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  DateFormat(
-                                                    'MM-dd HH:mm',
-                                                  ).format(c.createdAt),
-                                                ),
-                                                if (meId != c.author.id)
-                                                  IconButton(
-                                                    tooltip: 'Report comment',
-                                                    icon: const Icon(
-                                                      Icons.flag_outlined,
-                                                      size: 20,
-                                                    ),
-                                                    onPressed: () =>
-                                                        _showContentReport(
-                                                          context,
-                                                          targetType: 'comment',
-                                                          objectId: c.id,
-                                                        ),
-                                                  ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(c.content),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
+                            return PostCommentThread(
+                              comments: items,
+                              meId: meId,
+                              onReply: (c) => setState(() => _replyTarget = c),
+                              onLike: (c) => _onCommentLike(postId, c),
+                              onReport: (c) => _showContentReport(
+                                context,
+                                targetType: 'comment',
+                                objectId: c.id,
+                              ),
                             );
                           },
                         ),
@@ -304,7 +282,11 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage>
                     ),
                   ),
                 ),
-                _CommentComposer(postId: postId),
+                _CommentComposer(
+                  postId: postId,
+                  replyTarget: _replyTarget,
+                  onClearReply: () => setState(() => _replyTarget = null),
+                ),
               ],
             );
           },
@@ -731,8 +713,15 @@ class _PhotoViewerPageState extends State<_PhotoViewerPage> {
 }
 
 class _CommentComposer extends ConsumerStatefulWidget {
-  const _CommentComposer({required this.postId});
+  const _CommentComposer({
+    required this.postId,
+    required this.replyTarget,
+    required this.onClearReply,
+  });
+
   final String postId;
+  final WallComment? replyTarget;
+  final VoidCallback onClearReply;
 
   @override
   ConsumerState<_CommentComposer> createState() => _CommentComposerState();
@@ -763,9 +752,14 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
     try {
       await ref
           .read(postWallRemoteProvider)
-          .createComment(postcardId: widget.postId, content: text);
+          .createComment(
+            postcardId: widget.postId,
+            content: text,
+            parentCommentId: widget.replyTarget?.id,
+          );
       if (!mounted) return;
       _commentCtrl.clear();
+      widget.onClearReply();
       ref.invalidate(postCommentsProvider(widget.postId));
       ref.invalidate(postDetailProvider(widget.postId));
       PostalSnack.show(
@@ -784,37 +778,110 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+    final l10n = AppLocalizations.of(context)!;
+    final reply = widget.replyTarget;
+
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: PostalTokens.paperEnvelope,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
         border: Border(
-          top: BorderSide(color: Theme.of(context).colorScheme.outline),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: PostalTextField(
-              controller: _commentCtrl,
-              label: 'Write a comment',
-              showClearButton: true,
-            ),
+          top: BorderSide(
+            color: PostalTokens.perforationLine.withValues(alpha: 0.95),
           ),
-          const SizedBox(width: 8),
-          // PostalButton expand needs bounded width inside Row.
-          SizedBox(
-            width: 96,
-            child: PostalButton(
-              label: 'Send',
-              onPressed: _sending ? null : _send,
-              busy: _sending,
-              expand: true,
-              minHeight: 52,
-            ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: PostalTokens.inkNavy.withValues(alpha: 0.06),
+            offset: const Offset(0, -4),
+            blurRadius: 12,
           ),
         ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (reply != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: PostalTokens.postboxGreen.withValues(alpha: 0.08),
+                      borderRadius: PostalTokens.shapeSm,
+                      border: Border.all(
+                        color: PostalTokens.postboxGreen.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.reply_rounded,
+                            size: 16,
+                            color: PostalTokens.postboxGreen,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n.postDetailReplyingTo(reply.author.nickname),
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: PostalTokens.postboxGreen,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            iconSize: 18,
+                            onPressed: widget.onClearReply,
+                            icon: Icon(
+                              Icons.close_rounded,
+                              color: PostalTokens.inkTertiary,
+                            ),
+                            tooltip: l10n.postDetailCancelReply,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: PostalTextField(
+                      controller: _commentCtrl,
+                      label: l10n.postDetailWriteComment,
+                      showClearButton: true,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 96,
+                    child: PostalButton(
+                      label: l10n.postDetailSendComment,
+                      onPressed: _sending ? null : _send,
+                      busy: _sending,
+                      expand: true,
+                      minHeight: 52,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

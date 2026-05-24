@@ -31,6 +31,7 @@ class AppUser {
   final List<String> interests;
   final List<int> interestTagIds;
   final String? avatarUrl;
+
   /// 0 待审核 1 通过 2 驳回（仅本人资料接口返回）
   final int? avatarAuditStatus;
   final bool isVip;
@@ -179,12 +180,33 @@ class WallComment {
     required this.author,
     required this.content,
     required this.createdAt,
+    this.replyTo,
+    this.likeCount = 0,
+    this.likedByMe = false,
+    this.replies = const [],
   });
 
   final String id;
   final AppUser author;
   final String content;
   final DateTime createdAt;
+  final AppUser? replyTo;
+  final int likeCount;
+  final bool likedByMe;
+  final List<WallComment> replies;
+
+  WallComment copyWith({int? likeCount, bool? likedByMe}) {
+    return WallComment(
+      id: id,
+      author: author,
+      content: content,
+      createdAt: createdAt,
+      replyTo: replyTo,
+      likeCount: likeCount ?? this.likeCount,
+      likedByMe: likedByMe ?? this.likedByMe,
+      replies: replies,
+    );
+  }
 }
 
 enum LetterType { registered, standard }

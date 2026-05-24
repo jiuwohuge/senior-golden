@@ -913,6 +913,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letterDetailTitle => 'Letter';
 
   @override
+  String get letterAcceptContact => 'Accept postal contact';
+
+  @override
+  String get letterAcceptContactDone => 'Postal contact accepted';
+
+  @override
+  String get letterAcceptContactSuccess =>
+      'You are now postal friends. Open instant chat below or from Connections.';
+
+  @override
   String get chatFriendsOnlySnack =>
       'Only postal friends in Connections can use live chat.';
 
@@ -928,6 +938,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get postDetailCommentPosted => 'Comment posted.';
+
+  @override
+  String get postDetailReply => 'Reply';
+
+  @override
+  String postDetailReplyingTo(Object name) {
+    return 'Replying to @$name';
+  }
+
+  @override
+  String get postDetailCancelReply => 'Cancel';
+
+  @override
+  String get postDetailLike => 'Like';
+
+  @override
+  String get postDetailReportComment => 'Report';
+
+  @override
+  String get postDetailCommentsSection => 'Comments';
+
+  @override
+  String get postDetailReplyPrefix => 'Reply';
+
+  @override
+  String get postDetailWriteComment => 'Write a comment';
+
+  @override
+  String get postDetailSendComment => 'Send';
+
+  @override
+  String get postDetailNoCommentsTitle => 'No comments yet';
+
+  @override
+  String get postDetailNoCommentsSubtitle => 'Start the first kind reply.';
 
   @override
   String get errorInvalidContentId => 'Invalid content id.';

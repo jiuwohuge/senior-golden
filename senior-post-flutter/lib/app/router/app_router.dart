@@ -14,6 +14,7 @@ import '../../features/auth/forgot_password_page.dart';
 import '../../features/auth/legal_page.dart';
 import '../../features/directory/user_card_page.dart';
 import '../../features/mailbox/chat_page.dart';
+import '../../features/mailbox/im_user_id.dart';
 import '../../features/mailbox/letter_detail_page.dart';
 import '../../features/mailbox/mailbox_archive_page.dart';
 import '../../features/post_wall/post_compose_page.dart';
@@ -151,8 +152,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           } else if (extra is String) {
             displayName = extra;
           }
+          final rawPeerId = state.pathParameters['userId'] ?? '';
           return ChatPage(
-            peerUserId: state.pathParameters['userId']!,
+            peerUserId: normalizeImUserId(rawPeerId) ?? rawPeerId,
             displayName: displayName,
             peerAvatarUrl: peerAvatarUrl,
           );

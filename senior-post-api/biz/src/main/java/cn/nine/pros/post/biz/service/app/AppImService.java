@@ -4,18 +4,23 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.TencentImProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
+import cn.nine.pros.post.biz.integration.tencent.TencentImPostalPeerSyncService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.client.model.out.AppImUserSigVO;
 import com.tencentyun.TLSSigAPIv2;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * 腾讯 IM：UserSig 签发 + 打开聊天前的 IM 补偿同步（对端 account_import）。
+ */
 @Service
 @RequiredArgsConstructor
 public class AppImService {
 
     private final TencentImProperties tencentImProperties;
     private final FriendshipService friendshipService;
+    private final TencentImPostalPeerSyncService postalPeerSyncService;
     private final AppMessages appMessages;
 
     public AppImUserSigVO currentUserSig() {
@@ -23,7 +28,6 @@ public class AppImService {
         if (uid == null) {
             throw new BadRequestException(appMessages.get("app.error.im.needLogin"));
         }
-        // 无邮政好友（Connections）时不签发 UserSig，避免大量注册/未建联用户占用腾讯 IM 在线席位。
         if (friendshipService.listActiveFriendshipsForUser(uid).isEmpty()) {
             throw new BadRequestException(appMessages.get("app.error.im.noPostalFriends"));
         }
@@ -43,5 +47,22 @@ public class AppImService {
                 .userSig(sig)
                 .expireInSeconds(expire)
                 .build();
+    }
+
+    /**
+     * 业务已是邮政好友，但 IM 可能未导入对端：补偿 account_import + friend_add（幂等，不抛导入失败）。
+     */
+    public void compensateChatPeer(Long peerUserId) {
+        Long viewerId = MyRequestContextHolder.userId();
+        if (viewerId == null) {
+            throw new BadRequestException(appMessages.get("app.error.im.needLogin"));
+        }
+        if (peerUserId == null || peerUserId <= 0) {
+            throw new BadRequestException(appMessages.get("app.error.im.invalidPeer"));
+        }
+        if (!friendshipService.areActiveFriends(viewerId, peerUserId)) {
+            throw new BadRequestException(appMessages.get("app.error.im.notFriends"));
+        }
+        postalPeerSyncService.syncPair(viewerId, peerUserId);
     }
 }

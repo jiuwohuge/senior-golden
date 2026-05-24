@@ -52,6 +52,13 @@ class MailboxRemoteRepository {
     await _dio.post<dynamic>('/api/mailbox/letters/$letterId/accept-postal');
   }
 
+  /// 业务好友已在 Connections，补偿将双方 userId 导入腾讯 IM 并同步 IM 好友（幂等）。
+  Future<void> syncImPeer(String peerUserId) async {
+    await _dio.post<dynamic>(
+      '/api/im/peers/${int.parse(peerUserId)}/sync',
+    );
+  }
+
   Future<MailboxLetter> speedUp(String letterId) async {
     final r = await _dio.post<dynamic>(
       '/api/mailbox/letters/${int.parse(letterId)}/speed-up',
