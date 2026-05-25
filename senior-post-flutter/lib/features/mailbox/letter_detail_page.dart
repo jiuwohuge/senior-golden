@@ -118,6 +118,7 @@ class LetterDetailPage extends ConsumerStatefulWidget {
 class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
   final _reply = TextEditingController();
   bool _acceptBusy = false;
+
   /// 接受成功后立即置灰按钮，不等待 friendship provider 二次请求。
   bool _acceptedLocally = false;
   bool _replyBusy = false;
@@ -621,6 +622,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                       extra: <String, dynamic>{
                         'name': letter.peer.nickname,
                         'avatarUrl': letter.peer.avatarUrl,
+                        'trustedFriendship': true,
                       },
                     ),
                     child: const Text('Open instant chat'),

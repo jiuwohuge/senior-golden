@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tencent_cloud_chat_sdk/enum/V2TimAdvancedMsgListener.dart';
 import 'package:tencent_cloud_chat_sdk/enum/message_elem_type.dart';
-import 'package:tencent_cloud_chat_sdk/enum/message_priority_enum.dart';
 import 'package:tencent_cloud_chat_sdk/enum/message_status.dart';
 import 'package:tencent_cloud_chat_sdk/manager/v2_tim_manager.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_message.dart';
@@ -14,6 +13,7 @@ import '../../l10n/app_localizations.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
+import 'chat_im_support.dart';
 import 'chat_senior_emojis.dart';
 import 'im_unread_providers.dart';
 import 'im_user_id.dart';
@@ -27,10 +27,14 @@ class ChatPage extends ConsumerStatefulWidget {
     required this.peerUserId,
     this.displayName,
     this.peerAvatarUrl,
+    this.trustedFriendship = false,
   });
   final String peerUserId;
   final String? displayName;
   final String? peerAvatarUrl;
+
+  /// Connections / 已建立笔友关系的入口为 true，跳过 friendship-active 与主动 sync。
+  final bool trustedFriendship;
 
   @override
   ConsumerState<ChatPage> createState() => _ChatPageState();
@@ -74,20 +78,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
     setState(() => _busy = true);
     try {
-      final repo = ref.read(mailboxRemoteRepositoryProvider);
-      final canChat = await repo.isFriendshipActive(peerId);
-      if (!canChat) {
-        if (mounted) {
-          final l10n = AppLocalizations.of(context)!;
-          PostalSnack.show(
-            context,
-            l10n.chatFriendsOnlySnack,
-            tone: PostalSnackTone.error,
-          );
-        }
-        return;
-      }
-      await repo.syncImPeer(peerId);
       await ref.read(seniorPostTimFacadeProvider).ensureLoggedIn();
       final tim = V2TIMManager();
       final created = await tim.v2TIMMessageManager.createTextMessage(
@@ -97,22 +87,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         throw ApiBusinessException(created.code, created.desc);
       }
       final msg = created.data?.messageInfo;
-      var send = await tim.v2TIMMessageManager.sendMessage(
-        message: msg,
-        receiver: peerId,
-        groupID: '',
-        priority: MessagePriorityEnum.V2TIM_PRIORITY_NORMAL,
-      );
-      if (send.code != 0 && isImUserIdError(send.desc)) {
-        await repo.syncImPeer(peerId);
-        await Future<void>.delayed(const Duration(milliseconds: 400));
-        send = await tim.v2TIMMessageManager.sendMessage(
-          message: msg,
-          receiver: peerId,
-          groupID: '',
-          priority: MessagePriorityEnum.V2TIM_PRIORITY_NORMAL,
-        );
+      if (msg == null) {
+        throw ApiBusinessException(0, 'Failed to create message');
       }
+      final send = await sendC2cTextWithRecovery(
+        ref: ref,
+        peerUserId: peerId,
+        message: msg,
+      );
       if (send.code != 0) {
         throw ApiBusinessException(send.code, send.desc);
       }
@@ -239,36 +221,75 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       ),
       body: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  PostalTokens.postboxGreen.withValues(alpha: 0.14),
-                  PostalTokens.paperCream,
+          const PostalPerforationStrip(height: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: PostalTokens.paperEnvelope.withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: PostalTokens.kraftBrown.withValues(alpha: 0.28),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: PostalTokens.inkNavy.withValues(alpha: 0.04),
+                    offset: const Offset(0, 2),
+                    blurRadius: 8,
+                  ),
                 ],
               ),
-            ),
-            child: Text(
-              'Postal chat — letters stay in Archive; here is for quick notes.',
-              style: textTheme.bodyMedium?.copyWith(
-                color: PostalTokens.inkSecondary,
-                height: 1.4,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: PostalTokens.postboxGreen.withValues(
+                          alpha: 0.12,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.markunread_mailbox_outlined,
+                        size: 20,
+                        color: PostalTokens.postboxGreen.withValues(
+                          alpha: 0.85,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Postal chat — letters stay in Archive; here is for quick notes.',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: PostalTokens.inkSecondary,
+                          height: 1.45,
+                        ),
+                      ),
+                    ),
+                    IgnorePointer(
+                      child: PostmarkRing(
+                        size: 34,
+                        strokeWidth: 1.2,
+                        color: PostalTokens.stampVermilion.withValues(
+                          alpha: 0.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
           Expanded(
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [PostalTokens.paperCream, PostalTokens.paperEnvelope],
-                ),
-              ),
+            child: PostalChatBackground(
               child: _CloudChatBody(
                 imPeerId: imPeerId,
+                trustedFriendship: widget.trustedFriendship,
                 peerDisplayName: widget.displayName,
                 peerAvatarUrl: widget.peerAvatarUrl,
                 scrollController: _scroll,
@@ -459,14 +480,28 @@ class _BubbleTile extends StatelessWidget {
         bubble.sendStatus == MessageStatus.V2TIM_MSG_STATUS_SEND_FAIL;
     final maxBubbleW = MediaQuery.sizeOf(context).width * 0.72;
     const avatarSize = 42.0;
+    final bubbleRadius = BorderRadius.only(
+      topLeft: const Radius.circular(18),
+      topRight: const Radius.circular(18),
+      bottomLeft: Radius.circular(bubble.incoming ? 6 : 18),
+      bottomRight: Radius.circular(bubble.incoming ? 18 : 6),
+    );
     final bubbleCard = Container(
       constraints: BoxConstraints(maxWidth: maxBubbleW),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: bubbleRadius,
         border: border,
-        boxShadow: PostalTokens.shadowSoft,
+        boxShadow: [
+          BoxShadow(
+            color: PostalTokens.inkNavy.withValues(
+              alpha: bubble.incoming ? 0.06 : 0.12,
+            ),
+            offset: const Offset(0, 3),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: align,
@@ -510,7 +545,7 @@ class _BubbleTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: bubble.incoming
             ? <Widget>[
                 avatar,
@@ -534,10 +569,12 @@ class _CloudChatBody extends ConsumerStatefulWidget {
     required this.imPeerId,
     required this.scrollController,
     required this.sentMessageSink,
+    this.trustedFriendship = false,
     this.peerDisplayName,
     this.peerAvatarUrl,
   });
   final String imPeerId;
+  final bool trustedFriendship;
   final String? peerDisplayName;
   final String? peerAvatarUrl;
   final ScrollController scrollController;
@@ -656,36 +693,25 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
       _loadError = null;
     });
     try {
-      final repo = ref.read(mailboxRemoteRepositoryProvider);
-      final canChat = await repo.isFriendshipActive(widget.imPeerId);
-      if (!canChat) {
-        if (!mounted) return;
-        setState(() {
-          _loading = false;
-          _loadError =
-              'Live chat is only for postal friends in Connections. Accept a delivered letter to add someone first.';
-          _items = const [];
-        });
-        return;
+      if (!widget.trustedFriendship) {
+        final repo = ref.read(mailboxRemoteRepositoryProvider);
+        final canChat = await repo.isFriendshipActive(widget.imPeerId);
+        if (!canChat) {
+          if (!mounted) return;
+          setState(() {
+            _loading = false;
+            _loadError =
+                'Live chat is only for postal friends in Connections. Accept a delivered letter to add someone first.';
+            _items = const [];
+          });
+          return;
+        }
       }
-      await repo.syncImPeer(widget.imPeerId);
-      await ref.read(seniorPostTimFacadeProvider).ensureLoggedIn();
-      final tim = V2TIMManager();
-      final me = await tim.getLoginUser();
-      var r = await tim.v2TIMMessageManager.getC2CHistoryMessageList(
-        userID: widget.imPeerId,
-        count: 30,
-        lastMsg: null,
+
+      final r = await loadC2cHistoryWithRecovery(
+        ref: ref,
+        peerUserId: widget.imPeerId,
       );
-      if (r.code != 0 && isImUserIdError(r.desc)) {
-        await repo.syncImPeer(widget.imPeerId);
-        await Future<void>.delayed(const Duration(milliseconds: 400));
-        r = await tim.v2TIMMessageManager.getC2CHistoryMessageList(
-          userID: widget.imPeerId,
-          count: 30,
-          lastMsg: null,
-        );
-      }
       if (!mounted) return;
       if (r.code != 0) {
         setState(() {
@@ -695,6 +721,8 @@ class _CloudChatBodyState extends ConsumerState<_CloudChatBody> {
         });
         return;
       }
+      final tim = V2TIMManager();
+      final me = await tim.getLoginUser();
       final list = r.data != null
           ? List<V2TimMessage>.from(r.data!)
           : <V2TimMessage>[];

@@ -145,10 +145,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra;
           String? displayName;
           String? peerAvatarUrl;
+          var trustedFriendship = false;
           if (extra is Map) {
-            displayName = extra['name'] as String? ??
-                extra['displayName'] as String?;
+            displayName =
+                extra['name'] as String? ?? extra['displayName'] as String?;
             peerAvatarUrl = extra['avatarUrl'] as String?;
+            trustedFriendship = extra['trustedFriendship'] == true;
           } else if (extra is String) {
             displayName = extra;
           }
@@ -157,6 +159,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             peerUserId: normalizeImUserId(rawPeerId) ?? rawPeerId,
             displayName: displayName,
             peerAvatarUrl: peerAvatarUrl,
+            trustedFriendship: trustedFriendship,
           );
         },
       ),

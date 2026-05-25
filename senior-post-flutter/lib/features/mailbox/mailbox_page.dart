@@ -152,10 +152,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
 
 /// 可下拉刷新的滚动容器（空态 / 错误态占满 Tab 高度）。
 class _MailboxRefreshBody extends StatelessWidget {
-  const _MailboxRefreshBody({
-    required this.onRefresh,
-    required this.child,
-  });
+  const _MailboxRefreshBody({required this.onRefresh, required this.child});
 
   final Future<void> Function() onRefresh;
   final Widget child;
@@ -198,19 +195,14 @@ class _PostalInboxTab extends ConsumerWidget {
           tone: PostalEmptyTone.error,
         ),
       ),
-      data: (letters) => _PostalInboxBody(
-        letters: letters,
-        onRefresh: onRefresh,
-      ),
+      data: (letters) =>
+          _PostalInboxBody(letters: letters, onRefresh: onRefresh),
     );
   }
 }
 
 class _PostalInboxBody extends ConsumerWidget {
-  const _PostalInboxBody({
-    required this.letters,
-    required this.onRefresh,
-  });
+  const _PostalInboxBody({required this.letters, required this.onRefresh});
 
   final List<MailboxLetter> letters;
   final Future<void> Function() onRefresh;
@@ -317,8 +309,9 @@ class _ConnectionsTab extends ConsumerWidget {
             itemBuilder: (_, i) {
               final r = rows[i];
               final id = r.peer.id.trim();
-              final unread =
-                  (id.isEmpty || id == '0') ? 0 : (unreadMap[id] ?? 0);
+              final unread = (id.isEmpty || id == '0')
+                  ? 0
+                  : (unreadMap[id] ?? 0);
               return _ImStyleRow(
                 title: r.peer.nickname,
                 subtitle: r.lastMessage,
@@ -339,6 +332,7 @@ class _ConnectionsTab extends ConsumerWidget {
                     extra: <String, dynamic>{
                       'name': r.peer.nickname,
                       'avatarUrl': r.peer.avatarUrl,
+                      'trustedFriendship': true,
                     },
                   );
                 },

@@ -24,3 +24,24 @@ bool isImUserIdError(String? message) {
       lower.contains('invalid userid') ||
       lower.contains('user not exist');
 }
+
+/// 腾讯 IM UserSig 失效 / 未登录等，需重新拉取 `/api/im/usersig` 后重试。
+bool isTimCredentialError(int code, String? message) {
+  if (code == 6206 ||
+      code == 6205 ||
+      code == 6014 ||
+      code == 70001 ||
+      code == 70003 ||
+      code == 70009) {
+    return true;
+  }
+  if (message == null || message.isEmpty) {
+    return false;
+  }
+  final lower = message.toLowerCase();
+  return lower.contains('usersig') ||
+      lower.contains('user sig') ||
+      lower.contains('sig expire') ||
+      lower.contains('not login') ||
+      lower.contains('not logged');
+}

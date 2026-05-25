@@ -31,6 +31,12 @@ class SeniorPostTimFacade {
   /// 认为 UserSig 仍可用的截止时间（较服务端 TTL 提前刷新，避免临界过期）。
   DateTime? _credentialUsableUntil;
   V2TimConversationListener? _conversationListener;
+  Future<void>? _ensureLoginInFlight;
+
+  /// UserSig 被判定失效时调用，下次 [ensureLoggedIn] 会重新请求 `/api/im/usersig`。
+  void invalidateCredentials() {
+    _credentialUsableUntil = null;
+  }
 
   Future<void> disposeAsync() async {
     final l = _conversationListener;
@@ -118,7 +124,22 @@ class SeniorPostTimFacade {
     await _syncAllConversationsUnread();
   }
 
-  Future<void> ensureLoggedIn() async {
+  Future<void> ensureLoggedIn({bool forceRefresh = false}) async {
+    if (!forceRefresh && _ensureLoginInFlight != null) {
+      return _ensureLoginInFlight!;
+    }
+    final task = _ensureLoggedInImpl(forceRefresh: forceRefresh);
+    _ensureLoginInFlight = task;
+    try {
+      await task;
+    } finally {
+      if (identical(_ensureLoginInFlight, task)) {
+        _ensureLoginInFlight = null;
+      }
+    }
+  }
+
+  Future<void> _ensureLoggedInImpl({required bool forceRefresh}) async {
     final token = _ref.read(authTokenProvider);
     if (token == null || token.isEmpty) {
       throw ApiBusinessException(8500, 'Not logged in');
@@ -126,7 +147,8 @@ class SeniorPostTimFacade {
     final dio = _ref.read(dioProvider);
     try {
       final now = DateTime.now();
-      if (_sdkInited &&
+      if (!forceRefresh &&
+          _sdkInited &&
           _loggedUserId != null &&
           _credentialUsableUntil != null &&
           now.isBefore(_credentialUsableUntil!)) {
