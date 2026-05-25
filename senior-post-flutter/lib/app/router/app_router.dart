@@ -19,7 +19,6 @@ import '../../features/mailbox/letter_detail_page.dart';
 import '../../features/mailbox/mailbox_archive_page.dart';
 import '../../features/post_wall/post_compose_page.dart';
 import '../../features/post_wall/post_detail_page.dart';
-import '../../features/profile/about_page.dart';
 import '../../features/profile/account_delete_page.dart';
 import '../../features/profile/blacklist_page.dart';
 import '../../features/profile/feedback_page.dart';
@@ -28,7 +27,6 @@ import '../../features/profile/my_postcards_page.dart';
 import '../../features/profile/profile_edit_page.dart';
 import '../../features/profile/settings_page.dart';
 import '../../features/profile/stamps_ledger_page.dart';
-import '../../features/profile/vip_center_page.dart';
 import '../../features/shell/main_shell.dart';
 import 'app_navigator_key.dart';
 import 'shop_routes.dart';
@@ -176,10 +174,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const StampsLedgerPage(),
       ),
       GoRoute(
-        path: '/profile/vip',
-        builder: (context, state) => const VipCenterPage(),
-      ),
-      GoRoute(
         path: ShopRoutes.path,
         builder: (context, state) {
           final q = state.uri.queryParameters;
@@ -205,7 +199,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/settings/feedback',
         builder: (context, state) => const FeedbackPage(),
       ),
-      GoRoute(path: '/about', builder: (context, state) => const AboutPage()),
       GoRoute(
         path: '/account/delete',
         builder: (context, state) => const AccountDeletePage(),

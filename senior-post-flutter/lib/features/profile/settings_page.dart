@@ -90,22 +90,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _pickLanguage,
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.feedback_outlined),
-                    title: Text(l10n.settingsFeedback),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.push('/settings/feedback'),
-                  ),
                 ],
               ),
             ),
             const SizedBox(height: 12),
-            PostalButton(
-              label: l10n.settingsAbout,
-              variant: PostalButtonVariant.secondary,
-              onPressed: () => context.push('/about'),
-            ),
-            const SizedBox(height: 8),
             PostalButton(
               label: l10n.settingsDeleteAccount,
               variant: PostalButtonVariant.danger,

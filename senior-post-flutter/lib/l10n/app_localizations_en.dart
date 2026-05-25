@@ -163,9 +163,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authGenderFemale => 'Female';
 
   @override
-  String get authGenderOther => 'Other';
-
-  @override
   String get authRegisterAvatarOptional => 'Profile photo (optional)';
 
   @override
@@ -980,6 +977,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get chatEmojiPickerSubtitle =>
       'Tap an emoji to add it to your message.';
+
+  @override
+  String get chatComposerHint => 'Write a message';
 
   @override
   String get postDetailCommentRequired => 'Please enter a comment.';

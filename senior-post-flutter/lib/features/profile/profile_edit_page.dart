@@ -48,7 +48,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     _countryCode = _normalizeCountryCode(
       user.countryCode.isEmpty ? null : user.countryCode,
     );
-    _gender = user.gender >= 1 ? user.gender : null;
+    _gender = user.gender == 1 || user.gender == 2 ? user.gender : null;
     _loadingMe = true;
     WidgetsBinding.instance.addPostFrameCallback((_) => _pullMe());
   }
@@ -421,11 +421,6 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                           label: Text(l10n.authGenderFemale),
                           selected: _gender == 2,
                           onSelected: _saving ? null : (_) => setState(() => _gender = 2),
-                        ),
-                        FilterChip(
-                          label: Text(l10n.authGenderOther),
-                          selected: _gender == 3,
-                          onSelected: _saving ? null : (_) => setState(() => _gender = 3),
                         ),
                       ],
                     ),

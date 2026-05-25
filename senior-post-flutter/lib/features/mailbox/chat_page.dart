@@ -13,6 +13,7 @@ import '../../l10n/app_localizations.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
+import 'chat_composer_bar.dart';
 import 'chat_im_support.dart';
 import 'chat_senior_emojis.dart';
 import 'im_unread_providers.dart';
@@ -297,112 +298,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ),
             ),
           ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 8, 14, 14),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isNarrow = constraints.maxWidth < 360;
-                  return DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: PostalTokens.paperCard,
-                      borderRadius: BorderRadius.circular(22),
-                      boxShadow: PostalTokens.shadowSoft,
-                      border: Border.all(
-                        color: PostalTokens.kraftBrown.withValues(alpha: 0.28),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isNarrow ? 4 : 8,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            tooltip: 'Emoji',
-                            iconSize: 28,
-                            onPressed: _busy ? null : _openEmojiPicker,
-                            icon: Icon(
-                              Icons.emoji_emotions_outlined,
-                              color: _busy
-                                  ? PostalTokens.inkTertiary
-                                  : PostalTokens.postboxGreen,
-                            ),
-                          ),
-                          Expanded(
-                            child: PostalTextField(
-                              controller: _input,
-                              label: 'Write a message',
-                              maxLines: 4,
-                              minLines: 1,
-                              showClearButton: false,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          _ChatSendButton(
-                            busy: _busy,
-                            onPressed: _busy ? null : _send,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+          ChatComposerBar(
+            controller: _input,
+            busy: _busy,
+            onSend: _busy ? null : _send,
+            onEmojiTap: _busy ? null : _openEmojiPicker,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ChatSendButton extends StatefulWidget {
-  const _ChatSendButton({required this.busy, required this.onPressed});
-
-  final bool busy;
-  final VoidCallback? onPressed;
-
-  @override
-  State<_ChatSendButton> createState() => _ChatSendButtonState();
-}
-
-class _ChatSendButtonState extends State<_ChatSendButton> {
-  @override
-  Widget build(BuildContext context) {
-    final enabled = widget.onPressed != null && !widget.busy;
-    return Material(
-      color: enabled
-          ? PostalTokens.postboxGreen
-          : PostalTokens.inkTertiary.withValues(alpha: 0.35),
-      borderRadius: BorderRadius.circular(18),
-      elevation: enabled ? 3 : 0,
-      shadowColor: PostalTokens.inkNavy.withValues(alpha: 0.25),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: widget.onPressed,
-        splashColor: Colors.white.withValues(alpha: 0.2),
-        highlightColor: Colors.white.withValues(alpha: 0.08),
-        child: SizedBox(
-          width: 54,
-          height: 54,
-          child: widget.busy
-              ? const Padding(
-                  padding: EdgeInsets.all(15),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: Colors.white,
-                  ),
-                )
-              : Icon(
-                  Icons.send_rounded,
-                  color: enabled ? Colors.white : Colors.white70,
-                  size: 26,
-                ),
-        ),
       ),
     );
   }

@@ -9,32 +9,26 @@ class PostalGenderIcon extends StatelessWidget {
     this.semanticLabel,
   });
 
-  /// 1 男，2 女，3 其他；0 或未识别不显示。
+  /// 1 男，2 女；0 或未识别不显示。
   final int gender;
   final double size;
   final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    if (gender < 1 || gender > 3) {
+    if (gender != 1 && gender != 2) {
       return const SizedBox.shrink();
     }
     final (IconData icon, Color bg, Color border) = switch (gender) {
-      // 主流风格：高对比底色 + 白色图标，保证小尺寸下可读性。
       1 => (
         Icons.male_rounded,
         const Color(0xFF3B82F6),
         const Color(0xFF2563EB),
       ),
-      2 => (
+      _ => (
         Icons.female_rounded,
         const Color(0xFFEC4899),
         const Color(0xFFDB2777),
-      ),
-      _ => (
-        Icons.transgender_rounded,
-        const Color(0xFF64748B),
-        const Color(0xFF475569),
       ),
     };
     final badgeSize = size + 8;

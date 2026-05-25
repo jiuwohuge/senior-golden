@@ -43,7 +43,7 @@ class _SocialProfileCompletePageState
     if (session.nickname.isNotEmpty) {
       _nickname.text = session.nickname;
     }
-    if (session.gender >= 1 && session.gender <= 3) {
+    if (session.gender == 1 || session.gender == 2) {
       _gender = session.gender;
     }
     if (session.birthYear > 1900) {
@@ -62,7 +62,7 @@ class _SocialProfileCompletePageState
 
   Future<void> _submit(AppBootstrapData bootstrap) async {
     final l10n = AppLocalizations.of(context)!;
-    if (_gender == null ||
+    if (_gender != 1 && _gender != 2 ||
         _nickname.text.trim().isEmpty ||
         _birthYear == null) {
       PostalSnack.show(
@@ -164,13 +164,6 @@ class _SocialProfileCompletePageState
                           onSelected: _busy
                               ? null
                               : (_) => setState(() => _gender = 2),
-                        ),
-                        FilterChip(
-                          label: Text(l10n.authGenderOther),
-                          selected: _gender == 3,
-                          onSelected: _busy
-                              ? null
-                              : (_) => setState(() => _gender = 3),
                         ),
                       ],
                     ),

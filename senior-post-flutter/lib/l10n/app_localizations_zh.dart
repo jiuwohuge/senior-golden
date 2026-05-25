@@ -151,9 +151,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authGenderFemale => '女';
 
   @override
-  String get authGenderOther => '其他';
-
-  @override
   String get authRegisterAvatarOptional => '头像（可选）';
 
   @override
@@ -922,6 +919,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chatEmojiPickerSubtitle => '点选一个表情插入到消息中。';
+
+  @override
+  String get chatComposerHint => '写点什么…';
 
   @override
   String get postDetailCommentRequired => '请输入评论内容。';

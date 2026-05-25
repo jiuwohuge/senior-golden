@@ -2,7 +2,9 @@ import 'package:go_router/go_router.dart';
 
 import 'app_navigator_key.dart';
 
-/// 统一商品 / 邮票 / 会员入口（静态页阶段；路径集中管理便于后续替换为深链）。
+/// 统一商品 / 邮票 / 会员入口（静态页阶段）。
+///
+/// 不在个人中心菜单展示；由业务错误码或付费流程通过 [pushFromRoot] 弹窗跳转。
 abstract final class ShopRoutes {
   static const String path = '/shop';
 

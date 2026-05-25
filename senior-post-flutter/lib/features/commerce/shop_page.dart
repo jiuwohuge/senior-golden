@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/biz_error_codes.dart';
@@ -103,11 +102,6 @@ class ShopPage extends ConsumerWidget {
                                   color: PostalTokens.inkSecondary,
                                   height: 1.45,
                                 ),
-                          ),
-                          const SizedBox(height: 14),
-                          PostalButton(
-                            label: session.isVip ? '查看会员中心' : '前往会员中心',
-                            onPressed: () => context.push('/profile/vip'),
                           ),
                         ],
                       ),

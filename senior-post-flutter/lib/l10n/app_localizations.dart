@@ -374,12 +374,6 @@ abstract class AppLocalizations {
   /// **'Female'**
   String get authGenderFemale;
 
-  /// No description provided for @authGenderOther.
-  ///
-  /// In en, this message translates to:
-  /// **'Other'**
-  String get authGenderOther;
-
   /// No description provided for @authRegisterAvatarOptional.
   ///
   /// In en, this message translates to:
@@ -1861,6 +1855,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap an emoji to add it to your message.'**
   String get chatEmojiPickerSubtitle;
+
+  /// No description provided for @chatComposerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a message'**
+  String get chatComposerHint;
 
   /// No description provided for @postDetailCommentRequired.
   ///

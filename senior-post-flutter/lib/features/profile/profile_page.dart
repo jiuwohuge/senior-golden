@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
-import '../../app/router/shop_routes.dart';
 import '../../core/auth/auth_token.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
@@ -63,9 +62,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     l10n.profileAvatarRejectedHint,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFFB83A2A),
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: const Color(0xFFB83A2A),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 10),
@@ -100,50 +99,44 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Column(
               children: [
                 _ProfileItem(
-                  icon: Icons.photo_album_outlined,
-                  title: l10n.profileMyPostcards,
-                  onTap: () => context.push('/profile/my-postcards'),
-                ),
-                _ProfileItem(
                   icon: Icons.edit_note,
                   title: l10n.profileEditProfile,
                   onTap: () => context.push('/profile/edit'),
+                ),
+                _ProfileItem(
+                  icon: Icons.photo_album_outlined,
+                  title: l10n.profileMyPostcards,
+                  onTap: () => context.push('/profile/my-postcards'),
                 ),
                 _ProfileItem(
                   icon: Icons.interests_outlined,
                   title: l10n.profileInterestTags,
                   onTap: () => context.push('/profile/interests'),
                 ),
+                const Divider(height: 1),
                 _ProfileItem(
                   icon: Icons.receipt_long_outlined,
                   title: l10n.profileStampsLedger,
                   onTap: () => context.push('/profile/stamps'),
                 ),
-                _ProfileItem(
-                  icon: Icons.local_post_office_outlined,
-                  title: '邮票与商品',
-                  onTap: () => context.push(ShopRoutes.path),
-                ),
-                _ProfileItem(
-                  icon: Icons.workspace_premium_outlined,
-                  title: l10n.profileVipCenter,
-                  onTap: () => context.push('/profile/vip'),
-                ),
+                const Divider(height: 1),
                 _ProfileItem(
                   icon: Icons.block_outlined,
                   title: l10n.profileBlacklist,
                   onTap: () => context.push('/profile/blocks'),
+                ),
+                const Divider(height: 1),
+                _ProfileItem(
+                  icon: Icons.feedback_outlined,
+                  title: l10n.settingsFeedback,
+                  onTap: () => context.push('/settings/feedback'),
                 ),
                 _ProfileItem(
                   icon: Icons.settings_outlined,
                   title: l10n.profileSettings,
                   onTap: () => context.push('/settings'),
                 ),
-                _ProfileItem(
-                  icon: Icons.info_outline,
-                  title: l10n.profileAbout,
-                  onTap: () => context.push('/about'),
-                ),
+                const Divider(height: 1),
                 _ProfileItem(
                   icon: Icons.policy_outlined,
                   title: l10n.profileUserAgreement,
