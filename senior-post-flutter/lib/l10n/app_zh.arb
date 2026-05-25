@@ -164,6 +164,14 @@
   "postWallEmptySubtitle": "今天由你来发第一张明信片吧。",
   "postWallWriteAction": "写明信片",
   "postWallFAB": "去写",
+  "postWallFeedEveryone": "全部",
+  "postWallFeedConnections": "好友",
+  "postWallEmptyConnectionsSubtitle": "邮政好友还没有公开明信片，先通过信件建立笔友关系吧。",
+  "userCardFriendPostcardsTitle": "好友明信片",
+  "userCardFriendPostcardsSubtitle": "笔友最近发布的公开动态",
+  "userCardFriendPostcardsEmpty": "还没有公开明信片",
+  "userCardLoadMorePostcards": "加载更多",
+  "postComposeRejected": "明信片未通过审核，请修改后重新发布。",
   "postWallPhotosLabel": "{count} 张配图",
   "@postWallPhotosLabel": {
     "placeholders": {

@@ -464,6 +464,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get postWallFAB => '去写';
 
   @override
+  String get postWallFeedEveryone => '全部';
+
+  @override
+  String get postWallFeedConnections => '好友';
+
+  @override
+  String get postWallEmptyConnectionsSubtitle => '邮政好友还没有公开明信片，先通过信件建立笔友关系吧。';
+
+  @override
+  String get userCardFriendPostcardsTitle => '好友明信片';
+
+  @override
+  String get userCardFriendPostcardsSubtitle => '笔友最近发布的公开动态';
+
+  @override
+  String get userCardFriendPostcardsEmpty => '还没有公开明信片';
+
+  @override
+  String get userCardLoadMorePostcards => '加载更多';
+
+  @override
+  String get postComposeRejected => '明信片未通过审核，请修改后重新发布。';
+
+  @override
   String postWallPhotosLabel(Object count) {
     return '$count 张配图';
   }

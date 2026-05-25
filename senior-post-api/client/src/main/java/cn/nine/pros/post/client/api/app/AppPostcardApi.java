@@ -31,6 +31,12 @@ public interface AppPostcardApi {
     @PostMapping("/mine/paging")
     PageData<PostcardWallItemVO> minePaging(@RequestBody @Valid AppPostcardPageInDto body);
 
+    @Operation(summary = "指定用户已通过审核的明信片（本人或邮政好友可见）")
+    @PostMapping("/users/{userId}/paging")
+    PageData<PostcardWallItemVO> userPostcardsPaging(
+            @PathVariable("userId") Long userId,
+            @RequestBody @Valid AppPostcardPageInDto body);
+
     @Operation(summary = "明信片详情（公开仅已通过；作者可查看待审/驳回）")
     @GetMapping("/{postcardId}")
     PostcardDetailVO getDetail(@PathVariable("postcardId") Long postcardId);

@@ -4,6 +4,7 @@ import cn.nine.commons.data.dto.AbstractAuditableDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -60,5 +61,11 @@ public class PostcardDTO extends AbstractAuditableDTO {
      */
     @Schema(description = "发布时间")
     private Object publishedAt;
+
+    @Schema(description = "机审摘要")
+    private String machineReviewNote;
+
+    @Schema(description = "机审完成时间")
+    private LocalDateTime machineReviewedAt;
 
 }

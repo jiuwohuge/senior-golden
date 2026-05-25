@@ -498,6 +498,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postWallFAB => 'Write';
 
   @override
+  String get postWallFeedEveryone => 'Everyone';
+
+  @override
+  String get postWallFeedConnections => 'Connections';
+
+  @override
+  String get postWallEmptyConnectionsSubtitle =>
+      'No postcards from your postal friends yet. Connect through letters first.';
+
+  @override
+  String get userCardFriendPostcardsTitle => 'Their postcards';
+
+  @override
+  String get userCardFriendPostcardsSubtitle =>
+      'Recent posts from your postal friend';
+
+  @override
+  String get userCardFriendPostcardsEmpty => 'No public postcards yet';
+
+  @override
+  String get userCardLoadMorePostcards => 'Load more';
+
+  @override
+  String get postComposeRejected =>
+      'Your postcard was not approved. Please revise and try again.';
+
+  @override
   String postWallPhotosLabel(Object count) {
     return '$count photos';
   }

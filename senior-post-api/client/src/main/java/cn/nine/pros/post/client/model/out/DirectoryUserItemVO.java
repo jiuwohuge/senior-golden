@@ -44,4 +44,7 @@ public class DirectoryUserItemVO {
 
     @Schema(description = "兴趣标签名称（与 sys_tag.tag_name 一致，名录筛选 interestNames 用名）")
     private List<String> interestTagNames;
+
+    @Schema(description = "当前浏览者与该用户是否为活跃邮政好友（Connections）")
+    private Boolean postalFriend;
 }

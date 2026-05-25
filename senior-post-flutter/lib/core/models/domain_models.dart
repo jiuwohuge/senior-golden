@@ -18,6 +18,7 @@ class AppUser {
     this.isVip = false,
     this.deletionRequestedAt,
     this.deletionEffectiveAt,
+    this.postalFriend = false,
   });
 
   final String id;
@@ -44,6 +45,9 @@ class AppUser {
       !hasAvatar || avatarAuditStatus == null || avatarAuditStatus == 1;
   final DateTime? deletionRequestedAt;
   final DateTime? deletionEffectiveAt;
+
+  /// 当前浏览者与该用户是否为邮政好友（名录用户卡）
+  final bool postalFriend;
 
   int get age => DateTime.now().year - birthYear;
 
@@ -95,6 +99,7 @@ class AppUser {
       isVip: m['isVip'] as bool? ?? false,
       deletionRequestedAt: delReq,
       deletionEffectiveAt: delEff,
+      postalFriend: m['postalFriend'] as bool? ?? false,
     );
   }
 
@@ -118,6 +123,7 @@ class AppUser {
       countryCode: countryCode ?? this.countryCode,
       countryName: countryName ?? this.countryName,
       birthYear: birthYear,
+      gender: gender,
       bio: bio ?? this.bio,
       interests: interests ?? this.interests,
       interestTagIds: interestTagIds ?? this.interestTagIds,
@@ -126,6 +132,7 @@ class AppUser {
       isVip: isVip ?? this.isVip,
       deletionRequestedAt: deletionRequestedAt ?? this.deletionRequestedAt,
       deletionEffectiveAt: deletionEffectiveAt ?? this.deletionEffectiveAt,
+      postalFriend: postalFriend,
     );
   }
 }
@@ -143,6 +150,7 @@ class WallPost {
     this.postStatus,
     this.canSendLetter = true,
     this.isOwner = false,
+    this.machineReviewNote,
   });
 
   final String id;
@@ -162,6 +170,9 @@ class WallPost {
 
   /// 当前用户是否为作者（详情接口 `owner`）
   final bool isOwner;
+
+  /// 机审摘要（作者详情接口，驳回时可能有说明）
+  final String? machineReviewNote;
 
   List<String> get resolvedImageUrls {
     if (imageUrls != null && imageUrls!.isNotEmpty) {

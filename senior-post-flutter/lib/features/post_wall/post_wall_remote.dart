@@ -11,11 +11,16 @@ class PostWallRemoteRepository {
 
   final Dio _dio;
 
-  Future<List<WallPost>> listWall({int page = 1, int size = 50}) async {
+  Future<List<WallPost>> listWall({
+    int page = 1,
+    int size = 50,
+    bool connectionsOnly = false,
+  }) async {
     final r = await _dio.post<dynamic>(
       '/api/postcards/paging',
       data: <String, dynamic>{
         'page': <String, dynamic>{'page': page, 'size': size},
+        if (connectionsOnly) 'connectionsOnly': true,
       },
     );
     final pd = _unwrapPageData(r);
@@ -46,6 +51,25 @@ class PostWallRemoteRepository {
         .whereType<Map<String, dynamic>>()
         .map(_voToWallComment)
         .toList();
+  }
+
+  Future<List<WallPost>> listUserPostcards({
+    required String userId,
+    int page = 1,
+    int size = 1,
+  }) async {
+    if (int.tryParse(userId) == null) {
+      return [];
+    }
+    final r = await _dio.post<dynamic>(
+      '/api/postcards/users/$userId/paging',
+      data: <String, dynamic>{
+        'page': <String, dynamic>{'page': page, 'size': size},
+      },
+    );
+    final pd = _unwrapPageData(r);
+    final rows = _recordsList(pd);
+    return rows.whereType<Map<String, dynamic>>().map(_voToWallPost).toList();
   }
 
   Future<WallPost> createPost({
@@ -202,6 +226,7 @@ WallPost _voToWallPost(Map<String, dynamic> m) {
   final single = m['imageUrl'] as String?;
   final isOwner = m['owner'] as bool? ?? false;
   final canSendLetter = m['canSendLetter'] as bool? ?? !isOwner;
+  final machineNote = m['machineReviewNote'] as String?;
   return WallPost(
     id: id,
     author: _authorFromMap(authorMap),
@@ -214,6 +239,8 @@ WallPost _voToWallPost(Map<String, dynamic> m) {
     postStatus: (m['postStatus'] as num?)?.toInt(),
     canSendLetter: canSendLetter,
     isOwner: isOwner,
+    machineReviewNote:
+        machineNote != null && machineNote.trim().isNotEmpty ? machineNote.trim() : null,
   );
 }
 

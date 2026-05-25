@@ -20,6 +20,8 @@ public interface AppPostcardService {
 
     PostcardDetailVO create(long userId, AppPostcardCreateInDto body);
 
+    PageData<PostcardWallItemVO> userPostcardsPage(long viewerUserId, long targetUserId, AppPostcardPageInDto body);
+
     PageData<PostcardCommentItemVO> commentsPage(long viewerUserId, Long postcardId, AppPostcardCommentPageInDto body);
 
     PostcardCommentItemVO createComment(long userId, Long postcardId, AppPostcardCommentCreateInDto body);

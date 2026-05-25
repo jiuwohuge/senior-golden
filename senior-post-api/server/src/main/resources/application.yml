@@ -94,6 +94,21 @@ senior-post:
     get-expire-seconds: 900
     key-prefix: app/uploads
     public-read-base-url: ${ALIYUN_OSS_PUBLIC_BASE_URL:}
+  moderation:
+    pending-retry-minutes: 5
+    retry-fixed-delay-ms: 120000
+    baidu:
+      app-id: ${MODERATION_BAIDU_APP_ID:}
+      api-key: ${MODERATION_BAIDU_API_KEY:}
+      api-secret: ${MODERATION_BAIDU_API_SECRET:}
+      connection-timeout-ms: 10000
+      socket-timeout-ms: 60000
+    deepseek:
+      api-key: ${MODERATION_DEEPSEEK_API_KEY:}
+      base-url: ${MODERATION_DEEPSEEK_BASE_URL:https://api.deepseek.com}
+      model: ${MODERATION_DEEPSEEK_MODEL:deepseek-chat}
+      connect-timeout-ms: 10000
+      read-timeout-ms: 60000
   mailbox:
     # 平邮到期自动送达：定时扫描间隔（毫秒）
     standard-delivery-fixed-delay-ms: 30000

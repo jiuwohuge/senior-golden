@@ -177,6 +177,14 @@
   "postWallEmptySubtitle": "Be the first to share a postcard today.",
   "postWallWriteAction": "Write postcard",
   "postWallFAB": "Write",
+  "postWallFeedEveryone": "Everyone",
+  "postWallFeedConnections": "Connections",
+  "postWallEmptyConnectionsSubtitle": "No postcards from your postal friends yet. Connect through letters first.",
+  "userCardFriendPostcardsTitle": "Their postcards",
+  "userCardFriendPostcardsSubtitle": "Recent posts from your postal friend",
+  "userCardFriendPostcardsEmpty": "No public postcards yet",
+  "userCardLoadMorePostcards": "Load more",
+  "postComposeRejected": "Your postcard was not approved. Please revise and try again.",
   "postWallPhotosLabel": "{count} photos",
   "@postWallPhotosLabel": {
     "placeholders": {

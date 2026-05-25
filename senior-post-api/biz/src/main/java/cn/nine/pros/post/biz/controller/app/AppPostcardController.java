@@ -37,6 +37,12 @@ public class AppPostcardController implements AppPostcardApi {
     }
 
     @Override
+    public PageData<PostcardWallItemVO> userPostcardsPaging(Long userId, AppPostcardPageInDto body) {
+        long uid = requireUserId();
+        return appPostcardService.userPostcardsPage(uid, userId, body);
+    }
+
+    @Override
     public PostcardDetailVO getDetail(Long postcardId) {
         long uid = requireUserId();
         return appPostcardService.getDetail(uid, postcardId);

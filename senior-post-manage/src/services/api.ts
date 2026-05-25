@@ -48,6 +48,12 @@ export const api = {
   saveConfig: (body: any) => request.post('/webapi/config/save', body),
   deleteConfig: (id: number) => request.post(`/webapi/config/${id}/delete`),
 
+  getModerationConfig: () => request.get('/webapi/config/moderation'),
+  saveModerationConfig: (body: {
+    postcardImageEnabled: boolean
+    postcardTextEnabled: boolean
+  }) => request.post('/webapi/config/moderation/save', body),
+
   countries: (params: any) => request.post('/webapi/country/paging', params),
   saveCountry: (body: any) => request.post('/webapi/country/save', body),
   deleteCountry: (id: number) => request.post(`/webapi/country/${id}/delete`),

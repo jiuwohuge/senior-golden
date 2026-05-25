@@ -13,6 +13,7 @@ type PostcardRow = {
   images?: string[] | null
   reviewStatus?: number
   status?: number
+  machineReviewNote?: string | null
 }
 
 function normalizeImageList(row: PostcardRow): string[] {
@@ -82,6 +83,14 @@ export default function PostcardList() {
           if (v === 2) return <Tag color="red">驳回</Tag>
           return <Tag>{String(v)}</Tag>
         },
+      },
+      {
+        title: '机审备注',
+        width: 200,
+        dataIndex: 'machineReviewNote',
+        ellipsis: true,
+        render: (t: string | null | undefined) =>
+          t ? <Paragraph ellipsis={{ rows: 2 }}>{t}</Paragraph> : <Text type="secondary">—</Text>,
       },
       {
         title: '操作',

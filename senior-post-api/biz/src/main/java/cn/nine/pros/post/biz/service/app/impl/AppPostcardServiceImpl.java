@@ -8,9 +8,11 @@ import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.PostcardCommentDomain;
 import cn.nine.pros.post.biz.model.domain.PostcardCommentLikeDomain;
 import cn.nine.pros.post.biz.model.domain.PostcardDomain;
+import cn.nine.pros.post.biz.moderation.PostcardCreatedEvent;
 import cn.nine.pros.post.biz.service.app.AppBlacklistService;
 import cn.nine.pros.post.biz.service.app.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.app.AppPostcardService;
+import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.PostcardCommentLikeService;
 import cn.nine.pros.post.biz.service.base.PostcardCommentService;
@@ -32,6 +34,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -58,6 +61,8 @@ public class AppPostcardServiceImpl implements AppPostcardService {
     private final OssDisplayUrlService ossDisplayUrlService;
     private final StampGrantService stampGrantService;
     private final AppBlacklistService appBlacklistService;
+    private final FriendshipService friendshipService;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final AppMessages appMessages;
 
     @Override
@@ -70,8 +75,15 @@ public class AppPostcardServiceImpl implements AppPostcardService {
                 .apply("status = 1")
                 .apply("NOT EXISTS (SELECT 1 FROM bu_user_blacklist bl WHERE bl.del_flag = FALSE "
                         + "AND ((bl.user_id = {0} AND bl.blocked_user_id = bu_postcard.user_id) "
-                        + "OR (bl.user_id = bu_postcard.user_id AND bl.blocked_user_id = {0})))", userId)
-                .orderByDesc(PostcardDomain::getPublishedAt);
+                        + "OR (bl.user_id = bu_postcard.user_id AND bl.blocked_user_id = {0})))", userId);
+        if (body != null && Boolean.TRUE.equals(body.getConnectionsOnly())) {
+            qw.apply(
+                    "EXISTS (SELECT 1 FROM bu_friendship f WHERE f.del_flag = FALSE AND f.status = 1 "
+                            + "AND ((f.user_low = {0} AND f.user_high = bu_postcard.user_id) "
+                            + "OR (f.user_high = {0} AND f.user_low = bu_postcard.user_id)))",
+                    userId);
+        }
+        qw.orderByDesc(PostcardDomain::getPublishedAt);
         Page<PostcardDomain> p = postcardService.page(AppPageHelper.mpPage(pq), qw);
         Map<Long, UserDTO> authorMap = loadAuthors(p.getRecords());
         List<PostcardWallItemVO> records = new ArrayList<>();
@@ -137,7 +149,6 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         if (content.length() > 2000) {
             throw new BadRequestException(appMessages.get("app.error.postcard.bodyTooLong"));
         }
-        sensitiveWordService.assertPlainTextAllowed(content);
         List<String> urls = new ArrayList<>();
         if (body.getImageUrls() != null) {
             for (String u : body.getImageUrls()) {
@@ -162,11 +173,40 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         d.initAudit(userId);
         postcardService.save(d);
         stampGrantService.afterPostcardCreated(userId, d.getId());
+        applicationEventPublisher.publishEvent(new PostcardCreatedEvent(d.getId()));
         PostcardDomain fresh = postcardService.getById(d.getId());
         UserDTO author = userService.findById(userId);
         PostcardDetailVO vo = toDetail(fresh, author, 0, userId);
         ossDisplayUrlService.applyPostcardDetail(userId, vo);
         return vo;
+    }
+
+    @Override
+    public PageData<PostcardWallItemVO> userPostcardsPage(
+            long viewerUserId, long targetUserId, AppPostcardPageInDto body) {
+        if (!Objects.equals(viewerUserId, targetUserId)
+                && !friendshipService.areActiveFriends(viewerUserId, targetUserId)) {
+            throw new BadRequestException(appMessages.get("app.error.postcard.notFound"));
+        }
+        if (appBlacklistService.areMutuallyBlocked(viewerUserId, targetUserId)) {
+            throw new BadRequestException(appMessages.get("app.error.postcard.notFound"));
+        }
+        PageQuery pq = AppPageHelper.normalize(body == null ? null : body.getPage());
+        LambdaQueryWrapper<PostcardDomain> qw = new LambdaQueryWrapper<PostcardDomain>()
+                .eq(PostcardDomain::isDelFlag, false)
+                .eq(PostcardDomain::getUserId, targetUserId)
+                .apply("review_status = 1")
+                .apply("status = 1")
+                .orderByDesc(PostcardDomain::getPublishedAt);
+        Page<PostcardDomain> p = postcardService.page(AppPageHelper.mpPage(pq), qw);
+        Map<Long, UserDTO> authorMap = loadAuthors(p.getRecords());
+        List<PostcardWallItemVO> records = new ArrayList<>();
+        for (PostcardDomain row : p.getRecords()) {
+            int cc = countVisibleComments(row.getId());
+            records.add(toWallItem(row, authorMap.get(row.getUserId()), cc, false, viewerUserId));
+        }
+        ossDisplayUrlService.applyPostcardWall(viewerUserId, records);
+        return AppPageHelper.pageData(pq, p, records);
     }
 
     @Override
@@ -383,7 +423,7 @@ public class AppPostcardServiceImpl implements AppPostcardService {
         List<String> imgs = normalizeImageUrls(row);
         String first = imgs.isEmpty() ? null : imgs.get(0);
         boolean owner = Objects.equals(viewerUserId, row.getUserId());
-        return PostcardDetailVO.builder()
+        PostcardDetailVO.PostcardDetailVOBuilder b = PostcardDetailVO.builder()
                 .id(row.getId())
                 .content(row.getContent())
                 .imageUrl(first)
@@ -393,8 +433,11 @@ public class AppPostcardServiceImpl implements AppPostcardService {
                 .author(toAuthor(author))
                 .reviewStatus(intVal(row.getReviewStatus()))
                 .owner(owner)
-                .canSendLetter(!owner)
-                .build();
+                .canSendLetter(!owner);
+        if (owner && StringUtils.hasText(row.getMachineReviewNote())) {
+            b.machineReviewNote(row.getMachineReviewNote().trim());
+        }
+        return b.build();
     }
 
     /**

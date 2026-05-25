@@ -11,6 +11,7 @@ import cn.nine.pros.post.biz.service.app.AppBlacklistService;
 import cn.nine.pros.post.biz.service.app.AppDirectoryService;
 import cn.nine.pros.post.biz.service.app.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.app.support.UserInterestAssembler;
+import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.TagService;
 import cn.nine.pros.post.biz.service.base.UserService;
@@ -43,6 +44,7 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
     private final OssDisplayUrlService ossDisplayUrlService;
     private final UserInterestAssembler userInterestAssembler;
     private final AppBlacklistService appBlacklistService;
+    private final FriendshipService friendshipService;
     private final AppMessages appMessages;
 
     @Override
@@ -202,6 +204,7 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
             av = ossDisplayUrlService.signAvatarForViewer(viewerUserId, av.trim());
         }
         UserInterestAssembler.Payload interests = userInterestAssembler.loadForUser(u.getId());
+        boolean postalFriend = u.getId() != null && friendshipService.areActiveFriends(viewerUserId, u.getId());
         return DirectoryUserItemVO.builder()
                 .id(u.getId())
                 .nickname(u.getNickname())
@@ -211,6 +214,7 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
                 .birthYear(u.getBirthYear())
                 .avatarUrl(av)
                 .isVip(Boolean.TRUE.equals(u.getIsVip()))
+                .postalFriend(postalFriend)
                 .interestTagIds(interests.ids())
                 .interestTagNames(interests.names())
                 .build();

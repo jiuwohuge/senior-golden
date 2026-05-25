@@ -36,6 +36,7 @@ class _PostWallPageState extends ConsumerState<PostWallPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final scope = ref.watch(postWallFeedScopeProvider);
     final postsAsync = ref.watch(postWallListProvider);
     return SafeArea(
       top: false,
@@ -44,6 +45,27 @@ class _PostWallPageState extends ConsumerState<PostWallPage> {
           Column(
             children: [
               const PostalPerforationStrip(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 4),
+                child: SegmentedButton<PostWallFeedScope>(
+                  segments: [
+                    ButtonSegment(
+                      value: PostWallFeedScope.everyone,
+                      label: Text(l10n.postWallFeedEveryone),
+                    ),
+                    ButtonSegment(
+                      value: PostWallFeedScope.connections,
+                      label: Text(l10n.postWallFeedConnections),
+                    ),
+                  ],
+                  selected: {scope},
+                  onSelectionChanged: (selected) {
+                    ref.read(postWallFeedScopeProvider.notifier).state =
+                        selected.first;
+                    ref.invalidate(postWallListProvider);
+                  },
+                ),
+              ),
               Expanded(
                 child: postsAsync.when(
                   loading: () => const PostalSkeletonList(),
@@ -73,7 +95,9 @@ class _PostWallPageState extends ConsumerState<PostWallPage> {
                                   height: constraints.maxHeight,
                                   child: PostalEmptyState(
                                     title: l10n.postWallEmptyTitle,
-                                    subtitle: l10n.postWallEmptySubtitle,
+                                    subtitle: scope == PostWallFeedScope.connections
+                                        ? l10n.postWallEmptyConnectionsSubtitle
+                                        : l10n.postWallEmptySubtitle,
                                   ),
                                 ),
                               ],

@@ -67,4 +67,12 @@ public class PostcardDomain extends AbstractAuditableDomain {
     @Schema(description = "发布时间")
     private Object publishedAt;
 
+    @Schema(description = "机审摘要")
+    @TableField("machine_review_note")
+    private String machineReviewNote;
+
+    @Schema(description = "机审完成时间")
+    @TableField("machine_reviewed_at")
+    private java.time.LocalDateTime machineReviewedAt;
+
 }

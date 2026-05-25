@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Configuration;
         TencentImProperties.class,
         OssProperties.class,
         SeniorPostAuthProperties.class,
-        StampGrantProperties.class
+        StampGrantProperties.class,
+        ModerationProperties.class
 })
 public class PostBizConfiguration {
 }

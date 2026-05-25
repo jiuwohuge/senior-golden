@@ -16,6 +16,10 @@
     <name>senior-post-biz</name>
     <description>资深帖子业务层模块</description>
 
+    <properties>
+        <baidu.aip.version>4.16.18</baidu.aip.version>
+    </properties>
+
     <dependencies>
         <!-- Spring Boot Starter -->
         <dependency>
@@ -126,6 +130,20 @@
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
             <version>2.7.0</version>
+        </dependency>
+
+        <!-- 百度内容审核（明信片配图） -->
+        <dependency>
+            <groupId>com.baidu.aip</groupId>
+            <artifactId>java-sdk</artifactId>
+            <version>${baidu.aip.version}</version>
+            <exclusions>
+                <!-- SDK 自带 slf4j-simple，与 Spring Boot Logback 冲突 -->
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

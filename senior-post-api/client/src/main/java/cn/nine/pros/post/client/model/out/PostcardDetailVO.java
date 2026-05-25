@@ -45,4 +45,7 @@ public class PostcardDetailVO {
 
     @Schema(description = "当前登录用户是否可向作者寄信（本人帖子为 false）")
     private Boolean canSendLetter;
+
+    @Schema(description = "机审摘要（仅作者且已机审时返回）")
+    private String machineReviewNote;
 }

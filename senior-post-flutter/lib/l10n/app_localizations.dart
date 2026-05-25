@@ -992,6 +992,54 @@ abstract class AppLocalizations {
   /// **'Write'**
   String get postWallFAB;
 
+  /// No description provided for @postWallFeedEveryone.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get postWallFeedEveryone;
+
+  /// No description provided for @postWallFeedConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'Connections'**
+  String get postWallFeedConnections;
+
+  /// No description provided for @postWallEmptyConnectionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No postcards from your postal friends yet. Connect through letters first.'**
+  String get postWallEmptyConnectionsSubtitle;
+
+  /// No description provided for @userCardFriendPostcardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Their postcards'**
+  String get userCardFriendPostcardsTitle;
+
+  /// No description provided for @userCardFriendPostcardsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent posts from your postal friend'**
+  String get userCardFriendPostcardsSubtitle;
+
+  /// No description provided for @userCardFriendPostcardsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No public postcards yet'**
+  String get userCardFriendPostcardsEmpty;
+
+  /// No description provided for @userCardLoadMorePostcards.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get userCardLoadMorePostcards;
+
+  /// No description provided for @postComposeRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Your postcard was not approved. Please revise and try again.'**
+  String get postComposeRejected;
+
   /// No description provided for @postWallPhotosLabel.
   ///
   /// In en, this message translates to:

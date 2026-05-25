@@ -133,14 +133,21 @@ class _PostComposePageState extends ConsumerState<PostComposePage> {
     setState(() => _busy = true);
     try {
       final refs = _images.map((e) => e.backendRef).toList();
-      await ref
-          .read(postWallRemoteProvider)
-          .createPost(
+      final created = await ref.read(postWallRemoteProvider).createPost(
             content: _content.text.trim(),
             imageUrls: refs.isEmpty ? null : refs,
           );
       ref.invalidate(postWallListProvider);
       if (!mounted) return;
+      if (created.reviewStatus == 2) {
+        final note = created.machineReviewNote;
+        PostalSnack.show(
+          context,
+          note != null && note.isNotEmpty ? note : l10n.postComposeRejected,
+          tone: PostalSnackTone.error,
+        );
+        return;
+      }
       PostalSnack.show(
         context,
         l10n.postComposePublishedReal,
