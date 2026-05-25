@@ -47,8 +47,33 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
     _minAge = f.minAge;
     _maxAge = f.maxAge;
     _interests.addAll(f.interests);
-    _genders.addAll(f.genders);
+    _genders.addAll(f.genders.where((g) => g == 1 || g == 2));
     _sort = f.sort;
+  }
+
+  /// 筛选分组：标题 + 说明 + 控件，避免下一组芯片被误读为上一组子项。
+  Widget _filterFieldGroup({
+    required BuildContext context,
+    required String title,
+    String? hint,
+    required Widget child,
+  }) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(title, style: theme.textTheme.titleSmall),
+        if (hint != null && hint.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            hint,
+            style: theme.textTheme.bodySmall?.copyWith(color: PostalTokens.inkSecondary),
+          ),
+        ],
+        const SizedBox(height: 8),
+        child,
+      ],
+    );
   }
 
   /// [Wrap] 内单颗芯片若「最小宽度」超过父级可用宽度会横向溢出；同时下拉未 `isExpanded` 时
@@ -205,59 +230,63 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                             onChanged: (v) => setState(() => _maxAge = v.round()),
                           ),
                           const SizedBox(height: 8),
-                          Text(l10n.directoryFilterGender, style: Theme.of(context).textTheme.titleSmall),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            children: [
-                              FilterChip(
-                                label: Text(l10n.directoryFilterGenderAll),
-                                selected: _genders.isEmpty,
-                                onSelected: (_) => setState(() => _genders.clear()),
-                              ),
-                              FilterChip(
-                                label: Text(l10n.authGenderMale),
-                                selected: _genders.contains(1),
-                                onSelected: (v) => setState(() {
-                                  if (v) {
-                                    _genders.add(1);
-                                  } else {
-                                    _genders.remove(1);
-                                  }
-                                }),
-                              ),
-                              FilterChip(
-                                label: Text(l10n.authGenderFemale),
-                                selected: _genders.contains(2),
-                                onSelected: (v) => setState(() {
-                                  if (v) {
-                                    _genders.add(2);
-                                  } else {
-                                    _genders.remove(2);
-                                  }
-                                }),
-                              ),
-                              FilterChip(
-                                label: Text(l10n.authGenderOther),
-                                selected: _genders.contains(3),
-                                onSelected: (v) => setState(() {
-                                  if (v) {
-                                    _genders.add(3);
-                                  } else {
-                                    _genders.remove(3);
-                                  }
-                                }),
-                              ),
-                            ],
+                          _filterFieldGroup(
+                            context: context,
+                            title: l10n.directoryFilterGender,
+                            hint: l10n.directoryFilterGenderHint,
+                            child: Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                FilterChip(
+                                  label: Text(l10n.directoryFilterGenderAll),
+                                  selected: _genders.isEmpty,
+                                  onSelected: (_) => setState(() => _genders.clear()),
+                                ),
+                                FilterChip(
+                                  label: Text(l10n.authGenderMale),
+                                  selected: _genders.contains(1),
+                                  onSelected: (v) => setState(() {
+                                    if (v) {
+                                      _genders.add(1);
+                                    } else {
+                                      _genders.remove(1);
+                                    }
+                                  }),
+                                ),
+                                FilterChip(
+                                  label: Text(l10n.authGenderFemale),
+                                  selected: _genders.contains(2),
+                                  onSelected: (v) => setState(() {
+                                    if (v) {
+                                      _genders.add(2);
+                                    } else {
+                                      _genders.remove(2);
+                                    }
+                                  }),
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 8),
-                          if (tagOptions.isEmpty)
-                            Text(
-                              'No interest tags from server. Add tags in admin or try another language.',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            )
-                          else
-                            _chipsForOptions(tagOptions),
+                          const SizedBox(height: 20),
+                          Divider(
+                            height: 1,
+                            color: PostalTokens.perforationLine.withValues(alpha: 0.75),
+                          ),
+                          const SizedBox(height: 16),
+                          _filterFieldGroup(
+                            context: context,
+                            title: l10n.directoryFilterInterests,
+                            hint: l10n.directoryFilterInterestsHint,
+                            child: tagOptions.isEmpty
+                                ? Text(
+                                    l10n.directoryFilterInterestsEmpty,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: PostalTokens.inkSecondary,
+                                        ),
+                                  )
+                                : _chipsForOptions(tagOptions),
+                          ),
                         ],
                       ),
                     ),
@@ -285,7 +314,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               PostalButton(
-                                label: 'Apply filters',
+                                label: l10n.directoryFilterApply,
                                 onPressed: () {
                                   final min = _minAge <= _maxAge ? _minAge : _maxAge;
                                   final max = _maxAge >= _minAge ? _maxAge : _minAge;
@@ -303,7 +332,7 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                               ),
                               const SizedBox(height: 8),
                               PostalButton(
-                                label: 'Clear',
+                                label: l10n.directoryFilterClear,
                                 variant: PostalButtonVariant.secondary,
                                 onPressed: () {
                                   ref.read(directoryFilterProvider.notifier).state =

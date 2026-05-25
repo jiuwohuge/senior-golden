@@ -211,7 +211,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get directoryFilterGender => 'Gender';
 
   @override
+  String get directoryFilterGenderHint =>
+      'Optional — leave all selected to show everyone.';
+
+  @override
   String get directoryFilterGenderAll => 'All';
+
+  @override
+  String get directoryFilterInterests => 'Interest tags';
+
+  @override
+  String get directoryFilterInterestsHint =>
+      'Optional — pick one or more to narrow pen pals by shared hobbies.';
+
+  @override
+  String get directoryFilterInterestsEmpty =>
+      'No interest tags from the server. Try another language or ask an admin to add tags.';
+
+  @override
+  String get directoryFilterApply => 'Apply filters';
+
+  @override
+  String get directoryFilterClear => 'Clear';
 
   @override
   String get authGoRegister => 'Create an account';

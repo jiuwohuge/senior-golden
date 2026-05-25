@@ -196,7 +196,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get directoryFilterGender => '性别';
 
   @override
+  String get directoryFilterGenderHint => '可选；不选或选「全部」表示不限性别。';
+
+  @override
   String get directoryFilterGenderAll => '全部';
+
+  @override
+  String get directoryFilterInterests => '兴趣标签';
+
+  @override
+  String get directoryFilterInterestsHint => '可选；多选可缩小名录，匹配有共同爱好的笔友。';
+
+  @override
+  String get directoryFilterInterestsEmpty => '服务器暂无兴趣标签，可尝试切换语言或由管理员维护词表。';
+
+  @override
+  String get directoryFilterApply => '应用筛选';
+
+  @override
+  String get directoryFilterClear => '清除';
 
   @override
   String get authGoRegister => '注册新账号';

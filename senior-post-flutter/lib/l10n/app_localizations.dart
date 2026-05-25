@@ -464,11 +464,47 @@ abstract class AppLocalizations {
   /// **'Gender'**
   String get directoryFilterGender;
 
+  /// No description provided for @directoryFilterGenderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — leave all selected to show everyone.'**
+  String get directoryFilterGenderHint;
+
   /// No description provided for @directoryFilterGenderAll.
   ///
   /// In en, this message translates to:
   /// **'All'**
   String get directoryFilterGenderAll;
+
+  /// No description provided for @directoryFilterInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest tags'**
+  String get directoryFilterInterests;
+
+  /// No description provided for @directoryFilterInterestsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — pick one or more to narrow pen pals by shared hobbies.'**
+  String get directoryFilterInterestsHint;
+
+  /// No description provided for @directoryFilterInterestsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No interest tags from the server. Try another language or ask an admin to add tags.'**
+  String get directoryFilterInterestsEmpty;
+
+  /// No description provided for @directoryFilterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply filters'**
+  String get directoryFilterApply;
+
+  /// No description provided for @directoryFilterClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get directoryFilterClear;
 
   /// No description provided for @authGoRegister.
   ///
