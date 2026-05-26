@@ -18,6 +18,7 @@
 | **会话/审计轨迹** | 仓库根目录 [`progress.md`](../progress.md)、[`findings.md`](../findings.md) |
 | **架构与技术栈基线** | 仓库根目录 [`PLAN.md`](../PLAN.md) |
 | **任务总索引** | 仓库根目录 [`task_plan.md`](../task_plan.md) |
+| **时光邮局 v1 开发计划（留档）** | [`plan/time-letter/task_plan.md`](plan/time-letter/task_plan.md) · 真源 [`时光邮局功能提案.md`](../时光邮局功能提案.md) §5 |
 
 ---
 
@@ -36,7 +37,12 @@ doc/
     ├── 04-dev-plan.md           技术方案与人日
     ├── 05-task-tracker.md       任务跟踪真源
     ├── 06-env-setup.md          环境与依赖勾选
-    └── 07-gap-analysis-and-roadmap.md  遗漏 + 路线图 + §2.0 代码对齐
+    ├── 07-gap-analysis-and-roadmap.md  遗漏 + 路线图 + §2.0 代码对齐
+    └── time-letter/               时光邮局 v1 专项（2026-05-25 留档）
+        ├── task_plan.md           M1–M4 里程碑
+        ├── findings.md            代码摸底
+        ├── progress.md            专项会话日志
+        └── 01-dev-plan.md         API/表/文件清单
 ```
 
 **后端专项**：`senior-post-api/底层框架能力.md`（框架约定，与 `01` 独立）。

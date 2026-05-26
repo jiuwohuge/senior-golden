@@ -338,3 +338,18 @@
 | 终端日志中 `auth/me` 与 `im/usersig` 成对高频出现 | 与业务墙/名录接口无直接映射，属于会话刷新 + IM 预热触发链。 |
 | 根因在导航壳重建 | `MainShell` 底部 Tab 使用 `context.go(...)` 切路径，导致 `MainShell` 重建；`ProfilePage.initState` 每次重建都会调用 `refreshSessionFromServer -> /api/auth/me`。 |
 | 业务接口本身未被改写 | 墙与名录仓储仍指向 `/api/postcards/*`、`/api/directory/*`；高频 `auth/me` 是副作用噪声。 |
+
+---
+
+## 22. 时光邮局 v1（2026-05-25 · 留档，未开工）
+
+| 项 | 说明 |
+|----|------|
+| **需求真源** | [时光邮局功能提案.md](../时光邮局功能提案.md) **§5**（Claude 合并定稿） |
+| **开发计划** | [doc/plan/time-letter/task_plan.md](doc/plan/time-letter/task_plan.md)（M1–M4） |
+| **技术清单** | [doc/plan/time-letter/01-dev-plan.md](doc/plan/time-letter/01-dev-plan.md) |
+| **代码现状** | 无 `time_letter` 实现；最新 Flyway **V25** → 新表建议 **V26** |
+| **关键差异** | 时光信发送前 **强制互关**；社交信 `sendLetter` 不要求互关 |
+| **不可混用** | `bu_letter`、`/api/mailbox/*`、加急/提前拆信 |
+| **Flutter 落点** | `mailbox_page.dart` 增第三 Tab「时光」；新建 `lib/features/time_letter/` |
+| **详细摸底** | [doc/plan/time-letter/findings.md](doc/plan/time-letter/findings.md) |

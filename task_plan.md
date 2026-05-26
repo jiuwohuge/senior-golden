@@ -19,6 +19,7 @@
 | [07-gap-analysis-and-roadmap.md](doc/plan/07-gap-analysis-and-roadmap.md) | 遗漏功能系统化清单 + 四阶段路线图 + 资源口径 |
 | [findings.md](findings.md) | 摸底事实与代码证据（持续追加） |
 | [progress.md](progress.md) | 会话级动作日志 |
+| **[时光邮局 v1 开发计划](doc/plan/time-letter/task_plan.md)** | **留档 2026-05-25**：M1–M4 里程碑、状态机、配额；真源 [时光邮局功能提案.md](时光邮局功能提案.md) §5 |
 
 **默认口径**：负责人 `AI + Owner`；周期 **人日（D）**；日历用 **Wn** 相对周，避免与真实日历强绑。
 
@@ -56,6 +57,7 @@
 | 2026-05-09 | 决策 | **下一开发波次**：**FP-A1-006** → **FP-X-001** → **FP-A1-007** → **FP-X-003** → **FP-A10-001**（见 `05` Sprint 4、`07` §3） |
 | 2026-05-09 | 决策 | **注销生效**：冷静期结束 `finalizeAccountDeletion` 前 **`bu_friendship` → status=0** + 腾讯 REST **`sns/friend_delete`（Delete_Type_Both）**；细节见 `findings.md` §15 |
 | 2026-05-20 | 决策 | **删号释放 UNIQUE**：邮箱/openId 等登录标识删除时追加 `+deleted.{epochMillis}`；identity 表落地后统一 `releaseAllForUser`；见 `findings.md` §20、认证首页计划 §十二 |
+| 2026-05-25 | 决策 | **时光邮局 v1**：独立 `bu_time_letter` + `/api/app/time-letter/*`；与 `bu_letter` 严格分离；Mailbox 第三 Tab「时光」；计划留档 [doc/plan/time-letter/](doc/plan/time-letter/)，真源 [时光邮局功能提案.md](时光邮局功能提案.md) §5 |
 
 ---
 

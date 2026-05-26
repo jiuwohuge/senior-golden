@@ -1,5 +1,12 @@
 # 会话进度日志
 
+## 2026-05-25 — 时光邮局 v1：需求定稿 + 开发计划留档（planning-with-files）
+
+- **动作**：§2 辩论完成；§4 Cursor + §5 Claude 合并定稿；Cursor 审阅 §5 工程补充项；代码摸底（`bu_letter`/调度/Flutter Mailbox）；创建 `doc/plan/time-letter/` 四份留档文件；更新根 `task_plan.md` / `findings.md` §22。
+- **产出**：`doc/plan/time-letter/task_plan.md`、`findings.md`、`progress.md`、`01-dev-plan.md`；Cursor Plan `.cursor/plans/时光邮局_v1_开发_44a13890.plan.md`。
+- **状态**：Phase 0 完成，**未写业务代码**；待 Owner 研究后从 M1 开工。
+- **下一步**：确认 M3 裁剪与 TTS 依赖 → `V26__time_letter.sql`。
+
 ## 2026-05-18 — 忘记密码完成态按钮优化 + 管理端用户编辑/删除（frontend-design）
 
 - **Flutter**：`forgot_password_page.dart` 完成态由通用空态改为定制成功卡片，强化“返回登录”主按钮（渐变、阴影、高对比）。
