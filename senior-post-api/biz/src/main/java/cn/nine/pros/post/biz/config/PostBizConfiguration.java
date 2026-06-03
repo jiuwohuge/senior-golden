@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
         OssProperties.class,
         SeniorPostAuthProperties.class,
         StampGrantProperties.class,
-        ModerationProperties.class
+        ModerationProperties.class,
+        TimeLetterProperties.class
 })
 public class PostBizConfiguration {
 }

@@ -16,6 +16,8 @@ import '../../features/directory/user_card_page.dart';
 import '../../features/mailbox/chat_page.dart';
 import '../../features/mailbox/im_user_id.dart';
 import '../../features/mailbox/letter_detail_page.dart';
+import '../../features/time_letter/time_letter_compose_page.dart';
+import '../../features/time_letter/time_letter_open_page.dart';
 import '../../features/mailbox/mailbox_archive_page.dart';
 import '../../features/post_wall/post_compose_page.dart';
 import '../../features/post_wall/post_detail_page.dart';
@@ -136,6 +138,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/mailbox/archive',
         builder: (context, state) => const MailboxArchivePage(),
+      ),
+      GoRoute(
+        path: '/time-letter/compose',
+        builder: (context, state) {
+          final extra = state.extra;
+          var toSelf = false;
+          String? recipientId;
+          String? recipientNickname;
+          if (extra is Map) {
+            toSelf = extra['toSelf'] == true;
+            recipientId = extra['recipientId'] as String?;
+            recipientNickname = extra['recipientNickname'] as String?;
+          }
+          return TimeLetterComposePage(
+            toSelf: toSelf,
+            recipientId: recipientId,
+            recipientNickname: recipientNickname,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/time-letter/:id/open',
+        builder: (context, state) => TimeLetterOpenPage(
+          letterId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: '/chat/:userId',

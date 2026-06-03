@@ -168,13 +168,32 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
               side: BorderSide(color: PostalTokens.perforationLine.withValues(alpha: 0.9)),
             ),
             onSelected: (value) async {
-              if (value == 'block') {
+              if (value == 'time_letter') {
+                context.push(
+                  '/time-letter/compose',
+                  extra: <String, dynamic>{
+                    'recipientId': user.id,
+                    'recipientNickname': user.nickname,
+                  },
+                );
+              } else if (value == 'block') {
                 await _onBlockUser(context, user);
               } else if (value == 'report') {
                 await _onReportUser(context, user);
               }
             },
             itemBuilder: (ctx) => [
+              if (user.postalFriend)
+                PopupMenuItem<String>(
+                  value: 'time_letter',
+                  child: Text(
+                    l10n.timeLetterSendToFriend,
+                    style: const TextStyle(
+                      color: PostalTokens.inkNavy,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               PopupMenuItem<String>(
                 value: 'block',
                 child: Text(

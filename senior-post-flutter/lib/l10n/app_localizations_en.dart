@@ -1154,4 +1154,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sendLetterContentLabel => 'Letter content';
+
+  @override
+  String get mailboxTabPostalInbox => 'Postal inbox';
+
+  @override
+  String get mailboxTabConnections => 'Connections';
+
+  @override
+  String get mailboxTabTimeLetter => 'Time';
+
+  @override
+  String get timeLetterComposeTitle => 'Time Post Office';
+
+  @override
+  String get timeLetterComposeToSelf => 'Letter to future me';
+
+  @override
+  String timeLetterComposeToFriend(Object name) {
+    return 'To $name';
+  }
+
+  @override
+  String get timeLetterDeliveryDate => 'Delivery date';
+
+  @override
+  String timeLetterDaysUntil(Object days) {
+    return '$days days until delivery';
+  }
+
+  @override
+  String get timeLetterBodyHint =>
+      'Write what you want your future self or friend to read…';
+
+  @override
+  String get timeLetterBodyEmpty => 'Please write your letter.';
+
+  @override
+  String get timeLetterSealSlide => 'Slide to seal';
+
+  @override
+  String get timeLetterSealSuccessTitle => 'Sealed';
+
+  @override
+  String get timeLetterSealSuccessMessage =>
+      'Your time letter is on its way. It will arrive on the date you chose.';
+
+  @override
+  String get timeLetterTabOutbox => 'Outbox';
+
+  @override
+  String get timeLetterTabInbox => 'Inbox';
+
+  @override
+  String get timeLetterTabMemorial => 'Memorial';
+
+  @override
+  String get timeLetterEmptyTitle => 'No time letters yet';
+
+  @override
+  String get timeLetterEmptySubtitle =>
+      'Write to your future self or a postal friend.';
+
+  @override
+  String get timeLetterLoadError => 'Could not load time letters';
+
+  @override
+  String get timeLetterSealedHidden => 'Sealed — content hidden until delivery';
+
+  @override
+  String get timeLetterTapToOpen => 'Tap to open when delivered';
+
+  @override
+  String get timeLetterCancelTitle => 'Cancel this letter?';
+
+  @override
+  String get timeLetterCancelMessage =>
+      'Stamps will be refunded if you cancel within 24 hours.';
+
+  @override
+  String get timeLetterOpenTitle => 'Open time letter';
+
+  @override
+  String get timeLetterOpenRitual => 'Open the envelope';
+
+  @override
+  String timeLetterReadEstimate(Object minutes) {
+    return 'About $minutes min read';
+  }
+
+  @override
+  String get timeLetterStar => 'Add to memorial';
+
+  @override
+  String get timeLetterStarred => 'In memorial';
+
+  @override
+  String get timeLetterSendToFriend => 'Time letter';
+
+  @override
+  String timeLetterBanner(Object inFlight, Object unread, Object today) {
+    return '$inFlight in transit · $unread to open · $today arrived today';
+  }
 }

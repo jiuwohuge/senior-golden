@@ -14,6 +14,8 @@ import '../../widgets/postal/postal.dart';
 import 'im_unread_providers.dart';
 import 'mailbox_providers.dart';
 import 'tim_facade.dart';
+import '../time_letter/time_letter_list_tab.dart';
+import '../time_letter/time_letter_providers.dart';
 
 class MailboxPage extends ConsumerStatefulWidget {
   const MailboxPage({super.key});
@@ -30,7 +32,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_onTabSelected);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -51,6 +53,8 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
         ref.invalidate(postalInboxLettersProvider);
       case 1:
         ref.invalidate(mailboxFriendsProvider);
+      case 2:
+        invalidateTimeLetterLists(ref);
     }
   }
 
@@ -64,6 +68,11 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
   Future<void> _refreshConnections() async {
     ref.invalidate(mailboxFriendsProvider);
     await ref.read(mailboxFriendsProvider.future);
+  }
+
+  Future<void> _refreshTimeLetters() async {
+    invalidateTimeLetterLists(ref);
+    await ref.read(timeLetterStatsProvider.future);
   }
 
   Future<void> _primeImForUnread() async {
@@ -129,9 +138,10 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
               labelColor: PostalTokens.postboxGreen,
               unselectedLabelColor: PostalTokens.inkTertiary,
               indicatorColor: PostalTokens.postboxGreen,
-              tabs: const [
-                Tab(text: 'Postal inbox'),
-                Tab(text: 'Connections'),
+              tabs: [
+                Tab(text: l10n.mailboxTabPostalInbox),
+                Tab(text: l10n.mailboxTabConnections),
+                Tab(text: l10n.mailboxTabTimeLetter),
               ],
             ),
           ),
@@ -141,6 +151,7 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
               children: [
                 _PostalInboxTab(onRefresh: _refreshPostalInbox),
                 _ConnectionsTab(onRefresh: _refreshConnections),
+                TimeLetterListTab(onRefresh: _refreshTimeLetters),
               ],
             ),
           ),
@@ -312,12 +323,28 @@ class _ConnectionsTab extends ConsumerWidget {
               final unread = (id.isEmpty || id == '0')
                   ? 0
                   : (unreadMap[id] ?? 0);
+              final l10n = AppLocalizations.of(context)!;
               return _ImStyleRow(
                 title: r.peer.nickname,
                 subtitle: r.lastMessage,
                 time: r.lastTime,
                 avatarUrl: r.peer.avatarUrl,
                 unreadCount: unread,
+                trailing: IconButton(
+                  tooltip: l10n.timeLetterSendToFriend,
+                  icon: const Icon(Icons.schedule_send_outlined),
+                  color: PostalTokens.postboxGreen,
+                  onPressed: () {
+                    if (id.isEmpty || id == '0') return;
+                    context.push(
+                      '/time-letter/compose',
+                      extra: <String, dynamic>{
+                        'recipientId': id,
+                        'recipientNickname': r.peer.nickname,
+                      },
+                    );
+                  },
+                ),
                 onTap: () {
                   if (id.isEmpty || id == '0') {
                     PostalSnack.show(
@@ -353,6 +380,7 @@ class _ImStyleRow extends StatelessWidget {
     required this.onTap,
     this.avatarUrl,
     this.unreadCount = 0,
+    this.trailing,
   });
 
   final String title;
@@ -361,6 +389,7 @@ class _ImStyleRow extends StatelessWidget {
   final VoidCallback onTap;
   final String? avatarUrl;
   final int unreadCount;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -439,7 +468,8 @@ class _ImStyleRow extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              if (trailing != null) trailing!,
+              const SizedBox(width: 6),
               Text(
                 DateFormat('MM-dd').format(time),
                 style: theme.textTheme.labelSmall?.copyWith(

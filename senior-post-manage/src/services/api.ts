@@ -40,6 +40,11 @@ export const api = {
   approveComment: (id: number) => request.post(`/webapi/content/comment/${id}/approve`),
   rejectComment: (id: number, reason: string) => request.post(`/webapi/content/comment/${id}/reject`, { reason }),
 
+  timeLetters: (params: any) => request.post('/webapi/content/time-letter/paging', params),
+  timeLetterDetail: (id: number) => request.get(`/webapi/content/time-letter/${id}`),
+  takedownTimeLetter: (id: number, reason: string) =>
+    request.post(`/webapi/content/time-letter/${id}/takedown`, { reason }),
+
   reports: (params: any) => request.post('/webapi/report/paging', params),
   handleReport: (id: number, handleNote?: string) => request.post(`/webapi/report/${id}/handle`, { handleNote, result: 1 }),
   rejectReport: (id: number, handleNote?: string) => request.post(`/webapi/report/${id}/reject`, { handleNote, result: 2 }),

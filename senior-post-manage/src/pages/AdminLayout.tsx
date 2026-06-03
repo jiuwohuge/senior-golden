@@ -12,6 +12,7 @@ import VipConfig from './config/VipConfig'
 import ModerationConfig from './config/ModerationConfig'
 import CommentList from './content/CommentList'
 import PostcardList from './content/PostcardList'
+import TimeLetterList from './content/TimeLetterList'
 import ActionLogList from './log/ActionLogList'
 import LoginLogList from './log/LoginLogList'
 import ReportList from './report/List'
@@ -66,6 +67,7 @@ export default function AdminLayout() {
         label: '内容审核',
         children: [
           { key: '/content/postcard', label: <Link to="/content/postcard">明信片审核</Link> },
+          { key: '/content/time-letter', label: <Link to="/content/time-letter">时光信</Link> },
           { key: '/content/comment', label: <Link to="/content/comment">评论审核</Link> },
           { key: '/report', label: <Link to="/report">明信片举报</Link> },
         ],
@@ -193,6 +195,7 @@ export default function AdminLayout() {
             <Route path="/user/feedback" element={<FeedbackList />} />
             <Route path="/stamps/ledger" element={<StampLedgerList />} />
             <Route path="/content/postcard" element={<PostcardList />} />
+            <Route path="/content/time-letter" element={<TimeLetterList />} />
             <Route path="/content/comment" element={<CommentList />} />
             <Route path="/report" element={<ReportList />} />
             <Route path="/config/list" element={<ConfigList />} />

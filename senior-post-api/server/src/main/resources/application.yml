@@ -113,6 +113,17 @@ senior-post:
     # 平邮到期自动送达：定时扫描间隔（毫秒）
     standard-delivery-fixed-delay-ms: 30000
     standard-delivery-batch-size: 200
+  time-letter:
+    stamp-cost: 1
+    max-delivery-years: 2
+    daily-create-limit: 5
+    recipient-30d-limit: 3
+    in-flight-limit: 20
+    body-max-length: 1500
+    body-soft-hint-length: 800
+    cancel-window-hours: 24
+    delivery-batch-size: 200
+    delivery-fixed-delay-ms: 60000
 
 jh:
   config:

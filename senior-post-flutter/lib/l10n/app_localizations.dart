@@ -2179,6 +2179,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Letter content'**
   String get sendLetterContentLabel;
+
+  /// No description provided for @mailboxTabPostalInbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal inbox'**
+  String get mailboxTabPostalInbox;
+
+  /// No description provided for @mailboxTabConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'Connections'**
+  String get mailboxTabConnections;
+
+  /// No description provided for @mailboxTabTimeLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get mailboxTabTimeLetter;
+
+  /// No description provided for @timeLetterComposeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Post Office'**
+  String get timeLetterComposeTitle;
+
+  /// No description provided for @timeLetterComposeToSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter to future me'**
+  String get timeLetterComposeToSelf;
+
+  /// No description provided for @timeLetterComposeToFriend.
+  ///
+  /// In en, this message translates to:
+  /// **'To {name}'**
+  String timeLetterComposeToFriend(Object name);
+
+  /// No description provided for @timeLetterDeliveryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery date'**
+  String get timeLetterDeliveryDate;
+
+  /// No description provided for @timeLetterDaysUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days until delivery'**
+  String timeLetterDaysUntil(Object days);
+
+  /// No description provided for @timeLetterBodyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write what you want your future self or friend to read…'**
+  String get timeLetterBodyHint;
+
+  /// No description provided for @timeLetterBodyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please write your letter.'**
+  String get timeLetterBodyEmpty;
+
+  /// No description provided for @timeLetterSealSlide.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide to seal'**
+  String get timeLetterSealSlide;
+
+  /// No description provided for @timeLetterSealSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sealed'**
+  String get timeLetterSealSuccessTitle;
+
+  /// No description provided for @timeLetterSealSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your time letter is on its way. It will arrive on the date you chose.'**
+  String get timeLetterSealSuccessMessage;
+
+  /// No description provided for @timeLetterTabOutbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Outbox'**
+  String get timeLetterTabOutbox;
+
+  /// No description provided for @timeLetterTabInbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox'**
+  String get timeLetterTabInbox;
+
+  /// No description provided for @timeLetterTabMemorial.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorial'**
+  String get timeLetterTabMemorial;
+
+  /// No description provided for @timeLetterEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No time letters yet'**
+  String get timeLetterEmptyTitle;
+
+  /// No description provided for @timeLetterEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write to your future self or a postal friend.'**
+  String get timeLetterEmptySubtitle;
+
+  /// No description provided for @timeLetterLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load time letters'**
+  String get timeLetterLoadError;
+
+  /// No description provided for @timeLetterSealedHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Sealed — content hidden until delivery'**
+  String get timeLetterSealedHidden;
+
+  /// No description provided for @timeLetterTapToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to open when delivered'**
+  String get timeLetterTapToOpen;
+
+  /// No description provided for @timeLetterCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this letter?'**
+  String get timeLetterCancelTitle;
+
+  /// No description provided for @timeLetterCancelMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamps will be refunded if you cancel within 24 hours.'**
+  String get timeLetterCancelMessage;
+
+  /// No description provided for @timeLetterOpenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open time letter'**
+  String get timeLetterOpenTitle;
+
+  /// No description provided for @timeLetterOpenRitual.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the envelope'**
+  String get timeLetterOpenRitual;
+
+  /// No description provided for @timeLetterReadEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'About {minutes} min read'**
+  String timeLetterReadEstimate(Object minutes);
+
+  /// No description provided for @timeLetterStar.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to memorial'**
+  String get timeLetterStar;
+
+  /// No description provided for @timeLetterStarred.
+  ///
+  /// In en, this message translates to:
+  /// **'In memorial'**
+  String get timeLetterStarred;
+
+  /// No description provided for @timeLetterSendToFriend.
+  ///
+  /// In en, this message translates to:
+  /// **'Time letter'**
+  String get timeLetterSendToFriend;
+
+  /// No description provided for @timeLetterBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'{inFlight} in transit · {unread} to open · {today} arrived today'**
+  String timeLetterBanner(Object inFlight, Object unread, Object today);
 }
 
 class _AppLocalizationsDelegate

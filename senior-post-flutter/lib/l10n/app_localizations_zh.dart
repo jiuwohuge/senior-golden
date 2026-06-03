@@ -1091,4 +1091,102 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sendLetterContentLabel => '信件正文';
+
+  @override
+  String get mailboxTabPostalInbox => '邮政收件';
+
+  @override
+  String get mailboxTabConnections => '笔友';
+
+  @override
+  String get mailboxTabTimeLetter => '时光';
+
+  @override
+  String get timeLetterComposeTitle => '时光邮局';
+
+  @override
+  String get timeLetterComposeToSelf => '写给未来的自己';
+
+  @override
+  String timeLetterComposeToFriend(Object name) {
+    return '写给 $name';
+  }
+
+  @override
+  String get timeLetterDeliveryDate => '送达日期';
+
+  @override
+  String timeLetterDaysUntil(Object days) {
+    return '还有 $days 天送达';
+  }
+
+  @override
+  String get timeLetterBodyHint => '写下想对未来自己或笔友说的话…';
+
+  @override
+  String get timeLetterBodyEmpty => '请先填写正文';
+
+  @override
+  String get timeLetterSealSlide => '滑动封缄';
+
+  @override
+  String get timeLetterSealSuccessTitle => '封缄成功';
+
+  @override
+  String get timeLetterSealSuccessMessage => '时光信已寄出，将在您选择的日期送达。';
+
+  @override
+  String get timeLetterTabOutbox => '发件箱';
+
+  @override
+  String get timeLetterTabInbox => '收件箱';
+
+  @override
+  String get timeLetterTabMemorial => '纪念册';
+
+  @override
+  String get timeLetterEmptyTitle => '还没有时光信';
+
+  @override
+  String get timeLetterEmptySubtitle => '写给未来的自己，或互关笔友。';
+
+  @override
+  String get timeLetterLoadError => '无法加载时光信';
+
+  @override
+  String get timeLetterSealedHidden => '已封缄，送达前不可查看正文';
+
+  @override
+  String get timeLetterTapToOpen => '送达后可拆信阅读';
+
+  @override
+  String get timeLetterCancelTitle => '取消这封信？';
+
+  @override
+  String get timeLetterCancelMessage => '24 小时内取消将退还邮票。';
+
+  @override
+  String get timeLetterOpenTitle => '拆阅时光信';
+
+  @override
+  String get timeLetterOpenRitual => '拆开信封';
+
+  @override
+  String timeLetterReadEstimate(Object minutes) {
+    return '约 $minutes 分钟阅读';
+  }
+
+  @override
+  String get timeLetterStar => '加入纪念册';
+
+  @override
+  String get timeLetterStarred => '已收藏';
+
+  @override
+  String get timeLetterSendToFriend => '寄时光信';
+
+  @override
+  String timeLetterBanner(Object inFlight, Object unread, Object today) {
+    return '在途 $inFlight 封 · 待拆 $unread 封 · 今日送达 $today 封';
+  }
 }

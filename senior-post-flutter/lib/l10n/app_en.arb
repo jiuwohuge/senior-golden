@@ -451,5 +451,57 @@
   "sendLetterRegisteredSubVip": "Free for VIP",
   "sendLetterRegisteredSubPaid": "Consumes 1 stamp",
   "sendLetterStandardSub": "Free, delayed delivery",
-  "sendLetterContentLabel": "Letter content"
+  "sendLetterContentLabel": "Letter content",
+  "mailboxTabPostalInbox": "Postal inbox",
+  "mailboxTabConnections": "Connections",
+  "mailboxTabTimeLetter": "Time",
+  "timeLetterComposeTitle": "Time Post Office",
+  "timeLetterComposeToSelf": "Letter to future me",
+  "timeLetterComposeToFriend": "To {name}",
+  "@timeLetterComposeToFriend": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "timeLetterDeliveryDate": "Delivery date",
+  "timeLetterDaysUntil": "{days} days until delivery",
+  "@timeLetterDaysUntil": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "timeLetterBodyHint": "Write what you want your future self or friend to read…",
+  "timeLetterBodyEmpty": "Please write your letter.",
+  "timeLetterSealSlide": "Slide to seal",
+  "timeLetterSealSuccessTitle": "Sealed",
+  "timeLetterSealSuccessMessage": "Your time letter is on its way. It will arrive on the date you chose.",
+  "timeLetterTabOutbox": "Outbox",
+  "timeLetterTabInbox": "Inbox",
+  "timeLetterTabMemorial": "Memorial",
+  "timeLetterEmptyTitle": "No time letters yet",
+  "timeLetterEmptySubtitle": "Write to your future self or a postal friend.",
+  "timeLetterLoadError": "Could not load time letters",
+  "timeLetterSealedHidden": "Sealed — content hidden until delivery",
+  "timeLetterTapToOpen": "Tap to open when delivered",
+  "timeLetterCancelTitle": "Cancel this letter?",
+  "timeLetterCancelMessage": "Stamps will be refunded if you cancel within 24 hours.",
+  "timeLetterOpenTitle": "Open time letter",
+  "timeLetterOpenRitual": "Open the envelope",
+  "timeLetterReadEstimate": "About {minutes} min read",
+  "@timeLetterReadEstimate": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "timeLetterStar": "Add to memorial",
+  "timeLetterStarred": "In memorial",
+  "timeLetterSendToFriend": "Time letter",
+  "timeLetterBanner": "{inFlight} in transit · {unread} to open · {today} arrived today",
+  "@timeLetterBanner": {
+    "placeholders": {
+      "inFlight": {},
+      "unread": {},
+      "today": {}
+    }
+  }
 }

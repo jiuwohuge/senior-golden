@@ -438,5 +438,57 @@
   "sendLetterRegisteredSubVip": "会员免费",
   "sendLetterRegisteredSubPaid": "消耗 1 枚邮票",
   "sendLetterStandardSub": "免费，延迟送达",
-  "sendLetterContentLabel": "信件正文"
+  "sendLetterContentLabel": "信件正文",
+  "mailboxTabPostalInbox": "邮政收件",
+  "mailboxTabConnections": "笔友",
+  "mailboxTabTimeLetter": "时光",
+  "timeLetterComposeTitle": "时光邮局",
+  "timeLetterComposeToSelf": "写给未来的自己",
+  "timeLetterComposeToFriend": "写给 {name}",
+  "@timeLetterComposeToFriend": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "timeLetterDeliveryDate": "送达日期",
+  "timeLetterDaysUntil": "还有 {days} 天送达",
+  "@timeLetterDaysUntil": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "timeLetterBodyHint": "写下想对未来自己或笔友说的话…",
+  "timeLetterBodyEmpty": "请先填写正文",
+  "timeLetterSealSlide": "滑动封缄",
+  "timeLetterSealSuccessTitle": "封缄成功",
+  "timeLetterSealSuccessMessage": "时光信已寄出，将在您选择的日期送达。",
+  "timeLetterTabOutbox": "发件箱",
+  "timeLetterTabInbox": "收件箱",
+  "timeLetterTabMemorial": "纪念册",
+  "timeLetterEmptyTitle": "还没有时光信",
+  "timeLetterEmptySubtitle": "写给未来的自己，或互关笔友。",
+  "timeLetterLoadError": "无法加载时光信",
+  "timeLetterSealedHidden": "已封缄，送达前不可查看正文",
+  "timeLetterTapToOpen": "送达后可拆信阅读",
+  "timeLetterCancelTitle": "取消这封信？",
+  "timeLetterCancelMessage": "24 小时内取消将退还邮票。",
+  "timeLetterOpenTitle": "拆阅时光信",
+  "timeLetterOpenRitual": "拆开信封",
+  "timeLetterReadEstimate": "约 {minutes} 分钟阅读",
+  "@timeLetterReadEstimate": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "timeLetterStar": "加入纪念册",
+  "timeLetterStarred": "已收藏",
+  "timeLetterSendToFriend": "寄时光信",
+  "timeLetterBanner": "在途 {inFlight} 封 · 待拆 {unread} 封 · 今日送达 {today} 封",
+  "@timeLetterBanner": {
+    "placeholders": {
+      "inFlight": {},
+      "unread": {},
+      "today": {}
+    }
+  }
 }
