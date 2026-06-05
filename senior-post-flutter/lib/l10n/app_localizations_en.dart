@@ -12,33 +12,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Senior Post';
 
   @override
-  String get appTagline => 'Slow, kind letters — across the world.';
+  String get appTagline => 'A calm post office for trusted pen pals.';
 
   @override
-  String get tabPostWall => 'Post Wall';
+  String get tabPostWall => 'Topics';
 
   @override
-  String get tabDirectory => 'Directory';
+  String get tabDirectory => 'Pen Pals';
 
   @override
-  String get tabMailbox => 'Post Box';
+  String get tabMailbox => 'My Mailbox';
 
   @override
-  String get tabProfile => 'My Post';
+  String get tabProfile => 'Memorial';
 
   @override
-  String get a11yTabPostWall =>
-      'Post Wall: browse postcards from members worldwide';
+  String get a11yTabPostWall => 'Topics: official prompts and today\'s mailbox';
 
   @override
-  String get a11yTabDirectory =>
-      'Directory: find members by country and interests';
+  String get a11yTabDirectory => 'Pen Pals: read profiles and write slowly';
 
   @override
-  String get a11yTabMailbox => 'Post Box: your letters and conversations';
+  String get a11yTabMailbox => 'My Mailbox: your letters and conversations';
 
   @override
-  String get a11yTabProfile => 'My Post: your profile and account';
+  String get a11yTabProfile => 'Memorial: saved letters, profile and account';
 
   @override
   String get a11yNavBar => 'Main sections of the app';
@@ -52,7 +50,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placeholderHint =>
-      'Tip: use the bar below to switch between Post Wall, Directory, Post Box, and My Post.';
+      'Tip: use the bar below to switch between Topics, Pen Pals, My Mailbox, and Memorial.';
 
   @override
   String get postalMotifContentDescription =>
@@ -699,10 +697,46 @@ class AppLocalizationsEn extends AppLocalizations {
       'This member may be unavailable or restricted for you.';
 
   @override
-  String get directoryTitle => 'Post Directory';
+  String get directoryTitle => 'Pen Pal Hall';
 
   @override
-  String get directorySubtitle => 'Find pen pals by country and interests';
+  String get directorySubtitle =>
+      'Read a profile first, then write one thoughtful letter. This is not fast matching.';
+
+  @override
+  String get directoryFilterCta => 'Filter pen pals';
+
+  @override
+  String get directorySafetyTitle => 'Letters before private chat';
+
+  @override
+  String get directorySafetyBody =>
+      'Profiles are only a beginning. Avoid money, investment, verification codes, and private contact requests until trust is real.';
+
+  @override
+  String get directoryListTitle => 'People open to letters';
+
+  @override
+  String get directoryListSubtitle =>
+      'Choose by story and shared interests, not by speed.';
+
+  @override
+  String get directoryLetterFirstBadge => 'Letter first';
+
+  @override
+  String get directoryViewProfile => 'Read profile';
+
+  @override
+  String get directoryBioFallback =>
+      'This member has not written a self-introduction yet. You can read their interests before deciding whether to write.';
+
+  @override
+  String get directoryInterestEmpty => 'Interests to be added';
+
+  @override
+  String directoryMoreInterests(Object count) {
+    return '+$count more';
+  }
 
   @override
   String get directoryLoadFailed => 'Unable to load directory';
@@ -712,7 +746,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get directoryEmptySubtitle =>
-      'Try clearing filters or changing age range.';
+      'Try clearing filters, or come back after new official topics bring more letters.';
 
   @override
   String directoryAgeYears(Object age) {
@@ -1256,4 +1290,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String timeLetterBanner(Object inFlight, Object unread, Object today) {
     return '$inFlight in transit · $unread to open · $today arrived today';
   }
+
+  @override
+  String get topicFriendFallback => 'friend';
+
+  @override
+  String topicTodayGreeting(Object name) {
+    return 'Good to see you, $name';
+  }
+
+  @override
+  String get topicTodayIntro =>
+      'There is no rush here. Read what has arrived, write one thoughtful letter, or pick a topic for today.';
+
+  @override
+  String get topicTodayLetters => 'Letters needing attention';
+
+  @override
+  String topicTodayLettersCount(Object count) {
+    return '$count letters';
+  }
+
+  @override
+  String get topicTodayLoading => 'Loading';
+
+  @override
+  String get topicTodayTime => 'Time letters';
+
+  @override
+  String topicTodayTimeLetters(Object inFlight, Object unread) {
+    return '$inFlight waiting · $unread ready';
+  }
+
+  @override
+  String get topicTodayTimeLettersLoading => 'Checking';
+
+  @override
+  String get topicWriteLetter => 'Write a letter';
+
+  @override
+  String get topicOpenMailbox => 'Open mailbox';
+
+  @override
+  String get topicOfficialLetterTitle => 'A note from the Post Office';
+
+  @override
+  String get topicOfficialIdentity => 'Official letter · clearly marked';
+
+  @override
+  String get topicOfficialLetterBody =>
+      'Today you can write about a memory, a meal, or a place you miss. We will never pretend an official note is a real pen pal.';
+
+  @override
+  String get topicOfficialCta => 'Write to future me';
+
+  @override
+  String get topicDailyTitle => 'Today\'s topic mailboxes';
+
+  @override
+  String get topicDailySubtitle =>
+      'Choose one gentle prompt. A good letter is better than a long scroll.';
+
+  @override
+  String get topicWriteToTopic => 'Write here';
+
+  @override
+  String get topicOfficialExample => 'Official example';
+
+  @override
+  String get topicTodayTopic => 'Today';
+
+  @override
+  String get topicHometownTitle => 'Hometown memories';
+
+  @override
+  String get topicHometownPrompt =>
+      'Describe a road, a market, or a familiar doorway from the place you still remember.';
+
+  @override
+  String get topicRetirementTitle => 'A quiet day after retirement';
+
+  @override
+  String get topicRetirementPrompt =>
+      'Write about one ordinary moment that made you feel comfortable recently.';
+
+  @override
+  String get topicOldPhotoTitle => 'The story behind an old photo';
+
+  @override
+  String get topicOldPhotoPrompt =>
+      'Pick a person, place, or season from an old photo and write what still stays with you.';
+
+  @override
+  String get topicSafetyTitle => 'A calmer way to meet pen pals';
+
+  @override
+  String get topicSafetyBody =>
+      'Money, investment, verification codes and private contact requests will be treated carefully. You can write slowly and decide slowly.';
 }

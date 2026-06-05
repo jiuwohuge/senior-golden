@@ -1,25 +1,25 @@
 {
   "@@locale": "zh",
-  "appTitle": "邮政社交",
+  "appTitle": "时光邮局",
   "@appTitle": {
     "description": "应用名称"
   },
-  "appTagline": "慢慢写信，温柔相连。",
+  "appTagline": "可信笔友，慢慢来信。",
   "@appTagline": {
     "description": "品牌短句，邮政笔友气质"
   },
-  "tabPostWall": "明信片墙",
-  "tabDirectory": "通信名录",
-  "tabMailbox": "邮政信箱",
-  "tabProfile": "我的邮政",
-  "a11yTabPostWall": "明信片墙：浏览全球会员公开的明信片",
-  "a11yTabDirectory": "通信名录：按国家与兴趣寻找笔友",
-  "a11yTabMailbox": "邮政信箱：您的信件与对话",
-  "a11yTabProfile": "我的邮政：个人资料与账户",
+  "tabPostWall": "主题信箱",
+  "tabDirectory": "笔友",
+  "tabMailbox": "我的信箱",
+  "tabProfile": "纪念册",
+  "a11yTabPostWall": "主题信箱：官方主题与今日信箱",
+  "a11yTabDirectory": "笔友：先读资料，再慢慢写信",
+  "a11yTabMailbox": "我的信箱：您的信件与对话",
+  "a11yTabProfile": "纪念册：收藏信件、资料与账户",
   "a11yNavBar": "应用主要分区导航",
   "placeholderWelcomeTitle": "此区域正在准备中",
   "placeholderWelcomeBody": "我们正在完善这一页面。明信片、信件与好友将很快在此呈现。感谢您的耐心。",
-  "placeholderHint": "提示：使用下方导航在明信片墙、通信名录、邮政信箱与我的邮政之间切换。",
+  "placeholderHint": "提示：使用下方导航在主题信箱、笔友、我的信箱与纪念册之间切换。",
   "postalMotifContentDescription": "顶部的装饰性邮戳图案",
   "authLoginTitle": "登录",
   "authEmailLabel": "邮箱",
@@ -254,11 +254,26 @@
   "userCardErrorTitle": "无法加载资料",
   "userCardNotFoundTitle": "找不到该会员",
   "userCardNotFoundSubtitle": "对方可能暂不可用，或与你的关系受限。",
-  "directoryTitle": "通信名录",
-  "directorySubtitle": "按国家与兴趣寻找笔友",
+  "directoryTitle": "笔友大厅",
+  "directorySubtitle": "先读资料，再写一封认真来信。这里不做快速匹配。",
+  "directoryFilterCta": "筛选笔友",
+  "directorySafetyTitle": "先通信，再私聊",
+  "directorySafetyBody": "资料只是开始。涉及金钱、投资、验证码、私下联系方式等内容，请等真正熟悉后再决定。",
+  "directoryListTitle": "愿意收信的人",
+  "directoryListSubtitle": "看故事和共同兴趣，不急着刷人。",
+  "directoryLetterFirstBadge": "先写信",
+  "directoryViewProfile": "查看资料",
+  "directoryBioFallback": "这位成员还没有写自我介绍。你可以先看看兴趣，再决定是否写信。",
+  "directoryInterestEmpty": "兴趣待补充",
+  "directoryMoreInterests": "还有 {count} 个",
+  "@directoryMoreInterests": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "directoryLoadFailed": "名录加载失败",
   "directoryEmptyTitle": "没有符合条件的会员",
-  "directoryEmptySubtitle": "尝试清空筛选或调整年龄范围。",
+  "directoryEmptySubtitle": "可以清空筛选，或等新的官方主题带来更多来信后再看看。",
   "directoryAgeYears": "{age} 岁",
   "@directoryAgeYears": {
     "placeholders": {
@@ -490,5 +505,49 @@
       "unread": {},
       "today": {}
     }
-  }
+  },
+  "topicFriendFallback": "朋友",
+  "topicTodayGreeting": "{name}，今天慢慢来",
+  "@topicTodayGreeting": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "topicTodayIntro": "这里不催促。可以读一封来信，写一封认真回信，或从今日主题开始。",
+  "topicTodayLetters": "待处理来信",
+  "topicTodayLettersCount": "{count} 封",
+  "@topicTodayLettersCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "topicTodayLoading": "加载中",
+  "topicTodayTime": "时光信",
+  "topicTodayTimeLetters": "在途 {inFlight} · 可拆 {unread}",
+  "@topicTodayTimeLetters": {
+    "placeholders": {
+      "inFlight": {},
+      "unread": {}
+    }
+  },
+  "topicTodayTimeLettersLoading": "检查中",
+  "topicWriteLetter": "写一封信",
+  "topicOpenMailbox": "打开信箱",
+  "topicOfficialLetterTitle": "来自时光邮局的一封信",
+  "topicOfficialIdentity": "官方来信 · 明确标注",
+  "topicOfficialLetterBody": "今天可以写一段回忆、一顿饭，或一个你仍然想念的地方。官方来信永远不会伪装成真实笔友。",
+  "topicOfficialCta": "写给未来的自己",
+  "topicDailyTitle": "今日主题信箱",
+  "topicDailySubtitle": "选一个温和的话题慢慢写。好信件比长时间刷屏更重要。",
+  "topicWriteToTopic": "写进这个信箱",
+  "topicOfficialExample": "官方示例",
+  "topicTodayTopic": "今日主题",
+  "topicHometownTitle": "记忆里的故乡",
+  "topicHometownPrompt": "写一条路、一个集市，或一扇你还记得的门。",
+  "topicRetirementTitle": "退休后的安静一天",
+  "topicRetirementPrompt": "写最近一个让你觉得舒服的普通时刻。",
+  "topicOldPhotoTitle": "老照片背后的故事",
+  "topicOldPhotoPrompt": "从一张老照片里选一个人、一个地方或一个季节，写下仍留在心里的部分。",
+  "topicSafetyTitle": "更安心地认识笔友",
+  "topicSafetyBody": "涉及金钱、投资、验证码、私下联系方式等内容会被谨慎提醒。你可以慢慢写，也可以慢慢决定。"
 }

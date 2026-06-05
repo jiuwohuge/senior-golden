@@ -4,34 +4,34 @@
   "@appTitle": {
     "description": "Application name shown in task switcher and about screens."
   },
-  "appTagline": "Slow, kind letters — across the world.",
+  "appTagline": "A calm post office for trusted pen pals.",
   "@appTagline": {
     "description": "Short brand line under the app name; postal / pen-pal tone."
   },
-  "tabPostWall": "Post Wall",
+  "tabPostWall": "Topics",
   "@tabPostWall": {
-    "description": "Bottom navigation: global postcard feed."
+    "description": "Bottom navigation: official topic mailbox."
   },
-  "tabDirectory": "Directory",
+  "tabDirectory": "Pen Pals",
   "@tabDirectory": {
-    "description": "Bottom navigation: directory of members."
+    "description": "Bottom navigation: calm pen-pal hall."
   },
-  "tabMailbox": "Post Box",
+  "tabMailbox": "My Mailbox",
   "@tabMailbox": {
     "description": "Bottom navigation: messages and letters."
   },
-  "tabProfile": "My Post",
+  "tabProfile": "Memorial",
   "@tabProfile": {
-    "description": "Bottom navigation: profile and settings."
+    "description": "Bottom navigation: memorial album, profile, and settings."
   },
-  "a11yTabPostWall": "Post Wall: browse postcards from members worldwide",
-  "a11yTabDirectory": "Directory: find members by country and interests",
-  "a11yTabMailbox": "Post Box: your letters and conversations",
-  "a11yTabProfile": "My Post: your profile and account",
+  "a11yTabPostWall": "Topics: official prompts and today's mailbox",
+  "a11yTabDirectory": "Pen Pals: read profiles and write slowly",
+  "a11yTabMailbox": "My Mailbox: your letters and conversations",
+  "a11yTabProfile": "Memorial: saved letters, profile and account",
   "a11yNavBar": "Main sections of the app",
   "placeholderWelcomeTitle": "This area is being prepared",
   "placeholderWelcomeBody": "We are finishing this screen. Your postcards, letters, and friends will appear here soon. Thank you for your patience.",
-  "placeholderHint": "Tip: use the bar below to switch between Post Wall, Directory, Post Box, and My Post.",
+  "placeholderHint": "Tip: use the bar below to switch between Topics, Pen Pals, My Mailbox, and Memorial.",
   "postalMotifContentDescription": "Decorative postmark in the header",
   "authLoginTitle": "Sign in",
   "authEmailLabel": "Email",
@@ -267,11 +267,26 @@
   "userCardErrorTitle": "Unable to load profile",
   "userCardNotFoundTitle": "Profile not found",
   "userCardNotFoundSubtitle": "This member may be unavailable or restricted for you.",
-  "directoryTitle": "Post Directory",
-  "directorySubtitle": "Find pen pals by country and interests",
+  "directoryTitle": "Pen Pal Hall",
+  "directorySubtitle": "Read a profile first, then write one thoughtful letter. This is not fast matching.",
+  "directoryFilterCta": "Filter pen pals",
+  "directorySafetyTitle": "Letters before private chat",
+  "directorySafetyBody": "Profiles are only a beginning. Avoid money, investment, verification codes, and private contact requests until trust is real.",
+  "directoryListTitle": "People open to letters",
+  "directoryListSubtitle": "Choose by story and shared interests, not by speed.",
+  "directoryLetterFirstBadge": "Letter first",
+  "directoryViewProfile": "Read profile",
+  "directoryBioFallback": "This member has not written a self-introduction yet. You can read their interests before deciding whether to write.",
+  "directoryInterestEmpty": "Interests to be added",
+  "directoryMoreInterests": "+{count} more",
+  "@directoryMoreInterests": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "directoryLoadFailed": "Unable to load directory",
   "directoryEmptyTitle": "No matching members",
-  "directoryEmptySubtitle": "Try clearing filters or changing age range.",
+  "directoryEmptySubtitle": "Try clearing filters, or come back after new official topics bring more letters.",
   "directoryAgeYears": "{age} years old",
   "@directoryAgeYears": {
     "placeholders": {
@@ -503,5 +518,49 @@
       "unread": {},
       "today": {}
     }
-  }
+  },
+  "topicFriendFallback": "friend",
+  "topicTodayGreeting": "Good to see you, {name}",
+  "@topicTodayGreeting": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "topicTodayIntro": "There is no rush here. Read what has arrived, write one thoughtful letter, or pick a topic for today.",
+  "topicTodayLetters": "Letters needing attention",
+  "topicTodayLettersCount": "{count} letters",
+  "@topicTodayLettersCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "topicTodayLoading": "Loading",
+  "topicTodayTime": "Time letters",
+  "topicTodayTimeLetters": "{inFlight} waiting · {unread} ready",
+  "@topicTodayTimeLetters": {
+    "placeholders": {
+      "inFlight": {},
+      "unread": {}
+    }
+  },
+  "topicTodayTimeLettersLoading": "Checking",
+  "topicWriteLetter": "Write a letter",
+  "topicOpenMailbox": "Open mailbox",
+  "topicOfficialLetterTitle": "A note from the Post Office",
+  "topicOfficialIdentity": "Official letter · clearly marked",
+  "topicOfficialLetterBody": "Today you can write about a memory, a meal, or a place you miss. We will never pretend an official note is a real pen pal.",
+  "topicOfficialCta": "Write to future me",
+  "topicDailyTitle": "Today's topic mailboxes",
+  "topicDailySubtitle": "Choose one gentle prompt. A good letter is better than a long scroll.",
+  "topicWriteToTopic": "Write here",
+  "topicOfficialExample": "Official example",
+  "topicTodayTopic": "Today",
+  "topicHometownTitle": "Hometown memories",
+  "topicHometownPrompt": "Describe a road, a market, or a familiar doorway from the place you still remember.",
+  "topicRetirementTitle": "A quiet day after retirement",
+  "topicRetirementPrompt": "Write about one ordinary moment that made you feel comfortable recently.",
+  "topicOldPhotoTitle": "The story behind an old photo",
+  "topicOldPhotoPrompt": "Pick a person, place, or season from an old photo and write what still stays with you.",
+  "topicSafetyTitle": "A calmer way to meet pen pals",
+  "topicSafetyBody": "Money, investment, verification codes and private contact requests will be treated carefully. You can write slowly and decide slowly."
 }

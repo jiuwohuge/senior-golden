@@ -9,34 +9,34 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => '邮政社交';
+  String get appTitle => '时光邮局';
 
   @override
-  String get appTagline => '慢慢写信，温柔相连。';
+  String get appTagline => '可信笔友，慢慢来信。';
 
   @override
-  String get tabPostWall => '明信片墙';
+  String get tabPostWall => '主题信箱';
 
   @override
-  String get tabDirectory => '通信名录';
+  String get tabDirectory => '笔友';
 
   @override
-  String get tabMailbox => '邮政信箱';
+  String get tabMailbox => '我的信箱';
 
   @override
-  String get tabProfile => '我的邮政';
+  String get tabProfile => '纪念册';
 
   @override
-  String get a11yTabPostWall => '明信片墙：浏览全球会员公开的明信片';
+  String get a11yTabPostWall => '主题信箱：官方主题与今日信箱';
 
   @override
-  String get a11yTabDirectory => '通信名录：按国家与兴趣寻找笔友';
+  String get a11yTabDirectory => '笔友：先读资料，再慢慢写信';
 
   @override
-  String get a11yTabMailbox => '邮政信箱：您的信件与对话';
+  String get a11yTabMailbox => '我的信箱：您的信件与对话';
 
   @override
-  String get a11yTabProfile => '我的邮政：个人资料与账户';
+  String get a11yTabProfile => '纪念册：收藏信件、资料与账户';
 
   @override
   String get a11yNavBar => '应用主要分区导航';
@@ -48,7 +48,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get placeholderWelcomeBody => '我们正在完善这一页面。明信片、信件与好友将很快在此呈现。感谢您的耐心。';
 
   @override
-  String get placeholderHint => '提示：使用下方导航在明信片墙、通信名录、邮政信箱与我的邮政之间切换。';
+  String get placeholderHint => '提示：使用下方导航在主题信箱、笔友、我的信箱与纪念册之间切换。';
 
   @override
   String get postalMotifContentDescription => '顶部的装饰性邮戳图案';
@@ -654,10 +654,42 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userCardNotFoundSubtitle => '对方可能暂不可用，或与你的关系受限。';
 
   @override
-  String get directoryTitle => '通信名录';
+  String get directoryTitle => '笔友大厅';
 
   @override
-  String get directorySubtitle => '按国家与兴趣寻找笔友';
+  String get directorySubtitle => '先读资料，再写一封认真来信。这里不做快速匹配。';
+
+  @override
+  String get directoryFilterCta => '筛选笔友';
+
+  @override
+  String get directorySafetyTitle => '先通信，再私聊';
+
+  @override
+  String get directorySafetyBody => '资料只是开始。涉及金钱、投资、验证码、私下联系方式等内容，请等真正熟悉后再决定。';
+
+  @override
+  String get directoryListTitle => '愿意收信的人';
+
+  @override
+  String get directoryListSubtitle => '看故事和共同兴趣，不急着刷人。';
+
+  @override
+  String get directoryLetterFirstBadge => '先写信';
+
+  @override
+  String get directoryViewProfile => '查看资料';
+
+  @override
+  String get directoryBioFallback => '这位成员还没有写自我介绍。你可以先看看兴趣，再决定是否写信。';
+
+  @override
+  String get directoryInterestEmpty => '兴趣待补充';
+
+  @override
+  String directoryMoreInterests(Object count) {
+    return '还有 $count 个';
+  }
 
   @override
   String get directoryLoadFailed => '名录加载失败';
@@ -666,7 +698,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get directoryEmptyTitle => '没有符合条件的会员';
 
   @override
-  String get directoryEmptySubtitle => '尝试清空筛选或调整年龄范围。';
+  String get directoryEmptySubtitle => '可以清空筛选，或等新的官方主题带来更多来信后再看看。';
 
   @override
   String directoryAgeYears(Object age) {
@@ -1189,4 +1221,95 @@ class AppLocalizationsZh extends AppLocalizations {
   String timeLetterBanner(Object inFlight, Object unread, Object today) {
     return '在途 $inFlight 封 · 待拆 $unread 封 · 今日送达 $today 封';
   }
+
+  @override
+  String get topicFriendFallback => '朋友';
+
+  @override
+  String topicTodayGreeting(Object name) {
+    return '$name，今天慢慢来';
+  }
+
+  @override
+  String get topicTodayIntro => '这里不催促。可以读一封来信，写一封认真回信，或从今日主题开始。';
+
+  @override
+  String get topicTodayLetters => '待处理来信';
+
+  @override
+  String topicTodayLettersCount(Object count) {
+    return '$count 封';
+  }
+
+  @override
+  String get topicTodayLoading => '加载中';
+
+  @override
+  String get topicTodayTime => '时光信';
+
+  @override
+  String topicTodayTimeLetters(Object inFlight, Object unread) {
+    return '在途 $inFlight · 可拆 $unread';
+  }
+
+  @override
+  String get topicTodayTimeLettersLoading => '检查中';
+
+  @override
+  String get topicWriteLetter => '写一封信';
+
+  @override
+  String get topicOpenMailbox => '打开信箱';
+
+  @override
+  String get topicOfficialLetterTitle => '来自时光邮局的一封信';
+
+  @override
+  String get topicOfficialIdentity => '官方来信 · 明确标注';
+
+  @override
+  String get topicOfficialLetterBody =>
+      '今天可以写一段回忆、一顿饭，或一个你仍然想念的地方。官方来信永远不会伪装成真实笔友。';
+
+  @override
+  String get topicOfficialCta => '写给未来的自己';
+
+  @override
+  String get topicDailyTitle => '今日主题信箱';
+
+  @override
+  String get topicDailySubtitle => '选一个温和的话题慢慢写。好信件比长时间刷屏更重要。';
+
+  @override
+  String get topicWriteToTopic => '写进这个信箱';
+
+  @override
+  String get topicOfficialExample => '官方示例';
+
+  @override
+  String get topicTodayTopic => '今日主题';
+
+  @override
+  String get topicHometownTitle => '记忆里的故乡';
+
+  @override
+  String get topicHometownPrompt => '写一条路、一个集市，或一扇你还记得的门。';
+
+  @override
+  String get topicRetirementTitle => '退休后的安静一天';
+
+  @override
+  String get topicRetirementPrompt => '写最近一个让你觉得舒服的普通时刻。';
+
+  @override
+  String get topicOldPhotoTitle => '老照片背后的故事';
+
+  @override
+  String get topicOldPhotoPrompt => '从一张老照片里选一个人、一个地方或一个季节，写下仍留在心里的部分。';
+
+  @override
+  String get topicSafetyTitle => '更安心地认识笔友';
+
+  @override
+  String get topicSafetyBody => '涉及金钱、投资、验证码、私下联系方式等内容会被谨慎提醒。你可以慢慢写，也可以慢慢决定。';
 }

@@ -8,10 +8,10 @@ import '../../app/theme/postal_tokens.dart';
 import '../directory/directory_page.dart';
 import '../mailbox/im_unread_providers.dart';
 import '../mailbox/mailbox_page.dart';
-import '../post_wall/post_wall_page.dart';
 import '../profile/profile_page.dart';
+import '../topic_mailbox/topic_mailbox_page.dart';
 
-/// 底部四 Tab 与路由路径（与需求文档 Tab 结构一致）。
+/// Main bottom tabs: Topics / Pen Pals / My Mailbox / Memorial.
 abstract final class MainShellRoute {
   static const pathPostWall = '/';
   static const pathDirectory = '/directory';
@@ -19,7 +19,7 @@ abstract final class MainShellRoute {
   static const pathProfile = '/profile';
 }
 
-/// 主框架：Post Wall / Directory / Post Box / My Post。
+/// Main shell for the 3.0 slow-social post office experience.
 class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key, this.initialIndex = 0});
 
@@ -92,7 +92,7 @@ class _MainShellState extends ConsumerState<MainShell> {
       body: IndexedStack(
         index: _index,
         children: const [
-          PostWallPage(key: ValueKey('wall')),
+          TopicMailboxPage(key: ValueKey('topic-mailbox')),
           DirectoryPage(key: ValueKey('directory')),
           MailboxPage(key: ValueKey('mailbox')),
           ProfilePage(key: ValueKey('profile')),
@@ -106,22 +106,22 @@ class _MainShellState extends ConsumerState<MainShell> {
           destinations: [
             NavigationDestination(
               icon: Icon(
-                Icons.collections_bookmark_outlined,
+                Icons.mark_email_unread_outlined,
                 semanticLabel: l10n.a11yTabPostWall,
               ),
               selectedIcon: Icon(
-                Icons.collections_bookmark,
+                Icons.mark_email_unread,
                 semanticLabel: l10n.a11yTabPostWall,
               ),
               label: l10n.tabPostWall,
             ),
             NavigationDestination(
               icon: Icon(
-                Icons.grid_view_outlined,
+                Icons.diversity_3_outlined,
                 semanticLabel: l10n.a11yTabDirectory,
               ),
               selectedIcon: Icon(
-                Icons.grid_view,
+                Icons.diversity_3,
                 semanticLabel: l10n.a11yTabDirectory,
               ),
               label: l10n.tabDirectory,
@@ -141,11 +141,11 @@ class _MainShellState extends ConsumerState<MainShell> {
             ),
             NavigationDestination(
               icon: Icon(
-                Icons.person_outline,
+                Icons.collections_bookmark_outlined,
                 semanticLabel: l10n.a11yTabProfile,
               ),
               selectedIcon: Icon(
-                Icons.person,
+                Icons.collections_bookmark,
                 semanticLabel: l10n.a11yTabProfile,
               ),
               label: l10n.tabProfile,

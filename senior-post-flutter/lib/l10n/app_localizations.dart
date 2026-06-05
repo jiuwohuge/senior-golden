@@ -107,55 +107,55 @@ abstract class AppLocalizations {
   /// Short brand line under the app name; postal / pen-pal tone.
   ///
   /// In en, this message translates to:
-  /// **'Slow, kind letters — across the world.'**
+  /// **'A calm post office for trusted pen pals.'**
   String get appTagline;
 
-  /// Bottom navigation: global postcard feed.
+  /// Bottom navigation: official topic mailbox.
   ///
   /// In en, this message translates to:
-  /// **'Post Wall'**
+  /// **'Topics'**
   String get tabPostWall;
 
-  /// Bottom navigation: directory of members.
+  /// Bottom navigation: calm pen-pal hall.
   ///
   /// In en, this message translates to:
-  /// **'Directory'**
+  /// **'Pen Pals'**
   String get tabDirectory;
 
   /// Bottom navigation: messages and letters.
   ///
   /// In en, this message translates to:
-  /// **'Post Box'**
+  /// **'My Mailbox'**
   String get tabMailbox;
 
-  /// Bottom navigation: profile and settings.
+  /// Bottom navigation: memorial album, profile, and settings.
   ///
   /// In en, this message translates to:
-  /// **'My Post'**
+  /// **'Memorial'**
   String get tabProfile;
 
   /// No description provided for @a11yTabPostWall.
   ///
   /// In en, this message translates to:
-  /// **'Post Wall: browse postcards from members worldwide'**
+  /// **'Topics: official prompts and today\'s mailbox'**
   String get a11yTabPostWall;
 
   /// No description provided for @a11yTabDirectory.
   ///
   /// In en, this message translates to:
-  /// **'Directory: find members by country and interests'**
+  /// **'Pen Pals: read profiles and write slowly'**
   String get a11yTabDirectory;
 
   /// No description provided for @a11yTabMailbox.
   ///
   /// In en, this message translates to:
-  /// **'Post Box: your letters and conversations'**
+  /// **'My Mailbox: your letters and conversations'**
   String get a11yTabMailbox;
 
   /// No description provided for @a11yTabProfile.
   ///
   /// In en, this message translates to:
-  /// **'My Post: your profile and account'**
+  /// **'Memorial: saved letters, profile and account'**
   String get a11yTabProfile;
 
   /// No description provided for @a11yNavBar.
@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @placeholderHint.
   ///
   /// In en, this message translates to:
-  /// **'Tip: use the bar below to switch between Post Wall, Directory, Post Box, and My Post.'**
+  /// **'Tip: use the bar below to switch between Topics, Pen Pals, My Mailbox, and Memorial.'**
   String get placeholderHint;
 
   /// No description provided for @postalMotifContentDescription.
@@ -1349,14 +1349,74 @@ abstract class AppLocalizations {
   /// No description provided for @directoryTitle.
   ///
   /// In en, this message translates to:
-  /// **'Post Directory'**
+  /// **'Pen Pal Hall'**
   String get directoryTitle;
 
   /// No description provided for @directorySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Find pen pals by country and interests'**
+  /// **'Read a profile first, then write one thoughtful letter. This is not fast matching.'**
   String get directorySubtitle;
+
+  /// No description provided for @directoryFilterCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter pen pals'**
+  String get directoryFilterCta;
+
+  /// No description provided for @directorySafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters before private chat'**
+  String get directorySafetyTitle;
+
+  /// No description provided for @directorySafetyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles are only a beginning. Avoid money, investment, verification codes, and private contact requests until trust is real.'**
+  String get directorySafetyBody;
+
+  /// No description provided for @directoryListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'People open to letters'**
+  String get directoryListTitle;
+
+  /// No description provided for @directoryListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose by story and shared interests, not by speed.'**
+  String get directoryListSubtitle;
+
+  /// No description provided for @directoryLetterFirstBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter first'**
+  String get directoryLetterFirstBadge;
+
+  /// No description provided for @directoryViewProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Read profile'**
+  String get directoryViewProfile;
+
+  /// No description provided for @directoryBioFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'This member has not written a self-introduction yet. You can read their interests before deciding whether to write.'**
+  String get directoryBioFallback;
+
+  /// No description provided for @directoryInterestEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests to be added'**
+  String get directoryInterestEmpty;
+
+  /// No description provided for @directoryMoreInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String directoryMoreInterests(Object count);
 
   /// No description provided for @directoryLoadFailed.
   ///
@@ -1373,7 +1433,7 @@ abstract class AppLocalizations {
   /// No description provided for @directoryEmptySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Try clearing filters or changing age range.'**
+  /// **'Try clearing filters, or come back after new official topics bring more letters.'**
   String get directoryEmptySubtitle;
 
   /// No description provided for @directoryAgeYears.
@@ -2359,6 +2419,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{inFlight} in transit · {unread} to open · {today} arrived today'**
   String timeLetterBanner(Object inFlight, Object unread, Object today);
+
+  /// No description provided for @topicFriendFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'friend'**
+  String get topicFriendFallback;
+
+  /// No description provided for @topicTodayGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Good to see you, {name}'**
+  String topicTodayGreeting(Object name);
+
+  /// No description provided for @topicTodayIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no rush here. Read what has arrived, write one thoughtful letter, or pick a topic for today.'**
+  String get topicTodayIntro;
+
+  /// No description provided for @topicTodayLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters needing attention'**
+  String get topicTodayLetters;
+
+  /// No description provided for @topicTodayLettersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} letters'**
+  String topicTodayLettersCount(Object count);
+
+  /// No description provided for @topicTodayLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get topicTodayLoading;
+
+  /// No description provided for @topicTodayTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time letters'**
+  String get topicTodayTime;
+
+  /// No description provided for @topicTodayTimeLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'{inFlight} waiting · {unread} ready'**
+  String topicTodayTimeLetters(Object inFlight, Object unread);
+
+  /// No description provided for @topicTodayTimeLettersLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking'**
+  String get topicTodayTimeLettersLoading;
+
+  /// No description provided for @topicWriteLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a letter'**
+  String get topicWriteLetter;
+
+  /// No description provided for @topicOpenMailbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Open mailbox'**
+  String get topicOpenMailbox;
+
+  /// No description provided for @topicOfficialLetterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A note from the Post Office'**
+  String get topicOfficialLetterTitle;
+
+  /// No description provided for @topicOfficialIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Official letter · clearly marked'**
+  String get topicOfficialIdentity;
+
+  /// No description provided for @topicOfficialLetterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Today you can write about a memory, a meal, or a place you miss. We will never pretend an official note is a real pen pal.'**
+  String get topicOfficialLetterBody;
+
+  /// No description provided for @topicOfficialCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Write to future me'**
+  String get topicOfficialCta;
+
+  /// No description provided for @topicDailyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s topic mailboxes'**
+  String get topicDailyTitle;
+
+  /// No description provided for @topicDailySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one gentle prompt. A good letter is better than a long scroll.'**
+  String get topicDailySubtitle;
+
+  /// No description provided for @topicWriteToTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Write here'**
+  String get topicWriteToTopic;
+
+  /// No description provided for @topicOfficialExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Official example'**
+  String get topicOfficialExample;
+
+  /// No description provided for @topicTodayTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get topicTodayTopic;
+
+  /// No description provided for @topicHometownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hometown memories'**
+  String get topicHometownTitle;
+
+  /// No description provided for @topicHometownPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe a road, a market, or a familiar doorway from the place you still remember.'**
+  String get topicHometownPrompt;
+
+  /// No description provided for @topicRetirementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A quiet day after retirement'**
+  String get topicRetirementTitle;
+
+  /// No description provided for @topicRetirementPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Write about one ordinary moment that made you feel comfortable recently.'**
+  String get topicRetirementPrompt;
+
+  /// No description provided for @topicOldPhotoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The story behind an old photo'**
+  String get topicOldPhotoTitle;
+
+  /// No description provided for @topicOldPhotoPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a person, place, or season from an old photo and write what still stays with you.'**
+  String get topicOldPhotoPrompt;
+
+  /// No description provided for @topicSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A calmer way to meet pen pals'**
+  String get topicSafetyTitle;
+
+  /// No description provided for @topicSafetyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Money, investment, verification codes and private contact requests will be treated carefully. You can write slowly and decide slowly.'**
+  String get topicSafetyBody;
 }
 
 class _AppLocalizationsDelegate
