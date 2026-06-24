@@ -1387,4 +1387,148 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get topicSafetyBody =>
       'Money, investment, verification codes and private contact requests will be treated carefully. You can write slowly and decide slowly.';
+
+  @override
+  String get composeTitle => 'Write a letter';
+
+  @override
+  String get composeStepDestinationTitle => 'Who is this letter for?';
+
+  @override
+  String get composeStepDestinationSubtitle =>
+      'One step at a time. There is no rush.';
+
+  @override
+  String get composeStepFooter =>
+      'Basic letter writing is never blocked by payment.';
+
+  @override
+  String get composeChooseSelf => 'To myself';
+
+  @override
+  String get composeChooseSelfSub => 'A time letter for your future self';
+
+  @override
+  String get composeChoosePenPal => 'To a pen pal';
+
+  @override
+  String get composeChoosePenPalSub =>
+      'A thoughtful letter, slowly getting to know each other';
+
+  @override
+  String get composeChooseTopic => 'To a topic mailbox';
+
+  @override
+  String get composeChooseTopicSub => 'Start from today\'s gentle prompt';
+
+  @override
+  String get composePickDestinationRequired =>
+      'Please choose who you are writing to';
+
+  @override
+  String get composeStepPenPalTitle => 'Choose a pen pal';
+
+  @override
+  String get composeStepPenPalSubtitle =>
+      'Start with someone you already connected with. If you have none yet, visit the pen pal hall first.';
+
+  @override
+  String get composePickPenPalRequired => 'Please choose a pen pal';
+
+  @override
+  String get composePenPalEmptyTitle => 'No pen pals yet';
+
+  @override
+  String get composePenPalEmptySubtitle =>
+      'Visit the pen pal hall, read profiles, and send your first thoughtful letter.';
+
+  @override
+  String get composePenPalLoadFailed => 'Could not load pen pals';
+
+  @override
+  String get composeGoDirectory => 'Go to pen pals';
+
+  @override
+  String get composeStepTopicTitle => 'Choose a topic';
+
+  @override
+  String get composeStepTopicSubtitle => 'Pick one gentle prompt for today.';
+
+  @override
+  String get composePickTopicRequired => 'Please choose a topic';
+
+  @override
+  String get composeStepBodyTitle => 'Write the letter';
+
+  @override
+  String get composeBodyLabel => 'Letter body';
+
+  @override
+  String get composeBodyFooter =>
+      'Thoughtful writing matters more than length.';
+
+  @override
+  String get composeBodyRequired => 'Please write the letter body first';
+
+  @override
+  String get composeBodySubtitleSelf =>
+      'To your future self — a memory, a wish, or how today feels.';
+
+  @override
+  String composeBodySubtitlePenPal(Object name) {
+    return 'A thoughtful letter to $name.';
+  }
+
+  @override
+  String composeBodySubtitleTimePenPal(Object name) {
+    return 'A time letter to $name, delivered on the date you choose.';
+  }
+
+  @override
+  String get composeBodySubtitleTopic => 'Write about the topic you selected.';
+
+  @override
+  String get composeStepDeliveryTitle => 'Choose delivery date';
+
+  @override
+  String get composeStepDeliverySubtitle =>
+      'The time letter stays sealed until that date.';
+
+  @override
+  String get composeStepMailTitle => 'Choose delivery type';
+
+  @override
+  String get composeStepMailSubtitle =>
+      'Standard post is free. Registered mail uses a stamp (free for VIP).';
+
+  @override
+  String get composeStepSealTitle => 'Seal and send';
+
+  @override
+  String get composeStepSealSubtitle =>
+      'After sealing, the letter waits until delivery day.';
+
+  @override
+  String get composeStepSendTitle => 'Ready to send';
+
+  @override
+  String get composeStepSendSubtitle =>
+      'Track status in My Mailbox after sending.';
+
+  @override
+  String get composeSendNow => 'Send now';
+
+  @override
+  String get composeStepTopicSubmitTitle => 'Submit to topic mailbox';
+
+  @override
+  String get composeStepTopicSubmitSubtitle =>
+      'After review, approved submissions become visible to others.';
+
+  @override
+  String get composeTopicSubmit => 'Submit to topic';
+
+  @override
+  String get composeTopicSubmitted =>
+      'Submitted to the topic mailbox. It will appear after review.';
 }

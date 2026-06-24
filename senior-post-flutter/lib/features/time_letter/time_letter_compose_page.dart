@@ -62,11 +62,10 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
   }
 
   Future<void> _refreshDaysHint() async {
-    final iso = DateFormat('yyyy-MM-dd').format(_deliveryDate);
     try {
       final days = await ref
           .read(timeLetterRemoteProvider)
-          .previewDaysUntil(iso, _deliveryTz);
+          .previewDaysUntil(_deliveryDate, _deliveryTz);
       if (mounted) setState(() => _daysHint = '$days');
     } catch (_) {}
   }
@@ -88,18 +87,23 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
     final l10n = AppLocalizations.of(context)!;
     final body = _bodyCtrl.text.trim();
     if (body.isEmpty) {
-      PostalSnack.show(context, l10n.timeLetterBodyEmpty, tone: PostalSnackTone.error);
+      PostalSnack.show(
+        context,
+        l10n.timeLetterBodyEmpty,
+        tone: PostalSnackTone.error,
+      );
       return;
     }
     setState(() => _sealing = true);
     try {
-      final iso = DateFormat('yyyy-MM-dd').format(_deliveryDate);
       final sealId =
           '${DateTime.now().millisecondsSinceEpoch}-${ref.read(appSessionProvider).user.id}';
-      final result = await ref.read(timeLetterRemoteProvider).seal(
+      final result = await ref
+          .read(timeLetterRemoteProvider)
+          .seal(
             recipientId: widget.toSelf ? null : widget.recipientId,
             body: body,
-            deliveryDate: iso,
+            deliveryDate: _deliveryDate,
             deliveryTz: _deliveryTz,
             sealRequestId: sealId,
           );
@@ -109,7 +113,11 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          icon: Icon(Icons.mark_email_read_outlined, color: PostalTokens.success, size: 48),
+          icon: Icon(
+            Icons.mark_email_read_outlined,
+            color: PostalTokens.success,
+            size: 48,
+          ),
           title: Text(l10n.timeLetterSealSuccessTitle),
           content: Text(l10n.timeLetterSealSuccessMessage),
           actions: [
@@ -121,9 +129,14 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
         ),
       );
       if (mounted) context.pop(result.id);
-    } on ApiBusinessException catch (e) {
+    } catch (e) {
+      final biz = apiBusinessExceptionFrom(e);
       if (mounted) {
-        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+        PostalSnack.show(
+          context,
+          biz?.message ?? e.toString(),
+          tone: PostalSnackTone.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _sealing = false);
@@ -177,15 +190,16 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
               controller: _bodyCtrl,
               maxLines: 12,
               maxLength: 1500,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontSize: 20,
-                    height: 1.5,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontSize: 20, height: 1.5),
               decoration: InputDecoration(
                 hintText: l10n.timeLetterBodyHint,
                 filled: true,
                 fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 24),

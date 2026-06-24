@@ -2587,6 +2587,258 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Money, investment, verification codes and private contact requests will be treated carefully. You can write slowly and decide slowly.'**
   String get topicSafetyBody;
+
+  /// No description provided for @composeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a letter'**
+  String get composeTitle;
+
+  /// No description provided for @composeStepDestinationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is this letter for?'**
+  String get composeStepDestinationTitle;
+
+  /// No description provided for @composeStepDestinationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One step at a time. There is no rush.'**
+  String get composeStepDestinationSubtitle;
+
+  /// No description provided for @composeStepFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic letter writing is never blocked by payment.'**
+  String get composeStepFooter;
+
+  /// No description provided for @composeChooseSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'To myself'**
+  String get composeChooseSelf;
+
+  /// No description provided for @composeChooseSelfSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A time letter for your future self'**
+  String get composeChooseSelfSub;
+
+  /// No description provided for @composeChoosePenPal.
+  ///
+  /// In en, this message translates to:
+  /// **'To a pen pal'**
+  String get composeChoosePenPal;
+
+  /// No description provided for @composeChoosePenPalSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A thoughtful letter, slowly getting to know each other'**
+  String get composeChoosePenPalSub;
+
+  /// No description provided for @composeChooseTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'To a topic mailbox'**
+  String get composeChooseTopic;
+
+  /// No description provided for @composeChooseTopicSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from today\'s gentle prompt'**
+  String get composeChooseTopicSub;
+
+  /// No description provided for @composePickDestinationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose who you are writing to'**
+  String get composePickDestinationRequired;
+
+  /// No description provided for @composeStepPenPalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a pen pal'**
+  String get composeStepPenPalTitle;
+
+  /// No description provided for @composeStepPenPalSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with someone you already connected with. If you have none yet, visit the pen pal hall first.'**
+  String get composeStepPenPalSubtitle;
+
+  /// No description provided for @composePickPenPalRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a pen pal'**
+  String get composePickPenPalRequired;
+
+  /// No description provided for @composePenPalEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No pen pals yet'**
+  String get composePenPalEmptyTitle;
+
+  /// No description provided for @composePenPalEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit the pen pal hall, read profiles, and send your first thoughtful letter.'**
+  String get composePenPalEmptySubtitle;
+
+  /// No description provided for @composePenPalLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load pen pals'**
+  String get composePenPalLoadFailed;
+
+  /// No description provided for @composeGoDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to pen pals'**
+  String get composeGoDirectory;
+
+  /// No description provided for @composeStepTopicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a topic'**
+  String get composeStepTopicTitle;
+
+  /// No description provided for @composeStepTopicSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one gentle prompt for today.'**
+  String get composeStepTopicSubtitle;
+
+  /// No description provided for @composePickTopicRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a topic'**
+  String get composePickTopicRequired;
+
+  /// No description provided for @composeStepBodyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the letter'**
+  String get composeStepBodyTitle;
+
+  /// No description provided for @composeBodyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter body'**
+  String get composeBodyLabel;
+
+  /// No description provided for @composeBodyFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Thoughtful writing matters more than length.'**
+  String get composeBodyFooter;
+
+  /// No description provided for @composeBodyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please write the letter body first'**
+  String get composeBodyRequired;
+
+  /// No description provided for @composeBodySubtitleSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'To your future self — a memory, a wish, or how today feels.'**
+  String get composeBodySubtitleSelf;
+
+  /// No description provided for @composeBodySubtitlePenPal.
+  ///
+  /// In en, this message translates to:
+  /// **'A thoughtful letter to {name}.'**
+  String composeBodySubtitlePenPal(Object name);
+
+  /// No description provided for @composeBodySubtitleTimePenPal.
+  ///
+  /// In en, this message translates to:
+  /// **'A time letter to {name}, delivered on the date you choose.'**
+  String composeBodySubtitleTimePenPal(Object name);
+
+  /// No description provided for @composeBodySubtitleTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Write about the topic you selected.'**
+  String get composeBodySubtitleTopic;
+
+  /// No description provided for @composeStepDeliveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose delivery date'**
+  String get composeStepDeliveryTitle;
+
+  /// No description provided for @composeStepDeliverySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The time letter stays sealed until that date.'**
+  String get composeStepDeliverySubtitle;
+
+  /// No description provided for @composeStepMailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose delivery type'**
+  String get composeStepMailTitle;
+
+  /// No description provided for @composeStepMailSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard post is free. Registered mail uses a stamp (free for VIP).'**
+  String get composeStepMailSubtitle;
+
+  /// No description provided for @composeStepSealTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Seal and send'**
+  String get composeStepSealTitle;
+
+  /// No description provided for @composeStepSealSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'After sealing, the letter waits until delivery day.'**
+  String get composeStepSealSubtitle;
+
+  /// No description provided for @composeStepSendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to send'**
+  String get composeStepSendTitle;
+
+  /// No description provided for @composeStepSendSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track status in My Mailbox after sending.'**
+  String get composeStepSendSubtitle;
+
+  /// No description provided for @composeSendNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Send now'**
+  String get composeSendNow;
+
+  /// No description provided for @composeStepTopicSubmitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit to topic mailbox'**
+  String get composeStepTopicSubmitTitle;
+
+  /// No description provided for @composeStepTopicSubmitSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'After review, approved submissions become visible to others.'**
+  String get composeStepTopicSubmitSubtitle;
+
+  /// No description provided for @composeTopicSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit to topic'**
+  String get composeTopicSubmit;
+
+  /// No description provided for @composeTopicSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted to the topic mailbox. It will appear after review.'**
+  String get composeTopicSubmitted;
 }
 
 class _AppLocalizationsDelegate

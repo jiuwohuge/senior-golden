@@ -6,6 +6,8 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
+import '../compose/compose_intent.dart';
+import '../compose/topic_mailbox_catalog.dart';
 import '../mailbox/mailbox_providers.dart';
 import '../time_letter/time_letter_providers.dart';
 
@@ -56,7 +58,10 @@ class TopicMailboxPage extends ConsumerWidget {
             _OfficialLetterCard(
               title: l10n.topicOfficialLetterTitle,
               body: l10n.topicOfficialLetterBody,
-              onWrite: () => context.push('/time-letter/compose'),
+              onWrite: () => context.push(
+                '/compose',
+                extra: const ComposeIntent(kind: ComposeKind.selfTimeLetter),
+              ),
             ),
             const SizedBox(height: 16),
             _SectionHeader(
@@ -64,12 +69,18 @@ class TopicMailboxPage extends ConsumerWidget {
               subtitle: l10n.topicDailySubtitle,
             ),
             const SizedBox(height: 10),
-            ..._topicSpecs(l10n).map(
+            ...topicMailboxTopics(l10n).map(
               (topic) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _TopicMailboxCard(
                   topic: topic,
-                  onTap: () => context.push('/post/new'),
+                  onTap: () => context.push(
+                    '/compose',
+                    extra: ComposeIntent(
+                      kind: ComposeKind.topicMailbox,
+                      topicKey: topic.key,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -139,7 +150,7 @@ class _TodayMailboxPanel extends StatelessWidget {
                 child: PostalButton(
                   label: l10n.topicWriteLetter,
                   icon: Icons.edit_note,
-                  onPressed: () => context.push('/time-letter/compose'),
+                  onPressed: () => context.push('/compose'),
                 ),
               ),
               const SizedBox(width: 10),
@@ -312,7 +323,7 @@ class _SectionHeader extends StatelessWidget {
 class _TopicMailboxCard extends StatelessWidget {
   const _TopicMailboxCard({required this.topic, required this.onTap});
 
-  final _TopicSpec topic;
+  final TopicMailboxTopic topic;
   final VoidCallback onTap;
 
   @override
@@ -414,43 +425,3 @@ class _SafetyNotice extends StatelessWidget {
     );
   }
 }
-
-class _TopicSpec {
-  const _TopicSpec({
-    required this.title,
-    required this.prompt,
-    required this.label,
-    required this.icon,
-    required this.accent,
-  });
-
-  final String title;
-  final String prompt;
-  final String label;
-  final IconData icon;
-  final Color accent;
-}
-
-List<_TopicSpec> _topicSpecs(AppLocalizations l10n) => [
-  _TopicSpec(
-    title: l10n.topicHometownTitle,
-    prompt: l10n.topicHometownPrompt,
-    label: l10n.topicOfficialExample,
-    icon: Icons.home_work_outlined,
-    accent: PostalTokens.postboxGreen,
-  ),
-  _TopicSpec(
-    title: l10n.topicRetirementTitle,
-    prompt: l10n.topicRetirementPrompt,
-    label: l10n.topicTodayTopic,
-    icon: Icons.local_florist_outlined,
-    accent: PostalTokens.stampGold,
-  ),
-  _TopicSpec(
-    title: l10n.topicOldPhotoTitle,
-    prompt: l10n.topicOldPhotoPrompt,
-    label: l10n.topicOfficialExample,
-    icon: Icons.photo_camera_back_outlined,
-    accent: PostalTokens.stampVermilion,
-  ),
-];

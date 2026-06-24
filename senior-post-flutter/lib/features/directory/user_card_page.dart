@@ -12,8 +12,8 @@ import '../../widgets/postal/postal_gender_icon.dart';
 import '../post_wall/post_wall_compact_tile.dart';
 import '../post_wall/post_wall_remote.dart';
 import '../social/social_remote.dart';
+import '../compose/compose_intent.dart';
 import 'directory_remote.dart';
-import 'send_letter_sheet.dart';
 import 'user_report_sheet.dart';
 
 final directoryUserProvider = FutureProvider.family<AppUser?, String>((
@@ -48,11 +48,9 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
     try {
       final nextPage = append ? _friendPage + 1 : 1;
       final size = append ? 10 : 1;
-      final batch = await ref.read(postWallRemoteProvider).listUserPostcards(
-            userId: userId,
-            page: nextPage,
-            size: size,
-          );
+      final batch = await ref
+          .read(postWallRemoteProvider)
+          .listUserPostcards(userId: userId, page: nextPage, size: size);
       if (!mounted) return;
       setState(() {
         if (append) {
@@ -113,11 +111,7 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
       }
     } on ApiBusinessException catch (e) {
       if (context.mounted) {
-        PostalSnack.show(
-          context,
-          e.message,
-          tone: PostalSnackTone.error,
-        );
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
       }
     }
   }
@@ -165,16 +159,19 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
             color: PostalTokens.paperEnvelope,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: PostalTokens.perforationLine.withValues(alpha: 0.9)),
+              side: BorderSide(
+                color: PostalTokens.perforationLine.withValues(alpha: 0.9),
+              ),
             ),
             onSelected: (value) async {
               if (value == 'time_letter') {
                 context.push(
-                  '/time-letter/compose',
-                  extra: <String, dynamic>{
-                    'recipientId': user.id,
-                    'recipientNickname': user.nickname,
-                  },
+                  '/compose',
+                  extra: ComposeIntent(
+                    kind: ComposeKind.penPalTimeLetter,
+                    peerId: user.id,
+                    peerNickname: user.nickname,
+                  ),
                 );
               } else if (value == 'block') {
                 await _onBlockUser(context, user);
@@ -276,8 +273,7 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
           );
         }
         final theme = Theme.of(context);
-        final isSelf =
-            session.user.id.isNotEmpty && session.user.id == user.id;
+        final isSelf = session.user.id.isNotEmpty && session.user.id == user.id;
         final showFab = !isSelf;
         final showFriendFeed = !isSelf && user.postalFriend;
         if (showFriendFeed && !_friendSectionInit && !_friendLoading) {
@@ -304,12 +300,15 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
                       letterSpacing: 0.25,
                     ),
                   ),
-                  onPressed: () async {
-                    await showPostalSendLetterSheet(
-                      context,
-                      peerId: user.id,
-                      peerNickname: user.nickname,
-                      countryLabel: user.countryName,
+                  onPressed: () {
+                    context.push(
+                      '/compose',
+                      extra: ComposeIntent(
+                        kind: ComposeKind.penPalMail,
+                        peerId: user.id,
+                        peerNickname: user.nickname,
+                        peerCountryLabel: user.countryName,
+                      ),
                     );
                   },
                 )
@@ -327,158 +326,162 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
                 ),
                 children: [
                   PostalCardEnvelope(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Center(
-                        child: PostalAvatar(
-                          name: user.nickname,
-                          size: 72,
-                          imageUrl: user.avatarUrl,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: PostalAvatar(
+                            name: user.nickname,
+                            size: 72,
+                            imageUrl: user.avatarUrl,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              user.nickname,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: -0.2,
-                                height: 1.15,
-                                color: PostalTokens.inkNavy,
+                        const SizedBox(height: 14),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                user.nickname,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: -0.2,
+                                  height: 1.15,
+                                  color: PostalTokens.inkNavy,
+                                ),
                               ),
                             ),
-                          ),
-                          if (user.gender >= 1) ...[
-                            const SizedBox(width: 6),
-                            PostalGenderIcon(gender: user.gender, size: 18),
+                            if (user.gender >= 1) ...[
+                              const SizedBox(width: 6),
+                              PostalGenderIcon(gender: user.gender, size: 18),
+                            ],
                           ],
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Center(
-                        child: PostalCountrySeal(
-                          countryCode: user.countryCode,
-                          countryName: user.countryName,
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        l10n.directoryAgeYears('${user.age}'),
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          letterSpacing: 0.2,
+                        const SizedBox(height: 10),
+                        Center(
+                          child: PostalCountrySeal(
+                            countryCode: user.countryCode,
+                            countryName: user.countryName,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 18),
-                      Text(
-                        l10n.userCardBioSection,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: PostalTokens.postboxGreen,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.2,
+                        const SizedBox(height: 10),
+                        Text(
+                          l10n.directoryAgeYears('${user.age}'),
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            letterSpacing: 0.2,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        user.bio.trim().isEmpty
-                            ? l10n.userCardBioEmpty
-                            : user.bio,
-                        textAlign: TextAlign.start,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          height: 1.5,
-                          color: user.bio.trim().isEmpty
-                              ? PostalTokens.inkTertiary
-                              : PostalTokens.inkNavy.withValues(alpha: 0.92),
-                          fontStyle: user.bio.trim().isEmpty
-                              ? FontStyle.italic
-                              : FontStyle.normal,
-                        ),
-                      ),
-                      if (user.interests.isNotEmpty) ...[
                         const SizedBox(height: 18),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          alignment: WrapAlignment.center,
-                          children: user.interests
-                              .map(
-                                (t) => Chip(
-                                  label: Text(t),
-                                  backgroundColor:
-                                      PostalTokens.paperCard.withValues(alpha: 0.95),
-                                  side: BorderSide(
-                                    color: PostalTokens.perforationLine,
-                                  ),
-                                  labelStyle:
-                                      theme.textTheme.bodyMedium?.copyWith(
-                                    color: PostalTokens.inkNavy,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
-                                  ),
-                                ),
-                              )
-                              .toList(),
+                        Text(
+                          l10n.userCardBioSection,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: PostalTokens.postboxGreen,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.2,
+                          ),
                         ),
-                      ],
-                    ],
-                  ),
-                ),
-                if (showFriendFeed) ...[
-                  const SizedBox(height: 22),
-                  Divider(
-                    height: 1,
-                    color: PostalTokens.perforationLine.withValues(alpha: 0.75),
-                  ),
-                  const SizedBox(height: 16),
-                  PostalSectionTitle(
-                    title: l10n.userCardFriendPostcardsTitle,
-                    subtitle: l10n.userCardFriendPostcardsSubtitle,
-                  ),
-                  const SizedBox(height: 12),
-                  if (_friendLoading && _friendPosts.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  else if (_friendPosts.isEmpty && _friendSectionInit)
-                    Text(
-                      l10n.userCardFriendPostcardsEmpty,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: PostalTokens.inkSecondary,
-                      ),
-                    )
-                  else ...[
-                    for (final post in _friendPosts) ...[
-                      PostWallCompactTile(post: post),
-                      const SizedBox(height: 10),
-                    ],
-                    if (_friendHasMore)
-                      Center(
-                        child: TextButton(
-                          onPressed: _friendLoading
-                              ? null
-                              : () => _loadFriendPostcards(append: true),
-                          child: _friendLoading
-                              ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                        const SizedBox(height: 8),
+                        Text(
+                          user.bio.trim().isEmpty
+                              ? l10n.userCardBioEmpty
+                              : user.bio,
+                          textAlign: TextAlign.start,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            height: 1.5,
+                            color: user.bio.trim().isEmpty
+                                ? PostalTokens.inkTertiary
+                                : PostalTokens.inkNavy.withValues(alpha: 0.92),
+                            fontStyle: user.bio.trim().isEmpty
+                                ? FontStyle.italic
+                                : FontStyle.normal,
+                          ),
+                        ),
+                        if (user.interests.isNotEmpty) ...[
+                          const SizedBox(height: 18),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.center,
+                            children: user.interests
+                                .map(
+                                  (t) => Chip(
+                                    label: Text(t),
+                                    backgroundColor: PostalTokens.paperCard
+                                        .withValues(alpha: 0.95),
+                                    side: BorderSide(
+                                      color: PostalTokens.perforationLine,
+                                    ),
+                                    labelStyle: theme.textTheme.bodyMedium
+                                        ?.copyWith(
+                                          color: PostalTokens.inkNavy,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
+                                  ),
                                 )
-                              : Text(l10n.userCardLoadMorePostcards),
-                        ),
+                                .toList(),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (showFriendFeed) ...[
+                    const SizedBox(height: 22),
+                    Divider(
+                      height: 1,
+                      color: PostalTokens.perforationLine.withValues(
+                        alpha: 0.75,
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    PostalSectionTitle(
+                      title: l10n.userCardFriendPostcardsTitle,
+                      subtitle: l10n.userCardFriendPostcardsSubtitle,
+                    ),
+                    const SizedBox(height: 12),
+                    if (_friendLoading && _friendPosts.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_friendPosts.isEmpty && _friendSectionInit)
+                      Text(
+                        l10n.userCardFriendPostcardsEmpty,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: PostalTokens.inkSecondary,
+                        ),
+                      )
+                    else ...[
+                      for (final post in _friendPosts) ...[
+                        PostWallCompactTile(post: post),
+                        const SizedBox(height: 10),
+                      ],
+                      if (_friendHasMore)
+                        Center(
+                          child: TextButton(
+                            onPressed: _friendLoading
+                                ? null
+                                : () => _loadFriendPostcards(append: true),
+                            child: _friendLoading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(l10n.userCardLoadMorePostcards),
+                          ),
+                        ),
+                    ],
                   ],
                 ],
-              ],
-            ),
+              ),
             ),
           ),
         );

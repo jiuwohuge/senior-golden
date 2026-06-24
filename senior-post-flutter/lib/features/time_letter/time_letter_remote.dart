@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
 import '../../core/network/dio_provider.dart';
+import '../../core/time/backend_date_format.dart';
 
 final timeLetterRemoteProvider = Provider<TimeLetterRemoteRepository>((ref) {
   return TimeLetterRemoteRepository(ref.watch(dioProvider));
@@ -145,7 +146,7 @@ class TimeLetterRemoteRepository {
     int? id,
     String? recipientId,
     required String body,
-    required String deliveryDate,
+    required DateTime deliveryDate,
     required String deliveryTz,
     String? contentTag,
     String? emotionTag,
@@ -156,7 +157,7 @@ class TimeLetterRemoteRepository {
         if (id != null) 'id': id,
         if (recipientId != null) 'recipientId': int.tryParse(recipientId),
         'body': body,
-        'deliveryDate': deliveryDate,
+        'deliveryDate': formatBackendLocalDate(deliveryDate),
         'deliveryTz': deliveryTz,
         if (contentTag != null) 'contentTag': contentTag,
         if (emotionTag != null) 'emotionTag': emotionTag,
@@ -169,7 +170,7 @@ class TimeLetterRemoteRepository {
     int? draftId,
     String? recipientId,
     required String body,
-    required String deliveryDate,
+    required DateTime deliveryDate,
     required String deliveryTz,
     required String sealRequestId,
     String? contentTag,
@@ -181,7 +182,7 @@ class TimeLetterRemoteRepository {
         if (draftId != null) 'draftId': draftId,
         if (recipientId != null) 'recipientId': int.tryParse(recipientId),
         'body': body,
-        'deliveryDate': deliveryDate,
+        'deliveryDate': formatBackendLocalDate(deliveryDate),
         'deliveryTz': deliveryTz,
         'sealRequestId': sealRequestId,
         if (contentTag != null) 'contentTag': contentTag,
@@ -262,11 +263,11 @@ class TimeLetterRemoteRepository {
     }).toList();
   }
 
-  Future<int> previewDaysUntil(String deliveryDate, String deliveryTz) async {
+  Future<int> previewDaysUntil(DateTime deliveryDate, String deliveryTz) async {
     final r = await _dio.post<dynamic>(
       '/api/time-letter/preview-delivery',
       data: <String, dynamic>{
-        'deliveryDate': deliveryDate,
+        'deliveryDate': formatBackendLocalDate(deliveryDate),
         'deliveryTz': deliveryTz,
       },
     );

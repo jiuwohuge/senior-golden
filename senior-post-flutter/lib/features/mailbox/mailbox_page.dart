@@ -14,6 +14,7 @@ import '../../widgets/postal/postal.dart';
 import 'im_unread_providers.dart';
 import 'mailbox_providers.dart';
 import 'tim_facade.dart';
+import '../compose/compose_intent.dart';
 import '../time_letter/time_letter_list_tab.dart';
 import '../time_letter/time_letter_providers.dart';
 
@@ -337,11 +338,12 @@ class _ConnectionsTab extends ConsumerWidget {
                   onPressed: () {
                     if (id.isEmpty || id == '0') return;
                     context.push(
-                      '/time-letter/compose',
-                      extra: <String, dynamic>{
-                        'recipientId': id,
-                        'recipientNickname': r.peer.nickname,
-                      },
+                      '/compose',
+                      extra: ComposeIntent(
+                        kind: ComposeKind.penPalTimeLetter,
+                        peerId: id,
+                        peerNickname: r.peer.nickname,
+                      ),
                     );
                   },
                 ),

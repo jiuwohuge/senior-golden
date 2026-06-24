@@ -549,5 +549,57 @@
   "topicOldPhotoTitle": "老照片背后的故事",
   "topicOldPhotoPrompt": "从一张老照片里选一个人、一个地方或一个季节，写下仍留在心里的部分。",
   "topicSafetyTitle": "更安心地认识笔友",
-  "topicSafetyBody": "涉及金钱、投资、验证码、私下联系方式等内容会被谨慎提醒。你可以慢慢写，也可以慢慢决定。"
+  "topicSafetyBody": "涉及金钱、投资、验证码、私下联系方式等内容会被谨慎提醒。你可以慢慢写，也可以慢慢决定。",
+  "composeTitle": "写一封信",
+  "composeStepDestinationTitle": "这封信写给谁",
+  "composeStepDestinationSubtitle": "每一步只做一件事。不着急，慢慢写。",
+  "composeStepFooter": "基础写信不会被付费拦住。",
+  "composeChooseSelf": "写给自己",
+  "composeChooseSelfSub": "时光信，寄给未来的自己",
+  "composeChoosePenPal": "写给笔友",
+  "composeChoosePenPalSub": "认真来信，慢慢认识",
+  "composeChooseTopic": "写给主题信箱",
+  "composeChooseTopicSub": "从今日话题开始表达",
+  "composePickDestinationRequired": "请先选择写信对象",
+  "composeStepPenPalTitle": "选择一位笔友",
+  "composeStepPenPalSubtitle": "先从已建立联系的朋友里选。若还没有笔友，可以先去笔友大厅。",
+  "composePickPenPalRequired": "请选择一位笔友",
+  "composePenPalEmptyTitle": "还没有笔友",
+  "composePenPalEmptySubtitle": "可以先去笔友大厅读资料，写第一封认真来信。",
+  "composePenPalLoadFailed": "笔友列表加载失败",
+  "composeGoDirectory": "去笔友大厅",
+  "composeStepTopicTitle": "选择主题",
+  "composeStepTopicSubtitle": "选一个温和的话题慢慢写。",
+  "composePickTopicRequired": "请选择一个主题",
+  "composeStepBodyTitle": "写下正文",
+  "composeBodyLabel": "信件正文",
+  "composeBodyFooter": "认真表达比字数多少更重要。",
+  "composeBodyRequired": "请先写下正文",
+  "composeBodySubtitleSelf": "写给未来的自己。可以是一段回忆、一个愿望，或今天的心情。",
+  "composeBodySubtitlePenPal": "写给 {name} 的一封认真来信。",
+  "@composeBodySubtitlePenPal": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "composeBodySubtitleTimePenPal": "写给 {name} 的时光信，会在选定日期送达。",
+  "@composeBodySubtitleTimePenPal": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "composeBodySubtitleTopic": "围绕所选主题，写下你想分享的内容。",
+  "composeStepDeliveryTitle": "选择送达日期",
+  "composeStepDeliverySubtitle": "时光信会在所选日期才拆阅。",
+  "composeStepMailTitle": "选择投递方式",
+  "composeStepMailSubtitle": "平邮免费；挂号信需要邮票（VIP 免费）。",
+  "composeStepSealTitle": "封缄寄出",
+  "composeStepSealSubtitle": "滑动封缄后，信件进入等待送达。",
+  "composeStepSendTitle": "确认寄出",
+  "composeStepSendSubtitle": "寄出后可在「我的信箱」查看状态。",
+  "composeSendNow": "立即寄出",
+  "composeStepTopicSubmitTitle": "投进主题信箱",
+  "composeStepTopicSubmitSubtitle": "确认后投稿进入审核，通过后其他用户可见。",
+  "composeTopicSubmit": "投进主题信箱",
+  "composeTopicSubmitted": "已投进主题信箱，审核通过后会展示。"
 }

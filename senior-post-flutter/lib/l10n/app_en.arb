@@ -562,5 +562,57 @@
   "topicOldPhotoTitle": "The story behind an old photo",
   "topicOldPhotoPrompt": "Pick a person, place, or season from an old photo and write what still stays with you.",
   "topicSafetyTitle": "A calmer way to meet pen pals",
-  "topicSafetyBody": "Money, investment, verification codes and private contact requests will be treated carefully. You can write slowly and decide slowly."
+  "topicSafetyBody": "Money, investment, verification codes and private contact requests will be treated carefully. You can write slowly and decide slowly.",
+  "composeTitle": "Write a letter",
+  "composeStepDestinationTitle": "Who is this letter for?",
+  "composeStepDestinationSubtitle": "One step at a time. There is no rush.",
+  "composeStepFooter": "Basic letter writing is never blocked by payment.",
+  "composeChooseSelf": "To myself",
+  "composeChooseSelfSub": "A time letter for your future self",
+  "composeChoosePenPal": "To a pen pal",
+  "composeChoosePenPalSub": "A thoughtful letter, slowly getting to know each other",
+  "composeChooseTopic": "To a topic mailbox",
+  "composeChooseTopicSub": "Start from today's gentle prompt",
+  "composePickDestinationRequired": "Please choose who you are writing to",
+  "composeStepPenPalTitle": "Choose a pen pal",
+  "composeStepPenPalSubtitle": "Start with someone you already connected with. If you have none yet, visit the pen pal hall first.",
+  "composePickPenPalRequired": "Please choose a pen pal",
+  "composePenPalEmptyTitle": "No pen pals yet",
+  "composePenPalEmptySubtitle": "Visit the pen pal hall, read profiles, and send your first thoughtful letter.",
+  "composePenPalLoadFailed": "Could not load pen pals",
+  "composeGoDirectory": "Go to pen pals",
+  "composeStepTopicTitle": "Choose a topic",
+  "composeStepTopicSubtitle": "Pick one gentle prompt for today.",
+  "composePickTopicRequired": "Please choose a topic",
+  "composeStepBodyTitle": "Write the letter",
+  "composeBodyLabel": "Letter body",
+  "composeBodyFooter": "Thoughtful writing matters more than length.",
+  "composeBodyRequired": "Please write the letter body first",
+  "composeBodySubtitleSelf": "To your future self — a memory, a wish, or how today feels.",
+  "composeBodySubtitlePenPal": "A thoughtful letter to {name}.",
+  "@composeBodySubtitlePenPal": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "composeBodySubtitleTimePenPal": "A time letter to {name}, delivered on the date you choose.",
+  "@composeBodySubtitleTimePenPal": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "composeBodySubtitleTopic": "Write about the topic you selected.",
+  "composeStepDeliveryTitle": "Choose delivery date",
+  "composeStepDeliverySubtitle": "The time letter stays sealed until that date.",
+  "composeStepMailTitle": "Choose delivery type",
+  "composeStepMailSubtitle": "Standard post is free. Registered mail uses a stamp (free for VIP).",
+  "composeStepSealTitle": "Seal and send",
+  "composeStepSealSubtitle": "After sealing, the letter waits until delivery day.",
+  "composeStepSendTitle": "Ready to send",
+  "composeStepSendSubtitle": "Track status in My Mailbox after sending.",
+  "composeSendNow": "Send now",
+  "composeStepTopicSubmitTitle": "Submit to topic mailbox",
+  "composeStepTopicSubmitSubtitle": "After review, approved submissions become visible to others.",
+  "composeTopicSubmit": "Submit to topic",
+  "composeTopicSubmitted": "Submitted to the topic mailbox. It will appear after review."
 }

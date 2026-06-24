@@ -5,6 +5,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../widgets/postal/postal.dart';
+import '../compose/compose_intent.dart';
 import 'time_letter_providers.dart';
 import 'time_letter_remote.dart';
 
@@ -76,8 +77,10 @@ class _TimeLetterListTabState extends ConsumerState<TimeLetterListTab>
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => context.push(
-                    '/time-letter/compose',
-                    extra: const {'toSelf': true},
+                    '/compose',
+                    extra: const ComposeIntent(
+                      kind: ComposeKind.selfTimeLetter,
+                    ),
                   ),
                   icon: const Icon(Icons.edit_note_outlined),
                   label: Text(l10n.timeLetterComposeToSelf),
@@ -151,7 +154,10 @@ class _LetterList extends ConsumerWidget {
         loading: () => ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: const [
-            SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
+            SizedBox(
+              height: 200,
+              child: Center(child: CircularProgressIndicator()),
+            ),
           ],
         ),
         error: (e, _) => ListView(
@@ -204,8 +210,8 @@ class _TimeLetterTile extends ConsumerWidget {
     final subtitle = item.bodyPreview?.isNotEmpty == true
         ? item.bodyPreview!
         : (isOutbox == true
-            ? l10n.timeLetterSealedHidden
-            : l10n.timeLetterTapToOpen);
+              ? l10n.timeLetterSealedHidden
+              : l10n.timeLetterTapToOpen);
     final trailing = isOutbox == true && item.daysUntilDelivery != null
         ? Text(l10n.timeLetterDaysUntil('${item.daysUntilDelivery}'))
         : null;
@@ -250,12 +256,17 @@ class _TimeLetterTile extends ConsumerWidget {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: PostalTokens.postboxGreen.withValues(alpha: 0.12),
+                backgroundColor: PostalTokens.postboxGreen.withValues(
+                  alpha: 0.12,
+                ),
                 backgroundImage: item.peerAvatarUrl != null
                     ? NetworkImage(item.peerAvatarUrl!)
                     : null,
                 child: item.peerAvatarUrl == null
-                    ? Icon(Icons.person_outline, color: PostalTokens.postboxGreen)
+                    ? Icon(
+                        Icons.person_outline,
+                        color: PostalTokens.postboxGreen,
+                      )
                     : null,
               ),
               const SizedBox(width: 12),
@@ -266,8 +277,8 @@ class _TimeLetterTile extends ConsumerWidget {
                     Text(
                       item.peerNickname ?? l10n.timeLetterComposeToSelf,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -283,7 +294,11 @@ class _TimeLetterTile extends ConsumerWidget {
               if (item.starFlag)
                 const Padding(
                   padding: EdgeInsets.only(left: 6),
-                  child: Icon(Icons.star_rounded, color: PostalTokens.stampGold, size: 20),
+                  child: Icon(
+                    Icons.star_rounded,
+                    color: PostalTokens.stampGold,
+                    size: 20,
+                  ),
                 ),
             ],
           ),

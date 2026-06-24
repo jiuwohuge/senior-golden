@@ -1312,4 +1312,134 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get topicSafetyBody => '涉及金钱、投资、验证码、私下联系方式等内容会被谨慎提醒。你可以慢慢写，也可以慢慢决定。';
+
+  @override
+  String get composeTitle => '写一封信';
+
+  @override
+  String get composeStepDestinationTitle => '这封信写给谁';
+
+  @override
+  String get composeStepDestinationSubtitle => '每一步只做一件事。不着急，慢慢写。';
+
+  @override
+  String get composeStepFooter => '基础写信不会被付费拦住。';
+
+  @override
+  String get composeChooseSelf => '写给自己';
+
+  @override
+  String get composeChooseSelfSub => '时光信，寄给未来的自己';
+
+  @override
+  String get composeChoosePenPal => '写给笔友';
+
+  @override
+  String get composeChoosePenPalSub => '认真来信，慢慢认识';
+
+  @override
+  String get composeChooseTopic => '写给主题信箱';
+
+  @override
+  String get composeChooseTopicSub => '从今日话题开始表达';
+
+  @override
+  String get composePickDestinationRequired => '请先选择写信对象';
+
+  @override
+  String get composeStepPenPalTitle => '选择一位笔友';
+
+  @override
+  String get composeStepPenPalSubtitle => '先从已建立联系的朋友里选。若还没有笔友，可以先去笔友大厅。';
+
+  @override
+  String get composePickPenPalRequired => '请选择一位笔友';
+
+  @override
+  String get composePenPalEmptyTitle => '还没有笔友';
+
+  @override
+  String get composePenPalEmptySubtitle => '可以先去笔友大厅读资料，写第一封认真来信。';
+
+  @override
+  String get composePenPalLoadFailed => '笔友列表加载失败';
+
+  @override
+  String get composeGoDirectory => '去笔友大厅';
+
+  @override
+  String get composeStepTopicTitle => '选择主题';
+
+  @override
+  String get composeStepTopicSubtitle => '选一个温和的话题慢慢写。';
+
+  @override
+  String get composePickTopicRequired => '请选择一个主题';
+
+  @override
+  String get composeStepBodyTitle => '写下正文';
+
+  @override
+  String get composeBodyLabel => '信件正文';
+
+  @override
+  String get composeBodyFooter => '认真表达比字数多少更重要。';
+
+  @override
+  String get composeBodyRequired => '请先写下正文';
+
+  @override
+  String get composeBodySubtitleSelf => '写给未来的自己。可以是一段回忆、一个愿望，或今天的心情。';
+
+  @override
+  String composeBodySubtitlePenPal(Object name) {
+    return '写给 $name 的一封认真来信。';
+  }
+
+  @override
+  String composeBodySubtitleTimePenPal(Object name) {
+    return '写给 $name 的时光信，会在选定日期送达。';
+  }
+
+  @override
+  String get composeBodySubtitleTopic => '围绕所选主题，写下你想分享的内容。';
+
+  @override
+  String get composeStepDeliveryTitle => '选择送达日期';
+
+  @override
+  String get composeStepDeliverySubtitle => '时光信会在所选日期才拆阅。';
+
+  @override
+  String get composeStepMailTitle => '选择投递方式';
+
+  @override
+  String get composeStepMailSubtitle => '平邮免费；挂号信需要邮票（VIP 免费）。';
+
+  @override
+  String get composeStepSealTitle => '封缄寄出';
+
+  @override
+  String get composeStepSealSubtitle => '滑动封缄后，信件进入等待送达。';
+
+  @override
+  String get composeStepSendTitle => '确认寄出';
+
+  @override
+  String get composeStepSendSubtitle => '寄出后可在「我的信箱」查看状态。';
+
+  @override
+  String get composeSendNow => '立即寄出';
+
+  @override
+  String get composeStepTopicSubmitTitle => '投进主题信箱';
+
+  @override
+  String get composeStepTopicSubmitSubtitle => '确认后投稿进入审核，通过后其他用户可见。';
+
+  @override
+  String get composeTopicSubmit => '投进主题信箱';
+
+  @override
+  String get composeTopicSubmitted => '已投进主题信箱，审核通过后会展示。';
 }
