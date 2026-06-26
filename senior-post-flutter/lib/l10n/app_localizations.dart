@@ -131,7 +131,7 @@ abstract class AppLocalizations {
   /// Bottom navigation: memorial album, profile, and settings.
   ///
   /// In en, this message translates to:
-  /// **'Memorial'**
+  /// **'Me'**
   String get tabProfile;
 
   /// No description provided for @a11yTabPostWall.

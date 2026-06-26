@@ -24,7 +24,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabMailbox => 'My Mailbox';
 
   @override
-  String get tabProfile => 'Memorial';
+  String get tabProfile => 'Me';
 
   @override
   String get a11yTabPostWall => 'Topics: official prompts and today\'s mailbox';

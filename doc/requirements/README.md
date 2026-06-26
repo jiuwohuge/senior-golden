@@ -14,8 +14,8 @@
 | [04-compose.md](04-compose.md) | 模块 4：统一写信流程 | ✅ |
 | [05-time-letter.md](05-time-letter.md) | 模块 5：时光信 | ✅ |
 | [06-mailbox.md](06-mailbox.md) | 模块 6：信箱（收件箱 / 笔友对话） | ✅ |
-| [07-memorial.md](07-memorial.md) | 模块 7：纪念册 | ✅ |
-| [08-profile.md](08-profile.md) | 模块 8：我的（资料 / 设置 / 邮票） | ✅ |
+| [07-memorial.md](07-memorial.md) | 模块 7：纪念册（收藏信件） | ✅ |
+| [08-profile.md](08-profile.md) | 模块 8：个人中心（资料 / 设置 / 邮票） | ✅ |
 | [09-safety.md](09-safety.md) | 模块 9：安全与反欺诈 | ✅ |
 | [10-cold-start.md](10-cold-start.md) | 模块 10：冷启动与种子数据 | ❌ 待开发 |
 | [11-payment.md](11-payment.md) | 模块 11：付费与盈利 | ❌ 待开发 |

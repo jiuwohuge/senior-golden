@@ -24,7 +24,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tabMailbox => '我的信箱';
 
   @override
-  String get tabProfile => '纪念册';
+  String get tabProfile => '我的';
 
   @override
   String get a11yTabPostWall => '主题信箱：官方主题与今日信箱';
