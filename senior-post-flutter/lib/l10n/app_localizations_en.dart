@@ -36,7 +36,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get a11yTabMailbox => 'My Mailbox: your letters and conversations';
 
   @override
-  String get a11yTabProfile => 'Memorial: saved letters, profile and account';
+  String get a11yTabProfile => 'Me: profile, saved letters and settings';
 
   @override
   String get a11yNavBar => 'Main sections of the app';

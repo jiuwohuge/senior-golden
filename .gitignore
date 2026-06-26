@@ -3,3 +3,6 @@
 .vscode
 logs
 .env
+# Temp files
+*.log
+out.txt

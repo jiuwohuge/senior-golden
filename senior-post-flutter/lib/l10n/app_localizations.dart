@@ -128,7 +128,7 @@ abstract class AppLocalizations {
   /// **'My Mailbox'**
   String get tabMailbox;
 
-  /// Bottom navigation: memorial album, profile, and settings.
+  /// Bottom navigation: personal profile and settings
   ///
   /// In en, this message translates to:
   /// **'Me'**
@@ -155,7 +155,7 @@ abstract class AppLocalizations {
   /// No description provided for @a11yTabProfile.
   ///
   /// In en, this message translates to:
-  /// **'Memorial: saved letters, profile and account'**
+  /// **'Me: profile, saved letters and settings'**
   String get a11yTabProfile;
 
   /// No description provided for @a11yNavBar.

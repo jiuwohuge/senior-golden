@@ -36,7 +36,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get a11yTabMailbox => '我的信箱：您的信件与对话';
 
   @override
-  String get a11yTabProfile => '纪念册：收藏信件、资料与账户';
+  String get a11yTabProfile => '我的：个人资料、收藏信件与设置';
 
   @override
   String get a11yNavBar => '应用主要分区导航';

@@ -1,1 +1,619 @@
-{   "@@locale": "en",   "appTitle": "Senior Post",   "@appTitle": {     "description": "Application name shown in task switcher and about screens."   },   "appTagline": "A calm post office for trusted pen pals.",   "@appTagline": {     "description": "Short brand line under the app name; postal / pen-pal tone."   },   "tabPostWall": "Topics",   "@tabPostWall": {     "description": "Bottom navigation: official topic mailbox."   },   "tabDirectory": "Pen Pals",   "@tabDirectory": {     "description": "Bottom navigation: calm pen-pal hall."   },   "tabMailbox": "My Mailbox",   "@tabMailbox": {     "description": "Bottom navigation: messages and letters."   },   "tabProfile": "Me",   "@tabProfile": {     "description": "Bottom navigation: memorial album, profile, and settings."   },   "a11yTabPostWall": "Topics: official prompts and today's mailbox",   "a11yTabDirectory": "Pen Pals: read profiles and write slowly",   "a11yTabMailbox": "My Mailbox: your letters and conversations",   "a11yTabProfile": "Memorial: saved letters, profile and account",   "a11yNavBar": "Main sections of the app",   "placeholderWelcomeTitle": "This area is being prepared",   "placeholderWelcomeBody": "We are finishing this screen. Your postcards, letters, and friends will appear here soon. Thank you for your patience.",   "placeholderHint": "Tip: use the bar below to switch between Topics, Pen Pals, My Mailbox, and Memorial.",   "postalMotifContentDescription": "Decorative postmark in the header",   "authLoginTitle": "Sign in",   "authEmailLabel": "Email",   "authPasswordLabel": "Password",   "authLoginSubmit": "Sign in",   "authWelcomeRegister": "Create account",   "authWelcomeLogin": "Sign in",   "authWelcomeHaveAccount": "Already have an account?",   "authWelcomeHighlightLetters": "Write and receive real letters at a calm pace",   "authWelcomeHighlightDirectory": "Meet pen pals worldwide in the directory",   "authWelcomeHighlightPace": "Designed for adults 45 and over",   "authWelcomeTagline": "Letters at your pace — for adults 45+",   "authWelcomeLegalFooter": "By signing up, you accept our {terms} and {privacy}.",   "authRegisterWizardEmailTitle": "What's your email?",   "authRegisterWizardEmailSubtitle": "We'll use it for sign-in and important notices about your post.",   "authRegisterWizardPasswordTitle": "Choose a password",   "authRegisterWizardPasswordSubtitle": "At least 8 characters. Keep it somewhere safe.",   "authRegisterWizardNameTitle": "What should we call you?",   "authRegisterWizardNameSubtitle": "This name appears on postcards, letters, and the directory.",   "authRegisterWizardGenderTitle": "How do you identify?",   "authRegisterWizardGenderSubtitle": "Helps us show you the right people in the directory.",   "authRegisterWizardAgeTitle": "How old are you?",   "authRegisterWizardAgeSubtitle": "Your birth year helps us tailor the community for 45+.",   "authRegisterProfileHint": "This info shows on your profile.",   "authRegisterAgePreview": "I'm {age}",   "@authRegisterAgePreview": {     "placeholders": { "age": {} }   },   "authRegisterSummaryGender": "Gender",   "authContinueWithGoogle": "Continue with Google",   "authOrContinueWithEmail": "or sign in with email",   "authGoogleNotConfigured": "Google sign-in is not configured yet",   "authGenderLabel": "Gender",   "authGenderMale": "Male",   "authGenderFemale": "Female",   "authRegisterAvatarOptional": "Profile photo (optional)",   "authRegisterAvatarSkipHint": "You can skip and add a photo later in My Post.",   "authRegisterWizardAvatarTitle": "Show us your smile",   "authRegisterWizardAvatarSubtitle": "Add a friendly photo of yourself — a smile goes a long way.",   "authRegisterAvatarTapToAdd": "Tap to add a photo",   "authRegisterAvatarAgreeFirst": "Please accept the terms below before uploading a photo",   "authRegisterAvatarUploading": "Uploading photo…",   "authRegisterAvatarUploaded": "Uploaded",   "authRegisterSummaryAvatarPending": "Selected, pending upload",   "authRegisterSummaryAvatar": "Photo",   "authRegisterSummaryAvatarSet": "Selected — uploads after sign-up",   "authRegisterSummaryAvatarSkipped": "Skipped",   "authSocialCompleteTitle": "Complete your profile",   "directoryFilterGender": "Gender",   "directoryFilterGenderHint": "Optional — leave all selected to show everyone.",   "directoryFilterGenderAll": "All",   "directoryFilterInterests": "Interest tags",   "directoryFilterInterestsHint": "Optional — pick one or more to narrow pen pals by shared hobbies.",   "directoryFilterInterestsEmpty": "No interest tags from the server. Try another language or ask an admin to add tags.",   "directoryFilterApply": "Apply filters",   "directoryFilterClear": "Clear",   "authGoRegister": "Create an account",   "authRegisterTitle": "Create account",   "authNicknameLabel": "Nickname",   "authBirthYearLabel": "Year of birth",   "authCountryCodeLabel": "Country (optional)",   "authAgreeTerms": "I agree to the Terms and Privacy Policy",   "authRegisterSubmit": "Register",   "authGoLogin": "Already have an account? Sign in",   "authFieldRequired": "Please fill in this field",   "authPasswordTooShort": "Password must be at least 8 characters",   "authAgreeRequired": "Please accept the terms to continue",   "authBusy": "Please wait…",   "authCountrySkip": "Skip",   "authBootstrapLoadFailed": "Could not load signup options. Check your network and try again.",   "authRetry": "Retry",   "authBirthYearRangeError": "Birth year list is empty. Check server config for minimum age."   ,   "authWelcomeBack": "Welcome back to your global post office.",   "authMockTip": "Sign in with your registered email to use all features.",   "authAgreeTpl": "I have read and agree to {terms} and {privacy}.",   "authTermsTitle": "Terms of Service",   "authPrivacyTitle": "Privacy Policy",   "authForgotPassword": "Forgot password",   "authForgotIntro": "We'll email a 6-digit code to your registered address. In local dev, check server logs if SMTP is not configured.",   "authForgotCodeHint": "6-digit code",   "authForgotResetSuccess": "Password updated. You can sign in now.",   "authForgotCodeInvalid": "Enter the 6-digit code",   "authOnboardingAgain": "View introduction",   "authEmailInvalid": "Please enter a valid email address",   "authRegisterSubtitle": "Create your postal social account in one minute.",   "authRegisterWizardHint": "Tap any step below to jump — your entries stay until you submit.",   "authRegisterTabAccount": "Account",   "authRegisterTabProfile": "Profile",   "authRegisterTabInterests": "Interests",   "authRegisterTabReview": "Review",   "authRegisterStepProgress": "Step {current} of {total}",   "@authRegisterStepProgress": {     "placeholders": {       "current": {},       "total": {}     }   },   "authRegisterStepAccountTitle": "Sign-in details",   "authRegisterStepAccountSubtitle": "We’ll use your email to reach you about letters and security.",   "authRegisterStepProfileTitle": "About you",   "authRegisterStepProfileSubtitle": "This is how you appear on postcards, letters, and the directory.",   "authRegisterStepInterestsTitle": "Interests",   "authRegisterStepInterestsSubtitle": "Choose at least three tags — they power better pen-pal matches.",   "authRegisterStepReviewTitle": "Review & terms",   "authRegisterStepReviewSubtitle": "Check your details, then accept the policies to open your account.",   "authRegisterNext": "Continue",   "authRegisterBack": "Back",   "authRegisterSummaryEmail": "Email",   "authRegisterSummaryNickname": "Nickname",   "authRegisterSummaryBirth": "Year of birth",   "authRegisterSummaryCountry": "Country / region",   "authRegisterSummaryInterests": "Interests",   "authRegisterInterestsMin": "Please select at least three interests.",   "authRegisterInterestsServerEmpty": "No interest tags from the server. Try another language or ask an admin to add tags.",   "authConfirmPasswordLabel": "Confirm password",   "authPasswordNotMatch": "Passwords do not match",   "authBirthYearRequired": "Please choose your year of birth",   "authForgotStepEmail": "Email",   "authForgotStepCode": "Code",   "authForgotStepDone": "Done",   "authForgotSendCode": "Send reset email",   "authForgotMailSent": "Reset instructions have been sent.",   "authForgotCode": "Verification code",   "authForgotNewPassword": "New password",   "authForgotResetNow": "Reset password",   "authForgotDoneTitle": "Password reset complete",   "authForgotDoneBody": "You can now return to login and sign in with your new password.",   "authBackToLogin": "Back to login",   "onboardTitle1": "A global postal social network",   "onboardBody1": "Meet peers worldwide in a calm, respectful, non-dating environment.",   "onboardTitle2": "Slow letters, real companionship",   "onboardBody2": "Send postcards and letters at your own pace. No like-count pressure.",   "onboardTitle3": "Trusted and age-friendly",   "onboardBody3": "Designed for 45+ users with clear typography, calm colors and privacy-first defaults.",   "onboardSkip": "Skip",   "onboardNext": "Next",   "onboardDone": "Start now",   "commonRetry": "Retry",   "postWallUnavailable": "Post wall is temporarily unavailable",   "postWallEmptyTitle": "No postcards yet",   "postWallEmptySubtitle": "Be the first to share a postcard today.",   "postWallWriteAction": "Write postcard",   "postWallFAB": "Write",   "postWallFeedEveryone": "Everyone",   "postWallFeedConnections": "Connections",   "postWallEmptyConnectionsSubtitle": "No postcards from your postal friends yet. Connect through letters first.",   "userCardFriendPostcardsTitle": "Their postcards",   "userCardFriendPostcardsSubtitle": "Recent posts from your postal friend",   "userCardFriendPostcardsEmpty": "No public postcards yet",   "userCardLoadMorePostcards": "Load more",   "postComposeRejected": "Your postcard was not approved. Please revise and try again.",   "postWallPhotosLabel": "{count} photos",   "@postWallPhotosLabel": {     "placeholders": {       "count": {}     }   },   "postWallSendLetterTooltip": "Send letter",   "postWallCommentsCount": "Comments {count}",   "@postWallCommentsCount": {     "placeholders": {       "count": {}     }   },   "postComposeTitle": "Write postcard",   "postComposeSectionTitle": "Compose",   "postComposeSectionSubtitle": "Write one postcard for today",   "postComposeContentLabel": "Postcard content",   "postComposeContentHint": "Write your day, thoughts, or greetings…",   "postComposeMaxImages": "At most {max} images",   "@postComposeMaxImages": {     "placeholders": {       "max": {}     }   },   "postComposeUploadNeedRealApi": "Image upload needs a server-issued URL. Check your network and try again.",   "postComposePickerChannelError": "Gallery channel not connected. Fully stop the app and run again; if it persists run flutter clean.",   "postComposeImageUploaded": "Image uploaded",   "postComposeNeedContent": "Please write something first.",   "postComposePublishedMock": "Postcard submitted.",   "postComposePublishedReal": "Submitted for review. It will appear after approval.",   "postComposeUploading": "Uploading…",   "postComposeAddImage": "Add image (OSS)",   "postComposeAddAnother": "Add another ({n}/{max})",   "@postComposeAddAnother": {     "placeholders": {       "n": {},       "max": {}     }   },   "postComposePublish": "Publish now",   "postcardImageCropTitle": "Crop image (4:3)",   "postcardImageCropHelp": "Pan and zoom, then confirm to crop to 4:3 and upload.",   "profileBlacklist": "Blocked users",   "settingsFeedback": "Send feedback",   "dialogConfirm": "OK",   "socialBlockUser": "Block",   "socialBlockConfirmTitle": "Block this user?",   "socialBlockConfirmMessage": "They won't be able to send you letters, and you won't see each other on the wall or directory.",   "socialBlockSuccess": "User blocked",   "socialUnblock": "Unblock",   "socialUnblockConfirm": "Unblock {name}?",   "@socialUnblockConfirm": {     "placeholders": {       "name": {}     }   },   "socialUnblockSuccess": "Unblocked",   "socialBlacklistTitle": "Blocked users",   "socialBlacklistSubtitle": "Blocked users won't appear on the wall or directory and can't send you letters.",   "socialBlacklistEmpty": "No blocked users",   "socialBlockedAt": "Blocked at: {time}",   "@socialBlockedAt": {     "placeholders": {       "time": {}     }   },   "feedbackTitle": "Feedback",   "feedbackBodyLabel": "Your message (required)",   "feedbackBodyHint": "Describe steps, what you expected, and what happened.",   "feedbackSubmit": "Submit",   "feedbackSubmitting": "Submitting…",   "feedbackSuccess": "Thanks — we'll review it soon.",   "feedbackNeedContent": "Please enter your feedback.",   "userCardTitle": "Member profile",   "userCardSendLetter": "Send letter",   "userCardBack": "Back",   "userCardBioSection": "Introduction",   "userCardBioEmpty": "No introduction yet.",   "userCardReportUser": "Report",   "userCardReportSheetTitle": "Report this member",   "userCardErrorTitle": "Unable to load profile",   "userCardNotFoundTitle": "Profile not found",   "userCardNotFoundSubtitle": "This member may be unavailable or restricted for you.",   "directoryTitle": "Pen Pal Hall",   "directorySubtitle": "Read a profile first, then write one thoughtful letter. This is not fast matching.",   "directoryFilterCta": "Filter pen pals",   "directorySafetyTitle": "Letters before private chat",   "directorySafetyBody": "Profiles are only a beginning. Avoid money, investment, verification codes, and private contact requests until trust is real.",   "directoryListTitle": "People open to letters",   "directoryListSubtitle": "Choose by story and shared interests, not by speed.",   "directoryLetterFirstBadge": "Letter first",   "directoryViewProfile": "Read profile",   "directoryBioFallback": "This member has not written a self-introduction yet. You can read their interests before deciding whether to write.",   "directoryInterestEmpty": "Interests to be added",   "directoryMoreInterests": "+{count} more",   "@directoryMoreInterests": {     "placeholders": {       "count": {}     }   },   "directoryLoadFailed": "Unable to load directory",   "directoryEmptyTitle": "No matching members",   "directoryEmptySubtitle": "Try clearing filters, or come back after new official topics bring more letters.",   "directoryAgeYears": "{age} years old",   "@directoryAgeYears": {     "placeholders": {       "age": {}     }   },   "authBirthYearSheetTitle": "Year of birth",   "authBirthYearFormat": "{year} ({age})",   "@authBirthYearFormat": {     "placeholders": {       "year": {},       "age": {}     }   },   "authCountryAutoLabel": "Region (from app language)",   "authEmailHint": "name@example.com",   "profileEditTitle": "Edit profile",   "profileNickname": "Nickname",   "profileCountry": "Country",   "profileBio": "Bio",   "profileSave": "Save",   "profileMockUpdated": "Profile updated",   "profileSaved": "Profile saved",   "profileAvatarChange": "Change profile photo",   "profileAvatarCropTitle": "Crop photo",   "profileAvatarCropDone": "Done",   "profileAvatarCropCancel": "Cancel",   "profileAvatarCropConfirm": "Confirm crop",   "profileAvatarCropHelp": "Drag and pinch to fit your face in the circle. Cancel returns without saving.",   "profileAvatarPreviewHint": "Adjust the circle, then confirm crop. On the previous screen, tap Upload photo to save, or Discard to cancel.",   "profileAvatarConfirmUpload": "Upload photo",   "profileAvatarDiscardUpload": "Discard",   "profileAvatarUploadSuccess": "Profile photo updated",   "profileAvatarUploadFailed": "Could not upload photo",   "profileAvatarUploading": "Uploading photo…",   "profileAvatarAuditPending": "Under review",   "profileAvatarAuditRejected": "Rejected",   "profileAvatarUploadPendingReview": "Photo submitted for review",   "profileAvatarRejectedHint": "Photo was not approved. Please upload again.",   "profileEditCancel": "Close",   "profileEditProfile": "Edit profile",   "profileInterestTags": "Interest tags",   "profileStampsLedger": "Stamps ledger",   "profileVipCenter": "VIP center",   "profileSettings": "Settings",   "profileAbout": "About",   "profileUserAgreement": "User Agreement",   "profilePrivacyPolicy": "Privacy Policy",   "profileLogout": "Log out",   "settingsTitle": "Settings",   "settingsPushNotifications": "Push notifications",   "settingsUnreadBadges": "Show unread badges",   "settingsLanguage": "Language",   "settingsLanguageSubtitle": "English / 中文 / System",   "settingsLanguageEnglish": "English",   "settingsLanguageChinese": "中文",   "settingsLanguageSystem": "Follow system",   "settingsAbout": "About",   "settingsDeleteAccount": "Delete account",   "legalEffectiveDate": "Effective date: 2026-05-01",   "legalTermsContent": "1) This app provides interest-based social communication for adults aged 45+ only.\\n\\n2) The product does not provide dating or matchmaking services.\\n\\n3) You are responsible for the legality of your content and must not publish prohibited content.\\n\\n4) We may suspend accounts for abuse, harassment, spam, fraud, or policy violations.\\n\\n5) We provide moderation and reporting mechanisms to maintain a safe communication environment.",   "legalPrivacyContent": "1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.",   "vipCenterUnlimitedRegisteredMail": "Unlimited registered mail for members (server rules apply).",   "vipCenterStandardPriorityHours": "Standard mail priority: ~{hours}h (configured).",   "@vipCenterStandardPriorityHours": {     "placeholders": {       "hours": {}     }   },   "vipCenterFreeSpeedUpStandard": "Free speed-up on standard mail for members (server rules apply).",   "vipCenterPurchaseDisabled": "VIP purchase is currently disabled.",   "vipCenterCheckoutNotWired": "Subscription checkout is not wired yet; benefits follow your account VIP flag.",   "vipCenterLoadFailed": "Failed to load VIP info: {error}",   "@vipCenterLoadFailed": {     "placeholders": {       "error": {}     }   },   "profileMyPostcards": "My postcards",   "myPostcardsEmptyTitle": "No postcards yet",   "myPostcardsEmptySubtitle": "Write one from the Post Wall tab — it will appear here with review status.",   "myPostcardsLoadFailedTitle": "Could not load postcards",   "postcardReviewPendingBadge": "Pending review",   "postcardReviewApprovedBadge": "Approved",   "postcardReviewRejectedBadge": "Rejected",   "postcardPostHiddenBadge": "Hidden",   "postcardPostRemovedBadge": "Removed",   "postcardReviewPendingBanner": "This postcard is pending review. Only you can see it here.",   "postcardReviewRejectedBanner": "This postcard was not approved for the public wall. You can still view it from your list.",   "letterMailboxSealedPreview": "Letter sealed until arrival",   "letterContentHiddenHint": "This letter is still on its way. The message is hidden until it arrives, or you can open it early with one stamp (VIP free).",   "letterEarlyOpenCta": "Open early (1 stamp)",   "letterEarlyOpenSuccess": "Letter opened — full message is now visible.",   "postDetailTitle": "Postcard",   "letterDetailTitle": "Letter",   "letterAcceptContact": "Accept postal contact",   "letterAcceptContactDone": "Postal contact accepted",   "letterAcceptContactSuccess": "You are now postal friends. Open instant chat below or from Connections.",   "chatFriendsOnlySnack": "Only postal friends in Connections can use live chat.",   "chatEmojiPickerTitle": "Friendly stamps",   "chatEmojiPickerSubtitle": "Tap an emoji to add it to your message.",   "chatComposerHint": "Write a message",   "postDetailCommentRequired": "Please enter a comment.",   "postDetailCommentPosted": "Comment posted.",   "postDetailReply": "Reply",   "postDetailReplyingTo": "Replying to @{name}",   "@postDetailReplyingTo": {     "placeholders": {       "name": {}     }   },   "postDetailCancelReply": "Cancel",   "postDetailLike": "Like",   "postDetailReportComment": "Report",   "postDetailCommentsSection": "Comments",   "postDetailReplyPrefix": "Reply",   "postDetailWriteComment": "Write a comment",   "postDetailSendComment": "Send",   "postDetailNoCommentsTitle": "No comments yet",   "postDetailNoCommentsSubtitle": "Start the first kind reply.",   "errorInvalidContentId": "Invalid content id.",   "errorInvalidResponse": "Invalid response from server.",   "directoryFilterSectionTitle": "Filter directory",   "directoryFilterSectionSubtitle": "Country, age range, interests, and sort",   "directoryFilterCountryLabel": "Country",   "directoryFilterSort": "Sort",   "directoryFilterNewest": "Newest",   "directoryFilterClosestAge": "Closest age",   "directoryFilterSharedInterests": "Shared interests",   "directoryFilterAllCountries": "All countries",   "directoryFilterMinAge": "Min age: {age}",   "@directoryFilterMinAge": {     "placeholders": {       "age": {}     }   },   "directoryFilterMaxAge": "Max age: {age}",   "@directoryFilterMaxAge": {     "placeholders": {       "age": {}     }   },   "mailboxArchiveTitle": "Letter archive",   "mailboxOpenArchive": "Archive",   "mailboxPostOnTheWay": "A post is on the way",   "shopTitleStampsVip": "Stamps & membership",   "shopPlaceholderOrders": "Orders & history (placeholder)",   "shopPlaceholderBuy": "Buy (placeholder)",   "shopOrdersSnackbar": "Orders and payment history will open once the catalog is connected.",   "shopPricePlaceholder": "Price: —",   "shopCheckoutSnackbar": "Checkout opens when payments are connected.",   "shopSkuStampLine": "×{count} stamps",   "@shopSkuStampLine": {     "placeholders": {       "count": {}     }   },   "interestsPickerSaved": "Interests saved.",   "reportReasonRequired": "Please enter a report reason.",   "reportSubmitted": "Report submitted.",   "accountDeleteTitle": "Delete account",   "stampsLedgerTitle": "Stamps ledger",   "interestsPickerTitle": "Interest tags",   "sendLetterRegisteredMail": "Registered Mail",   "sendLetterStandardPost": "Standard Post",   "sendLetterBodyRequired": "Please write the letter content.",   "sendLetterRegisteredStampShort": "Not enough stamps for registered mail.",   "sendLetterSentSuccess": "Letter sent.",   "sendLetterSentSuccessTitle": "Letter sent",   "sendLetterSentSuccessMessage": "Your letter is on its way. They will find it in their Post Box.",   "sendLetterSheetTitle": "Send letter to {name}",   "@sendLetterSheetTitle": {     "placeholders": {       "name": {}     }   },   "sendLetterRegisteredSubVip": "Free for VIP",   "sendLetterRegisteredSubPaid": "Consumes 1 stamp",   "sendLetterStandardSub": "Free, delayed delivery",   "sendLetterContentLabel": "Letter content",   "mailboxTabPostalInbox": "Postal inbox",   "mailboxTabConnections": "Connections",   "mailboxTabTimeLetter": "Time",   "timeLetterComposeTitle": "Time Post Office",   "timeLetterComposeToSelf": "Letter to future me",   "timeLetterComposeToFriend": "To {name}",   "@timeLetterComposeToFriend": {     "placeholders": {       "name": {}     }   },   "timeLetterDeliveryDate": "Delivery date",   "timeLetterDaysUntil": "{days} days until delivery",   "@timeLetterDaysUntil": {     "placeholders": {       "days": {}     }   },   "timeLetterBodyHint": "Write what you want your future self or friend to read…",   "timeLetterBodyEmpty": "Please write your letter.",   "timeLetterSealSlide": "Slide to seal",   "timeLetterSealSuccessTitle": "Sealed",   "timeLetterSealSuccessMessage": "Your time letter is on its way. It will arrive on the date you chose.",   "timeLetterTabOutbox": "Outbox",   "timeLetterTabInbox": "Inbox",   "timeLetterTabMemorial": "Memorial",   "timeLetterEmptyTitle": "No time letters yet",   "timeLetterEmptySubtitle": "Write to your future self or a postal friend.",   "timeLetterLoadError": "Could not load time letters",   "timeLetterSealedHidden": "Sealed — content hidden until delivery",   "timeLetterTapToOpen": "Tap to open when delivered",   "timeLetterCancelTitle": "Cancel this letter?",   "timeLetterCancelMessage": "Stamps will be refunded if you cancel within 24 hours.",   "timeLetterOpenTitle": "Open time letter",   "timeLetterOpenRitual": "Open the envelope",   "timeLetterReadEstimate": "About {minutes} min read",   "@timeLetterReadEstimate": {     "placeholders": {       "minutes": {}     }   },   "timeLetterStar": "Add to memorial",   "timeLetterStarred": "In memorial",   "timeLetterSendToFriend": "Time letter",   "timeLetterBanner": "{inFlight} in transit · {unread} to open · {today} arrived today",   "@timeLetterBanner": {     "placeholders": {       "inFlight": {},       "unread": {},       "today": {}     }   },   "topicFriendFallback": "friend",   "topicTodayGreeting": "Good to see you, {name}",   "@topicTodayGreeting": {     "placeholders": {       "name": {}     }   },   "topicTodayIntro": "There is no rush here. Read what has arrived, write one thoughtful letter, or pick a topic for today.",   "topicTodayLetters": "Letters needing attention",   "topicTodayLettersCount": "{count} letters",   "@topicTodayLettersCount": {     "placeholders": {       "count": {}     }   },   "topicTodayLoading": "Loading",   "topicTodayTime": "Time letters",   "topicTodayTimeLetters": "{inFlight} waiting · {unread} ready",   "@topicTodayTimeLetters": {     "placeholders": {       "inFlight": {},       "unread": {}     }   },   "topicTodayTimeLettersLoading": "Checking",   "topicWriteLetter": "Write a letter",   "topicOpenMailbox": "Open mailbox",   "topicOfficialLetterTitle": "A note from the Post Office",   "topicOfficialIdentity": "Official letter · clearly marked",   "topicOfficialLetterBody": "Today you can write about a memory, a meal, or a place you miss. We will never pretend an official note is a real pen pal.",   "topicOfficialCta": "Write to future me",   "topicDailyTitle": "Today's topic mailboxes",   "topicDailySubtitle": "Choose one gentle prompt. A good letter is better than a long scroll.",   "topicWriteToTopic": "Write here",   "topicOfficialExample": "Official example",   "topicTodayTopic": "Today",   "topicHometownTitle": "Hometown memories",   "topicHometownPrompt": "Describe a road, a market, or a familiar doorway from the place you still remember.",   "topicRetirementTitle": "A quiet day after retirement",   "topicRetirementPrompt": "Write about one ordinary moment that made you feel comfortable recently.",   "topicOldPhotoTitle": "The story behind an old photo",   "topicOldPhotoPrompt": "Pick a person, place, or season from an old photo and write what still stays with you.",   "topicSafetyTitle": "A calmer way to meet pen pals",   "topicSafetyBody": "Money, investment, verification codes and private contact requests will be treated carefully. You can write slowly and decide slowly.",   "composeTitle": "Write a letter",   "composeStepDestinationTitle": "Who is this letter for?",   "composeStepDestinationSubtitle": "One step at a time. There is no rush.",   "composeStepFooter": "Basic letter writing is never blocked by payment.",   "composeChooseSelf": "To myself",   "composeChooseSelfSub": "A time letter for your future self",   "composeChoosePenPal": "To a pen pal",   "composeChoosePenPalSub": "A thoughtful letter, slowly getting to know each other",   "composeChooseTopic": "To a topic mailbox",   "composeChooseTopicSub": "Start from today's gentle prompt",   "composePickDestinationRequired": "Please choose who you are writing to",   "composeStepPenPalTitle": "Choose a pen pal",   "composeStepPenPalSubtitle": "Start with someone you already connected with. If you have none yet, visit the pen pal hall first.",   "composePickPenPalRequired": "Please choose a pen pal",   "composePenPalEmptyTitle": "No pen pals yet",   "composePenPalEmptySubtitle": "Visit the pen pal hall, read profiles, and send your first thoughtful letter.",   "composePenPalLoadFailed": "Could not load pen pals",   "composeGoDirectory": "Go to pen pals",   "composeStepTopicTitle": "Choose a topic",   "composeStepTopicSubtitle": "Pick one gentle prompt for today.",   "composePickTopicRequired": "Please choose a topic",   "composeStepBodyTitle": "Write the letter",   "composeBodyLabel": "Letter body",   "composeBodyFooter": "Thoughtful writing matters more than length.",   "composeBodyRequired": "Please write the letter body first",   "composeBodySubtitleSelf": "To your future self — a memory, a wish, or how today feels.",   "composeBodySubtitlePenPal": "A thoughtful letter to {name}.",   "@composeBodySubtitlePenPal": {     "placeholders": {       "name": {}     }   },   "composeBodySubtitleTimePenPal": "A time letter to {name}, delivered on the date you choose.",   "@composeBodySubtitleTimePenPal": {     "placeholders": {       "name": {}     }   },   "composeBodySubtitleTopic": "Write about the topic you selected.",   "composeStepDeliveryTitle": "Choose delivery date",   "composeStepDeliverySubtitle": "The time letter stays sealed until that date.",   "composeStepMailTitle": "Choose delivery type",   "composeStepMailSubtitle": "Standard post is free. Registered mail uses a stamp (free for VIP).",   "composeStepSealTitle": "Seal and send",   "composeStepSealSubtitle": "After sealing, the letter waits until delivery day.",   "composeStepSendTitle": "Ready to send",   "composeStepSendSubtitle": "Track status in My Mailbox after sending.",   "composeSendNow": "Send now",   "composeStepTopicSubmitTitle": "Submit to topic mailbox",   "composeStepTopicSubmitSubtitle": "After review, approved submissions become visible to others.",   "composeTopicSubmit": "Submit to topic",   "composeTopicSubmitted": "Submitted to the topic mailbox. It will appear after review." }
+{
+  "@@locale": "en",
+  "appTitle": "Senior Post",
+  "@appTitle": {
+    "description": "Application name shown in task switcher and about screens."
+  },
+  "appTagline": "A calm post office for trusted pen pals.",
+  "@appTagline": {
+    "description": "Short brand line under the app name; postal / pen-pal tone."
+  },
+  "tabPostWall": "Topics",
+  "@tabPostWall": {
+    "description": "Bottom navigation: official topic mailbox."
+  },
+  "tabDirectory": "Pen Pals",
+  "@tabDirectory": {
+    "description": "Bottom navigation: calm pen-pal hall."
+  },
+  "tabMailbox": "My Mailbox",
+  "@tabMailbox": {
+    "description": "Bottom navigation: messages and letters."
+  },
+  "tabProfile": "Me",
+  "@tabProfile": {
+    "description": "Bottom navigation: personal profile and settings"
+  },
+  "a11yTabPostWall": "Topics: official prompts and today's mailbox",
+  "a11yTabDirectory": "Pen Pals: read profiles and write slowly",
+  "a11yTabMailbox": "My Mailbox: your letters and conversations",
+  "a11yTabProfile": "Me: profile, saved letters and settings",
+  "a11yNavBar": "Main sections of the app",
+  "placeholderWelcomeTitle": "This area is being prepared",
+  "placeholderWelcomeBody": "We are finishing this screen. Your postcards, letters, and friends will appear here soon. Thank you for your patience.",
+  "placeholderHint": "Tip: use the bar below to switch between Topics, Pen Pals, My Mailbox, and Memorial.",
+  "postalMotifContentDescription": "Decorative postmark in the header",
+  "authLoginTitle": "Sign in",
+  "authEmailLabel": "Email",
+  "authPasswordLabel": "Password",
+  "authLoginSubmit": "Sign in",
+  "authWelcomeRegister": "Create account",
+  "authWelcomeLogin": "Sign in",
+  "authWelcomeHaveAccount": "Already have an account?",
+  "authWelcomeHighlightLetters": "Write and receive real letters at a calm pace",
+  "authWelcomeHighlightDirectory": "Meet pen pals worldwide in the directory",
+  "authWelcomeHighlightPace": "Designed for adults 45 and over",
+  "authWelcomeTagline": "Letters at your pace — for adults 45+",
+  "authWelcomeLegalFooter": "By signing up, you accept our {terms} and {privacy}.",
+  "authRegisterWizardEmailTitle": "What's your email?",
+  "authRegisterWizardEmailSubtitle": "We'll use it for sign-in and important notices about your post.",
+  "authRegisterWizardPasswordTitle": "Choose a password",
+  "authRegisterWizardPasswordSubtitle": "At least 8 characters. Keep it somewhere safe.",
+  "authRegisterWizardNameTitle": "What should we call you?",
+  "authRegisterWizardNameSubtitle": "This name appears on postcards, letters, and the directory.",
+  "authRegisterWizardGenderTitle": "How do you identify?",
+  "authRegisterWizardGenderSubtitle": "Helps us show you the right people in the directory.",
+  "authRegisterWizardAgeTitle": "How old are you?",
+  "authRegisterWizardAgeSubtitle": "Your birth year helps us tailor the community for 45+.",
+  "authRegisterProfileHint": "This info shows on your profile.",
+  "authRegisterAgePreview": "I'm {age}",
+  "@authRegisterAgePreview": {
+    "placeholders": {
+      "age": {}
+    }
+  },
+  "authRegisterSummaryGender": "Gender",
+  "authContinueWithGoogle": "Continue with Google",
+  "authOrContinueWithEmail": "or sign in with email",
+  "authGoogleNotConfigured": "Google sign-in is not configured yet",
+  "authGenderLabel": "Gender",
+  "authGenderMale": "Male",
+  "authGenderFemale": "Female",
+  "authRegisterAvatarOptional": "Profile photo (optional)",
+  "authRegisterAvatarSkipHint": "You can skip and add a photo later in My Post.",
+  "authRegisterWizardAvatarTitle": "Show us your smile",
+  "authRegisterWizardAvatarSubtitle": "Add a friendly photo of yourself — a smile goes a long way.",
+  "authRegisterAvatarTapToAdd": "Tap to add a photo",
+  "authRegisterAvatarAgreeFirst": "Please accept the terms below before uploading a photo",
+  "authRegisterAvatarUploading": "Uploading photo…",
+  "authRegisterAvatarUploaded": "Uploaded",
+  "authRegisterSummaryAvatarPending": "Selected, pending upload",
+  "authRegisterSummaryAvatar": "Photo",
+  "authRegisterSummaryAvatarSet": "Selected — uploads after sign-up",
+  "authRegisterSummaryAvatarSkipped": "Skipped",
+  "authSocialCompleteTitle": "Complete your profile",
+  "directoryFilterGender": "Gender",
+  "directoryFilterGenderHint": "Optional — leave all selected to show everyone.",
+  "directoryFilterGenderAll": "All",
+  "directoryFilterInterests": "Interest tags",
+  "directoryFilterInterestsHint": "Optional — pick one or more to narrow pen pals by shared hobbies.",
+  "directoryFilterInterestsEmpty": "No interest tags from the server. Try another language or ask an admin to add tags.",
+  "directoryFilterApply": "Apply filters",
+  "directoryFilterClear": "Clear",
+  "authGoRegister": "Create an account",
+  "authRegisterTitle": "Create account",
+  "authNicknameLabel": "Nickname",
+  "authBirthYearLabel": "Year of birth",
+  "authCountryCodeLabel": "Country (optional)",
+  "authAgreeTerms": "I agree to the Terms and Privacy Policy",
+  "authRegisterSubmit": "Register",
+  "authGoLogin": "Already have an account? Sign in",
+  "authFieldRequired": "Please fill in this field",
+  "authPasswordTooShort": "Password must be at least 8 characters",
+  "authAgreeRequired": "Please accept the terms to continue",
+  "authBusy": "Please wait…",
+  "authCountrySkip": "Skip",
+  "authBootstrapLoadFailed": "Could not load signup options. Check your network and try again.",
+  "authRetry": "Retry",
+  "authBirthYearRangeError": "Birth year list is empty. Check server config for minimum age.",
+  "authWelcomeBack": "Welcome back to your global post office.",
+  "authMockTip": "Sign in with your registered email to use all features.",
+  "authAgreeTpl": "I have read and agree to {terms} and {privacy}.",
+  "authTermsTitle": "Terms of Service",
+  "authPrivacyTitle": "Privacy Policy",
+  "authForgotPassword": "Forgot password",
+  "authForgotIntro": "We'll email a 6-digit code to your registered address. In local dev, check server logs if SMTP is not configured.",
+  "authForgotCodeHint": "6-digit code",
+  "authForgotResetSuccess": "Password updated. You can sign in now.",
+  "authForgotCodeInvalid": "Enter the 6-digit code",
+  "authOnboardingAgain": "View introduction",
+  "authEmailInvalid": "Please enter a valid email address",
+  "authRegisterSubtitle": "Create your postal social account in one minute.",
+  "authRegisterWizardHint": "Tap any step below to jump — your entries stay until you submit.",
+  "authRegisterTabAccount": "Account",
+  "authRegisterTabProfile": "Profile",
+  "authRegisterTabInterests": "Interests",
+  "authRegisterTabReview": "Review",
+  "authRegisterStepProgress": "Step {current} of {total}",
+  "@authRegisterStepProgress": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "authRegisterStepAccountTitle": "Sign-in details",
+  "authRegisterStepAccountSubtitle": "We’ll use your email to reach you about letters and security.",
+  "authRegisterStepProfileTitle": "About you",
+  "authRegisterStepProfileSubtitle": "This is how you appear on postcards, letters, and the directory.",
+  "authRegisterStepInterestsTitle": "Interests",
+  "authRegisterStepInterestsSubtitle": "Choose at least three tags — they power better pen-pal matches.",
+  "authRegisterStepReviewTitle": "Review & terms",
+  "authRegisterStepReviewSubtitle": "Check your details, then accept the policies to open your account.",
+  "authRegisterNext": "Continue",
+  "authRegisterBack": "Back",
+  "authRegisterSummaryEmail": "Email",
+  "authRegisterSummaryNickname": "Nickname",
+  "authRegisterSummaryBirth": "Year of birth",
+  "authRegisterSummaryCountry": "Country / region",
+  "authRegisterSummaryInterests": "Interests",
+  "authRegisterInterestsMin": "Please select at least three interests.",
+  "authRegisterInterestsServerEmpty": "No interest tags from the server. Try another language or ask an admin to add tags.",
+  "authConfirmPasswordLabel": "Confirm password",
+  "authPasswordNotMatch": "Passwords do not match",
+  "authBirthYearRequired": "Please choose your year of birth",
+  "authForgotStepEmail": "Email",
+  "authForgotStepCode": "Code",
+  "authForgotStepDone": "Done",
+  "authForgotSendCode": "Send reset email",
+  "authForgotMailSent": "Reset instructions have been sent.",
+  "authForgotCode": "Verification code",
+  "authForgotNewPassword": "New password",
+  "authForgotResetNow": "Reset password",
+  "authForgotDoneTitle": "Password reset complete",
+  "authForgotDoneBody": "You can now return to login and sign in with your new password.",
+  "authBackToLogin": "Back to login",
+  "onboardTitle1": "A global postal social network",
+  "onboardBody1": "Meet peers worldwide in a calm, respectful, non-dating environment.",
+  "onboardTitle2": "Slow letters, real companionship",
+  "onboardBody2": "Send postcards and letters at your own pace. No like-count pressure.",
+  "onboardTitle3": "Trusted and age-friendly",
+  "onboardBody3": "Designed for 45+ users with clear typography, calm colors and privacy-first defaults.",
+  "onboardSkip": "Skip",
+  "onboardNext": "Next",
+  "onboardDone": "Start now",
+  "commonRetry": "Retry",
+  "postWallUnavailable": "Post wall is temporarily unavailable",
+  "postWallEmptyTitle": "No postcards yet",
+  "postWallEmptySubtitle": "Be the first to share a postcard today.",
+  "postWallWriteAction": "Write postcard",
+  "postWallFAB": "Write",
+  "postWallFeedEveryone": "Everyone",
+  "postWallFeedConnections": "Connections",
+  "postWallEmptyConnectionsSubtitle": "No postcards from your postal friends yet. Connect through letters first.",
+  "userCardFriendPostcardsTitle": "Their postcards",
+  "userCardFriendPostcardsSubtitle": "Recent posts from your postal friend",
+  "userCardFriendPostcardsEmpty": "No public postcards yet",
+  "userCardLoadMorePostcards": "Load more",
+  "postComposeRejected": "Your postcard was not approved. Please revise and try again.",
+  "postWallPhotosLabel": "{count} photos",
+  "@postWallPhotosLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "postWallSendLetterTooltip": "Send letter",
+  "postWallCommentsCount": "Comments {count}",
+  "@postWallCommentsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "postComposeTitle": "Write postcard",
+  "postComposeSectionTitle": "Compose",
+  "postComposeSectionSubtitle": "Write one postcard for today",
+  "postComposeContentLabel": "Postcard content",
+  "postComposeContentHint": "Write your day, thoughts, or greetings…",
+  "postComposeMaxImages": "At most {max} images",
+  "@postComposeMaxImages": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "postComposeUploadNeedRealApi": "Image upload needs a server-issued URL. Check your network and try again.",
+  "postComposePickerChannelError": "Gallery channel not connected. Fully stop the app and run again; if it persists run flutter clean.",
+  "postComposeImageUploaded": "Image uploaded",
+  "postComposeNeedContent": "Please write something first.",
+  "postComposePublishedMock": "Postcard submitted.",
+  "postComposePublishedReal": "Submitted for review. It will appear after approval.",
+  "postComposeUploading": "Uploading…",
+  "postComposeAddImage": "Add image (OSS)",
+  "postComposeAddAnother": "Add another ({n}/{max})",
+  "@postComposeAddAnother": {
+    "placeholders": {
+      "n": {},
+      "max": {}
+    }
+  },
+  "postComposePublish": "Publish now",
+  "postcardImageCropTitle": "Crop image (4:3)",
+  "postcardImageCropHelp": "Pan and zoom, then confirm to crop to 4:3 and upload.",
+  "profileBlacklist": "Blocked users",
+  "settingsFeedback": "Send feedback",
+  "dialogConfirm": "OK",
+  "socialBlockUser": "Block",
+  "socialBlockConfirmTitle": "Block this user?",
+  "socialBlockConfirmMessage": "They won't be able to send you letters, and you won't see each other on the wall or directory.",
+  "socialBlockSuccess": "User blocked",
+  "socialUnblock": "Unblock",
+  "socialUnblockConfirm": "Unblock {name}?",
+  "@socialUnblockConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "socialUnblockSuccess": "Unblocked",
+  "socialBlacklistTitle": "Blocked users",
+  "socialBlacklistSubtitle": "Blocked users won't appear on the wall or directory and can't send you letters.",
+  "socialBlacklistEmpty": "No blocked users",
+  "socialBlockedAt": "Blocked at: {time}",
+  "@socialBlockedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "feedbackTitle": "Feedback",
+  "feedbackBodyLabel": "Your message (required)",
+  "feedbackBodyHint": "Describe steps, what you expected, and what happened.",
+  "feedbackSubmit": "Submit",
+  "feedbackSubmitting": "Submitting…",
+  "feedbackSuccess": "Thanks — we'll review it soon.",
+  "feedbackNeedContent": "Please enter your feedback.",
+  "userCardTitle": "Member profile",
+  "userCardSendLetter": "Send letter",
+  "userCardBack": "Back",
+  "userCardBioSection": "Introduction",
+  "userCardBioEmpty": "No introduction yet.",
+  "userCardReportUser": "Report",
+  "userCardReportSheetTitle": "Report this member",
+  "userCardErrorTitle": "Unable to load profile",
+  "userCardNotFoundTitle": "Profile not found",
+  "userCardNotFoundSubtitle": "This member may be unavailable or restricted for you.",
+  "directoryTitle": "Pen Pal Hall",
+  "directorySubtitle": "Read a profile first, then write one thoughtful letter. This is not fast matching.",
+  "directoryFilterCta": "Filter pen pals",
+  "directorySafetyTitle": "Letters before private chat",
+  "directorySafetyBody": "Profiles are only a beginning. Avoid money, investment, verification codes, and private contact requests until trust is real.",
+  "directoryListTitle": "People open to letters",
+  "directoryListSubtitle": "Choose by story and shared interests, not by speed.",
+  "directoryLetterFirstBadge": "Letter first",
+  "directoryViewProfile": "Read profile",
+  "directoryBioFallback": "This member has not written a self-introduction yet. You can read their interests before deciding whether to write.",
+  "directoryInterestEmpty": "Interests to be added",
+  "directoryMoreInterests": "+{count} more",
+  "@directoryMoreInterests": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "directoryLoadFailed": "Unable to load directory",
+  "directoryEmptyTitle": "No matching members",
+  "directoryEmptySubtitle": "Try clearing filters, or come back after new official topics bring more letters.",
+  "directoryAgeYears": "{age} years old",
+  "@directoryAgeYears": {
+    "placeholders": {
+      "age": {}
+    }
+  },
+  "authBirthYearSheetTitle": "Year of birth",
+  "authBirthYearFormat": "{year} ({age})",
+  "@authBirthYearFormat": {
+    "placeholders": {
+      "year": {},
+      "age": {}
+    }
+  },
+  "authCountryAutoLabel": "Region (from app language)",
+  "authEmailHint": "name@example.com",
+  "profileEditTitle": "Edit profile",
+  "profileNickname": "Nickname",
+  "profileCountry": "Country",
+  "profileBio": "Bio",
+  "profileSave": "Save",
+  "profileMockUpdated": "Profile updated",
+  "profileSaved": "Profile saved",
+  "profileAvatarChange": "Change profile photo",
+  "profileAvatarCropTitle": "Crop photo",
+  "profileAvatarCropDone": "Done",
+  "profileAvatarCropCancel": "Cancel",
+  "profileAvatarCropConfirm": "Confirm crop",
+  "profileAvatarCropHelp": "Drag and pinch to fit your face in the circle. Cancel returns without saving.",
+  "profileAvatarPreviewHint": "Adjust the circle, then confirm crop. On the previous screen, tap Upload photo to save, or Discard to cancel.",
+  "profileAvatarConfirmUpload": "Upload photo",
+  "profileAvatarDiscardUpload": "Discard",
+  "profileAvatarUploadSuccess": "Profile photo updated",
+  "profileAvatarUploadFailed": "Could not upload photo",
+  "profileAvatarUploading": "Uploading photo…",
+  "profileAvatarAuditPending": "Under review",
+  "profileAvatarAuditRejected": "Rejected",
+  "profileAvatarUploadPendingReview": "Photo submitted for review",
+  "profileAvatarRejectedHint": "Photo was not approved. Please upload again.",
+  "profileEditCancel": "Close",
+  "profileEditProfile": "Edit profile",
+  "profileInterestTags": "Interest tags",
+  "profileStampsLedger": "Stamps ledger",
+  "profileVipCenter": "VIP center",
+  "profileSettings": "Settings",
+  "profileAbout": "About",
+  "profileUserAgreement": "User Agreement",
+  "profilePrivacyPolicy": "Privacy Policy",
+  "profileLogout": "Log out",
+  "settingsTitle": "Settings",
+  "settingsPushNotifications": "Push notifications",
+  "settingsUnreadBadges": "Show unread badges",
+  "settingsLanguage": "Language",
+  "settingsLanguageSubtitle": "English / 中文 / System",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageChinese": "中文",
+  "settingsLanguageSystem": "Follow system",
+  "settingsAbout": "About",
+  "settingsDeleteAccount": "Delete account",
+  "legalEffectiveDate": "Effective date: 2026-05-01",
+  "legalTermsContent": "1) This app provides interest-based social communication for adults aged 45+ only.\\n\\n2) The product does not provide dating or matchmaking services.\\n\\n3) You are responsible for the legality of your content and must not publish prohibited content.\\n\\n4) We may suspend accounts for abuse, harassment, spam, fraud, or policy violations.\\n\\n5) We provide moderation and reporting mechanisms to maintain a safe communication environment.",
+  "legalPrivacyContent": "1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.",
+  "vipCenterUnlimitedRegisteredMail": "Unlimited registered mail for members (server rules apply).",
+  "vipCenterStandardPriorityHours": "Standard mail priority: ~{hours}h (configured).",
+  "@vipCenterStandardPriorityHours": {
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "vipCenterFreeSpeedUpStandard": "Free speed-up on standard mail for members (server rules apply).",
+  "vipCenterPurchaseDisabled": "VIP purchase is currently disabled.",
+  "vipCenterCheckoutNotWired": "Subscription checkout is not wired yet; benefits follow your account VIP flag.",
+  "vipCenterLoadFailed": "Failed to load VIP info: {error}",
+  "@vipCenterLoadFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "profileMyPostcards": "My postcards",
+  "myPostcardsEmptyTitle": "No postcards yet",
+  "myPostcardsEmptySubtitle": "Write one from the Post Wall tab — it will appear here with review status.",
+  "myPostcardsLoadFailedTitle": "Could not load postcards",
+  "postcardReviewPendingBadge": "Pending review",
+  "postcardReviewApprovedBadge": "Approved",
+  "postcardReviewRejectedBadge": "Rejected",
+  "postcardPostHiddenBadge": "Hidden",
+  "postcardPostRemovedBadge": "Removed",
+  "postcardReviewPendingBanner": "This postcard is pending review. Only you can see it here.",
+  "postcardReviewRejectedBanner": "This postcard was not approved for the public wall. You can still view it from your list.",
+  "letterMailboxSealedPreview": "Letter sealed until arrival",
+  "letterContentHiddenHint": "This letter is still on its way. The message is hidden until it arrives, or you can open it early with one stamp (VIP free).",
+  "letterEarlyOpenCta": "Open early (1 stamp)",
+  "letterEarlyOpenSuccess": "Letter opened — full message is now visible.",
+  "postDetailTitle": "Postcard",
+  "letterDetailTitle": "Letter",
+  "letterAcceptContact": "Accept postal contact",
+  "letterAcceptContactDone": "Postal contact accepted",
+  "letterAcceptContactSuccess": "You are now postal friends. Open instant chat below or from Connections.",
+  "chatFriendsOnlySnack": "Only postal friends in Connections can use live chat.",
+  "chatEmojiPickerTitle": "Friendly stamps",
+  "chatEmojiPickerSubtitle": "Tap an emoji to add it to your message.",
+  "chatComposerHint": "Write a message",
+  "postDetailCommentRequired": "Please enter a comment.",
+  "postDetailCommentPosted": "Comment posted.",
+  "postDetailReply": "Reply",
+  "postDetailReplyingTo": "Replying to @{name}",
+  "@postDetailReplyingTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "postDetailCancelReply": "Cancel",
+  "postDetailLike": "Like",
+  "postDetailReportComment": "Report",
+  "postDetailCommentsSection": "Comments",
+  "postDetailReplyPrefix": "Reply",
+  "postDetailWriteComment": "Write a comment",
+  "postDetailSendComment": "Send",
+  "postDetailNoCommentsTitle": "No comments yet",
+  "postDetailNoCommentsSubtitle": "Start the first kind reply.",
+  "errorInvalidContentId": "Invalid content id.",
+  "errorInvalidResponse": "Invalid response from server.",
+  "directoryFilterSectionTitle": "Filter directory",
+  "directoryFilterSectionSubtitle": "Country, age range, interests, and sort",
+  "directoryFilterCountryLabel": "Country",
+  "directoryFilterSort": "Sort",
+  "directoryFilterNewest": "Newest",
+  "directoryFilterClosestAge": "Closest age",
+  "directoryFilterSharedInterests": "Shared interests",
+  "directoryFilterAllCountries": "All countries",
+  "directoryFilterMinAge": "Min age: {age}",
+  "@directoryFilterMinAge": {
+    "placeholders": {
+      "age": {}
+    }
+  },
+  "directoryFilterMaxAge": "Max age: {age}",
+  "@directoryFilterMaxAge": {
+    "placeholders": {
+      "age": {}
+    }
+  },
+  "mailboxArchiveTitle": "Letter archive",
+  "mailboxOpenArchive": "Archive",
+  "mailboxPostOnTheWay": "A post is on the way",
+  "shopTitleStampsVip": "Stamps & membership",
+  "shopPlaceholderOrders": "Orders & history (placeholder)",
+  "shopPlaceholderBuy": "Buy (placeholder)",
+  "shopOrdersSnackbar": "Orders and payment history will open once the catalog is connected.",
+  "shopPricePlaceholder": "Price: —",
+  "shopCheckoutSnackbar": "Checkout opens when payments are connected.",
+  "shopSkuStampLine": "×{count} stamps",
+  "@shopSkuStampLine": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "interestsPickerSaved": "Interests saved.",
+  "reportReasonRequired": "Please enter a report reason.",
+  "reportSubmitted": "Report submitted.",
+  "accountDeleteTitle": "Delete account",
+  "stampsLedgerTitle": "Stamps ledger",
+  "interestsPickerTitle": "Interest tags",
+  "sendLetterRegisteredMail": "Registered Mail",
+  "sendLetterStandardPost": "Standard Post",
+  "sendLetterBodyRequired": "Please write the letter content.",
+  "sendLetterRegisteredStampShort": "Not enough stamps for registered mail.",
+  "sendLetterSentSuccess": "Letter sent.",
+  "sendLetterSentSuccessTitle": "Letter sent",
+  "sendLetterSentSuccessMessage": "Your letter is on its way. They will find it in their Post Box.",
+  "sendLetterSheetTitle": "Send letter to {name}",
+  "@sendLetterSheetTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "sendLetterRegisteredSubVip": "Free for VIP",
+  "sendLetterRegisteredSubPaid": "Consumes 1 stamp",
+  "sendLetterStandardSub": "Free, delayed delivery",
+  "sendLetterContentLabel": "Letter content",
+  "mailboxTabPostalInbox": "Postal inbox",
+  "mailboxTabConnections": "Connections",
+  "mailboxTabTimeLetter": "Time",
+  "timeLetterComposeTitle": "Time Post Office",
+  "timeLetterComposeToSelf": "Letter to future me",
+  "timeLetterComposeToFriend": "To {name}",
+  "@timeLetterComposeToFriend": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "timeLetterDeliveryDate": "Delivery date",
+  "timeLetterDaysUntil": "{days} days until delivery",
+  "@timeLetterDaysUntil": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "timeLetterBodyHint": "Write what you want your future self or friend to read…",
+  "timeLetterBodyEmpty": "Please write your letter.",
+  "timeLetterSealSlide": "Slide to seal",
+  "timeLetterSealSuccessTitle": "Sealed",
+  "timeLetterSealSuccessMessage": "Your time letter is on its way. It will arrive on the date you chose.",
+  "timeLetterTabOutbox": "Outbox",
+  "timeLetterTabInbox": "Inbox",
+  "timeLetterTabMemorial": "Memorial",
+  "timeLetterEmptyTitle": "No time letters yet",
+  "timeLetterEmptySubtitle": "Write to your future self or a postal friend.",
+  "timeLetterLoadError": "Could not load time letters",
+  "timeLetterSealedHidden": "Sealed — content hidden until delivery",
+  "timeLetterTapToOpen": "Tap to open when delivered",
+  "timeLetterCancelTitle": "Cancel this letter?",
+  "timeLetterCancelMessage": "Stamps will be refunded if you cancel within 24 hours.",
+  "timeLetterOpenTitle": "Open time letter",
+  "timeLetterOpenRitual": "Open the envelope",
+  "timeLetterReadEstimate": "About {minutes} min read",
+  "@timeLetterReadEstimate": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "timeLetterStar": "Add to memorial",
+  "timeLetterStarred": "In memorial",
+  "timeLetterSendToFriend": "Time letter",
+  "timeLetterBanner": "{inFlight} in transit · {unread} to open · {today} arrived today",
+  "@timeLetterBanner": {
+    "placeholders": {
+      "inFlight": {},
+      "unread": {},
+      "today": {}
+    }
+  },
+  "topicFriendFallback": "friend",
+  "topicTodayGreeting": "Good to see you, {name}",
+  "@topicTodayGreeting": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "topicTodayIntro": "There is no rush here. Read what has arrived, write one thoughtful letter, or pick a topic for today.",
+  "topicTodayLetters": "Letters needing attention",
+  "topicTodayLettersCount": "{count} letters",
+  "@topicTodayLettersCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "topicTodayLoading": "Loading",
+  "topicTodayTime": "Time letters",
+  "topicTodayTimeLetters": "{inFlight} waiting · {unread} ready",
+  "@topicTodayTimeLetters": {
+    "placeholders": {
+      "inFlight": {},
+      "unread": {}
+    }
+  },
+  "topicTodayTimeLettersLoading": "Checking",
+  "topicWriteLetter": "Write a letter",
+  "topicOpenMailbox": "Open mailbox",
+  "topicOfficialLetterTitle": "A note from the Post Office",
+  "topicOfficialIdentity": "Official letter · clearly marked",
+  "topicOfficialLetterBody": "Today you can write about a memory, a meal, or a place you miss. We will never pretend an official note is a real pen pal.",
+  "topicOfficialCta": "Write to future me",
+  "topicDailyTitle": "Today's topic mailboxes",
+  "topicDailySubtitle": "Choose one gentle prompt. A good letter is better than a long scroll.",
+  "topicWriteToTopic": "Write here",
+  "topicOfficialExample": "Official example",
+  "topicTodayTopic": "Today",
+  "topicHometownTitle": "Hometown memories",
+  "topicHometownPrompt": "Describe a road, a market, or a familiar doorway from the place you still remember.",
+  "topicRetirementTitle": "A quiet day after retirement",
+  "topicRetirementPrompt": "Write about one ordinary moment that made you feel comfortable recently.",
+  "topicOldPhotoTitle": "The story behind an old photo",
+  "topicOldPhotoPrompt": "Pick a person, place, or season from an old photo and write what still stays with you.",
+  "topicSafetyTitle": "A calmer way to meet pen pals",
+  "topicSafetyBody": "Money, investment, verification codes and private contact requests will be treated carefully. You can write slowly and decide slowly.",
+  "composeTitle": "Write a letter",
+  "composeStepDestinationTitle": "Who is this letter for?",
+  "composeStepDestinationSubtitle": "One step at a time. There is no rush.",
+  "composeStepFooter": "Basic letter writing is never blocked by payment.",
+  "composeChooseSelf": "To myself",
+  "composeChooseSelfSub": "A time letter for your future self",
+  "composeChoosePenPal": "To a pen pal",
+  "composeChoosePenPalSub": "A thoughtful letter, slowly getting to know each other",
+  "composeChooseTopic": "To a topic mailbox",
+  "composeChooseTopicSub": "Start from today's gentle prompt",
+  "composePickDestinationRequired": "Please choose who you are writing to",
+  "composeStepPenPalTitle": "Choose a pen pal",
+  "composeStepPenPalSubtitle": "Start with someone you already connected with. If you have none yet, visit the pen pal hall first.",
+  "composePickPenPalRequired": "Please choose a pen pal",
+  "composePenPalEmptyTitle": "No pen pals yet",
+  "composePenPalEmptySubtitle": "Visit the pen pal hall, read profiles, and send your first thoughtful letter.",
+  "composePenPalLoadFailed": "Could not load pen pals",
+  "composeGoDirectory": "Go to pen pals",
+  "composeStepTopicTitle": "Choose a topic",
+  "composeStepTopicSubtitle": "Pick one gentle prompt for today.",
+  "composePickTopicRequired": "Please choose a topic",
+  "composeStepBodyTitle": "Write the letter",
+  "composeBodyLabel": "Letter body",
+  "composeBodyFooter": "Thoughtful writing matters more than length.",
+  "composeBodyRequired": "Please write the letter body first",
+  "composeBodySubtitleSelf": "To your future self — a memory, a wish, or how today feels.",
+  "composeBodySubtitlePenPal": "A thoughtful letter to {name}.",
+  "@composeBodySubtitlePenPal": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "composeBodySubtitleTimePenPal": "A time letter to {name}, delivered on the date you choose.",
+  "@composeBodySubtitleTimePenPal": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "composeBodySubtitleTopic": "Write about the topic you selected.",
+  "composeStepDeliveryTitle": "Choose delivery date",
+  "composeStepDeliverySubtitle": "The time letter stays sealed until that date.",
+  "composeStepMailTitle": "Choose delivery type",
+  "composeStepMailSubtitle": "Standard post is free. Registered mail uses a stamp (free for VIP).",
+  "composeStepSealTitle": "Seal and send",
+  "composeStepSealSubtitle": "After sealing, the letter waits until delivery day.",
+  "composeStepSendTitle": "Ready to send",
+  "composeStepSendSubtitle": "Track status in My Mailbox after sending.",
+  "composeSendNow": "Send now",
+  "composeStepTopicSubmitTitle": "Submit to topic mailbox",
+  "composeStepTopicSubmitSubtitle": "After review, approved submissions become visible to others.",
+  "composeTopicSubmit": "Submit to topic",
+  "composeTopicSubmitted": "Submitted to the topic mailbox. It will appear after review."
+}
