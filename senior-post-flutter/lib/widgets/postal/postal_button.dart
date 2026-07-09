@@ -5,6 +5,9 @@ import '../../app/theme/postal_tokens.dart';
 /// 邮政风格按钮。所有变体均为实色或描边，禁止透明主按钮。
 enum PostalButtonVariant { primary, secondary, ghost, danger }
 
+/// 按钮内容排布：并排主操作区用 [stacked] 保留适老化字号。
+enum PostalButtonLayout { inline, stacked }
+
 class PostalButton extends StatelessWidget {
   const PostalButton({
     super.key,
@@ -16,6 +19,7 @@ class PostalButton extends StatelessWidget {
     this.expand = true,
     this.minHeight = 52,
     this.pill = false,
+    this.layout = PostalButtonLayout.inline,
   });
 
   final String label;
@@ -25,10 +29,19 @@ class PostalButton extends StatelessWidget {
   final bool busy;
   final bool expand;
   final double minHeight;
+
   /// 胶囊圆角（欢迎页等），否则使用 [PostalTokens.shapeMd]。
   final bool pill;
 
+  /// [stacked]：图标在上、文案在下，适合首页并排双主按钮。
+  final PostalButtonLayout layout;
+
   bool get _disabled => onPressed == null || busy;
+
+  bool get _stacked => layout == PostalButtonLayout.stacked;
+
+  double get _effectiveMinHeight =>
+      _stacked ? (minHeight < 58 ? 58 : minHeight) : minHeight;
 
   BorderRadius get _shape =>
       pill ? BorderRadius.circular(minHeight / 2) : PostalTokens.shapeMd;
@@ -38,6 +51,8 @@ class PostalButton extends StatelessWidget {
     final theme = Theme.of(context);
     final child = busy
         ? _busyIndicator()
+        : _stacked
+        ? _stackedLabel(theme.textTheme)
         : _labelRow(theme.textTheme.labelLarge);
 
     final shell = switch (variant) {
@@ -47,7 +62,7 @@ class PostalButton extends StatelessWidget {
       PostalButtonVariant.danger => _danger(child),
     };
 
-    final fixedHeight = SizedBox(height: minHeight, child: shell);
+    final fixedHeight = SizedBox(height: _effectiveMinHeight, child: shell);
 
     // 避免 `SizedBox(width: double.infinity)`：与部分父级（如 Row / Flexible）合并约束时会得到
     // 非法的无限宽度。有界时用 LayoutBuilder 的 maxWidth 铺满；无界或非 expand 用 IntrinsicWidth。
@@ -59,7 +74,7 @@ class PostalButton extends StatelessWidget {
       builder: (context, c) {
         final w = c.maxWidth;
         if (w.isFinite && w > 0) {
-          return SizedBox(width: w, height: minHeight, child: shell);
+          return SizedBox(width: w, height: _effectiveMinHeight, child: shell);
         }
         return IntrinsicWidth(child: fixedHeight);
       },
@@ -78,6 +93,34 @@ class PostalButton extends StatelessWidget {
     );
   }
 
+  Widget _stackedLabel(TextTheme textTheme) {
+    final color = switch (variant) {
+      PostalButtonVariant.primary => Colors.white,
+      PostalButtonVariant.danger => Colors.white,
+      _ => PostalTokens.postboxGreen,
+    };
+    final style = textTheme.labelLarge?.copyWith(
+      color: color,
+      fontSize: 15,
+      height: 1.15,
+      letterSpacing: 0.15,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 24, color: color),
+            const SizedBox(height: 4),
+          ],
+          Text(label, maxLines: 2, textAlign: TextAlign.center, style: style),
+        ],
+      ),
+    );
+  }
+
   Widget _labelRow(TextStyle? base) {
     final color = switch (variant) {
       PostalButtonVariant.primary => Colors.white,
@@ -86,14 +129,28 @@ class PostalButton extends StatelessWidget {
     };
     final style = base?.copyWith(color: color, letterSpacing: 0.4);
     if (icon == null) {
-      return Center(child: Text(label, style: style));
+      return Center(
+        child: Text(
+          label,
+          maxLines: 2,
+          textAlign: TextAlign.center,
+          style: style,
+        ),
+      );
     }
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(icon, size: 20, color: color),
         const SizedBox(width: 8),
-        Text(label, style: style),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            style: style,
+          ),
+        ),
       ],
     );
   }
@@ -132,7 +189,7 @@ class PostalButton extends StatelessWidget {
           shadowColor: Colors.transparent,
           disabledBackgroundColor: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: _shape),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: _stacked ? 10 : 20),
         ),
         child: child,
       ),
@@ -175,8 +232,9 @@ class PostalButton extends StatelessWidget {
       onPressed: _disabled ? null : onPressed,
       style: FilledButton.styleFrom(
         backgroundColor: PostalTokens.stampVermilion,
-        disabledBackgroundColor:
-            PostalTokens.stampVermilion.withValues(alpha: 0.4),
+        disabledBackgroundColor: PostalTokens.stampVermilion.withValues(
+          alpha: 0.4,
+        ),
         shape: RoundedRectangleBorder(borderRadius: _shape),
         padding: EdgeInsets.zero,
       ),

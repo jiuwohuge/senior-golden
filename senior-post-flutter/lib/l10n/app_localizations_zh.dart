@@ -832,7 +832,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsLanguage => '语言';
 
   @override
-  String get settingsLanguageSubtitle => 'English / 中文 / 跟随系统';
+  String get settingsLanguageSubtitle => '默认英语 / 中文';
 
   @override
   String get settingsLanguageEnglish => 'English';
@@ -841,7 +841,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsLanguageChinese => '中文';
 
   @override
-  String get settingsLanguageSystem => '跟随系统';
+  String get settingsLanguageSystem => '默认英语';
 
   @override
   String get settingsAbout => '关于';

@@ -1,6 +1,6 @@
 ---
 name: backend-foundation-capabilities
-description: Enforces senior-post backend base-framework conventions for Spring Boot API and service development, including MyRequestContextHolder usage, unified response (ResultResponseHandlerMethodProcessor), 85xx token error codes, PageQuery/PageData pagination, audit domain fields, Feign bridge CRUD, Redis template, AES encrypt (@EnableEncrypt / wj.security), graceful shutdown, Locale interceptor, codegen templates, and prohibitions from commons-* modules. Use when implementing, modifying, or reviewing backend code in senior-post (Controller, Service, Domain, Mapper, Feign, Redis).
+description: Enforces senior-post backend base-framework conventions for Spring Boot API and service development, including mandatory five-layer architecture (Controller → Business Service → IService/ServiceImpl → Mapper → Table), MyRequestContextHolder usage, unified response (ResultResponseHandlerMethodProcessor), 85xx token error codes, PageQuery/PageData pagination, audit domain fields, Feign bridge CRUD, Redis template, AES encrypt (@EnableEncrypt / wj.security), graceful shutdown, Locale interceptor, codegen templates, and prohibitions from commons-* modules. Use when implementing, modifying, or reviewing backend code in senior-post (Controller, Service, Domain, Mapper, Feign, Redis).
 ---
 
 # Backend Foundation Capabilities
@@ -24,11 +24,12 @@ Framework modules (能力来自 `commons-*`，详见源文档模块表):
 
 ## Mandatory Rules
 
-1. Never parse `HttpServletRequest` manually for user/client context in business code; use `MyRequestContextHolder`.
-2. Never manually wrap controller returns as `ApiResponse`; framework uses `ResultResponseHandlerMethodProcessor`.
-3. Never hardcode user identity; use `MyRequestContextHolder.userId()`（`Long`，未登录可为 `null`）或 `getContext().getTokenInfo()`。
-4. Prefer framework components over ad-hoc duplicates.
-5. Do not use `new Date()` for business timestamps; use `LocalDateTime.now()`（与源文档「禁止事项」一致）.
+1. **Layered architecture (hard requirement)** — follow §10 below; Controller must not inject or call Mapper.
+2. Never parse `HttpServletRequest` manually for user/client context in business code; use `MyRequestContextHolder`.
+3. Never manually wrap controller returns as `ApiResponse`; framework uses `ResultResponseHandlerMethodProcessor`.
+4. Never hardcode user identity; use `MyRequestContextHolder.userId()`（`Long`，未登录可为 `null`）或 `getContext().getTokenInfo()`。
+5. Prefer framework components over ad-hoc duplicates.
+6. Do not use `new Date()` for business timestamps; use `LocalDateTime.now()`（与源文档「禁止事项」一致）.
 
 ## Client request headers (typical)
 
@@ -93,16 +94,114 @@ Use `MyRequestContextHolder` per `底层框架能力.md` §2: 禁止在 Service/
 
 `CodeConfig` + `DatabaseCodeMapping.execute`；`templateList` 常用 `TemplatePackageConstant.domain`, `dtoDb`, `mapstruct`, `repository`, `client`, `resource`, `feignClient`, `feignResource` 等 — 完整模板清单见源文档 §10.1。
 
+### 10) Layered Architecture Convention（强制 · PLAN §1.1）
+
+**所有数据库访问必须走五层调用链，禁止跨层直调：**
+
+```
+Controller → Business Service → Base IService (IService / ServiceImpl) → Mapper → Table
+```
+
+#### 包结构约定（`senior-post-api/biz`）
+
+| 包 | 职责 |
+|----|------|
+| `...controller.app` / `...controller.admin` | HTTP 入参、鉴权上下文、调 BizService、返回 DTO |
+| `...service.biz` | 业务编排、领域规则、**事务边界**、组合多个 Base Service |
+| `...service.base` | `IService<T>` 接口 + `ServiceImpl<M, T>` 实现，**所有可复用 DB 方法收口于此** |
+| `...mapper` | MyBatis Mapper，**仅**被对应 `ServiceImpl` 调用 |
+| `...model.domain` | 表实体 / Domain |
+
+#### 每层禁止事项
+
+| 层级 | 允许 | 禁止 |
+|------|------|------|
+| **Controller** | 校验、调 `XxxBizService`、返回 DTO/`PageData` | ❌ 注入 `Mapper`；❌ `LambdaQueryWrapper` / SQL；❌ 业务编排 |
+| **Business Service** | 调多个 `XxxService`、抛业务异常、`@Transactional` | ❌ 注入 `Mapper`；❌ 直写 SQL |
+| **Base IService / ServiceImpl** | `getById`、条件查询、分页、批量更新等**可复用**方法 | ❌ 堆叠跨域业务流程（上提 BizService） |
+| **Mapper** | 单表映射、简单自定义 SQL | ❌ 被 Controller 或 BizService 注入 |
+
+#### 表域标准形态
+
+每个保留的 `bu_*` 表至少具备：
+
+- `XxxMapper` extends `BaseMapper<XxxDomain>`
+- `XxxService` extends `IService<XxxDomain>`
+- `XxxServiceImpl` extends `ServiceImpl<XxxMapper, XxxDomain>` implements `XxxService`
+- `XxxBizService`（按需）编排 `XxxService` 与其他 Service
+
+可复用查询（按 ID、按 userId、按状态分页等）**写在 `ServiceImpl` 公共方法**，供多个 BizService 复用，禁止在 Controller 或 BizService 内重复拼装相同 Wrapper。
+
+#### 示例
+
+```java
+// ❌ BAD — Controller 直调 Mapper
+@RestController
+public class AppLetterController {
+    @Resource
+    private LetterMapper letterMapper;
+
+    @GetMapping("/{id}")
+    public LetterDTO get(@PathVariable Long id) {
+        return map(letterMapper.selectById(id));
+    }
+}
+
+// ✅ GOOD — 五层链路
+@RestController
+public class AppLetterController {
+    @Resource
+    private LetterBizService letterBizService;
+
+    @GetMapping("/{id}")
+    public LetterDTO get(@PathVariable Long id) {
+        return letterBizService.getLetter(id);
+    }
+}
+
+@Service
+public class LetterBizService {
+    @Resource
+    private LetterService letterService;
+
+    public LetterDTO getLetter(Long id) {
+        LetterDomain domain = letterService.getByIdOrThrow(id);
+        return LetterMapstruct.INSTANCE.toDto(domain);
+    }
+}
+
+@Service
+public class LetterServiceImpl
+        extends ServiceImpl<LetterMapper, LetterDomain>
+        implements LetterService {
+
+    public LetterDomain getByIdOrThrow(Long id) {
+        LetterDomain domain = getById(id);
+        if (domain == null) {
+            throw new BusinessException("信件不存在");
+        }
+        return domain;
+    }
+}
+```
+
+#### 存量重构要求
+
+- 发现 Controller / BizService 注入 `Mapper` → **必须重构**为经 `ServiceImpl` 公共方法访问。
+- 新增接口 Code Review 以本节前述规则为硬门槛。
+
 ## Prohibitions (align with source doc §十二)
 
-1. 禁止自行解析 `HttpServletRequest` 取用户/客户端信息  
-2. 禁止手动包装 Controller 返回值为 `ApiResponse`  
-3. 禁止在 Service 中用 `new Date()` 写时间，使用 `LocalDateTime.now()`  
-4. 禁止硬编码用户 ID  
-5. 禁止重复造轮子，优先使用框架组件  
+1. **禁止 Controller / BizService 注入或调用 Mapper**（数据访问仅经 `ServiceImpl`）  
+2. 禁止自行解析 `HttpServletRequest` 取用户/客户端信息  
+3. 禁止手动包装 Controller 返回值为 `ApiResponse`  
+4. 禁止在 Service 中用 `new Date()` 写时间，使用 `LocalDateTime.now()`  
+5. 禁止硬编码用户 ID  
+6. 禁止重复造轮子，优先使用框架组件  
 
 ## Delivery Self-Check
 
+- **Layering**：Controller → BizService → ServiceImpl → Mapper；Controller/BizService 无 `Mapper` 注入  
 - Context：`MyRequestContextHolder`，无手搓 request 解析  
 - Controller：无手动 `ApiResponse` 包装  
 - Exceptions：框架异常类型 + Token **`85xx`**  

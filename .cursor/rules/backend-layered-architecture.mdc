@@ -1,0 +1,50 @@
+---
+description: Mandatory senior-post backend five-layer architecture. Forces reading backend-foundation-capabilities skill before writing or reviewing Java under senior-post-api.
+globs: senior-post-api/**/*.java
+alwaysApply: false
+---
+
+# Backend Layered Architecture (Mandatory)
+
+Before implementing, modifying, or reviewing **any** Java under `senior-post-api`, you **must** read and follow:
+
+`.cursor/skills/backend-foundation-capabilities/SKILL.md` — especially **§10 Layered Architecture** and **Mandatory Rules**.
+
+## Hard requirement
+
+All database access follows this chain only:
+
+```
+Controller → Business Service → IService / ServiceImpl → Mapper → Table
+```
+
+## Never
+
+- Inject or call `Mapper` from **Controller** or **Business Service**
+- Put `LambdaQueryWrapper`, SQL, or pagination queries in Controller
+- Duplicate the same DB query in multiple Controllers/BizServices — extract to `ServiceImpl` public methods
+
+## Always
+
+- Controller → `XxxBizService` only (HTTP + DTO return)
+- BizService → orchestration, `@Transactional`, calls `XxxService` / other base services
+- `XxxServiceImpl` extends `ServiceImpl<XxxMapper, XxxDomain>` — **all reusable DB methods live here**
+- Mapper injected **only** in matching `ServiceImpl`
+
+## Package layout (`senior-post-api/biz`)
+
+- `controller.app` / `controller.admin`
+- `service.biz`
+- `service.base` (+ `*ServiceImpl`)
+- `mapper`
+- `model.domain`
+
+## When touching existing code
+
+If Controller or BizService already injects `Mapper`, **refactor** to the five-layer chain as part of the same task — do not add new cross-layer violations.
+
+## Self-check before finishing
+
+- [ ] No `Mapper` field in any Controller or `service.biz` class
+- [ ] New queries added to `ServiceImpl`, not Controller
+- [ ] Framework rules from skill still apply (`MyRequestContextHolder`, no manual `ApiResponse`, `PageQuery`/`PageData`, audit fields)

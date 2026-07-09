@@ -150,6 +150,7 @@ class _TodayMailboxPanel extends StatelessWidget {
                 child: PostalButton(
                   label: l10n.topicWriteLetter,
                   icon: Icons.edit_note,
+                  layout: PostalButtonLayout.stacked,
                   onPressed: () => context.push('/compose'),
                 ),
               ),
@@ -159,6 +160,7 @@ class _TodayMailboxPanel extends StatelessWidget {
                   label: l10n.topicOpenMailbox,
                   icon: Icons.local_post_office_outlined,
                   variant: PostalButtonVariant.secondary,
+                  layout: PostalButtonLayout.stacked,
                   onPressed: () => context.go('/mailbox'),
                 ),
               ),
@@ -356,13 +358,24 @@ class _TopicMailboxCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              PostalStatusChip.draft(label: topic.label),
-              const Spacer(),
-              Text(
-                l10n.topicWriteToTopic,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: PostalTokens.postboxGreen,
-                  fontWeight: FontWeight.w800,
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: PostalStatusChip.draft(label: topic.label),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  l10n.topicWriteToTopic,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: PostalTokens.postboxGreen,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
               const SizedBox(width: 4),

@@ -14,9 +14,11 @@ When a user gives feature-level instructions (not explicit API-level instruction
 1. For mixed feature requests, split work into backend contract/data flow and frontend interaction flow before coding.
 2. If frontend depends on a missing/unclear backend interface, define or implement backend contract first, then continue frontend integration.
 3. Backend code under `senior-post` must follow `backend-foundation-capabilities` conventions by default.
+4. Flutter app and admin UI design work must follow `frontend-design` skill — see `.cursor/rules/frontend-design-required.mdc`.
 
 ## Backend Enforcement (senior-post)
 
+- **Layering (mandatory)**: Controller → BizService → IService/ServiceImpl → Mapper; see `.cursor/rules/backend-layered-architecture.mdc` and skill `backend-foundation-capabilities` §10.
 - Use request context from `MyRequestContextHolder`; do not parse request manually.
 - Follow unified response behavior; do not manually wrap controller returns.
 - Use framework exception conventions and align auth/token issues with `85xx`.

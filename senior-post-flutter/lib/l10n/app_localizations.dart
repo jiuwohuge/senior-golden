@@ -1691,7 +1691,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLanguageSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'English / 中文 / System'**
+  /// **'Default English / 中文'**
   String get settingsLanguageSubtitle;
 
   /// No description provided for @settingsLanguageEnglish.
@@ -1709,7 +1709,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLanguageSystem.
   ///
   /// In en, this message translates to:
-  /// **'Follow system'**
+  /// **'Default English'**
   String get settingsLanguageSystem;
 
   /// No description provided for @settingsAbout.

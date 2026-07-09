@@ -882,7 +882,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguage => 'Language';
 
   @override
-  String get settingsLanguageSubtitle => 'English / 中文 / System';
+  String get settingsLanguageSubtitle => 'Default English / 中文';
 
   @override
   String get settingsLanguageEnglish => 'English';
@@ -891,7 +891,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguageChinese => '中文';
 
   @override
-  String get settingsLanguageSystem => 'Follow system';
+  String get settingsLanguageSystem => 'Default English';
 
   @override
   String get settingsAbout => 'About';

@@ -1,0 +1,60 @@
+---
+description: Mandatory frontend-design skill for Flutter app and admin UI work. Read skill before building or restyling pages, components, or layouts.
+globs: senior-post-flutter/**/*.dart,senior-post-manage/**/*.{tsx,ts,css}
+alwaysApply: false
+---
+
+# Frontend Design Skill (Mandatory)
+
+When **designing, implementing, or restyling** UI under `senior-post-flutter` or `senior-post-manage`, you **must** read and apply:
+
+`C:\Users\Administrator\.claude\skills\frontend-design\SKILL.md`
+
+Do this **before writing code** — not after a generic scaffold.
+
+## When this rule applies
+
+- New pages, tabs, sheets, dialogs, cards, lists
+- Visual refresh, layout, typography, color, motion, empty states
+- Reusable widgets/components with user-visible styling
+- Admin dashboards, tables, forms, login, config screens
+
+## Workflow
+
+1. **Read** `frontend-design` skill (Design Thinking + Aesthetics Guidelines).
+2. **Commit** to a clear aesthetic direction for this screen (purpose, tone, differentiation).
+3. **Implement** production-grade UI — avoid generic AI slop (Inter-only, purple gradients, cookie-cutter layouts).
+4. **Refine** spacing, hierarchy, motion, and details before marking done.
+
+## Product-specific constraints (override skill defaults when they conflict)
+
+### Flutter App (`senior-post-flutter`) — 45+ 银发用户
+
+`frontend-design` drives **distinctive, polished visuals**; **PRD 适老化 §12.8 always wins** on accessibility:
+
+- 正文字号下限 ~17–18pt；关键信息更大
+- 触控区 ≥ 48×48dp；主行动大按钮
+- 图标必须配文字标签；高对比（WCAG AA）
+- 一屏一主张、低密度（尤其邮局首页 §11 / §12.2）
+
+Do **not** sacrifice readability or touch targets for decorative minimalism.
+
+### 管理后台 (`senior-post-manage`)
+
+- Apply `frontend-design` for cohesive admin/dashboard character within Ant Design 5 + React 18 stack.
+- Prefer refined, utilitarian clarity for operators; motion sparingly on data-heavy tables.
+- Keep Ant Design primitives; elevate via typography, spacing, color tokens, and layout — not fighting the component library.
+
+## Never
+
+- Ship new user-facing UI without reading the skill first
+- Default to undifferentiated templates when the task is design-facing
+- Ignore existing design system tokens where present (`postal_theme.dart`, `postal_tokens.dart`, manage `index.css`)
+
+## Self-check before finishing
+
+- [ ] Read `frontend-design` skill this session
+- [ ] Clear aesthetic direction stated or reflected in code
+- [ ] Flutter: §12.8 适老化 not violated
+- [ ] No generic AI clichés (unless explicitly requested)
+- [ ] Visual hierarchy and primary action obvious on first glance
