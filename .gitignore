@@ -6,3 +6,4 @@ logs
 # Temp files
 *.log
 out.txt
+*.tsbuildinfo
