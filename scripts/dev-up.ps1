@@ -1,11 +1,13 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Package API JAR then start/rebuild services via root docker-compose.yml.
+  Package API JAR then rebuild/restart app services via root docker-compose.yml.
 
 .DESCRIPTION
   Always runs `mvn clean package`, copies the server JAR into senior-post-api/dist,
-  then `docker compose build` + `up -d`. Prefer this over local spring-boot:run.
+  then rebuilds app images and recreates only senior-post-api / senior-post-manage.
+  Middleware (postgresql / redis / nginx) is started if missing, never force-recreated.
+  Prefer this over local spring-boot:run.
 #>
 param(
     [switch]$ApiOnly,
@@ -48,31 +50,35 @@ Write-Host "==> JAR -> dist/$($TargetJar.Name)" -ForegroundColor Cyan
 $composeArgs = @("compose")
 if ($ComposeFile) { $composeArgs += @("-f", $ComposeFile) }
 
-$services = @("senior-post-api")
+# Middleware: ensure running, do not rebuild/recreate
+$middleware = @("postgresql", "redis")
 if (-not $ApiOnly) {
-    $services += @("senior-post-manage", "postgresql", "redis")
-    # nginx optional; include if present in compose
-    $services += "nginx"
+    $middleware += "nginx"
 }
+
+Write-Host "==> docker compose up -d --no-recreate ($($middleware -join ', '))" -ForegroundColor Cyan
+& docker @($composeArgs + @("up", "-d", "--no-recreate") + $middleware)
+if ($LASTEXITCODE -ne 0) { throw "docker compose up middleware failed" }
 
 Write-Host "==> docker compose build senior-post-api" -ForegroundColor Cyan
 & docker @($composeArgs + @("build", "senior-post-api"))
 if ($LASTEXITCODE -ne 0) { throw "docker compose build senior-post-api failed" }
 
-if (-not $ApiOnly -and -not $SkipManageBuild) {
-    Write-Host "==> docker compose build senior-post-manage (optional image; runtime uses volume+vite)" -ForegroundColor Cyan
-    & docker @($composeArgs + @("build", "senior-post-manage"))
-}
+Write-Host "==> docker compose up -d --force-recreate --no-deps senior-post-api" -ForegroundColor Cyan
+& docker @($composeArgs + @("up", "-d", "--force-recreate", "--no-deps", "senior-post-api"))
+if ($LASTEXITCODE -ne 0) { throw "docker compose up senior-post-api failed" }
 
-Write-Host "==> docker compose up -d" -ForegroundColor Cyan
-if ($ApiOnly) {
-    & docker @($composeArgs + @("up", "-d", "postgresql", "redis", "senior-post-api"))
-} else {
-    & docker @($composeArgs + @("up", "-d"))
+if (-not $ApiOnly) {
+    if (-not $SkipManageBuild) {
+        Write-Host "==> docker compose build senior-post-manage (optional image; runtime uses volume+vite)" -ForegroundColor Cyan
+        & docker @($composeArgs + @("build", "senior-post-manage"))
+    }
+    Write-Host "==> docker compose up -d --force-recreate --no-deps senior-post-manage" -ForegroundColor Cyan
+    & docker @($composeArgs + @("up", "-d", "--force-recreate", "--no-deps", "senior-post-manage"))
+    if ($LASTEXITCODE -ne 0) { throw "docker compose up senior-post-manage failed" }
 }
-if ($LASTEXITCODE -ne 0) { throw "docker compose up failed" }
 
 Write-Host ""
 Write-Host "API:    http://localhost:9011/backend" -ForegroundColor Green
 Write-Host "Manage: http://localhost:8080" -ForegroundColor Green
-Write-Host "Done." -ForegroundColor Green
+Write-Host "Done. (middleware left untouched: postgresql / redis / nginx)" -ForegroundColor Green
