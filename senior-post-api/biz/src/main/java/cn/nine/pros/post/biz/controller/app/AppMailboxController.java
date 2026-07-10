@@ -3,7 +3,7 @@ package cn.nine.pros.post.biz.controller.app;
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
-import cn.nine.pros.post.biz.service.app.AppMailboxService;
+import cn.nine.pros.post.biz.service.biz.AppMailboxService;
 import cn.nine.pros.post.client.api.app.AppMailboxApi;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;

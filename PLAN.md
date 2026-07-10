@@ -127,30 +127,31 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 ### M0 — 清场 + 基座 + 适老化基线（约 1~2 周）
 
 **Flyway 重置**
-- [ ] 删除 `db/migration/V1~V28` 全部脚本
-- [ ] 编写 `V1__init.sql`：仅包含 4.0 保留表结构（用户/身份/信件/关系/黑名单/举报/配置/行为等），不含明信片/邮票/示例表
-- [ ] 开发库执行 clean + migrate，验证启动与基线表一致
+- [x] 删除 `db/migration/V1~V28` 全部脚本
+- [x] 编写 `V1__init.sql`：仅包含 4.0 保留表结构（用户/身份/信件/关系/黑名单/举报/配置/行为等），不含明信片/邮票/示例表
+- [x] 编写 `V2__seed_reference_data.sql`：国家 / 超管 / 标签 / 敏感词 / 系统配置
+- [x] 开发库执行 clean + migrate，验证启动与基线表一致（需本地 PostgreSQL）
 
 **废弃代码直接删除**
-- [ ] 后端：删除 `AppPostcardController`、`AppStampsController`、`Postcard*`、`Stamp*`、`Example`/`Food` 全链路（Controller/Service/Mapper/Domain/DTO）
-- [ ] 前端：删除 `features/post_wall/**`、`my_postcards_page`、`speed_up_sheet`、`stamps_ledger_page` 及路由引用
-- [ ] 管理后台：删除明信片/邮票相关页面与 API 调用（若有）
-- [ ] 全仓 `grep` 确认无残留 import/路由/菜单
+- [x] 后端：删除 `AppPostcardController`、`AppStampsController`、`Postcard*`、`Stamp*`、`Example`/`Food` 全链路（Controller/Service/Mapper/Domain/DTO）
+- [x] 前端：删除 `features/post_wall/**`、`my_postcards_page`、`speed_up_sheet`、`stamps_ledger_page` 及路由引用
+- [x] 管理后台：删除明信片/邮票相关页面与 API 调用（若有）
+- [x] 全仓 `grep` 确认无残留 import/路由/菜单（Flutter `lib` 已 `analyze` 通过；manage `npm run build` 通过）
 
 **后端分层基线**
-- [ ] 确立包结构约定：`controller` / `service.biz` / `service.base` / `mapper` / `model.domain`
-- [ ] 存量 Controller **禁止直调 Mapper**：逐模块重构为 Controller → BizService → XxxServiceImpl → Mapper
-- [ ] 为保留域补齐/规范 `IService` + `ServiceImpl` 公共查询方法（用户、信件、关系、登录记录等）
-- [ ] CI/自检：`biz` 模块编译通过；抽查无 Controller 注入 Mapper
+- [x] 确立包结构约定：`controller` / `service.biz` / `service.base` / `mapper` / `model.domain`
+- [x] 存量 Controller **禁止直调 Mapper**：逐模块重构为 Controller → BizService → XxxServiceImpl → Mapper
+- [x] 为保留域补齐/规范 `IService` + `ServiceImpl` 公共查询方法（用户、信件、关系、登录记录等）
+- [x] CI/自检：`biz` 模块编译通过；抽查无 Controller 注入 Mapper
 
 **前端基线**
-- [ ] `main_shell` 底部四 Tab：**邮局 / 笔友 / 信箱 / 我的**（骨架页占位）
-- [ ] 适老化基线：字号下限 / 触控≥48dp / 图文双标签 / 大按钮 → 主题与通用组件
+- [x] `main_shell` 底部四 Tab：**邮局 / 笔友 / 信箱 / 我的**（骨架页占位）
+- [x] 适老化基线：字号下限 / 触控≥48dp / 图文双标签 / 大按钮 → 主题与通用组件
 
 **验证**
-- [ ] `mvn -pl biz,client -am compile` 通过
-- [ ] `flutter analyze` 通过
-- [ ] 应用可启动；认证 + 基础用户接口可用
+- [x] `mvn -pl biz,client -am compile` 通过
+- [x] `flutter analyze lib` 通过
+- [x] 应用可启动；认证 + 基础用户接口可用
 
 ### M1 — 账户 + 用户内核（约 2~3 周）
 - [ ] 账户：注册去验证码(§2.1)；邮箱验证绑定(§2.9)；登录记录 + 异常登录(§2.5/2.6)
@@ -238,4 +239,4 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 - [x] S4. PRD v4.0 定稿
 - [x] S5. 按 PRD 重排里程碑 M0~M5
 - [x] S6. 补充工程治理：后端分层 / 废弃即删 / Flyway 重置
-- [ ] S7. M0 清场执行（Flyway 重置 + 废弃删除 + 分层基线 + 四 Tab 骨架）（待启动）
+- [x] S7. M0 清场执行（Flyway 重置、分层基线、废弃删除、四 Tab 骨架、适老化基线、邮局首页接线 **已完成**）

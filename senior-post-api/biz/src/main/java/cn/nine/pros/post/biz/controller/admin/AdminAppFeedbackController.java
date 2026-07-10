@@ -1,7 +1,7 @@
 package cn.nine.pros.post.biz.controller.admin;
 
 import cn.nine.commons.data.page.PageData;
-import cn.nine.pros.post.biz.service.app.impl.AdminAppFeedbackService;
+import cn.nine.pros.post.biz.service.biz.impl.AdminAppFeedbackService;
 import cn.nine.pros.post.client.api.admin.AdminAppFeedbackApi;
 import cn.nine.pros.post.client.model.input.admin.AppFeedbackAdminQueryInDto;
 import cn.nine.pros.post.client.model.out.AppFeedbackAdminItemVO;

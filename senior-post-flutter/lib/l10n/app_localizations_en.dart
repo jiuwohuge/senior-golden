@@ -15,25 +15,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTagline => 'A calm post office for trusted pen pals.';
 
   @override
-  String get tabPostWall => 'Topics';
+  String get tabPostWall => 'Post Office';
 
   @override
   String get tabDirectory => 'Pen Pals';
 
   @override
-  String get tabMailbox => 'My Mailbox';
+  String get tabMailbox => 'Mailbox';
 
   @override
   String get tabProfile => 'Me';
 
   @override
-  String get a11yTabPostWall => 'Topics: official prompts and today\'s mailbox';
+  String get a11yTabPostWall =>
+      'Post Office: write letters, messages and in-transit mail';
 
   @override
-  String get a11yTabDirectory => 'Pen Pals: read profiles and write slowly';
+  String get a11yTabDirectory =>
+      'Pen Pals: recommendations, search and my pen pals';
 
   @override
-  String get a11yTabMailbox => 'My Mailbox: your letters and conversations';
+  String get a11yTabMailbox => 'Mailbox: received, sent and time letters';
+
+  @override
+  String get postOfficeGreeting => 'Good morning';
+
+  @override
+  String get postOfficeTodayHint =>
+      'Write your first letter and wait for a reply';
+
+  @override
+  String get postOfficeWriteLetter => 'Write a letter';
+
+  @override
+  String postOfficeFreeQuotaHint(int count) {
+    return '$count free letters left today';
+  }
+
+  @override
+  String postOfficeMessagesSummary(int count) {
+    return 'Messages · $count';
+  }
+
+  @override
+  String postOfficeInTransitSummary(int count) {
+    return 'In transit · $count';
+  }
 
   @override
   String get a11yTabProfile => 'Me: profile, saved letters and settings';

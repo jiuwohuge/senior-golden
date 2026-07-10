@@ -8,13 +8,40 @@
   "@appTagline": {
     "description": "品牌短句，邮政笔友气质"
   },
-  "tabPostWall": "主题信箱",
+  "tabPostWall": "邮局",
   "tabDirectory": "笔友",
-  "tabMailbox": "我的信箱",
+  "tabMailbox": "信箱",
   "tabProfile": "我的",
-  "a11yTabPostWall": "主题信箱：官方主题与今日信箱",
-  "a11yTabDirectory": "笔友：先读资料，再慢慢写信",
-  "a11yTabMailbox": "我的信箱：您的信件与对话",
+  "a11yTabPostWall": "邮局：写信、消息与信件在途",
+  "a11yTabDirectory": "笔友：推荐、找笔友与我的笔友",
+  "a11yTabMailbox": "信箱：收到的信、发出的信与时光信",
+  "postOfficeGreeting": "早上好",
+  "postOfficeTodayHint": "写下第一封信，等待有缘人回信",
+  "postOfficeWriteLetter": "写信",
+  "postOfficeFreeQuotaHint": "今日还可免费寄 {count} 封",
+  "@postOfficeFreeQuotaHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "postOfficeMessagesSummary": "消息 {count} 条",
+  "@postOfficeMessagesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "postOfficeInTransitSummary": "信件在途 {count} 封",
+  "@postOfficeInTransitSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "a11yTabProfile": "我的：个人资料、收藏信件与设置",
   "a11yNavBar": "应用主要分区导航",
   "placeholderWelcomeTitle": "此区域正在准备中",

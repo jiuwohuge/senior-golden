@@ -67,7 +67,7 @@ abstract final class PostalTheme {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
-            fontSize: 13,
+            fontSize: PostalTokens.minBodyFontSize,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
             letterSpacing: 0.2,
             color: selected
@@ -90,9 +90,18 @@ abstract final class PostalTheme {
         thickness: 1,
       ),
       inputDecorationTheme: _inputDecorationTheme(textTheme),
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: const WidgetStatePropertyAll(
+            Size(PostalTokens.minTouchTarget, PostalTokens.minTouchTarget),
+          ),
+        ),
+      ),
       filledButtonTheme: FilledButtonThemeData(
         style: ButtonStyle(
-          minimumSize: const WidgetStatePropertyAll(Size.fromHeight(52)),
+          minimumSize: const WidgetStatePropertyAll(
+            Size.fromHeight(PostalTokens.minTouchTarget),
+          ),
           shape: const WidgetStatePropertyAll(
             RoundedRectangleBorder(borderRadius: PostalTokens.shapeMd),
           ),
@@ -115,7 +124,9 @@ abstract final class PostalTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
-          minimumSize: const WidgetStatePropertyAll(Size.fromHeight(52)),
+          minimumSize: const WidgetStatePropertyAll(
+            Size.fromHeight(PostalTokens.minTouchTarget),
+          ),
           shape: const WidgetStatePropertyAll(
             RoundedRectangleBorder(borderRadius: PostalTokens.shapeMd),
           ),
@@ -151,6 +162,9 @@ abstract final class PostalTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: ButtonStyle(
+          minimumSize: const WidgetStatePropertyAll(
+            Size(PostalTokens.minTouchTarget, PostalTokens.minTouchTarget),
+          ),
           padding: const WidgetStatePropertyAll(
             EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           ),
@@ -380,7 +394,7 @@ abstract final class PostalTheme {
         weight: FontWeight.w500,
       ),
       bodyMedium: make(
-        size: 16,
+        size: PostalTokens.minBodyFontSize,
         height: 1.5,
         weight: FontWeight.w500,
       ),
@@ -398,7 +412,7 @@ abstract final class PostalTheme {
         letter: 0.3,
       ),
       labelMedium: make(
-        size: 14,
+        size: PostalTokens.minBodyFontSize,
         height: 1.25,
         weight: FontWeight.w600,
         color: PostalTokens.inkSecondary,

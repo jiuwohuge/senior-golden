@@ -4,8 +4,6 @@ import cn.nine.pros.post.biz.config.TimeLetterProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.TimeLetterMapper;
 import cn.nine.pros.post.biz.model.domain.TimeLetterDomain;
-import cn.nine.pros.post.biz.service.base.StampAccountService;
-import cn.nine.pros.post.biz.service.base.StampTransactionService;
 import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.common.enums.TimeLetterStatus;
@@ -23,8 +21,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,10 +34,6 @@ class TimeLetterDeliveryServiceTest {
     private TimeLetterService timeLetterService;
     @Mock
     private UserService userService;
-    @Mock
-    private StampAccountService stampAccountService;
-    @Mock
-    private StampTransactionService stampTransactionService;
     @Mock
     private TimeLetterProperties properties;
     @Mock
@@ -76,11 +68,11 @@ class TimeLetterDeliveryServiceTest {
         int n = service.deliverDueLetters(50);
 
         assertThat(n).isEqualTo(1);
-        verify(stampAccountService, never()).addBalance(any(Long.class), any(Integer.class), any(), any(Long.class));
+        verify(timeLetterService, times(1)).update(any());
     }
 
     @Test
-    void deliverDue_refundsWhenRecipientUnavailable() {
+    void deliverDue_marksFailedWhenRecipientUnavailable() {
         TimeLetterDomain row = new TimeLetterDomain();
         row.setId(2L);
         row.setSenderId(10L);
@@ -93,7 +85,6 @@ class TimeLetterDeliveryServiceTest {
         UserDTO sender = new UserDTO();
         sender.setId(10L);
         sender.setStatus(1);
-        sender.setStampsBalance(5);
 
         when(timeLetterMapper.selectList(ArgumentMatchers.any())).thenReturn(List.of(row));
         when(userService.findById(99L)).thenReturn(null);
@@ -104,6 +95,6 @@ class TimeLetterDeliveryServiceTest {
         int n = service.deliverDueLetters(50);
 
         assertThat(n).isZero();
-        verify(stampAccountService, times(1)).addBalance(eq(10L), eq(1), any(), any(Long.class));
+        verify(timeLetterService, times(1)).update(any());
     }
 }

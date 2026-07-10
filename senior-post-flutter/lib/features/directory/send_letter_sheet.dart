@@ -99,18 +99,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
       );
       return;
     }
-    final session = ref.read(appSessionProvider);
     if (!mounted) return;
-    if (_type == LetterType.registered &&
-        !session.isVip &&
-        session.stampBalance < 1) {
-      PostalSnack.show(
-        sheetContext,
-        l10n.sendLetterRegisteredStampShort,
-        tone: PostalSnackTone.warning,
-      );
-      return;
-    }
     setState(() => _busy = true);
     try {
       await ref
@@ -271,12 +260,6 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                                         ),
                                       ),
                                     ],
-                                  ),
-                                  const SizedBox(height: 6),
-                                  PostalStampBadge(
-                                    balance: session.stampBalance,
-                                    cap: session.dailyStampCap,
-                                    isVip: session.isVip,
                                   ),
                                   const SizedBox(height: 12),
                                   PostalTextField(

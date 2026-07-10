@@ -44,8 +44,17 @@ class SeniorPostApp extends ConsumerWidget {
       supportedLocales: AppLocalizations.supportedLocales,
       locale: localeOverride ?? const Locale('en'),
       builder: (context, child) {
-        return Stack(
-          children: [if (child != null) child, const ReleaseNoteLayer()],
+        final media = MediaQuery.of(context);
+        return MediaQuery(
+          data: media.copyWith(
+            textScaler: media.textScaler.clamp(
+              minScaleFactor: 1.0,
+              maxScaleFactor: 2.0,
+            ),
+          ),
+          child: Stack(
+            children: [if (child != null) child, const ReleaseNoteLayer()],
+          ),
         );
       },
     );

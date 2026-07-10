@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/models/domain_models.dart';
-import '../../core/session/app_session.dart';
 import '../auth/auth_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'im_unread_providers.dart';
@@ -109,7 +108,6 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final session = ref.watch(appSessionProvider);
     return SafeArea(
       top: false,
       child: Column(
@@ -119,11 +117,6 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
             child: Row(
               children: [
-                PostalStampBadge(
-                  balance: session.stampBalance,
-                  cap: session.dailyStampCap,
-                  isVip: session.isVip,
-                ),
                 const Spacer(),
                 TextButton(
                   onPressed: () => context.push('/mailbox/archive'),

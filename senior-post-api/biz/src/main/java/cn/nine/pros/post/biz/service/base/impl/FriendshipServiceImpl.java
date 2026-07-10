@@ -3,10 +3,10 @@ package cn.nine.pros.post.biz.service.base.impl;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.mapper.FriendshipMapper;
-import cn.nine.pros.post.biz.mapper.LetterMapper;
 import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
+import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.client.common.enums.LetterBizStatus;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.List;
 public class FriendshipServiceImpl implements FriendshipService {
 
     private final FriendshipMapper friendshipMapper;
-    private final LetterMapper letterMapper;
+    private final LetterService letterService;
     private final cn.nine.pros.post.biz.integration.tencent.TencentImFriendshipNotifier tencentImFriendshipNotifier;
     private final AppMessages appMessages;
 
@@ -53,7 +53,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public FriendshipDomain ensureActiveFriendship(Long actorUserId, Long letterId) {
-        LetterDomain letter = letterMapper.selectById(letterId);
+        LetterDomain letter = letterService.getById(letterId);
         if (letter == null || Boolean.TRUE.equals(letter.isDelFlag())) {
             throw new BadRequestException(appMessages.get("app.error.friendship.letterNotFound"));
         }

@@ -14,6 +14,6 @@ export 'postal_painters.dart';
 export 'postal_section_title.dart';
 export 'postal_skeleton.dart';
 export 'postal_snack.dart';
-export 'postal_stamp_badge.dart';
+export 'postal_min_touch.dart';
 export 'postal_status_chip.dart';
 export 'postal_text_field.dart';

@@ -17,7 +17,6 @@ import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import 'mailbox_providers.dart';
 import 'mailbox_remote.dart';
-import 'speed_up_sheet.dart';
 
 /// Dio 拦截器将业务失败封装为 [DioException.error]；统一取出可读文案。
 String? _postalApiUserMessage(Object error) {
@@ -279,26 +278,6 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                   footer: () {
                     final foot = <Widget>[];
                     if (isDelivering &&
-                        letter.outgoing &&
-                        letter.type == LetterType.standard) {
-                      foot.add(
-                        PostalButton(
-                          label: 'Speed Up',
-                          onPressed: () async {
-                            await showModalBottomSheet<void>(
-                              context: context,
-                              builder: (_) => SpeedUpSheet(letterId: letter.id),
-                            );
-                            ref.invalidate(
-                              letterDetailProvider(widget.letterId),
-                            );
-                            ref.invalidate(mailboxLettersProvider);
-                            ref.invalidate(postalInboxLettersProvider);
-                          },
-                        ),
-                      );
-                    }
-                    if (isDelivering &&
                         !letter.outgoing &&
                         letter.type == LetterType.standard &&
                         letter.contentHidden) {
@@ -474,7 +453,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                   title: 'Registered',
                                   subtitle: session.isVip
                                       ? 'VIP · instant delivery'
-                                      : '1 stamp · instant delivery',
+                                      : 'Instant delivery',
                                   selected: _replyType == LetterType.registered,
                                   onTap: () => setState(
                                     () => _replyType = LetterType.registered,
@@ -494,20 +473,6 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                   height: 1.4,
                                 ),
                           ),
-                          if (_replyType == LetterType.registered &&
-                              !session.isVip) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              'Your stamps: ${session.stampBalance}',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: session.stampBalance < 1
-                                        ? PostalTokens.stampVermilion
-                                        : PostalTokens.inkSecondary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                          ],
                         ],
                       );
                     },
@@ -532,17 +497,6 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                               PostalSnack.show(
                                 context,
                                 'Please write your reply.',
-                                tone: PostalSnackTone.warning,
-                              );
-                              return;
-                            }
-                            final session = ref.read(appSessionProvider);
-                            if (_replyType == LetterType.registered &&
-                                !session.isVip &&
-                                session.stampBalance < 1) {
-                              PostalSnack.show(
-                                context,
-                                'Not enough stamps for registered mail.',
                                 tone: PostalSnackTone.warning,
                               );
                               return;

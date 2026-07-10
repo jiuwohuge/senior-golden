@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class TencentImProperties {
 
     /**
-     * 控制台 SDKAppID；为 0 时 {@link cn.nine.pros.post.biz.service.app.AppImService} 拒绝签发。
+     * 控制台 SDKAppID；为 0 时 {@link cn.nine.pros.post.biz.service.biz.AppImService} 拒绝签发。
      */
     private long sdkAppId;
 

@@ -46,7 +46,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> _afterAuth(AuthSignInResult _) async {
     if (!mounted) return;
-    context.go(MainShellRoute.pathPostWall);
+    context.go(MainShellRoute.pathPostOffice);
   }
 
   Future<void> _submit() async {

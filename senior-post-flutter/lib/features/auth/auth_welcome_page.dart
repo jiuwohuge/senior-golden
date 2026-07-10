@@ -40,7 +40,7 @@ class _AuthWelcomePageState extends ConsumerState<AuthWelcomePage> {
       context.go(LoginRoutes.socialComplete);
       return;
     }
-    context.go(MainShellRoute.pathPostWall);
+    context.go(MainShellRoute.pathPostOffice);
   }
 
   Future<void> _signInWithGoogle() async {

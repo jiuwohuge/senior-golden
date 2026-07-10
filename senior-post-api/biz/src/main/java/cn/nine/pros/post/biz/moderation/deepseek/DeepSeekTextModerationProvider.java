@@ -6,15 +6,12 @@ import cn.nine.pros.post.biz.moderation.TextModerationProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 @Slf4j
@@ -41,7 +38,7 @@ public class DeepSeekTextModerationProvider implements TextModerationProvider {
     }
 
     @Override
-    public TextModerationResult auditPostcardText(String content) {
+    public TextModerationResult auditText(String content) {
         if (!StringUtils.hasText(content)) {
             return TextModerationResult.of(ModerationVerdict.PASS, "none", "", "");
         }
@@ -70,7 +67,7 @@ public class DeepSeekTextModerationProvider implements TextModerationProvider {
                     objectMapper.readValue(assistant, DeepSeekModerationResultDto.class);
             return mapVerdict(parsed);
         } catch (Exception e) {
-            log.warn("DeepSeek postcard moderation failed: {}", e.getMessage());
+            log.warn("DeepSeek text moderation failed: {}", e.getMessage());
             return TextModerationResult.of(ModerationVerdict.ERROR, "", "", e.getMessage());
         }
     }
@@ -102,12 +99,10 @@ public class DeepSeekTextModerationProvider implements TextModerationProvider {
         return req;
     }
 
+    private static final String DEFAULT_SYSTEM_PROMPT =
+            "Respond JSON only: {\"pass\":boolean,\"severity\":\"none|low|high\",\"categories\":[],\"reason\":\"\"}";
+
     private static String loadSystemPrompt() {
-        try {
-            ClassPathResource res = new ClassPathResource("moderation/postcard-system-prompt.txt");
-            return StreamUtils.copyToString(res.getInputStream(), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            return "Respond JSON only: {\"pass\":boolean,\"severity\":\"none|low|high\",\"categories\":[],\"reason\":\"\"}";
-        }
+        return DEFAULT_SYSTEM_PROMPT;
     }
 }

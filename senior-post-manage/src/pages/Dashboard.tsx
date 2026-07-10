@@ -1,11 +1,10 @@
-import { CrownOutlined, FileImageOutlined, MailOutlined, TeamOutlined, WarningOutlined } from '@ant-design/icons'
+import { CrownOutlined, MailOutlined, TeamOutlined, WarningOutlined } from '@ant-design/icons'
 import { Card, Col, Row, Spin, Statistic, message } from 'antd'
 import { useEffect, useState } from 'react'
 import { api } from '../services/api'
 
 const STATS = [
   { title: '用户数', key: 'users', color: '#1677ff', bg: '#e6f4ff', icon: <TeamOutlined /> },
-  { title: '明信片数', key: 'postcards', color: '#52c41a', bg: '#f6ffed', icon: <FileImageOutlined /> },
   { title: '信件数', key: 'letters', color: '#722ed1', bg: '#f9f0ff', icon: <MailOutlined /> },
   { title: '待处理举报', key: 'reportsPending', color: '#fa8c16', bg: '#fff7e6', icon: <WarningOutlined /> },
   { title: 'VIP 订阅', key: 'vipSubscriptions', color: '#eb2f96', bg: '#fff0f6', icon: <CrownOutlined /> },

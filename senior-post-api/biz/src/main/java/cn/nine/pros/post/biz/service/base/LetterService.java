@@ -6,6 +6,7 @@ import cn.nine.pros.post.client.model.db.LetterDTO;
 
 import java.util.List;
 
+
 /**
  * 信件表（挂号信/平邮） Service
  *
@@ -18,5 +19,7 @@ public interface LetterService extends IService<LetterDomain> {
     LetterDTO findById(Long id);
 
     void delByIds(List<Long> ids);
+
+    long countPeerLetterReferencingContent(long viewerUserId, long ownerUserId, List<String> variants);
 
 }

@@ -4,7 +4,7 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.biz.i18n.AppMessages;
-import cn.nine.pros.post.biz.service.app.AppTimeLetterService;
+import cn.nine.pros.post.biz.service.biz.AppTimeLetterService;
 import cn.nine.pros.post.client.api.app.AppTimeLetterApi;
 import cn.nine.pros.post.client.model.input.app.TimeLetterDraftSaveInDto;
 import cn.nine.pros.post.client.model.input.app.TimeLetterPageInDto;

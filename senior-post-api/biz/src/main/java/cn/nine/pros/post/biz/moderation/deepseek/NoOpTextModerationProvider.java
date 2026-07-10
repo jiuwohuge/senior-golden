@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class NoOpTextModerationProvider implements TextModerationProvider {
 
     @Override
-    public TextModerationResult auditPostcardText(String content) {
+    public TextModerationResult auditText(String content) {
         return TextModerationResult.of(ModerationVerdict.SKIPPED, "", "", "deepseek disabled");
     }
 }

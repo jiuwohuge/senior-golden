@@ -3,7 +3,7 @@ package cn.nine.pros.post.biz.controller.admin;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.model.domain.TimeLetterDomain;
-import cn.nine.pros.post.biz.service.admin.AdminTimeLetterService;
+import cn.nine.pros.post.biz.service.biz.admin.AdminTimeLetterService;
 import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.client.api.admin.AdminTimeLetterApi;
 import cn.nine.pros.post.client.model.db.TimeLetterDTO;

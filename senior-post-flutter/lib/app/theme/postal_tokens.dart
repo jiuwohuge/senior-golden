@@ -80,6 +80,16 @@ abstract final class PostalTokens {
   static const double s48 = 48;
 
   // ────────────────────────────────────────────────────────────────
+  // Accessibility baseline (M0)
+  // ────────────────────────────────────────────────────────────────
+
+  /// 最小可点击区域（Material / WCAG 建议 ≥48dp）
+  static const double minTouchTarget = 48.0;
+
+  /// 正文/标签最小字号（适老化基线 ≥17pt）
+  static const double minBodyFontSize = 17.0;
+
+  // ────────────────────────────────────────────────────────────────
   // Radius scale
   // ────────────────────────────────────────────────────────────────
 

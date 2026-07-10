@@ -5,21 +5,21 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import 'package:senior_post_flutter/widgets/postal_decorations.dart';
 
 import '../../app/theme/postal_tokens.dart';
+import '../post_office/post_office_home_page.dart';
 import '../directory/directory_page.dart';
 import '../mailbox/im_unread_providers.dart';
 import '../mailbox/mailbox_page.dart';
 import '../profile/profile_page.dart';
-import '../topic_mailbox/topic_mailbox_page.dart';
 
-/// Main bottom tabs: Topics / Pen Pals / My Mailbox / Memorial.
+/// Main bottom tabs: Post Office / Pen Pals / Mailbox / Me (4.0).
 abstract final class MainShellRoute {
-  static const pathPostWall = '/';
-  static const pathDirectory = '/directory';
+  static const pathPostOffice = '/';
+  static const pathPenPals = '/penpals';
   static const pathMailbox = '/mailbox';
   static const pathProfile = '/profile';
 }
 
-/// Main shell for the 3.0 slow-social post office experience.
+/// Main shell for the 4.0 slow-mail post office experience.
 class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key, this.initialIndex = 0});
 
@@ -42,8 +42,8 @@ class _MainShellState extends ConsumerState<MainShell> {
     setState(() => _index = index);
     if (!mounted) return;
     final loc = switch (index) {
-      0 => MainShellRoute.pathPostWall,
-      1 => MainShellRoute.pathDirectory,
+      0 => MainShellRoute.pathPostOffice,
+      1 => MainShellRoute.pathPenPals,
       2 => MainShellRoute.pathMailbox,
       _ => MainShellRoute.pathProfile,
     };
@@ -92,8 +92,8 @@ class _MainShellState extends ConsumerState<MainShell> {
       body: IndexedStack(
         index: _index,
         children: const [
-          TopicMailboxPage(key: ValueKey('topic-mailbox')),
-          DirectoryPage(key: ValueKey('directory')),
+          PostOfficeHomePage(key: ValueKey('post-office')),
+          DirectoryPage(key: ValueKey('penpals')),
           MailboxPage(key: ValueKey('mailbox')),
           ProfilePage(key: ValueKey('profile')),
         ],

@@ -15,25 +15,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appTagline => '可信笔友，慢慢来信。';
 
   @override
-  String get tabPostWall => '主题信箱';
+  String get tabPostWall => '邮局';
 
   @override
   String get tabDirectory => '笔友';
 
   @override
-  String get tabMailbox => '我的信箱';
+  String get tabMailbox => '信箱';
 
   @override
   String get tabProfile => '我的';
 
   @override
-  String get a11yTabPostWall => '主题信箱：官方主题与今日信箱';
+  String get a11yTabPostWall => '邮局：写信、消息与信件在途';
 
   @override
-  String get a11yTabDirectory => '笔友：先读资料，再慢慢写信';
+  String get a11yTabDirectory => '笔友：推荐、找笔友与我的笔友';
 
   @override
-  String get a11yTabMailbox => '我的信箱：您的信件与对话';
+  String get a11yTabMailbox => '信箱：收到的信、发出的信与时光信';
+
+  @override
+  String get postOfficeGreeting => '早上好';
+
+  @override
+  String get postOfficeTodayHint => '写下第一封信，等待有缘人回信';
+
+  @override
+  String get postOfficeWriteLetter => '写信';
+
+  @override
+  String postOfficeFreeQuotaHint(int count) {
+    return '今日还可免费寄 $count 封';
+  }
+
+  @override
+  String postOfficeMessagesSummary(int count) {
+    return '消息 $count 条';
+  }
+
+  @override
+  String postOfficeInTransitSummary(int count) {
+    return '信件在途 $count 封';
+  }
 
   @override
   String get a11yTabProfile => '我的：个人资料、收藏信件与设置';

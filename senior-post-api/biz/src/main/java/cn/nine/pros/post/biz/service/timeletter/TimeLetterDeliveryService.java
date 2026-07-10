@@ -2,14 +2,10 @@ package cn.nine.pros.post.biz.service.timeletter;
 
 import cn.nine.pros.post.biz.config.TimeLetterProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
-import cn.nine.pros.post.biz.mapper.TimeLetterMapper;
 import cn.nine.pros.post.biz.model.domain.TimeLetterDomain;
-import cn.nine.pros.post.biz.service.base.StampAccountService;
-import cn.nine.pros.post.biz.service.base.StampTransactionService;
 import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.common.enums.TimeLetterStatus;
-import cn.nine.pros.post.client.model.db.StampTransactionDTO;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -32,17 +28,14 @@ public class TimeLetterDeliveryService {
     private static final long SYSTEM_UPDATED_BY = 0L;
     private static final int USER_STATUS_NORMAL = 1;
 
-    private final TimeLetterMapper timeLetterMapper;
-    private final TimeLetterService timeLetterService;
+        private final TimeLetterService timeLetterService;
     private final UserService userService;
-    private final StampAccountService stampAccountService;
-    private final StampTransactionService stampTransactionService;
     private final TimeLetterProperties properties;
     private final AppMessages appMessages;
 
     @Transactional(rollbackFor = Exception.class)
     public int deliverDueLetters(int maxBatch) {
-        List<TimeLetterDomain> pending = timeLetterMapper.selectList(new LambdaQueryWrapper<TimeLetterDomain>()
+        List<TimeLetterDomain> pending = timeLetterService.list(new LambdaQueryWrapper<TimeLetterDomain>()
                 .eq(TimeLetterDomain::isDelFlag, false)
                 .eq(TimeLetterDomain::getStatus, TimeLetterStatus.PENDING.getCode())
                 .orderByAsc(TimeLetterDomain::getDeliveryDate)
@@ -60,14 +53,12 @@ public class TimeLetterDeliveryService {
             Long recipientId = row.getRecipientId() != null ? row.getRecipientId() : row.getSenderId();
             if (!canUserReceive(recipientId)) {
                 if (markFailed(row, appMessages.get("app.timeLetter.fail.recipientUnavailable"))) {
-                    refundSender(row);
                     failed++;
                 }
                 continue;
             }
             if (!canUserReceive(row.getSenderId())) {
                 if (markFailed(row, appMessages.get("app.timeLetter.fail.senderUnavailable"))) {
-                    refundSender(row);
                     failed++;
                 }
                 continue;
@@ -126,26 +117,6 @@ public class TimeLetterDeliveryService {
                 .set(TimeLetterDomain::getUpdatedBy, SYSTEM_UPDATED_BY));
     }
 
-    private void refundSender(TimeLetterDomain row) {
-        int cost = row.getStampCost() != null ? row.getStampCost() : 0;
-        if (cost <= 0 || row.getSenderId() == null) {
-            return;
-        }
-        LocalDateTime now = LocalDateTime.now();
-        long senderId = row.getSenderId();
-        stampAccountService.addBalance(senderId, cost, now, SYSTEM_UPDATED_BY);
-        UserDTO sender = userService.findById(senderId);
-        int balanceAfter = sender != null && sender.getStampsBalance() != null
-                ? sender.getStampsBalance() + cost
-                : cost;
-        StampTransactionDTO tx = new StampTransactionDTO();
-        tx.setUserId(senderId);
-        tx.setChangeAmount(cost);
-        tx.setBalanceAfter(balanceAfter);
-        tx.setReason(appMessages.get("app.stamp.reason.timeLetterRefund"));
-        tx.setRefId(row.getId());
-        stampTransactionService.upsert(tx);
-    }
 
     private static int userStatus(Object status) {
         if (status instanceof Number n) {

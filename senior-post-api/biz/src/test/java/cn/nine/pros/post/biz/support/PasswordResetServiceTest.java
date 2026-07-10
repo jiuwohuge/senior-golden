@@ -1,13 +1,13 @@
-package cn.nine.pros.post.biz.support;
+﻿package cn.nine.pros.post.biz.support;
 
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.SeniorPostAuthProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
-import cn.nine.pros.post.biz.mapper.PasswordResetTokenMapper;
+import cn.nine.pros.post.biz.service.base.PasswordResetTokenService;
 import cn.nine.pros.post.biz.model.domain.PasswordResetTokenDomain;
-import cn.nine.pros.post.biz.service.app.PasswordResetService;
-import cn.nine.pros.post.biz.service.app.mail.MailOutboxService;
-import cn.nine.pros.post.biz.service.app.support.PasswordResetHasher;
+import cn.nine.pros.post.biz.service.biz.PasswordResetService;
+import cn.nine.pros.post.biz.service.base.MailOutboxService;
+import cn.nine.pros.post.biz.service.biz.support.PasswordResetHasher;
 import cn.nine.pros.post.biz.service.base.UserIdentityService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
@@ -38,7 +38,7 @@ class PasswordResetServiceTest {
     @Mock
     private UserIdentityService userIdentityService;
     @Mock
-    private PasswordResetTokenMapper passwordResetTokenMapper;
+    private PasswordResetTokenService passwordResetTokenService;
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
@@ -59,7 +59,7 @@ class PasswordResetServiceTest {
         passwordResetService = new PasswordResetService(
                 userService,
                 userIdentityService,
-                passwordResetTokenMapper,
+                passwordResetTokenService,
                 passwordEncoder,
                 mailOutboxService,
                 authProperties,
@@ -70,7 +70,7 @@ class PasswordResetServiceTest {
     void requestForgotPassword_unknownEmail_doesNotInsert() {
         when(userService.findByEmail("x@y.com")).thenReturn(null);
         passwordResetService.requestForgotPassword("x@y.com");
-        verify(passwordResetTokenMapper, never()).insert(any(PasswordResetTokenDomain.class));
+        verify(passwordResetTokenService, never()).insert(any(PasswordResetTokenDomain.class));
         verify(mailOutboxService, never()).enqueuePasswordReset(anyString(), anyString(), anyString(), anyInt());
     }
 
@@ -80,12 +80,12 @@ class PasswordResetServiceTest {
         u.setId(1L);
         u.setStatus(1);
         when(userService.findByEmail("a@b.com")).thenReturn(u);
-        when(passwordResetTokenMapper.selectCount(any())).thenReturn(0L);
-        when(passwordResetTokenMapper.selectOne(any())).thenReturn(null);
+        when(passwordResetTokenService.selectCount(any())).thenReturn(0L);
+        when(passwordResetTokenService.selectOne(any())).thenReturn(null);
 
         passwordResetService.requestForgotPassword("a@b.com");
 
-        verify(passwordResetTokenMapper).insert(any(PasswordResetTokenDomain.class));
+        verify(passwordResetTokenService).insert(any(PasswordResetTokenDomain.class));
         verify(mailOutboxService).enqueuePasswordReset(eq("a@b.com"), anyString(), anyString(), eq(15));
     }
 
@@ -98,7 +98,7 @@ class PasswordResetServiceTest {
         PasswordResetTokenDomain tok = new PasswordResetTokenDomain();
         tok.setCodeHash(PasswordResetHasher.hexHash("test-pepper", 9L, "111111"));
         tok.setExpiresAt(LocalDateTime.now().plusMinutes(10));
-        when(passwordResetTokenMapper.selectList(any())).thenReturn(List.of(tok));
+        when(passwordResetTokenService.selectList(any())).thenReturn(List.of(tok));
         when(appMessages.get("app.error.code.invalid")).thenReturn("Invalid or expired verification code.");
 
         assertThatThrownBy(() -> passwordResetService.completeReset("u@example.com", "222222", "newpass123"))

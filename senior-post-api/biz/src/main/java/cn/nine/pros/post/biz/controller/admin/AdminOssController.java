@@ -3,7 +3,7 @@ package cn.nine.pros.post.biz.controller.admin;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
-import cn.nine.pros.post.biz.service.app.AppOssService;
+import cn.nine.pros.post.biz.service.biz.AppOssService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.api.admin.AdminOssApi;
 import cn.nine.pros.post.client.model.input.app.AppOssGetSignInDto;

@@ -4,42 +4,21 @@ import '../bootstrap/app_bootstrap.dart';
 import '../i18n/app_locale_provider.dart';
 import '../models/domain_models.dart';
 
-/// 登录后会话：当前用户展示态 + 邮票余额（来自 `/api/auth/me`）。
+/// 登录后会话：当前用户展示态（来自 `/api/auth/me`）。
 class AppSessionState {
-  AppSessionState({
-    required this.user,
-    required this.stampBalance,
-    required this.dailyStampCap,
-  });
+  AppSessionState({required this.user});
 
   final AppUser user;
-  final int stampBalance;
-  final int dailyStampCap;
 
   bool get isVip => user.isVip;
 
-  AppSessionState copyWith({
-    AppUser? user,
-    int? stampBalance,
-    int? dailyStampCap,
-  }) {
-    return AppSessionState(
-      user: user ?? this.user,
-      stampBalance: stampBalance ?? this.stampBalance,
-      dailyStampCap: dailyStampCap ?? this.dailyStampCap,
-    );
+  AppSessionState copyWith({AppUser? user}) {
+    return AppSessionState(user: user ?? this.user);
   }
 }
 
 class AppSessionNotifier extends StateNotifier<AppSessionState> {
-  AppSessionNotifier(this._ref)
-    : super(
-        AppSessionState(
-          user: _guestUser,
-          stampBalance: 0,
-          dailyStampCap: 0,
-        ),
-      );
+  AppSessionNotifier(this._ref) : super(AppSessionState(user: _guestUser));
 
   final Ref _ref;
 
@@ -55,11 +34,7 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
   );
 
   void clear() {
-    state = AppSessionState(
-      user: _guestUser,
-      stampBalance: 0,
-      dailyStampCap: 0,
-    );
+    state = AppSessionState(user: _guestUser);
   }
 
   void updateProfile({
@@ -162,7 +137,6 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
         deletionRequestedAt: delReq,
         deletionEffectiveAt: delEff,
       ),
-      stampBalance: (m['stampsBalance'] as num?)?.toInt() ?? state.stampBalance,
     );
   }
 }

@@ -15,9 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 信件表（挂号信/平邮） ServiceImpl
- *
- * @author Administrator
+ * 信件表（挂号信/平邮）ServiceImpl
  */
 @Service
 public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
@@ -56,4 +54,8 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
                 .in(LetterDomain::getId, ids));
     }
 
+    @Override
+    public long countPeerLetterReferencingContent(long viewerUserId, long ownerUserId, List<String> variants) {
+        return getBaseMapper().countPeerLetterReferencingContent(viewerUserId, ownerUserId, variants);
+    }
 }

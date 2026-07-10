@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/bootstrap/app_bootstrap.dart';
-import '../../core/session/app_session.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
 
@@ -11,7 +10,6 @@ class VipCenterPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final session = ref.watch(appSessionProvider);
     final lang = Localizations.localeOf(context).languageCode;
     final bootstrapAsync = ref.watch(appBootstrapProvider(lang));
     final l10n = AppLocalizations.of(context)!;
@@ -42,12 +40,6 @@ class VipCenterPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      PostalStampBadge(
-                        isVip: session.isVip,
-                        balance: session.stampBalance,
-                        cap: session.dailyStampCap,
-                      ),
-                      const SizedBox(height: 10),
                       if (v.unlimitedStampsBenefit)
                         Text(l10n.vipCenterUnlimitedRegisteredMail),
                       if (v.standardDeliveryHours > 0)

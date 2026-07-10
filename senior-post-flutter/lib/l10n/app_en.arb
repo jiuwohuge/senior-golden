@@ -8,25 +8,52 @@
   "@appTagline": {
     "description": "Short brand line under the app name; postal / pen-pal tone."
   },
-  "tabPostWall": "Topics",
+  "tabPostWall": "Post Office",
   "@tabPostWall": {
-    "description": "Bottom navigation: official topic mailbox."
+    "description": "Bottom navigation: post office home."
   },
   "tabDirectory": "Pen Pals",
   "@tabDirectory": {
-    "description": "Bottom navigation: calm pen-pal hall."
+    "description": "Bottom navigation: discover and manage pen pals."
   },
-  "tabMailbox": "My Mailbox",
+  "tabMailbox": "Mailbox",
   "@tabMailbox": {
-    "description": "Bottom navigation: messages and letters."
+    "description": "Bottom navigation: letter history."
   },
   "tabProfile": "Me",
   "@tabProfile": {
     "description": "Bottom navigation: personal profile and settings"
   },
-  "a11yTabPostWall": "Topics: official prompts and today's mailbox",
-  "a11yTabDirectory": "Pen Pals: read profiles and write slowly",
-  "a11yTabMailbox": "My Mailbox: your letters and conversations",
+  "a11yTabPostWall": "Post Office: write letters, messages and in-transit mail",
+  "a11yTabDirectory": "Pen Pals: recommendations, search and my pen pals",
+  "a11yTabMailbox": "Mailbox: received, sent and time letters",
+  "postOfficeGreeting": "Good morning",
+  "postOfficeTodayHint": "Write your first letter and wait for a reply",
+  "postOfficeWriteLetter": "Write a letter",
+  "postOfficeFreeQuotaHint": "{count} free letters left today",
+  "@postOfficeFreeQuotaHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "postOfficeMessagesSummary": "Messages · {count}",
+  "@postOfficeMessagesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "postOfficeInTransitSummary": "In transit · {count}",
+  "@postOfficeInTransitSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "a11yTabProfile": "Me: profile, saved letters and settings",
   "a11yNavBar": "Main sections of the app",
   "placeholderWelcomeTitle": "This area is being prepared",

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_exception.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
-import '../post_wall/post_wall_remote.dart';
+import '../social/social_remote.dart';
 
 /// 举报用户（`targetType`: `user`，与后端 [AppReportServiceImpl] 对齐）。
 class UserReportSheet extends ConsumerStatefulWidget {
@@ -39,7 +39,7 @@ class _UserReportSheetState extends ConsumerState<UserReportSheet> {
       if (id == null) {
         throw ApiBusinessException(0, l10n.errorInvalidContentId);
       }
-      await ref.read(postWallRemoteProvider).submitReport(
+      await ref.read(socialRemoteProvider).submitReport(
             targetType: 'user',
             targetId: id,
             reason: text,

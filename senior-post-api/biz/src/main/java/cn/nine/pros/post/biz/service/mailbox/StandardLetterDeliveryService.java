@@ -1,6 +1,5 @@
 package cn.nine.pros.post.biz.service.mailbox;
 
-import cn.nine.pros.post.biz.mapper.LetterMapper;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.client.common.enums.LetterBizStatus;
@@ -27,8 +26,7 @@ public class StandardLetterDeliveryService {
     /** 系统任务更新人（与业务用户 ID 区分） */
     private static final long SYSTEM_UPDATED_BY = 0L;
 
-    private final LetterMapper letterMapper;
-    private final LetterService letterService;
+        private final LetterService letterService;
 
     /**
      * 将已到预计送达时间的平邮置为已送达。
@@ -39,7 +37,7 @@ public class StandardLetterDeliveryService {
      */
     @Transactional(rollbackFor = Exception.class)
     public int deliverDueStandardLetters(LocalDateTime now, int maxBatch) {
-        List<LetterDomain> due = letterMapper.selectList(new LambdaQueryWrapper<LetterDomain>()
+        List<LetterDomain> due = letterService.list(new LambdaQueryWrapper<LetterDomain>()
                 .eq(LetterDomain::isDelFlag, false)
                 .eq(LetterDomain::getLetterType, LetterPhysicalType.STANDARD.getCode())
                 .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())

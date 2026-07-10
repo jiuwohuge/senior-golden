@@ -1,7 +1,7 @@
 package cn.nine.pros.post.biz.moderation;
 
 import cn.nine.pros.post.biz.config.OssProperties;
-import cn.nine.pros.post.biz.service.app.support.OssObjectKeyResolver;
+import cn.nine.pros.post.biz.service.biz.support.OssObjectKeyResolver;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.OSSObject;

@@ -92,6 +92,22 @@ class SocialRemoteRepository {
       },
     );
   }
+
+  /// `targetType`: `user` | `postcard` | `comment`（与 `/api/reports` 对齐）。
+  Future<void> submitReport({
+    required String targetType,
+    required int targetId,
+    required String reason,
+  }) async {
+    await _dio.post<dynamic>(
+      '/api/reports',
+      data: <String, dynamic>{
+        'targetType': targetType,
+        'targetId': targetId,
+        'reason': reason,
+      },
+    );
+  }
 }
 
 final socialRemoteProvider = Provider<SocialRemoteRepository>(

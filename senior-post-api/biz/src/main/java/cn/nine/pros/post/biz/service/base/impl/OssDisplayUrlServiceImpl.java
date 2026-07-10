@@ -1,14 +1,11 @@
 package cn.nine.pros.post.biz.service.base.impl;
 
 import cn.nine.pros.post.biz.config.OssProperties;
-import cn.nine.pros.post.biz.service.app.support.OssGetPresigner;
-import cn.nine.pros.post.biz.service.app.support.OssObjectKeyResolver;
+import cn.nine.pros.post.biz.service.biz.support.OssGetPresigner;
+import cn.nine.pros.post.biz.service.biz.support.OssObjectKeyResolver;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.OssReadAuthorizationService;
 import cn.nine.pros.post.client.model.out.OssGetSignItemVO;
-import cn.nine.pros.post.client.model.out.PostcardAuthorVO;
-import cn.nine.pros.post.client.model.out.PostcardDetailVO;
-import cn.nine.pros.post.client.model.out.PostcardWallItemVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -31,8 +28,7 @@ public class OssDisplayUrlServiceImpl implements OssDisplayUrlService {
     private final OssReadAuthorizationService readAuthorizationService;
     private final OssGetPresigner ossGetPresigner;
 
-    @Override
-    public String signForViewer(long viewerUserId, String storedRef) {
+    private String signForViewer(long viewerUserId, String storedRef) {
         if (!StringUtils.hasText(storedRef) || !ossConfigured()) {
             return storedRef;
         }
@@ -41,82 +37,8 @@ public class OssDisplayUrlServiceImpl implements OssDisplayUrlService {
         return m.getOrDefault(t, t);
     }
 
-    @Override
-    public void applyPostcardWall(long viewerUserId, List<PostcardWallItemVO> rows) {
-        if (rows == null || rows.isEmpty() || !ossConfigured()) {
-            return;
-        }
-        Set<String> refs = new LinkedHashSet<>();
-        for (PostcardWallItemVO r : rows) {
-            collectImageRefs(r.getImageUrl(), r.getImageUrls(), refs);
-            if (r.getAuthor() != null && StringUtils.hasText(r.getAuthor().getAvatarUrl())) {
-                refs.add(r.getAuthor().getAvatarUrl().trim());
-            }
-        }
-        Map<String, String> sig = buildViewerSignedMap(viewerUserId, refs);
-        for (PostcardWallItemVO r : rows) {
-            if (StringUtils.hasText(r.getImageUrl())) {
-                r.setImageUrl(sig.getOrDefault(r.getImageUrl().trim(), r.getImageUrl()));
-            }
-            if (r.getImageUrls() != null && !r.getImageUrls().isEmpty()) {
-                List<String> next = new ArrayList<>();
-                for (String u : r.getImageUrls()) {
-                    if (StringUtils.hasText(u)) {
-                        String k = u.trim();
-                        next.add(sig.getOrDefault(k, u));
-                    } else {
-                        next.add(u);
-                    }
-                }
-                r.setImageUrls(next);
-            }
-            if (r.getAuthor() != null && StringUtils.hasText(r.getAuthor().getAvatarUrl())) {
-                String a = r.getAuthor().getAvatarUrl().trim();
-                r.getAuthor().setAvatarUrl(sig.getOrDefault(a, r.getAuthor().getAvatarUrl()));
-            }
-        }
-    }
 
-    @Override
-    public void applyPostcardDetail(long viewerUserId, PostcardDetailVO detail) {
-        if (detail == null || !ossConfigured()) {
-            return;
-        }
-        Set<String> refs = new LinkedHashSet<>();
-        collectImageRefs(detail.getImageUrl(), detail.getImageUrls(), refs);
-        if (detail.getAuthor() != null && StringUtils.hasText(detail.getAuthor().getAvatarUrl())) {
-            refs.add(detail.getAuthor().getAvatarUrl().trim());
-        }
-        Map<String, String> sig = buildViewerSignedMap(viewerUserId, refs);
-        if (StringUtils.hasText(detail.getImageUrl())) {
-            detail.setImageUrl(sig.getOrDefault(detail.getImageUrl().trim(), detail.getImageUrl()));
-        }
-        if (detail.getImageUrls() != null && !detail.getImageUrls().isEmpty()) {
-            List<String> next = new ArrayList<>();
-            for (String u : detail.getImageUrls()) {
-                if (StringUtils.hasText(u)) {
-                    String k = u.trim();
-                    next.add(sig.getOrDefault(k, u));
-                } else {
-                    next.add(u);
-                }
-            }
-            detail.setImageUrls(next);
-        }
-        if (detail.getAuthor() != null && StringUtils.hasText(detail.getAuthor().getAvatarUrl())) {
-            String a = detail.getAuthor().getAvatarUrl().trim();
-            detail.getAuthor().setAvatarUrl(sig.getOrDefault(a, detail.getAuthor().getAvatarUrl()));
-        }
-    }
 
-    @Override
-    public void applyAuthor(long viewerUserId, PostcardAuthorVO author) {
-        if (author == null || !StringUtils.hasText(author.getAvatarUrl()) || !ossConfigured()) {
-            return;
-        }
-        String a = author.getAvatarUrl().trim();
-        author.setAvatarUrl(signForViewer(viewerUserId, a));
-    }
 
     @Override
     public String signAvatarForViewer(long viewerUserId, String avatarStoredRef) {
@@ -210,18 +132,6 @@ public class OssDisplayUrlServiceImpl implements OssDisplayUrlService {
         return out;
     }
 
-    private static void collectImageRefs(String imageUrl, List<String> imageUrls, Set<String> refs) {
-        if (imageUrls != null) {
-            for (String u : imageUrls) {
-                if (StringUtils.hasText(u)) {
-                    refs.add(u.trim());
-                }
-            }
-        }
-        if (StringUtils.hasText(imageUrl)) {
-            refs.add(imageUrl.trim());
-        }
-    }
 
     private boolean ossConfigured() {
         return StringUtils.hasText(ossProperties.getEndpoint())

@@ -25,7 +25,7 @@ function normalizeExt(file: File): string {
 /** 管理端：为指定用户获取 PUT 预签名（/webapi/oss/put-sign）。 */
 export async function fetchAdminPutSign(
   userId: number,
-  scene: 'avatar' | 'postcard' | 'letter',
+  scene: 'avatar' | 'letter',
   file: File,
 ): Promise<OssPutSignResult> {
   const ext = normalizeExt(file)

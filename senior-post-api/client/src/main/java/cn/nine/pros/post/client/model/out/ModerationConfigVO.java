@@ -10,18 +10,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "明信片机审开关（管理后台）")
+@Schema(description = "Moderation provider credential readiness")
 public class ModerationConfigVO {
 
-    @Schema(description = "是否开启明信片配图鉴黄（百度）")
-    private Boolean postcardImageEnabled;
-
-    @Schema(description = "是否开启明信片正文鉴黄（DeepSeek）")
-    private Boolean postcardTextEnabled;
-
-    @Schema(description = "服务端是否已配置百度凭证（不回传密钥）")
+    @Schema(description = "Baidu credentials configured on server")
     private Boolean baiduCredentialsReady;
 
-    @Schema(description = "服务端是否已配置 DeepSeek API Key")
+    @Schema(description = "DeepSeek API key configured on server")
     private Boolean deepseekCredentialsReady;
 }

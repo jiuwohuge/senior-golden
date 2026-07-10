@@ -4,7 +4,7 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.biz.i18n.AppMessages;
-import cn.nine.pros.post.biz.service.app.AppDirectoryService;
+import cn.nine.pros.post.biz.service.biz.AppDirectoryService;
 import cn.nine.pros.post.client.api.app.AppDirectoryApi;
 import cn.nine.pros.post.client.model.input.app.AppDirectoryPageInDto;
 import cn.nine.pros.post.client.model.out.DirectoryUserItemVO;

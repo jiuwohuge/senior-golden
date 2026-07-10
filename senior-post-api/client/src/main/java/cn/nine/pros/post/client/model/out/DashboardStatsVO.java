@@ -16,9 +16,6 @@ public class DashboardStatsVO {
     @Schema(description = "日活用户")
     private Long dailyActiveUsers;
 
-    @Schema(description = "明信片总数")
-    private Long totalPostcards;
-
     @Schema(description = "信件总数")
     private Long totalLetters;
 

@@ -3,7 +3,7 @@ package cn.nine.pros.post.biz.controller.app;
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
-import cn.nine.pros.post.biz.service.app.AppOssService;
+import cn.nine.pros.post.biz.service.biz.AppOssService;
 import cn.nine.pros.post.client.api.app.AppOssApi;
 import cn.nine.pros.post.client.model.input.app.AppOssGetSignInDto;
 import cn.nine.pros.post.client.model.out.OssGetSignBatchResultVO;

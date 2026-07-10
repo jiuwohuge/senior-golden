@@ -110,22 +110,22 @@ abstract class AppLocalizations {
   /// **'A calm post office for trusted pen pals.'**
   String get appTagline;
 
-  /// Bottom navigation: official topic mailbox.
+  /// Bottom navigation: post office home.
   ///
   /// In en, this message translates to:
-  /// **'Topics'**
+  /// **'Post Office'**
   String get tabPostWall;
 
-  /// Bottom navigation: calm pen-pal hall.
+  /// Bottom navigation: discover and manage pen pals.
   ///
   /// In en, this message translates to:
   /// **'Pen Pals'**
   String get tabDirectory;
 
-  /// Bottom navigation: messages and letters.
+  /// Bottom navigation: letter history.
   ///
   /// In en, this message translates to:
-  /// **'My Mailbox'**
+  /// **'Mailbox'**
   String get tabMailbox;
 
   /// Bottom navigation: personal profile and settings
@@ -137,20 +137,56 @@ abstract class AppLocalizations {
   /// No description provided for @a11yTabPostWall.
   ///
   /// In en, this message translates to:
-  /// **'Topics: official prompts and today\'s mailbox'**
+  /// **'Post Office: write letters, messages and in-transit mail'**
   String get a11yTabPostWall;
 
   /// No description provided for @a11yTabDirectory.
   ///
   /// In en, this message translates to:
-  /// **'Pen Pals: read profiles and write slowly'**
+  /// **'Pen Pals: recommendations, search and my pen pals'**
   String get a11yTabDirectory;
 
   /// No description provided for @a11yTabMailbox.
   ///
   /// In en, this message translates to:
-  /// **'My Mailbox: your letters and conversations'**
+  /// **'Mailbox: received, sent and time letters'**
   String get a11yTabMailbox;
+
+  /// No description provided for @postOfficeGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get postOfficeGreeting;
+
+  /// No description provided for @postOfficeTodayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your first letter and wait for a reply'**
+  String get postOfficeTodayHint;
+
+  /// No description provided for @postOfficeWriteLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a letter'**
+  String get postOfficeWriteLetter;
+
+  /// No description provided for @postOfficeFreeQuotaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} free letters left today'**
+  String postOfficeFreeQuotaHint(int count);
+
+  /// No description provided for @postOfficeMessagesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages · {count}'**
+  String postOfficeMessagesSummary(int count);
+
+  /// No description provided for @postOfficeInTransitSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'In transit · {count}'**
+  String postOfficeInTransitSummary(int count);
 
   /// No description provided for @a11yTabProfile.
   ///

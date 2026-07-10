@@ -1,8 +1,8 @@
 package cn.nine.pros.post.biz.controller.app;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
-import cn.nine.pros.post.biz.service.app.AppBootstrapService;
-import cn.nine.pros.post.biz.service.app.AppReleaseNoteService;
+import cn.nine.pros.post.biz.service.biz.AppBootstrapService;
+import cn.nine.pros.post.biz.service.biz.AppReleaseNoteService;
 import cn.nine.pros.post.client.api.app.AppBootstrapApi;
 import cn.nine.pros.post.client.model.out.AppBootstrapVO;
 import cn.nine.pros.post.client.model.out.AppReleaseNoteVO;

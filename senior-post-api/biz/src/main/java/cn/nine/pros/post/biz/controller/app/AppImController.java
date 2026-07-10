@@ -1,6 +1,6 @@
 package cn.nine.pros.post.biz.controller.app;
 
-import cn.nine.pros.post.biz.service.app.AppImService;
+import cn.nine.pros.post.biz.service.biz.AppImService;
 import cn.nine.pros.post.client.api.app.AppImApi;
 import cn.nine.pros.post.client.model.out.AppImUserSigVO;
 import lombok.RequiredArgsConstructor;

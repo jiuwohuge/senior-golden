@@ -9,8 +9,6 @@ import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../../widgets/postal/postal_gender_icon.dart';
-import '../post_wall/post_wall_compact_tile.dart';
-import '../post_wall/post_wall_remote.dart';
 import '../social/social_remote.dart';
 import '../compose/compose_intent.dart';
 import 'directory_remote.dart';
@@ -33,51 +31,7 @@ class UserCardPage extends ConsumerStatefulWidget {
 }
 
 class _UserCardPageState extends ConsumerState<UserCardPage> {
-  final List<WallPost> _friendPosts = [];
-  int _friendPage = 0;
-  bool _friendLoading = false;
-  bool _friendHasMore = true;
-  bool _friendSectionInit = false;
-
   String get userId => widget.userId;
-
-  Future<void> _loadFriendPostcards({required bool append}) async {
-    if (_friendLoading) return;
-    if (append && !_friendHasMore) return;
-    setState(() => _friendLoading = true);
-    try {
-      final nextPage = append ? _friendPage + 1 : 1;
-      final size = append ? 10 : 1;
-      final batch = await ref
-          .read(postWallRemoteProvider)
-          .listUserPostcards(userId: userId, page: nextPage, size: size);
-      if (!mounted) return;
-      setState(() {
-        if (append) {
-          _friendPosts.addAll(batch);
-        } else {
-          _friendPosts
-            ..clear()
-            ..addAll(batch);
-        }
-        _friendPage = nextPage;
-        _friendHasMore = batch.length >= size;
-        _friendSectionInit = true;
-      });
-    } finally {
-      if (mounted) setState(() => _friendLoading = false);
-    }
-  }
-
-  bool _onScrollLoadMore(ScrollNotification n) {
-    if (!_friendHasMore || _friendLoading) return false;
-    if (n.metrics.extentAfter > 160) return false;
-    if (n is ScrollEndNotification || n is ScrollUpdateNotification) {
-      _loadFriendPostcards(append: true);
-    }
-    return false;
-  }
-
   Future<void> _onBlockUser(BuildContext context, AppUser user) async {
     final l10n = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
@@ -275,12 +229,6 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
         final theme = Theme.of(context);
         final isSelf = session.user.id.isNotEmpty && session.user.id == user.id;
         final showFab = !isSelf;
-        final showFriendFeed = !isSelf && user.postalFriend;
-        if (showFriendFeed && !_friendSectionInit && !_friendLoading) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _loadFriendPostcards(append: false);
-          });
-        }
 
         return Scaffold(
           backgroundColor: PostalTokens.paperCream,
@@ -315,9 +263,7 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
               : null,
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           body: SafeArea(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: showFriendFeed ? _onScrollLoadMore : null,
-              child: ListView(
+            child: ListView(
                 padding: EdgeInsets.fromLTRB(
                   20,
                   18,
@@ -430,60 +376,9 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
                       ],
                     ),
                   ),
-                  if (showFriendFeed) ...[
-                    const SizedBox(height: 22),
-                    Divider(
-                      height: 1,
-                      color: PostalTokens.perforationLine.withValues(
-                        alpha: 0.75,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    PostalSectionTitle(
-                      title: l10n.userCardFriendPostcardsTitle,
-                      subtitle: l10n.userCardFriendPostcardsSubtitle,
-                    ),
-                    const SizedBox(height: 12),
-                    if (_friendLoading && _friendPosts.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24),
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    else if (_friendPosts.isEmpty && _friendSectionInit)
-                      Text(
-                        l10n.userCardFriendPostcardsEmpty,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: PostalTokens.inkSecondary,
-                        ),
-                      )
-                    else ...[
-                      for (final post in _friendPosts) ...[
-                        PostWallCompactTile(post: post),
-                        const SizedBox(height: 10),
-                      ],
-                      if (_friendHasMore)
-                        Center(
-                          child: TextButton(
-                            onPressed: _friendLoading
-                                ? null
-                                : () => _loadFriendPostcards(append: true),
-                            child: _friendLoading
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(l10n.userCardLoadMorePostcards),
-                          ),
-                        ),
-                    ],
-                  ],
                 ],
               ),
             ),
-          ),
         );
       },
     );

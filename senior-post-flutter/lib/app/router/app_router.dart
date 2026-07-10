@@ -20,16 +20,12 @@ import '../../features/compose/compose_flow_page.dart';
 import '../../features/compose/compose_intent.dart';
 import '../../features/time_letter/time_letter_open_page.dart';
 import '../../features/mailbox/mailbox_archive_page.dart';
-import '../../features/post_wall/post_compose_page.dart';
-import '../../features/post_wall/post_detail_page.dart';
 import '../../features/profile/account_delete_page.dart';
 import '../../features/profile/blacklist_page.dart';
 import '../../features/profile/feedback_page.dart';
 import '../../features/profile/interests_picker_page.dart';
-import '../../features/profile/my_postcards_page.dart';
 import '../../features/profile/profile_edit_page.dart';
 import '../../features/profile/settings_page.dart';
-import '../../features/profile/stamps_ledger_page.dart';
 import '../../features/shell/main_shell.dart';
 import 'app_navigator_key.dart';
 import 'shop_routes.dart';
@@ -63,7 +59,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (loggedIn &&
           authPaths.contains(loc) &&
           loc != LoginRoutes.socialComplete) {
-        return MainShellRoute.pathPostWall;
+        return MainShellRoute.pathPostOffice;
       }
       return null;
     },
@@ -102,11 +98,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const LegalPage(type: LegalPageType.privacy),
       ),
       GoRoute(
-        path: MainShellRoute.pathPostWall,
+        path: MainShellRoute.pathPostOffice,
         builder: (context, state) => const MainShell(initialIndex: 0),
       ),
       GoRoute(
-        path: MainShellRoute.pathDirectory,
+        path: MainShellRoute.pathPenPals,
         builder: (context, state) => const MainShell(initialIndex: 1),
       ),
       GoRoute(
@@ -116,15 +112,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: MainShellRoute.pathProfile,
         builder: (context, state) => const MainShell(initialIndex: 3),
-      ),
-      GoRoute(
-        path: '/post/new',
-        builder: (context, state) => const PostComposePage(),
-      ),
-      GoRoute(
-        path: '/post/:id',
-        builder: (context, state) =>
-            PostDetailPage(postId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/user/:id',
@@ -201,10 +188,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const InterestsPickerPage(),
       ),
       GoRoute(
-        path: '/profile/stamps',
-        builder: (context, state) => const StampsLedgerPage(),
-      ),
-      GoRoute(
         path: ShopRoutes.path,
         builder: (context, state) {
           final q = state.uri.queryParameters;
@@ -213,10 +196,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             hint: q['hint'],
           );
         },
-      ),
-      GoRoute(
-        path: '/profile/my-postcards',
-        builder: (context, state) => const MyPostcardsPage(),
       ),
       GoRoute(
         path: '/profile/blocks',

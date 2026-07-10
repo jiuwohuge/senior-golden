@@ -3,7 +3,7 @@ package cn.nine.pros.post.biz.controller.app;
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
-import cn.nine.pros.post.biz.service.app.AppReportService;
+import cn.nine.pros.post.biz.service.biz.AppReportService;
 import cn.nine.pros.post.client.api.app.AppReportApi;
 import cn.nine.pros.post.client.model.input.app.AppReportCreateInDto;
 import lombok.RequiredArgsConstructor;

@@ -8,7 +8,7 @@ import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.model.domain.UserIdentityDomain;
 import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
-import cn.nine.pros.post.biz.service.app.AppJwtService;
+import cn.nine.pros.post.biz.service.biz.AppJwtService;
 import cn.nine.pros.post.biz.service.base.UserIdentityService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.api.admin.AdminAuthApi;

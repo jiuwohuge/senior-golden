@@ -13,8 +13,6 @@ import '../auth/auth_repository.dart';
 import '../directory/send_letter_sheet.dart';
 import '../mailbox/mailbox_providers.dart';
 import '../mailbox/mailbox_remote.dart';
-import '../post_wall/post_providers.dart';
-import '../post_wall/post_wall_remote.dart';
 import '../time_letter/time_letter_providers.dart';
 import '../time_letter/time_letter_remote.dart';
 import '../time_letter/time_letter_seal_slider.dart';
@@ -274,20 +272,8 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   }
 
   Future<void> _submitPenPalMail() async {
-    final l10n = AppLocalizations.of(context)!;
     final body = _bodyCtrl.text.trim();
     if (body.isEmpty || _peerId == null) return;
-    final session = ref.read(appSessionProvider);
-    if (_mailType == LetterType.registered &&
-        !session.isVip &&
-        session.stampBalance < 1) {
-      PostalSnack.show(
-        context,
-        l10n.sendLetterRegisteredStampShort,
-        tone: PostalSnackTone.warning,
-      );
-      return;
-    }
     setState(() => _busy = true);
     try {
       await ref
@@ -318,38 +304,15 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     final l10n = AppLocalizations.of(context)!;
     final body = _bodyCtrl.text.trim();
     if (body.isEmpty) return;
-    final topic = findTopicMailboxTopic(l10n, _topicKey);
-    final content = topic == null ? body : '【${topic.title}】\n$body';
     setState(() => _busy = true);
     try {
-      final created = await ref
-          .read(postWallRemoteProvider)
-          .createPost(content: content);
-      ref.invalidate(postWallListProvider);
+      // WHY: 4.0 邮局投递 API 尚未接入；M0 仅移除废弃明信片链路。
       if (!mounted) return;
-      if (created.reviewStatus == 2) {
-        PostalSnack.show(
-          context,
-          l10n.postComposeRejected,
-          tone: PostalSnackTone.warning,
-        );
-      } else {
-        PostalSnack.show(
-          context,
-          l10n.composeTopicSubmitted,
-          tone: PostalSnackTone.success,
-        );
-      }
-      if (mounted) context.go('/');
-    } catch (e) {
-      final biz = apiBusinessExceptionFrom(e);
-      if (mounted) {
-        PostalSnack.show(
-          context,
-          biz?.message ?? e.toString(),
-          tone: PostalSnackTone.error,
-        );
-      }
+      PostalSnack.show(
+        context,
+        l10n.postWallUnavailable,
+        tone: PostalSnackTone.warning,
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -554,16 +517,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         return ListView(
           physics: const ClampingScrollPhysics(),
           children: [
-            if (_kind == ComposeKind.penPalMail ||
-                _kind == ComposeKind.penPalTimeLetter)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: PostalStampBadge(
-                  balance: session.stampBalance,
-                  cap: session.dailyStampCap,
-                  isVip: session.isVip,
-                ),
-              ),
             PostalTextField(
               controller: _bodyCtrl,
               label: l10n.composeBodyLabel,
@@ -612,12 +565,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                     ? l10n.sendLetterRegisteredSubVip
                     : l10n.sendLetterRegisteredSubPaid,
               ),
-            ),
-            const SizedBox(height: 8),
-            PostalStampBadge(
-              balance: session.stampBalance,
-              cap: session.dailyStampCap,
-              isVip: session.isVip,
             ),
           ],
         );

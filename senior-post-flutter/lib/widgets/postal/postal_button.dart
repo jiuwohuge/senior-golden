@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/postal_tokens.dart';
 
 /// 邮政风格按钮。所有变体均为实色或描边，禁止透明主按钮。
-enum PostalButtonVariant { primary, secondary, ghost, danger }
+enum PostalButtonVariant { primary, primaryLarge, secondary, ghost, danger }
 
 /// 按钮内容排布：并排主操作区用 [stacked] 保留适老化字号。
 enum PostalButtonLayout { inline, stacked }
@@ -40,8 +40,19 @@ class PostalButton extends StatelessWidget {
 
   bool get _stacked => layout == PostalButtonLayout.stacked;
 
-  double get _effectiveMinHeight =>
-      _stacked ? (minHeight < 58 ? 58 : minHeight) : minHeight;
+  double get _effectiveMinHeight {
+    if (variant == PostalButtonVariant.primaryLarge) {
+      return minHeight < 64 ? 64 : minHeight;
+    }
+    if (_stacked) {
+      return minHeight < PostalTokens.minTouchTarget
+          ? PostalTokens.minTouchTarget
+          : minHeight;
+    }
+    return minHeight < PostalTokens.minTouchTarget
+        ? PostalTokens.minTouchTarget
+        : minHeight;
+  }
 
   BorderRadius get _shape =>
       pill ? BorderRadius.circular(minHeight / 2) : PostalTokens.shapeMd;
@@ -56,7 +67,8 @@ class PostalButton extends StatelessWidget {
         : _labelRow(theme.textTheme.labelLarge);
 
     final shell = switch (variant) {
-      PostalButtonVariant.primary => _primary(child),
+      PostalButtonVariant.primary ||
+      PostalButtonVariant.primaryLarge => _primary(child),
       PostalButtonVariant.secondary => _secondary(child),
       PostalButtonVariant.ghost => _ghost(child),
       PostalButtonVariant.danger => _danger(child),
@@ -83,7 +95,9 @@ class PostalButton extends StatelessWidget {
 
   Widget _busyIndicator() {
     final color = switch (variant) {
-      PostalButtonVariant.primary || PostalButtonVariant.danger => Colors.white,
+      PostalButtonVariant.primary ||
+      PostalButtonVariant.primaryLarge ||
+      PostalButtonVariant.danger => Colors.white,
       _ => PostalTokens.postboxGreen,
     };
     return SizedBox(
@@ -95,7 +109,8 @@ class PostalButton extends StatelessWidget {
 
   Widget _stackedLabel(TextTheme textTheme) {
     final color = switch (variant) {
-      PostalButtonVariant.primary => Colors.white,
+      PostalButtonVariant.primary ||
+      PostalButtonVariant.primaryLarge ||
       PostalButtonVariant.danger => Colors.white,
       _ => PostalTokens.postboxGreen,
     };
@@ -123,7 +138,8 @@ class PostalButton extends StatelessWidget {
 
   Widget _labelRow(TextStyle? base) {
     final color = switch (variant) {
-      PostalButtonVariant.primary => Colors.white,
+      PostalButtonVariant.primary ||
+      PostalButtonVariant.primaryLarge ||
       PostalButtonVariant.danger => Colors.white,
       _ => PostalTokens.postboxGreen,
     };

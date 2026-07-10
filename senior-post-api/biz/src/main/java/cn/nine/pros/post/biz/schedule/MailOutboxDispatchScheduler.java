@@ -1,6 +1,6 @@
 package cn.nine.pros.post.biz.schedule;
 
-import cn.nine.pros.post.biz.service.app.mail.MailOutboxService;
+import cn.nine.pros.post.biz.service.base.MailOutboxService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

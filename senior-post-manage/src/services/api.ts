@@ -24,8 +24,6 @@ export const api = {
   userDevices: (userId: number) => request.get(`/webapi/user/${userId}/devices`),
   blockDevice: (body: { deviceUuid: string; reason?: string }) => request.post('/webapi/user/device/block', body),
 
-  postcards: (params: any) => request.post('/webapi/content/postcard/paging', params),
-  postcardDetail: (id: number) => request.get(`/webapi/content/postcard/${id}`),
   /** 私有桶看图：列表/详情已服务端换签；此接口供扩展场景批量换签 */
   ossGetSign: (body: { objectKeys: string[] }) => request.post('/webapi/oss/get-sign', body),
   ossPutSign: (params: {
@@ -34,11 +32,6 @@ export const api = {
     ext?: string
     contentType?: string
   }) => request.get('/webapi/oss/put-sign', { params }),
-  comments: (params: any) => request.post('/webapi/content/comment/paging', params),
-  approvePostcard: (id: number) => request.post(`/webapi/content/postcard/${id}/approve`),
-  rejectPostcard: (id: number, reason: string) => request.post(`/webapi/content/postcard/${id}/reject`, { reason }),
-  approveComment: (id: number) => request.post(`/webapi/content/comment/${id}/approve`),
-  rejectComment: (id: number, reason: string) => request.post(`/webapi/content/comment/${id}/reject`, { reason }),
 
   timeLetters: (params: any) => request.post('/webapi/content/time-letter/paging', params),
   timeLetterDetail: (id: number) => request.get(`/webapi/content/time-letter/${id}`),
@@ -54,10 +47,7 @@ export const api = {
   deleteConfig: (id: number) => request.post(`/webapi/config/${id}/delete`),
 
   getModerationConfig: () => request.get('/webapi/config/moderation'),
-  saveModerationConfig: (body: {
-    postcardImageEnabled: boolean
-    postcardTextEnabled: boolean
-  }) => request.post('/webapi/config/moderation/save', body),
+  saveModerationConfig: () => request.post('/webapi/config/moderation/save', {}),
 
   countries: (params: any) => request.post('/webapi/country/paging', params),
   saveCountry: (body: any) => request.post('/webapi/country/save', body),
@@ -77,6 +67,5 @@ export const api = {
 
   actionLogs: (params: any) => request.post('/webapi/log/action/paging', params),
   loginLogs: (params: any) => request.post('/webapi/log/login/paging', params),
-  stampLedgerPaging: (params: any) => request.post('/webapi/stamps/ledger/paging', params),
   feedbackPaging: (params: any) => request.post('/webapi/feedback/paging', params),
 }

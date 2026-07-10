@@ -83,18 +83,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: PostalStampBadge(
-                  balance: session.stampBalance,
-                  cap: session.dailyStampCap,
-                  isVip: session.isVip,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
           PostalCardEnvelope(
             child: Column(
               children: [
@@ -104,20 +92,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   onTap: () => context.push('/profile/edit'),
                 ),
                 _ProfileItem(
-                  icon: Icons.photo_album_outlined,
-                  title: l10n.profileMyPostcards,
-                  onTap: () => context.push('/profile/my-postcards'),
-                ),
-                _ProfileItem(
                   icon: Icons.interests_outlined,
                   title: l10n.profileInterestTags,
                   onTap: () => context.push('/profile/interests'),
-                ),
-                const Divider(height: 1),
-                _ProfileItem(
-                  icon: Icons.receipt_long_outlined,
-                  title: l10n.profileStampsLedger,
-                  onTap: () => context.push('/profile/stamps'),
                 ),
                 const Divider(height: 1),
                 _ProfileItem(

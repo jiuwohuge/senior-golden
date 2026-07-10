@@ -344,7 +344,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           await _uploadAvatarIfPossible(l10n, autoCountryCode);
         }
       }
-      if (mounted) context.go(MainShellRoute.pathPostWall);
+      if (mounted) context.go(MainShellRoute.pathPostOffice);
     } on ApiBusinessException catch (e) {
       if (mounted) {
         PostalSnack.show(context, e.message, tone: PostalSnackTone.error);

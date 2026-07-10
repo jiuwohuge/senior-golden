@@ -5,7 +5,7 @@ package cn.nine.pros.post.biz.moderation;
  */
 public interface TextModerationProvider {
 
-    TextModerationResult auditPostcardText(String content);
+    TextModerationResult auditText(String content);
 
     record TextModerationResult(
             ModerationVerdict verdict,

@@ -1,6 +1,6 @@
 package cn.nine.pros.post.biz.controller.app;
 
-import cn.nine.pros.post.biz.service.app.AppAuthService;
+import cn.nine.pros.post.biz.service.biz.AppAuthService;
 import cn.nine.pros.post.client.api.app.AppAuthApi;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
 import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;

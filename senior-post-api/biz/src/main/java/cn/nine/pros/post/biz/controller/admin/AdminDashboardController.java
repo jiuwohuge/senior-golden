@@ -13,7 +13,6 @@ import java.util.Map;
 public class AdminDashboardController implements AdminDashboardApi {
 
     private final UserService userService;
-    private final PostcardService postcardService;
     private final LetterService letterService;
     private final ReportService reportService;
     private final VipSubscriptionService vipSubscriptionService;
@@ -22,7 +21,6 @@ public class AdminDashboardController implements AdminDashboardApi {
     public Map<String, Object> summary() {
         Map<String, Object> m = new HashMap<>();
         m.put("users", userService.countActiveAppUsers());
-        m.put("postcards", postcardService.count());
         m.put("letters", letterService.count());
         m.put("reportsPending", reportService.lambdaQuery().eq(cn.nine.pros.post.biz.model.domain.ReportDomain::getStatus, 0).count());
         m.put("vipSubscriptions", vipSubscriptionService.count());

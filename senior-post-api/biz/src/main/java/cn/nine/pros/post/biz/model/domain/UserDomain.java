@@ -63,11 +63,6 @@ public class UserDomain extends AbstractAuditableDomain {
     @Schema(description = "头像审核：0待审核 1通过 2驳回")
     private Integer avatarAuditStatus;
     /**
-     * 邮票余额
-     */
-    @Schema(description = "邮票余额")
-    private Integer stampsBalance;
-    /**
      * 是否VIP会员（冗余）
      */
     @Schema(description = "是否VIP会员（冗余）")

@@ -78,12 +78,6 @@ senior-post:
     rest-api-user-sig-expire-seconds: 120
     account-import-before-friend-add: true
     rest-api-max-retries: 2
-  stamps-grant:
-    login-enabled: true
-    login-daily-amount: 1
-    postcard-enabled: true
-    postcard-reward-per-post: 1
-    postcard-daily-stamp-cap: 5
   # 阿里云 OSS：未配置完整四项时 /api/oss/put-sign 返回业务错误提示
   oss:
     endpoint: ${ALIYUN_OSS_ENDPOINT:}

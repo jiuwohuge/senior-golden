@@ -146,7 +146,6 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final session = ref.watch(appSessionProvider);
     final title = widget.toSelf
         ? l10n.timeLetterComposeToSelf
         : l10n.timeLetterComposeToFriend(widget.recipientNickname ?? '');
@@ -165,11 +164,6 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
           children: [
             Row(
               children: [
-                PostalStampBadge(
-                  balance: session.stampBalance,
-                  cap: session.dailyStampCap,
-                  isVip: session.isVip,
-                ),
                 const Spacer(),
                 Text(title, style: Theme.of(context).textTheme.titleMedium),
               ],
