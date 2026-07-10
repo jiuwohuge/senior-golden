@@ -13,6 +13,7 @@ import cn.nine.pros.post.biz.service.biz.AppMailboxService;
 import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
 import cn.nine.pros.post.biz.service.biz.WritingStyleService;
 import cn.nine.pros.post.biz.service.base.ActionService;
+import cn.nine.pros.post.biz.service.base.DailyQuotaClaimService;
 import cn.nine.pros.post.biz.service.base.ConfigService;
 import cn.nine.pros.post.biz.service.base.CountryService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
@@ -83,6 +84,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private final AppCommerceBizService appCommerceBizService;
     private final CountryService countryService;
     private final TextModerationProvider textModerationProvider;
+    private final DailyQuotaClaimService dailyQuotaClaimService;
 
     /**
      * 邮政收件箱：本人相关且未读的信件列表（含 POST_OFFICE 入池仅发件人可见）。
@@ -200,10 +202,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         String fontId = normalizeMetaId(body.getFontId(), "default");
         String templateId = normalizeMetaId(body.getTemplateId(), "default");
         appCommerceBizService.assertLetterContentEntitlements(fromUserId, skinId, fontId, templateId);
-        LetterPhysicalType physicalType = LetterPhysicalType.fromCode(body.getLetterType());
-        if (physicalType == null) {
-            throw new BusinessException(appMessages.get("app.error.letter.typeInvalid"));
-        }
+        // M6：产品面废弃平邮/挂号，统一 STANDARD；速度仅 §6.1
+        LetterPhysicalType physicalType = LetterPhysicalType.STANDARD;
 
         UserDTO sender = userService.findById(fromUserId);
         if (sender == null || userStatus(sender.getStatus()) != USER_STATUS_NORMAL) {
@@ -224,10 +224,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         letter.setAuditStatus(LetterAuditStatus.PENDING_REVIEW.getCode());
         letter.setLetterType(physicalType.getCode());
         letter.setContentMetaJson(LetterContentMeta.of(skinId, fontId, templateId));
-        // 运输轨仅作展示兼容；速度一律 §6.1
-        letter.setSendMode(physicalType == LetterPhysicalType.STANDARD
-                ? LetterSendMode.STANDARD_POST.getCode()
-                : LetterSendMode.REGISTERED_MAIL.getCode());
+        letter.setSendMode(LetterSendMode.STANDARD_POST.getCode());
 
         if (mode == LetterMode.POST_OFFICE) {
             letter.setStatus(LetterBizStatus.PENDING.getCode());
@@ -250,6 +247,10 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             maybeAutoApproveOnSend(letter.getId(), now);
         }
         writingStyleService.recompute(fromUserId);
+        if (!Boolean.TRUE.equals(sender.getFirstLetterDone())) {
+            userService.markFirstLetterDone(fromUserId);
+            log.info("first letter marked done, userId={}, letterId={}", fromUserId, letter.getId());
+        }
         String actionType = parentLetterId != null
                 ? BehaviorActionTypes.REPLY_LETTER
                 : BehaviorActionTypes.SEND_LETTER;
@@ -261,14 +262,19 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         return toItem(saved, fromUserId, false);
     }
 
-    /** 非 VIP 强制每日写信额度（拒绝信不计入）。 */
+    /** 非 VIP：须先领取今日额度，且未超发。 */
     private void assertDailyQuota(long fromUserId, UserDTO sender) {
         if (Boolean.TRUE.equals(sender.getIsVip())) {
             return;
         }
+        LocalDate today = LocalDate.now();
+        if (!dailyQuotaClaimService.hasClaimed(fromUserId, today)) {
+            log.info("letter send rejected: daily quota not claimed, userId={}", fromUserId);
+            throw new BusinessException(appMessages.get("app.error.letter.quotaNotClaimed"));
+        }
         int quota = configService.getInt(LETTER_DAILY_QUOTA_KEY, DEFAULT_DAILY_LETTER_QUOTA);
-        LocalDateTime dayStart = LocalDate.now().atStartOfDay();
-        LocalDateTime dayEnd = LocalDate.now().atTime(LocalTime.MAX);
+        LocalDateTime dayStart = today.atStartOfDay();
+        LocalDateTime dayEnd = today.atTime(LocalTime.MAX);
         long sent = letterService.countSentQuotaByFromUserBetween(fromUserId, dayStart, dayEnd);
         if (sent >= quota) {
             log.info("letter send rejected: daily quota exhausted, userId={}, sent={}, quota={}",

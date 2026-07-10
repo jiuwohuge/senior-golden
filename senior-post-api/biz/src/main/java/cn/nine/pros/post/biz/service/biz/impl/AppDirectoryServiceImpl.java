@@ -61,6 +61,10 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
         Page<UserDomain> p = userService.pageDirectory(viewerUserId, body, pq);
         List<DirectoryUserItemVO> records = new ArrayList<>();
         for (UserDomain u : p.getRecords()) {
+            // 兜底：绝不把当前用户放进找笔友列表
+            if (u.getId() != null && u.getId() == viewerUserId) {
+                continue;
+            }
             records.add(toVo(viewerUserId, u));
         }
         return AppPageHelper.pageData(pq, p, records);

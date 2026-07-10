@@ -42,13 +42,17 @@ class MailboxRemoteRepository {
   Future<MailboxLetter> sendLetter({
     String? toUserId,
     required String content,
-    required LetterType type,
+    LetterType type = LetterType.standard,
     String? parentLetterId,
     int? mode,
+    String? skinId,
+    String? fontId,
+    String? templateId,
   }) async {
+    // M6：产品面废弃平邮/挂号选项，发信固定 STANDARD(2)。
     final body = <String, dynamic>{
       'content': content,
-      'letterType': type == LetterType.registered ? 1 : 2,
+      'letterType': 2,
     };
     if (toUserId != null && toUserId.isNotEmpty) {
       body['toUserId'] = int.parse(toUserId);
@@ -59,6 +63,17 @@ class MailboxRemoteRepository {
     if (parentLetterId != null && parentLetterId.isNotEmpty) {
       body['parentLetterId'] = int.parse(parentLetterId);
     }
+    if (skinId != null && skinId.isNotEmpty) {
+      body['skinId'] = skinId;
+    }
+    if (fontId != null && fontId.isNotEmpty) {
+      body['fontId'] = fontId;
+    }
+    if (templateId != null && templateId.isNotEmpty) {
+      body['templateId'] = templateId;
+    }
+    // 保留 type 参数以兼容旧调用方；值不再影响请求体。
+    assert(type == LetterType.standard || type == LetterType.registered);
     final r = await _dio.post<dynamic>('/api/mailbox/letters/send', data: body);
     final map = _unwrapMapData(r);
     return voToMailboxLetter(map);

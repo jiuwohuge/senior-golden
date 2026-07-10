@@ -5,6 +5,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/models/domain_models.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../../widgets/postal/postal_gender_icon.dart';
 import '../compose/compose_intent.dart';
@@ -110,6 +111,7 @@ class _RecommendTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final async = ref.watch(dailyRecommendationsProvider);
+    final selfId = ref.watch(appSessionProvider).user.id;
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: async.when(
@@ -124,7 +126,11 @@ class _RecommendTab extends ConsumerWidget {
           ],
         ),
         data: (users) {
-          if (users.isEmpty) {
+          // 客户端兜底：过滤掉当前登录用户自己。
+          final filtered = selfId.isEmpty
+              ? users
+              : users.where((u) => u.id != selfId).toList();
+          if (filtered.isEmpty) {
             return ListView(
               children: [
                 PostalEmptyState(
@@ -137,7 +143,7 @@ class _RecommendTab extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: [
-              for (final user in users) ...[
+              for (final user in filtered) ...[
                 _PenPalCard(user: user, showRecommendReason: true),
                 const SizedBox(height: 12),
               ],
@@ -159,6 +165,7 @@ class _FindTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final usersAsync = ref.watch(directoryUsersProvider);
+    final selfId = ref.watch(appSessionProvider).user.id;
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
@@ -180,7 +187,10 @@ class _FindTab extends ConsumerWidget {
               tone: PostalEmptyTone.error,
             ),
             data: (users) {
-              if (users.isEmpty) {
+              final filtered = selfId.isEmpty
+                  ? users
+                  : users.where((u) => u.id != selfId).toList();
+              if (filtered.isEmpty) {
                 return PostalEmptyState(
                   title: l10n.directoryEmptyTitle,
                   subtitle: l10n.directoryEmptySubtitle,
@@ -188,7 +198,7 @@ class _FindTab extends ConsumerWidget {
               }
               return Column(
                 children: [
-                  for (final user in users.take(30)) ...[
+                  for (final user in filtered.take(30)) ...[
                     _PenPalCard(user: user),
                     const SizedBox(height: 12),
                   ],

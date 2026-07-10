@@ -21,6 +21,9 @@ class ComposeIntent {
     this.peerNickname,
     this.peerCountryLabel,
     this.topicKey,
+    this.fromFirstLetterGuide = false,
+    this.initialParagraphs,
+    this.templateId,
   });
 
   /// When null, the flow starts with a destination picker.
@@ -32,12 +35,22 @@ class ComposeIntent {
   /// Legacy topic key (unused for POST_OFFICE).
   final String? topicKey;
 
+  /// 来自首封信引导：正文步展示模板提示。
+  final bool fromFirstLetterGuide;
+
+  /// 预填段落（模板）。
+  final List<String>? initialParagraphs;
+  final String? templateId;
+
   ComposeIntent copyWith({
     ComposeKind? kind,
     String? peerId,
     String? peerNickname,
     String? peerCountryLabel,
     String? topicKey,
+    bool? fromFirstLetterGuide,
+    List<String>? initialParagraphs,
+    String? templateId,
   }) {
     return ComposeIntent(
       kind: kind ?? this.kind,
@@ -45,6 +58,10 @@ class ComposeIntent {
       peerNickname: peerNickname ?? this.peerNickname,
       peerCountryLabel: peerCountryLabel ?? this.peerCountryLabel,
       topicKey: topicKey ?? this.topicKey,
+      fromFirstLetterGuide:
+          fromFirstLetterGuide ?? this.fromFirstLetterGuide,
+      initialParagraphs: initialParagraphs ?? this.initialParagraphs,
+      templateId: templateId ?? this.templateId,
     );
   }
 

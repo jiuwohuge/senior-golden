@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_token.dart';
 import '../../core/network/router_refresh.dart';
+import '../../core/session/app_session.dart';
 import '../../features/commerce/my_entitlements_page.dart';
 import '../../features/commerce/shop_page.dart';
 import '../../features/auth/login_page.dart';
@@ -24,6 +25,8 @@ import '../../features/time_letter/time_letter_open_page.dart';
 import '../../features/letter_drafts/letter_drafts_page.dart';
 import '../../features/letter_export/letter_export_page.dart';
 import '../../features/letter_favorites/letter_favorites_page.dart';
+import '../../features/onboarding/first_letter_guide_page.dart';
+import '../../features/post_office/in_transit_page.dart';
 import '../../features/post_office/post_office_relation_messages_page.dart';
 import '../../features/profile/account_delete_page.dart';
 import '../../features/profile/blacklist_page.dart';
@@ -64,7 +67,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (loggedIn &&
           authPaths.contains(loc) &&
           loc != LoginRoutes.socialComplete) {
+        final user = ref.read(appSessionProvider).user;
+        // 首封信未完成时先进引导，而不是直接进邮局。
+        if (user.id.isNotEmpty && user.firstLetterDone != true) {
+          return FirstLetterGuidePage.path;
+        }
         return MainShellRoute.pathPostOffice;
+      }
+      // 已登录且未完成首封信：主壳路径强制进引导（compose / 引导页本身放行）。
+      if (loggedIn) {
+        final user = ref.read(appSessionProvider).user;
+        final needsFirst = user.id.isNotEmpty && user.firstLetterDone != true;
+        final onMainShell =
+            loc == MainShellRoute.pathPostOffice ||
+            loc == MainShellRoute.pathPenPals ||
+            loc == MainShellRoute.pathMailbox ||
+            loc == MainShellRoute.pathProfile;
+        if (needsFirst && onMainShell) {
+          return FirstLetterGuidePage.path;
+        }
+        if (!needsFirst && loc == FirstLetterGuidePage.path) {
+          return MainShellRoute.pathPostOffice;
+        }
       }
       return null;
     },
@@ -101,6 +125,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: LoginRoutes.legalPrivacy,
         builder: (context, state) =>
             const LegalPage(type: LegalPageType.privacy),
+      ),
+      GoRoute(
+        path: FirstLetterGuidePage.path,
+        builder: (context, state) => const FirstLetterGuidePage(),
       ),
       GoRoute(
         path: MainShellRoute.pathPostOffice,
@@ -140,6 +168,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/post-office/messages',
         builder: (context, state) => const PostOfficeRelationMessagesPage(),
+      ),
+      GoRoute(
+        path: InTransitPage.path,
+        builder: (context, state) => const InTransitPage(),
       ),
       GoRoute(
         path: '/mailbox/archive',

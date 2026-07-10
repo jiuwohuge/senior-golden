@@ -59,6 +59,8 @@ public class UserDomain extends AbstractAuditableDomain {
     private String writingStyle;
     @Schema(description = "邮箱是否已验证绑定")
     private Boolean emailVerified;
+    @Schema(description = "是否已完成首封信引导")
+    private Boolean firstLetterDone;
     /**
      * 个人简介
      */

@@ -8,4 +8,9 @@ import cn.nine.pros.post.biz.service.biz.support.GeoIpLookup;
 public interface GeoIpService {
 
     GeoIpLookup resolve(String ip);
+
+    /**
+     * GPS 经纬度反向地理编码为国家/城市；失败返回 empty，不抛异常。
+     */
+    GeoIpLookup reverseFromLatLng(Double latitude, Double longitude);
 }

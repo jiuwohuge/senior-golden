@@ -12,6 +12,7 @@ import '../../core/oss/oss_upload_service.dart';
 import '../../core/session/app_session.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../widgets/postal/postal.dart';
+import '../onboarding/first_letter_guide_page.dart';
 import '../shell/main_shell.dart'; // MainShellRoute
 import 'auth_repository.dart';
 import 'widgets/birth_year_picker_sheet.dart';
@@ -104,7 +105,13 @@ class _SocialProfileCompletePageState
             interestTagIds: _interestTagIds.toList(),
             avatarUrl: avatarKey,
           );
-      if (mounted) context.go(MainShellRoute.pathPostOffice);
+      if (mounted) {
+        final done =
+            ref.read(appSessionProvider).user.firstLetterDone == true;
+        context.go(
+          done ? MainShellRoute.pathPostOffice : FirstLetterGuidePage.path,
+        );
+      }
     } on ApiBusinessException catch (e) {
       if (mounted) {
         PostalSnack.show(context, e.message, tone: PostalSnackTone.error);

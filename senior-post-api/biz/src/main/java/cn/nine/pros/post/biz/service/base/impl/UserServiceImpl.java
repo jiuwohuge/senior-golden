@@ -144,6 +144,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
     }
 
     @Override
+    public void markFirstLetterDone(long userId) {
+        LocalDateTime now = LocalDateTime.now();
+        update(new LambdaUpdateWrapper<UserDomain>()
+                .eq(UserDomain::getId, userId)
+                .eq(UserDomain::getFirstLetterDone, false)
+                .set(UserDomain::getFirstLetterDone, true)
+                .set(UserDomain::getUpdatedAt, now)
+                .set(UserDomain::getUpdatedBy, userId));
+    }
+
+    @Override
     public void markLoginSuccess(long userId, String languageIfEmpty) {
         LocalDateTime now = LocalDateTime.now();
         LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>()

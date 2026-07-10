@@ -3655,6 +3655,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preferences saved'**
   String get settingsPreferencesSaved;
+
+  /// No description provided for @quotaClaimTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim today\'s free quota'**
+  String get quotaClaimTitle;
+
+  /// No description provided for @quotaClaimMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You can send {count} free letters each day. Claim today\'s quota before writing.'**
+  String quotaClaimMessage(int count);
+
+  /// No description provided for @quotaClaimButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim today\'s free quota'**
+  String get quotaClaimButton;
+
+  /// No description provided for @firstLetterGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your first letter'**
+  String get firstLetterGuideTitle;
+
+  /// No description provided for @firstLetterGuideSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a sincere letter through the post office — we\'ll match you with someone kind.'**
+  String get firstLetterGuideSubtitle;
+
+  /// No description provided for @firstLetterGuideHintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ideas to start'**
+  String get firstLetterGuideHintTitle;
+
+  /// No description provided for @firstLetterGuideHintBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a recent feeling, a small joy, or the kind of pen pal you\'d like to meet. Short and sincere is enough.'**
+  String get firstLetterGuideHintBody;
+
+  /// No description provided for @firstLetterGuideCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Start my first letter'**
+  String get firstLetterGuideCta;
+
+  /// No description provided for @firstLetterGuideSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get firstLetterGuideSkip;
+
+  /// No description provided for @firstLetterComposeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your first post-office letter. You can pick a free template and skin in the next step.'**
+  String get firstLetterComposeHint;
+
+  /// No description provided for @inTransitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters in transit'**
+  String get inTransitTitle;
+
+  /// No description provided for @inTransitLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load in-transit letters'**
+  String get inTransitLoadFailed;
+
+  /// No description provided for @inTransitEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in transit'**
+  String get inTransitEmptyTitle;
+
+  /// No description provided for @inTransitEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent and incoming letters will show progress here.'**
+  String get inTransitEmptySubtitle;
+
+  /// No description provided for @inTransitSectionOutbound.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent · not arrived'**
+  String get inTransitSectionOutbound;
+
+  /// No description provided for @inTransitSectionInbound.
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming · not arrived'**
+  String get inTransitSectionInbound;
+
+  /// No description provided for @inTransitSectionUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered · unread'**
+  String get inTransitSectionUnread;
+
+  /// No description provided for @inTransitSectionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No letters in this section'**
+  String get inTransitSectionEmpty;
+
+  /// No description provided for @inTransitEtaHours.
+  ///
+  /// In en, this message translates to:
+  /// **'About {hours} hours until arrival'**
+  String inTransitEtaHours(int hours);
+
+  /// No description provided for @writeDestinationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who are you writing to?'**
+  String get writeDestinationTitle;
+
+  /// No description provided for @writeDestinationPostOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'To a kindred spirit'**
+  String get writeDestinationPostOffice;
+
+  /// No description provided for @writeDestinationPostOfficeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop it in the post office for a match'**
+  String get writeDestinationPostOfficeSub;
+
+  /// No description provided for @writeDestinationSelfTime.
+  ///
+  /// In en, this message translates to:
+  /// **'To my future self'**
+  String get writeDestinationSelfTime;
+
+  /// No description provided for @writeDestinationSelfTimeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A time letter that opens on a chosen date'**
+  String get writeDestinationSelfTimeSub;
+
+  /// No description provided for @composeAddParagraph.
+  ///
+  /// In en, this message translates to:
+  /// **'Add paragraph'**
+  String get composeAddParagraph;
+
+  /// No description provided for @composeRemoveParagraph.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove paragraph'**
+  String get composeRemoveParagraph;
+
+  /// No description provided for @composeParagraphLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paragraph {n}'**
+  String composeParagraphLabel(int n);
+
+  /// No description provided for @composeTemplatePickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter templates'**
+  String get composeTemplatePickerTitle;
+
+  /// No description provided for @composeTemplateEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No templates available'**
+  String get composeTemplateEmpty;
+
+  /// No description provided for @composeTemplateApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled into the body — edit as you like'**
+  String get composeTemplateApplied;
+
+  /// No description provided for @composeStepMailSubtitleSkins.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose paper and template; delivery speed follows distance and relationship.'**
+  String get composeStepMailSubtitleSkins;
+
+  /// No description provided for @commerceProductSkinLinen.
+  ///
+  /// In en, this message translates to:
+  /// **'Linen paper'**
+  String get commerceProductSkinLinen;
+
+  /// No description provided for @commerceProductTemplateEmotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Heartfelt note'**
+  String get commerceProductTemplateEmotion;
+
+  /// No description provided for @commerceProductTemplateNarrative.
+  ///
+  /// In en, this message translates to:
+  /// **'Story sketch'**
+  String get commerceProductTemplateNarrative;
+
+  /// No description provided for @authRegisterSummaryLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get authRegisterSummaryLocation;
+
+  /// No description provided for @authRegisterLocationCaptured.
+  ///
+  /// In en, this message translates to:
+  /// **'Captured (optional)'**
+  String get authRegisterLocationCaptured;
 }
 
 class _AppLocalizationsDelegate

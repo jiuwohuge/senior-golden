@@ -121,6 +121,7 @@ public class AppAuthService {
         user.setStatus(1);
         user.setStaffRole(0);
         user.setEmailVerified(false);
+        user.setFirstLetterDone(false);
         user.setLanguage(resolveClientLanguageTag());
         user.setDelFlag(false);
         LocalDateTime now = LocalDateTime.now();
@@ -131,7 +132,8 @@ public class AppAuthService {
         user.setLastLoginAt(now);
         String registerIp = MyRequestContextHolder.ipAddress();
         user.setRegisterIp(registerIp);
-        applyGeoToUser(user, geoIpService.resolve(registerIp), true);
+        // GPS 优先：有经纬度则反查国家；否则 IP；再否则保留客户端 countryCode
+        applyClientGeoThenIp(user, body.getLatitude(), body.getLongitude(), registerIp);
         userService.save(user);
         applyRegisterAvatarIfPresent(user.getId(), body.getAvatarUrl());
 
@@ -430,6 +432,11 @@ public class AppAuthService {
             changed = true;
             userRowChanged = true;
         }
+        if (body.getLatitude() != null || body.getLongitude() != null) {
+            applyProfileGeoPatch(row, body.getLatitude(), body.getLongitude());
+            changed = true;
+            userRowChanged = true;
+        }
         if (body.getBio() != null) {
             row.setBio(body.getBio().trim());
             changed = true;
@@ -676,6 +683,42 @@ public class AppAuthService {
         }
     }
 
+    /**
+     * 注册定位优先级：客户端 GPS 反查 → IP → 已填 countryCode。
+     */
+    private void applyClientGeoThenIp(UserDomain user, Double latitude, Double longitude, String registerIp) {
+        if (latitude != null && longitude != null) {
+            user.setLatitude(latitude);
+            user.setLongitude(longitude);
+            GeoIpLookup gps = geoIpService.reverseFromLatLng(latitude, longitude);
+            applyGeoToUser(user, gps, true);
+            log.info("register geo from GPS, country={}", user.getCountryCode());
+        }
+        applyGeoToUser(user, geoIpService.resolve(registerIp), true);
+    }
+
+    /** 资料补丁：写入坐标并在国家为空时反查。 */
+    private void applyProfileGeoPatch(UserDomain row, Double latitude, Double longitude) {
+        if (latitude != null) {
+            row.setLatitude(latitude);
+        }
+        if (longitude != null) {
+            row.setLongitude(longitude);
+        }
+        Double lat = row.getLatitude();
+        Double lng = row.getLongitude();
+        if (lat == null || lng == null) {
+            return;
+        }
+        GeoIpLookup gps = geoIpService.reverseFromLatLng(lat, lng);
+        if (!StringUtils.hasText(row.getCountryCode()) && gps.hasCountry()) {
+            row.setCountryCode(gps.countryCode());
+        }
+        if (!StringUtils.hasText(row.getCity()) && StringUtils.hasText(gps.city())) {
+            row.setCity(gps.city());
+        }
+    }
+
     private void applyGeoUpdateIfEmpty(long userId, GeoIpLookup geo) {
         if (geo == null || (!geo.hasCountry() && geo.latitude() == null)) {
             return;
@@ -805,6 +848,7 @@ public class AppAuthService {
                 .language(dto.getLanguage())
                 .writingStyle(dto.getWritingStyle())
                 .emailVerified(Boolean.TRUE.equals(dto.getEmailVerified()))
+                .firstLetterDone(Boolean.TRUE.equals(dto.getFirstLetterDone()))
                 .bio(dto.getBio())
                 .avatarUrl(av)
                 .isVip(dto.getIsVip());

@@ -1,10 +1,8 @@
 package cn.nine.pros.post.client.model.input.app;
 
 import cn.nine.pros.post.client.common.enums.LetterMode;
-import cn.nine.pros.post.client.common.enums.LetterPhysicalType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -24,10 +22,9 @@ public class AppSendLetterInDto {
     private String content;
 
     /**
-     * 见 {@link LetterPhysicalType}：展示形态；投递速度由 §6.1 决定。
+     * 兼容旧客户端；服务端统一强制 STANDARD（§6.2，速度仅由距离+关系决定）。
      */
-    @NotNull
-    @Schema(description = "LetterPhysicalType.code：1=REGISTERED 2=STANDARD", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "已废弃：忽略挂号/平邮；服务端固定 STANDARD=2")
     private Integer letterType;
 
     @Schema(description = "回复的原信件 ID；若填写则仅收信人可发，且收件人自动为原发件人")

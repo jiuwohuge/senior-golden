@@ -308,6 +308,14 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
     }
 
     @Override
+    public long countRepliesSentByUser(long userId) {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getFromUserId, userId)
+                .isNotNull(LetterDomain::getParentLetterId));
+    }
+
+    @Override
     public long countExchangeBetween(long userIdA, long userIdB) {
         if (userIdA == userIdB) {
             return 0;

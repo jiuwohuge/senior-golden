@@ -48,6 +48,12 @@ public class AppRegisterInDto {
     @Schema(description = "国家代码 ISO 3166-1 alpha-2，可空")
     private String countryCode;
 
+    @Schema(description = "可选 GPS 纬度（优先于 IP 定位）")
+    private Double latitude;
+
+    @Schema(description = "可选 GPS 经度（优先于 IP 定位）")
+    private Double longitude;
+
     @NotNull
     @AssertTrue(message = "须同意用户协议与隐私政策")
     @Schema(description = "是否已同意协议")

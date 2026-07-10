@@ -6,6 +6,7 @@ import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.service.biz.AppPostOfficeService;
 import cn.nine.pros.post.client.api.app.AppPostOfficeApi;
 import cn.nine.pros.post.client.model.out.AppPostOfficeHomeVO;
+import cn.nine.pros.post.client.model.out.DailyQuotaClaimVO;
 import cn.nine.pros.post.client.model.out.PostOfficeInTransitItemVO;
 import cn.nine.pros.post.client.model.out.PostOfficeRelationMessageVO;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,11 @@ public class AppPostOfficeController implements AppPostOfficeApi {
     @Override
     public List<PostOfficeInTransitItemVO> inTransit() {
         return appPostOfficeService.listInTransit(requireUserId());
+    }
+
+    @Override
+    public DailyQuotaClaimVO claimDailyQuota() {
+        return appPostOfficeService.claimDailyQuota(requireUserId());
     }
 
     private Long requireUserId() {

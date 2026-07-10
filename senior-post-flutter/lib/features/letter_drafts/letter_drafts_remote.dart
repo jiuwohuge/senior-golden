@@ -33,7 +33,8 @@ class LetterDraftsRemoteRepository {
           'toUserId': int.parse(toUserId),
         'contentJson': <String, dynamic>{
           'content': content,
-          'letterType': letterType == LetterType.registered ? 1 : 2,
+          // M6：草稿也固定 STANDARD，不再写入挂号。
+          'letterType': 2,
         },
       },
     );

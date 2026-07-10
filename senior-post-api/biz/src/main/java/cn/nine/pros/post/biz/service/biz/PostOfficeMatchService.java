@@ -255,6 +255,13 @@ public class PostOfficeMatchService {
         if (score == Double.NEGATIVE_INFINITY) {
             return null;
         }
+        // §7.5 / §2.8：新用户首封信优先匹配高回信意愿用户
+        if (senderProtected) {
+            long replies = letterService.countRepliesSentByUser(cand.getId());
+            long sent = letterService.countLettersSentByUser(cand.getId());
+            double replyRate = sent <= 0 ? 0.0 : Math.min(1.0, (double) replies / (double) sent);
+            score += 0.15 * replyRate;
+        }
         return score;
     }
 

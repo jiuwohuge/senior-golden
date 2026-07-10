@@ -28,6 +28,15 @@ public class AppPostOfficeHomeVO {
     @Schema(description = "今日已发送（含回信）")
     private Integer sentToday;
 
+    @Schema(description = "今日是否已领取免费额度")
+    private Boolean quotaClaimedToday;
+
+    @Schema(description = "剩余可发（未领取时为 0）")
+    private Integer remainingQuota;
+
+    @Schema(description = "是否已完成首封信引导")
+    private Boolean firstLetterDone;
+
     @Schema(description = "关系消息摘要条数（笔友申请等）")
     private Integer relationMessageCount;
 

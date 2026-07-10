@@ -13,6 +13,7 @@ import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
+import '../../widgets/letter/letter_compose_editor.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../relation/relation_display_label.dart';
@@ -30,84 +31,6 @@ String? _postalApiUserMessage(Object error) {
   }
   if (error is DioException) return error.message;
   return null;
-}
-
-/// 回信邮种：高对比选中态 + 副标题，避免主题 [ChoiceChip] 选中后字色不可读。
-Widget _replyMailKindChip({
-  required BuildContext context,
-  required String title,
-  required String subtitle,
-  required bool selected,
-  required VoidCallback onTap,
-}) {
-  final bg = selected ? PostalTokens.postboxGreen : PostalTokens.paperCard;
-  final border = selected
-      ? PostalTokens.postboxGreen
-      : PostalTokens.perforationLine;
-  final titleColor = selected ? Colors.white : PostalTokens.inkNavy;
-  final subColor = selected
-      ? Colors.white.withValues(alpha: 0.9)
-      : PostalTokens.inkSecondary;
-
-  return Material(
-    color: Colors.transparent,
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: PostalTokens.shapeSm,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: PostalTokens.shapeSm,
-          border: Border.all(color: border, width: selected ? 2 : 1.2),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: PostalTokens.postboxGreen.withValues(alpha: 0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: titleColor,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                if (selected)
-                  Icon(
-                    Icons.check_circle_rounded,
-                    size: 22,
-                    color: Colors.white.withValues(alpha: 0.95),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: subColor,
-                fontWeight: FontWeight.w600,
-                height: 1.3,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
 }
 
 class LetterDetailPage extends ConsumerStatefulWidget {
@@ -133,7 +56,6 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
   bool _favoriteBusy = false;
   bool _favorited = false;
   bool _showOpenRitual = false;
-  LetterType _replyType = LetterType.standard;
 
   @override
   void initState() {
@@ -276,6 +198,8 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                     ),
                     const SizedBox(height: 12),
                     PostalCardEnvelope(
+                      // §12.6 读信页按 skinId 渲染信纸底色。
+                      backgroundColor: letterSkinBackground(letter.skinId),
                       header: Row(
                         children: [
                           PostalAvatar(
@@ -478,61 +402,6 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                           color: PostalTokens.inkSecondary,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Builder(
-                        builder: (context) {
-                          final session = ref.watch(appSessionProvider);
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: _replyMailKindChip(
-                                      context: context,
-                                      title: 'Standard',
-                                      subtitle: 'Free · delayed delivery',
-                                      selected:
-                                          _replyType == LetterType.standard,
-                                      onTap: () => setState(
-                                        () => _replyType = LetterType.standard,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: _replyMailKindChip(
-                                      context: context,
-                                      title: 'Registered',
-                                      subtitle: session.isVip
-                                          ? 'VIP · filing mark · delayed'
-                                          : 'Filing mark · delayed',
-                                      selected:
-                                          _replyType == LetterType.registered,
-                                      onTap: () => setState(
-                                        () =>
-                                            _replyType = LetterType.registered,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _replyType == LetterType.standard
-                                    ? 'Standard mail travels by the delivery formula; the recipient may see sealed text until it arrives.'
-                                    : 'Registered mail keeps a filing mark; delivery time still follows the slow-post formula.',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: PostalTokens.inkTertiary,
-                                      height: 1.4,
-                                    ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
                       const SizedBox(height: 8),
                       PostalTextField(
                         controller: _reply,
@@ -564,7 +433,6 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                       .sendLetter(
                                         toUserId: letter.peer.id,
                                         content: text,
-                                        type: _replyType,
                                         parentLetterId: letter.id,
                                       );
                                   if (!context.mounted) return;

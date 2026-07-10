@@ -125,7 +125,7 @@ class _DraftCardState extends ConsumerState<_DraftCard> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '${draft.mode} · ${draft.letterType == LetterType.registered ? l10n.sendLetterRegisteredMail : l10n.sendLetterStandardPost}',
+            '${draft.mode}',
             style: Theme.of(
               context,
             ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),

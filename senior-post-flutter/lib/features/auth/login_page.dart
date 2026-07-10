@@ -9,7 +9,9 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/auth/google_sign_in_facade.dart';
 import '../../core/config/debug_api_base_url_dialog.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
+import '../onboarding/first_letter_guide_page.dart';
 import '../shell/main_shell.dart';
 import 'auth_consent_provider.dart';
 import 'auth_repository.dart';
@@ -58,7 +60,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
       return;
     }
-    context.go(MainShellRoute.pathPostOffice);
+    context.go(
+      ref.read(appSessionProvider).user.firstLetterDone == true
+          ? MainShellRoute.pathPostOffice
+          : FirstLetterGuidePage.path,
+    );
   }
 
   Future<void> _submit() async {

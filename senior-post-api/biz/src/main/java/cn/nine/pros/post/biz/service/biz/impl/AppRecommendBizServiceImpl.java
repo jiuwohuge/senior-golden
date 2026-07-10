@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.List;
 import java.util.Set;
 
@@ -69,6 +70,9 @@ public class AppRecommendBizServiceImpl implements AppRecommendBizService {
         List<DirectoryUserItemVO> out = new ArrayList<>();
         for (DailyRecommendationDomain row : rows) {
             if (row.getTargetUserId() == null) {
+                continue;
+            }
+            if (Objects.equals(row.getTargetUserId(), viewerUserId)) {
                 continue;
             }
             UserDomain u = userService.getById(row.getTargetUserId());

@@ -4,21 +4,39 @@ import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
+import '../../core/api/api_exception.dart';
 import '../../widgets/postal/postal_button.dart';
 import '../../widgets/postal/postal_card_envelope.dart';
+import '../../widgets/postal/postal_snack.dart';
 import '../compose/compose_intent.dart';
-import '../shell/main_shell.dart';
 import 'post_office_remote.dart';
 
 /// 邮局首页：一屏一主张 + 写信主 CTA + 两张摘要卡（§11）。
-class PostOfficeHomePage extends ConsumerWidget {
+class PostOfficeHomePage extends ConsumerStatefulWidget {
   const PostOfficeHomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PostOfficeHomePage> createState() => _PostOfficeHomePageState();
+}
+
+class _PostOfficeHomePageState extends ConsumerState<PostOfficeHomePage> {
+  bool _claimDialogScheduled = false;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final homeAsync = ref.watch(postOfficeHomeProvider);
+
+    // 每日额度未领取：不可关闭弹窗。
+    homeAsync.whenData((h) {
+      if (!h.quotaClaimedToday && !_claimDialogScheduled) {
+        _claimDialogScheduled = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showQuotaClaimDialog(h);
+        });
+      }
+    });
 
     final greeting = homeAsync.maybeWhen(
       data: (h) => h.greeting.isNotEmpty ? h.greeting : l10n.postOfficeGreeting,
@@ -64,11 +82,7 @@ class PostOfficeHomePage extends ConsumerWidget {
           label: l10n.postOfficeWriteLetter,
           icon: Icons.edit_outlined,
           variant: PostalButtonVariant.primaryLarge,
-          // 默认进邮局模式（POST_OFFICE）
-          onPressed: () => context.push(
-            '/compose',
-            extra: const ComposeIntent(kind: ComposeKind.postOffice),
-          ),
+          onPressed: () => _showWriteDestinationSheet(context),
         ),
         const SizedBox(height: 12),
         Center(
@@ -89,9 +103,181 @@ class PostOfficeHomePage extends ConsumerWidget {
         _SummaryCard(
           icon: Icons.local_shipping_outlined,
           title: l10n.postOfficeInTransitSummary(inTransit),
-          onTap: () => context.go(MainShellRoute.pathMailbox),
+          onTap: () => context.push('/post-office/in-transit'),
         ),
       ],
+    );
+  }
+
+  /// §11.5 首页写信分流：寄给有缘人 / 寄给未来的自己（不含 DIRECT）。
+  Future<void> _showWriteDestinationSheet(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: PostalTokens.paperEnvelope,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.writeDestinationTitle,
+                  style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                PostalCardEnvelope(
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    context.push(
+                      '/compose',
+                      extra: const ComposeIntent(kind: ComposeKind.postOffice),
+                    );
+                  },
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 22,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.local_post_office_outlined,
+                        size: 32,
+                        color: PostalTokens.postboxGreen,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.writeDestinationPostOffice,
+                              style: Theme.of(ctx).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.writeDestinationPostOfficeSub,
+                              style: Theme.of(ctx).textTheme.bodySmall
+                                  ?.copyWith(color: PostalTokens.inkSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                PostalCardEnvelope(
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    context.push(
+                      '/compose',
+                      extra: const ComposeIntent(
+                        kind: ComposeKind.selfTimeLetter,
+                      ),
+                    );
+                  },
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 22,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.schedule_send_outlined,
+                        size: 32,
+                        color: PostalTokens.kraftBrown,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.writeDestinationSelfTime,
+                              style: Theme.of(ctx).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.writeDestinationSelfTimeSub,
+                              style: Theme.of(ctx).textTheme.bodySmall
+                                  ?.copyWith(color: PostalTokens.inkSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showQuotaClaimDialog(PostOfficeHomeData home) async {
+    final l10n = AppLocalizations.of(context)!;
+    var claiming = false;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dlgCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            return PopScope(
+              canPop: false,
+              child: AlertDialog(
+                icon: Icon(
+                  Icons.card_giftcard_outlined,
+                  color: PostalTokens.postboxGreen,
+                  size: 48,
+                ),
+                title: Text(l10n.quotaClaimTitle),
+                content: Text(l10n.quotaClaimMessage(home.dailyLetterQuota)),
+                actions: [
+                  PostalButton(
+                    label: l10n.quotaClaimButton,
+                    busy: claiming,
+                    onPressed: claiming
+                        ? null
+                        : () async {
+                            setLocal(() => claiming = true);
+                            try {
+                              await ref
+                                  .read(postOfficeRemoteRepositoryProvider)
+                                  .claimDailyQuota();
+                              ref.invalidate(postOfficeHomeProvider);
+                              if (dlgCtx.mounted) Navigator.of(dlgCtx).pop();
+                            } catch (e) {
+                              final biz = apiBusinessExceptionFrom(e);
+                              if (ctx.mounted) {
+                                PostalSnack.show(
+                                  ctx,
+                                  biz?.message ?? e.toString(),
+                                  tone: PostalSnackTone.error,
+                                );
+                              }
+                              setLocal(() => claiming = false);
+                            }
+                          },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -815,5 +815,62 @@
   "ritualOpenLetter": "A letter is waiting to be opened",
   "ritualDeliverySent": "Your letter is on its way",
   "composeSkinPickerTitle": "Choose letter skin",
-  "settingsPreferencesSaved": "Preferences saved"
+  "settingsPreferencesSaved": "Preferences saved",
+  "quotaClaimTitle": "Claim today's free quota",
+  "quotaClaimMessage": "You can send {count} free letters each day. Claim today's quota before writing.",
+  "@quotaClaimMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quotaClaimButton": "Claim today's free quota",
+  "firstLetterGuideTitle": "Write your first letter",
+  "firstLetterGuideSubtitle": "Send a sincere letter through the post office — we'll match you with someone kind.",
+  "firstLetterGuideHintTitle": "Ideas to start",
+  "firstLetterGuideHintBody": "Share a recent feeling, a small joy, or the kind of pen pal you'd like to meet. Short and sincere is enough.",
+  "firstLetterGuideCta": "Start my first letter",
+  "firstLetterGuideSkip": "Maybe later",
+  "firstLetterComposeHint": "This is your first post-office letter. You can pick a free template and skin in the next step.",
+  "inTransitTitle": "Letters in transit",
+  "inTransitLoadFailed": "Couldn't load in-transit letters",
+  "inTransitEmptyTitle": "Nothing in transit",
+  "inTransitEmptySubtitle": "Sent and incoming letters will show progress here.",
+  "inTransitSectionOutbound": "Sent · not arrived",
+  "inTransitSectionInbound": "Incoming · not arrived",
+  "inTransitSectionUnread": "Delivered · unread",
+  "inTransitSectionEmpty": "No letters in this section",
+  "inTransitEtaHours": "About {hours} hours until arrival",
+  "@inTransitEtaHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "writeDestinationTitle": "Who are you writing to?",
+  "writeDestinationPostOffice": "To a kindred spirit",
+  "writeDestinationPostOfficeSub": "Drop it in the post office for a match",
+  "writeDestinationSelfTime": "To my future self",
+  "writeDestinationSelfTimeSub": "A time letter that opens on a chosen date",
+  "composeAddParagraph": "Add paragraph",
+  "composeRemoveParagraph": "Remove paragraph",
+  "composeParagraphLabel": "Paragraph {n}",
+  "@composeParagraphLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "composeTemplatePickerTitle": "Letter templates",
+  "composeTemplateEmpty": "No templates available",
+  "composeTemplateApplied": "Filled into the body — edit as you like",
+  "composeStepMailSubtitleSkins": "Choose paper and template; delivery speed follows distance and relationship.",
+  "commerceProductSkinLinen": "Linen paper",
+  "commerceProductTemplateEmotion": "Heartfelt note",
+  "commerceProductTemplateNarrative": "Story sketch",
+  "authRegisterSummaryLocation": "Location",
+  "authRegisterLocationCaptured": "Captured (optional)"
 }

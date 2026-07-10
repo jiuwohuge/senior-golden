@@ -123,9 +123,13 @@ String commerceProductTitle(dynamic l10n, String titleKey) {
   return switch (titleKey) {
     'commerce.product.skin.default' => l10n.commerceProductSkinDefault,
     'commerce.product.skin.vintage' => l10n.commerceProductSkinVintage,
+    'commerce.product.skin.linen' => l10n.commerceProductSkinLinen,
     'commerce.product.font.default' => l10n.commerceProductFontDefault,
     'commerce.product.font.handwriting' => l10n.commerceProductFontHandwriting,
     'commerce.product.export.pdf' => l10n.commerceProductExportPdf,
+    'commerce.product.template.emotion' => l10n.commerceProductTemplateEmotion,
+    'commerce.product.template.narrative' =>
+      l10n.commerceProductTemplateNarrative,
     _ => titleKey.replaceAll('commerce.product.', '').replaceAll('.', ' '),
   };
 }

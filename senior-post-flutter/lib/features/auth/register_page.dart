@@ -1,7 +1,7 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
@@ -11,7 +11,9 @@ import '../../core/api/api_exception.dart';
 import '../../core/bootstrap/app_bootstrap.dart';
 import '../../core/i18n/country_from_locale.dart';
 import '../../core/oss/oss_upload_service.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
+import '../onboarding/first_letter_guide_page.dart';
 import '../profile/avatar_crop_page.dart';
 import '../shell/main_shell.dart';
 import 'auth_repository.dart';
@@ -53,10 +55,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   bool _agreed = false;
   bool _busy = false;
   final Set<int> _interestTagIds = {};
+  String? _manualCountryCode;
+  double? _latitude;
+  double? _longitude;
+  bool _geoTried = false;
 
   @override
   void initState() {
     super.initState();
+    _tryCaptureLocation();
     void invalidateRegistration() {
       if (!_accountRegistered) return;
       setState(() {
@@ -79,6 +86,35 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     _email.addListener(invalidateRegistration);
     _email.addListener(clearEmailAvailability);
     _password.addListener(invalidateRegistration);
+  }
+
+  /// 可选 GPS：失败不阻塞注册，回落 locale / 手动国家。
+  Future<void> _tryCaptureLocation() async {
+    if (_geoTried || kIsWeb) return;
+    _geoTried = true;
+    try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return;
+      }
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 8),
+        ),
+      );
+      if (!mounted) return;
+      setState(() {
+        _latitude = pos.latitude;
+        _longitude = pos.longitude;
+      });
+    } catch (e) {
+      debugPrint('register geo skipped: $e');
+    }
   }
 
   @override
@@ -134,7 +170,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       setState(() => _step += 1);
       return;
     }
-    await _submit(l10n, autoCc);
+    await _submit(l10n, _manualCountryCode ?? autoCc);
   }
 
   bool _validateStep(
@@ -295,6 +331,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           gender: _gender!,
           birthYear: _birthYear!,
           countryCode: autoCountryCode,
+          latitude: _latitude,
+          longitude: _longitude,
           agreedTerms: true,
           interestTagIds: _interestTagIds.toList(),
           avatarUrl: _avatarObjectKey,
@@ -344,7 +382,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           await _uploadAvatarIfPossible(l10n, autoCountryCode);
         }
       }
-      if (mounted) context.go(MainShellRoute.pathPostOffice);
+      if (!mounted) return;
+      final done = ref.read(appSessionProvider).user.firstLetterDone == true;
+      context.go(
+        done ? MainShellRoute.pathPostOffice : FirstLetterGuidePage.path,
+      );
     } on ApiBusinessException catch (e) {
       if (mounted) {
         PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
@@ -654,7 +696,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _reviewCard(context, l10n, countryLabel),
+              _reviewCard(
+                context,
+                l10n,
+                countryLabel,
+                bootstrap.countries,
+                Localizations.localeOf(context).languageCode,
+              ),
               const SizedBox(height: 12),
               PostalCheckboxField(
                 value: _agreed,
@@ -685,6 +733,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     BuildContext context,
     AppLocalizations l10n,
     String countryLabel,
+    List<CountryItem> countries,
+    String lang,
   ) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -723,7 +773,69 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     '${DateTime.now().year - _birthYear!}',
                   ),
           ),
-          _summaryRow(context, l10n.authRegisterSummaryCountry, countryLabel),
+          // 国家：locale 启发式失败或需覆盖时，可手动选择。
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 96,
+                  child: Text(
+                    l10n.authRegisterSummaryCountry,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: PostalTokens.inkSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    // ignore: deprecated_member_use
+                    value: () {
+                      final codes = countries.map((c) => c.code).toSet();
+                      final preferred = _manualCountryCode;
+                      if (preferred != null && codes.contains(preferred)) {
+                        return preferred;
+                      }
+                      for (final c in countries) {
+                        if (c.displayName(lang) == countryLabel ||
+                            c.code == countryLabel) {
+                          return c.code;
+                        }
+                      }
+                      return codes.isEmpty ? null : codes.first;
+                    }(),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                    ),
+                    items: countries
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c.code,
+                            child: Text(c.displayName(lang)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: _busy
+                        ? null
+                        : (v) => setState(() => _manualCountryCode = v),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_latitude != null && _longitude != null)
+            _summaryRow(
+              context,
+              l10n.authRegisterSummaryLocation,
+              l10n.authRegisterLocationCaptured,
+            ),
           _summaryRow(
             context,
             l10n.authRegisterSummaryInterests,
@@ -978,16 +1090,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 locale,
                 bootstrap.countries,
               );
+              final effectiveCc = _manualCountryCode ?? autoCc;
               CountryItem? countryItem;
               for (final c in bootstrap.countries) {
-                if (c.code == autoCc) {
+                if (c.code == effectiveCc) {
                   countryItem = c;
                   break;
                 }
               }
               final countryLabel =
                   countryItem?.displayName(locale.languageCode) ??
-                  autoCc ??
+                  effectiveCc ??
                   '—';
               final copy = _stepCopy(l10n);
               final canNext = switch (_step) {
@@ -1013,7 +1126,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   subtitle: copy.$2,
                   footerHint: footerHint,
                   onBack: _busy ? null : _back,
-                  onNext: () => _next(l10n, autoCc, years, bootstrap),
+                  onNext: () => _next(l10n, effectiveCc, years, bootstrap),
                   nextEnabled: canNext && !(_step == 4 && years.isEmpty),
                   nextBusy: _busy || _avatarUploading,
                   isLastStep: _step == _kRegisterSteps - 1,
@@ -1023,7 +1136,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     years,
                     bootstrap,
                     countryLabel,
-                    autoCc,
+                    effectiveCc,
                   ),
                 ),
               );

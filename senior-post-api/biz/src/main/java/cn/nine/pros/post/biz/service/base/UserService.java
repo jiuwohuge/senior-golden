@@ -36,6 +36,9 @@ public interface UserService extends IService<UserDomain> {
     /** 标记邮箱已验证。 */
     void markEmailVerified(long userId);
 
+    /** 标记首封信引导已完成。 */
+    void markFirstLetterDone(long userId);
+
     /** 登录成功：刷新 last_login_at，清除删除申请；可选补全 language。 */
     void markLoginSuccess(long userId, String languageIfEmpty);
 

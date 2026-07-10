@@ -1,8 +1,11 @@
 package cn.nine.pros.post.biz.service.biz.impl;
 
+import cn.nine.commons.basic.exception.unchecked.BusinessException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
+import cn.nine.pros.post.biz.model.domain.DailyQuotaClaimDomain;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.service.base.ConfigService;
+import cn.nine.pros.post.biz.service.base.DailyQuotaClaimService;
 import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.UserService;
@@ -14,6 +17,7 @@ import cn.nine.pros.post.client.common.enums.LetterBizStatus;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.out.AppPostOfficeHomeVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
+import cn.nine.pros.post.client.model.out.DailyQuotaClaimVO;
 import cn.nine.pros.post.client.model.out.PostOfficeInTransitItemVO;
 import cn.nine.pros.post.client.model.out.PostOfficeRelationMessageVO;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -45,13 +50,25 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
     private final AppRelationBizService appRelationBizService;
     private final UserService userService;
     private final OssDisplayUrlService ossDisplayUrlService;
+    private final DailyQuotaClaimService dailyQuotaClaimService;
 
     @Override
     public AppPostOfficeHomeVO home(long userId) {
-        LocalDateTime dayStart = LocalDate.now().atStartOfDay();
-        LocalDateTime dayEnd = LocalDate.now().atTime(LocalTime.MAX);
+        LocalDate today = LocalDate.now();
+        LocalDateTime dayStart = today.atStartOfDay();
+        LocalDateTime dayEnd = today.atTime(LocalTime.MAX);
 
+        int quota = configService.getInt(LETTER_DAILY_QUOTA_KEY, DEFAULT_DAILY_LETTER_QUOTA);
         long sentToday = letterService.countSentQuotaByFromUserBetween(userId, dayStart, dayEnd);
+        boolean claimed = dailyQuotaClaimService.hasClaimed(userId, today);
+        UserDTO user = userService.findById(userId);
+        boolean vip = user != null && Boolean.TRUE.equals(user.getIsVip());
+        boolean effectiveClaimed = claimed || vip;
+        int remaining = effectiveClaimed ? Math.max(0, quota - (int) sentToday) : 0;
+        if (vip) {
+            remaining = quota;
+        }
+
         long outboundInTransit = letterService.countByFromUserAndStatus(
                 userId, LetterBizStatus.DELIVERING.getCode());
         long outboundPending = letterService.countByFromUserAndStatus(
@@ -66,15 +83,19 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
         AppPostOfficeHomeVO vo = AppPostOfficeHomeVO.builder()
                 .greeting(appMessages.get("app.postOffice.greeting"))
                 .todayHint(appMessages.get("app.postOffice.todayHint"))
-                .dailyLetterQuota(configService.getInt(LETTER_DAILY_QUOTA_KEY, DEFAULT_DAILY_LETTER_QUOTA))
+                .dailyLetterQuota(quota)
                 .sentToday((int) sentToday)
+                .quotaClaimedToday(effectiveClaimed)
+                .remainingQuota(remaining)
+                .firstLetterDone(user != null && Boolean.TRUE.equals(user.getFirstLetterDone()))
                 .relationMessageCount(relationCount)
                 .inTransitCount(inTransit)
                 .outboundInTransit((int) (outboundInTransit + outboundPending))
                 .inboundInTransit((int) inboundInTransit)
                 .unreadDelivered((int) unreadDelivered)
                 .build();
-        log.debug("post-office home userId={}, sentToday={}, inTransit={}", userId, sentToday, inTransit);
+        log.debug("post-office home userId={}, claimed={}, sentToday={}, inTransit={}",
+                userId, effectiveClaimed, sentToday, inTransit);
         return vo;
     }
 
@@ -92,6 +113,27 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
         return out;
     }
 
+    @Override
+    public DailyQuotaClaimVO claimDailyQuota(long userId) {
+        int quota = configService.getInt(LETTER_DAILY_QUOTA_KEY, DEFAULT_DAILY_LETTER_QUOTA);
+        LocalDate today = LocalDate.now();
+        DailyQuotaClaimDomain row = dailyQuotaClaimService.claim(userId, today, quota, userId);
+        if (row == null) {
+            throw new BusinessException(appMessages.get("app.error.letter.quotaClaimFailed"));
+        }
+        LocalDateTime dayStart = today.atStartOfDay();
+        LocalDateTime dayEnd = today.atTime(LocalTime.MAX);
+        long sentToday = letterService.countSentQuotaByFromUserBetween(userId, dayStart, dayEnd);
+        int remaining = Math.max(0, quota - (int) sentToday);
+        log.info("daily quota claim ok, userId={}, remaining={}", userId, remaining);
+        return DailyQuotaClaimVO.builder()
+                .claimed(true)
+                .dailyLetterQuota(quota)
+                .sentToday((int) sentToday)
+                .remainingQuota(remaining)
+                .build();
+    }
+
     private void appendOutbound(long userId, List<PostOfficeInTransitItemVO> out) {
         List<LetterDomain> sent = letterService.listSentForUser(userId, 100);
         for (LetterDomain l : sent) {
@@ -99,9 +141,6 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
             if (st != LetterBizStatus.DELIVERING.getCode()
                     && st != LetterBizStatus.PENDING.getCode()
                     && st != LetterBizStatus.MATCHED.getCode()) {
-                continue;
-            }
-            if (l.getToUserId() == null) {
                 continue;
             }
             out.add(buildTransitItem(userId, l, IN_TRANSIT_TYPE_OUT));
@@ -136,11 +175,33 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
                 ? (l.getToUserId() != null ? l.getToUserId() : 0L)
                 : (l.getFromUserId() != null ? l.getFromUserId() : 0L);
         String preview = TextPreviewSupport.previewOrHidden(false, l.getContent(), 120);
+        LocalDateTime sent = toLocalDateTime(l.getCreatedAt());
+        LocalDateTime eta = toLocalDateTime(l.getExpectedArrivalTime());
+        LocalDateTime now = LocalDateTime.now();
+        Double etaHours = null;
+        Double progress = null;
+        if (eta != null && itemType != IN_TRANSIT_TYPE_UNREAD) {
+            long minutes = ChronoUnit.MINUTES.between(now, eta);
+            etaHours = Math.max(0, minutes) / 60.0;
+            if (sent != null && eta.isAfter(sent)) {
+                long total = ChronoUnit.MINUTES.between(sent, eta);
+                long done = ChronoUnit.MINUTES.between(sent, now);
+                if (total > 0) {
+                    progress = Math.min(1.0, Math.max(0.0, (double) done / (double) total));
+                }
+            }
+        } else if (itemType == IN_TRANSIT_TYPE_UNREAD) {
+            progress = 1.0;
+            etaHours = 0.0;
+        }
         return PostOfficeInTransitItemVO.builder()
                 .itemType(itemType)
                 .letterId(l.getId())
                 .peer(toPublic(viewerUserId, peerId))
-                .expectedArrivalTime(toLocalDateTime(l.getExpectedArrivalTime()))
+                .sentTime(sent)
+                .expectedArrivalTime(eta)
+                .etaRelativeHours(etaHours)
+                .progressRatio(progress)
                 .preview(preview)
                 .build();
     }

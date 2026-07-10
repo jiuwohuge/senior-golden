@@ -803,5 +803,62 @@
   "ritualOpenLetter": "有一封信等待拆阅",
   "ritualDeliverySent": "信件已寄出",
   "composeSkinPickerTitle": "选择信纸皮肤",
-  "settingsPreferencesSaved": "偏好已保存"
+  "settingsPreferencesSaved": "偏好已保存",
+  "quotaClaimTitle": "领取今日免费额度",
+  "quotaClaimMessage": "每天可免费寄出 {count} 封信。请先领取今日额度后再写信。",
+  "@quotaClaimMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quotaClaimButton": "领取今日免费额度",
+  "firstLetterGuideTitle": "写给你的第一封信",
+  "firstLetterGuideSubtitle": "把一封真诚的信投进邮局，系统会帮你匹配一位有缘人。",
+  "firstLetterGuideHintTitle": "可以这样写",
+  "firstLetterGuideHintBody": "介绍一下自己最近的心情、喜欢的小事，或想认识怎样的笔友。不必很长，真诚即可。",
+  "firstLetterGuideCta": "开始写第一封信",
+  "firstLetterGuideSkip": "稍后再写",
+  "firstLetterComposeHint": "这是你的第一封邮局信。可在下一步选择免费模板与信纸。",
+  "inTransitTitle": "信件在途",
+  "inTransitLoadFailed": "在途列表加载失败",
+  "inTransitEmptyTitle": "暂无在途信件",
+  "inTransitEmptySubtitle": "寄出或收到的信件会在这里显示进度。",
+  "inTransitSectionOutbound": "发出未达",
+  "inTransitSectionInbound": "收到未达",
+  "inTransitSectionUnread": "已送达未读",
+  "inTransitSectionEmpty": "本分类暂无信件",
+  "inTransitEtaHours": "约 {hours} 小时后到达",
+  "@inTransitEtaHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "writeDestinationTitle": "想写给谁？",
+  "writeDestinationPostOffice": "寄给有缘人",
+  "writeDestinationPostOfficeSub": "投进邮局，等待匹配一位笔友",
+  "writeDestinationSelfTime": "寄给未来的自己",
+  "writeDestinationSelfTimeSub": "时光信，到选定日期再拆阅",
+  "composeAddParagraph": "添加段落",
+  "composeRemoveParagraph": "删除段落",
+  "composeParagraphLabel": "第 {n} 段",
+  "@composeParagraphLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "composeTemplatePickerTitle": "写信模板",
+  "composeTemplateEmpty": "暂无可用模板",
+  "composeTemplateApplied": "已填入正文，可继续修改",
+  "composeStepMailSubtitleSkins": "选择信纸与模板；投递速度由距离与关系决定。",
+  "commerceProductSkinLinen": "亚麻信纸",
+  "commerceProductTemplateEmotion": "情感倾诉",
+  "commerceProductTemplateNarrative": "叙事随笔",
+  "authRegisterSummaryLocation": "定位",
+  "authRegisterLocationCaptured": "已获取（可选）"
 }

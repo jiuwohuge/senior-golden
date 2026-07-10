@@ -142,6 +142,7 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
         latitude: (m['latitude'] as num?)?.toDouble() ?? state.user.latitude,
         longitude: (m['longitude'] as num?)?.toDouble() ?? state.user.longitude,
         writingStyle: m['writingStyle'] as String? ?? state.user.writingStyle,
+        firstLetterDone: m['firstLetterDone'] as bool? ?? state.user.firstLetterDone,
       ),
     );
   }

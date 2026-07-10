@@ -1982,4 +1982,126 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPreferencesSaved => 'Preferences saved';
+
+  @override
+  String get quotaClaimTitle => 'Claim today\'s free quota';
+
+  @override
+  String quotaClaimMessage(int count) {
+    return 'You can send $count free letters each day. Claim today\'s quota before writing.';
+  }
+
+  @override
+  String get quotaClaimButton => 'Claim today\'s free quota';
+
+  @override
+  String get firstLetterGuideTitle => 'Write your first letter';
+
+  @override
+  String get firstLetterGuideSubtitle =>
+      'Send a sincere letter through the post office — we\'ll match you with someone kind.';
+
+  @override
+  String get firstLetterGuideHintTitle => 'Ideas to start';
+
+  @override
+  String get firstLetterGuideHintBody =>
+      'Share a recent feeling, a small joy, or the kind of pen pal you\'d like to meet. Short and sincere is enough.';
+
+  @override
+  String get firstLetterGuideCta => 'Start my first letter';
+
+  @override
+  String get firstLetterGuideSkip => 'Maybe later';
+
+  @override
+  String get firstLetterComposeHint =>
+      'This is your first post-office letter. You can pick a free template and skin in the next step.';
+
+  @override
+  String get inTransitTitle => 'Letters in transit';
+
+  @override
+  String get inTransitLoadFailed => 'Couldn\'t load in-transit letters';
+
+  @override
+  String get inTransitEmptyTitle => 'Nothing in transit';
+
+  @override
+  String get inTransitEmptySubtitle =>
+      'Sent and incoming letters will show progress here.';
+
+  @override
+  String get inTransitSectionOutbound => 'Sent · not arrived';
+
+  @override
+  String get inTransitSectionInbound => 'Incoming · not arrived';
+
+  @override
+  String get inTransitSectionUnread => 'Delivered · unread';
+
+  @override
+  String get inTransitSectionEmpty => 'No letters in this section';
+
+  @override
+  String inTransitEtaHours(int hours) {
+    return 'About $hours hours until arrival';
+  }
+
+  @override
+  String get writeDestinationTitle => 'Who are you writing to?';
+
+  @override
+  String get writeDestinationPostOffice => 'To a kindred spirit';
+
+  @override
+  String get writeDestinationPostOfficeSub =>
+      'Drop it in the post office for a match';
+
+  @override
+  String get writeDestinationSelfTime => 'To my future self';
+
+  @override
+  String get writeDestinationSelfTimeSub =>
+      'A time letter that opens on a chosen date';
+
+  @override
+  String get composeAddParagraph => 'Add paragraph';
+
+  @override
+  String get composeRemoveParagraph => 'Remove paragraph';
+
+  @override
+  String composeParagraphLabel(int n) {
+    return 'Paragraph $n';
+  }
+
+  @override
+  String get composeTemplatePickerTitle => 'Letter templates';
+
+  @override
+  String get composeTemplateEmpty => 'No templates available';
+
+  @override
+  String get composeTemplateApplied =>
+      'Filled into the body — edit as you like';
+
+  @override
+  String get composeStepMailSubtitleSkins =>
+      'Choose paper and template; delivery speed follows distance and relationship.';
+
+  @override
+  String get commerceProductSkinLinen => 'Linen paper';
+
+  @override
+  String get commerceProductTemplateEmotion => 'Heartfelt note';
+
+  @override
+  String get commerceProductTemplateNarrative => 'Story sketch';
+
+  @override
+  String get authRegisterSummaryLocation => 'Location';
+
+  @override
+  String get authRegisterLocationCaptured => 'Captured (optional)';
 }

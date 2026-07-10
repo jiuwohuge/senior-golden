@@ -8,6 +8,7 @@ import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
+import '../../widgets/letter/letter_compose_editor.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../mailbox/mailbox_providers.dart';
@@ -50,11 +51,13 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   String? _peerCountryLabel;
 
   int _stepIndex = 0;
-  final _bodyCtrl = TextEditingController();
+  String _bodyText = '';
+  int _editorEpoch = 0;
+  List<String> _seedParagraphs = const [''];
   DateTime _deliveryDate = DateTime.now().add(const Duration(days: 7));
   String? _daysHint;
-  LetterType _mailType = LetterType.standard;
   String? _selectedSkinId;
+  String? _selectedTemplateId;
   bool _busy = false;
 
   List<_ComposeStep> _steps = const [];
@@ -66,6 +69,13 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     _peerId = widget.initialIntent.peerId;
     _peerNickname = widget.initialIntent.peerNickname;
     _peerCountryLabel = widget.initialIntent.peerCountryLabel;
+    _selectedTemplateId = widget.initialIntent.templateId;
+    if (widget.initialIntent.initialParagraphs?.isNotEmpty == true) {
+      _seedParagraphs = List<String>.from(
+        widget.initialIntent.initialParagraphs!,
+      );
+      _bodyText = LetterComposeEditor.joinParagraphs(_seedParagraphs);
+    }
     _rebuildSteps();
     if (_currentStep == _ComposeStep.deliveryDate ||
         _currentStep == _ComposeStep.seal) {
@@ -75,7 +85,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
 
   @override
   void dispose() {
-    _bodyCtrl.dispose();
     super.dispose();
   }
 
@@ -156,7 +165,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           return;
         }
       case _ComposeStep.body:
-        if (_bodyCtrl.text.trim().isEmpty) {
+        if (_bodyText.trim().isEmpty) {
           PostalSnack.show(
             context,
             l10n.composeBodyRequired,
@@ -203,7 +212,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
 
   Future<void> _submitTimeLetter() async {
     final l10n = AppLocalizations.of(context)!;
-    final body = _bodyCtrl.text.trim();
+    final body = _bodyText.trim();
     if (body.isEmpty) return;
     setState(() => _busy = true);
     try {
@@ -257,7 +266,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
 
   Future<void> _submitPenPalMail() async {
     final l10n = AppLocalizations.of(context)!;
-    final body = _bodyCtrl.text.trim();
+    final body = _bodyText.trim();
     if (body.isEmpty) return;
     final isPostOffice = _kind == ComposeKind.postOffice;
     if (!isPostOffice && _peerId == null) return;
@@ -268,8 +277,9 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           .sendLetter(
             toUserId: isPostOffice ? null : _peerId,
             content: body,
-            type: _mailType,
             mode: isPostOffice ? 1 : 2,
+            skinId: _selectedSkinId,
+            templateId: _selectedTemplateId,
           );
       await ref.read(authRepositoryProvider).refreshSessionFromServer();
       ref.invalidate(mailboxLettersProvider);
@@ -306,7 +316,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       case _ComposeStep.pickPenPal:
         return _peerId != null && _peerId!.isNotEmpty;
       case _ComposeStep.body:
-        return _bodyCtrl.text.trim().isNotEmpty;
+        return _bodyText.trim().isNotEmpty;
       default:
         return true;
     }
@@ -349,7 +359,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       case _ComposeStep.mailOptions:
         return (
           title: l10n.composeStepMailTitle,
-          subtitle: l10n.composeStepMailSubtitle,
+          subtitle: l10n.composeStepMailSubtitleSkins,
           footer: null,
         );
       case _ComposeStep.seal:
@@ -384,7 +394,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final session = ref.watch(appSessionProvider);
     if (_steps.isEmpty) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -413,15 +422,15 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
             nextEnabled: _nextEnabled,
             nextBusy: _busy,
             isLastStep: _stepIndex == _steps.length - 1 && showFab,
-            bottomAction: _buildBottomAction(l10n, session),
-            child: _buildStepBody(l10n, session),
+            bottomAction: _buildBottomAction(l10n),
+            child: _buildStepBody(l10n),
           ),
         ),
       ),
     );
   }
 
-  Widget? _buildBottomAction(AppLocalizations l10n, AppSessionState session) {
+  Widget? _buildBottomAction(AppLocalizations l10n) {
     switch (_currentStep) {
       case _ComposeStep.seal:
         return TimeLetterSealSlider(
@@ -441,7 +450,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     }
   }
 
-  Widget _buildStepBody(AppLocalizations l10n, AppSessionState session) {
+  Widget _buildStepBody(AppLocalizations l10n) {
     switch (_currentStep) {
       case _ComposeStep.destination:
         return _DestinationStep(
@@ -466,13 +475,23 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         return ListView(
           physics: const ClampingScrollPhysics(),
           children: [
-            PostalTextField(
-              controller: _bodyCtrl,
-              label: l10n.composeBodyLabel,
-              maxLines: 12,
-              minLines: 8,
-              showClearButton: false,
-              onChanged: (_) => setState(() {}),
+            if (widget.initialIntent.fromFirstLetterGuide) ...[
+              PostalCardEnvelope(
+                padding: const EdgeInsets.all(14),
+                child: Text(
+                  l10n.firstLetterComposeHint,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    height: 1.4,
+                    color: PostalTokens.inkSecondary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+            LetterComposeEditor(
+              key: ValueKey('compose-body-$_editorEpoch'),
+              initialParagraphs: _seedParagraphs,
+              onChanged: (text) => setState(() => _bodyText = text),
             ),
           ],
         );
@@ -489,12 +508,24 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         );
       case _ComposeStep.mailOptions:
         return _MailOptionsStep(
-          mailType: _mailType,
           selectedSkinId: _selectedSkinId,
+          selectedTemplateId: _selectedTemplateId,
           busy: _busy,
-          session: session,
-          onMailTypeChanged: (v) => setState(() => _mailType = v),
           onSkinChanged: (skinId) => setState(() => _selectedSkinId = skinId),
+          onTemplateApplied: (product) {
+            final paragraphs = product.paragraphs;
+            setState(() {
+              _selectedTemplateId =
+                  product.templateId ??
+                  product.productCode.replaceFirst('template.', '');
+              _seedParagraphs = paragraphs.isEmpty ? [''] : paragraphs;
+              _bodyText = LetterComposeEditor.joinParagraphs(_seedParagraphs);
+              _editorEpoch += 1;
+              // 回到正文步预览模板填充效果。
+              final bodyIdx = _steps.indexOf(_ComposeStep.body);
+              if (bodyIdx >= 0) _stepIndex = bodyIdx;
+            });
+          },
         );
       case _ComposeStep.seal:
         return Align(
@@ -542,53 +573,78 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
 
 class _MailOptionsStep extends ConsumerWidget {
   const _MailOptionsStep({
-    required this.mailType,
     required this.selectedSkinId,
+    required this.selectedTemplateId,
     required this.busy,
-    required this.session,
-    required this.onMailTypeChanged,
     required this.onSkinChanged,
+    required this.onTemplateApplied,
   });
 
-  final LetterType mailType;
   final String? selectedSkinId;
+  final String? selectedTemplateId;
   final bool busy;
-  final AppSessionState session;
-  final ValueChanged<LetterType> onMailTypeChanged;
   final ValueChanged<String?> onSkinChanged;
+  final ValueChanged<CommerceProduct> onTemplateApplied;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final skinsAsync = ref.watch(ownedSkinEntitlementsProvider);
+    final catalogAsync = ref.watch(commerceCatalogProvider);
+    final ownedAsync = ref.watch(ownedSkinEntitlementsProvider);
     return ListView(
       physics: const ClampingScrollPhysics(),
       children: [
-        RadioListTile<LetterType>(
-          // ignore: deprecated_member_use
-          value: LetterType.standard,
-          // ignore: deprecated_member_use
-          groupValue: mailType,
-          // ignore: deprecated_member_use
-          onChanged: busy ? null : (v) => onMailTypeChanged(v!),
-          title: Text(l10n.sendLetterStandardPost),
-          subtitle: Text(l10n.sendLetterStandardSub),
+        Text(
+          l10n.composeTemplatePickerTitle,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
         ),
-        RadioListTile<LetterType>(
-          // ignore: deprecated_member_use
-          value: LetterType.registered,
-          // ignore: deprecated_member_use
-          groupValue: mailType,
-          // ignore: deprecated_member_use
-          onChanged: busy ? null : (v) => onMailTypeChanged(v!),
-          title: Text(l10n.sendLetterRegisteredMail),
-          subtitle: Text(
-            session.isVip
-                ? l10n.sendLetterRegisteredSubVip
-                : l10n.sendLetterRegisteredSubPaid,
-          ),
+        const SizedBox(height: 8),
+        catalogAsync.when(
+          loading: () => const LinearProgressIndicator(),
+          error: (_, _) => const SizedBox.shrink(),
+          data: (catalog) {
+            // 免费或已拥有的写信模板。
+            final templates = catalog
+                .where(
+                  (p) =>
+                      p.productType == 'template' &&
+                      (p.priceCents <= 0 || p.owned),
+                )
+                .toList();
+            if (templates.isEmpty) {
+              return Text(
+                l10n.composeTemplateEmpty,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: PostalTokens.inkTertiary,
+                ),
+              );
+            }
+            return Column(
+              children: templates.map((t) {
+                final tid =
+                    t.templateId ?? t.productCode.replaceFirst('template.', '');
+                final selected = selectedTemplateId == tid;
+                return RadioListTile<String>(
+                  // ignore: deprecated_member_use
+                  value: tid,
+                  // ignore: deprecated_member_use
+                  groupValue: selectedTemplateId,
+                  // ignore: deprecated_member_use
+                  onChanged: busy
+                      ? null
+                      : (_) => onTemplateApplied(t),
+                  title: Text(commerceProductTitle(l10n, t.titleKey)),
+                  subtitle: selected
+                      ? Text(l10n.composeTemplateApplied)
+                      : null,
+                );
+              }).toList(),
+            );
+          },
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Text(
           l10n.composeSkinPickerTitle,
           style: Theme.of(
@@ -596,36 +652,77 @@ class _MailOptionsStep extends ConsumerWidget {
           ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 8),
-        skinsAsync.when(
-          loading: () => const LinearProgressIndicator(),
-          error: (_, _) => const SizedBox.shrink(),
-          data: (skins) {
+        catalogAsync.when(
+          loading: () => const SizedBox.shrink(),
+          error: (_, _) => ownedAsync.when(
+            loading: () => const LinearProgressIndicator(),
+            error: (_, _) => const SizedBox.shrink(),
+            data: (skins) => _skinRadios(
+              context,
+              l10n,
+              [
+                (id: 'default', label: l10n.commerceProductSkinDefault),
+                ...skins.map(
+                  (e) => (
+                    id: e.productCode.replaceFirst('skin.', ''),
+                    label: commerceProductTitle(l10n, e.titleKey),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          data: (catalog) {
+            final freeSkins = catalog.where(
+              (p) =>
+                  p.productType == 'skin' && (p.priceCents <= 0 || p.owned),
+            );
             final options = <({String id, String label})>[
               (id: 'default', label: l10n.commerceProductSkinDefault),
-              ...skins.map(
-                (e) => (
-                  id: e.productCode.replaceFirst('skin.', ''),
-                  label: commerceProductTitle(l10n, e.titleKey),
-                ),
-              ),
             ];
-            final selected = selectedSkinId ?? 'default';
-            return Column(
-              children: options.map((opt) {
-                return RadioListTile<String>(
-                  // ignore: deprecated_member_use
-                  value: opt.id,
-                  // ignore: deprecated_member_use
-                  groupValue: selected,
-                  // ignore: deprecated_member_use
-                  onChanged: busy ? null : (v) => onSkinChanged(v),
-                  title: Text(opt.label),
-                );
-              }).toList(),
-            );
+            final seen = {'default'};
+            for (final p in freeSkins) {
+              final id = p.skinId ?? p.productCode.replaceFirst('skin.', '');
+              if (seen.add(id)) {
+                options.add((
+                  id: id,
+                  label: commerceProductTitle(l10n, p.titleKey),
+                ));
+              }
+            }
+            return _skinRadios(context, l10n, options);
           },
         ),
       ],
+    );
+  }
+
+  Widget _skinRadios(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<({String id, String label})> options,
+  ) {
+    final selected = selectedSkinId ?? 'default';
+    return Column(
+      children: options.map((opt) {
+        return RadioListTile<String>(
+          // ignore: deprecated_member_use
+          value: opt.id,
+          // ignore: deprecated_member_use
+          groupValue: selected,
+          // ignore: deprecated_member_use
+          onChanged: busy ? null : (v) => onSkinChanged(v),
+          title: Text(opt.label),
+          secondary: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: letterSkinBackground(opt.id),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: PostalTokens.perforationLine),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

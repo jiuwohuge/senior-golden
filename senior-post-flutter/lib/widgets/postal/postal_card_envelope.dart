@@ -17,6 +17,7 @@ class PostalCardEnvelope extends StatelessWidget {
     ),
     this.onTap,
     this.accent = PostalTokens.stampVermilion,
+    this.backgroundColor,
   });
 
   final Widget child;
@@ -26,11 +27,14 @@ class PostalCardEnvelope extends StatelessWidget {
   final VoidCallback? onTap;
   final Color accent;
 
+  /// 信纸底色（读信页按 skinId 覆盖默认信封色）。
+  final Color? backgroundColor;
+
   @override
   Widget build(BuildContext context) {
     final content = DecoratedBox(
       decoration: BoxDecoration(
-        color: PostalTokens.paperEnvelope,
+        color: backgroundColor ?? PostalTokens.paperEnvelope,
         borderRadius: PostalTokens.shapeMd,
         border: Border.all(color: PostalTokens.perforationLine),
         boxShadow: PostalTokens.shadowSoft,

@@ -127,6 +127,8 @@ class AuthRepository {
     required int gender,
     required int birthYear,
     String? countryCode,
+    double? latitude,
+    double? longitude,
     required bool agreedTerms,
     List<int> interestTagIds = const [],
     String? avatarUrl,
@@ -147,6 +149,8 @@ class AuthRepository {
           'birthYear': birthYear,
           if (countryCode != null && countryCode.isNotEmpty)
             'countryCode': countryCode.trim(),
+          if (latitude != null) 'latitude': latitude,
+          if (longitude != null) 'longitude': longitude,
           'agreedTerms': agreedTerms,
           'interestTagIds': interestTagIds,
           if (avatarUrl != null && avatarUrl.isNotEmpty) 'avatarUrl': avatarUrl,

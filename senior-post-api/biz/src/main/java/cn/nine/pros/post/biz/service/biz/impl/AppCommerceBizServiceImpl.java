@@ -41,7 +41,7 @@ public class AppCommerceBizServiceImpl implements AppCommerceBizService {
     public List<CommerceProductVO> catalog(long userId) {
         Set<Long> ownedIds = ownedProductIds(userId);
         return commerceProductService.listAllActive().stream()
-                .map(p -> toProductVo(p, ownedIds.contains(p.getId())))
+                .map(p -> toProductVo(p, ownedIds.contains(p.getId()) || isFreeProduct(p)))
                 .collect(Collectors.toList());
     }
 
@@ -89,10 +89,20 @@ public class AppCommerceBizServiceImpl implements AppCommerceBizService {
             return;
         }
         String code = type + "." + id.trim();
+        CommerceProductDomain product = commerceProductService.findByCode(code);
+        if (isFreeProduct(product)) {
+            return;
+        }
         if (userEntitlementService.hasEntitlementByCode(userId, code)) {
             return;
         }
         throw new BusinessException(appMessages.get("app.error.commerce.entitlementRequired"));
+    }
+
+    private static boolean isFreeProduct(CommerceProductDomain product) {
+        return product != null
+                && !product.isDelFlag()
+                && (product.getPriceCents() == null || product.getPriceCents() <= 0);
     }
 
     private Set<Long> ownedProductIds(long userId) {

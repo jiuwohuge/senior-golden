@@ -99,6 +99,9 @@ public interface LetterService extends IService<LetterDomain> {
     /** 用户发出的信件总数（保护池）。 */
     long countLettersSentByUser(long userId);
 
+    /** 用户发出的回信数（parent_letter_id 非空，高回信意愿近似）。 */
+    long countRepliesSentByUser(long userId);
+
     /** 两用户间有效往来信件数（已送达及以上，非审核拒绝）。 */
     long countExchangeBetween(long userIdA, long userIdB);
 

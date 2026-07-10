@@ -26,6 +26,12 @@ public class AppAuthProfilePatchInDto {
     @Schema(description = "国家代码；非 null 时更新，空串表示清空")
     private String countryCode;
 
+    @Schema(description = "可选 GPS 纬度；非 null 时更新并尝试反查国家")
+    private Double latitude;
+
+    @Schema(description = "可选 GPS 经度；非 null 时更新并尝试反查国家")
+    private Double longitude;
+
     @Size(max = 2000)
     @Schema(description = "简介；非 null 时更新（可为空串）")
     private String bio;

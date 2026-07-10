@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.biz;
 
 import cn.nine.pros.post.client.model.out.AppPostOfficeHomeVO;
+import cn.nine.pros.post.client.model.out.DailyQuotaClaimVO;
 import cn.nine.pros.post.client.model.out.PostOfficeInTransitItemVO;
 import cn.nine.pros.post.client.model.out.PostOfficeRelationMessageVO;
 
@@ -13,4 +14,6 @@ public interface AppPostOfficeService {
     List<PostOfficeRelationMessageVO> listRelationMessages(long userId);
 
     List<PostOfficeInTransitItemVO> listInTransit(long userId);
+
+    DailyQuotaClaimVO claimDailyQuota(long userId);
 }

@@ -29,6 +29,9 @@ public class CommerceProductMetadata {
     @Schema(description = "模板 ID")
     private String templateId;
 
+    @Schema(description = "写信模板段落（引导填充）")
+    private java.util.List<String> paragraphs;
+
     @Schema(description = "预览色")
     private String previewColor;
 

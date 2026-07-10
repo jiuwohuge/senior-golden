@@ -28,6 +28,7 @@ class AppUser {
     this.latitude,
     this.longitude,
     this.writingStyle,
+    this.firstLetterDone,
   });
 
   final String id;
@@ -74,6 +75,9 @@ class AppUser {
 
   /// concise | narrative | emotional
   final String? writingStyle;
+
+  /// 是否已完成 §2.8 首封信引导（null 视为未完成）
+  final bool? firstLetterDone;
 
   int get age => DateTime.now().year - birthYear;
 
@@ -137,6 +141,7 @@ class AppUser {
       latitude: (m['latitude'] as num?)?.toDouble(),
       longitude: (m['longitude'] as num?)?.toDouble(),
       writingStyle: m['writingStyle'] as String?,
+      firstLetterDone: m['firstLetterDone'] as bool?,
     );
   }
 
@@ -158,6 +163,7 @@ class AppUser {
     double? latitude,
     double? longitude,
     String? writingStyle,
+    bool? firstLetterDone,
   }) {
     return AppUser(
       id: id,
@@ -182,6 +188,7 @@ class AppUser {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       writingStyle: writingStyle ?? this.writingStyle,
+      firstLetterDone: firstLetterDone ?? this.firstLetterDone,
     );
   }
 }
@@ -443,6 +450,18 @@ class CommerceProduct {
 
   String? get skinId => metadata['skinId'] as String?;
   String? get fontId => metadata['fontId'] as String?;
+  String? get templateId => metadata['templateId'] as String?;
+
+  /// 写信模板段落（来自 commerce metadata.paragraphs）
+  List<String> get paragraphs {
+    final raw = metadata['paragraphs'];
+    if (raw is! List) return const [];
+    return raw
+        .whereType<String>()
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
 }
 
 /// 用户商业权益，对齐 `CommerceEntitlementVO`。

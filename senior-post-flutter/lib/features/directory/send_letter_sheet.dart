@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
-import '../../core/models/domain_models.dart';
-import '../../core/session/app_session.dart';
 import '../../l10n/app_localizations.dart';
+import '../../widgets/letter/letter_compose_editor.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../mailbox/mailbox_providers.dart';
@@ -77,21 +76,14 @@ class SendLetterSheet extends ConsumerStatefulWidget {
 }
 
 class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
-  LetterType _type = LetterType.standard;
   bool _busy = false;
-  final _body = TextEditingController();
-
-  @override
-  void dispose() {
-    _body.dispose();
-    super.dispose();
-  }
+  String _body = '';
 
   /// [sheetContext] 须为嵌套在 [ScaffoldMessenger] 之下的子树 context，
   /// 否则 SnackBar 会挂到父页 Scaffold，在 bottom sheet 背后不可见。
   Future<void> _send(BuildContext sheetContext) async {
     final l10n = AppLocalizations.of(sheetContext)!;
-    if (_body.text.trim().isEmpty) {
+    if (_body.trim().isEmpty) {
       PostalSnack.show(
         sheetContext,
         l10n.sendLetterBodyRequired,
@@ -106,8 +98,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
           .read(mailboxRemoteRepositoryProvider)
           .sendLetter(
             toUserId: widget.peerId,
-            content: _body.text.trim(),
-            type: _type,
+            content: _body.trim(),
           );
       await ref.read(authRepositoryProvider).refreshSessionFromServer();
       if (!sheetContext.mounted) return;
@@ -130,7 +121,6 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final session = ref.watch(appSessionProvider);
     final mq = MediaQuery.of(context);
     final viewH = mq.size.height;
     final kb = mq.viewInsets.bottom;
@@ -213,65 +203,14 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                                     ),
                                   ),
                                   const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: RadioListTile<LetterType>(
-                                          // ignore: deprecated_member_use
-                                          value: LetterType.standard,
-                                          // ignore: deprecated_member_use
-                                          groupValue: _type,
-                                          // ignore: deprecated_member_use
-                                          onChanged: _busy
-                                              ? null
-                                              : (v) =>
-                                                    setState(() => _type = v!),
-                                          title: Text(
-                                            l10n.sendLetterStandardPost,
-                                          ),
-                                          subtitle: Text(
-                                            l10n.sendLetterStandardSub,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: RadioListTile<LetterType>(
-                                          // ignore: deprecated_member_use
-                                          value: LetterType.registered,
-                                          // ignore: deprecated_member_use
-                                          groupValue: _type,
-                                          // ignore: deprecated_member_use
-                                          onChanged: _busy
-                                              ? null
-                                              : (v) =>
-                                                    setState(() => _type = v!),
-                                          title: Text(
-                                            l10n.sendLetterRegisteredMail,
-                                          ),
-                                          subtitle: Text(
-                                            session.isVip
-                                                ? l10n.sendLetterRegisteredSubVip
-                                                : l10n.sendLetterRegisteredSubPaid,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  PostalTextField(
-                                    controller: _body,
+                                  LetterComposeEditor(
                                     label: l10n.sendLetterContentLabel,
-                                    maxLines: 7,
-                                    minLines: 5,
-                                    showClearButton: false,
+                                    onChanged: (text) => _body = text,
+                                    enabled: !_busy,
                                   ),
                                   const SizedBox(height: 14),
                                   PostalButton(
-                                    label: 'Send now',
+                                    label: l10n.composeSendNow,
                                     onPressed: _busy
                                         ? null
                                         : () => _send(sheetContext),

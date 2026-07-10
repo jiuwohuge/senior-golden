@@ -57,6 +57,42 @@ public class HttpGeoIpService implements GeoIpService {
         }
     }
 
+    @Override
+    public GeoIpLookup reverseFromLatLng(Double latitude, Double longitude) {
+        if (latitude == null || longitude == null) {
+            return GeoIpLookup.empty();
+        }
+        if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            return GeoIpLookup.empty();
+        }
+        try {
+            String url = "https://api.bigdatacloud.net/data/reverse-geocode-client"
+                    + "?latitude=" + latitude
+                    + "&longitude=" + longitude
+                    + "&localityLanguage=en";
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(3))
+                    .GET()
+                    .build();
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() != 200 || res.body() == null) {
+                log.warn("reverse geocode http status={}", res.statusCode());
+                return GeoIpLookup.empty();
+            }
+            JsonNode root = objectMapper.readTree(res.body());
+            String cc = textOrNull(root, "countryCode");
+            String city = textOrNull(root, "city");
+            if (!StringUtils.hasText(city)) {
+                city = textOrNull(root, "locality");
+            }
+            return new GeoIpLookup(cc, city, latitude, longitude);
+        } catch (Exception e) {
+            log.warn("reverse geocode failed, lat={}, lng={}: {}", latitude, longitude, e.toString());
+            return GeoIpLookup.empty();
+        }
+    }
+
     private static String textOrNull(JsonNode root, String field) {
         String v = root.path(field).asText(null);
         return StringUtils.hasText(v) ? v.trim() : null;

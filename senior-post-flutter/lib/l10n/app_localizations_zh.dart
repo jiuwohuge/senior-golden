@@ -1871,4 +1871,119 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsPreferencesSaved => '偏好已保存';
+
+  @override
+  String get quotaClaimTitle => '领取今日免费额度';
+
+  @override
+  String quotaClaimMessage(int count) {
+    return '每天可免费寄出 $count 封信。请先领取今日额度后再写信。';
+  }
+
+  @override
+  String get quotaClaimButton => '领取今日免费额度';
+
+  @override
+  String get firstLetterGuideTitle => '写给你的第一封信';
+
+  @override
+  String get firstLetterGuideSubtitle => '把一封真诚的信投进邮局，系统会帮你匹配一位有缘人。';
+
+  @override
+  String get firstLetterGuideHintTitle => '可以这样写';
+
+  @override
+  String get firstLetterGuideHintBody =>
+      '介绍一下自己最近的心情、喜欢的小事，或想认识怎样的笔友。不必很长，真诚即可。';
+
+  @override
+  String get firstLetterGuideCta => '开始写第一封信';
+
+  @override
+  String get firstLetterGuideSkip => '稍后再写';
+
+  @override
+  String get firstLetterComposeHint => '这是你的第一封邮局信。可在下一步选择免费模板与信纸。';
+
+  @override
+  String get inTransitTitle => '信件在途';
+
+  @override
+  String get inTransitLoadFailed => '在途列表加载失败';
+
+  @override
+  String get inTransitEmptyTitle => '暂无在途信件';
+
+  @override
+  String get inTransitEmptySubtitle => '寄出或收到的信件会在这里显示进度。';
+
+  @override
+  String get inTransitSectionOutbound => '发出未达';
+
+  @override
+  String get inTransitSectionInbound => '收到未达';
+
+  @override
+  String get inTransitSectionUnread => '已送达未读';
+
+  @override
+  String get inTransitSectionEmpty => '本分类暂无信件';
+
+  @override
+  String inTransitEtaHours(int hours) {
+    return '约 $hours 小时后到达';
+  }
+
+  @override
+  String get writeDestinationTitle => '想写给谁？';
+
+  @override
+  String get writeDestinationPostOffice => '寄给有缘人';
+
+  @override
+  String get writeDestinationPostOfficeSub => '投进邮局，等待匹配一位笔友';
+
+  @override
+  String get writeDestinationSelfTime => '寄给未来的自己';
+
+  @override
+  String get writeDestinationSelfTimeSub => '时光信，到选定日期再拆阅';
+
+  @override
+  String get composeAddParagraph => '添加段落';
+
+  @override
+  String get composeRemoveParagraph => '删除段落';
+
+  @override
+  String composeParagraphLabel(int n) {
+    return '第 $n 段';
+  }
+
+  @override
+  String get composeTemplatePickerTitle => '写信模板';
+
+  @override
+  String get composeTemplateEmpty => '暂无可用模板';
+
+  @override
+  String get composeTemplateApplied => '已填入正文，可继续修改';
+
+  @override
+  String get composeStepMailSubtitleSkins => '选择信纸与模板；投递速度由距离与关系决定。';
+
+  @override
+  String get commerceProductSkinLinen => '亚麻信纸';
+
+  @override
+  String get commerceProductTemplateEmotion => '情感倾诉';
+
+  @override
+  String get commerceProductTemplateNarrative => '叙事随笔';
+
+  @override
+  String get authRegisterSummaryLocation => '定位';
+
+  @override
+  String get authRegisterLocationCaptured => '已获取（可选）';
 }

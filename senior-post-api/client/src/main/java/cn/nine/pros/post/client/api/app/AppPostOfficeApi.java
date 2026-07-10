@@ -2,11 +2,13 @@ package cn.nine.pros.post.client.api.app;
 
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.out.AppPostOfficeHomeVO;
+import cn.nine.pros.post.client.model.out.DailyQuotaClaimVO;
 import cn.nine.pros.post.client.model.out.PostOfficeInTransitItemVO;
 import cn.nine.pros.post.client.model.out.PostOfficeRelationMessageVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -26,4 +28,8 @@ public interface AppPostOfficeApi {
     @Operation(summary = "信件在途明细（§11.4）")
     @GetMapping("/in-transit")
     List<PostOfficeInTransitItemVO> inTransit();
+
+    @Operation(summary = "领取今日免费写信额度（幂等，不可跳过）")
+    @PostMapping("/quota/daily-claim")
+    DailyQuotaClaimVO claimDailyQuota();
 }
