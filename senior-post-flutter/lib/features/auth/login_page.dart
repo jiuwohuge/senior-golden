@@ -25,9 +25,11 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _challengeCode = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _agreed = false;
   bool _busy = false;
+  bool _challengeMode = false;
 
   @override
   void initState() {
@@ -41,11 +43,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _challengeCode.dispose();
     super.dispose();
   }
 
-  Future<void> _afterAuth(AuthSignInResult _) async {
+  Future<void> _afterAuth(AuthSignInResult result) async {
     if (!mounted) return;
+    if (result.requireEmailChallenge) {
+      setState(() => _challengeMode = true);
+      PostalSnack.show(
+        context,
+        AppLocalizations.of(context)!.authLoginChallengeHint,
+        tone: PostalSnackTone.warning,
+      );
+      return;
+    }
     context.go(MainShellRoute.pathPostOffice);
   }
 
@@ -65,6 +77,54 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final result = await ref
           .read(authRepositoryProvider)
           .login(email: _email.text, password: _password.text);
+      await _afterAuth(result);
+    } on ApiBusinessException catch (e) {
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _sendChallengeCode() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(authRepositoryProvider)
+          .sendLoginChallenge(email: _email.text);
+      if (!mounted) return;
+      PostalSnack.show(
+        context,
+        l10n.authLoginChallengeCodeSent,
+        tone: PostalSnackTone.success,
+      );
+    } on ApiBusinessException catch (e) {
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _confirmChallenge() async {
+    final l10n = AppLocalizations.of(context)!;
+    final code = _challengeCode.text.trim();
+    if (code.isEmpty) {
+      PostalSnack.show(
+        context,
+        l10n.settingsEmailVerifyCodeRequired,
+        tone: PostalSnackTone.warning,
+      );
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      final result = await ref
+          .read(authRepositoryProvider)
+          .confirmLoginChallenge(email: _email.text, code: code);
       await _afterAuth(result);
     } on ApiBusinessException catch (e) {
       if (mounted) {
@@ -223,6 +283,38 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 return null;
                               },
                             ),
+                            if (_challengeMode) ...[
+                              SizedBox(height: compactLayout ? 10 : 14),
+                              Text(
+                                l10n.authLoginChallengeTitle,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                l10n.authLoginChallengeHint,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              SizedBox(height: compactLayout ? 10 : 14),
+                              PostalTextField(
+                                controller: _challengeCode,
+                                label: l10n.settingsEmailVerifyCodeLabel,
+                                keyboardType: TextInputType.number,
+                                prefixIcon: Icons.pin_outlined,
+                                textInputAction: TextInputAction.done,
+                              ),
+                              SizedBox(height: compactLayout ? 10 : 14),
+                              PostalButton(
+                                label: l10n.authLoginChallengeSend,
+                                variant: PostalButtonVariant.secondary,
+                                onPressed: _busy ? null : _sendChallengeCode,
+                              ),
+                              SizedBox(height: compactLayout ? 8 : 10),
+                              PostalButton(
+                                label: l10n.authLoginChallengeConfirm,
+                                onPressed: _busy ? null : _confirmChallenge,
+                                busy: _busy,
+                              ),
+                            ],
                             SizedBox(height: compactLayout ? 6 : 8),
                             Align(
                               alignment: Alignment.centerRight,
@@ -259,17 +351,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ],
                             ),
                             SizedBox(height: compactLayout ? 10 : 14),
-                            GestureDetector(
-                              onLongPress: kDebugMode && !_busy
-                                  ? () =>
-                                        showDebugApiBaseUrlDialog(context, ref)
-                                  : null,
-                              child: PostalButton(
-                                label: l10n.authLoginSubmit,
-                                onPressed: _busy ? null : _submit,
-                                busy: _busy,
+                            if (!_challengeMode)
+                              GestureDetector(
+                                onLongPress: kDebugMode && !_busy
+                                    ? () => showDebugApiBaseUrlDialog(
+                                        context,
+                                        ref,
+                                      )
+                                    : null,
+                                child: PostalButton(
+                                  label: l10n.authLoginSubmit,
+                                  onPressed: _busy ? null : _submit,
+                                  busy: _busy,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ),

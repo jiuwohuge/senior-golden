@@ -27,9 +27,9 @@ public class UserDomain extends AbstractAuditableDomain {
     private Long id;
 
     /**
-     * 性别：0 未设置，1 男，2 女，3 其他/不愿透露
+     * 性别：0 未设置，1 男，2 女
      */
-    @Schema(description = "性别")
+    @Schema(description = "性别：0未设置 1男 2女")
     private Integer gender;
 
     /**
@@ -47,6 +47,18 @@ public class UserDomain extends AbstractAuditableDomain {
      */
     @Schema(description = "国家代码")
     private String countryCode;
+    @Schema(description = "城市/地区")
+    private String city;
+    @Schema(description = "纬度")
+    private Double latitude;
+    @Schema(description = "经度")
+    private Double longitude;
+    @Schema(description = "用户语言标签，如 zh-CN")
+    private String language;
+    @Schema(description = "写作风格：concise|narrative|emotional")
+    private String writingStyle;
+    @Schema(description = "邮箱是否已验证绑定")
+    private Boolean emailVerified;
     /**
      * 个人简介
      */

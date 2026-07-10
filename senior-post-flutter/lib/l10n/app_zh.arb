@@ -356,10 +356,33 @@
   "settingsPushNotifications": "推送通知",
   "settingsUnreadBadges": "显示未读角标",
   "settingsLanguage": "语言",
-  "settingsLanguageSubtitle": "默认英语 / 中文",
+  "settingsLanguageSubtitle": "默认跟随设备；可手动覆盖",
   "settingsLanguageEnglish": "English",
   "settingsLanguageChinese": "中文",
-  "settingsLanguageSystem": "默认英语",
+  "settingsLanguageSystem": "跟随设备",
+  "settingsEmailVerify": "邮箱验证绑定",
+  "settingsEmailVerifyPending": "未验证 — 点击绑定",
+  "settingsEmailVerifyDone": "已验证",
+  "settingsEmailVerifyTitle": "邮箱验证",
+  "settingsEmailVerifyHint": "验证码将发送至 {email}",
+  "@settingsEmailVerifyHint": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsEmailVerifyCodeLabel": "验证码",
+  "settingsEmailVerifySendCode": "发送验证码",
+  "settingsEmailVerifyConfirm": "确认绑定",
+  "settingsEmailVerifyCodeSent": "验证码已发送",
+  "settingsEmailVerifyCodeRequired": "请输入验证码",
+  "settingsEmailVerifySuccess": "邮箱已验证",
+  "authLoginChallengeTitle": "确认是你本人",
+  "authLoginChallengeHint": "检测到异常登录，请输入发到邮箱的验证码。",
+  "authLoginChallengeSend": "发送验证码",
+  "authLoginChallengeConfirm": "验证并继续",
+  "authLoginChallengeCodeSent": "验证码已发送",
   "settingsAbout": "关于",
   "settingsDeleteAccount": "注销账号",
   "legalEffectiveDate": "生效日期：2026-05-01",

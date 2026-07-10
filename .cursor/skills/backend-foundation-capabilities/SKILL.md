@@ -1,6 +1,6 @@
 ---
 name: backend-foundation-capabilities
-description: Enforces senior-post backend base-framework conventions for Spring Boot API and service development, including mandatory five-layer architecture (Controller → Business Service → IService/ServiceImpl → Mapper → Table), MyRequestContextHolder usage, unified response (ResultResponseHandlerMethodProcessor), 85xx token error codes, PageQuery/PageData pagination, audit domain fields, Feign bridge CRUD, Redis template, AES encrypt (@EnableEncrypt / wj.security), graceful shutdown, Locale interceptor, codegen templates, and prohibitions from commons-* modules. Use when implementing, modifying, or reviewing backend code in senior-post (Controller, Service, Domain, Mapper, Feign, Redis).
+description: Enforces senior-post backend base-framework conventions for Spring Boot API and service development, including mandatory five-layer architecture (Controller → Business Service → IService/ServiceImpl → Mapper → Table), industry-standard Javadoc/comments and key-path SLF4J logging, MyRequestContextHolder usage, unified response (ResultResponseHandlerMethodProcessor), 85xx token error codes, PageQuery/PageData pagination, audit domain fields, Feign bridge CRUD, Redis template, AES encrypt (@EnableEncrypt / wj.security), graceful shutdown, Locale interceptor, codegen templates, and prohibitions from commons-* modules. Use when implementing, modifying, or reviewing backend code in senior-post (Controller, Service, Domain, Mapper, Feign, Redis).
 ---
 
 # Backend Foundation Capabilities
@@ -10,6 +10,9 @@ description: Enforces senior-post backend base-framework conventions for Spring 
 - **App**: `AppServiceDefine.SERVER_PREFIX` → `/api`（可加解密由 `@EnableEncrypt` 与 `wj.security` 等配置决定；客户端需按文档携带请求头）。
 - **Admin**: `AppServiceDefine.WEBAPI_PREFIX` → `/webapi`（对内明文 JSON，一般不走 AES；统一响应与 `/api` 一致，`85xx` 约定相同）。
 - DB schema changes: **Flyway** scripts under `senior-post-api/server/src/main/resources/db/migration`.
+  - **Dev policy (PLAN §1.3)**: append incremental `Vn__*.sql` only; do **not** consolidate/rewrite/delete the migration chain during milestones.
+  - **Pre-launch**: one-time migration cleanup window; not a recurring milestone task.
+- **Local run**: start API + Manage via root `docker-compose.yml` (see `.cursor/rules/docker-compose-dev-services.mdc`); always `mvn clean package` before API image rebuild (`scripts/dev-up.ps1`).
 
 ## Scope
 
@@ -30,6 +33,7 @@ Framework modules (能力来自 `commons-*`，详见源文档模块表):
 4. Never hardcode user identity; use `MyRequestContextHolder.userId()`（`Long`，未登录可为 `null`）或 `getContext().getTokenInfo()`。
 5. Prefer framework components over ad-hoc duplicates.
 6. Do not use `new Date()` for business timestamps; use `LocalDateTime.now()`（与源文档「禁止事项」一致）.
+7. **Comments + logging (hard requirement)** — follow §11 below; public/Biz methods, complex branches, and key business paths must be documented and logged appropriately.
 
 ## Client request headers (typical)
 
@@ -190,6 +194,78 @@ public class LetterServiceImpl
 - 发现 Controller / BizService 注入 `Mapper` → **必须重构**为经 `ServiceImpl` 公共方法访问。
 - 新增接口 Code Review 以本节前述规则为硬门槛。
 
+### 11) Comments & Logging Convention（强制 · 行业标准）
+
+目标：**可读、可维护、可排障**。注释解释「为什么 / 业务约束」，日志记录「关键决策与失败」；禁止无信息量噪音。
+
+#### 注释要求（Javadoc / 行内）
+
+| 位置 | 必须写什么 |
+|------|------------|
+| **Controller 公开 API 方法** | 一句话业务意图；关键入参约束（可选 `@param` / `@return`） |
+| **BizService 公开方法** | 业务目的、前置条件、副作用（写库/发信/扣额度/调外部）、事务边界说明 |
+| **复杂分支 / 状态机** | 每个非显然分支旁写「为何走此路径」（额度不足、幂等命中、审核拦截等） |
+| **非显然常量 / 魔法数** | 来源（`sys_config` 键、PRD 条款、外部协议） |
+| **TODO / FIXME** | 必须带责任上下文与后续里程碑（如 `// TODO(M2): POST_OFFICE 匹配池`） |
+
+**禁止：**
+
+- 复述代码字面意思的废话注释（如 `// get user by id`）
+- 大段注释掉的死代码（废弃即删）
+- 把密钥、Token、完整 PII 写进注释
+
+**推荐风格（中文业务说明 + 英文标识符）：**
+
+```java
+/**
+ * 标准信延迟投递：扫描 due 信件并标记送达。
+ * <p>幂等：已 delivered 的记录跳过；失败单条记 error 不中断批次。
+ */
+public void deliverDueStandardLetters() { ... }
+
+// VIP 用户跳过每日额度（PRD §16 / sys_config letter.daily_quota 仅约束非 VIP）
+if (user.isVip()) {
+    return;
+}
+```
+
+#### 日志要求（SLF4J）
+
+- BizService / Scheduler / 外部集成类使用 `@Slf4j`（或显式 `Logger`）。
+- **级别约定：**
+
+| 级别 | 何时用 |
+|------|--------|
+| `DEBUG` | 幂等命中、静默安全分支（如「邮箱不存在仍返回成功」）、详细排查信息 |
+| `INFO` | 关键业务里程碑：创建成功、投递批次开始/结束、状态迁移（含业务主键 id） |
+| `WARN` | 可恢复异常、降级、重试将发生、配置缺失回退默认值 |
+| `ERROR` | 失败且需人工关注：外部调用失败、批次内单条失败、数据不一致（带异常栈） |
+
+- **必须打日志的关键处：** 事务提交前的状态变更、外部 API（IM/OSS/邮件/审核）、定时任务入口与汇总、鉴权/额度/审核拒绝、捕获后吞掉或降级的异常。
+- **日志内容：** 业务主键（`userId`/`letterId`）、动作、结果；**禁止**打印密码、Token、完整邮件正文、身份证等敏感字段。
+- Controller 层默认不打业务流水日志（由统一请求日志过滤器覆盖）；仅在特殊编排或降级时补充。
+
+```java
+@Slf4j
+@Service
+public class LetterBizService {
+    public LetterDTO send(long userId, SendLetterInDto in) {
+        if (!quotaService.tryConsume(userId)) {
+            log.info("letter send rejected: daily quota exhausted, userId={}", userId);
+            throw new BadRequestException(...);
+        }
+        try {
+            LetterDomain saved = letterService.create(...);
+            log.info("letter created, userId={}, letterId={}, mode={}", userId, saved.getId(), in.getMode());
+            return toDto(saved);
+        } catch (Exception e) {
+            log.error("letter create failed, userId={}", userId, e);
+            throw e;
+        }
+    }
+}
+```
+
 ## Prohibitions (align with source doc §十二)
 
 1. **禁止 Controller / BizService 注入或调用 Mapper**（数据访问仅经 `ServiceImpl`）  
@@ -198,6 +274,8 @@ public class LetterServiceImpl
 4. 禁止在 Service 中用 `new Date()` 写时间，使用 `LocalDateTime.now()`  
 5. 禁止硬编码用户 ID  
 6. 禁止重复造轮子，优先使用框架组件  
+7. 禁止无业务信息的废话注释；禁止日志打印密钥 / Token / 敏感 PII  
+8. 禁止复杂业务分支无注释、关键路径（写库/外部调用/额度/审核）无日志  
 
 ## Delivery Self-Check
 
@@ -208,7 +286,10 @@ public class LetterServiceImpl
 - Pagination：`PageQuery` + `PageData`  
 - Audit：`initAudit` / `updateAudit` / 软删 `markDeleted`  
 - APP 加密：注解与 `wj.security` 配置一致（若该接口在加密范围内）  
+- **Comments**：Biz/公开方法有意图说明；复杂分支有「为何」注释  
+- **Logging**：关键写路径 / 外部调用 / 定时任务有 `INFO`/`WARN`/`ERROR`；无敏感字段泄漏  
 - 新增仅依赖源文档与 `commons-*` 已有能力时，已查源文档 FAQ/禁止项  
+
 
 ## Source
 

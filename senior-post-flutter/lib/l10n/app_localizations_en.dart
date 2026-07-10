@@ -909,7 +909,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguage => 'Language';
 
   @override
-  String get settingsLanguageSubtitle => 'Default English / 中文';
+  String get settingsLanguageSubtitle =>
+      'Follow device by default; override for testing';
 
   @override
   String get settingsLanguageEnglish => 'English';
@@ -918,7 +919,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguageChinese => '中文';
 
   @override
-  String get settingsLanguageSystem => 'Default English';
+  String get settingsLanguageSystem => 'Follow device';
+
+  @override
+  String get settingsEmailVerify => 'Verify email';
+
+  @override
+  String get settingsEmailVerifyPending => 'Not verified — tap to bind';
+
+  @override
+  String get settingsEmailVerifyDone => 'Verified';
+
+  @override
+  String get settingsEmailVerifyTitle => 'Email verification';
+
+  @override
+  String settingsEmailVerifyHint(String email) {
+    return 'We will send a code to $email';
+  }
+
+  @override
+  String get settingsEmailVerifyCodeLabel => 'Verification code';
+
+  @override
+  String get settingsEmailVerifySendCode => 'Send code';
+
+  @override
+  String get settingsEmailVerifyConfirm => 'Confirm';
+
+  @override
+  String get settingsEmailVerifyCodeSent => 'Verification code sent';
+
+  @override
+  String get settingsEmailVerifyCodeRequired => 'Please enter the code';
+
+  @override
+  String get settingsEmailVerifySuccess => 'Email verified';
+
+  @override
+  String get authLoginChallengeTitle => 'Confirm it\'s you';
+
+  @override
+  String get authLoginChallengeHint =>
+      'Unusual sign-in detected. Enter the code sent to your email.';
+
+  @override
+  String get authLoginChallengeSend => 'Send code';
+
+  @override
+  String get authLoginChallengeConfirm => 'Verify and continue';
+
+  @override
+  String get authLoginChallengeCodeSent => 'Code sent';
 
   @override
   String get settingsAbout => 'About';

@@ -39,9 +39,9 @@ public class UserDTO extends AbstractAuditableDTO {
     @Schema(description = "昵称")
     private String nickname;
     /**
-     * 性别：0 未设置，1 男，2 女，3 其他
+     * 性别：0 未设置，1 男，2 女
      */
-    @Schema(description = "性别")
+    @Schema(description = "性别：0未设置 1男 2女")
     private Integer gender;
 
     /**
@@ -54,6 +54,18 @@ public class UserDTO extends AbstractAuditableDTO {
      */
     @Schema(description = "国家代码")
     private String countryCode;
+    @Schema(description = "城市/地区")
+    private String city;
+    @Schema(description = "纬度")
+    private Double latitude;
+    @Schema(description = "经度")
+    private Double longitude;
+    @Schema(description = "用户语言标签")
+    private String language;
+    @Schema(description = "写作风格")
+    private String writingStyle;
+    @Schema(description = "邮箱是否已验证")
+    private Boolean emailVerified;
     /**
      * 个人简介
      */

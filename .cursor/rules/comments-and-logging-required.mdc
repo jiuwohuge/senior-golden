@@ -1,0 +1,28 @@
+---
+description: Enforce industry-standard comments and key-path logging for senior-post backend and frontend code changes.
+globs: senior-post-api/**/*.{java,xml,yml},senior-post-flutter/**/*.dart,senior-post-manage/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Comments & Logging (Mandatory)
+
+When **implementing or modifying** business code under `senior-post-api`、`senior-post-flutter`、`senior-post-manage/src`, you **must** follow the comment and logging sections in:
+
+| 端 | Skill（先读再写） |
+|----|-------------------|
+| 后端 | `.cursor/skills/backend-foundation-capabilities/SKILL.md` → **§11 Comments & Logging** |
+| 前端 | `.cursor/skills/frontend-engineering-conventions/SKILL.md` |
+
+## Hard requirements
+
+1. **Methods**：Biz / 公开 API / Provider / Remote 公开方法写清业务意图与副作用。
+2. **Complex branches**：非显然 `if`/`switch`/状态迁移旁注释「为何走此路径」。
+3. **Key logs**：写库成功/拒绝、外部调用失败、定时任务汇总、额度/审核拦截、前端关键 API 失败 — 按 skill 约定级别记录。
+4. **Never**：废话注释、注释死代码、日志打印 Token/密码/敏感 PII。
+
+## Self-check before finishing
+
+- [ ] Read the relevant skill section this session
+- [ ] New/changed public methods have intent comments
+- [ ] Complex branches explained
+- [ ] Key paths logged without sensitive data

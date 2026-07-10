@@ -1727,7 +1727,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLanguageSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Default English / 中文'**
+  /// **'Follow device by default; override for testing'**
   String get settingsLanguageSubtitle;
 
   /// No description provided for @settingsLanguageEnglish.
@@ -1745,8 +1745,104 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLanguageSystem.
   ///
   /// In en, this message translates to:
-  /// **'Default English'**
+  /// **'Follow device'**
   String get settingsLanguageSystem;
+
+  /// No description provided for @settingsEmailVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify email'**
+  String get settingsEmailVerify;
+
+  /// No description provided for @settingsEmailVerifyPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Not verified — tap to bind'**
+  String get settingsEmailVerifyPending;
+
+  /// No description provided for @settingsEmailVerifyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get settingsEmailVerifyDone;
+
+  /// No description provided for @settingsEmailVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verification'**
+  String get settingsEmailVerifyTitle;
+
+  /// No description provided for @settingsEmailVerifyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We will send a code to {email}'**
+  String settingsEmailVerifyHint(String email);
+
+  /// No description provided for @settingsEmailVerifyCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get settingsEmailVerifyCodeLabel;
+
+  /// No description provided for @settingsEmailVerifySendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get settingsEmailVerifySendCode;
+
+  /// No description provided for @settingsEmailVerifyConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get settingsEmailVerifyConfirm;
+
+  /// No description provided for @settingsEmailVerifyCodeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code sent'**
+  String get settingsEmailVerifyCodeSent;
+
+  /// No description provided for @settingsEmailVerifyCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the code'**
+  String get settingsEmailVerifyCodeRequired;
+
+  /// No description provided for @settingsEmailVerifySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verified'**
+  String get settingsEmailVerifySuccess;
+
+  /// No description provided for @authLoginChallengeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it\'s you'**
+  String get authLoginChallengeTitle;
+
+  /// No description provided for @authLoginChallengeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Unusual sign-in detected. Enter the code sent to your email.'**
+  String get authLoginChallengeHint;
+
+  /// No description provided for @authLoginChallengeSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get authLoginChallengeSend;
+
+  /// No description provided for @authLoginChallengeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify and continue'**
+  String get authLoginChallengeConfirm;
+
+  /// No description provided for @authLoginChallengeCodeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent'**
+  String get authLoginChallengeCodeSent;
 
   /// No description provided for @settingsAbout.
   ///

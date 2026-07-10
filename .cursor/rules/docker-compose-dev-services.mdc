@@ -1,0 +1,48 @@
+---
+description: Start/restart API and Manage via project docker-compose; always mvn clean package before API image rebuild.
+alwaysApply: true
+---
+
+# Dev Services via Docker Compose
+
+## Hard rule
+
+When starting, restarting, or rebuilding **backend API** and/or **Manage (admin) frontend** for this repo:
+
+1. **Do not** use local `mvn spring-boot:run` / IDE Run for the API as the default path (port `9011` conflicts with Compose).
+2. **Do** use the root [`docker-compose.yml`](docker-compose.yml).
+3. **Always** run `mvn clean package` (tests skippable) and refresh `senior-post-api/dist/*.jar` **before** rebuilding/recreating `senior-post-api`.
+
+Flutter App remains local (`flutter run`); it is not in Compose.
+
+## Preferred commands (repo root)
+
+PowerShell (Windows):
+
+```powershell
+.\scripts\dev-up.ps1
+# or API only:
+.\scripts\dev-up.ps1 -ApiOnly
+```
+
+Manual equivalent:
+
+```powershell
+cd senior-post-api
+mvn clean package "-Dmaven.test.skip=true"
+Copy-Item .\server\target\senior-post-server-*.jar .\dist\ -Force
+cd ..
+docker compose build senior-post-api
+docker compose up -d
+```
+
+- API: `http://localhost:9011/backend`
+- Manage (Vite in Compose): `http://localhost:8080` (mapped from container `5174`)
+- Postgres host port: `65432` (see compose)
+
+## Agent checklist
+
+- [ ] `mvn clean package` completed this start cycle
+- [ ] JAR copied into `senior-post-api/dist/`
+- [ ] `docker compose build` / `up` used (not bare Spring Boot on host)
+- [ ] If `9011` bind fails, stop the conflicting host process or recreate the API container

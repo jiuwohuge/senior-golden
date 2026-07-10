@@ -51,4 +51,13 @@ public class LoginDomain extends AbstractAuditableDomain {
     @Schema(description = "失败原因")
     private String failReason;
 
+    @Schema(description = "客户端 User-Agent")
+    private String userAgent;
+
+    @Schema(description = "登录 IP 国家码")
+    private String ipCountry;
+
+    @Schema(description = "风险：0无 1轻 2中 3高")
+    private Integer riskLevel;
+
 }

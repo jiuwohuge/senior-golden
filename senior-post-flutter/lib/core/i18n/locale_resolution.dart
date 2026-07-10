@@ -36,12 +36,19 @@ Locale resolveSeniorPostLocale(
   return english;
 }
 
-/// 与 [AppLocalizations.supportedLocales] 对齐的当前界面语言（设置覆盖 > 默认英语）。
-Locale seniorPostEffectiveLocale(Locale? override) {
+/// 与 [AppLocalizations.supportedLocales] 对齐的当前界面语言。
+/// 设置覆盖优先；否则按设备语言列表匹配，再回退英语。
+Locale seniorPostEffectiveLocale(
+  Locale? override, {
+  List<Locale>? deviceLocales,
+}) {
   if (override != null) {
     return override;
   }
-  return const Locale('en');
+  return resolveSeniorPostLocale(
+    deviceLocales ?? const <Locale>[],
+    AppLocalizations.supportedLocales,
+  );
 }
 
 /// HTTP `Accept-Language`，供后端 [MessageSource] 解析。

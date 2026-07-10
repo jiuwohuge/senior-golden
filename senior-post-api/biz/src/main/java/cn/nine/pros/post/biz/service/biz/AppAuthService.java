@@ -5,17 +5,21 @@ import cn.nine.commons.basic.context.RequestContext;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.config.OssProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
+import cn.nine.pros.post.biz.model.domain.LoginDomain;
 import cn.nine.pros.post.biz.model.domain.TagDomain;
 import cn.nine.pros.post.biz.model.domain.UserDeviceDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.model.domain.UserIdentityDomain;
 import cn.nine.pros.post.biz.service.biz.support.AppAuthProfileSupport;
+import cn.nine.pros.post.biz.service.biz.support.GeoIpLookup;
 import cn.nine.pros.post.biz.service.biz.support.GoogleIdTokenVerifierService;
 import cn.nine.pros.post.biz.service.biz.support.GoogleIdTokenVerifierService.VerifiedGoogleIdentity;
+import cn.nine.pros.post.biz.service.biz.support.LoginRiskEvaluator;
 import cn.nine.pros.post.biz.service.biz.support.OssReadableKeyValidator;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserInterestAssembler;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
+import cn.nine.pros.post.biz.service.base.LoginService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.TagService;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
@@ -29,6 +33,7 @@ import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
 import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
 import cn.nine.pros.post.client.model.input.AppGoogleCompleteInDto;
 import cn.nine.pros.post.client.model.input.AppGoogleLoginInDto;
+import cn.nine.pros.post.client.model.input.AppLoginChallengeConfirmInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
 import cn.nine.pros.post.client.model.input.AppResetPasswordInDto;
@@ -37,6 +42,8 @@ import cn.nine.pros.post.client.model.out.AppPublicUserVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,15 +54,19 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AppAuthService {
 
     private static final int MIN_AGE = 45;
     private static final int ACCOUNT_DELETION_COOLDOWN_DAYS = 7;
+    private static final int LOGIN_SUCCESS = 1;
+    private static final int LOGIN_FAIL = 2;
 
     private final UserService userService;
     private final UserIdentityService userIdentityService;
@@ -71,6 +82,9 @@ public class AppAuthService {
     private final FriendshipService friendshipService;
     private final AppMessages appMessages;
     private final GoogleIdTokenVerifierService googleIdTokenVerifierService;
+    private final LoginService loginService;
+    private final GeoIpService geoIpService;
+    private final EmailVerifyService emailVerifyService;
 
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO register(AppRegisterInDto body) {
@@ -97,6 +111,8 @@ public class AppAuthService {
         user.setIsVip(false);
         user.setStatus(1);
         user.setStaffRole(0);
+        user.setEmailVerified(false);
+        user.setLanguage(resolveClientLanguageTag());
         user.setDelFlag(false);
         LocalDateTime now = LocalDateTime.now();
         user.setCreatedAt(now);
@@ -104,7 +120,9 @@ public class AppAuthService {
         user.setCreatedBy(0L);
         user.setUpdatedBy(0L);
         user.setLastLoginAt(now);
-        user.setRegisterIp(MyRequestContextHolder.ipAddress());
+        String registerIp = MyRequestContextHolder.ipAddress();
+        user.setRegisterIp(registerIp);
+        applyGeoToUser(user, geoIpService.resolve(registerIp), true);
         userService.save(user);
         if (StringUtils.hasText(body.getAvatarUrl())) {
             LambdaUpdateWrapper<UserDomain> avUw =
@@ -119,47 +137,137 @@ public class AppAuthService {
         userTagService.replaceUserTags(user.getId(), user.getId(), new ArrayList<>(new LinkedHashSet<>(regTagIds)));
         String deviceUuid = assertDeviceUuidMatchesHeaderOrBody(body.getDeviceUuid());
         touchDevice(user.getId(), deviceUuid, normalizeDeviceType(body.getDeviceType()));
-
-        return finishAuth(user.getId(), true);
+        recordLogin(user.getId(), deviceUuid, LOGIN_SUCCESS, null, LoginRiskEvaluator.RISK_NONE);
+        log.info("user registered, userId={}", user.getId());
+        return finishAuth(user.getId(), true, LoginRiskEvaluator.RISK_NONE, false);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO login(AppLoginInDto body) {
         String email = body.getEmail().trim().toLowerCase();
+        String deviceUuid;
+        try {
+            deviceUuid = assertDeviceUuidMatchesHeaderOrBody(body.getDeviceUuid());
+        } catch (BadRequestException e) {
+            recordLogin(null, body.getDeviceUuid(), LOGIN_FAIL, "device_mismatch", LoginRiskEvaluator.RISK_NONE);
+            throw e;
+        }
         UserIdentityDomain ident = userIdentityService.findActiveEmailByUid(email);
         if (ident == null || !StringUtils.hasText(ident.getPasswordHash())) {
+            recordLogin(null, deviceUuid, LOGIN_FAIL, "bad_credential", LoginRiskEvaluator.RISK_NONE);
             throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         if (!passwordEncoder.matches(body.getPassword(), ident.getPasswordHash())) {
+            recordLogin(ident.getUserId(), deviceUuid, LOGIN_FAIL, "bad_credential", LoginRiskEvaluator.RISK_NONE);
             throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         UserDTO dto = userService.findById(ident.getUserId());
         if (dto == null) {
+            recordLogin(ident.getUserId(), deviceUuid, LOGIN_FAIL, "user_missing", LoginRiskEvaluator.RISK_NONE);
             throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         finalizeAccountDeletionIfCooldownElapsed(dto.getId());
         dto = userService.findById(dto.getId());
         if (dto == null) {
+            recordLogin(ident.getUserId(), deviceUuid, LOGIN_FAIL, "user_missing", LoginRiskEvaluator.RISK_NONE);
             throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         if (dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
+            recordLogin(dto.getId(), deviceUuid, LOGIN_FAIL, "unavailable", LoginRiskEvaluator.RISK_NONE);
             throw new BadRequestException(appMessages.get("app.error.account.unavailable"));
         }
 
+        return completeSuccessfulLogin(dto, deviceUuid, normalizeDeviceType(body.getDeviceType()));
+    }
+
+    /**
+     * 中风险登录二次验证通过后发放 Token。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public AppAuthResultVO confirmLoginChallenge(AppLoginChallengeConfirmInDto body) {
+        long userId = emailVerifyService.confirmLoginChallenge(body.getEmail(), body.getCode());
+        UserDTO dto = userService.findById(userId);
+        if (dto == null || dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
+            throw new BadRequestException(appMessages.get("app.error.account.unavailable"));
+        }
+        String deviceUuid = assertDeviceUuidMatchesHeaderOrBody(body.getDeviceUuid());
+        return completeSuccessfulLogin(dto, deviceUuid, normalizeDeviceType(body.getDeviceType()), true);
+    }
+
+    private AppAuthResultVO completeSuccessfulLogin(UserDTO dto, String deviceUuid, String deviceType) {
+        return completeSuccessfulLogin(dto, deviceUuid, deviceType, false);
+    }
+
+    private AppAuthResultVO completeSuccessfulLogin(
+            UserDTO dto, String deviceUuid, String deviceType, boolean skipRiskGate) {
+        String ip = MyRequestContextHolder.ipAddress();
+        GeoIpLookup geo = geoIpService.resolve(ip);
+        applyGeoUpdateIfEmpty(dto.getId(), geo);
+
+        List<LoginDomain> prev = loginService.list(
+                new LambdaQueryWrapper<LoginDomain>()
+                        .eq(LoginDomain::getUserId, dto.getId())
+                        .eq(LoginDomain::getLoginResult, LOGIN_SUCCESS)
+                        .orderByDesc(LoginDomain::getId)
+                        .last("LIMIT 5"));
+        UserDomain freshDomain = userService.getById(dto.getId());
+        Double curLat = geo.latitude() != null ? geo.latitude()
+                : (freshDomain != null ? freshDomain.getLatitude() : null);
+        Double curLng = geo.longitude() != null ? geo.longitude()
+                : (freshDomain != null ? freshDomain.getLongitude() : null);
+        Double prevLat = freshDomain != null ? freshDomain.getLatitude() : null;
+        Double prevLng = freshDomain != null ? freshDomain.getLongitude() : null;
+
+        LoginRiskEvaluator.RiskResult risk = skipRiskGate
+                ? new LoginRiskEvaluator.RiskResult(LoginRiskEvaluator.RISK_NONE, 0)
+                : LoginRiskEvaluator.evaluate(
+                        geo.countryCode(), deviceUuid, curLat, curLng, prev, prevLat, prevLng);
+
+        if (risk.level() == LoginRiskEvaluator.RISK_HIGH) {
+            LocalDateTime now = LocalDateTime.now();
+            userService.update(new LambdaUpdateWrapper<UserDomain>()
+                    .eq(UserDomain::getId, dto.getId())
+                    .set(UserDomain::getStatus, 2)
+                    .set(UserDomain::getUpdatedAt, now)
+                    .set(UserDomain::getUpdatedBy, dto.getId()));
+            recordLogin(dto.getId(), deviceUuid, LOGIN_FAIL, "risk_high", risk.level(), geo.countryCode());
+            log.warn("high risk login banned userId={}, triggers={}", dto.getId(), risk.triggerCount());
+            throw new BadRequestException(appMessages.get("app.error.login.riskHigh"));
+        }
+
+        if (risk.level() == LoginRiskEvaluator.RISK_MEDIUM && !skipRiskGate) {
+            recordLogin(dto.getId(), deviceUuid, LOGIN_FAIL, "risk_medium_challenge", risk.level(), geo.countryCode());
+            log.info("medium risk login challenge required, userId={}", dto.getId());
+            UserInterestAssembler.Payload interests = userInterestAssembler.loadForUser(dto.getId());
+            boolean complete = AppAuthProfileSupport.isProfileComplete(dto, interests.ids());
+            return AppAuthResultVO.builder()
+                    .token(null)
+                    .user(toPublic(userService.findById(dto.getId()), dto.getId(), true))
+                    .profileComplete(complete)
+                    .riskLevel(risk.level())
+                    .requireEmailChallenge(true)
+                    .build();
+        }
+
         LocalDateTime now = LocalDateTime.now();
-        userService.update(new LambdaUpdateWrapper<UserDomain>()
+        LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>()
                 .eq(UserDomain::getId, dto.getId())
                 .set(UserDomain::getLastLoginAt, now)
                 .set(UserDomain::getDeletionRequestedAt, null)
                 .set(UserDomain::getUpdatedAt, now)
-                .set(UserDomain::getUpdatedBy, dto.getId()));
+                .set(UserDomain::getUpdatedBy, dto.getId());
+        if (!StringUtils.hasText(dto.getLanguage())) {
+            uw.set(UserDomain::getLanguage, resolveClientLanguageTag());
+        }
+        userService.update(uw);
 
-        String deviceUuid = assertDeviceUuidMatchesHeaderOrBody(body.getDeviceUuid());
-        touchDevice(dto.getId(), deviceUuid, normalizeDeviceType(body.getDeviceType()));
-
+        touchDevice(dto.getId(), deviceUuid, deviceType);
+        recordLogin(dto.getId(), deviceUuid, LOGIN_SUCCESS, null, risk.level(), geo.countryCode());
         UserInterestAssembler.Payload interests = userInterestAssembler.loadForUser(dto.getId());
-        boolean complete = AppAuthProfileSupport.isProfileComplete(dto, interests.ids());
-        return finishAuth(dto.getId(), complete);
+        boolean complete = AppAuthProfileSupport.isProfileComplete(
+                userService.findById(dto.getId()), interests.ids());
+        log.info("user login ok, userId={}, risk={}", dto.getId(), risk.level());
+        return finishAuth(dto.getId(), complete, risk.level(), false);
     }
 
     public void validateRegisterEmail(String rawEmail) {
@@ -193,21 +301,8 @@ public class AppAuthService {
         if (dto == null || dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
             throw new BadRequestException(appMessages.get("app.error.account.unavailable"));
         }
-
-        LocalDateTime now = LocalDateTime.now();
-        userService.update(new LambdaUpdateWrapper<UserDomain>()
-                .eq(UserDomain::getId, userId)
-                .set(UserDomain::getLastLoginAt, now)
-                .set(UserDomain::getDeletionRequestedAt, null)
-                .set(UserDomain::getUpdatedAt, now)
-                .set(UserDomain::getUpdatedBy, userId));
-
         String deviceUuid = assertDeviceUuidMatchesHeaderOrBody(body.getDeviceUuid());
-        touchDevice(userId, deviceUuid, normalizeDeviceType(body.getDeviceType()));
-
-        UserInterestAssembler.Payload interests = userInterestAssembler.loadForUser(userId);
-        boolean complete = AppAuthProfileSupport.isProfileComplete(dto, interests.ids());
-        return finishAuth(userId, complete);
+        return completeSuccessfulLogin(dto, deviceUuid, normalizeDeviceType(body.getDeviceType()));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -240,7 +335,7 @@ public class AppAuthService {
         userService.update(uw);
         userTagService.replaceUserTags(uid, uid, new ArrayList<>(new LinkedHashSet<>(body.getInterestTagIds())));
 
-        return finishAuth(uid, true);
+        return finishAuth(uid, true, LoginRiskEvaluator.RISK_NONE, false);
     }
 
     public void forgotPassword(AppForgotPasswordInDto body) {
@@ -389,14 +484,121 @@ public class AppAuthService {
         return user.getId();
     }
 
-    private AppAuthResultVO finishAuth(long userId, boolean profileComplete) {
-        String token = appJwtService.createToken(userId);
+    private AppAuthResultVO finishAuth(
+            long userId, boolean profileComplete, int riskLevel, boolean requireChallenge) {
+        String token = requireChallenge ? null : appJwtService.createToken(userId);
         UserDTO fresh = userService.findById(userId);
         return AppAuthResultVO.builder()
                 .token(token)
                 .user(toPublic(fresh, fresh.getId(), true))
                 .profileComplete(profileComplete)
+                .riskLevel(riskLevel)
+                .requireEmailChallenge(requireChallenge)
                 .build();
+    }
+
+    private void recordLogin(Long userId, String deviceUuid, int result, String failReason, int riskLevel) {
+        recordLogin(userId, deviceUuid, result, failReason, riskLevel, null);
+    }
+
+    private void recordLogin(
+            Long userId, String deviceUuid, int result, String failReason, int riskLevel, String ipCountry) {
+        try {
+            String ip = MyRequestContextHolder.ipAddress();
+            GeoIpLookup geo = geoIpService.resolve(ip);
+            LoginDomain row = new LoginDomain();
+            row.setUserId(userId);
+            row.setLoginIp(ip);
+            row.setDeviceUuid(StringUtils.hasText(deviceUuid) ? deviceUuid.trim() : null);
+            row.setLoginResult(result);
+            row.setFailReason(failReason);
+            row.setUserAgent(resolveUserAgent());
+            row.setIpCountry(StringUtils.hasText(ipCountry) ? ipCountry : geo.countryCode());
+            row.setRiskLevel(riskLevel);
+            LocalDateTime now = LocalDateTime.now();
+            row.setCreatedAt(now);
+            row.setUpdatedAt(now);
+            row.setDelFlag(false);
+            loginService.save(row);
+        } catch (Exception e) {
+            log.warn("record login failed: {}", e.toString());
+        }
+    }
+
+    private static String resolveUserAgent() {
+        RequestContext ctx = MyRequestContextHolder.getContext();
+        if (ctx == null) {
+            return null;
+        }
+        try {
+            Object headers = ctx.getClass().getMethod("getHeaders").invoke(ctx);
+            if (headers instanceof java.util.Map<?, ?> map) {
+                Object ua = map.get("User-Agent");
+                if (ua == null) {
+                    ua = map.get("user-agent");
+                }
+                return ua != null ? ua.toString() : null;
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // framework may not expose headers map
+        }
+        return null;
+    }
+
+    private static String resolveClientLanguageTag() {
+        Locale loc = LocaleContextHolder.getLocale();
+        return loc != null ? loc.toLanguageTag() : "en";
+    }
+
+    /** 注册时用 IP 定位补全国家/城市/坐标（用户已选手动国家则保留）。 */
+    private void applyGeoToUser(UserDomain user, GeoIpLookup geo, boolean fillCountryIfBlank) {
+        if (geo == null) {
+            return;
+        }
+        if (fillCountryIfBlank && !StringUtils.hasText(user.getCountryCode()) && geo.hasCountry()) {
+            user.setCountryCode(geo.countryCode());
+        }
+        if (!StringUtils.hasText(user.getCity()) && StringUtils.hasText(geo.city())) {
+            user.setCity(geo.city());
+        }
+        if (user.getLatitude() == null && geo.latitude() != null) {
+            user.setLatitude(geo.latitude());
+        }
+        if (user.getLongitude() == null && geo.longitude() != null) {
+            user.setLongitude(geo.longitude());
+        }
+    }
+
+    private void applyGeoUpdateIfEmpty(long userId, GeoIpLookup geo) {
+        if (geo == null || (!geo.hasCountry() && geo.latitude() == null)) {
+            return;
+        }
+        UserDomain u = userService.getById(userId);
+        if (u == null) {
+            return;
+        }
+        LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>().eq(UserDomain::getId, userId);
+        boolean changed = false;
+        if (!StringUtils.hasText(u.getCountryCode()) && geo.hasCountry()) {
+            uw.set(UserDomain::getCountryCode, geo.countryCode());
+            changed = true;
+        }
+        if (!StringUtils.hasText(u.getCity()) && StringUtils.hasText(geo.city())) {
+            uw.set(UserDomain::getCity, geo.city());
+            changed = true;
+        }
+        if (u.getLatitude() == null && geo.latitude() != null) {
+            uw.set(UserDomain::getLatitude, geo.latitude());
+            changed = true;
+        }
+        if (u.getLongitude() == null && geo.longitude() != null) {
+            uw.set(UserDomain::getLongitude, geo.longitude());
+            changed = true;
+        }
+        if (changed) {
+            uw.set(UserDomain::getUpdatedAt, LocalDateTime.now()).set(UserDomain::getUpdatedBy, userId);
+            userService.update(uw);
+        }
     }
 
     private void finalizeAccountDeletionIfCooldownElapsed(Long userId) {
@@ -496,6 +698,12 @@ public class AppAuthService {
                 .gender(dto.getGender())
                 .birthYear(dto.getBirthYear())
                 .countryCode(dto.getCountryCode())
+                .city(dto.getCity())
+                .latitude(dto.getLatitude())
+                .longitude(dto.getLongitude())
+                .language(dto.getLanguage())
+                .writingStyle(dto.getWritingStyle())
+                .emailVerified(Boolean.TRUE.equals(dto.getEmailVerified()))
                 .bio(dto.getBio())
                 .avatarUrl(av)
                 .isVip(dto.getIsVip());

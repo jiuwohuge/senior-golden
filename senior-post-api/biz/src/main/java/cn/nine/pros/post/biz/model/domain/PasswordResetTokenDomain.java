@@ -20,6 +20,8 @@ public class PasswordResetTokenDomain implements Serializable {
     private Long id;
     private Long userId;
     private String codeHash;
+    /** password_reset | email_verify | login_challenge */
+    private String purpose;
     private LocalDateTime expiresAt;
     private LocalDateTime usedAt;
     private LocalDateTime createdAt;

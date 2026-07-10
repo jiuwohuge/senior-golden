@@ -1,6 +1,6 @@
 # PLAN · 慢邮件邮局系统 4.0（银发慢邮）
 
-> **版本**：4.0 · **分支**：`feature_4.0` · **更新**：2026-07-09 · **维护**：项目 Owner + AI 架构师
+> **版本**：4.0 · **分支**：`feature_4.0` · **更新**：2026-07-10 · **维护**：项目 Owner + AI 架构师
 > **需求真源**：[`doc/4.0需求改版.md`](doc/4.0需求改版.md)（PRD v4.0，§1~§20）
 > **后端框架能力真源**：[`senior-post-api/底层框架能力.md`](senior-post-api/底层框架能力.md)
 > **治理**：旧版 `doc/plan/**`、`doc/requirements/**`、根目录 `findings.md/progress.md/task_plan.md` 已废弃删除；本文件为唯一规划基线。
@@ -22,7 +22,7 @@
 | 配置 | 散落硬编码 | **统一管理后台配置驱动**（§20.2） |
 | 后端分层 | Controller 直调 Mapper 等混杂写法 | **强制五层链路**，数据访问收口 IService（§1.1） |
 | 代码治理 | 废弃功能留档/打补丁 | **废弃即删除**，保持工作区整洁（§1.2） |
-| 库表迁移 | Flyway V1~V28 历史脚本 | **清空重来**，开发期从 `V1__init.sql` 重建（§1.3） |
+| 库表迁移 | Flyway 历史脚本 | **增量追加**；开发期不整理迁移链，**上线前统一整理一次**（§1.3） |
 
 **核心闭环（§17）**：写信 → 匹配/投递 → 收信(读信) → 回信 → 达阈值加笔友 → 行为反馈优化匹配。
 
@@ -34,7 +34,7 @@
 |------|------|------|
 | 后端语言 | Java 17 | `commons-framework` 父 POM 统一管理 |
 | 后端框架 | Spring Boot 3.x + MyBatis-Plus 3.5.16 | 多模块 `client`/`biz`/`server` |
-| 库表迁移 | Flyway | `senior-post-api/server/src/main/resources/db/migration`（**开发期重置，见 §1.3**） |
+| 库表迁移 | Flyway | `senior-post-api/server/src/main/resources/db/migration`（**增量追加，上线前再整理，见 §1.3**） |
 | 数据库 | PostgreSQL | 主事务库 |
 | 缓存 | Redis | 缓存；**延迟投递用 PG + `@Scheduled`**，ZSet 仅列为后续优化（§6.3） |
 | 对象存储 | 阿里云 OSS | `put-sign`/`get-sign` 预签名直传（图片附件） |
@@ -73,17 +73,24 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 **废弃功能不做留档、不打补丁、不 `@Deprecated` 挂尸。**
 
 - 判定废弃 → **直接删除**对应 Controller / Service / Mapper / Domain / DTO / 前端 feature / 路由 / 测试 / 文档引用
-- 禁止：`// TODO remove later`、注释大块旧代码、保留空壳 Controller、保留无用 Flyway 脚本
+- 禁止：`// TODO remove later`、注释大块旧代码、保留空壳 Controller
 - 目标：本次构建的工作区**只保留 4.0 有效代码**，便于阅读、编译、评审
+- Flyway 脚本整理不在开发期做（见 §1.3）；上线前统一清理无用迁移
 
-### 1.3 Flyway 重置策略（开发期）
+### 1.3 Flyway 策略（开发期 vs 上线前）
 
-项目仍处于开发期，**不保留历史迁移链**。
+**开发期（当前约定，强制）：不整理 migration。**
 
-- **删除** `db/migration` 下全部 `V1~V28` 脚本
-- **重建**单一初始化脚本 `V1__init.sql`（及后续按需 `V2+`），表结构直接对齐 4.0 PRD + PLAN 当前设计
-- **本地/开发库**：`flyway clean`（仅 dev）或 drop schema 后由 Flyway 重新 migrate
-- **约束**：生产环境未上线，无历史数据迁移负担；后续若上线再冻结迁移链
+- Schema 变更只做 **增量脚本**（`Vn__*.sql` 顺序追加），禁止为「收敛/清场」反复删除、合并、重写已有迁移
+- 本地库可按需 `migrate`；仅在个人环境损坏时允许 drop schema 重跑，**不作为里程碑交付动作**
+- Agent / 里程碑任务 **不得** 把「Flyway 再收敛 / 仅保留 V1+V2」列为阻塞项
+
+**上线前（单独窗口，做一次即可）：**
+
+- 统一整理迁移链（合并基线、校验 history、必要时重建 `V1__init` + 冻结后续增量）
+- 整理完成后再冻结生产迁移策略；此前以增量可跑通为准
+
+> M0 曾做过一次基线重建（`V1__init` + `V2__seed`），属历史动作；**自本决策起不再在开发里程碑中重复整理。**
 
 ---
 
@@ -122,7 +129,7 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 
 ## 3. [功能清单]（依赖排序里程碑）
 
-> 原则：**M0 先清场**（Flyway 重置 + 废弃代码删除 + 分层基线）→ 账户/用户 → 信件/投递/首页/读信 → 匹配/行为 → 关系/笔友页/推荐 → 仪式/商业/配置。
+> 原则：**M0 先清场**（废弃代码删除 + 分层基线；Flyway 基线已落地，后续只增量）→ 账户/用户 → 信件/投递/首页/读信 → 匹配/行为 → 关系/笔友页/推荐 → 仪式/商业/配置。
 
 ### M0 — 清场 + 基座 + 适老化基线（约 1~2 周）
 
@@ -154,11 +161,11 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 - [x] 应用可启动；认证 + 基础用户接口可用
 
 ### M1 — 账户 + 用户内核（约 2~3 周）
-- [ ] 账户：注册去验证码(§2.1)；邮箱验证绑定(§2.9)；登录记录 + 异常登录(§2.5/2.6)
-- [ ] 用户：自动定位(§3.3)、Haversine(§3.4)、写作风格标签规则版(§3.7)、gender 二值(§3.1)
-- [ ] 语言：跟随设备 + 中/英本地化(§3.5)
-- [ ] Flyway `V2+`（若 init 后需增量）：`email_verified`、定位字段等
-- [ ] 新接口均走分层规范(§1.1)
+- [x] 账户：注册去验证码(§2.1)；邮箱验证绑定(§2.9)；登录记录 + 异常登录(§2.5/2.6)
+- [x] 用户：自动定位(§3.3)、Haversine(§3.4)、写作风格标签规则版(§3.7)、gender 二值(§3.1)
+- [x] 语言：跟随设备 + 中/英本地化(§3.5)
+- [x] Flyway 增量：`email_verified`、定位字段等（`V3__m1_user_account_fields`）；开发期不整理迁移链
+- [x] 新接口均走分层规范(§1.1)
 
 ### M2 — 信件 + 投递 + 邮局首页 + 读信页（约 3~4 周）
 - [ ] 信件：`mode`/`audit_status`/`parent_letter_id`/分模式状态机(§4.3)
@@ -176,14 +183,15 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 
 ### M5 — 仪式 + 商业 + 配置 + 推送 + 匹配 v2（4 周+）
 - [ ] 仪式/商业/管理后台配置(§5.4/§16/§20.2)；推送(§11.6)；匹配 v2 AI(§7.3)
+- [ ] **上线前**：Flyway 迁移链统一整理一次（§1.3），再冻结生产策略
 
 ---
 
 ## 4. [改动预测]（M0 首批；每次 ≤3 文件、断点式交付）
 
-**Flyway**
-- 删除：`db/migration/V1__init.sql` … `V28__*.sql`（全部）
-- 新增：`V1__init.sql`（4.0 基线表结构）
+**Flyway（M0 历史；开发期不再重复）**
+- 已完成：基线 `V1__init.sql` + `V2__seed_reference_data.sql`；后续仅增量 `Vn+`
+- 上线前再统一整理（见 §1.3 / M5）
 
 **后端删除（示例批次，按模块分批提交）**
 - `AppPostcardController` + `Postcard*` 全链路
@@ -198,7 +206,7 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 - `main_shell.dart`、`app_router.dart`
 - 删除 `features/post_wall/**` 等废弃目录
 
-> M0 完成后工作区应：**无废弃模块文件、无 V2~V28 脚本、Controller 无 Mapper 注入**。
+> M0 完成后工作区应：**无废弃模块文件、Controller 无 Mapper 注入**；Flyway 以可 migrate 为准，开发期不强制收敛脚本数量。
 
 ---
 
@@ -206,7 +214,7 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 
 - **后端编译**：`mvn -pl biz,client -am compile`
 - **分层合规**：静态检查 Controller 不注入 Mapper；BizService 不跳过 Base IService 直写 SQL
-- **Flyway**：dev 库 clean + migrate 后表结构与 `V1__init` 一致；应用启动无迁移错误
+- **Flyway**：应用启动 migrate 成功即可；开发期不要求 clean 后仅 V1；上线前整理窗口再做全量校验
 - **废弃清理**：全仓搜索废弃类名/路由为零命中
 - **Flutter**：`dart format` + `flutter analyze`
 - **业务冒烟**：注册/登录/用户资料/写信收发基础链路（随里程碑递进）
@@ -225,7 +233,9 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 | 2026-07-09 | 投递速度=距离+关系；读信页；写信分流；举报/拉黑入口 |
 | **2026-07-09** | **后端强制五层**：Controller → Business Service → IService/ServiceImpl → Mapper → Table；Controller 禁止直调 Mapper |
 | **2026-07-09** | **废弃代码直接删除**，不留档不打补丁，保持工作区整洁 |
-| **2026-07-09** | **Flyway 清空重来**：删除 V1~V28，从 `V1__init.sql` 重建（开发期） |
+| 2026-07-09 | Flyway 曾清空重来（M0 基线）；**已被 2026-07-10 决策取代** |
+| **2026-07-10** | **开发期不做 Flyway migration 整理**（只增量追加）；**上线前统一整理一次** |
+| **2026-07-10** | **本地启停 API/Manage 统一走根目录 docker-compose**；每次重建 API 前必须 `mvn clean package`（`scripts/dev-up.ps1`） |
 | 继承自 3.0 | JWT 单端在线；OSS 直传；`@Scheduled` 延迟投递；Riverpod；Manage 用 React |
 
 ---
@@ -238,5 +248,5 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 - [x] S3. 旧文档全量清理
 - [x] S4. PRD v4.0 定稿
 - [x] S5. 按 PRD 重排里程碑 M0~M5
-- [x] S6. 补充工程治理：后端分层 / 废弃即删 / Flyway 重置
-- [x] S7. M0 清场执行（Flyway 重置、分层基线、废弃删除、四 Tab 骨架、适老化基线、邮局首页接线 **已完成**）
+- [x] S6. 补充工程治理：后端分层 / 废弃即删 / Flyway 策略（开发期增量，上线前整理）
+- [x] S7. M0 清场执行（分层基线、废弃删除、四 Tab 骨架、适老化基线、邮局首页接线 **已完成**；Flyway 基线已落地，后续只增量）

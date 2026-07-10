@@ -25,12 +25,24 @@ public class AppPublicUserVO {
     @Schema(description = "昵称")
     private String nickname;
 
-    @Schema(description = "性别：0未设置 1男 2女 3其他")
+    @Schema(description = "性别：0未设置 1男 2女")
     private Integer gender;
     @Schema(description = "出生年份")
     private Integer birthYear;
     @Schema(description = "国家代码")
     private String countryCode;
+    @Schema(description = "城市/地区")
+    private String city;
+    @Schema(description = "纬度")
+    private Double latitude;
+    @Schema(description = "经度")
+    private Double longitude;
+    @Schema(description = "用户语言标签，如 zh-CN")
+    private String language;
+    @Schema(description = "写作风格：concise|narrative|emotional")
+    private String writingStyle;
+    @Schema(description = "邮箱是否已验证绑定")
+    private Boolean emailVerified;
     @Schema(description = "简介")
     private String bio;
     @Schema(description = "头像 URL")

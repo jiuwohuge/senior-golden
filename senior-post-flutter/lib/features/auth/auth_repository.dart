@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
@@ -16,9 +17,18 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 class AuthSignInResult {
-  const AuthSignInResult({required this.profileComplete});
+  const AuthSignInResult({
+    required this.profileComplete,
+    this.requireEmailChallenge = false,
+    this.riskLevel,
+  });
 
   final bool profileComplete;
+
+  /// 中风险登录：未发 Token，需邮箱验证码二次确认。
+  final bool requireEmailChallenge;
+
+  final int? riskLevel;
 }
 
 class AuthRepository {
@@ -182,6 +192,70 @@ class AuthRepository {
     }
   }
 
+  /// POST `/api/auth/email-verify/send` — 已登录邮箱账号发送绑定验证码。
+  Future<void> sendEmailVerifyCode() async {
+    final dio = _ref.read(dioProvider);
+    try {
+      await dio.post<Map<String, dynamic>>('/api/auth/email-verify/send');
+    } on DioException catch (e) {
+      debugPrint('sendEmailVerifyCode failed: $e');
+      _throwMappedDio(e);
+    }
+  }
+
+  /// POST `/api/auth/email-verify/confirm` — 确认邮箱验证绑定。
+  Future<void> confirmEmailVerify({required String code}) async {
+    final dio = _ref.read(dioProvider);
+    try {
+      await dio.post<Map<String, dynamic>>(
+        '/api/auth/email-verify/confirm',
+        data: <String, dynamic>{'code': code.trim()},
+      );
+      await refreshSessionFromServer();
+    } on DioException catch (e) {
+      debugPrint('confirmEmailVerify failed: $e');
+      _throwMappedDio(e);
+    }
+  }
+
+  /// POST `/api/auth/login-challenge/send` — 中风险登录二次验证发码。
+  Future<void> sendLoginChallenge({required String email}) async {
+    final dio = _ref.read(dioProvider);
+    try {
+      await dio.post<Map<String, dynamic>>(
+        '/api/auth/login-challenge/send',
+        data: <String, dynamic>{'email': email.trim()},
+      );
+    } on DioException catch (e) {
+      debugPrint('sendLoginChallenge failed: $e');
+      _throwMappedDio(e);
+    }
+  }
+
+  /// POST `/api/auth/login-challenge/confirm` — 二次验证通过后发 Token。
+  Future<AuthSignInResult> confirmLoginChallenge({
+    required String email,
+    required String code,
+  }) async {
+    final dio = _ref.read(dioProvider);
+    final deviceUuid = await _ensureDeviceUuid();
+    try {
+      final res = await dio.post<Map<String, dynamic>>(
+        '/api/auth/login-challenge/confirm',
+        data: <String, dynamic>{
+          'email': email.trim(),
+          'code': code.trim(),
+          'deviceUuid': deviceUuid,
+          'deviceType': _deviceTypeBody(),
+        },
+      );
+      return _applyAuthResponse(res);
+    } on DioException catch (e) {
+      debugPrint('confirmLoginChallenge failed: $e');
+      _throwMappedDio(e);
+    }
+  }
+
   Future<void> logout() async {
     await AuthStorage.clearToken();
     _ref.read(authTokenProvider.notifier).state = null;
@@ -252,7 +326,21 @@ class AuthRepository {
     final data = unwrapData<Map<String, dynamic>>(res, (raw) {
       return raw! as Map<String, dynamic>;
     });
-    final token = data['token']! as String;
+    final requireChallenge = data['requireEmailChallenge'] as bool? ?? false;
+    final riskLevel = (data['riskLevel'] as num?)?.toInt();
+    final token = data['token'] as String?;
+    // 中风险：服务端故意不发 Token，交由登录页走邮箱二次验证
+    if (requireChallenge || token == null || token.isEmpty) {
+      final userMap = data['user'] as Map<String, dynamic>?;
+      if (userMap != null) {
+        _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
+      }
+      return AuthSignInResult(
+        profileComplete: data['profileComplete'] as bool? ?? true,
+        requireEmailChallenge: true,
+        riskLevel: riskLevel,
+      );
+    }
     await AuthStorage.writeToken(token);
     _ref.read(authTokenProvider.notifier).state = token;
     _ref.invalidate(seniorPostTimFacadeProvider);
@@ -262,7 +350,10 @@ class AuthRepository {
     }
     _ref.read(invalidateAuthDataProvider)();
     final complete = data['profileComplete'] as bool? ?? true;
-    return AuthSignInResult(profileComplete: complete);
+    return AuthSignInResult(
+      profileComplete: complete,
+      riskLevel: riskLevel,
+    );
   }
 
   Future<String> _ensureDeviceUuid() async {

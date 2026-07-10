@@ -2,9 +2,12 @@ package cn.nine.pros.post.client.api.app;
 
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
+import cn.nine.pros.post.client.model.input.AppEmailVerifyConfirmInDto;
 import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
 import cn.nine.pros.post.client.model.input.AppGoogleCompleteInDto;
 import cn.nine.pros.post.client.model.input.AppGoogleLoginInDto;
+import cn.nine.pros.post.client.model.input.AppLoginChallengeConfirmInDto;
+import cn.nine.pros.post.client.model.input.AppLoginChallengeSendInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
 import cn.nine.pros.post.client.model.input.AppResetPasswordInDto;
@@ -65,4 +68,20 @@ public interface AppAuthApi {
     @Operation(summary = "提交账号注销申请（进入7日冷静期；期间再次登录将撤销申请）")
     @PostMapping("/account/deletion-request")
     void requestAccountDeletion();
+
+    @Operation(summary = "发送邮箱验证绑定码（需登录；仅邮箱账号）")
+    @PostMapping("/email-verify/send")
+    void sendEmailVerifyCode();
+
+    @Operation(summary = "确认邮箱验证绑定")
+    @PostMapping("/email-verify/confirm")
+    void confirmEmailVerify(@RequestBody @Valid AppEmailVerifyConfirmInDto body);
+
+    @Operation(summary = "中风险登录：发送邮箱二次验证码")
+    @PostMapping("/login-challenge/send")
+    void sendLoginChallenge(@RequestBody @Valid AppLoginChallengeSendInDto body);
+
+    @Operation(summary = "中风险登录：确认验证码并发放 Token")
+    @PostMapping("/login-challenge/confirm")
+    AppAuthResultVO confirmLoginChallenge(@RequestBody @Valid AppLoginChallengeConfirmInDto body);
 }

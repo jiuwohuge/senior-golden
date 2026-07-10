@@ -21,4 +21,10 @@ public class AppAuthResultVO {
 
     @Schema(description = "资料是否已满足 45+、性别、兴趣≥3 等必填项")
     private Boolean profileComplete;
+
+    @Schema(description = "登录风险：0无 1轻 2中 3高")
+    private Integer riskLevel;
+
+    @Schema(description = "中风险时为 true：需邮箱二次验证后再发 Token")
+    private Boolean requireEmailChallenge;
 }

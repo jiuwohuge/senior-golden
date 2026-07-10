@@ -6,6 +6,7 @@ import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.service.biz.AppBlacklistService;
 import cn.nine.pros.post.biz.service.biz.AppMailboxService;
+import cn.nine.pros.post.biz.service.biz.WritingStyleService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.SensitiveWordService;
@@ -42,12 +43,13 @@ public class AppMailboxServiceImpl implements AppMailboxService {
 
     private static final int USER_STATUS_NORMAL = 1;
 
-        private final LetterService letterService;
+    private final LetterService letterService;
     private final FriendshipService friendshipService;
     private final UserService userService;
     private final SensitiveWordService sensitiveWordService;
     private final OssDisplayUrlService ossDisplayUrlService;
     private final AppBlacklistService appBlacklistService;
+    private final WritingStyleService writingStyleService;
     private final AppMessages appMessages;
 
     @Override
@@ -182,7 +184,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
 
         letter.initAudit(fromUserId);
         letterService.save(letter);
-
+        // 发信后按规则重算写作风格（样本不足时内部跳过）
+        writingStyleService.recompute(fromUserId);
 
         LetterDomain saved = letterService.getById(letter.getId());
         return toItem(saved, fromUserId, false);

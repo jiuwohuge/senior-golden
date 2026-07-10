@@ -136,6 +136,12 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
         isVip: m['isVip'] as bool? ?? state.user.isVip,
         deletionRequestedAt: delReq,
         deletionEffectiveAt: delEff,
+        emailVerified: m['emailVerified'] as bool? ?? state.user.emailVerified,
+        language: m['language'] as String? ?? state.user.language,
+        city: m['city'] as String? ?? state.user.city,
+        latitude: (m['latitude'] as num?)?.toDouble() ?? state.user.latitude,
+        longitude: (m['longitude'] as num?)?.toDouble() ?? state.user.longitude,
+        writingStyle: m['writingStyle'] as String? ?? state.user.writingStyle,
       ),
     );
   }

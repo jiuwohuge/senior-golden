@@ -15,6 +15,7 @@ When a user gives feature-level instructions (not explicit API-level instruction
 2. If frontend depends on a missing/unclear backend interface, define or implement backend contract first, then continue frontend integration.
 3. Backend code under `senior-post` must follow `backend-foundation-capabilities` conventions by default.
 4. Flutter app and admin UI design work must follow `frontend-design` skill — see `.cursor/rules/frontend-design-required.mdc`.
+5. Backend and frontend **business code** must follow comment + key-path logging conventions — see `.cursor/rules/comments-and-logging-required.mdc`（backend §11 in `backend-foundation-capabilities`；frontend `frontend-engineering-conventions`）.
 
 ## Backend Enforcement (senior-post)
 
@@ -33,3 +34,9 @@ When a user gives feature-level instructions (not explicit API-level instruction
   - frontend files changed and why
   - API/DTO contract impact
 - If only one side is changed, explain why the other side is not required.
+
+## Local services (API + Manage)
+
+Start/restart **API** and **Manage** via root `docker-compose.yml` — see `.cursor/rules/docker-compose-dev-services.mdc`.
+Always `mvn clean package` + refresh `senior-post-api/dist/*.jar` before rebuilding the API image; prefer `.\scripts\dev-up.ps1`.
+Do not default to host `spring-boot:run` on port 9011.

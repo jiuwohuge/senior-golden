@@ -368,10 +368,33 @@
   "settingsPushNotifications": "Push notifications",
   "settingsUnreadBadges": "Show unread badges",
   "settingsLanguage": "Language",
-  "settingsLanguageSubtitle": "Default English / 中文",
+  "settingsLanguageSubtitle": "Follow device by default; override for testing",
   "settingsLanguageEnglish": "English",
   "settingsLanguageChinese": "中文",
-  "settingsLanguageSystem": "Default English",
+  "settingsLanguageSystem": "Follow device",
+  "settingsEmailVerify": "Verify email",
+  "settingsEmailVerifyPending": "Not verified — tap to bind",
+  "settingsEmailVerifyDone": "Verified",
+  "settingsEmailVerifyTitle": "Email verification",
+  "settingsEmailVerifyHint": "We will send a code to {email}",
+  "@settingsEmailVerifyHint": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsEmailVerifyCodeLabel": "Verification code",
+  "settingsEmailVerifySendCode": "Send code",
+  "settingsEmailVerifyConfirm": "Confirm",
+  "settingsEmailVerifyCodeSent": "Verification code sent",
+  "settingsEmailVerifyCodeRequired": "Please enter the code",
+  "settingsEmailVerifySuccess": "Email verified",
+  "authLoginChallengeTitle": "Confirm it's you",
+  "authLoginChallengeHint": "Unusual sign-in detected. Enter the code sent to your email.",
+  "authLoginChallengeSend": "Send code",
+  "authLoginChallengeConfirm": "Verify and continue",
+  "authLoginChallengeCodeSent": "Code sent",
   "settingsAbout": "About",
   "settingsDeleteAccount": "Delete account",
   "legalEffectiveDate": "Effective date: 2026-05-01",

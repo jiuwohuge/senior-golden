@@ -87,6 +87,7 @@ public class PasswordResetService {
         PasswordResetTokenDomain row = new PasswordResetTokenDomain();
         row.setUserId(user.getId());
         row.setCodeHash(hash);
+        row.setPurpose("password_reset");
         row.setExpiresAt(now.plusMinutes(authProperties.getPasswordResetExpireMinutes()));
         row.setCreatedAt(now);
         passwordResetTokenService.save(row);
@@ -117,6 +118,9 @@ public class PasswordResetService {
         List<PasswordResetTokenDomain> candidates = passwordResetTokenService.list(
                 new LambdaQueryWrapper<PasswordResetTokenDomain>()
                         .eq(PasswordResetTokenDomain::getUserId, user.getId())
+                        .and(w -> w.eq(PasswordResetTokenDomain::getPurpose, "password_reset")
+                                .or()
+                                .isNull(PasswordResetTokenDomain::getPurpose))
                         .isNull(PasswordResetTokenDomain::getUsedAt)
                         .gt(PasswordResetTokenDomain::getExpiresAt, now)
                         .orderByDesc(PasswordResetTokenDomain::getId)

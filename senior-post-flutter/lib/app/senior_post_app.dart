@@ -6,13 +6,14 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../core/auth/auth_data_refresh.dart';
 import '../core/auth/auth_token.dart';
 import '../core/i18n/app_locale_provider.dart';
+import '../core/i18n/locale_resolution.dart';
 import '../core/network/router_refresh.dart';
 import '../features/auth/auth_repository.dart';
 import '../features/startup/release_note_layer.dart';
 import 'router/app_router.dart';
 import 'theme/postal_theme.dart';
 
-/// 根应用：邮政主题、适老化字号、国际化（默认英语，可在设置中手动切换）。
+/// 根应用：邮政主题、适老化字号、国际化（默认跟随设备，设置可覆盖）。
 class SeniorPostApp extends ConsumerWidget {
   const SeniorPostApp({super.key});
 
@@ -35,6 +36,11 @@ class SeniorPostApp extends ConsumerWidget {
 
     final router = ref.watch(appRouterProvider);
     final localeOverride = ref.watch(appLocaleProvider);
+    // 无设置覆盖时按设备语言解析；覆盖仅作测试/偏好开关
+    final resolvedLocale = seniorPostEffectiveLocale(
+      localeOverride,
+      deviceLocales: WidgetsBinding.instance.platformDispatcher.locales,
+    );
 
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
@@ -42,7 +48,7 @@ class SeniorPostApp extends ConsumerWidget {
       routerConfig: router,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: localeOverride ?? const Locale('en'),
+      locale: resolvedLocale,
       builder: (context, child) {
         final media = MediaQuery.of(context);
         return MediaQuery(

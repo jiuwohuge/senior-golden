@@ -856,7 +856,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsLanguage => '语言';
 
   @override
-  String get settingsLanguageSubtitle => '默认英语 / 中文';
+  String get settingsLanguageSubtitle => '默认跟随设备；可手动覆盖';
 
   @override
   String get settingsLanguageEnglish => 'English';
@@ -865,7 +865,57 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsLanguageChinese => '中文';
 
   @override
-  String get settingsLanguageSystem => '默认英语';
+  String get settingsLanguageSystem => '跟随设备';
+
+  @override
+  String get settingsEmailVerify => '邮箱验证绑定';
+
+  @override
+  String get settingsEmailVerifyPending => '未验证 — 点击绑定';
+
+  @override
+  String get settingsEmailVerifyDone => '已验证';
+
+  @override
+  String get settingsEmailVerifyTitle => '邮箱验证';
+
+  @override
+  String settingsEmailVerifyHint(String email) {
+    return '验证码将发送至 $email';
+  }
+
+  @override
+  String get settingsEmailVerifyCodeLabel => '验证码';
+
+  @override
+  String get settingsEmailVerifySendCode => '发送验证码';
+
+  @override
+  String get settingsEmailVerifyConfirm => '确认绑定';
+
+  @override
+  String get settingsEmailVerifyCodeSent => '验证码已发送';
+
+  @override
+  String get settingsEmailVerifyCodeRequired => '请输入验证码';
+
+  @override
+  String get settingsEmailVerifySuccess => '邮箱已验证';
+
+  @override
+  String get authLoginChallengeTitle => '确认是你本人';
+
+  @override
+  String get authLoginChallengeHint => '检测到异常登录，请输入发到邮箱的验证码。';
+
+  @override
+  String get authLoginChallengeSend => '发送验证码';
+
+  @override
+  String get authLoginChallengeConfirm => '验证并继续';
+
+  @override
+  String get authLoginChallengeCodeSent => '验证码已发送';
 
   @override
   String get settingsAbout => '关于';

@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_locale_provider.dart';
 import 'locale_resolution.dart';
 
-/// 磁盘中的语言覆盖（若有）否则使用产品默认英语。
+/// 设置覆盖优先；否则跟随设备语言（再回退英语）。
 final effectiveAppLocaleProvider = Provider<Locale>((ref) {
   final override = ref.watch(appLocaleProvider);
-  return seniorPostEffectiveLocale(override);
+  return seniorPostEffectiveLocale(
+    override,
+    deviceLocales: WidgetsBinding.instance.platformDispatcher.locales,
+  );
 });

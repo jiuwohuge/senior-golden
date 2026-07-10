@@ -19,6 +19,12 @@ class AppUser {
     this.deletionRequestedAt,
     this.deletionEffectiveAt,
     this.postalFriend = false,
+    this.emailVerified = false,
+    this.language,
+    this.city,
+    this.latitude,
+    this.longitude,
+    this.writingStyle,
   });
 
   final String id;
@@ -48,6 +54,19 @@ class AppUser {
 
   /// 当前浏览者与该用户是否为邮政好友（名录用户卡）
   final bool postalFriend;
+
+  /// 邮箱是否已验证绑定（仅邮箱账号有意义）
+  final bool emailVerified;
+
+  /// 用户语言标签，如 zh-CN
+  final String? language;
+
+  final String? city;
+  final double? latitude;
+  final double? longitude;
+
+  /// concise | narrative | emotional
+  final String? writingStyle;
 
   int get age => DateTime.now().year - birthYear;
 
@@ -100,6 +119,12 @@ class AppUser {
       deletionRequestedAt: delReq,
       deletionEffectiveAt: delEff,
       postalFriend: m['postalFriend'] as bool? ?? false,
+      emailVerified: m['emailVerified'] as bool? ?? false,
+      language: m['language'] as String?,
+      city: m['city'] as String?,
+      latitude: (m['latitude'] as num?)?.toDouble(),
+      longitude: (m['longitude'] as num?)?.toDouble(),
+      writingStyle: m['writingStyle'] as String?,
     );
   }
 
@@ -115,6 +140,12 @@ class AppUser {
     bool? isVip,
     DateTime? deletionRequestedAt,
     DateTime? deletionEffectiveAt,
+    bool? emailVerified,
+    String? language,
+    String? city,
+    double? latitude,
+    double? longitude,
+    String? writingStyle,
   }) {
     return AppUser(
       id: id,
@@ -133,6 +164,12 @@ class AppUser {
       deletionRequestedAt: deletionRequestedAt ?? this.deletionRequestedAt,
       deletionEffectiveAt: deletionEffectiveAt ?? this.deletionEffectiveAt,
       postalFriend: postalFriend,
+      emailVerified: emailVerified ?? this.emailVerified,
+      language: language ?? this.language,
+      city: city ?? this.city,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      writingStyle: writingStyle ?? this.writingStyle,
     );
   }
 }

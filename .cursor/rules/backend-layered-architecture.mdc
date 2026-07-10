@@ -8,7 +8,7 @@ alwaysApply: false
 
 Before implementing, modifying, or reviewing **any** Java under `senior-post-api`, you **must** read and follow:
 
-`.cursor/skills/backend-foundation-capabilities/SKILL.md` — especially **§10 Layered Architecture** and **Mandatory Rules**.
+`.cursor/skills/backend-foundation-capabilities/SKILL.md` — especially **§10 Layered Architecture**、**§11 Comments & Logging**，以及 **Mandatory Rules**。
 
 ## Hard requirement
 
