@@ -4,6 +4,7 @@ import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.client.model.input.app.AppDirectoryPageInDto;
 import cn.nine.pros.post.client.model.out.DirectoryUserItemVO;
 import cn.nine.pros.post.client.model.out.InterestTagOptionVO;
+import cn.nine.pros.post.client.model.out.PenpalListItemVO;
 
 import java.util.List;
 
@@ -16,4 +17,8 @@ public interface AppDirectoryService {
     List<String> listInterestTagNames(String langCode);
 
     List<InterestTagOptionVO> listInterestTagOptions(String langCode);
+
+    List<DirectoryUserItemVO> listTodayRecommendations(long viewerUserId);
+
+    List<PenpalListItemVO> listPenpals(long viewerUserId);
 }

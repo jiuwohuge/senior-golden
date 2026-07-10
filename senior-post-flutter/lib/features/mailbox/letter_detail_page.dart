@@ -15,6 +15,8 @@ import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
+import '../relation/relation_display_label.dart';
+import '../relation/relation_remote.dart';
 import 'mailbox_providers.dart';
 import 'mailbox_remote.dart';
 
@@ -118,18 +120,18 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
   final _reply = TextEditingController();
   bool _acceptBusy = false;
 
-  /// 接受成功后立即置灰按钮，不等待 friendship provider 二次请求。
-  bool _acceptedLocally = false;
+  /// 发起笔友申请成功后立即置灰按钮。
+  bool _requestSentLocally = false;
   bool _replyBusy = false;
   LetterType _replyType = LetterType.standard;
 
   @override
   void dispose() {
-    ref.invalidate(postalInboxLettersProvider);
+    ref.invalidate(mailboxReceivedProvider);
+    ref.invalidate(mailboxSentProvider);
     _reply.dispose();
     super.dispose();
   }
-
 
   String _modeLabel(AppLocalizations l10n, LetterMode mode) {
     return switch (mode) {
@@ -147,10 +149,13 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
     };
   }
 
-  Widget _statusChip(MailboxLetter letter) {
+  Widget _statusChip(AppLocalizations l10n, MailboxLetter letter) {
     return switch (letter.status) {
+      // MATCHED：邮局已配对，仍属在途语义，单独标签便于用户辨认。
+      LetterStatus.matched => PostalStatusChip.delivering(
+        label: l10n.letterStatusMatched,
+      ),
       LetterStatus.pending ||
-      LetterStatus.matched ||
       LetterStatus.delivering => PostalStatusChip.delivering(),
       LetterStatus.registered => PostalStatusChip.registered(
         label: 'Registered',
@@ -190,13 +195,17 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                 letter.status == LetterStatus.matched;
             final isRegistered = letter.status == LetterStatus.registered;
             final eta = letter.expectedArrivalAt ?? letter.deliveryAt;
-            final friendsAsync = ref.watch(
-              friendshipActiveProvider(letter.peer.id),
-            );
-            final isFriend = friendsAsync.valueOrNull ?? false;
-            final connected = isFriend || _acceptedLocally;
-            final showAcceptSlot =
-                !letter.outgoing && letter.status == LetterStatus.delivered;
+            final relationState = letter.relationDisplayState;
+            final isPenpal = relationState == RelationDisplayState.penpal;
+            final requestPending =
+                relationState == RelationDisplayState.pendingOut ||
+                _requestSentLocally;
+            final showAddPenpalSlot =
+                !letter.outgoing &&
+                letter.status == LetterStatus.delivered &&
+                letter.canAddPenpal &&
+                !isPenpal &&
+                !requestPending;
             final canReply =
                 !letter.outgoing &&
                 letter.status == LetterStatus.delivered &&
@@ -225,7 +234,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
-                      _statusChip(letter),
+                      _statusChip(l10n, letter),
                     ],
                   ),
                   child: Column(
@@ -247,6 +256,18 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                             ),
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: PostalTokens.stampVermilion),
+                          ),
+                        ),
+                      if (relationState != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            relationDisplayLabel(l10n, relationState),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: PostalTokens.postboxGreen,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                         ),
                       if (isRegistered)
@@ -323,60 +344,40 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                     ],
                   ),
                 ),
-                if (showAcceptSlot) ...[
+                if (showAddPenpalSlot) ...[
                   const SizedBox(height: 14),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 320),
                     child: PostalButton(
-                      key: ValueKey(
-                        connected
-                            ? 'accepted_${letter.id}'
-                            : 'accept_${letter.id}',
-                      ),
-                      label: connected
-                          ? l10n.letterAcceptContactDone
-                          : l10n.letterAcceptContact,
-                      variant: connected
-                          ? PostalButtonVariant.secondary
-                          : PostalButtonVariant.primary,
+                      key: ValueKey('add_penpal_${letter.id}'),
+                      label: l10n.relationAddPenpal,
                       busy: _acceptBusy,
-                      onPressed: connected || _acceptBusy
+                      onPressed: _acceptBusy
                           ? null
                           : () async {
                               setState(() => _acceptBusy = true);
                               try {
-                                final remote = ref.read(
-                                  mailboxRemoteRepositoryProvider,
-                                );
-                                await remote.acceptPostalContact(letter.id);
-                                try {
-                                  await remote.syncImPeer(letter.peer.id);
-                                } catch (e) {
-                                  final imMsg = _postalApiUserMessage(e);
-                                  if (context.mounted && imMsg != null) {
-                                    PostalSnack.show(
-                                      context,
-                                      imMsg,
-                                      tone: PostalSnackTone.warning,
+                                await ref
+                                    .read(relationRemoteProvider)
+                                    .createPenpalRequest(
+                                      peerUserId: letter.peer.id,
+                                      sourceLetterId: letter.id,
                                     );
-                                  }
-                                }
                                 if (!context.mounted) return;
-                                setState(() => _acceptedLocally = true);
+                                setState(() => _requestSentLocally = true);
                                 PostalSnack.show(
                                   context,
-                                  l10n.letterAcceptContactSuccess,
+                                  l10n.relationAddPenpalSuccess,
                                   tone: PostalSnackTone.success,
                                 );
                                 ref.invalidate(
                                   letterDetailProvider(widget.letterId),
                                 );
                                 ref.invalidate(
-                                  friendshipActiveProvider(letter.peer.id),
+                                  relationWithProvider(letter.peer.id),
                                 );
-                                ref.invalidate(mailboxLettersProvider);
-                                ref.invalidate(postalInboxLettersProvider);
-                                ref.invalidate(mailboxFriendsProvider);
+                                ref.invalidate(mailboxReceivedProvider);
+                                ref.invalidate(mailboxSentProvider);
                               } catch (e) {
                                 final msg = _postalApiUserMessage(e);
                                 if (context.mounted && msg != null) {
@@ -393,6 +394,13 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                               }
                             },
                     ),
+                  ),
+                ] else if (requestPending) ...[
+                  const SizedBox(height: 14),
+                  PostalButton(
+                    label: l10n.letterAcceptContactDone,
+                    variant: PostalButtonVariant.secondary,
+                    onPressed: null,
                   ),
                 ],
                 const SizedBox(height: 16),
@@ -502,7 +510,8 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                               );
                               ref.invalidate(mailboxLettersProvider);
                               ref.invalidate(mailboxArchiveProvider);
-                              ref.invalidate(postalInboxLettersProvider);
+                              ref.invalidate(mailboxReceivedProvider);
+                              ref.invalidate(mailboxSentProvider);
                               PostalSnack.show(
                                 context,
                                 'Reply sent',
@@ -546,7 +555,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                   const SizedBox(height: 12),
                   PostalButton(label: 'Send reply', onPressed: null),
                 ],
-                if (connected) ...[
+                if (isPenpal) ...[
                   const SizedBox(height: 12),
                   OutlinedButton(
                     onPressed: () => context.push(

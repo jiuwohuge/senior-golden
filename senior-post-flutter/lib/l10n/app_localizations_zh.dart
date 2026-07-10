@@ -1022,6 +1022,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get letterStatusMatched => '已匹配';
+
+  @override
   String get letterAuditPending => '待审核';
 
   @override
@@ -1048,13 +1051,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterPeerUnknown => '未知收件人';
 
   @override
-  String get letterAcceptContact => '接受邮政好友';
+  String get letterAcceptContact => '添加笔友';
 
   @override
-  String get letterAcceptContactDone => '已接受好友';
+  String get letterAcceptContactDone => '申请已发送';
 
   @override
-  String get letterAcceptContactSuccess => '已成为邮政好友，可在下方或 Connections 中打开即时聊天。';
+  String get letterAcceptContactSuccess => '笔友申请已发送，对方确认后可在笔友页查看。';
 
   @override
   String get chatFriendsOnlySnack => '仅「邮政好友 / Connections」中的笔友可使用即时聊天。';
@@ -1238,13 +1241,140 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sendLetterContentLabel => '信件正文';
 
   @override
-  String get mailboxTabPostalInbox => '邮政收件';
+  String get mailboxTabReceived => '收到的信';
 
   @override
-  String get mailboxTabConnections => '笔友';
+  String get mailboxTabSent => '发出的信';
 
   @override
   String get mailboxTabTimeLetter => '时光信';
+
+  @override
+  String get mailboxReceivedEmptyTitle => '暂无收到的信';
+
+  @override
+  String get mailboxReceivedEmptySubtitle => '邮局或笔友寄来的信件会出现在这里。';
+
+  @override
+  String get mailboxSentEmptyTitle => '暂无发出的信';
+
+  @override
+  String get mailboxSentEmptySubtitle => '您寄出的信件会留在这里，直到对方已读。';
+
+  @override
+  String get directoryTabRecommend => '推荐笔友';
+
+  @override
+  String get directoryTabFind => '找笔友';
+
+  @override
+  String get directoryTabMyPenpals => '我的笔友';
+
+  @override
+  String get directoryRecommendEmpty => '今日暂无推荐';
+
+  @override
+  String get directoryRecommendEmptyHint => '明天再来看看，或去「找笔友」探索更多笔友。';
+
+  @override
+  String get directoryPenpalsEmpty => '还没有笔友';
+
+  @override
+  String get directoryPenpalsEmptyHint => '互通信件后可发起笔友申请，对方确认后会出现在这里。';
+
+  @override
+  String get directoryWriteLetter => '写信';
+
+  @override
+  String penpalListMeta(Object days, Object count) {
+    return '笔友 $days 天 · 往来 $count 封';
+  }
+
+  @override
+  String get postOfficeRelationMessagesTitle => '关系消息';
+
+  @override
+  String get postOfficeRelationMessagesEmpty => '暂无关系消息';
+
+  @override
+  String get postOfficeRelationMessagesEmptyHint => '笔友申请与可添加笔友提醒会出现在这里。';
+
+  @override
+  String penpalExchangeCount(Object count) {
+    return '已往来 $count 封信';
+  }
+
+  @override
+  String get penpalAccept => '同意';
+
+  @override
+  String get penpalIgnore => '忽略';
+
+  @override
+  String get penpalAcceptSuccess => '已成为笔友';
+
+  @override
+  String get penpalRequestSent => '笔友申请已发送';
+
+  @override
+  String get relationAddPenpal => '添加笔友';
+
+  @override
+  String get relationAddPenpalSuccess => '笔友申请已发送，等待对方确认';
+
+  @override
+  String get relationStateStranger => '陌生人';
+
+  @override
+  String get relationStateContacting => '通信中';
+
+  @override
+  String get relationStateCanAddPenpal => '可添加笔友';
+
+  @override
+  String get relationStatePendingOut => '申请中';
+
+  @override
+  String get relationStatePendingIn => '待确认';
+
+  @override
+  String get relationStatePenpal => '笔友';
+
+  @override
+  String get userCardWriteFirstLetter => '写第一封信';
+
+  @override
+  String get userCardContinueWriting => '继续写信';
+
+  @override
+  String get profileOverviewPenpals => '笔友';
+
+  @override
+  String get profileOverviewLetters => '通信';
+
+  @override
+  String get profileOverviewTimeLetters => '时光信';
+
+  @override
+  String get profileSectionMyContent => '我的内容';
+
+  @override
+  String get profileSectionShop => '商店与会员';
+
+  @override
+  String get profileSectionPrivacy => '隐私与安全';
+
+  @override
+  String get profileTimeLetterDrafts => '时光信';
+
+  @override
+  String get profilePrivacyRecommendPlaceholder => '屏蔽推荐（即将推出）';
+
+  @override
+  String get profilePrivacyStrangerPlaceholder => '拒收陌生信（即将推出）';
+
+  @override
+  String get commonLoadFailed => '加载失败';
 
   @override
   String get timeLetterComposeTitle => '时光邮局';

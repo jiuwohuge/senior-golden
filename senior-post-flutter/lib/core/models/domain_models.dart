@@ -19,6 +19,9 @@ class AppUser {
     this.deletionRequestedAt,
     this.deletionEffectiveAt,
     this.postalFriend = false,
+    this.relationDisplayState,
+    this.recommendReason,
+    this.letterCount = 0,
     this.emailVerified = false,
     this.language,
     this.city,
@@ -54,6 +57,10 @@ class AppUser {
 
   /// 当前浏览者与该用户是否为邮政好友（名录用户卡）
   final bool postalFriend;
+
+  final RelationDisplayState? relationDisplayState;
+  final String? recommendReason;
+  final int letterCount;
 
   /// 邮箱是否已验证绑定（仅邮箱账号有意义）
   final bool emailVerified;
@@ -119,6 +126,11 @@ class AppUser {
       deletionRequestedAt: delReq,
       deletionEffectiveAt: delEff,
       postalFriend: m['postalFriend'] as bool? ?? false,
+      relationDisplayState: RelationDisplayState.fromCode(
+        (m['relationDisplayState'] as num?)?.toInt(),
+      ),
+      recommendReason: m['recommendReason'] as String?,
+      letterCount: (m['letterCount'] as num?)?.toInt() ?? 0,
       emailVerified: m['emailVerified'] as bool? ?? false,
       language: m['language'] as String?,
       city: m['city'] as String?,
@@ -257,6 +269,93 @@ class WallComment {
   }
 }
 
+/// PRD §10.3 关系展示态（与后端 RelationDisplayState 整型对齐）
+enum RelationDisplayState {
+  stranger(1),
+  contacting(2),
+  canAddPenpal(3),
+  pendingOut(4),
+  pendingIn(5),
+  penpal(6);
+
+  const RelationDisplayState(this.code);
+  final int code;
+
+  static RelationDisplayState? fromCode(int? code) {
+    if (code == null) return null;
+    for (final v in values) {
+      if (v.code == code) return v;
+    }
+    return null;
+  }
+}
+
+class PenpalListItem {
+  const PenpalListItem({
+    required this.peerUserId,
+    required this.nickname,
+    this.avatarUrl,
+    this.countryCode,
+    this.letterCount = 0,
+    this.penpalDays = 0,
+    this.penpalSince,
+  });
+
+  final String peerUserId;
+  final String nickname;
+  final String? avatarUrl;
+  final String? countryCode;
+  final int letterCount;
+  final int penpalDays;
+  final DateTime? penpalSince;
+}
+
+class RelationSnapshot {
+  const RelationSnapshot({
+    required this.peerUserId,
+    required this.displayState,
+    this.letterCount = 0,
+    this.canAddPenpal = false,
+    this.pendingRequestId,
+    this.penpal = false,
+  });
+
+  final String peerUserId;
+  final RelationDisplayState displayState;
+  final int letterCount;
+  final bool canAddPenpal;
+  final String? pendingRequestId;
+  final bool penpal;
+}
+
+class PostOfficeRelationMessage {
+  const PostOfficeRelationMessage({
+    required this.messageType,
+    this.requestId,
+    required this.peer,
+    this.letterCount = 0,
+    this.canAddPenpal = false,
+  });
+
+  final int messageType;
+  final String? requestId;
+  final AppUser peer;
+  final int letterCount;
+  final bool canAddPenpal;
+}
+
+class ProfileOverview {
+  const ProfileOverview({
+    this.penpalCount = 0,
+    this.letterCount = 0,
+    this.timeLetterCount = 0,
+  });
+
+  final int penpalCount;
+  final int letterCount;
+  final int timeLetterCount;
+}
+
 enum LetterType { registered, standard }
 
 enum LetterStatus { pending, delivering, delivered, registered, matched }
@@ -283,6 +382,9 @@ class MailboxLetter {
     this.actualArrivalAt,
     this.mode = LetterMode.direct,
     this.auditStatus = 1,
+    this.relationDisplayState,
+    this.canAddPenpal = false,
+    this.recipientRead = false,
   });
 
   final String id;
@@ -300,6 +402,9 @@ class MailboxLetter {
   final DateTime? actualArrivalAt;
   final LetterMode mode;
   final int auditStatus;
+  final RelationDisplayState? relationDisplayState;
+  final bool canAddPenpal;
+  final bool recipientRead;
 }
 
 /// 邮政 Tab「Connections」：好友（笔友）列表行，语义对齐 `GET /api/mailbox/friends`。

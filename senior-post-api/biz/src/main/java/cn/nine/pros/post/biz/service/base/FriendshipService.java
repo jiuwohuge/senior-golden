@@ -24,4 +24,9 @@ public interface FriendshipService {
      * 账号正式注销（冷静期结束）时：将涉及该用户的本地好友关系置为失效，并尽力同步删除腾讯 IM 好友。
      */
     void deactivateAllFriendshipsForUser(long userId);
+
+    /**
+     * 笔友申请被同意后创建/激活好友关系。
+     */
+    FriendshipDomain createPenpalFromRequest(long actorUserId, long requesterId, long targetId, Long sourceLetterId);
 }

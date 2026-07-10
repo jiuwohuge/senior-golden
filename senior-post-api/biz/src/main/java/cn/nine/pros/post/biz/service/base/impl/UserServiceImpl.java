@@ -319,6 +319,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
         update(uw);
     }
 
+    @Override
+    public List<UserDomain> listActiveAppUsersExcluding(long excludeUserId, int limit) {
+        return list(new LambdaQueryWrapper<UserDomain>()
+                .eq(UserDomain::isDelFlag, false)
+                .apply("status = 1")
+                .eq(UserDomain::getStaffRole, 0)
+                .ne(UserDomain::getId, excludeUserId)
+                .orderByDesc(UserDomain::getId)
+                .last("LIMIT " + Math.max(1, limit)));
+    }
+
     private void enrichAuthFields(UserDTO dto) {
         if (dto == null || dto.getId() == null) {
             return;

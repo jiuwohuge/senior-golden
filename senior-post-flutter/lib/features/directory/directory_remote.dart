@@ -94,7 +94,6 @@ class DirectoryRemoteRepository {
     });
   }
 
-  /// 与 `sys_tag.tag_name` 一致，供筛选 `interestNames` 使用。
   Future<List<String>> listInterestTagNames({required String lang}) async {
     final r = await _dio.get<dynamic>(
       '/api/directory/interest-tags',
@@ -111,6 +110,44 @@ class DirectoryRemoteRepository {
           .toList();
     });
   }
+
+  Future<List<AppUser>> listTodayRecommendations() async {
+    final r = await _dio.get<dynamic>('/api/directory/recommendations/today');
+    return unwrapData(r, (raw) {
+      if (raw is! List<dynamic>) {
+        throw ApiBusinessException(0, 'Expected recommendation list');
+      }
+      return raw.whereType<Map<String, dynamic>>().map(_voToAppUser).toList();
+    });
+  }
+
+  Future<List<PenpalListItem>> listPenpals() async {
+    final r = await _dio.get<dynamic>('/api/directory/penpals');
+    return unwrapData(r, (raw) {
+      if (raw is! List<dynamic>) {
+        throw ApiBusinessException(0, 'Expected penpal list');
+      }
+      return raw.whereType<Map<String, dynamic>>().map(_voToPenpal).toList();
+    });
+  }
+}
+
+PenpalListItem _voToPenpal(Map<String, dynamic> m) {
+  final id = (m['peerUserId'] as num?)?.toInt() ?? 0;
+  DateTime? since;
+  final s = m['penpalSince'];
+  if (s is String && s.isNotEmpty) {
+    since = DateTime.tryParse(s.replaceAll(' ', 'T')) ?? DateTime.tryParse(s);
+  }
+  return PenpalListItem(
+    peerUserId: '$id',
+    nickname: (m['nickname'] as String?) ?? 'User',
+    avatarUrl: m['avatarUrl'] as String?,
+    countryCode: m['countryCode'] as String?,
+    letterCount: (m['letterCount'] as num?)?.toInt() ?? 0,
+    penpalDays: (m['penpalDays'] as num?)?.toInt() ?? 0,
+    penpalSince: since,
+  );
 }
 
 AppUser _voToAppUser(Map<String, dynamic> m) {

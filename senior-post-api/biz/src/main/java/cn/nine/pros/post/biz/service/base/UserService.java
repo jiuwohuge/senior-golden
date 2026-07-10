@@ -75,4 +75,9 @@ public interface UserService extends IService<UserDomain> {
     void adminUpdateVipDebug(long userId, boolean isVip, java.time.LocalDateTime vipExpireAt,
                              boolean clearVipExpireAt, Long auditUserId);
 
+    /**
+     * 匹配候选：正常 App 用户（非后台），排除指定用户，按 id 倒序限量。
+     */
+    List<UserDomain> listActiveAppUsersExcluding(long excludeUserId, int limit);
+
 }

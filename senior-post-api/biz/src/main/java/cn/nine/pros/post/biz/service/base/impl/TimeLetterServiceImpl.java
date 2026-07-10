@@ -195,6 +195,14 @@ public class TimeLetterServiceImpl extends ServiceImpl<TimeLetterMapper, TimeLet
     }
 
     @Override
+    public long countOwnedNonDraft(long userId) {
+        return count(new LambdaQueryWrapper<TimeLetterDomain>()
+                .eq(TimeLetterDomain::getSenderId, userId)
+                .eq(TimeLetterDomain::isDelFlag, false)
+                .ne(TimeLetterDomain::getStatus, TimeLetterStatus.DRAFT.getCode()));
+    }
+
+    @Override
     public List<TimeLetterDomain> listPendingForDelivery(int limit) {
         return list(new LambdaQueryWrapper<TimeLetterDomain>()
                 .eq(TimeLetterDomain::isDelFlag, false)

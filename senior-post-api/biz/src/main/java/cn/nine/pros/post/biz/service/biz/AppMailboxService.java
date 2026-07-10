@@ -17,6 +17,10 @@ public interface AppMailboxService {
 
     List<MailboxLetterItemVO> listArchive(Long userId);
 
+    List<MailboxLetterItemVO> listReceived(Long userId);
+
+    List<MailboxLetterItemVO> listSent(Long userId);
+
     AcceptPostalContactResultVO acceptPostalContact(Long actorUserId, Long letterId);
 
     /**

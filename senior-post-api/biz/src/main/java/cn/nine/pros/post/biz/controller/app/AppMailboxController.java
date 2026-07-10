@@ -42,6 +42,18 @@ public class AppMailboxController implements AppMailboxApi {
     }
 
     @Override
+    public List<MailboxLetterItemVO> listReceived() {
+        Long uid = requireUserId();
+        return appMailboxService.listReceived(uid);
+    }
+
+    @Override
+    public List<MailboxLetterItemVO> listSent() {
+        Long uid = requireUserId();
+        return appMailboxService.listSent(uid);
+    }
+
+    @Override
     public AcceptPostalContactResultVO acceptPostalContact(Long letterId) {
         Long uid = requireUserId();
         return appMailboxService.acceptPostalContact(uid, letterId);

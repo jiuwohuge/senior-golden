@@ -2036,6 +2036,12 @@ abstract class AppLocalizations {
   /// **'Mode: {mode}'**
   String letterModeLine(String mode);
 
+  /// No description provided for @letterStatusMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched'**
+  String get letterStatusMatched;
+
   /// No description provided for @letterAuditPending.
   ///
   /// In en, this message translates to:
@@ -2087,19 +2093,19 @@ abstract class AppLocalizations {
   /// No description provided for @letterAcceptContact.
   ///
   /// In en, this message translates to:
-  /// **'Accept postal contact'**
+  /// **'Add pen pal'**
   String get letterAcceptContact;
 
   /// No description provided for @letterAcceptContactDone.
   ///
   /// In en, this message translates to:
-  /// **'Postal contact accepted'**
+  /// **'Request sent'**
   String get letterAcceptContactDone;
 
   /// No description provided for @letterAcceptContactSuccess.
   ///
   /// In en, this message translates to:
-  /// **'You are now postal friends. Open instant chat below or from Connections.'**
+  /// **'Pen pal request sent. After they accept, find them under My pen pals.'**
   String get letterAcceptContactSuccess;
 
   /// No description provided for @chatFriendsOnlySnack.
@@ -2444,23 +2450,269 @@ abstract class AppLocalizations {
   /// **'Letter content'**
   String get sendLetterContentLabel;
 
-  /// No description provided for @mailboxTabPostalInbox.
+  /// No description provided for @mailboxTabReceived.
   ///
   /// In en, this message translates to:
-  /// **'Postal inbox'**
-  String get mailboxTabPostalInbox;
+  /// **'Received'**
+  String get mailboxTabReceived;
 
-  /// No description provided for @mailboxTabConnections.
+  /// No description provided for @mailboxTabSent.
   ///
   /// In en, this message translates to:
-  /// **'Connections'**
-  String get mailboxTabConnections;
+  /// **'Sent'**
+  String get mailboxTabSent;
 
   /// No description provided for @mailboxTabTimeLetter.
   ///
   /// In en, this message translates to:
   /// **'Time letter'**
   String get mailboxTabTimeLetter;
+
+  /// No description provided for @mailboxReceivedEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No received letters'**
+  String get mailboxReceivedEmptyTitle;
+
+  /// No description provided for @mailboxReceivedEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters from the post office or pen pals appear here.'**
+  String get mailboxReceivedEmptySubtitle;
+
+  /// No description provided for @mailboxSentEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No sent letters'**
+  String get mailboxSentEmptyTitle;
+
+  /// No description provided for @mailboxSentEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters you send stay here until the recipient has read them.'**
+  String get mailboxSentEmptySubtitle;
+
+  /// No description provided for @directoryTabRecommend.
+  ///
+  /// In en, this message translates to:
+  /// **'For you'**
+  String get directoryTabRecommend;
+
+  /// No description provided for @directoryTabFind.
+  ///
+  /// In en, this message translates to:
+  /// **'Find pen pals'**
+  String get directoryTabFind;
+
+  /// No description provided for @directoryTabMyPenpals.
+  ///
+  /// In en, this message translates to:
+  /// **'My pen pals'**
+  String get directoryTabMyPenpals;
+
+  /// No description provided for @directoryRecommendEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recommendations today'**
+  String get directoryRecommendEmpty;
+
+  /// No description provided for @directoryRecommendEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check back tomorrow, or browse Find pen pals.'**
+  String get directoryRecommendEmptyHint;
+
+  /// No description provided for @directoryPenpalsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No pen pals yet'**
+  String get directoryPenpalsEmpty;
+
+  /// No description provided for @directoryPenpalsEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After enough letters, send a pen pal request. Confirmed pals appear here.'**
+  String get directoryPenpalsEmptyHint;
+
+  /// No description provided for @directoryWriteLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get directoryWriteLetter;
+
+  /// No description provided for @penpalListMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen pal {days}d · {count} letters'**
+  String penpalListMeta(Object days, Object count);
+
+  /// No description provided for @postOfficeRelationMessagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Relation messages'**
+  String get postOfficeRelationMessagesTitle;
+
+  /// No description provided for @postOfficeRelationMessagesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No relation messages'**
+  String get postOfficeRelationMessagesEmpty;
+
+  /// No description provided for @postOfficeRelationMessagesEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen pal requests and add-pen-pal reminders show up here.'**
+  String get postOfficeRelationMessagesEmptyHint;
+
+  /// No description provided for @penpalExchangeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} letters exchanged'**
+  String penpalExchangeCount(Object count);
+
+  /// No description provided for @penpalAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get penpalAccept;
+
+  /// No description provided for @penpalIgnore.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get penpalIgnore;
+
+  /// No description provided for @penpalAcceptSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now pen pals'**
+  String get penpalAcceptSuccess;
+
+  /// No description provided for @penpalRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen pal request sent'**
+  String get penpalRequestSent;
+
+  /// No description provided for @relationAddPenpal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add pen pal'**
+  String get relationAddPenpal;
+
+  /// No description provided for @relationAddPenpalSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent — waiting for confirmation'**
+  String get relationAddPenpalSuccess;
+
+  /// No description provided for @relationStateStranger.
+  ///
+  /// In en, this message translates to:
+  /// **'Stranger'**
+  String get relationStateStranger;
+
+  /// No description provided for @relationStateContacting.
+  ///
+  /// In en, this message translates to:
+  /// **'In correspondence'**
+  String get relationStateContacting;
+
+  /// No description provided for @relationStateCanAddPenpal.
+  ///
+  /// In en, this message translates to:
+  /// **'Can add pen pal'**
+  String get relationStateCanAddPenpal;
+
+  /// No description provided for @relationStatePendingOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get relationStatePendingOut;
+
+  /// No description provided for @relationStatePendingIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting you'**
+  String get relationStatePendingIn;
+
+  /// No description provided for @relationStatePenpal.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen pal'**
+  String get relationStatePenpal;
+
+  /// No description provided for @userCardWriteFirstLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Write first letter'**
+  String get userCardWriteFirstLetter;
+
+  /// No description provided for @userCardContinueWriting.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep writing'**
+  String get userCardContinueWriting;
+
+  /// No description provided for @profileOverviewPenpals.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen pals'**
+  String get profileOverviewPenpals;
+
+  /// No description provided for @profileOverviewLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters'**
+  String get profileOverviewLetters;
+
+  /// No description provided for @profileOverviewTimeLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'Time letters'**
+  String get profileOverviewTimeLetters;
+
+  /// No description provided for @profileSectionMyContent.
+  ///
+  /// In en, this message translates to:
+  /// **'My content'**
+  String get profileSectionMyContent;
+
+  /// No description provided for @profileSectionShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop & membership'**
+  String get profileSectionShop;
+
+  /// No description provided for @profileSectionPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & safety'**
+  String get profileSectionPrivacy;
+
+  /// No description provided for @profileTimeLetterDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Time letters'**
+  String get profileTimeLetterDrafts;
+
+  /// No description provided for @profilePrivacyRecommendPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide recommendations (coming soon)'**
+  String get profilePrivacyRecommendPlaceholder;
+
+  /// No description provided for @profilePrivacyStrangerPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline stranger mail (coming soon)'**
+  String get profilePrivacyStrangerPlaceholder;
+
+  /// No description provided for @commonLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load'**
+  String get commonLoadFailed;
 
   /// No description provided for @timeLetterComposeTitle.
   ///

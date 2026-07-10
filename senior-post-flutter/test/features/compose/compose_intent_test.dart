@@ -25,8 +25,8 @@ void main() {
 
     test('overrides only specified fields', () {
       final a = ComposeIntent(kind: ComposeKind.selfTimeLetter);
-      final b = a.copyWith(kind: ComposeKind.topicMailbox, topicKey: 'hometown');
-      expect(b.kind, ComposeKind.topicMailbox);
+      final b = a.copyWith(kind: ComposeKind.postOffice, topicKey: 'hometown');
+      expect(b.kind, ComposeKind.postOffice);
       expect(b.topicKey, 'hometown');
       expect(b.peerId, isNull);
     });
@@ -72,8 +72,8 @@ void main() {
     test('penPalTimeLetter is present', () {
       expect(ComposeKind.values, contains(ComposeKind.penPalTimeLetter));
     });
-    test('topicMailbox is present', () {
-      expect(ComposeKind.values, contains(ComposeKind.topicMailbox));
+    test('postOffice is present', () {
+      expect(ComposeKind.values, contains(ComposeKind.postOffice));
     });
   });
 }

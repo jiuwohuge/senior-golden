@@ -6,7 +6,10 @@ import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.service.biz.AppBlacklistService;
 import cn.nine.pros.post.biz.service.biz.AppMailboxService;
+import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
 import cn.nine.pros.post.biz.service.biz.WritingStyleService;
+import cn.nine.pros.post.biz.service.base.ActionService;
+import cn.nine.pros.post.biz.service.base.ConfigService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.SensitiveWordService;
@@ -14,6 +17,7 @@ import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.biz.support.DeliveryDelayCalculator;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.base.UserService;
+import cn.nine.pros.post.client.common.constant.BehaviorActionTypes;
 import cn.nine.pros.post.client.common.enums.LetterAuditStatus;
 import cn.nine.pros.post.client.common.enums.LetterBizStatus;
 import cn.nine.pros.post.client.common.enums.LetterMode;
@@ -23,6 +27,8 @@ import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
+import cn.nine.pros.post.client.model.out.PenpalRequestResultVO;
+import cn.nine.pros.post.client.model.out.RelationSnapshotVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
 import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
@@ -32,7 +38,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -48,16 +56,22 @@ import java.util.stream.Collectors;
 public class AppMailboxServiceImpl implements AppMailboxService {
 
     private static final int USER_STATUS_NORMAL = 1;
+    private static final String LETTER_DAILY_QUOTA_KEY = "letter.daily_quota";
+    private static final String AUDIT_AUTO_APPROVE_SEC = "audit.auto_approve_seconds";
+    private static final int DEFAULT_DAILY_LETTER_QUOTA = 5;
 
     private final LetterService letterService;
     private final FriendshipService friendshipService;
     private final UserService userService;
     private final SensitiveWordService sensitiveWordService;
+    private final ConfigService configService;
+    private final ActionService actionService;
     private final OssDisplayUrlService ossDisplayUrlService;
     private final AppBlacklistService appBlacklistService;
     private final WritingStyleService writingStyleService;
     private final DeliveryDelayCalculator deliveryDelayCalculator;
     private final AppMessages appMessages;
+    private final AppRelationBizService appRelationBizService;
 
     /**
      * 邮政收件箱：本人相关且未读的信件列表（含 POST_OFFICE 入池仅发件人可见）。
@@ -104,20 +118,31 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<MailboxLetterItemVO> listReceived(Long userId) {
+        return letterService.listReceivedForUser(userId, 500).stream()
+                .map(l -> toItem(l, userId, false))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MailboxLetterItemVO> listSent(Long userId) {
+        return letterService.listSentForUser(userId, 500).stream()
+                .map(l -> toItem(l, userId, false))
+                .collect(Collectors.toList());
+    }
+
     /**
-     * 接受邮缘：基于信件确保双方好友关系并返回对端 userId。
-     * <p>前置：actor 为信件参与方；副作用：可能新建/激活 friendship。
+     * 兼容旧路径：基于信件发起笔友申请（§10.4）。
      */
     @Override
     public AcceptPostalContactResultVO acceptPostalContact(Long actorUserId, Long letterId) {
-        FriendshipDomain f = friendshipService.ensureActiveFriendship(actorUserId, letterId);
-        LetterDomain letter = letterService.getById(letterId);
-        long peer = peerUserId(letter, actorUserId);
-        log.info("postal contact accepted, actorUserId={}, letterId={}, peerUserId={}, friendshipId={}",
-                actorUserId, letterId, peer, f.getId());
+        PenpalRequestResultVO req = appRelationBizService.createPenpalRequestFromLetter(actorUserId, letterId);
+        log.info("penpal request via accept-postal, actorUserId={}, letterId={}, requestId={}",
+                actorUserId, letterId, req.getRequestId());
         return AcceptPostalContactResultVO.builder()
-                .friendshipId(f.getId())
-                .peerUserId(peer)
+                .requestId(req.getRequestId())
+                .peerUserId(req.getPeerUserId())
                 .build();
     }
 
@@ -152,7 +177,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         if (content.length() > 20000) {
             throw new BusinessException(appMessages.get("app.error.letter.contentTooLong"));
         }
-        // 敏感词通过后 M2 自动 APPROVED；拒绝则抛错不落库
+        // 敏感词硬拦截：拒绝则抛错不落库
         sensitiveWordService.assertPlainTextAllowed(content);
         LetterPhysicalType physicalType = LetterPhysicalType.fromCode(body.getLetterType());
         if (physicalType == null) {
@@ -163,6 +188,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         if (sender == null || userStatus(sender.getStatus()) != USER_STATUS_NORMAL) {
             throw new BusinessException(appMessages.get("app.error.sender.statusBad"));
         }
+        assertDailyQuota(fromUserId, sender);
 
         UserDTO toUser = loadValidatedRecipient(fromUserId, toUserId);
 
@@ -174,7 +200,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         letter.setIsAccelerated(false);
         letter.setParentLetterId(parentLetterId);
         letter.setMode(mode.getCode());
-        letter.setAuditStatus(LetterAuditStatus.APPROVED.getCode());
+        letter.setAuditStatus(LetterAuditStatus.PENDING_REVIEW.getCode());
         letter.setLetterType(physicalType.getCode());
         // 运输轨仅作展示兼容；速度一律 §6.1
         letter.setSendMode(physicalType == LetterPhysicalType.STANDARD
@@ -196,11 +222,45 @@ public class AppMailboxServiceImpl implements AppMailboxService {
 
         letter.initAudit(fromUserId);
         letterService.save(letter);
+        maybeAutoApproveOnSend(letter.getId(), now);
         writingStyleService.recompute(fromUserId);
+        String actionType = parentLetterId != null
+                ? BehaviorActionTypes.REPLY_LETTER
+                : BehaviorActionTypes.SEND_LETTER;
+        actionService.recordEvent(
+                fromUserId, actionType, BehaviorActionTypes.TARGET_LETTER, letter.getId(), null);
         log.info("letter sent, fromUserId={}, letterId={}, mode={}", fromUserId, letter.getId(), mode.getCode());
 
         LetterDomain saved = letterService.getById(letter.getId());
         return toItem(saved, fromUserId, false);
+    }
+
+    /** 非 VIP 强制每日写信额度（拒绝信不计入）。 */
+    private void assertDailyQuota(long fromUserId, UserDTO sender) {
+        if (Boolean.TRUE.equals(sender.getIsVip())) {
+            return;
+        }
+        int quota = configService.getInt(LETTER_DAILY_QUOTA_KEY, DEFAULT_DAILY_LETTER_QUOTA);
+        LocalDateTime dayStart = LocalDate.now().atStartOfDay();
+        LocalDateTime dayEnd = LocalDate.now().atTime(LocalTime.MAX);
+        long sent = letterService.countSentQuotaByFromUserBetween(fromUserId, dayStart, dayEnd);
+        if (sent >= quota) {
+            log.info("letter send rejected: daily quota exhausted, userId={}, sent={}, quota={}",
+                    fromUserId, sent, quota);
+            throw new BusinessException(appMessages.get("app.error.letter.dailyQuotaExhausted"));
+        }
+    }
+
+    /** auto_approve_seconds≤0 时立即放行，便于 DIRECT 进入投递轨。 */
+    private void maybeAutoApproveOnSend(Long letterId, LocalDateTime now) {
+        if (letterId == null) {
+            return;
+        }
+        int seconds = configService.getInt(AUDIT_AUTO_APPROVE_SEC, 0);
+        if (seconds > 0) {
+            return;
+        }
+        letterService.approveAudit(letterId, now, 0L);
     }
 
     /** 推断发送模式：显式 mode > 回信/有收件人 DIRECT > 默认 POST_OFFICE。 */
@@ -303,6 +363,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         if (!marked) {
             return letter;
         }
+        actionService.recordEvent(
+                viewerUserId, BehaviorActionTypes.OPEN_LETTER, BehaviorActionTypes.TARGET_LETTER, letterId, null);
         return letterService.getById(letterId);
     }
 
@@ -455,6 +517,9 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         Integer mode = l.getMode() != null ? l.getMode() : LetterMode.DIRECT.getCode();
         Integer audit = l.getAuditStatus() != null ? l.getAuditStatus() : LetterAuditStatus.APPROVED.getCode();
         boolean pendingPoolPlaceholder = pending && fromMe && peerId == 0;
+        RelationSnapshotVO relation = peerId > 0
+                ? appRelationBizService.resolveRelationSnapshot(viewer, peerId)
+                : null;
         return MailboxLetterItemVO.builder()
                 .letterId(l.getId())
                 .peer(peerVo)
@@ -471,6 +536,9 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .expectedArrivalTime(expected)
                 .actualArrivalTime(actual)
                 .contentHidden(hideBody)
+                .relationDisplayState(relation != null ? relation.getDisplayState() : null)
+                .canAddPenpal(relation != null ? relation.getCanAddPenpal() : false)
+                .recipientRead(l.getRecipientReadAt() != null)
                 .build();
     }
 

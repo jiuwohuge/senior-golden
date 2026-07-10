@@ -9,6 +9,7 @@ import cn.nine.pros.post.client.api.app.AppDirectoryApi;
 import cn.nine.pros.post.client.model.input.app.AppDirectoryPageInDto;
 import cn.nine.pros.post.client.model.out.DirectoryUserItemVO;
 import cn.nine.pros.post.client.model.out.InterestTagOptionVO;
+import cn.nine.pros.post.client.model.out.PenpalListItemVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,5 +56,23 @@ public class AppDirectoryController implements AppDirectoryApi {
             throw new BadRequestException(appMessages.get("app.error.notLoggedIn"));
         }
         return appDirectoryService.listInterestTagOptions(lang);
+    }
+
+    @Override
+    public List<DirectoryUserItemVO> todayRecommendations() {
+        return appDirectoryService.listTodayRecommendations(requireUserId());
+    }
+
+    @Override
+    public List<PenpalListItemVO> listPenpals() {
+        return appDirectoryService.listPenpals(requireUserId());
+    }
+
+    private Long requireUserId() {
+        Long uid = MyRequestContextHolder.userId();
+        if (uid == null) {
+            throw new BadRequestException(appMessages.get("app.error.notLoggedIn"));
+        }
+        return uid;
     }
 }

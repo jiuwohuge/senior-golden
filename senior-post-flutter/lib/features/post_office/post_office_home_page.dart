@@ -25,7 +25,8 @@ class PostOfficeHomePage extends ConsumerWidget {
       orElse: () => l10n.postOfficeGreeting,
     );
     final hint = homeAsync.maybeWhen(
-      data: (h) => h.todayHint.isNotEmpty ? h.todayHint : l10n.postOfficeTodayHint,
+      data: (h) =>
+          h.todayHint.isNotEmpty ? h.todayHint : l10n.postOfficeTodayHint,
       orElse: () => l10n.postOfficeTodayHint,
     );
     final remaining = homeAsync.maybeWhen(
@@ -82,7 +83,7 @@ class PostOfficeHomePage extends ConsumerWidget {
         _SummaryCard(
           icon: Icons.mail_outline,
           title: l10n.postOfficeMessagesSummary(relationCount),
-          onTap: () => context.go(MainShellRoute.pathMailbox),
+          onTap: () => context.push('/post-office/messages'),
         ),
         const SizedBox(height: 12),
         _SummaryCard(

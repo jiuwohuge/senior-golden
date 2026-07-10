@@ -5,6 +5,7 @@ import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.input.app.AppDirectoryPageInDto;
 import cn.nine.pros.post.client.model.out.DirectoryUserItemVO;
 import cn.nine.pros.post.client.model.out.InterestTagOptionVO;
+import cn.nine.pros.post.client.model.out.PenpalListItemVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -36,4 +37,12 @@ public interface AppDirectoryApi {
     @Operation(summary = "兴趣标签选项（id + 名称，资料 PATCH 用 id，名录筛选仍传 tag_name）")
     @GetMapping("/interest-tag-options")
     List<InterestTagOptionVO> listInterestTagOptions(@RequestParam(value = "lang", required = false) String lang);
+
+    @Operation(summary = "每日推荐笔友（§9）")
+    @GetMapping("/recommendations/today")
+    List<DirectoryUserItemVO> todayRecommendations();
+
+    @Operation(summary = "我的笔友列表（§8 Tab3）")
+    @GetMapping("/penpals")
+    List<PenpalListItemVO> listPenpals();
 }

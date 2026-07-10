@@ -4,14 +4,17 @@ import '../../core/auth/auth_token.dart';
 import '../../core/models/domain_models.dart';
 import 'directory_remote.dart';
 
-final directoryFilterProvider =
-    StateProvider<DirectoryFilter>((ref) => const DirectoryFilter());
+final directoryFilterProvider = StateProvider<DirectoryFilter>(
+  (ref) => const DirectoryFilter(),
+);
 
 /// 名录列表走 `/api/directory/users/paging`（排序与筛选由服务端计算）。
 final directoryUsersProvider = FutureProvider<List<AppUser>>((ref) async {
   ref.watch(authTokenProvider);
   final filter = ref.watch(directoryFilterProvider);
-  return ref.read(directoryRemoteProvider).pageUsers(
+  return ref
+      .read(directoryRemoteProvider)
+      .pageUsers(
         page: 1,
         size: 60,
         countryCode: filter.countryCode,
@@ -21,6 +24,16 @@ final directoryUsersProvider = FutureProvider<List<AppUser>>((ref) async {
         genders: filter.genders.toList(),
         sort: filter.sort,
       );
+});
+
+final dailyRecommendationsProvider = FutureProvider<List<AppUser>>((ref) async {
+  ref.watch(authTokenProvider);
+  return ref.read(directoryRemoteProvider).listTodayRecommendations();
+});
+
+final myPenpalsProvider = FutureProvider<List<PenpalListItem>>((ref) async {
+  ref.watch(authTokenProvider);
+  return ref.read(directoryRemoteProvider).listPenpals();
 });
 
 class DirectoryFilter {

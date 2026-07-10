@@ -17,6 +17,16 @@ class MailboxRemoteRepository {
     return rows.map(_voToMailboxLetter).toList();
   }
 
+  Future<List<MailboxLetter>> listReceived() async {
+    final r = await _dio.get<dynamic>('/api/mailbox/received');
+    return _unwrapListData(r).map(_voToMailboxLetter).toList();
+  }
+
+  Future<List<MailboxLetter>> listSent() async {
+    final r = await _dio.get<dynamic>('/api/mailbox/sent');
+    return _unwrapListData(r).map(_voToMailboxLetter).toList();
+  }
+
   Future<List<MailboxLetter>> listArchive() async {
     final r = await _dio.get<dynamic>('/api/mailbox/archive');
     final rows = _unwrapListData(r);
@@ -60,9 +70,7 @@ class MailboxRemoteRepository {
 
   /// 业务好友已在 Connections，补偿将双方 userId 导入腾讯 IM 并同步 IM 好友（幂等）。
   Future<void> syncImPeer(String peerUserId) async {
-    await _dio.post<dynamic>(
-      '/api/im/peers/${int.parse(peerUserId)}/sync',
-    );
+    await _dio.post<dynamic>('/api/im/peers/${int.parse(peerUserId)}/sync');
   }
 
   Future<MailboxLetter> speedUp(String letterId) async {
@@ -235,6 +243,11 @@ MailboxLetter _voToMailboxLetter(Map<String, dynamic> m) {
     actualArrivalAt: actualArrival,
     mode: mode,
     auditStatus: (m['auditStatus'] as num?)?.toInt() ?? 1,
+    relationDisplayState: RelationDisplayState.fromCode(
+      (m['relationDisplayState'] as num?)?.toInt(),
+    ),
+    canAddPenpal: m['canAddPenpal'] as bool? ?? false,
+    recipientRead: m['recipientRead'] as bool? ?? false,
   );
 }
 

@@ -13,6 +13,7 @@ import '../auth/auth_repository.dart';
 import '../directory/send_letter_sheet.dart';
 import '../mailbox/mailbox_providers.dart';
 import '../mailbox/mailbox_remote.dart';
+import '../post_office/post_office_remote.dart';
 import '../time_letter/time_letter_providers.dart';
 import '../time_letter/time_letter_remote.dart';
 import '../time_letter/time_letter_seal_slider.dart';
@@ -259,7 +260,9 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     if (!isPostOffice && _peerId == null) return;
     setState(() => _busy = true);
     try {
-      await ref.read(mailboxRemoteRepositoryProvider).sendLetter(
+      await ref
+          .read(mailboxRemoteRepositoryProvider)
+          .sendLetter(
             toUserId: isPostOffice ? null : _peerId,
             content: body,
             type: _mailType,
@@ -269,6 +272,10 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       ref.invalidate(mailboxLettersProvider);
       ref.invalidate(postalInboxLettersProvider);
       ref.invalidate(mailboxArchiveProvider);
+      // 邮局发信消耗今日额度；刷新首页 remainingQuota。
+      if (isPostOffice) {
+        ref.invalidate(postOfficeHomeProvider);
+      }
       if (!mounted) return;
       await showPostalSendLetterSuccessDialog(context);
       if (mounted) context.pop();

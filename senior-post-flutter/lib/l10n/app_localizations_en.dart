@@ -1085,6 +1085,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get letterStatusMatched => 'Matched';
+
+  @override
   String get letterAuditPending => 'Pending review';
 
   @override
@@ -1111,14 +1114,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letterPeerUnknown => 'Unknown recipient';
 
   @override
-  String get letterAcceptContact => 'Accept postal contact';
+  String get letterAcceptContact => 'Add pen pal';
 
   @override
-  String get letterAcceptContactDone => 'Postal contact accepted';
+  String get letterAcceptContactDone => 'Request sent';
 
   @override
   String get letterAcceptContactSuccess =>
-      'You are now postal friends. Open instant chat below or from Connections.';
+      'Pen pal request sent. After they accept, find them under My pen pals.';
 
   @override
   String get chatFriendsOnlySnack =>
@@ -1309,13 +1312,148 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendLetterContentLabel => 'Letter content';
 
   @override
-  String get mailboxTabPostalInbox => 'Postal inbox';
+  String get mailboxTabReceived => 'Received';
 
   @override
-  String get mailboxTabConnections => 'Connections';
+  String get mailboxTabSent => 'Sent';
 
   @override
   String get mailboxTabTimeLetter => 'Time letter';
+
+  @override
+  String get mailboxReceivedEmptyTitle => 'No received letters';
+
+  @override
+  String get mailboxReceivedEmptySubtitle =>
+      'Letters from the post office or pen pals appear here.';
+
+  @override
+  String get mailboxSentEmptyTitle => 'No sent letters';
+
+  @override
+  String get mailboxSentEmptySubtitle =>
+      'Letters you send stay here until the recipient has read them.';
+
+  @override
+  String get directoryTabRecommend => 'For you';
+
+  @override
+  String get directoryTabFind => 'Find pen pals';
+
+  @override
+  String get directoryTabMyPenpals => 'My pen pals';
+
+  @override
+  String get directoryRecommendEmpty => 'No recommendations today';
+
+  @override
+  String get directoryRecommendEmptyHint =>
+      'Check back tomorrow, or browse Find pen pals.';
+
+  @override
+  String get directoryPenpalsEmpty => 'No pen pals yet';
+
+  @override
+  String get directoryPenpalsEmptyHint =>
+      'After enough letters, send a pen pal request. Confirmed pals appear here.';
+
+  @override
+  String get directoryWriteLetter => 'Write';
+
+  @override
+  String penpalListMeta(Object days, Object count) {
+    return 'Pen pal ${days}d · $count letters';
+  }
+
+  @override
+  String get postOfficeRelationMessagesTitle => 'Relation messages';
+
+  @override
+  String get postOfficeRelationMessagesEmpty => 'No relation messages';
+
+  @override
+  String get postOfficeRelationMessagesEmptyHint =>
+      'Pen pal requests and add-pen-pal reminders show up here.';
+
+  @override
+  String penpalExchangeCount(Object count) {
+    return '$count letters exchanged';
+  }
+
+  @override
+  String get penpalAccept => 'Accept';
+
+  @override
+  String get penpalIgnore => 'Ignore';
+
+  @override
+  String get penpalAcceptSuccess => 'You are now pen pals';
+
+  @override
+  String get penpalRequestSent => 'Pen pal request sent';
+
+  @override
+  String get relationAddPenpal => 'Add pen pal';
+
+  @override
+  String get relationAddPenpalSuccess =>
+      'Request sent — waiting for confirmation';
+
+  @override
+  String get relationStateStranger => 'Stranger';
+
+  @override
+  String get relationStateContacting => 'In correspondence';
+
+  @override
+  String get relationStateCanAddPenpal => 'Can add pen pal';
+
+  @override
+  String get relationStatePendingOut => 'Request sent';
+
+  @override
+  String get relationStatePendingIn => 'Awaiting you';
+
+  @override
+  String get relationStatePenpal => 'Pen pal';
+
+  @override
+  String get userCardWriteFirstLetter => 'Write first letter';
+
+  @override
+  String get userCardContinueWriting => 'Keep writing';
+
+  @override
+  String get profileOverviewPenpals => 'Pen pals';
+
+  @override
+  String get profileOverviewLetters => 'Letters';
+
+  @override
+  String get profileOverviewTimeLetters => 'Time letters';
+
+  @override
+  String get profileSectionMyContent => 'My content';
+
+  @override
+  String get profileSectionShop => 'Shop & membership';
+
+  @override
+  String get profileSectionPrivacy => 'Privacy & safety';
+
+  @override
+  String get profileTimeLetterDrafts => 'Time letters';
+
+  @override
+  String get profilePrivacyRecommendPlaceholder =>
+      'Hide recommendations (coming soon)';
+
+  @override
+  String get profilePrivacyStrangerPlaceholder =>
+      'Decline stranger mail (coming soon)';
+
+  @override
+  String get commonLoadFailed => 'Unable to load';
 
   @override
   String get timeLetterComposeTitle => 'Time Post Office';

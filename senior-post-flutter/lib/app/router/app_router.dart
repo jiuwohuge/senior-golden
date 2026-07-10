@@ -20,6 +20,7 @@ import '../../features/compose/compose_flow_page.dart';
 import '../../features/compose/compose_intent.dart';
 import '../../features/time_letter/time_letter_open_page.dart';
 import '../../features/mailbox/mailbox_archive_page.dart';
+import '../../features/post_office/post_office_relation_messages_page.dart';
 import '../../features/profile/account_delete_page.dart';
 import '../../features/profile/blacklist_page.dart';
 import '../../features/profile/feedback_page.dart';
@@ -122,6 +123,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/letter/:id',
         builder: (context, state) =>
             LetterDetailPage(letterId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/post-office/messages',
+        builder: (context, state) => const PostOfficeRelationMessagesPage(),
       ),
       GoRoute(
         path: '/mailbox/archive',

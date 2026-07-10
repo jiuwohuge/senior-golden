@@ -10,12 +10,11 @@ import '../../app/theme/postal_tokens.dart';
 import '../../core/models/domain_models.dart';
 import '../auth/auth_repository.dart';
 import '../../widgets/postal/postal.dart';
-import 'im_unread_providers.dart';
 import 'mailbox_providers.dart';
 import 'tim_facade.dart';
-import '../compose/compose_intent.dart';
 import '../time_letter/time_letter_list_tab.dart';
 import '../time_letter/time_letter_providers.dart';
+import '../relation/relation_display_label.dart';
 
 class MailboxPage extends ConsumerStatefulWidget {
   const MailboxPage({super.key});
@@ -50,24 +49,22 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
   void _reloadTab(int index) {
     switch (index) {
       case 0:
-        ref.invalidate(postalInboxLettersProvider);
+        ref.invalidate(mailboxReceivedProvider);
       case 1:
-        ref.invalidate(mailboxFriendsProvider);
+        ref.invalidate(mailboxSentProvider);
       case 2:
         invalidateTimeLetterLists(ref);
     }
   }
 
-  Future<void> _refreshPostalInbox() async {
-    ref.invalidate(postalInboxLettersProvider);
-    ref.invalidate(mailboxArchiveProvider);
-    ref.invalidate(mailboxLettersProvider);
-    await ref.read(postalInboxLettersProvider.future);
+  Future<void> _refreshReceived() async {
+    ref.invalidate(mailboxReceivedProvider);
+    await ref.read(mailboxReceivedProvider.future);
   }
 
-  Future<void> _refreshConnections() async {
-    ref.invalidate(mailboxFriendsProvider);
-    await ref.read(mailboxFriendsProvider.future);
+  Future<void> _refreshSent() async {
+    ref.invalidate(mailboxSentProvider);
+    await ref.read(mailboxSentProvider.future);
   }
 
   Future<void> _refreshTimeLetters() async {
@@ -133,8 +130,8 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
               unselectedLabelColor: PostalTokens.inkTertiary,
               indicatorColor: PostalTokens.postboxGreen,
               tabs: [
-                Tab(text: l10n.mailboxTabPostalInbox),
-                Tab(text: l10n.mailboxTabConnections),
+                Tab(text: l10n.mailboxTabReceived),
+                Tab(text: l10n.mailboxTabSent),
                 Tab(text: l10n.mailboxTabTimeLetter),
               ],
             ),
@@ -143,8 +140,8 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _PostalInboxTab(onRefresh: _refreshPostalInbox),
-                _ConnectionsTab(onRefresh: _refreshConnections),
+                _ReceivedTab(onRefresh: _refreshReceived),
+                _SentTab(onRefresh: _refreshSent),
                 TimeLetterListTab(onRefresh: _refreshTimeLetters),
               ],
             ),
@@ -182,45 +179,94 @@ class _MailboxRefreshBody extends StatelessWidget {
   }
 }
 
-class _PostalInboxTab extends ConsumerWidget {
-  const _PostalInboxTab({required this.onRefresh});
+class _ReceivedTab extends ConsumerWidget {
+  const _ReceivedTab({required this.onRefresh});
 
   final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final lettersAsync = ref.watch(postalInboxLettersProvider);
+    final lettersAsync = ref.watch(mailboxReceivedProvider);
     return lettersAsync.when(
       loading: () => const PostalSkeletonList(itemCount: 5, itemHeight: 120),
       error: (e, _) => _MailboxRefreshBody(
         onRefresh: onRefresh,
         child: PostalEmptyState(
-          title: 'Unable to load mailbox',
+          title: AppLocalizations.of(context)!.commonLoadFailed,
           subtitle: '$e',
           tone: PostalEmptyTone.error,
         ),
       ),
-      data: (letters) =>
-          _PostalInboxBody(letters: letters, onRefresh: onRefresh),
+      data: (letters) => _MailboxLettersBody(
+        letters: letters,
+        onRefresh: onRefresh,
+        emptyTitle: AppLocalizations.of(context)!.mailboxReceivedEmptyTitle,
+        emptySubtitle: AppLocalizations.of(
+          context,
+        )!.mailboxReceivedEmptySubtitle,
+        showInTransitBanner: true,
+      ),
     );
   }
 }
 
-class _PostalInboxBody extends ConsumerWidget {
-  const _PostalInboxBody({required this.letters, required this.onRefresh});
+class _SentTab extends ConsumerWidget {
+  const _SentTab({required this.onRefresh});
 
-  final List<MailboxLetter> letters;
   final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final lettersAsync = ref.watch(mailboxSentProvider);
+    return lettersAsync.when(
+      loading: () => const PostalSkeletonList(itemCount: 5, itemHeight: 120),
+      error: (e, _) => _MailboxRefreshBody(
+        onRefresh: onRefresh,
+        child: PostalEmptyState(
+          title: AppLocalizations.of(context)!.commonLoadFailed,
+          subtitle: '$e',
+          tone: PostalEmptyTone.error,
+        ),
+      ),
+      data: (letters) => _MailboxLettersBody(
+        letters: letters,
+        onRefresh: onRefresh,
+        emptyTitle: AppLocalizations.of(context)!.mailboxSentEmptyTitle,
+        emptySubtitle: AppLocalizations.of(context)!.mailboxSentEmptySubtitle,
+        showInTransitBanner: false,
+      ),
+    );
+  }
+}
+
+class _MailboxLettersBody extends ConsumerWidget {
+  const _MailboxLettersBody({
+    required this.letters,
+    required this.onRefresh,
+    required this.emptyTitle,
+    required this.emptySubtitle,
+    required this.showInTransitBanner,
+  });
+
+  final List<MailboxLetter> letters;
+  final Future<void> Function() onRefresh;
+  final String emptyTitle;
+  final String emptySubtitle;
+  final bool showInTransitBanner;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final delivering = letters
-        .where((l) =>
-            l.status == LetterStatus.delivering ||
-            l.status == LetterStatus.pending ||
-            l.status == LetterStatus.matched)
-        .toList();
+    final delivering = showInTransitBanner
+        ? letters
+              .where(
+                (l) =>
+                    l.status == LetterStatus.delivering ||
+                    l.status == LetterStatus.pending ||
+                    l.status == LetterStatus.matched,
+              )
+              .toList()
+        : const <MailboxLetter>[];
     return Column(
       children: [
         if (delivering.isNotEmpty)
@@ -254,10 +300,9 @@ class _PostalInboxBody extends ConsumerWidget {
                           constraints: BoxConstraints(
                             minHeight: constraints.maxHeight,
                           ),
-                          child: const PostalEmptyState(
-                            title: 'Postal inbox is clear',
-                            subtitle:
-                                'No letters need attention here. Items you sent or received stay here until the recipient has read them (including registered mail).',
+                          child: PostalEmptyState(
+                            title: emptyTitle,
+                            subtitle: emptySubtitle,
                           ),
                         ),
                       );
@@ -277,212 +322,6 @@ class _PostalInboxBody extends ConsumerWidget {
   }
 }
 
-class _ConnectionsTab extends ConsumerWidget {
-  const _ConnectionsTab({required this.onRefresh});
-
-  final Future<void> Function() onRefresh;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(mailboxFriendsProvider);
-    final unreadMap = ref.watch(imC2cUnreadProvider);
-    return async.when(
-      loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 72),
-      error: (e, _) => _MailboxRefreshBody(
-        onRefresh: onRefresh,
-        child: PostalEmptyState(
-          title: 'Unable to load friends',
-          subtitle: '$e',
-          tone: PostalEmptyTone.error,
-        ),
-      ),
-      data: (rows) {
-        if (rows.isEmpty) {
-          return _MailboxRefreshBody(
-            onRefresh: onRefresh,
-            child: const PostalEmptyState(
-              title: 'No postal friends yet',
-              subtitle:
-                  'Accept a delivered letter to add someone here. This list is your friend list (not recent chats).',
-            ),
-          );
-        }
-        return RefreshIndicator(
-          onRefresh: onRefresh,
-          child: ListView.separated(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-            itemCount: rows.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (_, i) {
-              final r = rows[i];
-              final id = r.peer.id.trim();
-              final unread = (id.isEmpty || id == '0')
-                  ? 0
-                  : (unreadMap[id] ?? 0);
-              final l10n = AppLocalizations.of(context)!;
-              return _ImStyleRow(
-                title: r.peer.nickname,
-                subtitle: r.lastMessage,
-                time: r.lastTime,
-                avatarUrl: r.peer.avatarUrl,
-                unreadCount: unread,
-                trailing: IconButton(
-                  tooltip: l10n.timeLetterSendToFriend,
-                  icon: const Icon(Icons.schedule_send_outlined),
-                  color: PostalTokens.postboxGreen,
-                  onPressed: () {
-                    if (id.isEmpty || id == '0') return;
-                    context.push(
-                      '/compose',
-                      extra: ComposeIntent(
-                        kind: ComposeKind.penPalTimeLetter,
-                        peerId: id,
-                        peerNickname: r.peer.nickname,
-                      ),
-                    );
-                  },
-                ),
-                onTap: () {
-                  if (id.isEmpty || id == '0') {
-                    PostalSnack.show(
-                      context,
-                      'Cannot open chat: invalid friend id from server.',
-                      tone: PostalSnackTone.error,
-                    );
-                    return;
-                  }
-                  context.push(
-                    '/chat/$id',
-                    extra: <String, dynamic>{
-                      'name': r.peer.nickname,
-                      'avatarUrl': r.peer.avatarUrl,
-                      'trustedFriendship': true,
-                    },
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _ImStyleRow extends StatelessWidget {
-  const _ImStyleRow({
-    required this.title,
-    required this.subtitle,
-    required this.time,
-    required this.onTap,
-    this.avatarUrl,
-    this.unreadCount = 0,
-    this.trailing,
-  });
-
-  final String title;
-  final String subtitle;
-  final DateTime time;
-  final VoidCallback onTap;
-  final String? avatarUrl;
-  final int unreadCount;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  PostalAvatar(name: title, size: 48, imageUrl: avatarUrl),
-                  if (unreadCount > 0)
-                    Positioned(
-                      right: -2,
-                      top: -2,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 2,
-                        ),
-                        constraints: const BoxConstraints(minWidth: 18),
-                        decoration: BoxDecoration(
-                          color: PostalTokens.stampVermilion,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: PostalTokens.paperCream,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Text(
-                          unreadCount > 99 ? '99+' : '$unreadCount',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: unreadCount > 0
-                            ? FontWeight.w700
-                            : FontWeight.w600,
-                        color: PostalTokens.inkNavy,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: unreadCount > 0
-                            ? PostalTokens.inkSecondary
-                            : PostalTokens.inkTertiary,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (trailing != null) trailing!,
-              const SizedBox(width: 6),
-              Text(
-                DateFormat('MM-dd').format(time),
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: PostalTokens.inkTertiary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _LetterTile extends ConsumerWidget {
   const _LetterTile({required this.letter});
   final MailboxLetter letter;
@@ -490,9 +329,12 @@ class _LetterTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    // MATCHED 单独展示；pending/delivering 仍用在途芯片。
     final statusChip = switch (letter.status) {
+      LetterStatus.matched => PostalStatusChip.delivering(
+        label: l10n.letterStatusMatched,
+      ),
       LetterStatus.pending ||
-      LetterStatus.matched ||
       LetterStatus.delivering => PostalStatusChip.delivering(),
       LetterStatus.registered => PostalStatusChip.registered(
         label: 'Registered',
@@ -501,6 +343,12 @@ class _LetterTile extends ConsumerWidget {
         letter.type == LetterType.registered
             ? PostalStatusChip.registered(label: 'Registered')
             : PostalStatusChip.delivered(),
+    };
+    // auditStatus: 0 待审 / 1 通过 / 2 拒绝 — 非通过时在列表露出标签。
+    final auditLabel = switch (letter.auditStatus) {
+      0 => l10n.letterAuditPending,
+      2 => l10n.letterAuditRejected,
+      _ => null,
     };
     return PostalCardEnvelope(
       onTap: () {
@@ -534,6 +382,28 @@ class _LetterTile extends ConsumerWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
+          if (auditLabel != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              l10n.letterAuditLine(auditLabel),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: PostalTokens.stampVermilion,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          if (letter.relationDisplayState != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              relationDisplayLabel(l10n, letter.relationDisplayState!),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: letter.canAddPenpal
+                    ? PostalTokens.postboxGreen
+                    : PostalTokens.inkSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           Text(
             DateFormat('MM-dd HH:mm').format(letter.sentAt),

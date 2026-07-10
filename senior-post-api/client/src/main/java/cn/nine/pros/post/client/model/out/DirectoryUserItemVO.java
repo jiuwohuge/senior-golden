@@ -47,4 +47,16 @@ public class DirectoryUserItemVO {
 
     @Schema(description = "当前浏览者与该用户是否为活跃邮政好友（Connections）")
     private Boolean postalFriend;
+
+    @Schema(description = "关系展示态，整型同 RelationDisplayState")
+    private Integer relationDisplayState;
+
+    @Schema(description = "推荐理由（推荐 Tab）")
+    private String recommendReason;
+
+    @Schema(description = "与对端有效往来信件数")
+    private Integer letterCount;
+
+    @Schema(description = "成为笔友天数（我的笔友 Tab）")
+    private Integer penpalDays;
 }

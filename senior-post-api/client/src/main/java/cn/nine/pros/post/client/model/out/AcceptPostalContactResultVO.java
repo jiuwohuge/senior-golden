@@ -12,8 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AcceptPostalContactResultVO {
 
-    @Schema(description = "好友关系ID")
+    @Schema(description = "好友关系ID（申请阶段为 null）")
     private Long friendshipId;
+
+    @Schema(description = "笔友申请 ID（M4）")
+    private Long requestId;
 
     @Schema(description = "对端用户ID（TIM userID 同源）")
     private Long peerUserId;

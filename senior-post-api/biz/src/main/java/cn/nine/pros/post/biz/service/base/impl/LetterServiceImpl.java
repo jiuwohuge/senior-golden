@@ -7,6 +7,7 @@ import cn.nine.pros.post.biz.mapper.LetterMapper;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.model.mapstruct.LetterMapstruct;
 import cn.nine.pros.post.biz.service.base.LetterService;
+import cn.nine.pros.post.client.common.enums.LetterAuditStatus;
 import cn.nine.pros.post.client.common.enums.LetterBizStatus;
 import cn.nine.pros.post.client.model.db.LetterDTO;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -167,7 +168,9 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
         return update(new LambdaUpdateWrapper<LetterDomain>()
                 .eq(LetterDomain::getId, letterId)
                 .eq(LetterDomain::isDelFlag, false)
-                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
+                .in(LetterDomain::getStatus,
+                        LetterBizStatus.DELIVERING.getCode(),
+                        LetterBizStatus.MATCHED.getCode())
                 .set(LetterDomain::getStatus, LetterBizStatus.PENDING.getCode())
                 .set(LetterDomain::getUpdatedAt, at)
                 .set(LetterDomain::getUpdatedBy, 0L));
@@ -184,4 +187,226 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
                 .set(LetterDomain::getUpdatedAt, at)
                 .set(LetterDomain::getUpdatedBy, 0L));
     }
+
+    @Override
+    public List<LetterDomain> listPostOfficePendingPool(int limit) {
+        return list(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getMode, cn.nine.pros.post.client.common.enums.LetterMode.POST_OFFICE.getCode())
+                .eq(LetterDomain::getStatus, LetterBizStatus.PENDING.getCode())
+                .isNull(LetterDomain::getToUserId)
+                .orderByAsc(LetterDomain::getCreatedAt)
+                .last("LIMIT " + Math.max(1, limit)));
+    }
+
+    @Override
+    public boolean tryAssignMatch(long letterId, long toUserId, LocalDateTime matchedAt) {
+        return update(new LambdaUpdateWrapper<LetterDomain>()
+                .eq(LetterDomain::getId, letterId)
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getMode, cn.nine.pros.post.client.common.enums.LetterMode.POST_OFFICE.getCode())
+                .eq(LetterDomain::getStatus, LetterBizStatus.PENDING.getCode())
+                .isNull(LetterDomain::getToUserId)
+                .set(LetterDomain::getToUserId, toUserId)
+                .set(LetterDomain::getMatchedAt, matchedAt)
+                .set(LetterDomain::getStatus, LetterBizStatus.MATCHED.getCode())
+                .set(LetterDomain::getUpdatedAt, matchedAt)
+                .set(LetterDomain::getUpdatedBy, 0L));
+    }
+
+    @Override
+    public boolean startDeliveringAfterMatch(long letterId, LocalDateTime eta, LocalDateTime now) {
+        return update(new LambdaUpdateWrapper<LetterDomain>()
+                .eq(LetterDomain::getId, letterId)
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getStatus, LetterBizStatus.MATCHED.getCode())
+                .isNotNull(LetterDomain::getToUserId)
+                .set(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
+                .set(LetterDomain::getExpectedArrivalTime, eta)
+                .set(LetterDomain::getUpdatedAt, now)
+                .set(LetterDomain::getUpdatedBy, 0L));
+    }
+
+    @Override
+    public long countInboundPostOfficeSince(long toUserId, LocalDateTime since) {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getMode, cn.nine.pros.post.client.common.enums.LetterMode.POST_OFFICE.getCode())
+                .eq(LetterDomain::getToUserId, toUserId)
+                .isNotNull(LetterDomain::getMatchedAt)
+                .ge(LetterDomain::getMatchedAt, since));
+    }
+
+    @Override
+    public long countSentQuotaByFromUserBetween(long fromUserId, LocalDateTime start, LocalDateTime end) {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getFromUserId, fromUserId)
+                .ge(LetterDomain::getCreatedAt, start)
+                .le(LetterDomain::getCreatedAt, end)
+                .ne(LetterDomain::getAuditStatus,
+                        cn.nine.pros.post.client.common.enums.LetterAuditStatus.REJECTED.getCode()));
+    }
+
+    @Override
+    public boolean approveAudit(long letterId, LocalDateTime at, Long auditUserId) {
+        return update(new LambdaUpdateWrapper<LetterDomain>()
+                .eq(LetterDomain::getId, letterId)
+                .eq(LetterDomain::isDelFlag, false)
+                .ne(LetterDomain::getAuditStatus,
+                        cn.nine.pros.post.client.common.enums.LetterAuditStatus.REJECTED.getCode())
+                .set(LetterDomain::getAuditStatus,
+                        cn.nine.pros.post.client.common.enums.LetterAuditStatus.APPROVED.getCode())
+                .set(LetterDomain::getUpdatedAt, at)
+                .set(LetterDomain::getUpdatedBy, auditUserId));
+    }
+
+    @Override
+    public boolean rejectAudit(long letterId, LocalDateTime at, Long auditUserId) {
+        return update(new LambdaUpdateWrapper<LetterDomain>()
+                .eq(LetterDomain::getId, letterId)
+                .eq(LetterDomain::isDelFlag, false)
+                .set(LetterDomain::getAuditStatus,
+                        cn.nine.pros.post.client.common.enums.LetterAuditStatus.REJECTED.getCode())
+                .set(LetterDomain::getUpdatedAt, at)
+                .set(LetterDomain::getUpdatedBy, auditUserId));
+    }
+
+    @Override
+    public List<LetterDomain> listPendingReviewBefore(LocalDateTime createdBefore, int limit) {
+        return list(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getAuditStatus,
+                        cn.nine.pros.post.client.common.enums.LetterAuditStatus.PENDING_REVIEW.getCode())
+                .le(LetterDomain::getCreatedAt, createdBefore)
+                .orderByAsc(LetterDomain::getCreatedAt)
+                .last("LIMIT " + Math.max(1, limit)));
+    }
+
+    @Override
+    public com.baomidou.mybatisplus.extension.plugins.pagination.Page<LetterDomain> pageForAdminAudit(
+            cn.nine.commons.data.page.PageQuery pageQuery, Integer auditStatus, Integer mode) {
+        long page = pageQuery.getPage() == null || pageQuery.getPage() < 1 ? 1L : pageQuery.getPage();
+        long size = pageQuery.getSize() == null || pageQuery.getSize() < 1 ? 20L : pageQuery.getSize();
+        LambdaQueryWrapper<LetterDomain> qw = new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .orderByDesc(LetterDomain::getCreatedAt);
+        if (auditStatus != null) {
+            qw.eq(LetterDomain::getAuditStatus, auditStatus);
+        }
+        if (mode != null) {
+            qw.eq(LetterDomain::getMode, mode);
+        }
+        return page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(page, size), qw);
+    }
+
+    @Override
+    public long countLettersSentByUser(long userId) {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getFromUserId, userId));
+    }
+
+    @Override
+    public long countExchangeBetween(long userIdA, long userIdB) {
+        if (userIdA == userIdB) {
+            return 0;
+        }
+        return count(exchangeWrapper(userIdA, userIdB));
+    }
+
+    @Override
+    public boolean hasBidirectionalExchange(long userIdA, long userIdB) {
+        if (userIdA == userIdB) {
+            return false;
+        }
+        long aToB = count(exchangeDirectedWrapper(userIdA, userIdB));
+        if (aToB <= 0) {
+            return false;
+        }
+        return count(exchangeDirectedWrapper(userIdB, userIdA)) > 0;
+    }
+
+    @Override
+    public long countDeliveredParticipationForUser(long userId) {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .and(w -> w.eq(LetterDomain::getFromUserId, userId).or().eq(LetterDomain::getToUserId, userId)));
+    }
+
+    @Override
+    public List<LetterDomain> listReceivedForUser(long userId, int limit) {
+        return list(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getToUserId, userId)
+                .isNotNull(LetterDomain::getFromUserId)
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .orderByDesc(LetterDomain::getUpdatedAt)
+                .last("LIMIT " + Math.max(1, limit)));
+    }
+
+    @Override
+    public List<LetterDomain> listSentForUser(long userId, int limit) {
+        return list(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getFromUserId, userId)
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .orderByDesc(LetterDomain::getUpdatedAt)
+                .last("LIMIT " + Math.max(1, limit)));
+    }
+
+    @Override
+    public List<Long> listExchangePeerIds(long viewerUserId, int limit) {
+        List<LetterDomain> rows = list(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .and(w -> w.eq(LetterDomain::getFromUserId, viewerUserId)
+                        .or()
+                        .eq(LetterDomain::getToUserId, viewerUserId))
+                .orderByDesc(LetterDomain::getUpdatedAt)
+                .last("LIMIT " + Math.max(50, limit * 10)));
+        java.util.LinkedHashSet<Long> peers = new java.util.LinkedHashSet<>();
+        for (LetterDomain row : rows) {
+            if (row.getFromUserId() == null || row.getToUserId() == null) {
+                continue;
+            }
+            long peer = row.getFromUserId().equals(viewerUserId)
+                    ? row.getToUserId()
+                    : row.getFromUserId();
+            if (peer == viewerUserId) {
+                continue;
+            }
+            peers.add(peer);
+            if (peers.size() >= limit) {
+                break;
+            }
+        }
+        return new java.util.ArrayList<>(peers);
+    }
+
+    private static LambdaQueryWrapper<LetterDomain> exchangeWrapper(long userIdA, long userIdB) {
+        return new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .and(w -> w
+                        .nested(n -> n.eq(LetterDomain::getFromUserId, userIdA)
+                                .eq(LetterDomain::getToUserId, userIdB))
+                        .or()
+                        .nested(n -> n.eq(LetterDomain::getFromUserId, userIdB)
+                                .eq(LetterDomain::getToUserId, userIdA)));
+    }
+
+    private static LambdaQueryWrapper<LetterDomain> exchangeDirectedWrapper(long fromUserId, long toUserId) {
+        return new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .eq(LetterDomain::getFromUserId, fromUserId)
+                .eq(LetterDomain::getToUserId, toUserId);
+    }
+
 }

@@ -7,6 +7,7 @@ import '../../app/theme/postal_tokens.dart';
 import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal.dart';
 import '../../widgets/postal/postal_gender_icon.dart';
+import '../compose/compose_intent.dart';
 import 'directory_filter_sheet.dart';
 import 'directory_providers.dart';
 
@@ -17,15 +18,38 @@ class DirectoryPage extends ConsumerStatefulWidget {
   ConsumerState<DirectoryPage> createState() => _DirectoryPageState();
 }
 
-class _DirectoryPageState extends ConsumerState<DirectoryPage> {
+class _DirectoryPageState extends ConsumerState<DirectoryPage>
+    with SingleTickerProviderStateMixin {
   bool _refreshing = false;
+  late TabController _tabController;
 
-  Future<void> _onRefresh() async {
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onRefresh(int tab) async {
     if (_refreshing) return;
     _refreshing = true;
     try {
-      ref.invalidate(directoryUsersProvider);
-      await ref.read(directoryUsersProvider.future);
+      switch (tab) {
+        case 0:
+          ref.invalidate(dailyRecommendationsProvider);
+          await ref.read(dailyRecommendationsProvider.future);
+        case 1:
+          ref.invalidate(directoryUsersProvider);
+          await ref.read(directoryUsersProvider.future);
+        case 2:
+          ref.invalidate(myPenpalsProvider);
+          await ref.read(myPenpalsProvider.future);
+      }
     } finally {
       if (mounted) _refreshing = false;
     }
@@ -42,70 +66,221 @@ class _DirectoryPageState extends ConsumerState<DirectoryPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final usersAsync = ref.watch(directoryUsersProvider);
     return SafeArea(
       top: false,
-      child: RefreshIndicator(
-        onRefresh: _onRefresh,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      child: Column(
+        children: [
+          const PostalPerforationStrip(),
+          Material(
+            color: Theme.of(context).colorScheme.surface,
+            child: TabBar(
+              controller: _tabController,
+              labelColor: PostalTokens.postboxGreen,
+              unselectedLabelColor: PostalTokens.inkTertiary,
+              indicatorColor: PostalTokens.postboxGreen,
+              tabs: [
+                Tab(text: l10n.directoryTabRecommend),
+                Tab(text: l10n.directoryTabFind),
+                Tab(text: l10n.directoryTabMyPenpals),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _RecommendTab(onRefresh: () => _onRefresh(0)),
+                _FindTab(onFilter: _openFilter, onRefresh: () => _onRefresh(1)),
+                _MyPenpalsTab(onRefresh: () => _onRefresh(2)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecommendTab extends ConsumerWidget {
+  const _RecommendTab({required this.onRefresh});
+
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final async = ref.watch(dailyRecommendationsProvider);
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: async.when(
+        loading: () => const PostalSkeletonList(itemCount: 3, itemHeight: 176),
+        error: (e, _) => ListView(
           children: [
-            const PostalPerforationStrip(),
-            const SizedBox(height: 14),
-            _DirectoryIntroCard(onFilter: _openFilter),
-            const SizedBox(height: 12),
-            _DirectorySafetyCard(
-              title: l10n.directorySafetyTitle,
-              body: l10n.directorySafetyBody,
-            ),
-            const SizedBox(height: 16),
-            PostalSectionTitle(
-              title: l10n.directoryListTitle,
-              subtitle: l10n.directoryListSubtitle,
-              trailing: IconButton(
-                tooltip: l10n.directoryFilterCta,
-                onPressed: _openFilter,
-                icon: const Icon(Icons.tune),
-              ),
-            ),
-            const SizedBox(height: 12),
-            usersAsync.when(
-              loading: () => const PostalSkeletonList(
-                itemCount: 4,
-                itemHeight: 176,
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-              ),
-              error: (e, _) => PostalEmptyState(
-                title: l10n.directoryLoadFailed,
-                subtitle: '$e',
-                tone: PostalEmptyTone.error,
-                actionLabel: l10n.commonRetry,
-                onAction: () => ref.invalidate(directoryUsersProvider),
-              ),
-              data: (users) {
-                if (users.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 18),
-                    child: PostalEmptyState(
-                      title: l10n.directoryEmptyTitle,
-                      subtitle: l10n.directoryEmptySubtitle,
-                    ),
-                  );
-                }
-                return Column(
-                  children: [
-                    for (final user in users.take(30)) ...[
-                      _PenPalCard(user: user),
-                      const SizedBox(height: 12),
-                    ],
-                  ],
-                );
-              },
+            PostalEmptyState(
+              title: l10n.directoryLoadFailed,
+              subtitle: '$e',
+              tone: PostalEmptyTone.error,
             ),
           ],
         ),
+        data: (users) {
+          if (users.isEmpty) {
+            return ListView(
+              children: [
+                PostalEmptyState(
+                  title: l10n.directoryRecommendEmpty,
+                  subtitle: l10n.directoryRecommendEmptyHint,
+                ),
+              ],
+            );
+          }
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            children: [
+              for (final user in users) ...[
+                _PenPalCard(user: user, showRecommendReason: true),
+                const SizedBox(height: 12),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _FindTab extends ConsumerWidget {
+  const _FindTab({required this.onFilter, required this.onRefresh});
+
+  final VoidCallback onFilter;
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final usersAsync = ref.watch(directoryUsersProvider);
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        children: [
+          _DirectoryIntroCard(onFilter: onFilter),
+          const SizedBox(height: 12),
+          usersAsync.when(
+            loading: () => const PostalSkeletonList(
+              itemCount: 4,
+              itemHeight: 176,
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+            ),
+            error: (e, _) => PostalEmptyState(
+              title: l10n.directoryLoadFailed,
+              subtitle: '$e',
+              tone: PostalEmptyTone.error,
+            ),
+            data: (users) {
+              if (users.isEmpty) {
+                return PostalEmptyState(
+                  title: l10n.directoryEmptyTitle,
+                  subtitle: l10n.directoryEmptySubtitle,
+                );
+              }
+              return Column(
+                children: [
+                  for (final user in users.take(30)) ...[
+                    _PenPalCard(user: user),
+                    const SizedBox(height: 12),
+                  ],
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MyPenpalsTab extends ConsumerWidget {
+  const _MyPenpalsTab({required this.onRefresh});
+
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final async = ref.watch(myPenpalsProvider);
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: async.when(
+        loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 88),
+        error: (e, _) => ListView(
+          children: [
+            PostalEmptyState(title: l10n.directoryLoadFailed, subtitle: '$e'),
+          ],
+        ),
+        data: (rows) {
+          if (rows.isEmpty) {
+            return ListView(
+              children: [
+                PostalEmptyState(
+                  title: l10n.directoryPenpalsEmpty,
+                  subtitle: l10n.directoryPenpalsEmptyHint,
+                ),
+              ],
+            );
+          }
+          return ListView.separated(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            itemCount: rows.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            itemBuilder: (_, i) => _MyPenpalRow(item: rows[i]),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _MyPenpalRow extends StatelessWidget {
+  const _MyPenpalRow({required this.item});
+
+  final PenpalListItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return PostalCardEnvelope(
+      child: Row(
+        children: [
+          PostalAvatar(name: item.nickname, imageUrl: item.avatarUrl, size: 48),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.nickname,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(l10n.penpalListMeta(item.penpalDays, item.letterCount)),
+              ],
+            ),
+          ),
+          PostalButton(
+            label: l10n.directoryWriteLetter,
+            variant: PostalButtonVariant.secondary,
+            onPressed: () => context.push(
+              '/compose',
+              extra: ComposeIntent(
+                kind: ComposeKind.penPalMail,
+                peerId: item.peerUserId,
+                peerNickname: item.nickname,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -179,67 +354,22 @@ class _DirectoryIntroCard extends StatelessWidget {
   }
 }
 
-class _DirectorySafetyCard extends StatelessWidget {
-  const _DirectorySafetyCard({required this.title, required this.body});
-
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: PostalTokens.paperCard.withValues(alpha: 0.82),
-        borderRadius: PostalTokens.shapeMd,
-        border: Border.all(color: PostalTokens.perforationLine),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.verified_user_outlined,
-            color: PostalTokens.postboxGreen,
-            size: 28,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: theme.textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text(
-                  body,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: PostalTokens.inkSecondary,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _PenPalCard extends StatelessWidget {
-  const _PenPalCard({required this.user});
+  const _PenPalCard({required this.user, this.showRecommendReason = false});
 
   final AppUser user;
+  final bool showRecommendReason;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final bio = user.bio.trim().isEmpty ? l10n.directoryBioFallback : user.bio;
+    final isPenpal =
+        user.relationDisplayState == RelationDisplayState.penpal ||
+        user.postalFriend;
     return PostalCardEnvelope(
-      accent: user.postalFriend
-          ? PostalTokens.postboxGreen
-          : PostalTokens.stampGold,
+      accent: isPenpal ? PostalTokens.postboxGreen : PostalTokens.stampGold,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -299,6 +429,20 @@ class _PenPalCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
+          if (showRecommendReason &&
+              (user.recommendReason?.trim().isNotEmpty ?? false)) ...[
+            Text(
+              user.recommendReason!.trim(),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: PostalTokens.postboxGreen,
+                fontWeight: FontWeight.w700,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           Text(
             bio,
             maxLines: 3,
@@ -317,6 +461,22 @@ class _PenPalCard extends StatelessWidget {
             variant: PostalButtonVariant.ghost,
             onPressed: () => context.push('/user/${user.id}'),
           ),
+          if (!isPenpal) ...[
+            const SizedBox(height: 8),
+            PostalButton(
+              label: l10n.directoryWriteLetter,
+              icon: Icons.mail_outline,
+              onPressed: () => context.push(
+                '/compose',
+                extra: ComposeIntent(
+                  kind: ComposeKind.penPalMail,
+                  peerId: user.id,
+                  peerNickname: user.nickname,
+                  peerCountryLabel: user.countryName,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -23,4 +23,12 @@ public interface ActionService extends IService<ActionDomain> {
     com.baomidou.mybatisplus.extension.plugins.pagination.Page<cn.nine.pros.post.biz.model.domain.ActionDomain> pageForAdmin(
             cn.nine.commons.data.page.PageQuery pageQuery, Long userId, String actionType);
 
+    /**
+     * 记录行为事件（§14）；details 可为 null。
+     */
+    void recordEvent(long userId, String actionType, String targetType, Long targetId, String detailsJson);
+
+    /** 用户自 since 起是否有任意行为（匹配活跃过滤可选）。 */
+    boolean existsRecentAction(long userId, java.time.LocalDateTime since);
+
 }

@@ -40,6 +40,9 @@ public interface TimeLetterService extends IService<TimeLetterDomain> {
 
     long countSealedToRecipientSince(long senderId, long recipientId, LocalDateTime since);
 
+    /** 用户拥有的非草稿时光信数量。 */
+    long countOwnedNonDraft(long userId);
+
     List<TimeLetterDomain> listPendingForDelivery(int limit);
 
     boolean markDelivered(long letterId, LocalDateTime at);

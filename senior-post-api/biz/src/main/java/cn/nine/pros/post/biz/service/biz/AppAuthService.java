@@ -18,6 +18,7 @@ import cn.nine.pros.post.biz.service.biz.support.LoginRiskEvaluator;
 import cn.nine.pros.post.biz.service.biz.support.OssReadableKeyValidator;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserInterestAssembler;
+import cn.nine.pros.post.biz.service.base.ActionService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.LoginService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
@@ -27,6 +28,7 @@ import cn.nine.pros.post.biz.service.base.UserIdentityService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.base.UserTagService;
 import cn.nine.pros.post.client.common.constant.AuthProvider;
+import cn.nine.pros.post.client.common.constant.BehaviorActionTypes;
 import cn.nine.pros.post.client.common.constant.UserGender;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
@@ -87,6 +89,7 @@ public class AppAuthService {
     private final LoginService loginService;
     private final GeoIpService geoIpService;
     private final EmailVerifyService emailVerifyService;
+    private final ActionService actionService;
 
     /**
      * 邮箱注册：校验年龄/兴趣标签后建用户与邮箱身份，并完成首次登录发 Token。
@@ -511,6 +514,10 @@ public class AppAuthService {
 
     private AppAuthResultVO finishAuth(
             long userId, boolean profileComplete, int riskLevel, boolean requireChallenge) {
+        if (!requireChallenge) {
+            actionService.recordEvent(
+                    userId, BehaviorActionTypes.LOGIN, BehaviorActionTypes.TARGET_USER, userId, null);
+        }
         String token = requireChallenge ? null : appJwtService.createToken(userId);
         UserDTO fresh = userService.findById(userId);
         return AppAuthResultVO.builder()

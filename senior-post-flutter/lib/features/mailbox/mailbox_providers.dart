@@ -21,6 +21,18 @@ final postalInboxLettersProvider = FutureProvider<List<MailboxLetter>>((
   return ref.read(mailboxRemoteRepositoryProvider).listPostalInbox();
 });
 
+final mailboxReceivedProvider = FutureProvider<List<MailboxLetter>>((
+  ref,
+) async {
+  ref.watch(authTokenProvider);
+  return ref.read(mailboxRemoteRepositoryProvider).listReceived();
+});
+
+final mailboxSentProvider = FutureProvider<List<MailboxLetter>>((ref) async {
+  ref.watch(authTokenProvider);
+  return ref.read(mailboxRemoteRepositoryProvider).listSent();
+});
+
 final mailboxFriendsProvider = FutureProvider<List<FriendListRow>>((ref) async {
   ref.watch(authTokenProvider);
   return ref.read(mailboxRemoteRepositoryProvider).listMailboxFriends();

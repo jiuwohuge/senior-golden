@@ -3,12 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
+import '../../app/router/shop_routes.dart';
+import '../../app/theme/postal_tokens.dart';
 import '../../core/auth/auth_token.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../auth/login_routes.dart';
+import '../relation/relation_remote.dart';
+import '../shell/main_shell.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -33,6 +37,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final l10n = AppLocalizations.of(context)!;
     final session = ref.watch(appSessionProvider);
     final user = session.user;
+    final overviewAsync = ref.watch(profileOverviewProvider);
     return SafeArea(
       top: false,
       child: ListView(
@@ -79,10 +84,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 const SizedBox(height: 10),
                 Text(user.bio, textAlign: TextAlign.center),
+                const SizedBox(height: 16),
+                overviewAsync.when(
+                  loading: () => const PostalSkeletonList(
+                    itemCount: 1,
+                    itemHeight: 56,
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                  ),
+                  error: (_, _) => const SizedBox.shrink(),
+                  data: (overview) =>
+                      _ProfileOverviewRow(overview: overview, l10n: l10n),
+                ),
               ],
             ),
           ),
           const SizedBox(height: 12),
+          _ProfileSectionTitle(title: l10n.profileSectionMyContent),
           PostalCardEnvelope(
             child: Column(
               children: [
@@ -98,9 +116,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 const Divider(height: 1),
                 _ProfileItem(
+                  icon: Icons.schedule_send_outlined,
+                  title: l10n.profileTimeLetterDrafts,
+                  onTap: () => context.go(MainShellRoute.pathMailbox),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ProfileSectionTitle(title: l10n.profileSectionShop),
+          PostalCardEnvelope(
+            child: _ProfileItem(
+              icon: Icons.storefront_outlined,
+              title: l10n.shopTitleStampsVip,
+              onTap: () => context.push(ShopRoutes.path),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ProfileSectionTitle(title: l10n.profileSectionPrivacy),
+          PostalCardEnvelope(
+            child: Column(
+              children: [
+                _ProfileItem(
                   icon: Icons.block_outlined,
                   title: l10n.profileBlacklist,
                   onTap: () => context.push('/profile/blocks'),
+                ),
+                const Divider(height: 1),
+                _ProfileItem(
+                  icon: Icons.visibility_off_outlined,
+                  title: l10n.profilePrivacyRecommendPlaceholder,
+                  onTap: () {},
+                ),
+                _ProfileItem(
+                  icon: Icons.mail_lock_outlined,
+                  title: l10n.profilePrivacyStrangerPlaceholder,
+                  onTap: () {},
                 ),
                 const Divider(height: 1),
                 _ProfileItem(
@@ -139,6 +190,79 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               }
             },
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileSectionTitle extends StatelessWidget {
+  const _ProfileSectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: PostalTokens.inkSecondary,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileOverviewRow extends StatelessWidget {
+  const _ProfileOverviewRow({required this.overview, required this.l10n});
+
+  final ProfileOverview overview;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    Widget cell(String label, int value) {
+      return Expanded(
+        child: Column(
+          children: [
+            Text(
+              '$value',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: PostalTokens.postboxGreen,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: PostalTokens.inkSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: BoxDecoration(
+        color: PostalTokens.paperCard.withValues(alpha: 0.72),
+        borderRadius: PostalTokens.shapeMd,
+        border: Border.all(color: PostalTokens.perforationLine),
+      ),
+      child: Row(
+        children: [
+          cell(l10n.profileOverviewPenpals, overview.penpalCount),
+          cell(l10n.profileOverviewLetters, overview.letterCount),
+          cell(l10n.profileOverviewTimeLetters, overview.timeLetterCount),
         ],
       ),
     );

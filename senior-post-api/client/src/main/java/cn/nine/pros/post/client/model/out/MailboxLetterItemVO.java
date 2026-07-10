@@ -47,4 +47,13 @@ public class MailboxLetterItemVO {
 
     @Schema(description = "收件人视角：运输中平邮正文是否隐藏（提前拆信后为 false）")
     private Boolean contentHidden;
+
+    @Schema(description = "与对端关系展示态，整型同 RelationDisplayState")
+    private Integer relationDisplayState;
+
+    @Schema(description = "是否可添加笔友")
+    private Boolean canAddPenpal;
+
+    @Schema(description = "收件人是否已读")
+    private Boolean recipientRead;
 }

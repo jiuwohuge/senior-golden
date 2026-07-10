@@ -118,6 +118,31 @@ public class FriendshipServiceImpl implements FriendshipService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public FriendshipDomain createPenpalFromRequest(
+            long actorUserId, long requesterId, long targetId, Long sourceLetterId) {
+        long low = Math.min(requesterId, targetId);
+        long high = Math.max(requesterId, targetId);
+        FriendshipDomain existing = friendshipMapper.selectOne(new LambdaQueryWrapper<FriendshipDomain>()
+                .eq(FriendshipDomain::getUserLow, low)
+                .eq(FriendshipDomain::getUserHigh, high)
+                .eq(FriendshipDomain::isDelFlag, false));
+        if (existing != null) {
+            return ensureExistingFriendshipActive(existing, actorUserId, sourceLetterId, low, high);
+        }
+        FriendshipDomain f = new FriendshipDomain();
+        f.initAudit(actorUserId);
+        f.setUserLow(low);
+        f.setUserHigh(high);
+        f.setStatus(1);
+        f.setSourceLetterId(sourceLetterId);
+        f.setDelFlag(false);
+        friendshipMapper.insert(f);
+        tencentImFriendshipNotifier.afterFriendshipActive(low, high);
+        return f;
+    }
+
     private static int statusToInt(Object status) {
         if (status instanceof Number n) {
             return n.intValue();

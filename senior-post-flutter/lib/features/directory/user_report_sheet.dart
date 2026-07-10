@@ -30,7 +30,11 @@ class _UserReportSheetState extends ConsumerState<UserReportSheet> {
     final l10n = AppLocalizations.of(context)!;
     final text = _reason.text.trim();
     if (text.isEmpty) {
-      PostalSnack.show(context, l10n.reportReasonRequired, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.reportReasonRequired,
+        tone: PostalSnackTone.warning,
+      );
       return;
     }
     setState(() => _busy = true);
@@ -39,16 +43,19 @@ class _UserReportSheetState extends ConsumerState<UserReportSheet> {
       if (id == null) {
         throw ApiBusinessException(0, l10n.errorInvalidContentId);
       }
-      await ref.read(socialRemoteProvider).submitReport(
-            targetType: 'user',
-            targetId: id,
-            reason: text,
-          );
+      await ref
+          .read(socialRemoteProvider)
+          .submitReport(targetType: 'user', targetId: id, reason: text);
       if (!mounted) return;
-      PostalSnack.show(context, l10n.reportSubmitted, tone: PostalSnackTone.success);
+      PostalSnack.show(
+        context,
+        l10n.reportSubmitted,
+        tone: PostalSnackTone.success,
+      );
       Navigator.of(context).pop();
     } on ApiBusinessException catch (e) {
-      if (mounted) PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      if (mounted)
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

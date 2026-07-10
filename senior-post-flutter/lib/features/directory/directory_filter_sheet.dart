@@ -17,18 +17,26 @@ class DirectoryFilterTagOption {
 }
 
 final directoryFilterTagOptionsProvider =
-    FutureProvider.family<List<DirectoryFilterTagOption>, String>((ref, lang) async {
-  final options = await ref.read(directoryRemoteProvider).listInterestTagOptions(lang: lang);
-  return options
-      .map((o) => DirectoryFilterTagOption(value: o.tagName, label: o.tagName))
-      .toList();
-});
+    FutureProvider.family<List<DirectoryFilterTagOption>, String>((
+      ref,
+      lang,
+    ) async {
+      final options = await ref
+          .read(directoryRemoteProvider)
+          .listInterestTagOptions(lang: lang);
+      return options
+          .map(
+            (o) => DirectoryFilterTagOption(value: o.tagName, label: o.tagName),
+          )
+          .toList();
+    });
 
 class DirectoryFilterSheet extends ConsumerStatefulWidget {
   const DirectoryFilterSheet({super.key});
 
   @override
-  ConsumerState<DirectoryFilterSheet> createState() => _DirectoryFilterSheetState();
+  ConsumerState<DirectoryFilterSheet> createState() =>
+      _DirectoryFilterSheetState();
 }
 
 class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
@@ -67,7 +75,9 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
           const SizedBox(height: 4),
           Text(
             hint,
-            style: theme.textTheme.bodySmall?.copyWith(color: PostalTokens.inkSecondary),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: PostalTokens.inkSecondary,
+            ),
           ),
         ],
         const SizedBox(height: 8),
@@ -126,7 +136,8 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
 
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final sheetColor =
-        Theme.of(context).bottomSheetTheme.backgroundColor ?? PostalTokens.paperEnvelope;
+        Theme.of(context).bottomSheetTheme.backgroundColor ??
+        PostalTokens.paperEnvelope;
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
@@ -153,17 +164,21 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                             subtitle: l10n.directoryFilterSectionSubtitle,
                           ),
                           const SizedBox(height: 8),
-                          Text(l10n.directoryFilterSort, style: Theme.of(context).textTheme.titleSmall),
+                          Text(
+                            l10n.directoryFilterSort,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
                           const SizedBox(height: 8),
                           // ChoiceChip 选中：secondary 底与字同为邮筒绿时不可读，局部改为白字。
                           Theme(
                             data: Theme.of(context).copyWith(
                               chipTheme: ChipTheme.of(context).copyWith(
-                                secondaryLabelStyle:
-                                    ChipTheme.of(context).secondaryLabelStyle?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                secondaryLabelStyle: ChipTheme.of(context)
+                                    .secondaryLabelStyle
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                 checkmarkColor: Colors.white,
                               ),
                             ),
@@ -174,17 +189,22 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                                 ChoiceChip(
                                   label: Text(l10n.directoryFilterNewest),
                                   selected: _sort == 'DEFAULT',
-                                  onSelected: (_) => setState(() => _sort = 'DEFAULT'),
+                                  onSelected: (_) =>
+                                      setState(() => _sort = 'DEFAULT'),
                                 ),
                                 ChoiceChip(
                                   label: Text(l10n.directoryFilterClosestAge),
                                   selected: _sort == 'SAME_AGE',
-                                  onSelected: (_) => setState(() => _sort = 'SAME_AGE'),
+                                  onSelected: (_) =>
+                                      setState(() => _sort = 'SAME_AGE'),
                                 ),
                                 ChoiceChip(
-                                  label: Text(l10n.directoryFilterSharedInterests),
+                                  label: Text(
+                                    l10n.directoryFilterSharedInterests,
+                                  ),
                                   selected: _sort == 'SHARED_INTEREST',
-                                  onSelected: (_) => setState(() => _sort = 'SHARED_INTEREST'),
+                                  onSelected: (_) =>
+                                      setState(() => _sort = 'SHARED_INTEREST'),
                                 ),
                               ],
                             ),
@@ -194,7 +214,9 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                             // ignore: deprecated_member_use
                             value: _countryCode,
                             isExpanded: true,
-                            decoration: InputDecoration(labelText: l10n.directoryFilterCountryLabel),
+                            decoration: InputDecoration(
+                              labelText: l10n.directoryFilterCountryLabel,
+                            ),
                             items: [
                               DropdownMenuItem<String?>(
                                 value: null,
@@ -203,7 +225,9 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                               ...bootstrap.countries.map(
                                 (c) => DropdownMenuItem<String?>(
                                   value: c.code,
-                                  child: Text('${c.displayName(lang)} (${c.code})'),
+                                  child: Text(
+                                    '${c.displayName(lang)} (${c.code})',
+                                  ),
                                 ),
                               ),
                             ],
@@ -217,7 +241,8 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                             value: _minAge.toDouble(),
                             divisions: 45,
                             label: '$_minAge',
-                            onChanged: (v) => setState(() => _minAge = v.round()),
+                            onChanged: (v) =>
+                                setState(() => _minAge = v.round()),
                           ),
                           const SizedBox(height: 8),
                           Text(l10n.directoryFilterMaxAge('$_maxAge')),
@@ -227,7 +252,8 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                             value: _maxAge.toDouble(),
                             divisions: 55,
                             label: '$_maxAge',
-                            onChanged: (v) => setState(() => _maxAge = v.round()),
+                            onChanged: (v) =>
+                                setState(() => _maxAge = v.round()),
                           ),
                           const SizedBox(height: 8),
                           _filterFieldGroup(
@@ -241,7 +267,8 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                                 FilterChip(
                                   label: Text(l10n.directoryFilterGenderAll),
                                   selected: _genders.isEmpty,
-                                  onSelected: (_) => setState(() => _genders.clear()),
+                                  onSelected: (_) =>
+                                      setState(() => _genders.clear()),
                                 ),
                                 FilterChip(
                                   label: Text(l10n.authGenderMale),
@@ -271,7 +298,9 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                           const SizedBox(height: 20),
                           Divider(
                             height: 1,
-                            color: PostalTokens.perforationLine.withValues(alpha: 0.75),
+                            color: PostalTokens.perforationLine.withValues(
+                              alpha: 0.75,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           _filterFieldGroup(
@@ -281,7 +310,8 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                             child: tagOptions.isEmpty
                                 ? Text(
                                     l10n.directoryFilterInterestsEmpty,
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
                                           color: PostalTokens.inkSecondary,
                                         ),
                                   )
@@ -303,7 +333,9 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                         decoration: BoxDecoration(
                           border: Border(
                             top: BorderSide(
-                              color: PostalTokens.perforationLine.withValues(alpha: 0.95),
+                              color: PostalTokens.perforationLine.withValues(
+                                alpha: 0.95,
+                              ),
                             ),
                           ),
                         ),
@@ -316,16 +348,22 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                               PostalButton(
                                 label: l10n.directoryFilterApply,
                                 onPressed: () {
-                                  final min = _minAge <= _maxAge ? _minAge : _maxAge;
-                                  final max = _maxAge >= _minAge ? _maxAge : _minAge;
-                                  ref.read(directoryFilterProvider.notifier).state = DirectoryFilter(
-                                        countryCode: _countryCode,
-                                        minAge: min,
-                                        maxAge: max,
-                                        interests: _interests,
-                                        genders: _genders,
-                                        sort: _sort,
-                                      );
+                                  final min = _minAge <= _maxAge
+                                      ? _minAge
+                                      : _maxAge;
+                                  final max = _maxAge >= _minAge
+                                      ? _maxAge
+                                      : _minAge;
+                                  ref
+                                      .read(directoryFilterProvider.notifier)
+                                      .state = DirectoryFilter(
+                                    countryCode: _countryCode,
+                                    minAge: min,
+                                    maxAge: max,
+                                    interests: _interests,
+                                    genders: _genders,
+                                    sort: _sort,
+                                  );
                                   ref.invalidate(directoryUsersProvider);
                                   Navigator.of(context).pop();
                                 },
@@ -335,7 +373,11 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
                                 label: l10n.directoryFilterClear,
                                 variant: PostalButtonVariant.secondary,
                                 onPressed: () {
-                                  ref.read(directoryFilterProvider.notifier).state =
+                                  ref
+                                          .read(
+                                            directoryFilterProvider.notifier,
+                                          )
+                                          .state =
                                       const DirectoryFilter();
                                   ref.invalidate(directoryUsersProvider);
                                   Navigator.of(context).pop();

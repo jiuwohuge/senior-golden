@@ -73,4 +73,24 @@ public class ActionServiceImpl extends ServiceImpl<ActionMapper, ActionDomain>
         return page(PageQueryNormalize.mpPage(pageQuery, PageQueryNormalize.ADMIN_MAX_SIZE), qw);
     }
 
+    @Override
+    public void recordEvent(long userId, String actionType, String targetType, Long targetId, String detailsJson) {
+        ActionDomain domain = new ActionDomain();
+        domain.setUserId(userId);
+        domain.setActionType(actionType);
+        domain.setTargetType(targetType);
+        domain.setTargetId(targetId);
+        domain.setDetails(detailsJson);
+        domain.initAudit(userId);
+        save(domain);
+    }
+
+    @Override
+    public boolean existsRecentAction(long userId, LocalDateTime since) {
+        return count(new LambdaQueryWrapper<ActionDomain>()
+                .eq(ActionDomain::isDelFlag, false)
+                .eq(ActionDomain::getUserId, userId)
+                .ge(ActionDomain::getCreatedAt, since)) > 0;
+    }
+
 }

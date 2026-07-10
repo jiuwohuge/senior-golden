@@ -37,7 +37,15 @@ public interface AppMailboxApi {
     @GetMapping("/archive")
     List<MailboxLetterItemVO> listArchive();
 
-    @Operation(summary = "收件方建立建联（好友），并触发腾讯 IM 同步占位")
+    @Operation(summary = "收到的信流水（§12.4）")
+    @GetMapping("/received")
+    List<MailboxLetterItemVO> listReceived();
+
+    @Operation(summary = "发出的信流水（§12.4）")
+    @GetMapping("/sent")
+    List<MailboxLetterItemVO> listSent();
+
+    @Operation(summary = "发起笔友申请（兼容旧 accept-postal 路径）")
     @PostMapping("/letters/{letterId}/accept-postal")
     AcceptPostalContactResultVO acceptPostalContact(@PathVariable("letterId") Long letterId);
 

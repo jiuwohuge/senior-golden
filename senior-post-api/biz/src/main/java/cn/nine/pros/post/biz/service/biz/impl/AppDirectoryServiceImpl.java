@@ -5,24 +5,35 @@ import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.controller.app.AppPageHelper;
 import cn.nine.pros.post.biz.i18n.AppMessages;
+import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
 import cn.nine.pros.post.biz.model.domain.TagDomain;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.biz.AppBlacklistService;
 import cn.nine.pros.post.biz.service.biz.AppDirectoryService;
+import cn.nine.pros.post.biz.service.biz.AppRecommendBizService;
+import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserInterestAssembler;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
+import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.TagService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.input.app.AppDirectoryPageInDto;
 import cn.nine.pros.post.client.model.out.DirectoryUserItemVO;
 import cn.nine.pros.post.client.model.out.InterestTagOptionVO;
+import cn.nine.pros.post.client.model.out.PenpalListItemVO;
+import cn.nine.pros.post.client.model.out.RelationSnapshotVO;
+import cn.nine.pros.post.client.common.enums.RelationDisplayState;
+import cn.nine.pros.post.client.model.db.UserDTO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,6 +50,9 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
     private final UserInterestAssembler userInterestAssembler;
     private final AppBlacklistService appBlacklistService;
     private final FriendshipService friendshipService;
+    private final LetterService letterService;
+    private final AppRelationBizService appRelationBizService;
+    private final AppRecommendBizService appRecommendBizService;
     private final AppMessages appMessages;
 
     @Override
@@ -93,6 +107,48 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
         return List.of();
     }
 
+    @Override
+    public List<DirectoryUserItemVO> listTodayRecommendations(long viewerUserId) {
+        return appRecommendBizService.listTodayRecommendations(viewerUserId);
+    }
+
+    @Override
+    public List<PenpalListItemVO> listPenpals(long viewerUserId) {
+        List<FriendshipDomain> rows = friendshipService.listActiveFriendshipsForUser(viewerUserId);
+        List<PenpalListItemVO> out = new ArrayList<>();
+        for (FriendshipDomain f : rows) {
+            long low = f.getUserLow() != null ? f.getUserLow() : 0L;
+            long high = f.getUserHigh() != null ? f.getUserHigh() : 0L;
+            long peerId = low == viewerUserId ? high : low;
+            if (peerId <= 0) {
+                continue;
+            }
+            UserDTO peer = userService.findById(peerId);
+            if (peer == null) {
+                continue;
+            }
+            String avatar = UserAvatarAuditSupport.publicStoredRef(peer);
+            if (StringUtils.hasText(avatar)) {
+                avatar = ossDisplayUrlService.signAvatarForViewer(viewerUserId, avatar.trim());
+            }
+            LocalDateTime since = f.getUpdatedAt() != null ? f.getUpdatedAt() : f.getCreatedAt();
+            int penpalDays = since != null
+                    ? (int) ChronoUnit.DAYS.between(since.toLocalDate(), LocalDate.now())
+                    : 0;
+            int letterCount = (int) letterService.countExchangeBetween(viewerUserId, peerId);
+            out.add(PenpalListItemVO.builder()
+                    .peerUserId(peerId)
+                    .nickname(peer.getNickname())
+                    .avatarUrl(avatar)
+                    .countryCode(peer.getCountryCode())
+                    .letterCount(letterCount)
+                    .penpalDays(Math.max(0, penpalDays))
+                    .penpalSince(since)
+                    .build());
+        }
+        return out;
+    }
+
     private List<InterestTagOptionVO> loadTagOptionsForLang(String lang) {
         return tagService.listActiveByLang(lang).stream()
                 .filter(t -> t.getId() != null && StringUtils.hasText(t.getTagName()))
@@ -121,6 +177,13 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
         }
         UserInterestAssembler.Payload interests = userInterestAssembler.loadForUser(u.getId());
         boolean postalFriend = u.getId() != null && friendshipService.areActiveFriends(viewerUserId, u.getId());
+        RelationSnapshotVO relation = u.getId() != null
+                ? appRelationBizService.resolveRelationSnapshot(viewerUserId, u.getId())
+                : null;
+        Integer displayState = relation != null
+                ? relation.getDisplayState()
+                : (postalFriend ? RelationDisplayState.PENPAL.getCode() : RelationDisplayState.STRANGER.getCode());
+        Integer letterCount = relation != null ? relation.getLetterCount() : 0;
         return DirectoryUserItemVO.builder()
                 .id(u.getId())
                 .nickname(u.getNickname())
@@ -131,6 +194,8 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
                 .avatarUrl(av)
                 .isVip(Boolean.TRUE.equals(u.getIsVip()))
                 .postalFriend(postalFriend)
+                .relationDisplayState(displayState)
+                .letterCount(letterCount)
                 .interestTagIds(interests.ids())
                 .interestTagNames(interests.names())
                 .build();
