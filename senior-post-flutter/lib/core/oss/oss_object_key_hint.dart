@@ -32,7 +32,9 @@ String? _pathFromHttpUrl(String raw) {
 }
 
 RegExp _objectKeyPattern() {
-  final p = RegExp.escape(AppEnv.ossKeyPrefix.replaceAll(RegExp(r'^/+|/+$'), ''));
+  final p = RegExp.escape(
+    AppEnv.ossKeyPrefix.replaceAll(RegExp(r'^/+|/+$'), ''),
+  );
   return RegExp(
     '^$p/(postcard|avatar|letter)/\\d+/[^/]+\\.(jpg|jpeg|png|webp|gif)\$',
     caseSensitive: false,

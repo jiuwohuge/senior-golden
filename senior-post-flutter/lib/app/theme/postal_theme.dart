@@ -131,9 +131,7 @@ abstract final class PostalTheme {
             RoundedRectangleBorder(borderRadius: PostalTokens.shapeMd),
           ),
           textStyle: WidgetStatePropertyAll(
-            textTheme.labelLarge?.copyWith(
-              color: PostalTokens.postboxGreen,
-            ),
+            textTheme.labelLarge?.copyWith(color: PostalTokens.postboxGreen),
           ),
           side: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.disabled)) {
@@ -255,7 +253,9 @@ abstract final class PostalTheme {
         trackHeight: 5,
         activeTrackColor: PostalTokens.postboxGreen,
         inactiveTrackColor: PostalTokens.perforationLine,
-        secondaryActiveTrackColor: PostalTokens.postboxGreen.withValues(alpha: 0.55),
+        secondaryActiveTrackColor: PostalTokens.postboxGreen.withValues(
+          alpha: 0.55,
+        ),
         thumbColor: PostalTokens.postboxGreen,
         overlayColor: PostalTokens.postboxGreen.withValues(alpha: 0.14),
         valueIndicatorColor: PostalTokens.postboxGreen,
@@ -304,8 +304,7 @@ abstract final class PostalTheme {
       enabledBorder: makeBorder(PostalTokens.perforationLine),
       focusedBorder: makeBorder(PostalTokens.postboxGreen, width: 1.6),
       errorBorder: makeBorder(PostalTokens.stampVermilion),
-      focusedErrorBorder:
-          makeBorder(PostalTokens.stampVermilion, width: 1.6),
+      focusedErrorBorder: makeBorder(PostalTokens.stampVermilion, width: 1.6),
       disabledBorder: makeBorder(
         PostalTokens.perforationLine.withValues(alpha: 0.4),
       ),
@@ -325,8 +324,9 @@ abstract final class PostalTheme {
       bool display = false,
     }) {
       return TextStyle(
-        fontFamily:
-            display ? PostalTokens.fontFamilyDisplay : PostalTokens.fontFamilyBody,
+        fontFamily: display
+            ? PostalTokens.fontFamilyDisplay
+            : PostalTokens.fontFamilyBody,
         fontFamilyFallback: display
             ? PostalTokens.fontFamilyDisplayFallback
             : PostalTokens.fontFamilyBodyFallback,
@@ -372,27 +372,15 @@ abstract final class PostalTheme {
         weight: FontWeight.w700,
         display: true,
       ),
-      titleLarge: make(
-        size: 22,
-        height: 1.3,
-        weight: FontWeight.w700,
-      ),
-      titleMedium: make(
-        size: 19,
-        height: 1.35,
-        weight: FontWeight.w600,
-      ),
+      titleLarge: make(size: 22, height: 1.3, weight: FontWeight.w700),
+      titleMedium: make(size: 19, height: 1.35, weight: FontWeight.w600),
       titleSmall: make(
         size: 17,
         height: 1.35,
         weight: FontWeight.w600,
         color: PostalTokens.inkSecondary,
       ),
-      bodyLarge: make(
-        size: 18,
-        height: 1.5,
-        weight: FontWeight.w500,
-      ),
+      bodyLarge: make(size: 18, height: 1.5, weight: FontWeight.w500),
       bodyMedium: make(
         size: PostalTokens.minBodyFontSize,
         height: 1.5,

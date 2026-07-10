@@ -362,17 +362,13 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
     return PostalCardEnvelope(
       child: Column(
         children: [
-          Icon(
-            Icons.task_alt_rounded,
-            size: 56,
-            color: cs.primary,
-          ),
+          Icon(Icons.task_alt_rounded, size: 56, color: cs.primary),
           const SizedBox(height: 12),
           Text(
             l10n.authForgotDoneTitle,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 10),
@@ -389,10 +385,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(999),
               gradient: LinearGradient(
-                colors: [
-                  cs.primary,
-                  cs.primary.withValues(alpha: 0.82),
-                ],
+                colors: [cs.primary, cs.primary.withValues(alpha: 0.82)],
               ),
               boxShadow: [
                 BoxShadow(

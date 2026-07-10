@@ -39,11 +39,7 @@ class PostalBrandHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          width: 56,
-          height: 1.4,
-          color: PostalTokens.stampVermilion,
-        ),
+        Container(width: 56, height: 1.4, color: PostalTokens.stampVermilion),
         const SizedBox(height: 14),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),

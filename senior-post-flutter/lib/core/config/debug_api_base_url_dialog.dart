@@ -8,7 +8,10 @@ import 'api_base_url_provider.dart';
 import '../../widgets/postal/postal_snack.dart';
 
 /// Debug：配置 API Base URL（登录页长按「查看功能引导」唤起）。
-Future<void> showDebugApiBaseUrlDialog(BuildContext context, WidgetRef ref) async {
+Future<void> showDebugApiBaseUrlDialog(
+  BuildContext context,
+  WidgetRef ref,
+) async {
   if (!kDebugMode) {
     return;
   }
@@ -38,9 +41,7 @@ Future<void> showDebugApiBaseUrlDialog(BuildContext context, WidgetRef ref) asyn
     return;
   }
 
-  final message = result.restored
-      ? '已恢复默认：${result.url}'
-      : '已保存：${result.url}';
+  final message = result.restored ? '已恢复默认：${result.url}' : '已保存：${result.url}';
   SchedulerBinding.instance.addPostFrameCallback((_) {
     if (!context.mounted) {
       return;

@@ -1,6 +1,10 @@
 /// 与后端 `InterestTagOptionVO` 对齐。
 class InterestTagOption {
-  const InterestTagOption({required this.id, required this.tagName, this.langCode});
+  const InterestTagOption({
+    required this.id,
+    required this.tagName,
+    this.langCode,
+  });
 
   final int id;
   final String tagName;

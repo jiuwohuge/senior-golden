@@ -9,28 +9,28 @@ final timeLetterStatsProvider = FutureProvider<TimeLetterStats>((ref) async {
 
 final timeLetterOutboxProvider =
     FutureProvider.autoDispose<List<TimeLetterItem>>((ref) async {
-  return ref.read(timeLetterRemoteProvider).listOutbox();
-});
+      return ref.read(timeLetterRemoteProvider).listOutbox();
+    });
 
 final timeLetterInboxProvider =
     FutureProvider.autoDispose<List<TimeLetterItem>>((ref) async {
-  return ref.read(timeLetterRemoteProvider).listInbox();
-});
+      return ref.read(timeLetterRemoteProvider).listInbox();
+    });
 
 final timeLetterMemorialProvider =
     FutureProvider.autoDispose<List<TimeLetterItem>>((ref) async {
-  return ref.read(timeLetterRemoteProvider).listMemorial();
-});
+      return ref.read(timeLetterRemoteProvider).listMemorial();
+    });
 
 final timeLetterRecentRecipientsProvider =
     FutureProvider.autoDispose<List<TimeLetterRecentRecipient>>((ref) async {
-  return ref.read(timeLetterRemoteProvider).recentRecipients();
-});
+      return ref.read(timeLetterRemoteProvider).recentRecipients();
+    });
 
-final timeLetterDetailProvider =
-    FutureProvider.autoDispose.family<TimeLetterDetail, String>((ref, id) async {
-  return ref.read(timeLetterRemoteProvider).getDetail(id);
-});
+final timeLetterDetailProvider = FutureProvider.autoDispose
+    .family<TimeLetterDetail, String>((ref, id) async {
+      return ref.read(timeLetterRemoteProvider).getDetail(id);
+    });
 
 void invalidateTimeLetterLists(WidgetRef ref) {
   ref.invalidate(timeLetterStatsProvider);
@@ -39,7 +39,10 @@ void invalidateTimeLetterLists(WidgetRef ref) {
   ref.invalidate(timeLetterMemorialProvider);
 }
 
-Future<void> refreshSessionStampsAfterSeal(WidgetRef ref, int? balanceAfter) async {
+Future<void> refreshSessionStampsAfterSeal(
+  WidgetRef ref,
+  int? balanceAfter,
+) async {
   if (balanceAfter != null) {
     await ref.read(authRepositoryProvider).refreshSessionFromServer();
   } else {

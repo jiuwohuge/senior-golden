@@ -7,6 +7,7 @@ import '../../app/router/app_navigator_key.dart';
 import '../../core/auth/auth_token.dart';
 import '../../core/network/api_version.dart';
 import '../../core/network/dio_provider.dart';
+
 class AppReleaseNote {
   const AppReleaseNote({
     required this.id,
@@ -75,7 +76,10 @@ class _ReleaseNoteLayerState extends ConsumerState<ReleaseNoteLayer> {
       }
     });
 
-    ref.listen<AsyncValue<AppReleaseNote?>>(releaseNoteFetchProvider, (prev, next) {
+    ref.listen<AsyncValue<AppReleaseNote?>>(releaseNoteFetchProvider, (
+      prev,
+      next,
+    ) {
       next.whenData((note) {
         if (note == null || !mounted) {
           return;

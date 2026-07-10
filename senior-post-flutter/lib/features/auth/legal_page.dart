@@ -44,7 +44,9 @@ class LegalPage extends StatelessWidget {
                 ),
                 child: Text(
                   content,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.65),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(height: 1.65),
                 ),
               ),
             ],

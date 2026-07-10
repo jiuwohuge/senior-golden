@@ -12,7 +12,8 @@ class OssPutSignResult {
     return OssPutSignResult(
       putUrl: (json['putUrl'] as String?) ?? '',
       objectKey: (json['objectKey'] as String?) ?? '',
-      contentType: (json['contentType'] as String?) ?? 'application/octet-stream',
+      contentType:
+          (json['contentType'] as String?) ?? 'application/octet-stream',
       expireAtEpochMillis: (json['expireAtEpochMillis'] as num?)?.toInt() ?? 0,
       readUrl: json['readUrl'] as String?,
     );

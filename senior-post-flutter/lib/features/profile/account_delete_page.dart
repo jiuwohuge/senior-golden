@@ -38,7 +38,9 @@ class AccountDeletePage extends ConsumerWidget {
               variant: PostalButtonVariant.danger,
               onPressed: () async {
                 try {
-                  await ref.read(authRepositoryProvider).requestAccountDeletion();
+                  await ref
+                      .read(authRepositoryProvider)
+                      .requestAccountDeletion();
                   if (!context.mounted) return;
                   PostalSnack.show(
                     context,

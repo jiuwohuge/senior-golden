@@ -350,10 +350,7 @@ class AuthRepository {
     }
     _ref.read(invalidateAuthDataProvider)();
     final complete = data['profileComplete'] as bool? ?? true;
-    return AuthSignInResult(
-      profileComplete: complete,
-      riskLevel: riskLevel,
-    );
+    return AuthSignInResult(profileComplete: complete, riskLevel: riskLevel);
   }
 
   Future<String> _ensureDeviceUuid() async {

@@ -5,8 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 const _kLocalePref = 'app_locale_override';
 
 /// `null`：跟随系统（由 [SeniorPostApp] 的 resolution 决定）；非 null：强制界面语言。
-final appLocaleProvider =
-    StateNotifierProvider<AppLocaleNotifier, Locale?>((ref) {
+final appLocaleProvider = StateNotifierProvider<AppLocaleNotifier, Locale?>((
+  ref,
+) {
   return AppLocaleNotifier();
 });
 

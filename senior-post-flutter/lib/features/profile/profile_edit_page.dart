@@ -36,6 +36,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   bool _loadingMe = false;
   bool _saving = false;
   bool _avatarBusy = false;
+
   /// Cropped avatar bytes until user confirms upload.
   Uint8List? _avatarPendingBytes;
 
@@ -100,7 +101,11 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       );
     } on PlatformException catch (e) {
       if (mounted) {
-        PostalSnack.show(context, e.message ?? e.code, tone: PostalSnackTone.error);
+        PostalSnack.show(
+          context,
+          e.message ?? e.code,
+          tone: PostalSnackTone.error,
+        );
       }
       return;
     }
@@ -108,9 +113,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     final raw = await x.readAsBytes();
     if (!mounted) return;
     final cropped = await Navigator.of(context).push<Uint8List>(
-      MaterialPageRoute(
-        builder: (_) => AvatarCropPage(imageBytes: raw),
-      ),
+      MaterialPageRoute(builder: (_) => AvatarCropPage(imageBytes: raw)),
     );
     if (cropped == null || !mounted) return;
     setState(() => _avatarPendingBytes = cropped);
@@ -127,12 +130,16 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
 
     setState(() => _avatarBusy = true);
     try {
-      final key = await ref.read(ossUploadServiceProvider).uploadAvatarImage(
+      final key = await ref
+          .read(ossUploadServiceProvider)
+          .uploadAvatarImage(
             bytes: pending,
             ext: 'jpg',
             contentType: 'image/jpeg',
           );
-      await ref.read(authRepositoryProvider).updateProfileOnServer(
+      await ref
+          .read(authRepositoryProvider)
+          .updateProfileOnServer(
             nickname: _nickname.text.trim(),
             countryCode: _countryCode,
             bio: _bio.text,
@@ -156,7 +163,11 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       }
     } catch (_) {
       if (mounted) {
-        PostalSnack.show(context, l10n.profileAvatarUploadFailed, tone: PostalSnackTone.error);
+        PostalSnack.show(
+          context,
+          l10n.profileAvatarUploadFailed,
+          tone: PostalSnackTone.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _avatarBusy = false);
@@ -279,7 +290,8 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   title: l10n.authBootstrapLoadFailed,
                   subtitle: bootstrapDebugErrorHint(err),
                   actionLabel: l10n.authRetry,
-                  onAction: () => ref.invalidate(appBootstrapProvider(locale.languageCode)),
+                  onAction: () =>
+                      ref.invalidate(appBootstrapProvider(locale.languageCode)),
                   tone: PostalEmptyTone.error,
                 ),
                 data: (bootstrap) => ListView(
@@ -302,7 +314,8 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: PostalTokens.postboxGreen.withValues(alpha: 0.35),
+                                      color: PostalTokens.postboxGreen
+                                          .withValues(alpha: 0.35),
                                       width: 1.2,
                                     ),
                                   ),
@@ -371,13 +384,19 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.check_circle_outline,
-                                    color: PostalTokens.postboxGreen, size: 22),
+                                Icon(
+                                  Icons.check_circle_outline,
+                                  color: PostalTokens.postboxGreen,
+                                  size: 22,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     l10n.profileAvatarPreviewHint,
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
                                           color: PostalTokens.inkSecondary,
                                           height: 1.45,
                                         ),
@@ -390,24 +409,33 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                               label: l10n.profileAvatarConfirmUpload,
                               icon: Icons.cloud_upload_outlined,
                               busy: _avatarBusy,
-                              onPressed: _avatarBusy ? null : _confirmAvatarUpload,
+                              onPressed: _avatarBusy
+                                  ? null
+                                  : _confirmAvatarUpload,
                             ),
                             const SizedBox(height: 10),
                             PostalButton(
                               label: l10n.profileAvatarDiscardUpload,
                               variant: PostalButtonVariant.ghost,
                               busy: false,
-                              onPressed:
-                                  _avatarBusy ? null : _discardPendingAvatar,
+                              onPressed: _avatarBusy
+                                  ? null
+                                  : _discardPendingAvatar,
                             ),
                           ],
                         ),
                       ),
                     ],
                     const SizedBox(height: 20),
-                    PostalTextField(controller: _nickname, label: l10n.profileNickname),
+                    PostalTextField(
+                      controller: _nickname,
+                      label: l10n.profileNickname,
+                    ),
                     const SizedBox(height: 12),
-                    Text(l10n.authGenderLabel, style: Theme.of(context).textTheme.titleSmall),
+                    Text(
+                      l10n.authGenderLabel,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -415,22 +443,33 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                         FilterChip(
                           label: Text(l10n.authGenderMale),
                           selected: _gender == 1,
-                          onSelected: _saving ? null : (_) => setState(() => _gender = 1),
+                          onSelected: _saving
+                              ? null
+                              : (_) => setState(() => _gender = 1),
                         ),
                         FilterChip(
                           label: Text(l10n.authGenderFemale),
                           selected: _gender == 2,
-                          onSelected: _saving ? null : (_) => setState(() => _gender = 2),
+                          onSelected: _saving
+                              ? null
+                              : (_) => setState(() => _gender = 2),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       // ignore: deprecated_member_use
-                      value: _countryCode == null || _countryCode!.isEmpty ? null : _countryCode,
+                      value: _countryCode == null || _countryCode!.isEmpty
+                          ? null
+                          : _countryCode,
                       isExpanded: true,
-                      decoration: InputDecoration(labelText: l10n.profileCountry),
-                      items: _countryDropdownItems(bootstrap.countries, locale.languageCode),
+                      decoration: InputDecoration(
+                        labelText: l10n.profileCountry,
+                      ),
+                      items: _countryDropdownItems(
+                        bootstrap.countries,
+                        locale.languageCode,
+                      ),
                       onChanged: (v) => setState(() => _countryCode = v),
                     ),
                     const SizedBox(height: 12),
@@ -446,7 +485,9 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                       label: l10n.profileSave,
                       icon: Icons.save_outlined,
                       busy: _saving,
-                      onPressed: _saving ? null : () => _onSave(context, bootstrap.countries),
+                      onPressed: _saving
+                          ? null
+                          : () => _onSave(context, bootstrap.countries),
                     ),
                   ],
                 ),
@@ -455,7 +496,10 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     );
   }
 
-  Future<void> _onSave(BuildContext context, List<CountryItem> countries) async {
+  Future<void> _onSave(
+    BuildContext context,
+    List<CountryItem> countries,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
     String? countryName;
     if (_countryCode != null && _countryCode!.isNotEmpty) {
@@ -469,7 +513,9 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     }
     setState(() => _saving = true);
     try {
-      await ref.read(authRepositoryProvider).updateProfileOnServer(
+      await ref
+          .read(authRepositoryProvider)
+          .updateProfileOnServer(
             nickname: _nickname.text.trim(),
             countryCode: _countryCode,
             bio: _bio.text,

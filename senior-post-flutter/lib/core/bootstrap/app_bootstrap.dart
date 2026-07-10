@@ -39,7 +39,8 @@ class AppVipProductConfig {
           ? (json['taglineZh'] as String).trim()
           : '无限邮票 · 优先送达 · 无广告干扰',
       unlimitedStampsBenefit: json['unlimitedStampsBenefit'] as bool? ?? true,
-      standardDeliveryHours: (json['standardDeliveryHours'] as num?)?.toInt() ?? 0,
+      standardDeliveryHours:
+          (json['standardDeliveryHours'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -130,7 +131,10 @@ class CountryItem {
 }
 
 /// 启动配置（注册门槛、国家列表、兴趣标签选项）。未登录即可调用，与 `/api/bootstrap/init?lang=` 同步。
-final appBootstrapProvider = FutureProvider.family<AppBootstrapData, String>((ref, lang) async {
+final appBootstrapProvider = FutureProvider.family<AppBootstrapData, String>((
+  ref,
+  lang,
+) async {
   final dio = ref.read(dioProvider);
   final res = await dio.get<Map<String, dynamic>>(
     '/api/bootstrap/init',

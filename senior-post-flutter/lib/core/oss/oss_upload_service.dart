@@ -27,7 +27,8 @@ class OssUploadService {
       queryParameters: <String, dynamic>{
         'scene': scene,
         'ext': ext,
-        if (contentType != null && contentType.isNotEmpty) 'contentType': contentType,
+        if (contentType != null && contentType.isNotEmpty)
+          'contentType': contentType,
       },
     );
     final raw = res.data;
@@ -61,17 +62,16 @@ class OssUploadService {
           headers: <String, dynamic>{'Content-Type': sign.contentType},
         ),
       );
-      if (resp.statusCode == null || resp.statusCode! < 200 || resp.statusCode! >= 300) {
+      if (resp.statusCode == null ||
+          resp.statusCode! < 200 ||
+          resp.statusCode! >= 300) {
         throw ApiBusinessException(
           resp.statusCode ?? 0,
           'OSS upload failed: HTTP ${resp.statusCode}',
         );
       }
     } on DioException catch (e) {
-      throw ApiBusinessException(
-        0,
-        e.message ?? 'OSS upload failed',
-      );
+      throw ApiBusinessException(0, e.message ?? 'OSS upload failed');
     }
     if (sign.objectKey.isNotEmpty) {
       return sign.objectKey;
@@ -79,7 +79,10 @@ class OssUploadService {
     if (sign.readUrl != null && sign.readUrl!.isNotEmpty) {
       return sign.readUrl!;
     }
-    throw ApiBusinessException(0, 'Upload OK but missing objectKey from server');
+    throw ApiBusinessException(
+      0,
+      'Upload OK but missing objectKey from server',
+    );
   }
 
   /// 场景 `postcard` 上传一张图，返回写入后端的地址（私有桶为 objectKey；公开读配置下可能为 readUrl）。

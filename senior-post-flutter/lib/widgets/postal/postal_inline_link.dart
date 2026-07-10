@@ -47,7 +47,9 @@ class _PostalInlineLinkState extends State<PostalInlineLink> {
           onHighlightChanged: (v) => setState(() => _pressed = v),
           borderRadius: PostalTokens.shapeLg,
           splashColor: PostalTokens.postboxGreen.withValues(alpha: 0.08),
-          highlightColor: PostalTokens.stampVermilionMuted.withValues(alpha: 0.45),
+          highlightColor: PostalTokens.stampVermilionMuted.withValues(
+            alpha: 0.45,
+          ),
           child: AnimatedScale(
             scale: _pressed && _canTap ? 0.97 : 1,
             duration: PostalTokens.durationFast,

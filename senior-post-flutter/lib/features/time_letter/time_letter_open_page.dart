@@ -104,7 +104,9 @@ class _TimeLetterOpenPageState extends ConsumerState<TimeLetterOpenPage>
                           child: Icon(
                             Icons.mail_outline,
                             size: 120,
-                            color: PostalTokens.postboxGreen.withValues(alpha: 0.85),
+                            color: PostalTokens.postboxGreen.withValues(
+                              alpha: 0.85,
+                            ),
                           ),
                         ),
                       ),
@@ -122,18 +124,16 @@ class _TimeLetterOpenPageState extends ConsumerState<TimeLetterOpenPage>
                     Text(
                       l10n.timeLetterReadEstimate(readMin),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: PostalTokens.inkTertiary,
-                          ),
+                        color: PostalTokens.inkTertiary,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     Expanded(
                       child: SingleChildScrollView(
                         child: Text(
                           detail.body ?? '',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                fontSize: 22,
-                                height: 1.55,
-                              ),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontSize: 22, height: 1.55),
                         ),
                       ),
                     ),
@@ -143,7 +143,9 @@ class _TimeLetterOpenPageState extends ConsumerState<TimeLetterOpenPage>
                           await ref
                               .read(timeLetterRemoteProvider)
                               .toggleStar(widget.letterId);
-                          ref.invalidate(timeLetterDetailProvider(widget.letterId));
+                          ref.invalidate(
+                            timeLetterDetailProvider(widget.letterId),
+                          );
                           invalidateTimeLetterLists(ref);
                         },
                         icon: Icon(

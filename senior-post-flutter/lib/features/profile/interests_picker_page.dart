@@ -11,14 +11,17 @@ import '../directory/directory_remote.dart';
 
 final _pickerInterestOptionsProvider =
     FutureProvider.family<List<InterestTagOption>, String>((ref, lang) async {
-      return ref.read(directoryRemoteProvider).listInterestTagOptions(lang: lang);
+      return ref
+          .read(directoryRemoteProvider)
+          .listInterestTagOptions(lang: lang);
     });
 
 class InterestsPickerPage extends ConsumerStatefulWidget {
   const InterestsPickerPage({super.key});
 
   @override
-  ConsumerState<InterestsPickerPage> createState() => _InterestsPickerPageState();
+  ConsumerState<InterestsPickerPage> createState() =>
+      _InterestsPickerPageState();
 }
 
 class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
@@ -44,9 +47,9 @@ class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
     }
     setState(() => _saving = true);
     try {
-      await ref.read(authRepositoryProvider).updateProfileOnServer(
-            interestTagIds: _selected.toList(),
-          );
+      await ref
+          .read(authRepositoryProvider)
+          .updateProfileOnServer(interestTagIds: _selected.toList());
       if (!context.mounted) {
         return;
       }

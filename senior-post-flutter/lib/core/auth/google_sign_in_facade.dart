@@ -5,7 +5,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 class GoogleSignInFacade {
   GoogleSignInFacade._();
 
-  static const String _serverClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+  static const String _serverClientId = String.fromEnvironment(
+    'GOOGLE_WEB_CLIENT_ID',
+  );
 
   static bool get isConfigured => _serverClientId.isNotEmpty;
 

@@ -64,7 +64,11 @@ class _AvatarCropPageState extends State<AvatarCropPage> {
                   case CropSuccess(:final croppedImage):
                     Navigator.of(context).pop<Uint8List>(croppedImage);
                   case CropFailure(:final cause):
-                    PostalSnack.show(context, '$cause', tone: PostalSnackTone.error);
+                    PostalSnack.show(
+                      context,
+                      '$cause',
+                      tone: PostalSnackTone.error,
+                    );
                 }
               },
             ),
@@ -83,9 +87,9 @@ class _AvatarCropPageState extends State<AvatarCropPage> {
                     Text(
                       l10n.profileAvatarCropHelp,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: PostalTokens.inkSecondary,
-                            height: 1.4,
-                          ),
+                        color: PostalTokens.inkSecondary,
+                        height: 1.4,
+                      ),
                     ),
                     const SizedBox(height: 14),
                     Row(
@@ -107,7 +111,9 @@ class _AvatarCropPageState extends State<AvatarCropPage> {
                               ),
                               child: Text(
                                 l10n.profileAvatarCropCancel,
-                                style: const TextStyle(fontWeight: FontWeight.w700),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ),
@@ -127,7 +133,9 @@ class _AvatarCropPageState extends State<AvatarCropPage> {
                               ),
                               child: Text(
                                 l10n.profileAvatarCropConfirm,
-                                style: const TextStyle(fontWeight: FontWeight.w800),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                           ),

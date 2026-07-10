@@ -33,10 +33,7 @@ class VipCenterPage extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
               children: [
                 PostalCardEnvelope(
-                  header: PostalSectionTitle(
-                    title: title,
-                    subtitle: subtitle,
-                  ),
+                  header: PostalSectionTitle(title: title, subtitle: subtitle),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

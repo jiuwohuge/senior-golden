@@ -53,7 +53,9 @@ class _TimeLetterSealSliderState extends State<TimeLetterSealSlider> {
             decoration: BoxDecoration(
               color: PostalTokens.paperEnvelope,
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: PostalTokens.postboxGreen.withValues(alpha: 0.35)),
+              border: Border.all(
+                color: PostalTokens.postboxGreen.withValues(alpha: 0.35),
+              ),
             ),
             child: Stack(
               alignment: Alignment.centerLeft,
@@ -62,9 +64,9 @@ class _TimeLetterSealSliderState extends State<TimeLetterSealSlider> {
                   child: Text(
                     widget.label,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: PostalTokens.inkSecondary,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      color: PostalTokens.inkSecondary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 Positioned(
@@ -78,7 +80,10 @@ class _TimeLetterSealSliderState extends State<TimeLetterSealSlider> {
                     child: const SizedBox(
                       width: thumb,
                       height: thumb,
-                      child: Icon(Icons.local_post_office_outlined, color: Colors.white),
+                      child: Icon(
+                        Icons.local_post_office_outlined,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),

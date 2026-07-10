@@ -76,11 +76,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         children: [
                           PostmarkRing(
                             size: 88,
-                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.5),
                             year: '26',
                           ),
                           const SizedBox(height: 16),
-                          Icon(p.icon, size: 58, color: Theme.of(context).colorScheme.primary),
+                          Icon(
+                            p.icon,
+                            size: 58,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                           const SizedBox(height: 20),
                           Text(
                             p.title,
@@ -112,7 +118,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       decoration: BoxDecoration(
                         color: i == _index
                             ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                            : Theme.of(
+                                context,
+                              ).colorScheme.outline.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(99),
                       ),
                     ),
@@ -120,7 +128,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 ),
                 const SizedBox(height: 16),
                 PostalButton(
-                  label: _index == pages.length - 1 ? l10n.onboardDone : l10n.onboardNext,
+                  label: _index == pages.length - 1
+                      ? l10n.onboardDone
+                      : l10n.onboardNext,
                   onPressed: () async {
                     if (_index == pages.length - 1) {
                       context.go(LoginRoutes.login);

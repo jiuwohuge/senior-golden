@@ -4,8 +4,9 @@ import 'api_base_url.dart';
 import 'api_base_url_storage.dart';
 
 /// 当前生效的 API Base URL（Debug 覆盖 > `--dart-define` > 默认值）。
-final apiBaseUrlProvider =
-    StateNotifierProvider<ApiBaseUrlNotifier, String>((ref) {
+final apiBaseUrlProvider = StateNotifierProvider<ApiBaseUrlNotifier, String>((
+  ref,
+) {
   return ApiBaseUrlNotifier();
 });
 

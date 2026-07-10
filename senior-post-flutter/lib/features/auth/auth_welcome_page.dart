@@ -46,7 +46,11 @@ class _AuthWelcomePageState extends ConsumerState<AuthWelcomePage> {
   Future<void> _signInWithGoogle() async {
     final l10n = AppLocalizations.of(context)!;
     if (!GoogleSignInFacade.isConfigured) {
-      PostalSnack.show(context, l10n.authGoogleNotConfigured, tone: PostalSnackTone.warning);
+      PostalSnack.show(
+        context,
+        l10n.authGoogleNotConfigured,
+        tone: PostalSnackTone.warning,
+      );
       return;
     }
     setState(() => _busy = true);
@@ -56,7 +60,9 @@ class _AuthWelcomePageState extends ConsumerState<AuthWelcomePage> {
         if (mounted) setState(() => _busy = false);
         return;
       }
-      final result = await ref.read(authRepositoryProvider).signInWithGoogle(idToken: idToken);
+      final result = await ref
+          .read(authRepositoryProvider)
+          .signInWithGoogle(idToken: idToken);
       await _afterAuth(result);
     } on ApiBusinessException catch (e) {
       if (mounted) {
@@ -99,7 +105,9 @@ class _AuthWelcomePageState extends ConsumerState<AuthWelcomePage> {
             busy: _busy,
             onPressed: _busy
                 ? null
-                : () => _acceptTermsAndProceed(() => context.go(LoginRoutes.register)),
+                : () => _acceptTermsAndProceed(
+                    () => context.go(LoginRoutes.register),
+                  ),
           ),
           const SizedBox(height: 28),
           Text(
@@ -154,10 +162,7 @@ class _AuthWelcomePageState extends ConsumerState<AuthWelcomePage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   SizedBox(height: (h * 0.08).clamp(16.0, 56.0)),
-                  _WelcomeBrand(
-                    title: l10n.appTitle,
-                    tagline: l10n.appTagline,
-                  ),
+                  _WelcomeBrand(title: l10n.appTitle, tagline: l10n.appTagline),
                   if (useScroll) const SizedBox(height: 32) else const Spacer(),
                   Center(child: actions),
                   if (useScroll) const SizedBox(height: 32) else const Spacer(),
@@ -168,13 +173,19 @@ class _AuthWelcomePageState extends ConsumerState<AuthWelcomePage> {
 
               if (!useScroll) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 12,
+                  ),
                   child: column,
                 );
               }
 
               return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 20,
+                ),
                 child: column,
               );
             },
@@ -214,11 +225,7 @@ class _WelcomeBrand extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          width: 48,
-          height: 1.2,
-          color: PostalTokens.stampVermilion,
-        ),
+        Container(width: 48, height: 1.2, color: PostalTokens.stampVermilion),
         const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),

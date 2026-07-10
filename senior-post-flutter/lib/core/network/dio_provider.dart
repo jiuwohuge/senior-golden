@@ -50,9 +50,7 @@ final dioProvider = Provider<Dio>((ref) {
       onRequest: (options, handler) {
         final path = options.uri.path;
         final token = ref.read(authTokenProvider);
-        if (token != null &&
-            token.isNotEmpty &&
-            !isPublicApiPath(path)) {
+        if (token != null && token.isNotEmpty && !isPublicApiPath(path)) {
           options.headers['Token'] = token;
         }
         final locale = ref.read(effectiveAppLocaleProvider);
@@ -91,7 +89,10 @@ final dioProvider = Provider<Dio>((ref) {
         if (response.data is Map<String, dynamic>) {
           final map = response.data as Map<String, dynamic>;
           final path = response.requestOptions.uri.path;
-          final dec = JhApiCrypto.tryDecryptResponseDataField(path, map['data']);
+          final dec = JhApiCrypto.tryDecryptResponseDataField(
+            path,
+            map['data'],
+          );
           if (dec != null) {
             try {
               map['data'] = jsonDecode(dec) as Object?;
