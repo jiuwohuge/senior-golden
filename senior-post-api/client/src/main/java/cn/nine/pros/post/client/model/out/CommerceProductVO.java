@@ -1,12 +1,11 @@
 package cn.nine.pros.post.client.model.out;
 
+import cn.nine.pros.post.client.model.json.CommerceProductMetadata;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 @Data
 @Builder
@@ -20,7 +19,7 @@ public class CommerceProductVO {
     private String productType;
     private String titleKey;
     private Integer priceCents;
-    private Map<String, Object> metadataJson;
+    private CommerceProductMetadata metadataJson;
     private Integer sortOrder;
     private Integer status;
     private Boolean owned;

@@ -30,6 +30,7 @@ import cn.nine.pros.post.client.common.enums.LetterPhysicalType;
 import cn.nine.pros.post.client.common.enums.LetterSendMode;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
+import cn.nine.pros.post.client.model.json.LetterContentMeta;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
 import cn.nine.pros.post.client.model.out.PenpalRequestResultVO;
@@ -47,9 +48,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -224,7 +223,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         letter.setMode(mode.getCode());
         letter.setAuditStatus(LetterAuditStatus.PENDING_REVIEW.getCode());
         letter.setLetterType(physicalType.getCode());
-        letter.setContentMetaJson(buildContentMeta(skinId, fontId, templateId));
+        letter.setContentMetaJson(LetterContentMeta.of(skinId, fontId, templateId));
         // 运输轨仅作展示兼容；速度一律 §6.1
         letter.setSendMode(physicalType == LetterPhysicalType.STANDARD
                 ? LetterSendMode.STANDARD_POST.getCode()
@@ -549,9 +548,9 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 : null;
         UserDTO fromUser = l.getFromUserId() != null ? userService.findById(l.getFromUserId()) : null;
         UserDTO toUser = l.getToUserId() != null ? userService.findById(l.getToUserId()) : null;
-        Map<String, Object> meta = l.getContentMetaJson();
-        String skinId = metaString(meta, "skin_id", "default");
-        String fontId = metaString(meta, "font_id", "default");
+        LetterContentMeta meta = l.getContentMetaJson();
+        String skinId = meta != null ? meta.skinIdOrDefault() : LetterContentMeta.DEFAULT_ID;
+        String fontId = meta != null ? meta.fontIdOrDefault() : LetterContentMeta.DEFAULT_ID;
         return MailboxLetterItemVO.builder()
                 .letterId(l.getId())
                 .peer(peerVo)
@@ -583,22 +582,6 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             return defaultValue;
         }
         return raw.trim();
-    }
-
-    private static Map<String, Object> buildContentMeta(String skinId, String fontId, String templateId) {
-        Map<String, Object> meta = new HashMap<>();
-        meta.put("skin_id", skinId);
-        meta.put("font_id", fontId);
-        meta.put("template_id", templateId);
-        return meta;
-    }
-
-    private static String metaString(Map<String, Object> meta, String key, String defaultValue) {
-        if (meta == null || !meta.containsKey(key)) {
-            return defaultValue;
-        }
-        Object raw = meta.get(key);
-        return raw != null ? String.valueOf(raw) : defaultValue;
     }
 
     private String resolveCountryName(UserDTO user) {

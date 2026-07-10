@@ -1,19 +1,19 @@
 package cn.nine.pros.post.biz.model.domain;
 
 import cn.nine.commons.data.domain.AbstractAuditableDomain;
+import cn.nine.pros.post.biz.support.mybatis.PostgresJsonbTypeHandler;
+import cn.nine.pros.post.client.model.json.UserNotificationPrefs;
+import cn.nine.pros.post.client.model.json.UserPrivacyPrefs;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -30,11 +30,11 @@ public class UserPreferenceDomain extends AbstractAuditableDomain {
 
     private Long userId;
 
-    @TableField(value = "privacy_json", typeHandler = JacksonTypeHandler.class)
+    @TableField(value = "privacy_json", typeHandler = PostgresJsonbTypeHandler.class)
     @Schema(description = "隐私偏好 JSON")
-    private Map<String, Object> privacyJson;
+    private UserPrivacyPrefs privacyJson;
 
-    @TableField(value = "notifications_json", typeHandler = JacksonTypeHandler.class)
+    @TableField(value = "notifications_json", typeHandler = PostgresJsonbTypeHandler.class)
     @Schema(description = "通知偏好 JSON")
-    private Map<String, Object> notificationsJson;
+    private UserNotificationPrefs notificationsJson;
 }

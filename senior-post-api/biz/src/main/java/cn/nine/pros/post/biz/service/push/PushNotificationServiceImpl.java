@@ -102,16 +102,6 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         if (pref == null || pref.getNotificationsJson() == null) {
             return true;
         }
-        Object value = pref.getNotificationsJson().get(prefKey);
-        if (value == null) {
-            return true;
-        }
-        if (value instanceof Boolean b) {
-            return b;
-        }
-        if (value instanceof Number n) {
-            return n.intValue() != 0;
-        }
-        return Boolean.parseBoolean(String.valueOf(value));
+        return pref.getNotificationsJson().isEventAllowed(prefKey);
     }
 }

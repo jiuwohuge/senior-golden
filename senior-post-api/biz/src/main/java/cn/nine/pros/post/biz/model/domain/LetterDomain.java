@@ -7,11 +7,11 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import cn.nine.pros.post.biz.support.mybatis.PostgresJsonbTypeHandler;
+import cn.nine.pros.post.client.model.json.LetterContentMeta;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-import java.util.Map;
 
 /**
  * 信件表（挂号信/平邮） Domain
@@ -111,7 +111,7 @@ public class LetterDomain extends AbstractAuditableDomain {
     private LocalDateTime recipientReadAt;
 
     @Schema(description = "皮肤/字体/模板等表达增强元数据")
-    @TableField(value = "content_meta_json", typeHandler = JacksonTypeHandler.class)
-    private Map<String, Object> contentMetaJson;
+    @TableField(value = "content_meta_json", typeHandler = PostgresJsonbTypeHandler.class)
+    private LetterContentMeta contentMetaJson;
 
 }

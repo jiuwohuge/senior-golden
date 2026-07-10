@@ -42,10 +42,21 @@ UserPreferences _mapPreferences(Map<String, dynamic> m) {
       ? notifications
       : const {};
   return UserPreferences(
-    hideRecommendations: _readBool(privacyMap['hide_recommendations']),
-    rejectStrangerMail: _readBool(privacyMap['reject_stranger_letters']),
-    pushEnabled: _readBool(notifMap['push_enabled'], defaultValue: true),
-    unreadBadges: _readBool(notifMap['unread_badges'], defaultValue: true),
+    hideRecommendations: _readBool(
+      privacyMap['hide_recommendations'] ?? privacyMap['hideRecommendations'],
+    ),
+    rejectStrangerMail: _readBool(
+      privacyMap['reject_stranger_letters'] ??
+          privacyMap['rejectStrangerLetters'],
+    ),
+    pushEnabled: _readBool(
+      notifMap['push_enabled'] ?? notifMap['pushEnabled'],
+      defaultValue: true,
+    ),
+    unreadBadges: _readBool(
+      notifMap['unread_badges'] ?? notifMap['unreadBadges'],
+      defaultValue: true,
+    ),
   );
 }
 

@@ -1,12 +1,11 @@
 package cn.nine.pros.post.client.model.input.admin;
 
 import cn.nine.commons.data.dto.AbstractDTO;
+import cn.nine.pros.post.client.model.json.CommerceProductMetadata;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -31,8 +30,8 @@ public class AdminCommerceProductSaveInDto extends AbstractDTO {
     @Schema(description = "价格（分）")
     private Integer priceCents;
 
-    @Schema(description = "元数据 JSON")
-    private Map<String, Object> metadataJson;
+    @Schema(description = "元数据")
+    private CommerceProductMetadata metadataJson;
 
     @Schema(description = "排序")
     private Integer sortOrder;

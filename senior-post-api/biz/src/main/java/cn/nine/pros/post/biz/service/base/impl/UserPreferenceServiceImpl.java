@@ -1,29 +1,17 @@
 package cn.nine.pros.post.biz.service.base.impl;
 
-import cn.nine.commons.basic.exception.unchecked.BusinessException;
 import cn.nine.pros.post.biz.mapper.UserPreferenceMapper;
 import cn.nine.pros.post.biz.model.domain.UserPreferenceDomain;
 import cn.nine.pros.post.biz.service.base.UserPreferenceService;
+import cn.nine.pros.post.client.model.json.UserNotificationPrefs;
+import cn.nine.pros.post.client.model.json.UserPrivacyPrefs;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class UserPreferenceServiceImpl extends ServiceImpl<UserPreferenceMapper, UserPreferenceDomain>
         implements UserPreferenceService {
-
-    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
-    };
-
-    private final ObjectMapper objectMapper;
 
     @Override
     public UserPreferenceDomain findOrCreateForUser(Long userId) {
@@ -36,58 +24,49 @@ public class UserPreferenceServiceImpl extends ServiceImpl<UserPreferenceMapper,
         }
         UserPreferenceDomain row = new UserPreferenceDomain();
         row.setUserId(userId);
-        row.setPrivacyJson(new HashMap<>());
-        row.setNotificationsJson(new HashMap<>());
+        row.setPrivacyJson(new UserPrivacyPrefs());
+        row.setNotificationsJson(new UserNotificationPrefs());
         row.initAudit(userId);
         save(row);
         return row;
     }
 
     @Override
-    public UserPreferenceDomain updatePrivacy(Long userId, String privacyJson) {
+    public UserPreferenceDomain updatePrivacy(Long userId, UserPrivacyPrefs privacy) {
         UserPreferenceDomain row = findOrCreateForUser(userId);
-        row.setPrivacyJson(parseJsonMap(privacyJson));
+        row.setPrivacyJson(privacy != null ? privacy : new UserPrivacyPrefs());
         row.updateAudit(userId);
         updateById(row);
         return row;
     }
 
     @Override
-    public UserPreferenceDomain updateNotifications(Long userId, String notificationsJson) {
+    public UserPreferenceDomain updateNotifications(Long userId, UserNotificationPrefs notifications) {
         UserPreferenceDomain row = findOrCreateForUser(userId);
-        row.setNotificationsJson(parseJsonMap(notificationsJson));
+        row.setNotificationsJson(notifications != null ? notifications : new UserNotificationPrefs());
         row.updateAudit(userId);
         updateById(row);
         return row;
     }
 
     @Override
-    public UserPreferenceDomain mergePrivacy(Long userId, Map<String, Object> patch) {
+    public UserPreferenceDomain mergePrivacy(Long userId, UserPrivacyPrefs patch) {
         UserPreferenceDomain row = findOrCreateForUser(userId);
-        Map<String, Object> merged = new HashMap<>();
-        if (row.getPrivacyJson() != null) {
-            merged.putAll(row.getPrivacyJson());
-        }
-        if (patch != null) {
-            merged.putAll(patch);
-        }
-        row.setPrivacyJson(merged);
+        UserPrivacyPrefs current = row.getPrivacyJson() != null ? row.getPrivacyJson() : new UserPrivacyPrefs();
+        current.mergeFrom(patch);
+        row.setPrivacyJson(current);
         row.updateAudit(userId);
         updateById(row);
         return row;
     }
 
     @Override
-    public UserPreferenceDomain mergeNotifications(Long userId, Map<String, Object> patch) {
+    public UserPreferenceDomain mergeNotifications(Long userId, UserNotificationPrefs patch) {
         UserPreferenceDomain row = findOrCreateForUser(userId);
-        Map<String, Object> merged = new HashMap<>();
-        if (row.getNotificationsJson() != null) {
-            merged.putAll(row.getNotificationsJson());
-        }
-        if (patch != null) {
-            merged.putAll(patch);
-        }
-        row.setNotificationsJson(merged);
+        UserNotificationPrefs current =
+                row.getNotificationsJson() != null ? row.getNotificationsJson() : new UserNotificationPrefs();
+        current.mergeFrom(patch);
+        row.setNotificationsJson(current);
         row.updateAudit(userId);
         updateById(row);
         return row;
@@ -98,16 +77,5 @@ public class UserPreferenceServiceImpl extends ServiceImpl<UserPreferenceMapper,
                 .eq(UserPreferenceDomain::getUserId, userId)
                 .eq(UserPreferenceDomain::isDelFlag, false)
                 .last("LIMIT 1"));
-    }
-
-    private Map<String, Object> parseJsonMap(String json) {
-        if (!StringUtils.hasText(json)) {
-            return new HashMap<>();
-        }
-        try {
-            return objectMapper.readValue(json.trim(), MAP_TYPE);
-        } catch (Exception e) {
-            throw new BusinessException("Invalid preference JSON");
-        }
     }
 }

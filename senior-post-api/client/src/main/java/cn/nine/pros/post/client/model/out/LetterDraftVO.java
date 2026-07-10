@@ -1,5 +1,6 @@
 package cn.nine.pros.post.client.model.out;
 
+import cn.nine.pros.post.client.model.json.LetterDraftContent;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Data
 @Builder
@@ -19,6 +19,6 @@ public class LetterDraftVO {
     private Long id;
     private String mode;
     private Long toUserId;
-    private Map<String, Object> contentJson;
+    private LetterDraftContent contentJson;
     private LocalDateTime updatedAt;
 }

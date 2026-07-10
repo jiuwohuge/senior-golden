@@ -9,6 +9,7 @@ import cn.nine.pros.post.biz.service.biz.AppMailboxService;
 import cn.nine.pros.post.client.common.enums.LetterMode;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.input.app.LetterDraftSaveInDto;
+import cn.nine.pros.post.client.model.json.LetterDraftContent;
 import cn.nine.pros.post.client.model.out.LetterDraftVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,7 +51,7 @@ public class AppLetterDraftBizServiceImpl implements AppLetterDraftBizService {
         draft.setUserId(userId);
         draft.setMode(StringUtils.hasText(body.getMode()) ? body.getMode().trim().toUpperCase() : DEFAULT_MODE);
         draft.setToUserId(body.getToUserId());
-        draft.setContentJson(body.getContentJson() != null ? body.getContentJson() : new HashMap<>());
+        draft.setContentJson(body.getContentJson() != null ? body.getContentJson() : new LetterDraftContent());
         LetterDraftDomain saved = letterDraftService.saveOwned(draft, userId);
         if (saved == null) {
             throw new BusinessException(appMessages.get("app.error.draft.notFound"));
@@ -88,17 +86,19 @@ public class AppLetterDraftBizServiceImpl implements AppLetterDraftBizService {
     }
 
     private AppSendLetterInDto toSendDto(LetterDraftDomain draft) {
-        Map<String, Object> json = draft.getContentJson() != null ? draft.getContentJson() : Map.of();
-        Object contentObj = json.get("content");
-        if (contentObj == null || !StringUtils.hasText(String.valueOf(contentObj))) {
+        LetterDraftContent json = draft.getContentJson() != null ? draft.getContentJson() : new LetterDraftContent();
+        if (!StringUtils.hasText(json.getContent())) {
             throw new BusinessException(appMessages.get("app.error.letter.contentEmpty"));
         }
         AppSendLetterInDto send = new AppSendLetterInDto();
-        send.setContent(String.valueOf(contentObj).trim());
-        send.setLetterType(extractInt(json, "letterType", DEFAULT_LETTER_TYPE));
+        send.setContent(json.getContent().trim());
+        send.setLetterType(json.getLetterType() != null ? json.getLetterType() : DEFAULT_LETTER_TYPE);
         send.setToUserId(draft.getToUserId());
-        send.setParentLetterId(extractLong(json, "parentLetterId"));
+        send.setParentLetterId(json.getParentLetterId());
         send.setMode(resolveModeCode(draft.getMode()));
+        send.setSkinId(json.getSkinId());
+        send.setFontId(json.getFontId());
+        send.setTemplateId(json.getTemplateId());
         return send;
     }
 
@@ -112,36 +112,6 @@ public class AppLetterDraftBizServiceImpl implements AppLetterDraftBizService {
         }
         if ("DIRECT".equals(normalized)) {
             return LetterMode.DIRECT.getCode();
-        }
-        return null;
-    }
-
-    private static int extractInt(Map<String, Object> json, String key, int defaultValue) {
-        Object v = json.get(key);
-        if (v instanceof Number n) {
-            return n.intValue();
-        }
-        if (v != null) {
-            try {
-                return Integer.parseInt(String.valueOf(v));
-            } catch (NumberFormatException ignored) {
-                return defaultValue;
-            }
-        }
-        return defaultValue;
-    }
-
-    private static Long extractLong(Map<String, Object> json, String key) {
-        Object v = json.get(key);
-        if (v instanceof Number n) {
-            return n.longValue();
-        }
-        if (v != null) {
-            try {
-                return Long.parseLong(String.valueOf(v));
-            } catch (NumberFormatException ignored) {
-                return null;
-            }
         }
         return null;
     }
