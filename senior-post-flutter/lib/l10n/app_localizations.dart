@@ -3319,6 +3319,342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submitted to the topic mailbox. It will appear after review.'**
   String get composeTopicSubmitted;
+
+  /// No description provided for @shopVipSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership · VIP'**
+  String get shopVipSectionTitle;
+
+  /// No description provided for @shopVipOwnedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You are a member — see benefits below'**
+  String get shopVipOwnedSubtitle;
+
+  /// No description provided for @shopVipPromoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock more postal perks and cosmetics'**
+  String get shopVipPromoSubtitle;
+
+  /// No description provided for @shopVipBody.
+  ///
+  /// In en, this message translates to:
+  /// **'VIP benefits are configured on the server (e.g. registered-mail perks). Checkout will appear here when payments are connected.'**
+  String get shopVipBody;
+
+  /// No description provided for @shopCatalogEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No products yet'**
+  String get shopCatalogEmptyTitle;
+
+  /// No description provided for @shopCatalogEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Items will appear here once the catalog is configured.'**
+  String get shopCatalogEmptySubtitle;
+
+  /// No description provided for @shopMockPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Mock purchase'**
+  String get shopMockPurchase;
+
+  /// No description provided for @shopMockPurchaseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase complete — entitlement granted'**
+  String get shopMockPurchaseSuccess;
+
+  /// No description provided for @shopOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned'**
+  String get shopOwned;
+
+  /// No description provided for @shopPriceFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get shopPriceFree;
+
+  /// No description provided for @shopPriceAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'\${amount}'**
+  String shopPriceAmount(Object amount);
+
+  /// No description provided for @shopProductTypeSkin.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter skins'**
+  String get shopProductTypeSkin;
+
+  /// No description provided for @shopProductTypeFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Fonts'**
+  String get shopProductTypeFont;
+
+  /// No description provided for @shopProductTypeTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Templates'**
+  String get shopProductTypeTemplate;
+
+  /// No description provided for @shopProductTypeVipBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'VIP bundles'**
+  String get shopProductTypeVipBundle;
+
+  /// No description provided for @shopProductTypeExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get shopProductTypeExport;
+
+  /// No description provided for @shopProductTypeAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get shopProductTypeAttachment;
+
+  /// No description provided for @commerceProductSkinDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default paper'**
+  String get commerceProductSkinDefault;
+
+  /// No description provided for @commerceProductSkinVintage.
+  ///
+  /// In en, this message translates to:
+  /// **'Vintage paper'**
+  String get commerceProductSkinVintage;
+
+  /// No description provided for @commerceProductFontDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default font'**
+  String get commerceProductFontDefault;
+
+  /// No description provided for @commerceProductFontHandwriting.
+  ///
+  /// In en, this message translates to:
+  /// **'Handwriting font'**
+  String get commerceProductFontHandwriting;
+
+  /// No description provided for @commerceProductExportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF export'**
+  String get commerceProductExportPdf;
+
+  /// No description provided for @entitlementsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My cosmetics'**
+  String get entitlementsTitle;
+
+  /// No description provided for @entitlementsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No cosmetics yet'**
+  String get entitlementsEmptyTitle;
+
+  /// No description provided for @entitlementsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit the shop for letter skins, fonts, and more.'**
+  String get entitlementsEmptySubtitle;
+
+  /// No description provided for @entitlementsGrantedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Granted {date}'**
+  String entitlementsGrantedAt(Object date);
+
+  /// No description provided for @profileLetterDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter drafts'**
+  String get profileLetterDrafts;
+
+  /// No description provided for @profileLetterFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved letters'**
+  String get profileLetterFavorites;
+
+  /// No description provided for @profileLetterExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export letters'**
+  String get profileLetterExport;
+
+  /// No description provided for @profileMyEntitlements.
+  ///
+  /// In en, this message translates to:
+  /// **'My cosmetics'**
+  String get profileMyEntitlements;
+
+  /// No description provided for @profilePrivacyHideRecommend.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide recommendations'**
+  String get profilePrivacyHideRecommend;
+
+  /// No description provided for @profilePrivacyRejectStranger.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline stranger mail'**
+  String get profilePrivacyRejectStranger;
+
+  /// No description provided for @letterDraftsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter drafts'**
+  String get letterDraftsTitle;
+
+  /// No description provided for @letterDraftsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No drafts'**
+  String get letterDraftsEmptyTitle;
+
+  /// No description provided for @letterDraftsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a draft while writing and send it later.'**
+  String get letterDraftsEmptySubtitle;
+
+  /// No description provided for @letterDraftsSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get letterDraftsSend;
+
+  /// No description provided for @letterDraftsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get letterDraftsDelete;
+
+  /// No description provided for @letterDraftsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft deleted'**
+  String get letterDraftsDeleted;
+
+  /// No description provided for @letterDraftsNoContent.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty draft)'**
+  String get letterDraftsNoContent;
+
+  /// No description provided for @letterDraftsUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {time}'**
+  String letterDraftsUpdated(Object time);
+
+  /// No description provided for @letterFavoritesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved letters'**
+  String get letterFavoritesTitle;
+
+  /// No description provided for @letterFavoritesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved letters'**
+  String get letterFavoritesEmptyTitle;
+
+  /// No description provided for @letterFavoritesEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the star on a letter to save it here.'**
+  String get letterFavoritesEmptySubtitle;
+
+  /// No description provided for @letterExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export letters'**
+  String get letterExportTitle;
+
+  /// No description provided for @letterExportFromDate.
+  ///
+  /// In en, this message translates to:
+  /// **'From date'**
+  String get letterExportFromDate;
+
+  /// No description provided for @letterExportToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'To date'**
+  String get letterExportToDate;
+
+  /// No description provided for @letterExportDateOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get letterExportDateOptional;
+
+  /// No description provided for @letterExportSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate export'**
+  String get letterExportSubmit;
+
+  /// No description provided for @letterExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Download link ready'**
+  String get letterExportSuccess;
+
+  /// No description provided for @letterExportPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Export submitted'**
+  String get letterExportPending;
+
+  /// No description provided for @letterFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Save letter'**
+  String get letterFavorite;
+
+  /// No description provided for @letterUnfavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove save'**
+  String get letterUnfavorite;
+
+  /// No description provided for @ritualOpenLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'A letter is waiting to be opened'**
+  String get ritualOpenLetter;
+
+  /// No description provided for @ritualDeliverySent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your letter is on its way'**
+  String get ritualDeliverySent;
+
+  /// No description provided for @composeSkinPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose letter skin'**
+  String get composeSkinPickerTitle;
+
+  /// No description provided for @settingsPreferencesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences saved'**
+  String get settingsPreferencesSaved;
 }
 
 class _AppLocalizationsDelegate

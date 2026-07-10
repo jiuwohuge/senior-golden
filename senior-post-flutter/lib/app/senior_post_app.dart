@@ -10,6 +10,7 @@ import '../core/i18n/locale_resolution.dart';
 import '../core/network/router_refresh.dart';
 import '../features/auth/auth_repository.dart';
 import '../features/startup/release_note_layer.dart';
+import '../features/push/push_service.dart';
 import 'router/app_router.dart';
 import 'theme/postal_theme.dart';
 
@@ -28,6 +29,9 @@ class SeniorPostApp extends ConsumerWidget {
         Future.microtask(() async {
           try {
             await ref.read(authRepositoryProvider).refreshSessionFromServer();
+          } catch (_) {}
+          try {
+            await ensurePushTokenRegistered(ref);
           } catch (_) {}
           ref.invalidate(releaseNoteFetchProvider);
         });

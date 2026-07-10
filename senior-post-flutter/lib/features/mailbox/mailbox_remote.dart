@@ -14,29 +14,29 @@ class MailboxRemoteRepository {
   Future<List<MailboxLetter>> listPostalInbox() async {
     final r = await _dio.get<dynamic>('/api/mailbox/postal');
     final rows = _unwrapListData(r);
-    return rows.map(_voToMailboxLetter).toList();
+    return rows.map(voToMailboxLetter).toList();
   }
 
   Future<List<MailboxLetter>> listReceived() async {
     final r = await _dio.get<dynamic>('/api/mailbox/received');
-    return _unwrapListData(r).map(_voToMailboxLetter).toList();
+    return _unwrapListData(r).map(voToMailboxLetter).toList();
   }
 
   Future<List<MailboxLetter>> listSent() async {
     final r = await _dio.get<dynamic>('/api/mailbox/sent');
-    return _unwrapListData(r).map(_voToMailboxLetter).toList();
+    return _unwrapListData(r).map(voToMailboxLetter).toList();
   }
 
   Future<List<MailboxLetter>> listArchive() async {
     final r = await _dio.get<dynamic>('/api/mailbox/archive');
     final rows = _unwrapListData(r);
-    return rows.map(_voToMailboxLetter).toList();
+    return rows.map(voToMailboxLetter).toList();
   }
 
   Future<MailboxLetter?> getLetter(String letterId) async {
     final r = await _dio.get<dynamic>('/api/mailbox/letters/$letterId');
     final map = _unwrapMapData(r);
-    return _voToMailboxLetter(map);
+    return voToMailboxLetter(map);
   }
 
   Future<MailboxLetter> sendLetter({
@@ -61,7 +61,7 @@ class MailboxRemoteRepository {
     }
     final r = await _dio.post<dynamic>('/api/mailbox/letters/send', data: body);
     final map = _unwrapMapData(r);
-    return _voToMailboxLetter(map);
+    return voToMailboxLetter(map);
   }
 
   Future<void> acceptPostalContact(String letterId) async {
@@ -78,7 +78,7 @@ class MailboxRemoteRepository {
       '/api/mailbox/letters/${int.parse(letterId)}/speed-up',
     );
     final map = _unwrapMapData(r);
-    return _voToMailboxLetter(map);
+    return voToMailboxLetter(map);
   }
 
   Future<MailboxLetter> earlyOpen(String letterId) async {
@@ -86,7 +86,7 @@ class MailboxRemoteRepository {
       '/api/mailbox/letters/${int.parse(letterId)}/early-open',
     );
     final map = _unwrapMapData(r);
-    return _voToMailboxLetter(map);
+    return voToMailboxLetter(map);
   }
 
   Future<List<FriendListRow>> listMailboxFriends() async {
@@ -112,6 +112,46 @@ class MailboxRemoteRepository {
     }
     throw ApiBusinessException(0, 'Invalid friendship response');
   }
+
+  Future<void> favoriteLetter(String letterId) async {
+    await _dio.post<dynamic>('/api/letters/${int.parse(letterId)}/favorite');
+  }
+
+  Future<void> unfavoriteLetter(String letterId) async {
+    await _dio.delete<dynamic>('/api/letters/${int.parse(letterId)}/favorite');
+  }
+
+  Future<List<MailboxLetter>> listFavoriteLetters() async {
+    final r = await _dio.get<dynamic>('/api/letters/favorites');
+    return _unwrapListData(r).map(voToMailboxLetter).toList();
+  }
+
+  Future<LetterExportResult> exportLetters({
+    String? peerUserId,
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) async {
+    final body = <String, dynamic>{};
+    if (peerUserId != null && peerUserId.isNotEmpty) {
+      body['peerUserId'] = int.parse(peerUserId);
+    }
+    if (fromDate != null) {
+      body['fromDate'] = _formatDate(fromDate);
+    }
+    if (toDate != null) {
+      body['toDate'] = _formatDate(toDate);
+    }
+    final r = await _dio.post<dynamic>('/api/letters/export', data: body);
+    final map = _unwrapMapData(r);
+    return LetterExportResult(downloadUrl: map['downloadUrl'] as String?);
+  }
+}
+
+String _formatDate(DateTime d) {
+  final y = d.year.toString().padLeft(4, '0');
+  final m = d.month.toString().padLeft(2, '0');
+  final day = d.day.toString().padLeft(2, '0');
+  return '$y-$m-$day';
 }
 
 List<Map<String, dynamic>> _unwrapListData(Response<dynamic> r) {
@@ -192,7 +232,7 @@ FriendListRow _voToFriendRow(Map<String, dynamic> m) {
   return FriendListRow(peer: peer, lastMessage: sub, lastTime: connected);
 }
 
-MailboxLetter _voToMailboxLetter(Map<String, dynamic> m) {
+MailboxLetter voToMailboxLetter(Map<String, dynamic> m) {
   final peer = m['peer'];
   final peerMap = peer is Map<String, dynamic> ? peer : <String, dynamic>{};
   final letterId = '${m['letterId'] ?? m['id'] ?? ''}';
@@ -248,6 +288,12 @@ MailboxLetter _voToMailboxLetter(Map<String, dynamic> m) {
     ),
     canAddPenpal: m['canAddPenpal'] as bool? ?? false,
     recipientRead: m['recipientRead'] as bool? ?? false,
+    fromCountryName: m['fromCountryName'] as String?,
+    toCountryName: m['toCountryName'] as String?,
+    postmarkLabel: m['postmarkLabel'] as String?,
+    skinId: m['skinId'] as String?,
+    fontId: m['fontId'] as String?,
+    favorited: m['favorited'] as bool? ?? false,
   );
 }
 
@@ -270,4 +316,10 @@ final friendshipActiveProvider = FutureProvider.family<bool, String>((
   peerId,
 ) async {
   return ref.read(mailboxRemoteRepositoryProvider).isFriendshipActive(peerId);
+});
+
+final letterFavoritesProvider = FutureProvider<List<MailboxLetter>>((
+  ref,
+) async {
+  return ref.read(mailboxRemoteRepositoryProvider).listFavoriteLetters();
 });

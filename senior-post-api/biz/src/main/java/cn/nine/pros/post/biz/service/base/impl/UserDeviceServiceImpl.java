@@ -86,4 +86,33 @@ public class UserDeviceServiceImpl extends ServiceImpl<UserDeviceMapper, UserDev
                 .set(UserDeviceDomain::getUpdatedAt, now));
     }
 
+    @Override
+    public UserDeviceDomain upsertPushToken(Long userId, String deviceUuid, String platform, String token, boolean enabled) {
+        if (userId == null || deviceUuid == null || deviceUuid.isBlank()) {
+            return null;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        UserDeviceDomain existing = findActiveByUserIdAndDeviceUuid(userId, deviceUuid.trim());
+        if (existing != null) {
+            existing.setPushPlatform(platform != null ? platform.trim() : existing.getPushPlatform());
+            existing.setPushToken(token != null ? token.trim() : existing.getPushToken());
+            existing.setPushEnabled(enabled);
+            existing.setUpdatedAt(now);
+            existing.setUpdatedBy(userId);
+            updateById(existing);
+            return existing;
+        }
+        UserDeviceDomain row = new UserDeviceDomain();
+        row.setUserId(userId);
+        row.setDeviceUuid(deviceUuid.trim());
+        row.setDeviceType(platform != null ? platform.trim() : null);
+        row.setPushPlatform(platform != null ? platform.trim() : null);
+        row.setPushToken(token != null ? token.trim() : null);
+        row.setPushEnabled(enabled);
+        row.setStatus(1);
+        row.initAudit(userId);
+        save(row);
+        return row;
+    }
+
 }

@@ -13,6 +13,7 @@ import '../auth/auth_repository.dart';
 import '../auth/login_routes.dart';
 import '../relation/relation_remote.dart';
 import '../shell/main_shell.dart';
+import 'preferences_remote.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -120,16 +121,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   title: l10n.profileTimeLetterDrafts,
                   onTap: () => context.go(MainShellRoute.pathMailbox),
                 ),
+                const Divider(height: 1),
+                _ProfileItem(
+                  icon: Icons.drafts_outlined,
+                  title: l10n.profileLetterDrafts,
+                  onTap: () => context.push('/profile/letter-drafts'),
+                ),
+                _ProfileItem(
+                  icon: Icons.star_outline_rounded,
+                  title: l10n.profileLetterFavorites,
+                  onTap: () => context.push('/profile/letter-favorites'),
+                ),
+                _ProfileItem(
+                  icon: Icons.download_outlined,
+                  title: l10n.profileLetterExport,
+                  onTap: () => context.push('/profile/letter-export'),
+                ),
               ],
             ),
           ),
           const SizedBox(height: 12),
           _ProfileSectionTitle(title: l10n.profileSectionShop),
           PostalCardEnvelope(
-            child: _ProfileItem(
-              icon: Icons.storefront_outlined,
-              title: l10n.shopTitleStampsVip,
-              onTap: () => context.push(ShopRoutes.path),
+            child: Column(
+              children: [
+                _ProfileItem(
+                  icon: Icons.storefront_outlined,
+                  title: l10n.shopTitleStampsVip,
+                  onTap: () => context.push(ShopRoutes.path),
+                ),
+                const Divider(height: 1),
+                _ProfileItem(
+                  icon: Icons.palette_outlined,
+                  title: l10n.profileMyEntitlements,
+                  onTap: () => context.push('/shop/entitlements'),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
@@ -143,16 +170,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   onTap: () => context.push('/profile/blocks'),
                 ),
                 const Divider(height: 1),
-                _ProfileItem(
-                  icon: Icons.visibility_off_outlined,
-                  title: l10n.profilePrivacyRecommendPlaceholder,
-                  onTap: () {},
-                ),
-                _ProfileItem(
-                  icon: Icons.mail_lock_outlined,
-                  title: l10n.profilePrivacyStrangerPlaceholder,
-                  onTap: () {},
-                ),
+                const _PrivacyPreferencesSection(),
                 const Divider(height: 1),
                 _ProfileItem(
                   icon: Icons.feedback_outlined,
@@ -347,6 +365,63 @@ class _ProfileAvatarWithAudit extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _PrivacyPreferencesSection extends ConsumerStatefulWidget {
+  const _PrivacyPreferencesSection();
+
+  @override
+  ConsumerState<_PrivacyPreferencesSection> createState() =>
+      _PrivacyPreferencesSectionState();
+}
+
+class _PrivacyPreferencesSectionState
+    extends ConsumerState<_PrivacyPreferencesSection> {
+  bool _busy = false;
+
+  Future<void> _patch(UserPreferences next) async {
+    setState(() => _busy = true);
+    try {
+      await ref.read(preferencesRemoteProvider).patch(next);
+      ref.invalidate(userPreferencesProvider);
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final async = ref.watch(userPreferencesProvider);
+    return async.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.all(12),
+        child: LinearProgressIndicator(),
+      ),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (prefs) {
+        return Column(
+          children: [
+            SwitchListTile(
+              value: prefs.hideRecommendations,
+              onChanged: _busy
+                  ? null
+                  : (v) => _patch(prefs.copyWith(hideRecommendations: v)),
+              title: Text(l10n.profilePrivacyHideRecommend),
+            ),
+            SwitchListTile(
+              value: prefs.rejectStrangerMail,
+              onChanged: _busy
+                  ? null
+                  : (v) => _patch(prefs.copyWith(rejectStrangerMail: v)),
+              title: Text(l10n.profilePrivacyRejectStranger),
+            ),
+          ],
+        );
+      },
     );
   }
 }

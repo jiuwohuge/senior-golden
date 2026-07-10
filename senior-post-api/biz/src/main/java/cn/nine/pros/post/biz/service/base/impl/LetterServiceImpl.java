@@ -387,6 +387,35 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
         return new java.util.ArrayList<>(peers);
     }
 
+    @Override
+    public List<LetterDomain> listDeliveredForExport(
+            long userId, Long peerUserId, LocalDateTime from, LocalDateTime to, int limit) {
+        LambdaQueryWrapper<LetterDomain> qw = new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .and(w -> w.eq(LetterDomain::getFromUserId, userId)
+                        .or()
+                        .eq(LetterDomain::getToUserId, userId))
+                .orderByAsc(LetterDomain::getCreatedAt)
+                .last("LIMIT " + Math.max(1, limit));
+        if (peerUserId != null) {
+            qw.and(w -> w
+                    .nested(n -> n.eq(LetterDomain::getFromUserId, userId)
+                            .eq(LetterDomain::getToUserId, peerUserId))
+                    .or()
+                    .nested(n -> n.eq(LetterDomain::getFromUserId, peerUserId)
+                            .eq(LetterDomain::getToUserId, userId)));
+        }
+        if (from != null) {
+            qw.ge(LetterDomain::getCreatedAt, from);
+        }
+        if (to != null) {
+            qw.le(LetterDomain::getCreatedAt, to);
+        }
+        return list(qw);
+    }
+
     private static LambdaQueryWrapper<LetterDomain> exchangeWrapper(long userIdA, long userIdB) {
         return new LambdaQueryWrapper<LetterDomain>()
                 .eq(LetterDomain::isDelFlag, false)

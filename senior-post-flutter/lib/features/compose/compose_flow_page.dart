@@ -10,10 +10,11 @@ import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
-import '../directory/send_letter_sheet.dart';
 import '../mailbox/mailbox_providers.dart';
 import '../mailbox/mailbox_remote.dart';
 import '../post_office/post_office_remote.dart';
+import '../commerce/commerce_remote.dart';
+import '../ritual/delivery_sent_overlay.dart';
 import '../time_letter/time_letter_providers.dart';
 import '../time_letter/time_letter_remote.dart';
 import '../time_letter/time_letter_seal_slider.dart';
@@ -53,6 +54,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   DateTime _deliveryDate = DateTime.now().add(const Duration(days: 7));
   String? _daysHint;
   LetterType _mailType = LetterType.standard;
+  String? _selectedSkinId;
   bool _busy = false;
 
   List<_ComposeStep> _steps = const [];
@@ -254,6 +256,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   }
 
   Future<void> _submitPenPalMail() async {
+    final l10n = AppLocalizations.of(context)!;
     final body = _bodyCtrl.text.trim();
     if (body.isEmpty) return;
     final isPostOffice = _kind == ComposeKind.postOffice;
@@ -277,7 +280,10 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         ref.invalidate(postOfficeHomeProvider);
       }
       if (!mounted) return;
-      await showPostalSendLetterSuccessDialog(context);
+      final dest = _kind == ComposeKind.postOffice
+          ? l10n.composePostOfficeSendHint
+          : (_peerNickname ?? l10n.topicFriendFallback);
+      await showDeliverySentOverlay(context, destinationLabel: dest);
       if (mounted) context.pop();
     } catch (e) {
       final biz = apiBusinessExceptionFrom(e);
@@ -482,34 +488,13 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           onTap: _pickDate,
         );
       case _ComposeStep.mailOptions:
-        return ListView(
-          physics: const ClampingScrollPhysics(),
-          children: [
-            RadioListTile<LetterType>(
-              // ignore: deprecated_member_use
-              value: LetterType.standard,
-              // ignore: deprecated_member_use
-              groupValue: _mailType,
-              // ignore: deprecated_member_use
-              onChanged: _busy ? null : (v) => setState(() => _mailType = v!),
-              title: Text(l10n.sendLetterStandardPost),
-              subtitle: Text(l10n.sendLetterStandardSub),
-            ),
-            RadioListTile<LetterType>(
-              // ignore: deprecated_member_use
-              value: LetterType.registered,
-              // ignore: deprecated_member_use
-              groupValue: _mailType,
-              // ignore: deprecated_member_use
-              onChanged: _busy ? null : (v) => setState(() => _mailType = v!),
-              title: Text(l10n.sendLetterRegisteredMail),
-              subtitle: Text(
-                session.isVip
-                    ? l10n.sendLetterRegisteredSubVip
-                    : l10n.sendLetterRegisteredSubPaid,
-              ),
-            ),
-          ],
+        return _MailOptionsStep(
+          mailType: _mailType,
+          selectedSkinId: _selectedSkinId,
+          busy: _busy,
+          session: session,
+          onMailTypeChanged: (v) => setState(() => _mailType = v),
+          onSkinChanged: (skinId) => setState(() => _selectedSkinId = skinId),
         );
       case _ComposeStep.seal:
         return Align(
@@ -552,6 +537,96 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           ],
         );
     }
+  }
+}
+
+class _MailOptionsStep extends ConsumerWidget {
+  const _MailOptionsStep({
+    required this.mailType,
+    required this.selectedSkinId,
+    required this.busy,
+    required this.session,
+    required this.onMailTypeChanged,
+    required this.onSkinChanged,
+  });
+
+  final LetterType mailType;
+  final String? selectedSkinId;
+  final bool busy;
+  final AppSessionState session;
+  final ValueChanged<LetterType> onMailTypeChanged;
+  final ValueChanged<String?> onSkinChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final skinsAsync = ref.watch(ownedSkinEntitlementsProvider);
+    return ListView(
+      physics: const ClampingScrollPhysics(),
+      children: [
+        RadioListTile<LetterType>(
+          // ignore: deprecated_member_use
+          value: LetterType.standard,
+          // ignore: deprecated_member_use
+          groupValue: mailType,
+          // ignore: deprecated_member_use
+          onChanged: busy ? null : (v) => onMailTypeChanged(v!),
+          title: Text(l10n.sendLetterStandardPost),
+          subtitle: Text(l10n.sendLetterStandardSub),
+        ),
+        RadioListTile<LetterType>(
+          // ignore: deprecated_member_use
+          value: LetterType.registered,
+          // ignore: deprecated_member_use
+          groupValue: mailType,
+          // ignore: deprecated_member_use
+          onChanged: busy ? null : (v) => onMailTypeChanged(v!),
+          title: Text(l10n.sendLetterRegisteredMail),
+          subtitle: Text(
+            session.isVip
+                ? l10n.sendLetterRegisteredSubVip
+                : l10n.sendLetterRegisteredSubPaid,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          l10n.composeSkinPickerTitle,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 8),
+        skinsAsync.when(
+          loading: () => const LinearProgressIndicator(),
+          error: (_, _) => const SizedBox.shrink(),
+          data: (skins) {
+            final options = <({String id, String label})>[
+              (id: 'default', label: l10n.commerceProductSkinDefault),
+              ...skins.map(
+                (e) => (
+                  id: e.productCode.replaceFirst('skin.', ''),
+                  label: commerceProductTitle(l10n, e.titleKey),
+                ),
+              ),
+            ];
+            final selected = selectedSkinId ?? 'default';
+            return Column(
+              children: options.map((opt) {
+                return RadioListTile<String>(
+                  // ignore: deprecated_member_use
+                  value: opt.id,
+                  // ignore: deprecated_member_use
+                  groupValue: selected,
+                  // ignore: deprecated_member_use
+                  onChanged: busy ? null : (v) => onSkinChanged(v),
+                  title: Text(opt.label),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ],
+    );
   }
 }
 

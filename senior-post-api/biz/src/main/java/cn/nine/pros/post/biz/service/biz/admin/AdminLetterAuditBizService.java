@@ -8,6 +8,7 @@ import cn.nine.pros.post.biz.controller.admin.AdminPageHelper;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.model.mapstruct.LetterMapstruct;
 import cn.nine.pros.post.biz.service.base.LetterService;
+import cn.nine.pros.post.biz.service.push.PushNotificationService;
 import cn.nine.pros.post.client.common.enums.LetterBizStatus;
 import cn.nine.pros.post.client.model.db.LetterDTO;
 import cn.nine.pros.post.client.model.input.admin.LetterAuditQueryInDto;
@@ -32,6 +33,7 @@ public class AdminLetterAuditBizService {
 
     private final LetterService letterService;
     private final LetterMapstruct letterMapstruct;
+    private final PushNotificationService pushNotificationService;
 
     /**
      * 按审核状态/模式分页。
@@ -78,5 +80,8 @@ public class AdminLetterAuditBizService {
             letterService.abortDeliveryRejected(id, now);
         }
         log.info("letter audit rejected, letterId={}, adminId={}", id, MyRequestContextHolder.userId());
+        if (row.getFromUserId() != null) {
+            pushNotificationService.notifyAuditRejected(row.getFromUserId(), id);
+        }
     }
 }

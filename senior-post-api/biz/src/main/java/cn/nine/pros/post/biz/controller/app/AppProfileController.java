@@ -5,7 +5,9 @@ import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.service.biz.AppProfileBizService;
 import cn.nine.pros.post.client.api.app.AppProfileApi;
+import cn.nine.pros.post.client.model.input.app.UserPreferencesPatchInDto;
 import cn.nine.pros.post.client.model.out.ProfileOverviewVO;
+import cn.nine.pros.post.client.model.out.UserPreferencesVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,6 +21,16 @@ public class AppProfileController implements AppProfileApi {
     @Override
     public ProfileOverviewVO overview() {
         return appProfileBizService.overview(requireUserId());
+    }
+
+    @Override
+    public UserPreferencesVO preferences() {
+        return appProfileBizService.preferences(requireUserId());
+    }
+
+    @Override
+    public UserPreferencesVO patchPreferences(UserPreferencesPatchInDto body) {
+        return appProfileBizService.patchPreferences(requireUserId(), body);
     }
 
     private Long requireUserId() {

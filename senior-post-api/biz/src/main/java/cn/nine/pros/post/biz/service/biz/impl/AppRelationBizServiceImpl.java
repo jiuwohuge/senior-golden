@@ -14,6 +14,7 @@ import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.biz.AppBlacklistService;
 import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
+import cn.nine.pros.post.biz.service.push.PushNotificationService;
 import cn.nine.pros.post.client.common.constant.BehaviorActionTypes;
 import cn.nine.pros.post.client.common.enums.LetterBizStatus;
 import cn.nine.pros.post.client.common.enums.PenpalRequestStatus;
@@ -56,6 +57,7 @@ public class AppRelationBizServiceImpl implements AppRelationBizService {
     private final ActionService actionService;
     private final OssDisplayUrlService ossDisplayUrlService;
     private final AppMessages appMessages;
+    private final PushNotificationService pushNotificationService;
 
     @Override
     public RelationSnapshotVO resolveRelationSnapshot(long viewerUserId, long peerUserId) {
@@ -134,6 +136,7 @@ public class AppRelationBizServiceImpl implements AppRelationBizService {
                 null);
         log.info("penpal request accepted, actorUserId={}, requestId={}, requesterId={}",
                 actorUserId, requestId, req.getRequesterId());
+        pushNotificationService.notifyPenpalAccepted(req.getRequesterId(), actorUserId);
         return toResult(req, PenpalRequestStatus.ACCEPTED);
     }
 
@@ -197,6 +200,7 @@ public class AppRelationBizServiceImpl implements AppRelationBizService {
                 null);
         log.info("penpal request created, requesterId={}, targetId={}, requestId={}",
                 actorUserId, peerUserId, row.getId());
+        pushNotificationService.notifyPenpalRequest(peerUserId, actorUserId, row.getId());
         return PenpalRequestResultVO.builder()
                 .requestId(row.getId())
                 .peerUserId(peerUserId)

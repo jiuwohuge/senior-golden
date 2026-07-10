@@ -65,6 +65,17 @@ public class CountryServiceImpl extends ServiceImpl<CountryMapper, CountryDomain
                 .orderByAsc(CountryDomain::getId));
     }
 
+    @Override
+    public CountryDomain findActiveByCode(String countryCode) {
+        if (countryCode == null || countryCode.isBlank()) {
+            return null;
+        }
+        return getOne(new LambdaQueryWrapper<CountryDomain>()
+                .eq(CountryDomain::isDelFlag, false)
+                .eq(CountryDomain::getCountryCode, countryCode.trim())
+                .last("LIMIT 1"));
+    }
+
 
     @Override
     public com.baomidou.mybatisplus.extension.plugins.pagination.Page<CountryDomain> pageForAdmin(

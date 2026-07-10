@@ -732,5 +732,76 @@
   "composeStepTopicSubmitTitle": "投进主题信箱",
   "composeStepTopicSubmitSubtitle": "确认后投稿进入审核，通过后其他用户可见。",
   "composeTopicSubmit": "投进主题信箱",
-  "composeTopicSubmitted": "已投进主题信箱，审核通过后会展示。"
+  "composeTopicSubmitted": "已投进主题信箱，审核通过后会展示。",
+  "shopVipSectionTitle": "会员 · VIP",
+  "shopVipOwnedSubtitle": "您已是会员，可继续查看权益说明",
+  "shopVipPromoSubtitle": "开通会员可获得更多邮政能力与装扮权益",
+  "shopVipBody": "会员权益由服务端配置（如挂号信减免等）。支付与签约流程接入后将在此完成。",
+  "shopCatalogEmptyTitle": "暂无商品",
+  "shopCatalogEmptySubtitle": "运营配置商品后将在此展示。",
+  "shopMockPurchase": "模拟购买",
+  "shopMockPurchaseSuccess": "购买成功，权益已到账",
+  "shopOwned": "已拥有",
+  "shopPriceFree": "免费",
+  "shopPriceAmount": "¥{amount}",
+  "@shopPriceAmount": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "shopProductTypeSkin": "信纸皮肤",
+  "shopProductTypeFont": "字体",
+  "shopProductTypeTemplate": "模板",
+  "shopProductTypeVipBundle": "会员礼包",
+  "shopProductTypeExport": "导出",
+  "shopProductTypeAttachment": "附件",
+  "commerceProductSkinDefault": "默认信纸",
+  "commerceProductSkinVintage": "复古信纸",
+  "commerceProductFontDefault": "默认字体",
+  "commerceProductFontHandwriting": "手写体",
+  "commerceProductExportPdf": "PDF 导出",
+  "entitlementsTitle": "我的装扮",
+  "entitlementsEmptyTitle": "还没有装扮",
+  "entitlementsEmptySubtitle": "前往商店挑选信纸、字体等表达增强商品。",
+  "entitlementsGrantedAt": "获得于 {date}",
+  "@entitlementsGrantedAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "profileLetterDrafts": "信件草稿",
+  "profileLetterFavorites": "信件收藏",
+  "profileLetterExport": "信件导出",
+  "profileMyEntitlements": "我的装扮",
+  "profilePrivacyHideRecommend": "屏蔽推荐",
+  "profilePrivacyRejectStranger": "拒收陌生信",
+  "letterDraftsTitle": "信件草稿",
+  "letterDraftsEmptyTitle": "暂无草稿",
+  "letterDraftsEmptySubtitle": "写信时可保存草稿，稍后再寄出。",
+  "letterDraftsSend": "发送",
+  "letterDraftsDelete": "删除",
+  "letterDraftsDeleted": "草稿已删除",
+  "letterDraftsNoContent": "（空草稿）",
+  "letterDraftsUpdated": "更新于 {time}",
+  "@letterDraftsUpdated": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "letterFavoritesTitle": "信件收藏",
+  "letterFavoritesEmptyTitle": "暂无收藏",
+  "letterFavoritesEmptySubtitle": "在读信页点击星标即可收藏。",
+  "letterExportTitle": "信件导出",
+  "letterExportFromDate": "起始日期",
+  "letterExportToDate": "结束日期",
+  "letterExportDateOptional": "可选",
+  "letterExportSubmit": "生成导出",
+  "letterExportSuccess": "导出链接已生成",
+  "letterExportPending": "导出任务已提交",
+  "letterFavorite": "收藏",
+  "letterUnfavorite": "取消收藏",
+  "ritualOpenLetter": "有一封信等待拆阅",
+  "ritualDeliverySent": "信件已寄出",
+  "composeSkinPickerTitle": "选择信纸皮肤",
+  "settingsPreferencesSaved": "偏好已保存"
 }

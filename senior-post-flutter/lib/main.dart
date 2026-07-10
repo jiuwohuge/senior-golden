@@ -9,6 +9,7 @@ import 'core/config/api_base_url_provider.dart';
 import 'core/device/device_ids.dart';
 import 'core/device/device_install_id.dart';
 import 'features/auth/auth_repository.dart';
+import 'features/push/push_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +27,7 @@ Future<void> main() async {
       // 弱网场景不打断进入应用，后续页面仍可按需重试拉取。
       try {
         await container.read(authRepositoryProvider).refreshSessionFromServer();
+        await container.read(pushServiceProvider).registerIfPossible();
       } catch (_) {}
     }
   }

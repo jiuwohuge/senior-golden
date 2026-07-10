@@ -2,14 +2,19 @@ package cn.nine.pros.post.biz.service.biz.impl;
 
 import cn.nine.commons.basic.exception.unchecked.BusinessException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
+import cn.nine.pros.post.biz.moderation.ModerationVerdict;
+import cn.nine.pros.post.biz.moderation.TextModerationProvider;
+import cn.nine.pros.post.biz.model.domain.CountryDomain;
 import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.service.biz.AppBlacklistService;
+import cn.nine.pros.post.biz.service.biz.AppCommerceBizService;
 import cn.nine.pros.post.biz.service.biz.AppMailboxService;
 import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
 import cn.nine.pros.post.biz.service.biz.WritingStyleService;
 import cn.nine.pros.post.biz.service.base.ActionService;
 import cn.nine.pros.post.biz.service.base.ConfigService;
+import cn.nine.pros.post.biz.service.base.CountryService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.SensitiveWordService;
@@ -42,7 +47,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -57,6 +64,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
 
     private static final int USER_STATUS_NORMAL = 1;
     private static final String LETTER_DAILY_QUOTA_KEY = "letter.daily_quota";
+    private static final String LETTER_MAX_LENGTH_KEY = "letter.max_length";
+    private static final int DEFAULT_MAX_LETTER_LENGTH = 5000;
     private static final String AUDIT_AUTO_APPROVE_SEC = "audit.auto_approve_seconds";
     private static final int DEFAULT_DAILY_LETTER_QUOTA = 5;
 
@@ -72,6 +81,9 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private final DeliveryDelayCalculator deliveryDelayCalculator;
     private final AppMessages appMessages;
     private final AppRelationBizService appRelationBizService;
+    private final AppCommerceBizService appCommerceBizService;
+    private final CountryService countryService;
+    private final TextModerationProvider textModerationProvider;
 
     /**
      * 邮政收件箱：本人相关且未读的信件列表（含 POST_OFFICE 入池仅发件人可见）。
@@ -174,11 +186,21 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             throw new BusinessException(appMessages.get("app.error.letter.contentEmpty"));
         }
         String content = raw.trim();
-        if (content.length() > 20000) {
+        int maxLen = configService.getInt(LETTER_MAX_LENGTH_KEY, DEFAULT_MAX_LETTER_LENGTH);
+        if (content.length() > maxLen) {
             throw new BusinessException(appMessages.get("app.error.letter.contentTooLong"));
         }
         // 敏感词硬拦截：拒绝则抛错不落库
         sensitiveWordService.assertPlainTextAllowed(content);
+        TextModerationProvider.TextModerationResult moderation = textModerationProvider.auditText(content);
+        if (moderation.verdict() == ModerationVerdict.REJECT) {
+            throw new BusinessException(appMessages.get("app.error.letter.contentRejected"));
+        }
+
+        String skinId = normalizeMetaId(body.getSkinId(), "default");
+        String fontId = normalizeMetaId(body.getFontId(), "default");
+        String templateId = normalizeMetaId(body.getTemplateId(), "default");
+        appCommerceBizService.assertLetterContentEntitlements(fromUserId, skinId, fontId, templateId);
         LetterPhysicalType physicalType = LetterPhysicalType.fromCode(body.getLetterType());
         if (physicalType == null) {
             throw new BusinessException(appMessages.get("app.error.letter.typeInvalid"));
@@ -202,6 +224,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         letter.setMode(mode.getCode());
         letter.setAuditStatus(LetterAuditStatus.PENDING_REVIEW.getCode());
         letter.setLetterType(physicalType.getCode());
+        letter.setContentMetaJson(buildContentMeta(skinId, fontId, templateId));
         // 运输轨仅作展示兼容；速度一律 §6.1
         letter.setSendMode(physicalType == LetterPhysicalType.STANDARD
                 ? LetterSendMode.STANDARD_POST.getCode()
@@ -222,7 +245,11 @@ public class AppMailboxServiceImpl implements AppMailboxService {
 
         letter.initAudit(fromUserId);
         letterService.save(letter);
-        maybeAutoApproveOnSend(letter.getId(), now);
+        if (moderation.verdict() == ModerationVerdict.PASS) {
+            maybeAutoApproveOnSend(letter.getId(), now);
+        } else if (moderation.verdict() == ModerationVerdict.SKIPPED) {
+            maybeAutoApproveOnSend(letter.getId(), now);
+        }
         writingStyleService.recompute(fromUserId);
         String actionType = parentLetterId != null
                 ? BehaviorActionTypes.REPLY_LETTER
@@ -520,6 +547,11 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         RelationSnapshotVO relation = peerId > 0
                 ? appRelationBizService.resolveRelationSnapshot(viewer, peerId)
                 : null;
+        UserDTO fromUser = l.getFromUserId() != null ? userService.findById(l.getFromUserId()) : null;
+        UserDTO toUser = l.getToUserId() != null ? userService.findById(l.getToUserId()) : null;
+        Map<String, Object> meta = l.getContentMetaJson();
+        String skinId = metaString(meta, "skin_id", "default");
+        String fontId = metaString(meta, "font_id", "default");
         return MailboxLetterItemVO.builder()
                 .letterId(l.getId())
                 .peer(peerVo)
@@ -539,7 +571,53 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .relationDisplayState(relation != null ? relation.getDisplayState() : null)
                 .canAddPenpal(relation != null ? relation.getCanAddPenpal() : false)
                 .recipientRead(l.getRecipientReadAt() != null)
+                .fromCountryName(resolveCountryName(fromUser))
+                .toCountryName(resolveCountryName(toUser))
+                .skinId(skinId)
+                .fontId(fontId)
                 .build();
+    }
+
+    private static String normalizeMetaId(String raw, String defaultValue) {
+        if (!StringUtils.hasText(raw)) {
+            return defaultValue;
+        }
+        return raw.trim();
+    }
+
+    private static Map<String, Object> buildContentMeta(String skinId, String fontId, String templateId) {
+        Map<String, Object> meta = new HashMap<>();
+        meta.put("skin_id", skinId);
+        meta.put("font_id", fontId);
+        meta.put("template_id", templateId);
+        return meta;
+    }
+
+    private static String metaString(Map<String, Object> meta, String key, String defaultValue) {
+        if (meta == null || !meta.containsKey(key)) {
+            return defaultValue;
+        }
+        Object raw = meta.get(key);
+        return raw != null ? String.valueOf(raw) : defaultValue;
+    }
+
+    private String resolveCountryName(UserDTO user) {
+        if (user == null || !StringUtils.hasText(user.getCountryCode())) {
+            return null;
+        }
+        CountryDomain country = countryService.findActiveByCode(user.getCountryCode());
+        if (country == null) {
+            return user.getCountryCode();
+        }
+        String lang = user.getLanguage();
+        if (lang != null && lang.toLowerCase().startsWith("zh")) {
+            return StringUtils.hasText(country.getCountryNameZh())
+                    ? country.getCountryNameZh()
+                    : country.getCountryNameEn();
+        }
+        return StringUtils.hasText(country.getCountryNameEn())
+                ? country.getCountryNameEn()
+                : country.getCountryNameZh();
     }
 
     /**

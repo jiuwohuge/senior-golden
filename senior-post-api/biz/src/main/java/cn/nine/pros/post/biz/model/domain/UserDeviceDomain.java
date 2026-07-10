@@ -51,4 +51,13 @@ public class UserDeviceDomain extends AbstractAuditableDomain {
     @Schema(description = "状态：1正常 2黑名单")
     private Object status;
 
+    @Schema(description = "FCM/APNs push token")
+    private String pushToken;
+
+    @Schema(description = "推送平台 ios|android")
+    private String pushPlatform;
+
+    @Schema(description = "是否启用推送")
+    private Boolean pushEnabled;
+
 }

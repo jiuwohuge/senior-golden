@@ -1697,4 +1697,178 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get composeTopicSubmitted => '已投进主题信箱，审核通过后会展示。';
+
+  @override
+  String get shopVipSectionTitle => '会员 · VIP';
+
+  @override
+  String get shopVipOwnedSubtitle => '您已是会员，可继续查看权益说明';
+
+  @override
+  String get shopVipPromoSubtitle => '开通会员可获得更多邮政能力与装扮权益';
+
+  @override
+  String get shopVipBody => '会员权益由服务端配置（如挂号信减免等）。支付与签约流程接入后将在此完成。';
+
+  @override
+  String get shopCatalogEmptyTitle => '暂无商品';
+
+  @override
+  String get shopCatalogEmptySubtitle => '运营配置商品后将在此展示。';
+
+  @override
+  String get shopMockPurchase => '模拟购买';
+
+  @override
+  String get shopMockPurchaseSuccess => '购买成功，权益已到账';
+
+  @override
+  String get shopOwned => '已拥有';
+
+  @override
+  String get shopPriceFree => '免费';
+
+  @override
+  String shopPriceAmount(Object amount) {
+    return '¥$amount';
+  }
+
+  @override
+  String get shopProductTypeSkin => '信纸皮肤';
+
+  @override
+  String get shopProductTypeFont => '字体';
+
+  @override
+  String get shopProductTypeTemplate => '模板';
+
+  @override
+  String get shopProductTypeVipBundle => '会员礼包';
+
+  @override
+  String get shopProductTypeExport => '导出';
+
+  @override
+  String get shopProductTypeAttachment => '附件';
+
+  @override
+  String get commerceProductSkinDefault => '默认信纸';
+
+  @override
+  String get commerceProductSkinVintage => '复古信纸';
+
+  @override
+  String get commerceProductFontDefault => '默认字体';
+
+  @override
+  String get commerceProductFontHandwriting => '手写体';
+
+  @override
+  String get commerceProductExportPdf => 'PDF 导出';
+
+  @override
+  String get entitlementsTitle => '我的装扮';
+
+  @override
+  String get entitlementsEmptyTitle => '还没有装扮';
+
+  @override
+  String get entitlementsEmptySubtitle => '前往商店挑选信纸、字体等表达增强商品。';
+
+  @override
+  String entitlementsGrantedAt(Object date) {
+    return '获得于 $date';
+  }
+
+  @override
+  String get profileLetterDrafts => '信件草稿';
+
+  @override
+  String get profileLetterFavorites => '信件收藏';
+
+  @override
+  String get profileLetterExport => '信件导出';
+
+  @override
+  String get profileMyEntitlements => '我的装扮';
+
+  @override
+  String get profilePrivacyHideRecommend => '屏蔽推荐';
+
+  @override
+  String get profilePrivacyRejectStranger => '拒收陌生信';
+
+  @override
+  String get letterDraftsTitle => '信件草稿';
+
+  @override
+  String get letterDraftsEmptyTitle => '暂无草稿';
+
+  @override
+  String get letterDraftsEmptySubtitle => '写信时可保存草稿，稍后再寄出。';
+
+  @override
+  String get letterDraftsSend => '发送';
+
+  @override
+  String get letterDraftsDelete => '删除';
+
+  @override
+  String get letterDraftsDeleted => '草稿已删除';
+
+  @override
+  String get letterDraftsNoContent => '（空草稿）';
+
+  @override
+  String letterDraftsUpdated(Object time) {
+    return '更新于 $time';
+  }
+
+  @override
+  String get letterFavoritesTitle => '信件收藏';
+
+  @override
+  String get letterFavoritesEmptyTitle => '暂无收藏';
+
+  @override
+  String get letterFavoritesEmptySubtitle => '在读信页点击星标即可收藏。';
+
+  @override
+  String get letterExportTitle => '信件导出';
+
+  @override
+  String get letterExportFromDate => '起始日期';
+
+  @override
+  String get letterExportToDate => '结束日期';
+
+  @override
+  String get letterExportDateOptional => '可选';
+
+  @override
+  String get letterExportSubmit => '生成导出';
+
+  @override
+  String get letterExportSuccess => '导出链接已生成';
+
+  @override
+  String get letterExportPending => '导出任务已提交';
+
+  @override
+  String get letterFavorite => '收藏';
+
+  @override
+  String get letterUnfavorite => '取消收藏';
+
+  @override
+  String get ritualOpenLetter => '有一封信等待拆阅';
+
+  @override
+  String get ritualDeliverySent => '信件已寄出';
+
+  @override
+  String get composeSkinPickerTitle => '选择信纸皮肤';
+
+  @override
+  String get settingsPreferencesSaved => '偏好已保存';
 }

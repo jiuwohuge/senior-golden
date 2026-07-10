@@ -385,6 +385,12 @@ class MailboxLetter {
     this.relationDisplayState,
     this.canAddPenpal = false,
     this.recipientRead = false,
+    this.fromCountryName,
+    this.toCountryName,
+    this.postmarkLabel,
+    this.skinId,
+    this.fontId,
+    this.favorited = false,
   });
 
   final String id;
@@ -405,6 +411,116 @@ class MailboxLetter {
   final RelationDisplayState? relationDisplayState;
   final bool canAddPenpal;
   final bool recipientRead;
+  final String? fromCountryName;
+  final String? toCountryName;
+  final String? postmarkLabel;
+  final String? skinId;
+  final String? fontId;
+  final bool favorited;
+}
+
+/// 商店商品，对齐 `CommerceProductVO`。
+class CommerceProduct {
+  const CommerceProduct({
+    required this.id,
+    required this.productCode,
+    required this.productType,
+    required this.titleKey,
+    required this.priceCents,
+    this.metadata = const {},
+    this.sortOrder = 0,
+    this.owned = false,
+  });
+
+  final String id;
+  final String productCode;
+  final String productType;
+  final String titleKey;
+  final int priceCents;
+  final Map<String, dynamic> metadata;
+  final int sortOrder;
+  final bool owned;
+
+  String? get skinId => metadata['skinId'] as String?;
+  String? get fontId => metadata['fontId'] as String?;
+}
+
+/// 用户商业权益，对齐 `CommerceEntitlementVO`。
+class CommerceEntitlement {
+  const CommerceEntitlement({
+    required this.entitlementId,
+    required this.productId,
+    required this.productCode,
+    required this.productType,
+    required this.titleKey,
+    this.source,
+    this.expiresAt,
+    this.grantedAt,
+  });
+
+  final String entitlementId;
+  final String productId;
+  final String productCode;
+  final String productType;
+  final String titleKey;
+  final String? source;
+  final DateTime? expiresAt;
+  final DateTime? grantedAt;
+}
+
+/// 普通信件草稿，对齐 `LetterDraftVO`。
+class LetterDraft {
+  const LetterDraft({
+    required this.id,
+    required this.mode,
+    this.toUserId,
+    this.content = '',
+    this.letterType = LetterType.standard,
+    this.updatedAt,
+  });
+
+  final String id;
+  final String mode;
+  final String? toUserId;
+  final String content;
+  final LetterType letterType;
+  final DateTime? updatedAt;
+}
+
+/// 隐私与通知偏好，对齐 `UserPreferencesVO`。
+class UserPreferences {
+  const UserPreferences({
+    this.hideRecommendations = false,
+    this.rejectStrangerMail = false,
+    this.pushEnabled = true,
+    this.unreadBadges = true,
+  });
+
+  final bool hideRecommendations;
+  final bool rejectStrangerMail;
+  final bool pushEnabled;
+  final bool unreadBadges;
+
+  UserPreferences copyWith({
+    bool? hideRecommendations,
+    bool? rejectStrangerMail,
+    bool? pushEnabled,
+    bool? unreadBadges,
+  }) {
+    return UserPreferences(
+      hideRecommendations: hideRecommendations ?? this.hideRecommendations,
+      rejectStrangerMail: rejectStrangerMail ?? this.rejectStrangerMail,
+      pushEnabled: pushEnabled ?? this.pushEnabled,
+      unreadBadges: unreadBadges ?? this.unreadBadges,
+    );
+  }
+}
+
+/// 信件导出结果，对齐 `LetterExportResultVO`。
+class LetterExportResult {
+  const LetterExportResult({this.downloadUrl});
+
+  final String? downloadUrl;
 }
 
 /// 邮政 Tab「Connections」：好友（笔友）列表行，语义对齐 `GET /api/mailbox/friends`。

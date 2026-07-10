@@ -15,6 +15,7 @@ import cn.nine.pros.post.biz.service.biz.AppRecommendBizService;
 import cn.nine.pros.post.biz.service.biz.support.MatchScoringSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserInterestAssembler;
+import cn.nine.pros.post.biz.service.biz.support.UserPreferenceSupport;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.out.DirectoryUserItemVO;
 import lombok.RequiredArgsConstructor;
@@ -50,11 +51,16 @@ public class AppRecommendBizServiceImpl implements AppRecommendBizService {
     private final ConfigService configService;
     private final OssDisplayUrlService ossDisplayUrlService;
     private final UserInterestAssembler userInterestAssembler;
+    private final MatchScoringSupport matchScoringSupport;
+    private final UserPreferenceSupport userPreferenceSupport;
     private final cn.nine.pros.post.biz.i18n.AppMessages appMessages;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<DirectoryUserItemVO> listTodayRecommendations(long viewerUserId) {
+        if (userPreferenceSupport.hideRecommendations(viewerUserId)) {
+            return List.of();
+        }
         LocalDate today = LocalDate.now();
         if (!dailyRecommendationService.existsForUserOnDate(viewerUserId, today)) {
             generateForDate(viewerUserId, today);
@@ -99,14 +105,16 @@ public class AppRecommendBizServiceImpl implements AppRecommendBizService {
                 continue;
             }
             List<Integer> candTags = userTagService.listTagIdsByUserId(cand.getId());
-            double score = MatchScoringSupport.scoreCandidate(
+            double score = matchScoringSupport.scoreCandidateWeighted(
                     viewer,
                     cand,
                     viewerTags,
                     candTags,
                     viewerProtected,
                     protectN,
-                    letterService.countLettersSentByUser(cand.getId()));
+                    letterService.countLettersSentByUser(cand.getId()),
+                    null,
+                    null);
             if (score == Double.NEGATIVE_INFINITY) {
                 continue;
             }
@@ -114,9 +122,13 @@ public class AppRecommendBizServiceImpl implements AppRecommendBizService {
             scored.add(new ScoredCandidate(cand.getId(), score, reasonKey));
         }
         scored.sort(Comparator.comparingDouble(ScoredCandidate::score).reversed());
+
+        Set<Long> picked = new HashSet<>();
         int n = 0;
-        for (ScoredCandidate sc : scored) {
-            if (n >= dailyCount) {
+        while (n < dailyCount && picked.size() < scored.size()) {
+            MatchScoringSupport.DistributionBucket bucket = matchScoringSupport.pickDistributionBucket();
+            ScoredCandidate sc = pickFromBucket(scored, bucket, picked);
+            if (sc == null) {
                 break;
             }
             DailyRecommendationDomain row = new DailyRecommendationDomain();
@@ -127,11 +139,51 @@ public class AppRecommendBizServiceImpl implements AppRecommendBizService {
             row.setReasonKey(sc.reasonKey());
             row.initAudit(viewerUserId);
             dailyRecommendationService.save(row);
+            picked.add(sc.userId());
             n++;
         }
         if (n > 0) {
             log.info("daily recommendations generated, userId={}, date={}, count={}", viewerUserId, date, n);
         }
+    }
+
+    private ScoredCandidate pickFromBucket(
+            List<ScoredCandidate> sorted,
+            MatchScoringSupport.DistributionBucket bucket,
+            Set<Long> picked) {
+        if (sorted.isEmpty()) {
+            return null;
+        }
+        int size = sorted.size();
+        int third = Math.max(1, size / 3);
+        int from;
+        int to;
+        switch (bucket) {
+            case HIGH -> {
+                from = 0;
+                to = third;
+            }
+            case MID -> {
+                from = third;
+                to = Math.min(2 * third, size);
+            }
+            default -> {
+                from = Math.min(2 * third, size);
+                to = size;
+            }
+        }
+        for (int i = from; i < to; i++) {
+            ScoredCandidate sc = sorted.get(i);
+            if (!picked.contains(sc.userId())) {
+                return sc;
+            }
+        }
+        for (ScoredCandidate sc : sorted) {
+            if (!picked.contains(sc.userId())) {
+                return sc;
+            }
+        }
+        return null;
     }
 
     private boolean isEligible(long viewerUserId, Long candId) {
@@ -142,6 +194,9 @@ public class AppRecommendBizServiceImpl implements AppRecommendBizService {
             return false;
         }
         if (penpalRequestService.existsPendingBetween(viewerUserId, candId)) {
+            return false;
+        }
+        if (userPreferenceSupport.rejectStrangerLetters(candId)) {
             return false;
         }
         return !appBlacklistService.areMutuallyBlocked(viewerUserId, candId);

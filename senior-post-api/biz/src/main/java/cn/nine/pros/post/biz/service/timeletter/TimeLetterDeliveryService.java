@@ -5,6 +5,7 @@ import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.TimeLetterDomain;
 import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.biz.service.base.UserService;
+import cn.nine.pros.post.biz.service.push.PushNotificationService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class TimeLetterDeliveryService {
     private final UserService userService;
     private final TimeLetterProperties properties;
     private final AppMessages appMessages;
+    private final PushNotificationService pushNotificationService;
 
     @Transactional(rollbackFor = Exception.class)
     public int deliverDueLetters(int maxBatch) {
@@ -53,6 +55,7 @@ public class TimeLetterDeliveryService {
             }
             if (timeLetterService.markDelivered(row.getId(), LocalDateTime.now())) {
                 delivered++;
+                pushNotificationService.notifyTimeLetterDelivered(recipientId, row.getId());
             }
         }
         if (delivered > 0 || failed > 0) {

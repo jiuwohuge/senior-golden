@@ -8,24 +8,27 @@ import cn.nine.pros.post.biz.service.base.UserBlacklistService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.base.UserTagService;
 import cn.nine.pros.post.biz.service.biz.support.DeliveryDelayCalculator;
+import cn.nine.pros.post.biz.service.biz.support.MatchFeatureExtractionService;
+import cn.nine.pros.post.biz.service.biz.support.MatchScoringSupport;
+import cn.nine.pros.post.biz.service.biz.support.UserPreferenceSupport;
 import cn.nine.pros.post.client.common.enums.LetterAuditStatus;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * POST_OFFICE 匹配 v1：过滤 → 规则打分 → 赋收件人 → 启运。
+ * POST_OFFICE 匹配 v2：过滤 → 可配置加权打分 → 60/30/10 分发 → 赋收件人 → 启运。
  */
 @Slf4j
 @Service
@@ -44,6 +47,9 @@ public class PostOfficeMatchService {
     private final UserBlacklistService userBlacklistService;
     private final ConfigService configService;
     private final DeliveryDelayCalculator deliveryDelayCalculator;
+    private final MatchScoringSupport matchScoringSupport;
+    private final MatchFeatureExtractionService matchFeatureExtractionService;
+    private final UserPreferenceSupport userPreferenceSupport;
 
     /**
      * 自动放行超时 PENDING_REVIEW，再 drain 匹配池一批。
@@ -134,7 +140,6 @@ public class PostOfficeMatchService {
         if (Objects.equals(letter.getAuditStatus(), LetterAuditStatus.REJECTED.getCode())) {
             return;
         }
-        // 匹配前默认放行（与「默认放行进入投递」一致）
         letterService.approveAudit(letter.getId(), now, 0L);
     }
 
@@ -144,25 +149,64 @@ public class PostOfficeMatchService {
         int protectN = Math.max(0, configService.getInt(KEY_PROTECT, 3));
         LocalDateTime dayStart = LocalDate.now().atStartOfDay();
 
+        MatchFeatureExtractionService.LetterFeatures features =
+                matchFeatureExtractionService.extractFromLetterContent(letter.getContent());
+
         List<UserDomain> candidates = userService.listActiveAppUsersExcluding(sender.getId(), candidateLimit);
         List<Integer> senderTags = userTagService.listTagIdsByUserId(sender.getId());
         Set<Integer> senderTagSet = new HashSet<>(senderTags);
         boolean senderProtected = letterService.countLettersSentByUser(sender.getId()) <= protectN;
 
-        Long bestId = null;
-        double bestScore = Double.NEGATIVE_INFINITY;
+        List<ScoredCandidate> scored = new ArrayList<>();
         for (UserDomain cand : candidates) {
             Double score = scoreCandidate(sender, cand, senderTagSet, senderProtected,
-                    protectN, inboundCap, dayStart);
+                    protectN, inboundCap, dayStart, features);
             if (score == null) {
                 continue;
             }
-            if (score > bestScore) {
-                bestScore = score;
-                bestId = cand.getId();
+            scored.add(new ScoredCandidate(cand.getId(), score));
+        }
+        if (scored.isEmpty()) {
+            return null;
+        }
+        scored.sort(Comparator.comparingDouble(ScoredCandidate::score).reversed());
+
+        MatchScoringSupport.DistributionBucket bucket = matchScoringSupport.pickDistributionBucket();
+        ScoredCandidate picked = pickFromBucket(scored, bucket);
+        if (picked != null) {
+            return picked.userId();
+        }
+        return scored.get(0).userId();
+    }
+
+    private ScoredCandidate pickFromBucket(
+            List<ScoredCandidate> sorted,
+            MatchScoringSupport.DistributionBucket bucket) {
+        if (sorted.isEmpty()) {
+            return null;
+        }
+        int size = sorted.size();
+        int third = Math.max(1, size / 3);
+        int from;
+        int to;
+        switch (bucket) {
+            case HIGH -> {
+                from = 0;
+                to = third;
+            }
+            case MID -> {
+                from = third;
+                to = Math.min(2 * third, size);
+            }
+            default -> {
+                from = Math.min(2 * third, size);
+                to = size;
             }
         }
-        return bestId;
+        for (int i = from; i < to; i++) {
+            return sorted.get(i);
+        }
+        return sorted.get(0);
     }
 
     /**
@@ -175,8 +219,12 @@ public class PostOfficeMatchService {
             boolean senderProtected,
             int protectN,
             int inboundCap,
-            LocalDateTime dayStart) {
+            LocalDateTime dayStart,
+            MatchFeatureExtractionService.LetterFeatures features) {
         if (cand.getId() == null || Objects.equals(cand.getId(), sender.getId())) {
+            return null;
+        }
+        if (userPreferenceSupport.rejectStrangerLetters(cand.getId())) {
             return null;
         }
         if (userBlacklistService.existsActiveBlock(sender.getId(), cand.getId())
@@ -187,64 +235,29 @@ public class PostOfficeMatchService {
         if (inboundToday >= inboundCap) {
             return null;
         }
-        if (!languageCompatible(sender.getLanguage(), cand.getLanguage())) {
+        if (!MatchScoringSupport.languageCompatible(sender.getLanguage(), cand.getLanguage())) {
             return null;
         }
 
-        double score = ThreadLocalRandom.current().nextDouble(0, 1.0);
         List<Integer> candTags = userTagService.listTagIdsByUserId(cand.getId());
-        int shared = 0;
-        for (Integer t : candTags) {
-            if (senderTagSet.contains(t)) {
-                shared++;
-            }
-        }
-        score += shared * 3.0;
-        score += writingStyleBonus(sender.getWritingStyle(), cand.getWritingStyle());
-        if (sameIgnoreCase(sender.getLanguage(), cand.getLanguage())) {
-            score += 2.0;
-        }
-        if (sameIgnoreCase(sender.getCountryCode(), cand.getCountryCode())) {
-            score += 1.5;
-        }
-        long candSent = letterService.countLettersSentByUser(cand.getId());
-        if (candSent < protectN) {
-            score += 5.0;
-        }
-        if (senderProtected) {
-            score += 2.0;
+        Double emotion = features != null ? features.emotionScore() : null;
+        Double style = features != null ? features.styleScore() : null;
+        double score = matchScoringSupport.scoreCandidateWeighted(
+                sender,
+                cand,
+                List.copyOf(senderTagSet),
+                candTags,
+                senderProtected,
+                protectN,
+                letterService.countLettersSentByUser(cand.getId()),
+                emotion,
+                style);
+        if (score == Double.NEGATIVE_INFINITY) {
+            return null;
         }
         return score;
     }
 
-    private static double writingStyleBonus(String a, String b) {
-        if (!StringUtils.hasText(a) || !StringUtils.hasText(b)) {
-            return 0;
-        }
-        if (a.trim().equalsIgnoreCase(b.trim())) {
-            return 2.5;
-        }
-        return 0;
-    }
-
-    private static boolean languageCompatible(String a, String b) {
-        if (!StringUtils.hasText(a) || !StringUtils.hasText(b)) {
-            return true;
-        }
-        String la = a.trim().toLowerCase();
-        String lb = b.trim().toLowerCase();
-        if (la.equals(lb)) {
-            return true;
-        }
-        // zh / zh_CN / zh-Hans 粗匹配
-        return la.startsWith("zh") && lb.startsWith("zh")
-                || la.startsWith("en") && lb.startsWith("en");
-    }
-
-    private static boolean sameIgnoreCase(String a, String b) {
-        if (!StringUtils.hasText(a) || !StringUtils.hasText(b)) {
-            return false;
-        }
-        return a.trim().equalsIgnoreCase(b.trim());
+    private record ScoredCandidate(long userId, double score) {
     }
 }

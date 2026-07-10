@@ -38,4 +38,13 @@ public class AppSendLetterInDto {
      */
     @Schema(description = "LetterMode.code：1=POST_OFFICE 2=DIRECT；可空由服务端推断")
     private Integer mode;
+
+    @Schema(description = "信纸皮肤 ID，默认 default")
+    private String skinId;
+
+    @Schema(description = "字体 ID，默认 default")
+    private String fontId;
+
+    @Schema(description = "写信模板 ID")
+    private String templateId;
 }

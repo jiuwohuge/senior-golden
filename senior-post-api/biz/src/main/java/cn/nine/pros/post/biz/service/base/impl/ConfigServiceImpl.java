@@ -105,6 +105,22 @@ public class ConfigServiceImpl extends ServiceImpl<ConfigMapper, ConfigDomain>
         }
     }
 
+    @Override
+    public boolean getBoolean(String configKey, boolean defaultValue) {
+        ConfigDomain cfg = findActiveByKey(configKey);
+        if (cfg == null || cfg.getConfigValue() == null || cfg.getConfigValue().isBlank()) {
+            return defaultValue;
+        }
+        String v = cfg.getConfigValue().trim().toLowerCase();
+        if ("true".equals(v) || "1".equals(v) || "yes".equals(v) || "on".equals(v)) {
+            return true;
+        }
+        if ("false".equals(v) || "0".equals(v) || "no".equals(v) || "off".equals(v)) {
+            return false;
+        }
+        return defaultValue;
+    }
+
 
     @Override
     public com.baomidou.mybatisplus.extension.plugins.pagination.Page<ConfigDomain> pageForAdmin(

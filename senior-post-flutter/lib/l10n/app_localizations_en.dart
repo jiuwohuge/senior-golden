@@ -1802,4 +1802,184 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get composeTopicSubmitted =>
       'Submitted to the topic mailbox. It will appear after review.';
+
+  @override
+  String get shopVipSectionTitle => 'Membership · VIP';
+
+  @override
+  String get shopVipOwnedSubtitle => 'You are a member — see benefits below';
+
+  @override
+  String get shopVipPromoSubtitle => 'Unlock more postal perks and cosmetics';
+
+  @override
+  String get shopVipBody =>
+      'VIP benefits are configured on the server (e.g. registered-mail perks). Checkout will appear here when payments are connected.';
+
+  @override
+  String get shopCatalogEmptyTitle => 'No products yet';
+
+  @override
+  String get shopCatalogEmptySubtitle =>
+      'Items will appear here once the catalog is configured.';
+
+  @override
+  String get shopMockPurchase => 'Mock purchase';
+
+  @override
+  String get shopMockPurchaseSuccess =>
+      'Purchase complete — entitlement granted';
+
+  @override
+  String get shopOwned => 'Owned';
+
+  @override
+  String get shopPriceFree => 'Free';
+
+  @override
+  String shopPriceAmount(Object amount) {
+    return '\$$amount';
+  }
+
+  @override
+  String get shopProductTypeSkin => 'Letter skins';
+
+  @override
+  String get shopProductTypeFont => 'Fonts';
+
+  @override
+  String get shopProductTypeTemplate => 'Templates';
+
+  @override
+  String get shopProductTypeVipBundle => 'VIP bundles';
+
+  @override
+  String get shopProductTypeExport => 'Export';
+
+  @override
+  String get shopProductTypeAttachment => 'Attachments';
+
+  @override
+  String get commerceProductSkinDefault => 'Default paper';
+
+  @override
+  String get commerceProductSkinVintage => 'Vintage paper';
+
+  @override
+  String get commerceProductFontDefault => 'Default font';
+
+  @override
+  String get commerceProductFontHandwriting => 'Handwriting font';
+
+  @override
+  String get commerceProductExportPdf => 'PDF export';
+
+  @override
+  String get entitlementsTitle => 'My cosmetics';
+
+  @override
+  String get entitlementsEmptyTitle => 'No cosmetics yet';
+
+  @override
+  String get entitlementsEmptySubtitle =>
+      'Visit the shop for letter skins, fonts, and more.';
+
+  @override
+  String entitlementsGrantedAt(Object date) {
+    return 'Granted $date';
+  }
+
+  @override
+  String get profileLetterDrafts => 'Letter drafts';
+
+  @override
+  String get profileLetterFavorites => 'Saved letters';
+
+  @override
+  String get profileLetterExport => 'Export letters';
+
+  @override
+  String get profileMyEntitlements => 'My cosmetics';
+
+  @override
+  String get profilePrivacyHideRecommend => 'Hide recommendations';
+
+  @override
+  String get profilePrivacyRejectStranger => 'Decline stranger mail';
+
+  @override
+  String get letterDraftsTitle => 'Letter drafts';
+
+  @override
+  String get letterDraftsEmptyTitle => 'No drafts';
+
+  @override
+  String get letterDraftsEmptySubtitle =>
+      'Save a draft while writing and send it later.';
+
+  @override
+  String get letterDraftsSend => 'Send';
+
+  @override
+  String get letterDraftsDelete => 'Delete';
+
+  @override
+  String get letterDraftsDeleted => 'Draft deleted';
+
+  @override
+  String get letterDraftsNoContent => '(empty draft)';
+
+  @override
+  String letterDraftsUpdated(Object time) {
+    return 'Updated $time';
+  }
+
+  @override
+  String get letterFavoritesTitle => 'Saved letters';
+
+  @override
+  String get letterFavoritesEmptyTitle => 'No saved letters';
+
+  @override
+  String get letterFavoritesEmptySubtitle =>
+      'Tap the star on a letter to save it here.';
+
+  @override
+  String get letterExportTitle => 'Export letters';
+
+  @override
+  String get letterExportFromDate => 'From date';
+
+  @override
+  String get letterExportToDate => 'To date';
+
+  @override
+  String get letterExportDateOptional => 'Optional';
+
+  @override
+  String get letterExportSubmit => 'Generate export';
+
+  @override
+  String get letterExportSuccess => 'Download link ready';
+
+  @override
+  String get letterExportPending => 'Export submitted';
+
+  @override
+  String get letterFavorite => 'Save letter';
+
+  @override
+  String get letterUnfavorite => 'Remove save';
+
+  @override
+  String get ritualOpenLetter => 'A letter is waiting to be opened';
+
+  @override
+  String get ritualDeliverySent => 'Your letter is on its way';
+
+  @override
+  String get composeSkinPickerTitle => 'Choose letter skin';
+
+  @override
+  String get settingsPreferencesSaved => 'Preferences saved';
 }

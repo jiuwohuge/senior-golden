@@ -56,4 +56,16 @@ public class MailboxLetterItemVO {
 
     @Schema(description = "收件人是否已读")
     private Boolean recipientRead;
+
+    @Schema(description = "寄出地国家名（仪式展示）")
+    private String fromCountryName;
+
+    @Schema(description = "送达地国家名（仪式展示）")
+    private String toCountryName;
+
+    @Schema(description = "信纸皮肤 ID")
+    private String skinId;
+
+    @Schema(description = "字体 ID")
+    private String fontId;
 }

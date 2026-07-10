@@ -117,4 +117,8 @@ public interface LetterService extends IService<LetterDomain> {
     /** 与 viewer 有过有效往来的对端用户 ID（去重，按最近更新时间）。 */
     List<Long> listExchangePeerIds(long viewerUserId, int limit);
 
+    /** 已送达信件导出：用户参与且可选笔友/日期范围。 */
+    List<LetterDomain> listDeliveredForExport(
+            long userId, Long peerUserId, LocalDateTime from, LocalDateTime to, int limit);
+
 }

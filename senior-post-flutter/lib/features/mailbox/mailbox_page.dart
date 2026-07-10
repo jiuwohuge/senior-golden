@@ -353,7 +353,15 @@ class _LetterTile extends ConsumerWidget {
     return PostalCardEnvelope(
       onTap: () {
         ref.invalidate(letterDetailProvider(letter.id));
-        context.push('/letter/${letter.id}');
+        context.push(
+          '/letter/${letter.id}',
+          extra: <String, dynamic>{
+            'firstOpen':
+                !letter.outgoing &&
+                letter.status == LetterStatus.delivered &&
+                !letter.recipientRead,
+          },
+        );
       },
       header: Row(
         children: [

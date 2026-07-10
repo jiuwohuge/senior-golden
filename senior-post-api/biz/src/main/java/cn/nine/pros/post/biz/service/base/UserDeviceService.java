@@ -27,4 +27,7 @@ public interface UserDeviceService extends IService<UserDeviceDomain> {
 
     boolean blockByDeviceUuid(String deviceUuid, Long auditUserId);
 
+    /** 注册或更新设备 push token。 */
+    UserDeviceDomain upsertPushToken(Long userId, String deviceUuid, String platform, String token, boolean enabled);
+
 }

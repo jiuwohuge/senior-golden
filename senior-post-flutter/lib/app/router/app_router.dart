@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_token.dart';
 import '../../core/network/router_refresh.dart';
+import '../../features/commerce/my_entitlements_page.dart';
 import '../../features/commerce/shop_page.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/auth/login_routes.dart';
@@ -16,10 +17,13 @@ import '../../features/directory/user_card_page.dart';
 import '../../features/mailbox/chat_page.dart';
 import '../../features/mailbox/im_user_id.dart';
 import '../../features/mailbox/letter_detail_page.dart';
+import '../../features/mailbox/mailbox_archive_page.dart';
 import '../../features/compose/compose_flow_page.dart';
 import '../../features/compose/compose_intent.dart';
 import '../../features/time_letter/time_letter_open_page.dart';
-import '../../features/mailbox/mailbox_archive_page.dart';
+import '../../features/letter_drafts/letter_drafts_page.dart';
+import '../../features/letter_export/letter_export_page.dart';
+import '../../features/letter_favorites/letter_favorites_page.dart';
 import '../../features/post_office/post_office_relation_messages_page.dart';
 import '../../features/profile/account_delete_page.dart';
 import '../../features/profile/blacklist_page.dart';
@@ -121,8 +125,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/letter/:id',
-        builder: (context, state) =>
-            LetterDetailPage(letterId: state.pathParameters['id']!),
+        builder: (context, state) {
+          final extra = state.extra;
+          var firstOpen = false;
+          if (extra is Map) {
+            firstOpen = extra['firstOpen'] == true;
+          }
+          return LetterDetailPage(
+            letterId: state.pathParameters['id']!,
+            firstOpen: firstOpen,
+          );
+        },
       ),
       GoRoute(
         path: '/post-office/messages',
@@ -201,6 +214,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             hint: q['hint'],
           );
         },
+      ),
+      GoRoute(
+        path: '/shop/entitlements',
+        builder: (context, state) => const MyEntitlementsPage(),
+      ),
+      GoRoute(
+        path: '/profile/letter-drafts',
+        builder: (context, state) => const LetterDraftsPage(),
+      ),
+      GoRoute(
+        path: '/profile/letter-favorites',
+        builder: (context, state) => const LetterFavoritesPage(),
+      ),
+      GoRoute(
+        path: '/profile/letter-export',
+        builder: (context, state) => const LetterExportPage(),
       ),
       GoRoute(
         path: '/profile/blocks',

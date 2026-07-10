@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/postal_tokens.dart';
+import '../../core/api/api_exception.dart';
 import '../../core/api/biz_error_codes.dart';
+import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/postal/postal.dart';
+import 'commerce_remote.dart';
 
-/// 商品聚合页（静态阶段）：邮票说明、VIP 入口、邮票 SKU 占位，预留 API 接入点。
+/// 商品页：真实目录（按类型分组）+ MVP 模拟购买。
 class ShopPage extends ConsumerWidget {
   const ShopPage({super.key, this.triggerBizCode, this.hint});
 
@@ -18,30 +21,9 @@ class ShopPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final session = ref.watch(appSessionProvider);
+    final catalogAsync = ref.watch(commerceCatalogProvider);
     final mq = MediaQuery.sizeOf(context);
     final maxW = mq.width >= 600 ? 560.0 : double.infinity;
-
-    // TODO(2026-Q2): 替换为 GET /api/commerce/catalog 等
-    final stampSkus = <_StampSkuPlaceholder>[
-      const _StampSkuPlaceholder(
-        title: '邮票 · 直购',
-        subtitle: '购买固定数量邮票，即时到账（支付流程接入后启用）',
-        badge: '直购',
-        stamps: 10,
-      ),
-      const _StampSkuPlaceholder(
-        title: '邮票 · 礼包',
-        subtitle: '组合商品附赠邮票，适合长期写信用户',
-        badge: '礼包',
-        stamps: 30,
-      ),
-      const _StampSkuPlaceholder(
-        title: '限时 · 赠票',
-        subtitle: '活动期购买指定商品可获赠邮票（规则以运营配置为准）',
-        badge: '活动',
-        stamps: 5,
-      ),
-    ];
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.shopTitleStampsVip)),
@@ -59,30 +41,12 @@ class ShopPage extends ConsumerWidget {
                         (hint != null && hint!.isNotEmpty))
                       _ContextBanner(code: triggerBizCode, hint: hint),
                     PostalCardEnvelope(
-                      header: const PostalSectionTitle(
-                        title: '邮票从哪来',
-                        subtitle: '以下说明为当前产品规则摘要，细则以服务端配置为准',
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _bullet(context, '每日可领取或累积一定额度邮票（见个人中心邮票徽章）。'),
-                          _bullet(
-                            context,
-                            '挂号信等能力可能消耗邮票；投递速度由距离与关系公式决定，不再提供邮票加速。',
-                          ),
-                          _bullet(context, '后续将支持应用内购买邮票包、活动赠票及第三方合规支付渠道。'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    PostalCardEnvelope(
                       accent: PostalTokens.postboxGreen,
                       header: PostalSectionTitle(
-                        title: '会员 · VIP',
+                        title: l10n.shopVipSectionTitle,
                         subtitle: session.isVip
-                            ? '您已是会员，可继续查看权益说明'
-                            : '开通会员可获得更多邮政能力与邮票权益',
+                            ? l10n.shopVipOwnedSubtitle
+                            : l10n.shopVipPromoSubtitle,
                         trailing: session.isVip
                             ? Icon(
                                 Icons.verified_rounded,
@@ -91,54 +55,36 @@ class ShopPage extends ConsumerWidget {
                               )
                             : null,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            '会员权益由服务端配置（如挂号信减免等），'
-                            '支付与签约流程接入后将在此页或独立收银台完成。',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: PostalTokens.inkSecondary,
-                                  height: 1.45,
-                                ),
-                          ),
-                        ],
+                      child: Text(
+                        l10n.shopVipBody,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: PostalTokens.inkSecondary,
+                          height: 1.45,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      '邮票商品',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
+                    const SizedBox(height: 16),
+                    catalogAsync.when(
+                      loading: () => const PostalSkeletonList(
+                        itemCount: 3,
+                        itemHeight: 120,
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '以下为静态占位卡片；商品 ID、价格、库存将由商品系统 API 下发并渲染。',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: PostalTokens.inkTertiary,
-                        height: 1.4,
+                      error: (e, _) => PostalEmptyState(
+                        title: l10n.commonLoadFailed,
+                        subtitle: '$e',
+                        tone: PostalEmptyTone.error,
+                        actionLabel: l10n.commonRetry,
+                        onAction: () => ref.invalidate(commerceCatalogProvider),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...stampSkus.map(
-                      (s) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _StampSkuCard(sku: s),
+                      data: (products) => _CatalogByType(
+                        products: products,
+                        onPurchased: () {
+                          ref.invalidate(commerceCatalogProvider);
+                          ref.invalidate(commerceEntitlementsProvider);
+                        },
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton(
-                      onPressed: () {
-                        // TODO: 对账 / 订单列表页
-                        PostalSnack.show(
-                          context,
-                          l10n.shopOrdersSnackbar,
-                          tone: PostalSnackTone.info,
-                        );
-                      },
-                      child: Text(l10n.shopPlaceholderOrders),
                     ),
                   ],
                 ),
@@ -149,34 +95,167 @@ class ShopPage extends ConsumerWidget {
       ),
     );
   }
+}
 
-  static Widget _bullet(BuildContext context, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Container(
-              width: 7,
-              height: 7,
-              decoration: const BoxDecoration(
-                color: PostalTokens.stampVermilion,
-                shape: BoxShape.circle,
+class _CatalogByType extends StatelessWidget {
+  const _CatalogByType({required this.products, required this.onPurchased});
+
+  final List<CommerceProduct> products;
+  final VoidCallback onPurchased;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (products.isEmpty) {
+      return PostalEmptyState(
+        title: l10n.shopCatalogEmptyTitle,
+        subtitle: l10n.shopCatalogEmptySubtitle,
+      );
+    }
+    final grouped = <String, List<CommerceProduct>>{};
+    for (final p in products) {
+      grouped.putIfAbsent(p.productType, () => []).add(p);
+    }
+    for (final list in grouped.values) {
+      list.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    }
+    final types = grouped.keys.toList()..sort();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final type in types) ...[
+          Text(
+            commerceTypeLabel(l10n, type),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          ...grouped[type]!.map(
+            (p) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _ProductCard(product: p, onPurchased: onPurchased),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+}
+
+class _ProductCard extends ConsumerStatefulWidget {
+  const _ProductCard({required this.product, required this.onPurchased});
+
+  final CommerceProduct product;
+  final VoidCallback onPurchased;
+
+  @override
+  ConsumerState<_ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends ConsumerState<_ProductCard> {
+  bool _busy = false;
+
+  Future<void> _mockPurchase() async {
+    final l10n = AppLocalizations.of(context)!;
+    if (widget.product.owned) return;
+    setState(() => _busy = true);
+    try {
+      await ref.read(commerceRemoteProvider).mockPurchase(widget.product.id);
+      if (!mounted) return;
+      widget.onPurchased();
+      PostalSnack.show(
+        context,
+        l10n.shopMockPurchaseSuccess,
+        tone: PostalSnackTone.success,
+      );
+    } on ApiBusinessException catch (e) {
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final p = widget.product;
+    final previewColor = p.metadata['previewColor'] as String?;
+    Color? swatch;
+    if (previewColor != null && previewColor.startsWith('#')) {
+      final hex = previewColor.substring(1);
+      if (hex.length == 6) {
+        swatch = Color(int.parse('FF$hex', radix: 16));
+      }
+    }
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: swatch ?? PostalTokens.paperCard,
+        borderRadius: PostalTokens.shapeMd,
+        border: Border.all(color: PostalTokens.perforationLine),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    commerceProductTitle(l10n, p.titleKey),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                if (p.owned)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: PostalTokens.postboxGreen.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      l10n.shopOwned,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: PostalTokens.postboxGreen,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              formatPriceCents(p.priceCents, l10n),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: PostalTokens.inkSecondary,
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(height: 1.45),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.tonal(
+                onPressed: p.owned || _busy ? null : _mockPurchase,
+                child: _busy
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(p.owned ? l10n.shopOwned : l10n.shopMockPurchase),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -192,11 +271,11 @@ class _ContextBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final lines = <String>[];
     if (code == BizErrorCodes.stampInsufficient) {
-      lines.add('当前操作需要更多邮票，您可在下方选择购买方式或开通会员。');
+      lines.add('Current action needs more stamps — browse items below.');
     } else if (code == BizErrorCodes.vipRequired) {
-      lines.add('该功能需要会员身份，请前往会员中心了解开通方式。');
+      lines.add('This feature needs membership — see VIP section.');
     } else if (code != null) {
-      lines.add('业务提示（代码 $code）');
+      lines.add('Business hint (code $code)');
     }
     if (hint != null && hint!.isNotEmpty) {
       lines.add(hint!);
@@ -231,117 +310,6 @@ class _ContextBanner extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StampSkuPlaceholder {
-  const _StampSkuPlaceholder({
-    required this.title,
-    required this.subtitle,
-    required this.badge,
-    required this.stamps,
-  });
-
-  final String title;
-  final String subtitle;
-  final String badge;
-  final int stamps;
-}
-
-class _StampSkuCard extends StatelessWidget {
-  const _StampSkuCard({required this.sku});
-
-  final _StampSkuPlaceholder sku;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: PostalTokens.paperCard,
-        borderRadius: PostalTokens.shapeMd,
-        border: Border.all(color: PostalTokens.perforationLine),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: PostalTokens.postboxGreen.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: PostalTokens.postboxGreen.withValues(alpha: 0.35),
-                    ),
-                  ),
-                  child: Text(
-                    sku.badge,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: PostalTokens.postboxGreen,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  l10n.shopSkuStampLine('${sku.stamps}'),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              sku.title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              sku.subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: PostalTokens.inkSecondary,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Text(
-                  l10n.shopPricePlaceholder,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PostalTokens.inkTertiary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                FilledButton.tonal(
-                  onPressed: () {
-                    // TODO: POST /api/commerce/checkout 或唤起收银台
-                    PostalSnack.show(
-                      context,
-                      l10n.shopCheckoutSnackbar,
-                      tone: PostalSnackTone.info,
-                    );
-                  },
-                  child: Text(l10n.shopPlaceholderBuy),
-                ),
-              ],
-            ),
-          ],
         ),
       ),
     );

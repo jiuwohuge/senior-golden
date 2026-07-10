@@ -32,6 +32,9 @@ public interface ConfigService extends IService<ConfigDomain> {
     /** 读取浮点配置；缺失或非法时返回 defaultValue。 */
     double getDouble(String configKey, double defaultValue);
 
+    /** 读取布尔配置；true/1/yes/on 为 true，缺失或非法时返回 defaultValue。 */
+    boolean getBoolean(String configKey, boolean defaultValue);
+
 
     com.baomidou.mybatisplus.extension.plugins.pagination.Page<ConfigDomain> pageForAdmin(
             cn.nine.commons.data.page.PageQuery pageQuery, String configGroup);

@@ -744,5 +744,76 @@
   "composeStepTopicSubmitTitle": "Submit to topic mailbox",
   "composeStepTopicSubmitSubtitle": "After review, approved submissions become visible to others.",
   "composeTopicSubmit": "Submit to topic",
-  "composeTopicSubmitted": "Submitted to the topic mailbox. It will appear after review."
+  "composeTopicSubmitted": "Submitted to the topic mailbox. It will appear after review.",
+  "shopVipSectionTitle": "Membership · VIP",
+  "shopVipOwnedSubtitle": "You are a member — see benefits below",
+  "shopVipPromoSubtitle": "Unlock more postal perks and cosmetics",
+  "shopVipBody": "VIP benefits are configured on the server (e.g. registered-mail perks). Checkout will appear here when payments are connected.",
+  "shopCatalogEmptyTitle": "No products yet",
+  "shopCatalogEmptySubtitle": "Items will appear here once the catalog is configured.",
+  "shopMockPurchase": "Mock purchase",
+  "shopMockPurchaseSuccess": "Purchase complete — entitlement granted",
+  "shopOwned": "Owned",
+  "shopPriceFree": "Free",
+  "shopPriceAmount": "${amount}",
+  "@shopPriceAmount": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "shopProductTypeSkin": "Letter skins",
+  "shopProductTypeFont": "Fonts",
+  "shopProductTypeTemplate": "Templates",
+  "shopProductTypeVipBundle": "VIP bundles",
+  "shopProductTypeExport": "Export",
+  "shopProductTypeAttachment": "Attachments",
+  "commerceProductSkinDefault": "Default paper",
+  "commerceProductSkinVintage": "Vintage paper",
+  "commerceProductFontDefault": "Default font",
+  "commerceProductFontHandwriting": "Handwriting font",
+  "commerceProductExportPdf": "PDF export",
+  "entitlementsTitle": "My cosmetics",
+  "entitlementsEmptyTitle": "No cosmetics yet",
+  "entitlementsEmptySubtitle": "Visit the shop for letter skins, fonts, and more.",
+  "entitlementsGrantedAt": "Granted {date}",
+  "@entitlementsGrantedAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "profileLetterDrafts": "Letter drafts",
+  "profileLetterFavorites": "Saved letters",
+  "profileLetterExport": "Export letters",
+  "profileMyEntitlements": "My cosmetics",
+  "profilePrivacyHideRecommend": "Hide recommendations",
+  "profilePrivacyRejectStranger": "Decline stranger mail",
+  "letterDraftsTitle": "Letter drafts",
+  "letterDraftsEmptyTitle": "No drafts",
+  "letterDraftsEmptySubtitle": "Save a draft while writing and send it later.",
+  "letterDraftsSend": "Send",
+  "letterDraftsDelete": "Delete",
+  "letterDraftsDeleted": "Draft deleted",
+  "letterDraftsNoContent": "(empty draft)",
+  "letterDraftsUpdated": "Updated {time}",
+  "@letterDraftsUpdated": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "letterFavoritesTitle": "Saved letters",
+  "letterFavoritesEmptyTitle": "No saved letters",
+  "letterFavoritesEmptySubtitle": "Tap the star on a letter to save it here.",
+  "letterExportTitle": "Export letters",
+  "letterExportFromDate": "From date",
+  "letterExportToDate": "To date",
+  "letterExportDateOptional": "Optional",
+  "letterExportSubmit": "Generate export",
+  "letterExportSuccess": "Download link ready",
+  "letterExportPending": "Export submitted",
+  "letterFavorite": "Save letter",
+  "letterUnfavorite": "Remove save",
+  "ritualOpenLetter": "A letter is waiting to be opened",
+  "ritualDeliverySent": "Your letter is on its way",
+  "composeSkinPickerTitle": "Choose letter skin",
+  "settingsPreferencesSaved": "Preferences saved"
 }

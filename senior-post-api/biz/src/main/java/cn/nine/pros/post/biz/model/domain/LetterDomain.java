@@ -7,8 +7,11 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
+import java.util.Map;
 
 /**
  * 信件表（挂号信/平邮） Domain
@@ -20,7 +23,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@TableName("bu_letter")
+@TableName(value = "bu_letter", autoResultMap = true)
 public class LetterDomain extends AbstractAuditableDomain {
 
     private static final long serialVersionUID = 1L;
@@ -106,5 +109,9 @@ public class LetterDomain extends AbstractAuditableDomain {
     @Schema(description = "收件人首次已读时间")
     @TableField("recipient_read_at")
     private LocalDateTime recipientReadAt;
+
+    @Schema(description = "皮肤/字体/模板等表达增强元数据")
+    @TableField(value = "content_meta_json", typeHandler = JacksonTypeHandler.class)
+    private Map<String, Object> contentMetaJson;
 
 }

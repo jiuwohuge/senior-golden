@@ -68,4 +68,9 @@ export const api = {
   actionLogs: (params: any) => request.post('/webapi/log/action/paging', params),
   loginLogs: (params: any) => request.post('/webapi/log/login/paging', params),
   feedbackPaging: (params: any) => request.post('/webapi/feedback/paging', params),
+
+  commerceProducts: (body?: any) =>
+    request.post('/webapi/commerce/products/paging', body ?? { page: { page: 1, size: 200 } }),
+  saveCommerceProduct: (body: any) => request.post('/webapi/commerce/products/save', body),
+  grantCommerce: (body: { userId: number; productId: number }) => request.post('/webapi/commerce/grant', body),
 }

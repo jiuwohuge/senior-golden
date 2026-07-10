@@ -8,6 +8,8 @@ import '../../core/i18n/app_locale_provider.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
+import '../push/push_service.dart';
+import 'preferences_remote.dart';
 
 /// 设置页：通知开关、语言覆盖、邮箱验证绑定、注销入口。
 class SettingsPage extends ConsumerStatefulWidget {
@@ -18,10 +20,59 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
+  bool _prefsLoaded = false;
   bool _notify = true;
   bool _mailBadge = true;
+  bool _prefsBusy = false;
   bool _verifyBusy = false;
   final _verifyCode = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPreferences());
+  }
+
+  Future<void> _loadPreferences() async {
+    try {
+      final prefs = await ref.read(preferencesRemoteProvider).fetch();
+      if (!mounted) return;
+      setState(() {
+        _notify = prefs.pushEnabled;
+        _mailBadge = prefs.unreadBadges;
+        _prefsLoaded = true;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _prefsLoaded = true);
+    }
+  }
+
+  Future<void> _saveNotificationPrefs() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _prefsBusy = true);
+    try {
+      final current = await ref.read(preferencesRemoteProvider).fetch();
+      final next = current.copyWith(
+        pushEnabled: _notify,
+        unreadBadges: _mailBadge,
+      );
+      await ref.read(preferencesRemoteProvider).patch(next);
+      ref.invalidate(userPreferencesProvider);
+      await ensurePushTokenRegistered(ref, enabled: _notify);
+      if (!mounted) return;
+      PostalSnack.show(
+        context,
+        l10n.settingsPreferencesSaved,
+        tone: PostalSnackTone.success,
+      );
+    } on ApiBusinessException catch (e) {
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
+    } finally {
+      if (mounted) setState(() => _prefsBusy = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -193,16 +244,33 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             PostalCardEnvelope(
               child: Column(
                 children: [
-                  SwitchListTile(
-                    value: _notify,
-                    onChanged: (v) => setState(() => _notify = v),
-                    title: Text(l10n.settingsPushNotifications),
-                  ),
-                  SwitchListTile(
-                    value: _mailBadge,
-                    onChanged: (v) => setState(() => _mailBadge = v),
-                    title: Text(l10n.settingsUnreadBadges),
-                  ),
+                  if (!_prefsLoaded)
+                    const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: LinearProgressIndicator(),
+                    )
+                  else ...[
+                    SwitchListTile(
+                      value: _notify,
+                      onChanged: _prefsBusy
+                          ? null
+                          : (v) async {
+                              setState(() => _notify = v);
+                              await _saveNotificationPrefs();
+                            },
+                      title: Text(l10n.settingsPushNotifications),
+                    ),
+                    SwitchListTile(
+                      value: _mailBadge,
+                      onChanged: _prefsBusy
+                          ? null
+                          : (v) async {
+                              setState(() => _mailBadge = v);
+                              await _saveNotificationPrefs();
+                            },
+                      title: Text(l10n.settingsUnreadBadges),
+                    ),
+                  ],
                   ListTile(
                     title: Text(l10n.settingsLanguage),
                     subtitle: Text(l10n.settingsLanguageSubtitle),

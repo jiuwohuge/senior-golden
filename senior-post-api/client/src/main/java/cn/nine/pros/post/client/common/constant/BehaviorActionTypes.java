@@ -16,6 +16,8 @@ public final class BehaviorActionTypes {
     public static final String VIEW_RECOMMENDATION = "view_recommendation";
     public static final String WRITE_FROM_RECOMMENDATION = "write_from_recommendation";
 
+    public static final String MOCK_PURCHASE = "mock_purchase";
+
     public static final String TARGET_LETTER = "letter";
     public static final String TARGET_USER = "user";
 

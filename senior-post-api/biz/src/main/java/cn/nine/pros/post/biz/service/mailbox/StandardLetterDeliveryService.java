@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.mailbox;
 
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.service.base.LetterService;
+import cn.nine.pros.post.biz.service.push.PushNotificationService;
 import cn.nine.pros.post.client.common.enums.LetterAuditStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.util.Objects;
 public class StandardLetterDeliveryService {
 
     private final LetterService letterService;
+    private final PushNotificationService pushNotificationService;
 
     /**
      * 将已到预计送达时间的在途信置为已送达（不限 letter_type；速度由 §6.1 决定）。
@@ -49,6 +51,7 @@ public class StandardLetterDeliveryService {
             }
             if (letterService.markDelivered(row.getId(), now)) {
                 delivered++;
+                notifyDelivered(row);
                 log.debug("letter {} marked delivered at {}", row.getId(), now);
             }
         }
@@ -57,6 +60,13 @@ public class StandardLetterDeliveryService {
                     delivered, skippedAudit, abortedReject, maxBatch);
         }
         return delivered;
+    }
+
+    private void notifyDelivered(LetterDomain row) {
+        if (row.getToUserId() == null || row.getId() == null) {
+            return;
+        }
+        pushNotificationService.notifyLetterDelivered(row.getToUserId(), row.getId());
     }
 
     private int abortRejectedDelivery(long letterId, LocalDateTime now) {

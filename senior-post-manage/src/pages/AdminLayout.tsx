@@ -9,6 +9,9 @@ import ConfigList from './config/List'
 import SensitiveWordList from './config/SensitiveWordList'
 import VersionList from './config/VersionList'
 import VipConfig from './config/VipConfig'
+import MatchConfig from './config/MatchConfig'
+import LetterConfig from './config/LetterConfig'
+import CommerceProductList from './config/CommerceProductList'
 import ModerationConfig from './config/ModerationConfig'
 import TimeLetterList from './content/TimeLetterList'
 import ActionLogList from './log/ActionLogList'
@@ -76,6 +79,9 @@ export default function AdminLayout() {
           { key: '/config/version', label: <Link to="/config/version">版本管理</Link> },
           { key: '/config/announcement', label: <Link to="/config/announcement">公告管理</Link> },
           { key: '/config/vip', label: <Link to="/config/vip">VIP 配置</Link> },
+          { key: '/config/match', label: <Link to="/config/match">匹配配置</Link> },
+          { key: '/config/letter', label: <Link to="/config/letter">信件配置</Link> },
+          { key: '/config/commerce', label: <Link to="/config/commerce">商业商品</Link> },
           { key: '/config/moderation', label: <Link to="/config/moderation">内容安全</Link> },
         ],
       },
@@ -195,6 +201,9 @@ export default function AdminLayout() {
             <Route path="/config/version" element={<VersionList />} />
             <Route path="/config/announcement" element={<AnnouncementList />} />
             <Route path="/config/vip" element={<VipConfig />} />
+            <Route path="/config/match" element={<MatchConfig />} />
+            <Route path="/config/letter" element={<LetterConfig />} />
+            <Route path="/config/commerce" element={<CommerceProductList />} />
             <Route path="/config/moderation" element={<ModerationConfig />} />
             <Route path="/log/action" element={<ActionLogList />} />
             <Route path="/log/login" element={<LoginLogList />} />
