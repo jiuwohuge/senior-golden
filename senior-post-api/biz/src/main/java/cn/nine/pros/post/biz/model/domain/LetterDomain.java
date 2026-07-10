@@ -36,17 +36,17 @@ public class LetterDomain extends AbstractAuditableDomain {
     /**
      * 收件人用户ID
      */
-    @Schema(description = "收件人用户ID")
+    @Schema(description = "收件人用户ID（POST_OFFICE 入池时可空）")
     private Long toUserId;
     /**
-     * 类型：1挂号信（即时） 2平邮（慢信）
+     * 类型：1挂号信 2平邮（展示形态；速度由 §6.1 决定）
      */
-    @Schema(description = "类型：1挂号信（即时） 2平邮（慢信）")
+    @Schema(description = "类型：1挂号信 2平邮")
     private Object letterType;
     /**
-     * 状态：1运输中（仅平邮） 2已送达
+     * 状态：0待匹配/待启运 1运输中 2已送达 3挂号预留 4已匹配
      */
-    @Schema(description = "状态：1运输中（仅平邮） 2已送达")
+    @Schema(description = "状态：0PENDING 1DELIVERING 2DELIVERED 3REGISTERED 4MATCHED")
     private Object status;
     /**
      * 信件内容
@@ -81,8 +81,17 @@ public class LetterDomain extends AbstractAuditableDomain {
     /**
      * 发送模式：1平邮路径 2挂号路径 3直发/VIP
      */
-    @Schema(description = "发送模式：1平邮路径 2挂号路径 3直发/VIP")
+    @Schema(description = "发送模式（运输轨）：1平邮路径 2挂号路径 3直发/VIP")
     private Integer sendMode;
+
+    @Schema(description = "产品模式：1POST_OFFICE 2DIRECT 3SELF_TIME")
+    private Integer mode;
+
+    @Schema(description = "审核状态：0PENDING_REVIEW 1APPROVED 2REJECTED")
+    private Integer auditStatus;
+
+    @Schema(description = "POST_OFFICE 匹配成功时间")
+    private LocalDateTime matchedAt;
 
     /**
      * 收件人提前拆信（消耗邮票后运输中可读正文）

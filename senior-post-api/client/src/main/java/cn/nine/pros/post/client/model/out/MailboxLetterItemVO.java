@@ -22,8 +22,12 @@ public class MailboxLetterItemVO {
     private Integer letterType;
     @Schema(description = "发送模式，整型同 LetterSendMode：1=STANDARD_POST 2=REGISTERED_MAIL 3=DIRECT_VIP")
     private Integer sendMode;
-    @Schema(description = "业务状态，整型同 LetterBizStatus：1=DELIVERING 2=DELIVERED 3=REGISTERED（预留）")
+    @Schema(description = "业务状态，整型同 LetterBizStatus：0=PENDING 1=DELIVERING 2=DELIVERED 3=REGISTERED 4=MATCHED")
     private Integer status;
+    @Schema(description = "产品模式，整型同 LetterMode：1=POST_OFFICE 2=DIRECT 3=SELF_TIME")
+    private Integer mode;
+    @Schema(description = "审核状态，整型同 LetterAuditStatus：0=PENDING_REVIEW 1=APPROVED 2=REJECTED")
+    private Integer auditStatus;
     @Schema(description = "列表摘要")
     private String preview;
     @Schema(description = "全文（仅详情接口返回；列表为 null 以省流量）")

@@ -76,14 +76,8 @@ public final class LoginRiskEvaluator {
             latA = null;
         }
         OptionalDouble dist = GeoDistance.haversineKm(latA, lonA, latB, lonB);
-        if (dist.isPresent() && dist.getAsDouble() > 1000.0) {
-            if (last != null && last.getCreatedAt() != null
-                    && last.getCreatedAt().isAfter(LocalDateTime.now().minusHours(24))) {
-                triggers++;
-            } else if (prevLat != null && prevLng != null && currentLat != null && currentLng != null) {
-                // 资料坐标突变也计一次（无近期登录时）
-                triggers++;
-            }
+        if (isLongDistanceRiskTrigger(dist, last, prevLat, prevLng, currentLat, currentLng)) {
+            triggers++;
         }
 
         int level = RISK_NONE;
@@ -95,5 +89,23 @@ public final class LoginRiskEvaluator {
             level = RISK_LIGHT;
         }
         return new RiskResult(level, triggers);
+    }
+
+    /** 24h 内距离 > 1000km，或资料坐标突变（无近期登录时）。 */
+    private static boolean isLongDistanceRiskTrigger(
+            OptionalDouble dist,
+            LoginDomain last,
+            Double prevLat,
+            Double prevLng,
+            Double currentLat,
+            Double currentLng) {
+        if (dist.isEmpty() || dist.getAsDouble() <= 1000.0) {
+            return false;
+        }
+        if (last != null && last.getCreatedAt() != null
+                && last.getCreatedAt().isAfter(LocalDateTime.now().minusHours(24))) {
+            return true;
+        }
+        return prevLat != null && prevLng != null && currentLat != null && currentLng != null;
     }
 }

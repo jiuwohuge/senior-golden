@@ -19,4 +19,11 @@ public interface CountryService extends IService<CountryDomain> {
 
     void delByIds(List<Integer> ids);
 
+    /** 未删除国家，按 sort_order、id 升序。 */
+    List<CountryDomain> listActiveOrdered();
+
+
+    com.baomidou.mybatisplus.extension.plugins.pagination.Page<CountryDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery, String countryCode, String keyword);
+
 }

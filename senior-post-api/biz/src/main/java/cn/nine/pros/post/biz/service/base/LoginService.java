@@ -19,4 +19,11 @@ public interface LoginService extends IService<LoginDomain> {
 
     void delByIds(List<Long> ids);
 
+    /** 用户最近成功登录记录（login_result=1）。 */
+    List<LoginDomain> listRecentSuccessfulByUserId(long userId, int limit);
+
+
+    com.baomidou.mybatisplus.extension.plugins.pagination.Page<LoginDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery, Long userId, Integer loginResult);
+
 }

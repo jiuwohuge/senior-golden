@@ -1,10 +1,8 @@
 package cn.nine.pros.post.biz.service.biz.support;
 
 import cn.nine.pros.post.biz.model.domain.TagDomain;
-import cn.nine.pros.post.biz.model.domain.UserTagDomain;
 import cn.nine.pros.post.biz.service.base.TagService;
 import cn.nine.pros.post.biz.service.base.UserTagService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,12 +22,7 @@ public class UserInterestAssembler {
     public record Payload(List<Integer> ids, List<String> names) {}
 
     public Payload loadForUser(long userId) {
-        List<Integer> tagIds = userTagService.list(new LambdaQueryWrapper<UserTagDomain>()
-                        .eq(UserTagDomain::getUserId, userId)
-                        .eq(UserTagDomain::isDelFlag, false))
-                .stream()
-                .map(UserTagDomain::getTagId)
-                .collect(Collectors.toList());
+        List<Integer> tagIds = userTagService.listTagIdsByUserId(userId);
         if (tagIds.isEmpty()) {
             return new Payload(List.of(), List.of());
         }

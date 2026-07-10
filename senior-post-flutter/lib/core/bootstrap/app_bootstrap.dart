@@ -34,7 +34,7 @@ class AppVipProductConfig {
           : 'VIP',
       tagline: (json['tagline'] as String?)?.trim().isNotEmpty == true
           ? (json['tagline'] as String).trim()
-          : 'Unlimited stamps · Priority delivery · Ad-free',
+          : 'Unlimited stamps · Ad-free',
       taglineZh: (json['taglineZh'] as String?)?.trim().isNotEmpty == true
           ? (json['taglineZh'] as String).trim()
           : '无限邮票 · 优先送达 · 无广告干扰',
@@ -46,7 +46,7 @@ class AppVipProductConfig {
   static const AppVipProductConfig defaults = AppVipProductConfig(
     productEnabled: true,
     displayName: 'VIP',
-    tagline: 'Unlimited stamps · Priority delivery · Ad-free',
+    tagline: 'Unlimited stamps · Ad-free',
     taglineZh: '无限邮票 · 优先送达 · 无广告干扰',
     unlimitedStampsBenefit: true,
     standardDeliveryHours: 0,

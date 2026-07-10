@@ -1,5 +1,6 @@
 package cn.nine.pros.post.client.model.input.app;
 
+import cn.nine.pros.post.client.common.enums.LetterMode;
 import cn.nine.pros.post.client.common.enums.LetterPhysicalType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -8,14 +9,13 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
- * App 发送信件（挂号 / 平邮）。
+ * App 发送信件：DIRECT 需收件人；POST_OFFICE 可不指定收件人。
  */
 @Data
 @Schema(description = "发送信件")
 public class AppSendLetterInDto {
 
-    @NotNull
-    @Schema(description = "收件人用户 ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "收件人用户 ID；POST_OFFICE 可空；回信时可由 parentLetterId 推导")
     private Long toUserId;
 
     @NotBlank
@@ -24,12 +24,18 @@ public class AppSendLetterInDto {
     private String content;
 
     /**
-     * 见 {@link LetterPhysicalType}：{@link LetterPhysicalType#REGISTERED} 或 {@link LetterPhysicalType#STANDARD}。
+     * 见 {@link LetterPhysicalType}：展示形态；投递速度由 §6.1 决定。
      */
     @NotNull
-    @Schema(description = "LetterPhysicalType.code：1=REGISTERED（挂号信）2=STANDARD（平邮）", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "LetterPhysicalType.code：1=REGISTERED 2=STANDARD", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer letterType;
 
     @Schema(description = "回复的原信件 ID；若填写则仅收信人可发，且收件人自动为原发件人")
     private Long parentLetterId;
+
+    /**
+     * 见 {@link LetterMode}；缺省：有 toUserId/回信 → DIRECT，否则 POST_OFFICE。
+     */
+    @Schema(description = "LetterMode.code：1=POST_OFFICE 2=DIRECT；可空由服务端推断")
+    private Integer mode;
 }

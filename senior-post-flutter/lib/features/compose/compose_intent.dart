@@ -1,16 +1,16 @@
-/// Unified letter compose destination for 3.0 slow-social flows.
+/// Unified letter compose destination for 4.0 slow-social flows.
 enum ComposeKind {
-  /// Time letter to the signed-in user.
+  /// Time letter to the signed-in user (SELF_TIME / bu_time_letter).
   selfTimeLetter,
 
-  /// Postal letter (standard/registered) to a pen pal.
+  /// Postal letter (DIRECT) to a pen pal / peer.
   penPalMail,
 
   /// Time letter to an established pen pal.
   penPalTimeLetter,
 
-  /// Topic mailbox submission (currently maps to postcard create API).
-  topicMailbox,
+  /// Post office pool letter (POST_OFFICE, no recipient; match in M3).
+  postOffice,
 }
 
 /// Navigation payload for [ComposeFlowPage].
@@ -29,7 +29,7 @@ class ComposeIntent {
   final String? peerNickname;
   final String? peerCountryLabel;
 
-  /// One of [TopicMailboxCatalog] keys: hometown, retirement, oldPhoto.
+  /// Legacy topic key (unused for POST_OFFICE).
   final String? topicKey;
 
   ComposeIntent copyWith({

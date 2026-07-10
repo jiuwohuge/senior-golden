@@ -2,10 +2,7 @@ package cn.nine.pros.post.biz.service.mailbox;
 
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.service.base.LetterService;
-import cn.nine.pros.post.client.common.enums.LetterBizStatus;
-import cn.nine.pros.post.client.common.enums.LetterPhysicalType;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import cn.nine.pros.post.client.common.enums.LetterAuditStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,61 +10,60 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * 平邮到期自动送达：以 {@code bu_letter.expected_arrival_time} 为准，乐观条件更新避免重复投递。
- * Redis 延迟队列可作为后续扩展（高并发扫表优化），当前实现满足 FP-A5d-002 验收。
+ * 到期自动送达：扫描 DELIVERING 且 expected_arrival_time 到期的信件；
+ * DELIVERED 前须 audit_status=APPROVED；REJECTED 则中止。
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class StandardLetterDeliveryService {
 
-    /** 系统任务更新人（与业务用户 ID 区分） */
-    private static final long SYSTEM_UPDATED_BY = 0L;
-
-        private final LetterService letterService;
+    private final LetterService letterService;
 
     /**
-     * 将已到预计送达时间的平邮置为已送达。
-     *
-     * @param now      当前时间（可注入便于单测）
-     * @param maxBatch 单次处理上限
-     * @return 实际更新行数
+     * 将已到预计送达时间的在途信置为已送达（不限 letter_type；速度由 §6.1 决定）。
      */
     @Transactional(rollbackFor = Exception.class)
     public int deliverDueStandardLetters(LocalDateTime now, int maxBatch) {
-        List<LetterDomain> due = letterService.list(new LambdaQueryWrapper<LetterDomain>()
-                .eq(LetterDomain::isDelFlag, false)
-                .eq(LetterDomain::getLetterType, LetterPhysicalType.STANDARD.getCode())
-                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
-                .isNotNull(LetterDomain::getExpectedArrivalTime)
-                .le(LetterDomain::getExpectedArrivalTime, now)
-                .orderByAsc(LetterDomain::getExpectedArrivalTime)
-                .last("LIMIT " + maxBatch));
+        List<LetterDomain> due = letterService.listDueDelivering(now, maxBatch);
 
         int delivered = 0;
+        int skippedAudit = 0;
+        int abortedReject = 0;
         for (LetterDomain row : due) {
             if (row.getId() == null) {
                 continue;
             }
-            boolean ok = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
-                    .eq(LetterDomain::getId, row.getId())
-                    .eq(LetterDomain::isDelFlag, false)
-                    .eq(LetterDomain::getLetterType, LetterPhysicalType.STANDARD.getCode())
-                    .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
-                    .set(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
-                    .set(LetterDomain::getActualArrivalTime, now)
-                    .set(LetterDomain::getUpdatedAt, now)
-                    .set(LetterDomain::getUpdatedBy, SYSTEM_UPDATED_BY));
-            if (ok) {
+            Integer audit = row.getAuditStatus();
+            if (Objects.equals(audit, LetterAuditStatus.REJECTED.getCode())) {
+                abortedReject += abortRejectedDelivery(row.getId(), now);
+                continue;
+            }
+            if (!Objects.equals(audit, LetterAuditStatus.APPROVED.getCode())
+                    && audit != null) {
+                skippedAudit++;
+                continue;
+            }
+            if (letterService.markDelivered(row.getId(), now)) {
                 delivered++;
-                log.debug("Standard letter {} marked delivered at {}", row.getId(), now);
+                log.debug("letter {} marked delivered at {}", row.getId(), now);
             }
         }
-        if (delivered > 0) {
-            log.info("Standard mail delivery: {} letter(s) delivered (batch cap {})", delivered, maxBatch);
+        if (delivered > 0 || skippedAudit > 0 || abortedReject > 0) {
+            log.info("mail delivery: delivered={}, skippedAudit={}, abortedReject={} (batch {})",
+                    delivered, skippedAudit, abortedReject, maxBatch);
         }
         return delivered;
+    }
+
+    private int abortRejectedDelivery(long letterId, LocalDateTime now) {
+        if (!letterService.abortDeliveryRejected(letterId, now)) {
+            return 0;
+        }
+        log.info("letter delivery aborted (rejected), letterId={}", letterId);
+        return 1;
     }
 }

@@ -41,7 +41,7 @@ public interface AppMailboxApi {
     @PostMapping("/letters/{letterId}/accept-postal")
     AcceptPostalContactResultVO acceptPostalContact(@PathVariable("letterId") Long letterId);
 
-    @Operation(summary = "发送信件（挂号即时送达 / 平邮运输中）；非 VIP 挂号消耗邮票")
+    @Operation(summary = "发送信件（DIRECT 走 §6.1 延迟；POST_OFFICE 入池待匹配）")
     @PostMapping("/letters/send")
     MailboxLetterItemVO sendLetter(@RequestBody @Valid AppSendLetterInDto body);
 

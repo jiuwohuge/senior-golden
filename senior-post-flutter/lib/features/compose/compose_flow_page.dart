@@ -18,18 +18,15 @@ import '../time_letter/time_letter_remote.dart';
 import '../time_letter/time_letter_seal_slider.dart';
 import 'compose_intent.dart';
 import 'compose_step_scaffold.dart';
-import 'topic_mailbox_catalog.dart';
 
 enum _ComposeStep {
   destination,
   pickPenPal,
-  pickTopic,
   body,
   deliveryDate,
   mailOptions,
   seal,
   send,
-  topicSubmit,
 }
 
 class ComposeFlowPage extends ConsumerStatefulWidget {
@@ -49,7 +46,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   String? _peerId;
   String? _peerNickname;
   String? _peerCountryLabel;
-  String? _topicKey;
 
   int _stepIndex = 0;
   final _bodyCtrl = TextEditingController();
@@ -67,7 +63,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     _peerId = widget.initialIntent.peerId;
     _peerNickname = widget.initialIntent.peerNickname;
     _peerCountryLabel = widget.initialIntent.peerCountryLabel;
-    _topicKey = widget.initialIntent.topicKey;
     _rebuildSteps();
     if (_currentStep == _ComposeStep.deliveryDate ||
         _currentStep == _ComposeStep.seal) {
@@ -101,9 +96,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     if (_needsPenPalPicker) {
       steps.add(_ComposeStep.pickPenPal);
     }
-    if (_kind == ComposeKind.topicMailbox && _topicKey == null) {
-      steps.add(_ComposeStep.pickTopic);
-    }
     steps.add(_ComposeStep.body);
     switch (_kind) {
       case ComposeKind.selfTimeLetter:
@@ -111,10 +103,9 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         steps.add(_ComposeStep.deliveryDate);
         steps.add(_ComposeStep.seal);
       case ComposeKind.penPalMail:
+      case ComposeKind.postOffice:
         steps.add(_ComposeStep.mailOptions);
         steps.add(_ComposeStep.send);
-      case ComposeKind.topicMailbox:
-        steps.add(_ComposeStep.topicSubmit);
       case null:
         break;
     }
@@ -161,15 +152,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           );
           return;
         }
-      case _ComposeStep.pickTopic:
-        if (_topicKey == null) {
-          PostalSnack.show(
-            context,
-            l10n.composePickTopicRequired,
-            tone: PostalSnackTone.warning,
-          );
-          return;
-        }
       case _ComposeStep.body:
         if (_bodyCtrl.text.trim().isEmpty) {
           PostalSnack.show(
@@ -183,7 +165,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       case _ComposeStep.mailOptions:
       case _ComposeStep.seal:
       case _ComposeStep.send:
-      case _ComposeStep.topicSubmit:
         break;
     }
     if (_stepIndex < _steps.length - 1) {
@@ -273,12 +254,17 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
 
   Future<void> _submitPenPalMail() async {
     final body = _bodyCtrl.text.trim();
-    if (body.isEmpty || _peerId == null) return;
+    if (body.isEmpty) return;
+    final isPostOffice = _kind == ComposeKind.postOffice;
+    if (!isPostOffice && _peerId == null) return;
     setState(() => _busy = true);
     try {
-      await ref
-          .read(mailboxRemoteRepositoryProvider)
-          .sendLetter(toUserId: _peerId!, content: body, type: _mailType);
+      await ref.read(mailboxRemoteRepositoryProvider).sendLetter(
+            toUserId: isPostOffice ? null : _peerId,
+            content: body,
+            type: _mailType,
+            mode: isPostOffice ? 1 : 2,
+          );
       await ref.read(authRepositoryProvider).refreshSessionFromServer();
       ref.invalidate(mailboxLettersProvider);
       ref.invalidate(postalInboxLettersProvider);
@@ -300,32 +286,12 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     }
   }
 
-  Future<void> _submitTopic() async {
-    final l10n = AppLocalizations.of(context)!;
-    final body = _bodyCtrl.text.trim();
-    if (body.isEmpty) return;
-    setState(() => _busy = true);
-    try {
-      // WHY: 4.0 邮局投递 API 尚未接入；M0 仅移除废弃明信片链路。
-      if (!mounted) return;
-      PostalSnack.show(
-        context,
-        l10n.postWallUnavailable,
-        tone: PostalSnackTone.warning,
-      );
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
   bool get _nextEnabled {
     switch (_currentStep) {
       case _ComposeStep.destination:
         return _kind != null;
       case _ComposeStep.pickPenPal:
         return _peerId != null && _peerId!.isNotEmpty;
-      case _ComposeStep.pickTopic:
-        return _topicKey != null;
       case _ComposeStep.body:
         return _bodyCtrl.text.trim().isNotEmpty;
       default:
@@ -336,8 +302,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   bool get _isLastInteractiveStep {
     return _stepIndex == _steps.length - 1 &&
         (_currentStep == _ComposeStep.seal ||
-            _currentStep == _ComposeStep.send ||
-            _currentStep == _ComposeStep.topicSubmit);
+            _currentStep == _ComposeStep.send);
   }
 
   ({String title, String subtitle, String? footer}) _stepCopy(
@@ -354,12 +319,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         return (
           title: l10n.composeStepPenPalTitle,
           subtitle: l10n.composeStepPenPalSubtitle,
-          footer: null,
-        );
-      case _ComposeStep.pickTopic:
-        return (
-          title: l10n.composeStepTopicTitle,
-          subtitle: l10n.composeStepTopicSubtitle,
           footer: null,
         );
       case _ComposeStep.body:
@@ -392,15 +351,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           subtitle: l10n.composeStepSendSubtitle,
           footer: null,
         );
-      case _ComposeStep.topicSubmit:
-        final topic = findTopicMailboxTopic(l10n, _topicKey);
-        return (
-          title: l10n.composeStepTopicSubmitTitle,
-          subtitle: topic == null
-              ? l10n.composeStepTopicSubmitSubtitle
-              : topic.prompt,
-          footer: null,
-        );
     }
   }
 
@@ -413,9 +363,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       ComposeKind.penPalTimeLetter => l10n.composeBodySubtitleTimePenPal(
         _peerNickname ?? l10n.topicFriendFallback,
       ),
-      ComposeKind.topicMailbox =>
-        findTopicMailboxTopic(l10n, _topicKey)?.prompt ??
-            l10n.composeBodySubtitleTopic,
+      ComposeKind.postOffice => l10n.composeBodySubtitlePostOffice,
       null => l10n.composeStepDestinationSubtitle,
     };
   }
@@ -475,13 +423,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           onPressed: _busy ? null : _submitPenPalMail,
           busy: _busy,
         );
-      case _ComposeStep.topicSubmit:
-        return PostalButton(
-          label: l10n.composeTopicSubmit,
-          icon: Icons.mark_email_unread_outlined,
-          onPressed: _busy ? null : _submitTopic,
-          busy: _busy,
-        );
       default:
         return null;
     }
@@ -507,11 +448,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
               _peerCountryLabel = friend.peer.countryName;
             });
           },
-        );
-      case _ComposeStep.pickTopic:
-        return _PickTopicStep(
-          selectedKey: _topicKey,
-          onPick: (key) => setState(() => _topicKey = key),
         );
       case _ComposeStep.body:
         return ListView(
@@ -586,13 +522,16 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              l10n.sendLetterSheetTitle(
-                _peerNickname ?? l10n.topicFriendFallback,
-              ),
+              _kind == ComposeKind.postOffice
+                  ? l10n.composePostOfficeSendHint
+                  : l10n.sendLetterSheetTitle(
+                      _peerNickname ?? l10n.topicFriendFallback,
+                    ),
               style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
-            if (_peerCountryLabel != null &&
+            if (_kind != ComposeKind.postOffice &&
+                _peerCountryLabel != null &&
                 _peerCountryLabel!.trim().isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
@@ -604,39 +543,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
               ),
             ],
           ],
-        );
-      case _ComposeStep.topicSubmit:
-        final topic = findTopicMailboxTopic(l10n, _topicKey);
-        if (topic == null) return const SizedBox.shrink();
-        return PostalCardEnvelope(
-          accent: topic.accent,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(topic.icon, color: topic.accent),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      topic.title,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _bodyCtrl.text.trim(),
-                maxLines: 6,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: PostalTokens.inkSecondary,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
         );
     }
   }
@@ -671,11 +577,11 @@ class _DestinationStep extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ComposeChoiceTile(
-          label: l10n.composeChooseTopic,
-          subtitle: l10n.composeChooseTopicSub,
-          icon: Icons.mark_email_unread_outlined,
-          selected: kind == ComposeKind.topicMailbox,
-          onTap: () => onPick(ComposeKind.topicMailbox),
+          label: l10n.composeChoosePostOffice,
+          subtitle: l10n.composeChoosePostOfficeSub,
+          icon: Icons.local_post_office_outlined,
+          selected: kind == ComposeKind.postOffice,
+          onTap: () => onPick(ComposeKind.postOffice),
         ),
       ],
     );
@@ -723,34 +629,6 @@ class _PickPenPalStep extends ConsumerWidget {
               onTap: () => onPick(friend),
             );
           },
-        );
-      },
-    );
-  }
-}
-
-class _PickTopicStep extends StatelessWidget {
-  const _PickTopicStep({required this.selectedKey, required this.onPick});
-
-  final String? selectedKey;
-  final ValueChanged<String> onPick;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final topics = topicMailboxTopics(l10n);
-    return ListView.separated(
-      physics: const ClampingScrollPhysics(),
-      itemCount: topics.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (context, index) {
-        final topic = topics[index];
-        return ComposeChoiceTile(
-          label: topic.title,
-          subtitle: topic.prompt,
-          icon: topic.icon,
-          selected: selectedKey == topic.key,
-          onTap: () => onPick(topic.key),
         );
       },
     );

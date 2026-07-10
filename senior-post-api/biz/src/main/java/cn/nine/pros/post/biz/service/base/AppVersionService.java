@@ -19,4 +19,8 @@ public interface AppVersionService extends IService<AppVersionDomain> {
 
     void delByIds(List<Integer> ids);
 
+
+    com.baomidou.mybatisplus.extension.plugins.pagination.Page<cn.nine.pros.post.biz.model.domain.AppVersionDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery);
+
 }

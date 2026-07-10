@@ -1055,7 +1055,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get letterContentHiddenHint =>
-      'This letter is still on its way. The message is hidden until it arrives, or you can open it early with one stamp (VIP free).';
+      'This letter is still on its way. The message stays sealed until it arrives.';
 
   @override
   String get letterEarlyOpenCta => 'Open early (1 stamp)';
@@ -1069,6 +1069,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get letterDetailTitle => 'Letter';
+
+  @override
+  String get letterModePostOffice => 'Post office';
+
+  @override
+  String get letterModeDirect => 'Direct';
+
+  @override
+  String get letterModeSelfTime => 'Time letter (SELF_TIME)';
+
+  @override
+  String letterModeLine(String mode) {
+    return 'Mode: $mode';
+  }
+
+  @override
+  String get letterAuditPending => 'Pending review';
+
+  @override
+  String get letterAuditApproved => 'Approved';
+
+  @override
+  String get letterAuditRejected => 'Rejected';
+
+  @override
+  String letterAuditLine(String status) {
+    return 'Audit: $status';
+  }
+
+  @override
+  String get letterEtaLabel => 'Estimated arrival';
+
+  @override
+  String get letterDeliveredLabel => 'Delivered';
+
+  @override
+  String get letterPeerPostOfficePool => 'Post office pool';
+
+  @override
+  String get letterPeerUnknown => 'Unknown recipient';
 
   @override
   String get letterAcceptContact => 'Accept postal contact';
@@ -1275,7 +1315,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mailboxTabConnections => 'Connections';
 
   @override
-  String get mailboxTabTimeLetter => 'Time';
+  String get mailboxTabTimeLetter => 'Time letter';
 
   @override
   String get timeLetterComposeTitle => 'Time Post Office';
@@ -1482,23 +1522,37 @@ class AppLocalizationsEn extends AppLocalizations {
       'Basic letter writing is never blocked by payment.';
 
   @override
-  String get composeChooseSelf => 'To myself';
+  String get composeChooseSelf => 'To myself (time letter)';
 
   @override
-  String get composeChooseSelfSub => 'A time letter for your future self';
+  String get composeChooseSelfSub => 'SELF_TIME — open on a future date';
 
   @override
   String get composeChoosePenPal => 'To a pen pal';
 
   @override
-  String get composeChoosePenPalSub =>
-      'A thoughtful letter, slowly getting to know each other';
+  String get composeChoosePenPalSub => 'DIRECT — send to someone you know';
 
   @override
   String get composeChooseTopic => 'To a topic mailbox';
 
   @override
   String get composeChooseTopicSub => 'Start from today\'s gentle prompt';
+
+  @override
+  String get composeChoosePostOffice => 'To the post office';
+
+  @override
+  String get composeChoosePostOfficeSub =>
+      'POST_OFFICE — no recipient; wait for a match';
+
+  @override
+  String get composeBodySubtitlePostOffice =>
+      'Write freely — the post office will find a reader.';
+
+  @override
+  String get composePostOfficeSendHint =>
+      'This letter goes into the post office pool';
 
   @override
   String get composePickDestinationRequired =>
@@ -1578,7 +1632,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get composeStepMailSubtitle =>
-      'Standard post is free. Registered mail uses a stamp (free for VIP).';
+      'Standard and registered mail both use delayed delivery. Registered may use a stamp for the filing mark (free for VIP).';
 
   @override
   String get composeStepSealTitle => 'Seal and send';

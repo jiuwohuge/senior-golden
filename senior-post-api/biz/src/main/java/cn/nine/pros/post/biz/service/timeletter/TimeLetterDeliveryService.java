@@ -5,10 +5,7 @@ import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.TimeLetterDomain;
 import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.biz.service.base.UserService;
-import cn.nine.pros.post.client.common.enums.TimeLetterStatus;
 import cn.nine.pros.post.client.model.db.UserDTO;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,21 +22,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TimeLetterDeliveryService {
 
-    private static final long SYSTEM_UPDATED_BY = 0L;
     private static final int USER_STATUS_NORMAL = 1;
 
-        private final TimeLetterService timeLetterService;
+    private final TimeLetterService timeLetterService;
     private final UserService userService;
     private final TimeLetterProperties properties;
     private final AppMessages appMessages;
 
     @Transactional(rollbackFor = Exception.class)
     public int deliverDueLetters(int maxBatch) {
-        List<TimeLetterDomain> pending = timeLetterService.list(new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .eq(TimeLetterDomain::getStatus, TimeLetterStatus.PENDING.getCode())
-                .orderByAsc(TimeLetterDomain::getDeliveryDate)
-                .last("LIMIT " + maxBatch));
+        List<TimeLetterDomain> pending = timeLetterService.listPendingForDelivery(maxBatch);
 
         int delivered = 0;
         int failed = 0;
@@ -52,27 +44,14 @@ public class TimeLetterDeliveryService {
             }
             Long recipientId = row.getRecipientId() != null ? row.getRecipientId() : row.getSenderId();
             if (!canUserReceive(recipientId)) {
-                if (markFailed(row, appMessages.get("app.timeLetter.fail.recipientUnavailable"))) {
-                    failed++;
-                }
+                failed += markFailedCount(row.getId(), appMessages.get("app.timeLetter.fail.recipientUnavailable"));
                 continue;
             }
             if (!canUserReceive(row.getSenderId())) {
-                if (markFailed(row, appMessages.get("app.timeLetter.fail.senderUnavailable"))) {
-                    failed++;
-                }
+                failed += markFailedCount(row.getId(), appMessages.get("app.timeLetter.fail.senderUnavailable"));
                 continue;
             }
-            LocalDateTime now = LocalDateTime.now();
-            boolean ok = timeLetterService.update(new LambdaUpdateWrapper<TimeLetterDomain>()
-                    .eq(TimeLetterDomain::getId, row.getId())
-                    .eq(TimeLetterDomain::isDelFlag, false)
-                    .eq(TimeLetterDomain::getStatus, TimeLetterStatus.PENDING.getCode())
-                    .set(TimeLetterDomain::getStatus, TimeLetterStatus.DELIVERED.getCode())
-                    .set(TimeLetterDomain::getDeliveredAt, now)
-                    .set(TimeLetterDomain::getUpdatedAt, now)
-                    .set(TimeLetterDomain::getUpdatedBy, SYSTEM_UPDATED_BY));
-            if (ok) {
+            if (timeLetterService.markDelivered(row.getId(), LocalDateTime.now())) {
                 delivered++;
             }
         }
@@ -80,6 +59,14 @@ public class TimeLetterDeliveryService {
             log.info("Time letter delivery: delivered={}, failed={}", delivered, failed);
         }
         return delivered;
+    }
+
+    /** 标记失败成功时计 1，否则 0（幂等未改行不计入）。 */
+    private int markFailedCount(long letterId, String reason) {
+        if (!timeLetterService.markFailed(letterId, reason, LocalDateTime.now())) {
+            return 0;
+        }
+        return 1;
     }
 
     private boolean isDue(TimeLetterDomain row) {
@@ -104,19 +91,6 @@ public class TimeLetterDeliveryService {
         }
         return userStatus(u.getStatus()) == USER_STATUS_NORMAL;
     }
-
-    private boolean markFailed(TimeLetterDomain row, String reason) {
-        LocalDateTime now = LocalDateTime.now();
-        return timeLetterService.update(new LambdaUpdateWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::getId, row.getId())
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .eq(TimeLetterDomain::getStatus, TimeLetterStatus.PENDING.getCode())
-                .set(TimeLetterDomain::getStatus, TimeLetterStatus.FAILED.getCode())
-                .set(TimeLetterDomain::getFailReason, reason)
-                .set(TimeLetterDomain::getUpdatedAt, now)
-                .set(TimeLetterDomain::getUpdatedBy, SYSTEM_UPDATED_BY));
-    }
-
 
     private static int userStatus(Object status) {
         if (status instanceof Number n) {

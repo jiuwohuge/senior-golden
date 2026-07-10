@@ -19,4 +19,6 @@ public interface VipSubscriptionService extends IService<VipSubscriptionDomain> 
 
     void delByIds(List<Long> ids);
 
+    long countActive();
+
 }

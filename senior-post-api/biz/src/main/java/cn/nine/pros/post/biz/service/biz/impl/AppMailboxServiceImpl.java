@@ -11,9 +11,12 @@ import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.SensitiveWordService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
+import cn.nine.pros.post.biz.service.biz.support.DeliveryDelayCalculator;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.base.UserService;
+import cn.nine.pros.post.client.common.enums.LetterAuditStatus;
 import cn.nine.pros.post.client.common.enums.LetterBizStatus;
+import cn.nine.pros.post.client.common.enums.LetterMode;
 import cn.nine.pros.post.client.common.enums.LetterPhysicalType;
 import cn.nine.pros.post.client.common.enums.LetterSendMode;
 import cn.nine.pros.post.client.model.db.UserDTO;
@@ -23,9 +26,8 @@ import cn.nine.pros.post.client.model.out.AppPublicUserVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
 import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -34,9 +36,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+/**
+ * App 标准信箱业务：收件箱/归档/发信/早开/好友列表。
+ * <p>写路径（发信、早开、接受邮缘）落库后打 INFO；敏感词拒绝由 SensitiveWordService 抛错不落库。
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AppMailboxServiceImpl implements AppMailboxService {
@@ -50,8 +56,13 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private final OssDisplayUrlService ossDisplayUrlService;
     private final AppBlacklistService appBlacklistService;
     private final WritingStyleService writingStyleService;
+    private final DeliveryDelayCalculator deliveryDelayCalculator;
     private final AppMessages appMessages;
 
+    /**
+     * 邮政收件箱：本人相关且未读的信件列表（含 POST_OFFICE 入池仅发件人可见）。
+     * <p>前置：userId 已登录；无写库副作用。
+     */
     @Override
     public List<MailboxLetterItemVO> listPostalInbox(Long userId) {
         List<LetterDomain> letters = loadLettersForUser(userId, null, 500);
@@ -65,6 +76,10 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         return out;
     }
 
+    /**
+     * 增量同步信箱：返回 since 之后、仍属邮政收件箱可见范围的信件及 serverTime。
+     * <p>前置：userId 已登录；无写库副作用。
+     */
     @Override
     public LetterSyncResultVO sync(Long userId, LocalDateTime since) {
         List<LetterDomain> letters = loadLettersForUser(userId, since, 500);
@@ -78,6 +93,10 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .build();
     }
 
+    /**
+     * 归档列表：用户作为收/发件人的全部未删信件（含已读）。
+     * <p>前置：userId 已登录；无写库副作用。
+     */
     @Override
     public List<MailboxLetterItemVO> listArchive(Long userId) {
         return loadLettersForUser(userId, null, 500).stream()
@@ -85,43 +104,44 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 接受邮缘：基于信件确保双方好友关系并返回对端 userId。
+     * <p>前置：actor 为信件参与方；副作用：可能新建/激活 friendship。
+     */
     @Override
     public AcceptPostalContactResultVO acceptPostalContact(Long actorUserId, Long letterId) {
         FriendshipDomain f = friendshipService.ensureActiveFriendship(actorUserId, letterId);
         LetterDomain letter = letterService.getById(letterId);
         long peer = peerUserId(letter, actorUserId);
+        log.info("postal contact accepted, actorUserId={}, letterId={}, peerUserId={}, friendshipId={}",
+                actorUserId, letterId, peer, f.getId());
         return AcceptPostalContactResultVO.builder()
                 .friendshipId(f.getId())
                 .peerUserId(peer)
                 .build();
     }
 
+    /**
+     * 发送标准信：DIRECT 入运输轨或 POST_OFFICE 入匹配池；回信强制 DIRECT。
+     * <p>前置：发件人状态正常、正文非空且过敏感词、DIRECT 收件人合法且未互黑。
+     * <p>副作用：写 letter、重算写作风格；事务边界为本方法。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MailboxLetterItemVO sendLetter(long fromUserId, AppSendLetterInDto body) {
         Long parentLetterId = body.getParentLetterId();
-        long toUserId;
+        LetterMode mode = resolveSendMode(body, parentLetterId);
+        Long toUserId;
         if (parentLetterId != null) {
-            LetterDomain parent = letterService.getById(parentLetterId);
-            if (parent == null || parent.isDelFlag()) {
-                throw new BusinessException(appMessages.get("app.error.letter.originalMissing"));
-            }
-            if (!Objects.equals(parent.getToUserId(), fromUserId)) {
-                throw new BusinessException(appMessages.get("app.error.letter.replyRecipientOnly"));
-            }
-            long replyTo = parent.getFromUserId();
-            if (body.getToUserId() != null && !body.getToUserId().equals(replyTo)) {
-                throw new BusinessException(appMessages.get("app.error.letter.replyPeerMismatch"));
-            }
-            if (replyTo == fromUserId) {
-                throw new BusinessException(appMessages.get("app.error.letter.cannotMailSelf"));
-            }
-            toUserId = replyTo;
+            toUserId = resolveReplyRecipientId(fromUserId, parentLetterId, body);
+            mode = LetterMode.DIRECT;
+        } else if (mode == LetterMode.DIRECT) {
+            toUserId = requireDirectRecipientId(fromUserId, body);
+        } else if (mode == LetterMode.POST_OFFICE) {
+            // 入池：无收件人；匹配留 M3
+            toUserId = null;
         } else {
-            if (body.getToUserId() == null || body.getToUserId().equals(fromUserId)) {
-                throw new BusinessException(appMessages.get("app.error.letter.cannotMailSelf"));
-            }
-            toUserId = body.getToUserId();
+            throw new BusinessException(appMessages.get("app.error.letter.modeInvalid"));
         }
 
         String raw = body.getContent();
@@ -132,28 +152,20 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         if (content.length() > 20000) {
             throw new BusinessException(appMessages.get("app.error.letter.contentTooLong"));
         }
+        // 敏感词通过后 M2 自动 APPROVED；拒绝则抛错不落库
         sensitiveWordService.assertPlainTextAllowed(content);
         LetterPhysicalType physicalType = LetterPhysicalType.fromCode(body.getLetterType());
         if (physicalType == null) {
             throw new BusinessException(appMessages.get("app.error.letter.typeInvalid"));
         }
 
-        UserDTO toUser = userService.findById(toUserId);
-        if (toUser == null) {
-            throw new BusinessException(appMessages.get("app.error.recipient.notFound"));
-        }
-        if (userStatus(toUser.getStatus()) != USER_STATUS_NORMAL) {
-            throw new BusinessException(appMessages.get("app.error.recipient.statusBad"));
-        }
         UserDTO sender = userService.findById(fromUserId);
         if (sender == null || userStatus(sender.getStatus()) != USER_STATUS_NORMAL) {
             throw new BusinessException(appMessages.get("app.error.sender.statusBad"));
         }
-        if (appBlacklistService.areMutuallyBlocked(fromUserId, toUserId)) {
-            throw new BusinessException(appMessages.get("app.error.mail.cannotSendToPeer"));
-        }
 
-        boolean vip = Boolean.TRUE.equals(sender.getIsVip());
+        UserDTO toUser = loadValidatedRecipient(fromUserId, toUserId);
+
         LocalDateTime now = LocalDateTime.now();
         LetterDomain letter = new LetterDomain();
         letter.setFromUserId(fromUserId);
@@ -161,36 +173,103 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         letter.setContent(content);
         letter.setIsAccelerated(false);
         letter.setParentLetterId(parentLetterId);
+        letter.setMode(mode.getCode());
+        letter.setAuditStatus(LetterAuditStatus.APPROVED.getCode());
+        letter.setLetterType(physicalType.getCode());
+        // 运输轨仅作展示兼容；速度一律 §6.1
+        letter.setSendMode(physicalType == LetterPhysicalType.STANDARD
+                ? LetterSendMode.STANDARD_POST.getCode()
+                : LetterSendMode.REGISTERED_MAIL.getCode());
 
-        if (physicalType == LetterPhysicalType.STANDARD) {
-            letter.setLetterType(LetterPhysicalType.STANDARD.getCode());
-            letter.setStatus(LetterBizStatus.DELIVERING.getCode());
-            letter.setSendMode(LetterSendMode.STANDARD_POST.getCode());
-            letter.setExpectedArrivalTime(now.plusMinutes(ThreadLocalRandom.current().nextInt(10, 121)));
+        if (mode == LetterMode.POST_OFFICE) {
+            letter.setStatus(LetterBizStatus.PENDING.getCode());
+            letter.setExpectedArrivalTime(null);
             letter.setActualArrivalTime(null);
-        } else if (vip) {
-            letter.setLetterType(LetterPhysicalType.REGISTERED.getCode());
-            letter.setStatus(LetterBizStatus.DELIVERED.getCode());
-            letter.setSendMode(LetterSendMode.DIRECT_VIP.getCode());
-            letter.setExpectedArrivalTime(null);
-            letter.setActualArrivalTime(now);
+            log.info("POST_OFFICE letter pooled, fromUserId={}", fromUserId);
         } else {
-            letter.setLetterType(LetterPhysicalType.REGISTERED.getCode());
-            letter.setStatus(LetterBizStatus.DELIVERED.getCode());
-            letter.setSendMode(LetterSendMode.REGISTERED_MAIL.getCode());
-            letter.setExpectedArrivalTime(null);
-            letter.setActualArrivalTime(now);
+            LocalDateTime eta = deliveryDelayCalculator.expectedArrival(now, sender, toUser);
+            letter.setStatus(LetterBizStatus.DELIVERING.getCode());
+            letter.setExpectedArrivalTime(eta);
+            letter.setActualArrivalTime(null);
+            log.info("DIRECT letter queued, fromUserId={}, toUserId={}, eta={}", fromUserId, toUserId, eta);
         }
 
         letter.initAudit(fromUserId);
         letterService.save(letter);
-        // 发信后按规则重算写作风格（样本不足时内部跳过）
         writingStyleService.recompute(fromUserId);
+        log.info("letter sent, fromUserId={}, letterId={}, mode={}", fromUserId, letter.getId(), mode.getCode());
 
         LetterDomain saved = letterService.getById(letter.getId());
         return toItem(saved, fromUserId, false);
     }
 
+    /** 推断发送模式：显式 mode > 回信/有收件人 DIRECT > 默认 POST_OFFICE。 */
+    private static LetterMode resolveSendMode(AppSendLetterInDto body, Long parentLetterId) {
+        LetterMode explicit = LetterMode.fromCode(body.getMode());
+        if (explicit != null) {
+            return explicit;
+        }
+        if (parentLetterId != null || body.getToUserId() != null) {
+            return LetterMode.DIRECT;
+        }
+        return LetterMode.POST_OFFICE;
+    }
+
+    /**
+     * 回信路由：仅原信收件人可回，收件人固定为原信发件人。
+     */
+    private Long resolveReplyRecipientId(long fromUserId, Long parentLetterId, AppSendLetterInDto body) {
+        LetterDomain parent = letterService.getById(parentLetterId);
+        if (parent == null || parent.isDelFlag()) {
+            throw new BusinessException(appMessages.get("app.error.letter.originalMissing"));
+        }
+        if (!Objects.equals(parent.getToUserId(), fromUserId)) {
+            throw new BusinessException(appMessages.get("app.error.letter.replyRecipientOnly"));
+        }
+        long replyTo = parent.getFromUserId();
+        if (body.getToUserId() != null && !body.getToUserId().equals(replyTo)) {
+            throw new BusinessException(appMessages.get("app.error.letter.replyPeerMismatch"));
+        }
+        if (replyTo == fromUserId) {
+            throw new BusinessException(appMessages.get("app.error.letter.cannotMailSelf"));
+        }
+        return replyTo;
+    }
+
+    /**
+     * DIRECT 模式：必须有合法且非本人的 toUserId。
+     */
+    private Long requireDirectRecipientId(long fromUserId, AppSendLetterInDto body) {
+        if (body.getToUserId() == null || body.getToUserId().equals(fromUserId)) {
+            throw new BusinessException(appMessages.get("app.error.letter.cannotMailSelf"));
+        }
+        return body.getToUserId();
+    }
+
+    /**
+     * 加载并校验收件人：存在、状态正常、双方未互拉黑；无收件人时返回 null。
+     */
+    private UserDTO loadValidatedRecipient(long fromUserId, Long toUserId) {
+        if (toUserId == null) {
+            return null;
+        }
+        UserDTO toUser = userService.findById(toUserId);
+        if (toUser == null) {
+            throw new BusinessException(appMessages.get("app.error.recipient.notFound"));
+        }
+        if (userStatus(toUser.getStatus()) != USER_STATUS_NORMAL) {
+            throw new BusinessException(appMessages.get("app.error.recipient.statusBad"));
+        }
+        if (appBlacklistService.areMutuallyBlocked(fromUserId, toUserId)) {
+            throw new BusinessException(appMessages.get("app.error.mail.cannotSendToPeer"));
+        }
+        return toUser;
+    }
+
+    /**
+     * 查看信件详情：参与方可读；收件人首次打开已送达信时标记已读。
+     * <p>前置：viewer 为发/收件人；副作用：可能写 recipientReadAt。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MailboxLetterItemVO getLetter(long viewerUserId, long letterId) {
@@ -198,27 +277,39 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         if (l == null || l.isDelFlag()) {
             throw new BusinessException(appMessages.get("app.error.letter.notFound"));
         }
-        if (l.getFromUserId() != viewerUserId && l.getToUserId() != viewerUserId) {
+        boolean participant = Objects.equals(l.getFromUserId(), viewerUserId)
+                || (l.getToUserId() != null && Objects.equals(l.getToUserId(), viewerUserId));
+        if (!participant) {
             throw new BusinessException(appMessages.get("app.error.letter.noPermissionView"));
         }
-        if (Objects.equals(l.getToUserId(), viewerUserId)
-                && l.getRecipientReadAt() == null
-                && toInt(l.getStatus()) == LetterBizStatus.DELIVERED.getCode()) {
-            boolean marked = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
-                    .eq(LetterDomain::getId, letterId)
-                    .eq(LetterDomain::isDelFlag, false)
-                    .eq(LetterDomain::getToUserId, viewerUserId)
-                    .isNull(LetterDomain::getRecipientReadAt)
-                    .set(LetterDomain::getRecipientReadAt, LocalDateTime.now())
-                    .set(LetterDomain::getUpdatedAt, LocalDateTime.now())
-                    .set(LetterDomain::getUpdatedBy, viewerUserId));
-            if (marked) {
-                l = letterService.getById(letterId);
-            }
-        }
+        l = markRecipientReadIfNeeded(l, viewerUserId, letterId);
         return toItem(l, viewerUserId, true);
     }
 
+    /**
+     * 收件人首次打开已送达信件时标记已读并刷新实体；不满足条件则原样返回。
+     */
+    private LetterDomain markRecipientReadIfNeeded(LetterDomain letter, long viewerUserId, long letterId) {
+        if (!Objects.equals(letter.getToUserId(), viewerUserId)) {
+            return letter;
+        }
+        if (letter.getRecipientReadAt() != null) {
+            return letter;
+        }
+        if (toInt(letter.getStatus()) != LetterBizStatus.DELIVERED.getCode()) {
+            return letter;
+        }
+        boolean marked = letterService.markRecipientRead(letterId, viewerUserId, LocalDateTime.now());
+        if (!marked) {
+            return letter;
+        }
+        return letterService.getById(letterId);
+    }
+
+    /**
+     * 活跃好友列表（含对端公开资料与签名头像）。
+     * <p>前置：userId 已登录；无写库副作用。
+     */
     @Override
     public List<MailboxFriendItemVO> listFriends(Long userId) {
         List<FriendshipDomain> rows = friendshipService.listActiveFriendshipsForUser(userId);
@@ -248,11 +339,19 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         return out;
     }
 
+    /**
+     * 判断双方是否为活跃好友。
+     */
     @Override
     public boolean isFriendshipActive(long viewerUserId, long peerUserId) {
         return friendshipService.areActiveFriends(viewerUserId, peerUserId);
     }
 
+    /**
+     * 收件人提前拆信：运输中信件标记早开并立即送达。
+     * <p>前置：actor 为收件人、状态 DELIVERING、尚未早开、账号正常。
+     * <p>副作用：写 earlyOpen/delivered 状态；事务边界为本方法。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MailboxLetterItemVO earlyOpenLetter(long actorUserId, long letterId) {
@@ -262,9 +361,6 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         }
         if (letter.getToUserId() == null || !Objects.equals(letter.getToUserId(), actorUserId)) {
             throw new BusinessException(appMessages.get("app.error.letter.earlyOpenRecipientOnly"));
-        }
-        if (toInt(letter.getLetterType()) != LetterPhysicalType.STANDARD.getCode()) {
-            throw new BusinessException(appMessages.get("app.error.letter.earlyOpenStandardOnly"));
         }
         if (toInt(letter.getStatus()) != LetterBizStatus.DELIVERING.getCode()) {
             throw new BusinessException(appMessages.get("app.error.letter.earlyOpenBadStatus"));
@@ -278,70 +374,25 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         }
         boolean vip = Boolean.TRUE.equals(recipient.getIsVip());
         LocalDateTime now = LocalDateTime.now();
-        boolean letterPatched = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
-                .eq(LetterDomain::getId, letterId)
-                .eq(LetterDomain::isDelFlag, false)
-                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
-                .eq(LetterDomain::getToUserId, actorUserId)
-                .isNull(LetterDomain::getRecipientEarlyOpenAt)
-                .set(LetterDomain::getRecipientEarlyOpenAt, now)
-                // 收件人已付费拆信：对双方列表/归档与「已送达」语义一致，避免仍显示运输中
-                .set(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
-                .set(LetterDomain::getActualArrivalTime, now)
-                .set(LetterDomain::getRecipientReadAt, now)
-                .set(LetterDomain::getUpdatedAt, now)
-                .set(LetterDomain::getUpdatedBy, actorUserId));
+        boolean letterPatched = letterService.markEarlyOpenedAndDelivered(letterId, actorUserId, now);
         if (!letterPatched) {
+            log.info("letter early-open rejected: state changed, actorUserId={}, letterId={}", actorUserId, letterId);
             throw new BusinessException(appMessages.get("app.error.letter.stateChanged"));
         }
+        log.info("letter early-opened, actorUserId={}, letterId={}, vip={}", actorUserId, letterId, vip);
         LetterDomain saved = letterService.getById(letterId);
         return toItem(saved, actorUserId, true);
     }
 
+    /**
+     * 邮票加速已废弃（§16）；保留入口避免旧客户端 404，始终拒绝。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MailboxLetterItemVO speedUpLetter(long actorUserId, long letterId) {
-        LetterDomain letter = letterService.getById(letterId);
-        if (letter == null || letter.isDelFlag()) {
-            throw new BusinessException(appMessages.get("app.error.letter.notFound"));
-        }
-        if (letter.getFromUserId() != actorUserId) {
-            throw new BusinessException(appMessages.get("app.error.letter.speedUpSenderOnly"));
-        }
-        if (toInt(letter.getLetterType()) != LetterPhysicalType.STANDARD.getCode()) {
-            throw new BusinessException(appMessages.get("app.error.letter.speedUpStandardOnly"));
-        }
-        if (toInt(letter.getStatus()) != LetterBizStatus.DELIVERING.getCode()) {
-            throw new BusinessException(appMessages.get("app.error.letter.speedUpBadStatus"));
-        }
-        if (Boolean.TRUE.equals(letter.getIsAccelerated())) {
-            throw new BusinessException(appMessages.get("app.error.letter.speedUpAlready"));
-        }
-
-        UserDTO sender = userService.findById(actorUserId);
-        if (sender == null || userStatus(sender.getStatus()) != USER_STATUS_NORMAL) {
-            throw new BusinessException(appMessages.get("app.error.account.statusAbnormal"));
-        }
-        boolean vip = Boolean.TRUE.equals(sender.getIsVip());
-        LocalDateTime now = LocalDateTime.now();
-
-        boolean letterPatched = letterService.update(new LambdaUpdateWrapper<LetterDomain>()
-                .eq(LetterDomain::getId, letterId)
-                .eq(LetterDomain::isDelFlag, false)
-                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
-                .eq(LetterDomain::getFromUserId, actorUserId)
-                .set(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
-                .set(LetterDomain::getIsAccelerated, true)
-                .set(LetterDomain::getAcceleratedAt, now)
-                .set(LetterDomain::getActualArrivalTime, now)
-                .set(LetterDomain::getUpdatedAt, now)
-                .set(LetterDomain::getUpdatedBy, actorUserId));
-        if (!letterPatched) {
-            throw new BusinessException(appMessages.get("app.error.letter.stateChanged"));
-        }
-
-        LetterDomain saved = letterService.getById(letterId);
-        return toItem(saved, actorUserId, false);
+        // 邮票加速已废弃（§16 表达增强付费）；保留接口避免旧客户端 404
+        log.info("letter speed-up rejected: retired, actorUserId={}, letterId={}", actorUserId, letterId);
+        throw new BusinessException(appMessages.get("app.error.letter.speedUpRetired"));
     }
 
     private static int userStatus(Object status) {
@@ -355,32 +406,28 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     }
 
     private List<LetterDomain> loadLettersForUser(Long userId, LocalDateTime since, int limit) {
-        LambdaQueryWrapper<LetterDomain> q = new LambdaQueryWrapper<LetterDomain>()
-                .eq(LetterDomain::isDelFlag, false)
-                .and(w -> w.eq(LetterDomain::getFromUserId, userId).or().eq(LetterDomain::getToUserId, userId));
-        if (since != null) {
-            q.apply("COALESCE(updated_at, created_at) > {0}", since);
-        }
-        q.orderByDesc(LetterDomain::getUpdatedAt).last("LIMIT " + limit);
-        return letterService.list(q);
+        return letterService.listMailboxForUser(userId, since, limit);
     }
 
     private static long peerUserId(LetterDomain l, long viewer) {
-        if (l.getFromUserId() == viewer) {
+        if (l.getToUserId() == null) {
+            return 0L;
+        }
+        if (Objects.equals(l.getFromUserId(), viewer)) {
             return l.getToUserId();
         }
-        return l.getFromUserId();
+        return l.getFromUserId() != null ? l.getFromUserId() : 0L;
     }
 
     /**
-     * Postal inbox：与 Connections/好友关系无关。
-     * 收、发双方一致：只要本人是信件关联方，且收件方尚未产生「已读」时间
-     * （{@code recipient_read_at == null}），即出现在邮政收件箱。
-     * 这样挂号信（立即已送达）发件人也能在对方未读前看到该信；平邮运输中同理。
+     * Postal inbox：本人相关且未读；POST_OFFICE 入池仅发件人可见。
      */
     private static boolean includeInPostalInbox(LetterDomain l, long userId) {
         if (l == null || l.isDelFlag()) {
             return false;
+        }
+        if (l.getToUserId() == null) {
+            return Objects.equals(l.getFromUserId(), userId);
         }
         if (!Objects.equals(l.getToUserId(), userId) && !Objects.equals(l.getFromUserId(), userId)) {
             return false;
@@ -390,43 +437,33 @@ public class AppMailboxServiceImpl implements AppMailboxService {
 
     private MailboxLetterItemVO toItem(LetterDomain l, long viewer, boolean includeFullContent) {
         long peerId = peerUserId(l, viewer);
-        UserDTO peer = userService.findById(peerId);
+        UserDTO peer = peerId > 0 ? userService.findById(peerId) : null;
         boolean fromMe = Objects.equals(l.getFromUserId(), viewer);
         boolean delivering = toInt(l.getStatus()) == LetterBizStatus.DELIVERING.getCode();
-        boolean standard = toInt(l.getLetterType()) == LetterPhysicalType.STANDARD.getCode();
+        boolean pending = toInt(l.getStatus()) == LetterBizStatus.PENDING.getCode();
         boolean openedEarly = l.getRecipientEarlyOpenAt() != null;
-        boolean hideBody = !fromMe && delivering && standard && !openedEarly;
+        // 运输中对收件人隐藏正文；PENDING 入池发件人可见
+        boolean hideBody = !fromMe && delivering && !openedEarly;
 
         String fullContent = l.getContent() != null ? l.getContent() : "";
-        String preview;
-        String contentOut = null;
-        if (hideBody) {
-            preview = "";
-            if (includeFullContent) {
-                contentOut = "";
-            }
-        } else {
-            preview = fullContent.length() > 280 ? fullContent.substring(0, 280) + "…" : fullContent;
-            if (includeFullContent) {
-                contentOut = fullContent;
-            }
-        }
+        String preview = resolvePreviewBody(hideBody, fullContent, 280);
+        String contentOut = resolveContentOut(hideBody, includeFullContent, fullContent);
         AppPublicUserVO peerVo = toPublic(peer);
-        String peerAvatarRef = UserAvatarAuditSupport.publicStoredRef(peer);
-        if (StringUtils.hasText(peerAvatarRef)) {
-            peerVo.setAvatarUrl(ossDisplayUrlService.signAvatarForViewer(viewer, peerAvatarRef));
-        } else {
-            peerVo.setAvatarUrl(null);
-        }
+        applyPeerAvatarForViewer(peerVo, peer, viewer);
         LocalDateTime expected = toLocalDateTimeField(l.getExpectedArrivalTime());
         LocalDateTime actual = toLocalDateTimeField(l.getActualArrivalTime());
+        Integer mode = l.getMode() != null ? l.getMode() : LetterMode.DIRECT.getCode();
+        Integer audit = l.getAuditStatus() != null ? l.getAuditStatus() : LetterAuditStatus.APPROVED.getCode();
+        boolean pendingPoolPlaceholder = pending && fromMe && peerId == 0;
         return MailboxLetterItemVO.builder()
                 .letterId(l.getId())
                 .peer(peerVo)
                 .letterType(toInt(l.getLetterType()))
                 .sendMode(l.getSendMode() != null ? l.getSendMode() : LetterSendMode.STANDARD_POST.getCode())
                 .status(toInt(l.getStatus()))
-                .preview(preview)
+                .mode(mode)
+                .auditStatus(audit)
+                .preview(resolveMailboxPreview(pendingPoolPlaceholder, preview))
                 .content(contentOut)
                 .fromMe(fromMe)
                 .sentAt(l.getCreatedAt())
@@ -435,6 +472,51 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .actualArrivalTime(actual)
                 .contentHidden(hideBody)
                 .build();
+    }
+
+    /**
+     * 按隐藏策略生成列表预览；超长截断并加省略号。
+     */
+    private static String resolvePreviewBody(boolean hideBody, String fullContent, int maxLen) {
+        return cn.nine.pros.post.biz.support.TextPreviewSupport.previewOrHidden(hideBody, fullContent, maxLen);
+    }
+
+    /**
+     * 详情才返回全文；隐藏时返回空串，非详情返回 null。
+     */
+    private static String resolveContentOut(boolean hideBody, boolean includeFullContent, String fullContent) {
+        if (!includeFullContent) {
+            return null;
+        }
+        if (hideBody) {
+            return "";
+        }
+        return fullContent;
+    }
+
+    /**
+     * POST_OFFICE 入池且无 peer 时，空预览用占位标记便于客户端识别。
+     */
+    private static String resolveMailboxPreview(boolean pendingPoolPlaceholder, String preview) {
+        if (!pendingPoolPlaceholder) {
+            return preview;
+        }
+        return preview.isEmpty() ? "[POST_OFFICE]" : preview;
+    }
+
+    /**
+     * 为信箱条目 peer VO 填充可展示头像（审核通过引用 + 按查看者签名）。
+     */
+    private void applyPeerAvatarForViewer(AppPublicUserVO peerVo, UserDTO peer, long viewer) {
+        if (peer == null) {
+            return;
+        }
+        String peerAvatarRef = UserAvatarAuditSupport.publicStoredRef(peer);
+        if (!StringUtils.hasText(peerAvatarRef)) {
+            peerVo.setAvatarUrl(null);
+            return;
+        }
+        peerVo.setAvatarUrl(ossDisplayUrlService.signAvatarRefOrNull(viewer, peerAvatarRef));
     }
 
     private static LocalDateTime toLocalDateTimeField(Object raw) {

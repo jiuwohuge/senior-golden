@@ -216,7 +216,10 @@ class _PostalInboxBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final delivering = letters
-        .where((l) => l.status == LetterStatus.delivering)
+        .where((l) =>
+            l.status == LetterStatus.delivering ||
+            l.status == LetterStatus.pending ||
+            l.status == LetterStatus.matched)
         .toList();
     return Column(
       children: [
@@ -488,6 +491,8 @@ class _LetterTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final statusChip = switch (letter.status) {
+      LetterStatus.pending ||
+      LetterStatus.matched ||
       LetterStatus.delivering => PostalStatusChip.delivering(),
       LetterStatus.registered => PostalStatusChip.registered(
         label: 'Registered',

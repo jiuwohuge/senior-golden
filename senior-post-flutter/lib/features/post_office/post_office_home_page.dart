@@ -4,15 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
-import '../../core/bootstrap/app_bootstrap.dart';
-import '../../core/i18n/app_locale_provider.dart';
-import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal_button.dart';
 import '../../widgets/postal/postal_card_envelope.dart';
-import '../mailbox/mailbox_providers.dart';
+import '../compose/compose_intent.dart';
 import '../shell/main_shell.dart';
+import 'post_office_remote.dart';
 
-/// M0: 邮局首页 — 一屏一主张 + 摘要卡（§11 / §12.2 / §12.8）
+/// 邮局首页：一屏一主张 + 写信主 CTA + 两张摘要卡（§11）。
 class PostOfficeHomePage extends ConsumerWidget {
   const PostOfficeHomePage({super.key});
 
@@ -20,18 +18,26 @@ class PostOfficeHomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final lang = ref.watch(appLocaleProvider)?.languageCode ?? 'en';
-    final bootstrap = ref.watch(appBootstrapProvider(lang));
-    final dailyQuota = bootstrap.valueOrNull?.dailyLetterQuota ?? 5;
+    final homeAsync = ref.watch(postOfficeHomeProvider);
 
-    final inboxAsync = ref.watch(postalInboxLettersProvider);
-    final pendingCount = inboxAsync.maybeWhen(
-      data: (letters) => letters.length,
+    final greeting = homeAsync.maybeWhen(
+      data: (h) => h.greeting.isNotEmpty ? h.greeting : l10n.postOfficeGreeting,
+      orElse: () => l10n.postOfficeGreeting,
+    );
+    final hint = homeAsync.maybeWhen(
+      data: (h) => h.todayHint.isNotEmpty ? h.todayHint : l10n.postOfficeTodayHint,
+      orElse: () => l10n.postOfficeTodayHint,
+    );
+    final remaining = homeAsync.maybeWhen(
+      data: (h) => h.remainingQuota,
+      orElse: () => 5,
+    );
+    final relationCount = homeAsync.maybeWhen(
+      data: (h) => h.relationMessageCount,
       orElse: () => 0,
     );
-    final inTransitCount = inboxAsync.maybeWhen(
-      data: (letters) =>
-          letters.where((l) => l.status == LetterStatus.delivering).length,
+    final inTransit = homeAsync.maybeWhen(
+      data: (h) => h.inTransitCount,
       orElse: () => 0,
     );
 
@@ -39,14 +45,14 @@ class PostOfficeHomePage extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       children: [
         Text(
-          l10n.postOfficeGreeting,
+          greeting,
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          l10n.postOfficeTodayHint,
+          hint,
           style: theme.textTheme.bodyLarge?.copyWith(
             height: 1.4,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
@@ -57,12 +63,16 @@ class PostOfficeHomePage extends ConsumerWidget {
           label: l10n.postOfficeWriteLetter,
           icon: Icons.edit_outlined,
           variant: PostalButtonVariant.primaryLarge,
-          onPressed: () => context.push('/compose'),
+          // 默认进邮局模式（POST_OFFICE）
+          onPressed: () => context.push(
+            '/compose',
+            extra: const ComposeIntent(kind: ComposeKind.postOffice),
+          ),
         ),
         const SizedBox(height: 12),
         Center(
           child: Text(
-            l10n.postOfficeFreeQuotaHint(dailyQuota),
+            l10n.postOfficeFreeQuotaHint(remaining),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: PostalTokens.inkTertiary,
             ),
@@ -71,13 +81,13 @@ class PostOfficeHomePage extends ConsumerWidget {
         const SizedBox(height: 28),
         _SummaryCard(
           icon: Icons.mail_outline,
-          title: l10n.postOfficeMessagesSummary(pendingCount),
+          title: l10n.postOfficeMessagesSummary(relationCount),
           onTap: () => context.go(MainShellRoute.pathMailbox),
         ),
         const SizedBox(height: 12),
         _SummaryCard(
           icon: Icons.local_shipping_outlined,
-          title: l10n.postOfficeInTransitSummary(inTransitCount),
+          title: l10n.postOfficeInTransitSummary(inTransit),
           onTap: () => context.go(MainShellRoute.pathMailbox),
         ),
       ],
@@ -118,7 +128,7 @@ class _SummaryCard extends StatelessWidget {
           Icon(
             Icons.chevron_right,
             size: 28,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
           ),
         ],
       ),

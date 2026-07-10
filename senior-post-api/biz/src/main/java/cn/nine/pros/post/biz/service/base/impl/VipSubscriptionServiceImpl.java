@@ -56,4 +56,10 @@ public class VipSubscriptionServiceImpl extends ServiceImpl<VipSubscriptionMappe
                 .in(VipSubscriptionDomain::getId, ids));
     }
 
+    @Override
+    public long countActive() {
+        return count(new LambdaQueryWrapper<VipSubscriptionDomain>()
+                .eq(VipSubscriptionDomain::isDelFlag, false));
+    }
+
 }

@@ -19,4 +19,12 @@ public interface UserBlacklistService extends IService<UserBlacklistDomain> {
 
     void delByIds(List<Long> ids);
 
+    UserBlacklistDomain findByPair(long userId, long blockedUserId);
+
+    List<UserBlacklistDomain> listActiveByUserId(long userId);
+
+    boolean softUnblock(long userId, long blockedUserId);
+
+    boolean existsActiveBlock(long blockerUserId, long blockedUserId);
+
 }

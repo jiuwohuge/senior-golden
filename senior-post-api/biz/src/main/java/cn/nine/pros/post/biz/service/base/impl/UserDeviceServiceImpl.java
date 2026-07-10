@@ -56,4 +56,34 @@ public class UserDeviceServiceImpl extends ServiceImpl<UserDeviceMapper, UserDev
                 .in(UserDeviceDomain::getId, ids));
     }
 
+    @Override
+    public UserDeviceDomain findActiveByUserIdAndDeviceUuid(long userId, String deviceUuid) {
+        return getOne(new LambdaQueryWrapper<UserDeviceDomain>()
+                .eq(UserDeviceDomain::getUserId, userId)
+                .eq(UserDeviceDomain::getDeviceUuid, deviceUuid)
+                .eq(UserDeviceDomain::isDelFlag, false));
+    }
+
+    @Override
+    public java.util.List<UserDeviceDomain> listActiveByUserId(long userId) {
+        return list(new LambdaQueryWrapper<UserDeviceDomain>()
+                .eq(UserDeviceDomain::getUserId, userId)
+                .eq(UserDeviceDomain::isDelFlag, false)
+                .orderByDesc(UserDeviceDomain::getUpdatedAt));
+    }
+
+    @Override
+    public boolean blockByDeviceUuid(String deviceUuid, Long auditUserId) {
+        if (deviceUuid == null || deviceUuid.isBlank()) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        return update(new com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<UserDeviceDomain>()
+                .eq(UserDeviceDomain::getDeviceUuid, deviceUuid.trim())
+                .eq(UserDeviceDomain::isDelFlag, false)
+                .set(UserDeviceDomain::getStatus, 2)
+                .set(UserDeviceDomain::getUpdatedBy, auditUserId)
+                .set(UserDeviceDomain::getUpdatedAt, now));
+    }
+
 }

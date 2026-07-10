@@ -34,6 +34,7 @@ Framework modules (能力来自 `commons-*`，详见源文档模块表):
 5. Prefer framework components over ad-hoc duplicates.
 6. Do not use `new Date()` for business timestamps; use `LocalDateTime.now()`（与源文档「禁止事项」一致）.
 7. **Comments + logging (hard requirement)** — follow §11 below; public/Biz methods, complex branches, and key business paths must be documented and logged appropriately.
+8. **Control flow (hard requirement)** — follow §12 below; no nested if-else; no complex ternary; prefer guard clauses and method extraction.
 
 ## Client request headers (typical)
 
@@ -120,10 +121,17 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 
 | 层级 | 允许 | 禁止 |
 |------|------|------|
-| **Controller** | 校验、调 `XxxBizService`、返回 DTO/`PageData` | ❌ 注入 `Mapper`；❌ `LambdaQueryWrapper` / SQL；❌ 业务编排 |
-| **Business Service** | 调多个 `XxxService`、抛业务异常、`@Transactional` | ❌ 注入 `Mapper`；❌ 直写 SQL |
-| **Base IService / ServiceImpl** | `getById`、条件查询、分页、批量更新等**可复用**方法 | ❌ 堆叠跨域业务流程（上提 BizService） |
+| **Controller** | 校验、调 `XxxBizService`、返回 DTO/`PageData` | ❌ 注入 `Mapper` / Base `XxxService` 拼条件；❌ `LambdaQueryWrapper` / `QueryWrapper` / `lambdaQuery()`；❌ `count\|list\|getOne\|page(…, wrapper)`；❌ SQL；❌ 业务编排 |
+| **Business Service**（`service.biz` 及 `support`） | 调多个 Base `XxxService` **命名方法**、抛业务异常、`@Transactional` | ❌ 注入 `Mapper`；❌ `LambdaQueryWrapper` / `QueryWrapper` / `lambdaQuery()`；❌ `count\|list\|getOne\|page(…, wrapper)`；❌ 直写 SQL |
+| **Base IService / ServiceImpl** | `getById`、条件查询、分页、批量更新等**可复用命名方法**；**仅此处**可建 Wrapper | ❌ 堆叠跨域业务流程（上提 BizService） |
 | **Mapper** | 单表映射、简单自定义 SQL | ❌ 被 Controller 或 BizService 注入 |
+
+#### 查询下沉硬规则（强制）
+
+1. **Controller / Biz 禁止拼装任何查询条件**（含 MyBatis-Plus Wrapper 与 `lambdaQuery()` 链式条件）。
+2. 可复用查询写在 `XxxService` 接口 + `XxxServiceImpl`，命名约定：`countXByY` / `listXByY` / `findActiveByKey` / `pageActive(PageQuery, filters…)`。
+3. 过滤参数用基本类型 / 枚举 / 入参 DTO；**禁止**把 `Wrapper` 当作方法参数上抛给 Biz/Controller。
+4. Biz 仅允许：`getById` / `save` / `updateById` / `removeById` 等无条件单行 API，以及上述命名查询方法。
 
 #### 表域标准形态
 
@@ -139,7 +147,15 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 #### 示例
 
 ```java
-// ❌ BAD — Controller 直调 Mapper
+// ❌ BAD — Biz 内拼 LambdaQueryWrapper
+long sentToday = letterService.count(new LambdaQueryWrapper<LetterDomain>()
+        .eq(LetterDomain::getFromUserId, userId)
+        .ge(LetterDomain::getCreatedAt, dayStart));
+
+// ✅ GOOD — 命名方法下沉到 IService
+long sentToday = letterService.countSentByFromUserBetween(userId, dayStart, dayEnd);
+
+// ❌ BAD — Controller 直调 Mapper / 拼条件
 @RestController
 public class AppLetterController {
     @Resource
@@ -186,12 +202,22 @@ public class LetterServiceImpl
         }
         return domain;
     }
+
+    @Override
+    public long countSentByFromUserBetween(long userId, LocalDateTime start, LocalDateTime end) {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getFromUserId, userId)
+                .ge(LetterDomain::getCreatedAt, start)
+                .le(LetterDomain::getCreatedAt, end));
+    }
 }
 ```
 
 #### 存量重构要求
 
 - 发现 Controller / BizService 注入 `Mapper` → **必须重构**为经 `ServiceImpl` 公共方法访问。
+- 发现 Controller / BizService 使用 `LambdaQueryWrapper` / `lambdaQuery()` → **必须下沉**为 Base `XxxService` 命名方法。
 - 新增接口 Code Review 以本节前述规则为硬门槛。
 
 ### 11) Comments & Logging Convention（强制 · 行业标准）
@@ -204,7 +230,7 @@ public class LetterServiceImpl
 |------|------------|
 | **Controller 公开 API 方法** | 一句话业务意图；关键入参约束（可选 `@param` / `@return`） |
 | **BizService 公开方法** | 业务目的、前置条件、副作用（写库/发信/扣额度/调外部）、事务边界说明 |
-| **复杂分支 / 状态机** | 每个非显然分支旁写「为何走此路径」（额度不足、幂等命中、审核拦截等） |
+| **复杂分支 / 状态机** | 先按 §12 压平嵌套，再在每个非显然分支旁写「为何走此路径」（额度不足、幂等命中、审核拦截等） |
 | **非显然常量 / 魔法数** | 来源（`sys_config` 键、PRD 条款、外部协议） |
 | **TODO / FIXME** | 必须带责任上下文与后续里程碑（如 `// TODO(M2): POST_OFFICE 匹配池`） |
 
@@ -266,16 +292,61 @@ public class LetterBizService {
 }
 ```
 
+### 12) Coding Style / Control Flow Convention（强制）
+
+目标：分支可读、可测、可注释。优先 **卫语句（early return / early throw）** 与 **方法提取**；必要时用 `switch` / 策略表表达多状态。禁止用嵌套 if 或复杂三元堆逻辑。
+
+#### 硬规则
+
+| 规则 | 允许 | 禁止 |
+|------|------|------|
+| **if / else** | 卫语句；同级互斥分支；方法体内嵌套深度 ≤ 1（不再套 if） | `if` 内再 `if` / `else { if }`；用嵌套表达多状态 |
+| **三元 `?:`** | 单层简单取值：`a ? x : y`、`x != null ? x : def` | 嵌套三元；带副作用；多行或多调用链掩盖意图的三元 |
+| **超深逻辑** | 抽 `private` 方法；状态机用 `switch` / 策略表 | 在一个方法里堆多层分支 |
+
+#### BAD / GOOD
+
+```java
+// ❌ BAD — 嵌套 if
+if (user != null) {
+    if (user.isVip()) {
+        applyVip(user);
+    } else {
+        applyNormal(user);
+    }
+}
+
+// ✅ GOOD — 卫语句 + 提取
+if (user == null) {
+    throw new BadRequestException(...);
+}
+if (user.isVip()) {
+    return applyVip(user);
+}
+return applyNormal(user);
+
+// ❌ BAD — 嵌套三元
+String body = hide ? "" : (raw.length() > 120 ? raw.substring(0, 120) : raw);
+
+// ✅ GOOD — 命名方法表达意图
+String body = resolvePreviewBody(hide, raw, 120);
+```
+
+存量代码发现嵌套 if / 复杂三元时，**同任务内压平**（提取方法或卫语句），不要只加注释绕过。
+
 ## Prohibitions (align with source doc §十二)
 
-1. **禁止 Controller / BizService 注入或调用 Mapper**（数据访问仅经 `ServiceImpl`）  
-2. 禁止自行解析 `HttpServletRequest` 取用户/客户端信息  
-3. 禁止手动包装 Controller 返回值为 `ApiResponse`  
-4. 禁止在 Service 中用 `new Date()` 写时间，使用 `LocalDateTime.now()`  
-5. 禁止硬编码用户 ID  
-6. 禁止重复造轮子，优先使用框架组件  
-7. 禁止无业务信息的废话注释；禁止日志打印密钥 / Token / 敏感 PII  
-8. 禁止复杂业务分支无注释、关键路径（写库/外部调用/额度/审核）无日志  
+1. **禁止 Controller / BizService 注入或调用 Mapper**（数据访问仅经 `ServiceImpl`）
+2. **禁止 Controller / `service.biz`（含 support）使用 `LambdaQueryWrapper` / `QueryWrapper` / `lambdaQuery()` / `count|list|getOne|page(…, wrapper)`**；条件查询必须下沉为 Base `XxxService` 命名方法
+3. 禁止自行解析 `HttpServletRequest` 取用户/客户端信息
+4. 禁止手动包装 Controller 返回值为 `ApiResponse`
+5. 禁止在 Service 中用 `new Date()` 写时间，使用 `LocalDateTime.now()`
+6. 禁止硬编码用户 ID
+7. 禁止重复造轮子，优先使用框架组件
+8. 禁止无业务信息的废话注释；禁止日志打印密钥 / Token / 敏感 PII
+9. 禁止复杂业务分支无注释、关键路径（写库/外部调用/额度/审核）无日志
+10. **禁止嵌套 if-else**（`if` 内再 `if` / `else { if }`）；须卫语句或方法提取（§12）
+11. **禁止复杂三元表达式**（嵌套三元、带副作用、多调用链掩盖意图）；仅允许单层简单取值（§12）
 
 ## Delivery Self-Check
 
@@ -288,6 +359,7 @@ public class LetterBizService {
 - APP 加密：注解与 `wj.security` 配置一致（若该接口在加密范围内）  
 - **Comments**：Biz/公开方法有意图说明；复杂分支有「为何」注释  
 - **Logging**：关键写路径 / 外部调用 / 定时任务有 `INFO`/`WARN`/`ERROR`；无敏感字段泄漏  
+- **Control flow**：无嵌套 if-else；无复杂/嵌套三元；深逻辑已方法提取（§12）  
 - 新增仅依赖源文档与 `commons-*` 已有能力时，已查源文档 FAQ/禁止项  
 
 

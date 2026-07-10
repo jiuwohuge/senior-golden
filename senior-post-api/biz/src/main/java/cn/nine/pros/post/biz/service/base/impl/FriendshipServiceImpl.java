@@ -71,16 +71,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .eq(FriendshipDomain::getUserHigh, high)
                 .eq(FriendshipDomain::isDelFlag, false));
         if (existing != null) {
-            if (existing.getStatus() != null && existing.getStatus() == 1) {
-                tencentImFriendshipNotifier.afterFriendshipActive(low, high);
-                return existing;
-            }
-            existing.setStatus(1);
-            existing.setSourceLetterId(letterId);
-            existing.updateAudit(actorUserId);
-            friendshipMapper.updateById(existing);
-            tencentImFriendshipNotifier.afterFriendshipActive(low, high);
-            return existing;
+            return ensureExistingFriendshipActive(existing, actorUserId, letterId, low, high);
         }
         FriendshipDomain f = new FriendshipDomain();
         f.initAudit(actorUserId);
@@ -92,6 +83,20 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendshipMapper.insert(f);
         tencentImFriendshipNotifier.afterFriendshipActive(low, high);
         return f;
+    }
+
+    private FriendshipDomain ensureExistingFriendshipActive(
+            FriendshipDomain existing, Long actorUserId, Long letterId, long low, long high) {
+        if (existing.getStatus() != null && existing.getStatus() == 1) {
+            tencentImFriendshipNotifier.afterFriendshipActive(low, high);
+            return existing;
+        }
+        existing.setStatus(1);
+        existing.setSourceLetterId(letterId);
+        existing.updateAudit(actorUserId);
+        friendshipMapper.updateById(existing);
+        tencentImFriendshipNotifier.afterFriendshipActive(low, high);
+        return existing;
     }
 
     @Override

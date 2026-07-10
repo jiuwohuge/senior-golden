@@ -19,4 +19,8 @@ public interface ActionService extends IService<ActionDomain> {
 
     void delByIds(List<Long> ids);
 
+
+    com.baomidou.mybatisplus.extension.plugins.pagination.Page<cn.nine.pros.post.biz.model.domain.ActionDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery, Long userId, String actionType);
+
 }

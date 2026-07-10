@@ -5,14 +5,11 @@ import cn.nine.pros.post.biz.config.SeniorPostAuthProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.PasswordResetTokenDomain;
 import cn.nine.pros.post.biz.model.domain.UserIdentityDomain;
-import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.service.biz.support.PasswordResetHasher;
 import cn.nine.pros.post.biz.service.base.PasswordResetTokenService;
 import cn.nine.pros.post.biz.service.base.UserIdentityService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import cn.nine.pros.post.biz.service.base.MailOutboxService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,19 +58,12 @@ public class PasswordResetService {
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hourAgo = now.minusHours(1);
-        long recent = passwordResetTokenService.count(
-                new LambdaQueryWrapper<PasswordResetTokenDomain>()
-                        .eq(PasswordResetTokenDomain::getUserId, user.getId())
-                        .ge(PasswordResetTokenDomain::getCreatedAt, hourAgo));
+        long recent = passwordResetTokenService.countCreatedSince(user.getId(), null, hourAgo);
         if (recent >= authProperties.getPasswordResetMaxRequestsPerHour()) {
             throw new BadRequestException(appMessages.get("app.error.passwordReset.rateLimit"));
         }
 
-        PasswordResetTokenDomain last = passwordResetTokenService.getOne(
-                new LambdaQueryWrapper<PasswordResetTokenDomain>()
-                        .eq(PasswordResetTokenDomain::getUserId, user.getId())
-                        .orderByDesc(PasswordResetTokenDomain::getId)
-                        .last("LIMIT 1"));
+        PasswordResetTokenDomain last = passwordResetTokenService.findLatestByUserId(user.getId());
         if (last != null
                 && last.getCreatedAt() != null
                 && last.getCreatedAt().isAfter(now.minusSeconds(authProperties.getPasswordResetMinIntervalSeconds()))) {
@@ -115,16 +105,8 @@ public class PasswordResetService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        List<PasswordResetTokenDomain> candidates = passwordResetTokenService.list(
-                new LambdaQueryWrapper<PasswordResetTokenDomain>()
-                        .eq(PasswordResetTokenDomain::getUserId, user.getId())
-                        .and(w -> w.eq(PasswordResetTokenDomain::getPurpose, "password_reset")
-                                .or()
-                                .isNull(PasswordResetTokenDomain::getPurpose))
-                        .isNull(PasswordResetTokenDomain::getUsedAt)
-                        .gt(PasswordResetTokenDomain::getExpiresAt, now)
-                        .orderByDesc(PasswordResetTokenDomain::getId)
-                        .last("LIMIT 10"));
+        List<PasswordResetTokenDomain> candidates =
+                passwordResetTokenService.listValidPasswordResetCandidates(user.getId(), now, 10);
 
         PasswordResetTokenDomain matched = null;
         for (PasswordResetTokenDomain t : candidates) {
@@ -143,17 +125,9 @@ public class PasswordResetService {
         if (emailIdent == null) {
             throw new BadRequestException(appMessages.get("app.error.code.invalid"));
         }
-        userIdentityService.update(
-                new LambdaUpdateWrapper<UserIdentityDomain>()
-                        .eq(UserIdentityDomain::getId, emailIdent.getId())
-                        .set(UserIdentityDomain::getPasswordHash, passwordEncoder.encode(newPassword))
-                        .set(UserIdentityDomain::getUpdatedAt, now)
-                        .set(UserIdentityDomain::getUpdatedBy, user.getId()));
-        userService.update(
-                new LambdaUpdateWrapper<UserDomain>()
-                        .eq(UserDomain::getId, user.getId())
-                        .set(UserDomain::getUpdatedAt, now)
-                        .set(UserDomain::getUpdatedBy, user.getId()));
+        userIdentityService.updatePasswordHash(
+                emailIdent.getId(), passwordEncoder.encode(newPassword), user.getId(), now);
+        userService.touchUpdatedAt(user.getId());
 
         matched.setUsedAt(now);
         passwordResetTokenService.updateById(matched);

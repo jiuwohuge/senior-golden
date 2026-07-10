@@ -19,4 +19,6 @@ public interface TagService extends IService<TagDomain> {
 
     void delByIds(List<Integer> ids);
 
+    List<TagDomain> listActiveByLang(String langCode);
+
 }

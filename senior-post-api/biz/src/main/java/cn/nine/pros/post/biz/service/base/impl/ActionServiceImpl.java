@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.base.impl;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
+import cn.nine.pros.post.biz.support.PageQueryNormalize;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.nine.pros.post.biz.mapper.ActionMapper;
@@ -54,6 +55,22 @@ public class ActionServiceImpl extends ServiceImpl<ActionMapper, ActionDomain>
         actionDomain.setUpdatedAt(LocalDateTime.now());
         update(actionDomain, new LambdaQueryWrapper<ActionDomain>()
                 .in(ActionDomain::getId, ids));
+    }
+
+
+    @Override
+    public com.baomidou.mybatisplus.extension.plugins.pagination.Page<ActionDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery, Long userId, String actionType) {
+        LambdaQueryWrapper<ActionDomain> qw = new LambdaQueryWrapper<ActionDomain>()
+                .eq(ActionDomain::isDelFlag, false)
+                .orderByDesc(ActionDomain::getCreatedAt);
+        if (userId != null) {
+            qw.eq(ActionDomain::getUserId, userId);
+        }
+        if (actionType != null && !actionType.isBlank()) {
+            qw.eq(ActionDomain::getActionType, actionType.trim());
+        }
+        return page(PageQueryNormalize.mpPage(pageQuery, PageQueryNormalize.ADMIN_MAX_SIZE), qw);
     }
 
 }

@@ -19,4 +19,12 @@ public interface UserDeviceService extends IService<UserDeviceDomain> {
 
     void delByIds(List<Long> ids);
 
+    /** 用户 + deviceUuid 未删除设备。 */
+    UserDeviceDomain findActiveByUserIdAndDeviceUuid(long userId, String deviceUuid);
+
+
+    java.util.List<UserDeviceDomain> listActiveByUserId(long userId);
+
+    boolean blockByDeviceUuid(String deviceUuid, Long auditUserId);
+
 }

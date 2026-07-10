@@ -76,9 +76,8 @@ class TopicMailboxPage extends ConsumerWidget {
                   topic: topic,
                   onTap: () => context.push(
                     '/compose',
-                    extra: ComposeIntent(
-                      kind: ComposeKind.topicMailbox,
-                      topicKey: topic.key,
+                    extra: const ComposeIntent(
+                      kind: ComposeKind.postOffice,
                     ),
                   ),
                 ),

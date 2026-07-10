@@ -121,7 +121,6 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
   /// 接受成功后立即置灰按钮，不等待 friendship provider 二次请求。
   bool _acceptedLocally = false;
   bool _replyBusy = false;
-  bool _earlyOpenBusy = false;
   LetterType _replyType = LetterType.standard;
 
   @override
@@ -131,8 +130,27 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
     super.dispose();
   }
 
+
+  String _modeLabel(AppLocalizations l10n, LetterMode mode) {
+    return switch (mode) {
+      LetterMode.postOffice => l10n.letterModePostOffice,
+      LetterMode.direct => l10n.letterModeDirect,
+      LetterMode.selfTime => l10n.letterModeSelfTime,
+    };
+  }
+
+  String _auditLabel(AppLocalizations l10n, int auditStatus) {
+    return switch (auditStatus) {
+      0 => l10n.letterAuditPending,
+      2 => l10n.letterAuditRejected,
+      _ => l10n.letterAuditApproved,
+    };
+  }
+
   Widget _statusChip(MailboxLetter letter) {
     return switch (letter.status) {
+      LetterStatus.pending ||
+      LetterStatus.matched ||
       LetterStatus.delivering => PostalStatusChip.delivering(),
       LetterStatus.registered => PostalStatusChip.registered(
         label: 'Registered',
@@ -166,8 +184,12 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                 subtitle: 'This letter may have expired.',
               );
             }
-            final isDelivering = letter.status == LetterStatus.delivering;
+            final isDelivering =
+                letter.status == LetterStatus.delivering ||
+                letter.status == LetterStatus.pending ||
+                letter.status == LetterStatus.matched;
             final isRegistered = letter.status == LetterStatus.registered;
+            final eta = letter.expectedArrivalAt ?? letter.deliveryAt;
             final friendsAsync = ref.watch(
               friendshipActiveProvider(letter.peer.id),
             );
@@ -177,8 +199,13 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                 !letter.outgoing && letter.status == LetterStatus.delivered;
             final canReply =
                 !letter.outgoing &&
-                letter.status != LetterStatus.delivering &&
+                letter.status == LetterStatus.delivered &&
                 letter.peer.id.isNotEmpty;
+            final peerTitle = letter.peer.nickname.isNotEmpty
+                ? letter.peer.nickname
+                : (letter.mode == LetterMode.postOffice
+                      ? l10n.letterPeerPostOfficePool
+                      : l10n.letterPeerUnknown);
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
@@ -187,14 +214,14 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                   header: Row(
                     children: [
                       PostalAvatar(
-                        name: letter.peer.nickname,
+                        name: peerTitle,
                         size: 40,
                         imageUrl: letter.peer.avatarUrl,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          letter.peer.nickname,
+                          peerTitle,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
@@ -204,15 +231,35 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        l10n.letterModeLine(_modeLabel(l10n, letter.mode)),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PostalTokens.inkSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (letter.auditStatus != 1)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            l10n.letterAuditLine(
+                              _auditLabel(l10n, letter.auditStatus),
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: PostalTokens.stampVermilion),
+                          ),
+                        ),
                       if (isRegistered)
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.only(top: 10, bottom: 10),
                           child: Text(
                             'Registered mail: filing complete. It will show as delivered in a moment.',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: PostalTokens.inkSecondary),
                           ),
-                        ),
+                        )
+                      else
+                        const SizedBox(height: 10),
                       if (letter.contentHidden)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
@@ -261,89 +308,20 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                         ),
                       const SizedBox(height: 12),
                       Text(
-                        'Sent at ${DateFormat('MM-dd HH:mm').format(letter.sentAt)}',
+                        'Sent at ${DateFormat("MM-dd HH:mm").format(letter.sentAt)}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      if (letter.deliveryAt != null)
+                      if (eta != null)
                         Text(
                           '${isDelivering
-                              ? 'Estimated delivery'
+                              ? l10n.letterEtaLabel
                               : isRegistered
-                              ? 'Expected delivery'
-                              : 'Delivered'} ${DateFormat('MM-dd HH:mm').format(letter.deliveryAt!)}',
+                              ? l10n.letterEtaLabel
+                              : l10n.letterDeliveredLabel} ${DateFormat("MM-dd HH:mm").format(eta)}',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                     ],
                   ),
-                  footer: () {
-                    final foot = <Widget>[];
-                    if (isDelivering &&
-                        !letter.outgoing &&
-                        letter.type == LetterType.standard &&
-                        letter.contentHidden) {
-                      foot.add(
-                        PostalButton(
-                          label: l10n.letterEarlyOpenCta,
-                          busy: _earlyOpenBusy,
-                          onPressed: _earlyOpenBusy
-                              ? null
-                              : () async {
-                                  setState(() => _earlyOpenBusy = true);
-                                  try {
-                                    await ref
-                                        .read(mailboxRemoteRepositoryProvider)
-                                        .earlyOpen(letter.id);
-                                    if (!context.mounted) {
-                                      return;
-                                    }
-                                    await ref
-                                        .read(authRepositoryProvider)
-                                        .refreshSessionFromServer();
-                                    if (!context.mounted) {
-                                      return;
-                                    }
-                                    ref.invalidate(
-                                      letterDetailProvider(widget.letterId),
-                                    );
-                                    ref.invalidate(mailboxLettersProvider);
-                                    ref.invalidate(postalInboxLettersProvider);
-                                    ref.invalidate(mailboxArchiveProvider);
-                                    PostalSnack.show(
-                                      context,
-                                      l10n.letterEarlyOpenSuccess,
-                                      tone: PostalSnackTone.success,
-                                    );
-                                  } catch (e) {
-                                    final msg = _postalApiUserMessage(e);
-                                    if (context.mounted && msg != null) {
-                                      PostalSnack.show(
-                                        context,
-                                        msg,
-                                        tone: PostalSnackTone.error,
-                                      );
-                                    }
-                                  } finally {
-                                    if (mounted) {
-                                      setState(() => _earlyOpenBusy = false);
-                                    }
-                                  }
-                                },
-                        ),
-                      );
-                    }
-                    if (foot.isEmpty) {
-                      return null;
-                    }
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (var i = 0; i < foot.length; i++) ...[
-                          if (i > 0) const SizedBox(height: 10),
-                          foot[i],
-                        ],
-                      ],
-                    );
-                  }(),
                 ),
                 if (showAcceptSlot) ...[
                   const SizedBox(height: 14),
@@ -452,8 +430,8 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                   context: context,
                                   title: 'Registered',
                                   subtitle: session.isVip
-                                      ? 'VIP · instant delivery'
-                                      : 'Instant delivery',
+                                      ? 'VIP · filing mark · delayed'
+                                      : 'Filing mark · delayed',
                                   selected: _replyType == LetterType.registered,
                                   onTap: () => setState(
                                     () => _replyType = LetterType.registered,
@@ -465,8 +443,8 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                           const SizedBox(height: 8),
                           Text(
                             _replyType == LetterType.standard
-                                ? 'Standard mail travels for a while; the recipient may see blurred text until it arrives.'
-                                : 'Registered mail is treated as delivered immediately so the full letter is readable at once.',
+                                ? 'Standard mail travels by the delivery formula; the recipient may see sealed text until it arrives.'
+                                : 'Registered mail keeps a filing mark; delivery time still follows the slow-post formula.',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: PostalTokens.inkTertiary,

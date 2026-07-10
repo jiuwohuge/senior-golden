@@ -11,8 +11,6 @@ import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.out.AppBlockedUserItemVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -39,9 +37,7 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
         if (peer == null) {
             throw new BadRequestException(appMessages.get("app.error.block.userNotFound"));
         }
-        UserBlacklistDomain row = userBlacklistService.getOne(new LambdaQueryWrapper<UserBlacklistDomain>()
-                .eq(UserBlacklistDomain::getUserId, actorUserId)
-                .eq(UserBlacklistDomain::getBlockedUserId, blockedUserId));
+        UserBlacklistDomain row = userBlacklistService.findByPair(actorUserId, blockedUserId);
         LocalDateTime now = LocalDateTime.now();
         String r = StringUtils.hasText(reason) ? reason.trim() : null;
         if (row == null) {
@@ -65,13 +61,7 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
 
     @Override
     public void unblock(long actorUserId, long blockedUserId) {
-        boolean ok = userBlacklistService.update(null, new LambdaUpdateWrapper<UserBlacklistDomain>()
-                .eq(UserBlacklistDomain::getUserId, actorUserId)
-                .eq(UserBlacklistDomain::getBlockedUserId, blockedUserId)
-                .eq(UserBlacklistDomain::isDelFlag, false)
-                .set(UserBlacklistDomain::isDelFlag, true)
-                .set(UserBlacklistDomain::getUpdatedAt, LocalDateTime.now())
-                .set(UserBlacklistDomain::getUpdatedBy, actorUserId));
+        boolean ok = userBlacklistService.softUnblock(actorUserId, blockedUserId);
         if (!ok) {
             throw new BadRequestException(appMessages.get("app.error.block.recordNotFound"));
         }
@@ -79,10 +69,7 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
 
     @Override
     public List<AppBlockedUserItemVO> listBlocks(long actorUserId) {
-        List<UserBlacklistDomain> rows = userBlacklistService.list(new LambdaQueryWrapper<UserBlacklistDomain>()
-                .eq(UserBlacklistDomain::getUserId, actorUserId)
-                .eq(UserBlacklistDomain::isDelFlag, false)
-                .orderByDesc(UserBlacklistDomain::getCreatedAt));
+        List<UserBlacklistDomain> rows = userBlacklistService.listActiveByUserId(actorUserId);
         List<AppBlockedUserItemVO> out = new ArrayList<>();
         for (UserBlacklistDomain row : rows) {
             UserDTO u = userService.findById(row.getBlockedUserId());
@@ -114,11 +101,7 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
     }
 
     private boolean activeBlock(long blocker, long blocked) {
-        Long c = userBlacklistService.count(new LambdaQueryWrapper<UserBlacklistDomain>()
-                .eq(UserBlacklistDomain::getUserId, blocker)
-                .eq(UserBlacklistDomain::getBlockedUserId, blocked)
-                .eq(UserBlacklistDomain::isDelFlag, false));
-        return c != null && c > 0;
+        return userBlacklistService.existsActiveBlock(blocker, blocked);
     }
 
     private static LocalDateTime toLdt(Object raw) {

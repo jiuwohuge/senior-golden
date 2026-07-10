@@ -8,7 +8,7 @@ alwaysApply: false
 
 Before implementing, modifying, or reviewing **any** Java under `senior-post-api`, you **must** read and follow:
 
-`.cursor/skills/backend-foundation-capabilities/SKILL.md` — especially **§10 Layered Architecture**、**§11 Comments & Logging**，以及 **Mandatory Rules**。
+`.cursor/skills/backend-foundation-capabilities/SKILL.md` — especially **§10 Layered Architecture**、**§11 Comments & Logging**、**§12 Control Flow**，以及 **Mandatory Rules**。
 
 ## Hard requirement
 
@@ -20,15 +20,18 @@ Controller → Business Service → IService / ServiceImpl → Mapper → Table
 
 ## Never
 
-- Inject or call `Mapper` from **Controller** or **Business Service**
-- Put `LambdaQueryWrapper`, SQL, or pagination queries in Controller
-- Duplicate the same DB query in multiple Controllers/BizServices — extract to `ServiceImpl` public methods
+- Inject or call `Mapper` from **Controller** or **Business Service** (`service.biz` / `support`)
+- Put `LambdaQueryWrapper` / `QueryWrapper` / `lambdaQuery()` / SQL / `count|list|getOne|page(…, wrapper)` in **Controller or BizService**
+- Pass `Wrapper` as a method parameter up to Biz/Controller
+- Duplicate the same DB query in multiple Controllers/BizServices — extract to `ServiceImpl` public named methods
+- Nest `if` inside `if` / `else { if }` — use guard clauses or extract private methods (skill §12)
+- Use nested or side-effecting ternary expressions — only simple single-level value selection (skill §12)
 
 ## Always
 
 - Controller → `XxxBizService` only (HTTP + DTO return)
-- BizService → orchestration, `@Transactional`, calls `XxxService` / other base services
-- `XxxServiceImpl` extends `ServiceImpl<XxxMapper, XxxDomain>` — **all reusable DB methods live here**
+- BizService → orchestration, `@Transactional`, calls `XxxService` **named** APIs (`count*` / `list*` / `find*` / `page*` / `getById` / `save` / `updateById`)
+- `XxxServiceImpl` extends `ServiceImpl<XxxMapper, XxxDomain>` — **all reusable DB methods and Wrappers live here only**
 - Mapper injected **only** in matching `ServiceImpl`
 
 ## Package layout (`senior-post-api/biz`)
@@ -41,10 +44,12 @@ Controller → Business Service → IService / ServiceImpl → Mapper → Table
 
 ## When touching existing code
 
-If Controller or BizService already injects `Mapper`, **refactor** to the five-layer chain as part of the same task — do not add new cross-layer violations.
+If Controller or BizService already injects `Mapper` or builds query Wrappers, **refactor** to the five-layer chain as part of the same task — do not add new cross-layer violations.
 
 ## Self-check before finishing
 
 - [ ] No `Mapper` field in any Controller or `service.biz` class
-- [ ] New queries added to `ServiceImpl`, not Controller
+- [ ] No `LambdaQueryWrapper` / `QueryWrapper` / `lambdaQuery` import in Controller or `service.biz`
+- [ ] New queries added as named methods on `XxxService` / `ServiceImpl`, not Controller/Biz
 - [ ] Framework rules from skill still apply (`MyRequestContextHolder`, no manual `ApiResponse`, `PageQuery`/`PageData`, audit fields)
+- [ ] No nested if-else; no complex/nested ternary (skill §12)

@@ -8,7 +8,6 @@ import cn.nine.pros.post.biz.service.base.ReportService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.app.AppReportCreateInDto;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,12 +41,7 @@ public class AppReportServiceImpl implements AppReportService {
         }
         validateUserTarget(reporterUserId, body.getTargetId());
 
-        long pending = reportService.count(new LambdaQueryWrapper<ReportDomain>()
-                .eq(ReportDomain::isDelFlag, false)
-                .eq(ReportDomain::getReporterUserId, reporterUserId)
-                .eq(ReportDomain::getTargetType, rawType)
-                .eq(ReportDomain::getTargetId, body.getTargetId())
-                .apply("status = 0"));
+        long pending = reportService.countPendingByReporterTarget(reporterUserId, rawType, body.getTargetId());
         if (pending > 0) {
             throw new BadRequestException(appMessages.get("app.error.report.pendingDuplicate"));
         }

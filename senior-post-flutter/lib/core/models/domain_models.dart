@@ -259,9 +259,12 @@ class WallComment {
 
 enum LetterType { registered, standard }
 
-enum LetterStatus { delivering, delivered, registered }
+enum LetterStatus { pending, delivering, delivered, registered, matched }
 
 enum LetterSendMode { standardPost, registeredMail, directVip }
+
+/// PRD letter mode: 1 POST_OFFICE / 2 DIRECT / 3 SELF_TIME
+enum LetterMode { postOffice, direct, selfTime }
 
 class MailboxLetter {
   MailboxLetter({
@@ -278,6 +281,8 @@ class MailboxLetter {
     this.contentHidden = false,
     this.expectedArrivalAt,
     this.actualArrivalAt,
+    this.mode = LetterMode.direct,
+    this.auditStatus = 1,
   });
 
   final String id;
@@ -293,6 +298,8 @@ class MailboxLetter {
   final bool contentHidden;
   final DateTime? expectedArrivalAt;
   final DateTime? actualArrivalAt;
+  final LetterMode mode;
+  final int auditStatus;
 }
 
 /// 邮政 Tab「Connections」：好友（笔友）列表行，语义对齐 `GET /api/mailbox/friends`。

@@ -30,10 +30,9 @@ import cn.nine.pros.post.client.model.out.TimeLetterPreviewDeliveryVO;
 import cn.nine.pros.post.client.model.out.TimeLetterRecentRecipientVO;
 import cn.nine.pros.post.client.model.out.TimeLetterSealResultVO;
 import cn.nine.pros.post.client.model.out.TimeLetterStatsVO;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +52,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * App 时光信业务：草稿、封存、取消、收发件箱、纪念册与统计。
+ * <p>封存成功打 INFO；日限额/在途/同收件人 30 天限额拒绝打 INFO。
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AppTimeLetterServiceImpl implements AppTimeLetterService {
@@ -68,6 +72,10 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
     private final TimeLetterProperties properties;
     private final AppMessages appMessages;
 
+    /**
+     * 保存时光信草稿（新建或更新已有草稿）。
+     * <p>前置：发件人状态正常、投递日合法；副作用：写/更新 DRAFT 记录。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TimeLetterDetailVO saveDraft(long userId, TimeLetterDraftSaveInDto body) {
@@ -96,19 +104,33 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
         return toDetail(d, userId, true);
     }
 
+    /**
+     * 读取本人草稿详情。
+     * <p>前置：草稿归属当前用户且状态为 DRAFT。
+     */
     @Override
     public TimeLetterDetailVO getDraft(long userId, long draftId) {
         return toDetail(loadOwnedDraft(userId, draftId), userId, true);
     }
 
+    /**
+     * 软删除本人草稿。
+     * <p>前置：草稿归属当前用户；副作用：markDeleted。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteDraft(long userId, long draftId) {
         TimeLetterDomain d = loadOwnedDraft(userId, draftId);
         d.markDeleted(userId);
         timeLetterService.updateById(d);
+        log.info("time-letter draft deleted, userId={}, draftId={}", userId, draftId);
     }
 
+    /**
+     * 封存时光信：幂等 sealRequestId；过敏感词与额度后进入 PENDING。
+     * <p>前置：发件人正常、好友/自投递合法、投递日合法、未超日/在途/30 天限额。
+     * <p>副作用：写 PENDING 记录与 cancelDeadline；事务边界为本方法。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TimeLetterSealResultVO seal(long userId, TimeLetterSealInDto body) {
@@ -116,13 +138,11 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
         if (!StringUtils.hasText(body.getSealRequestId())) {
             throw new BusinessException(appMessages.get("app.timeLetter.error.sealRequestRequired"));
         }
-        TimeLetterDomain existing = timeLetterService.getOne(new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::getSenderId, userId)
-                .eq(TimeLetterDomain::getSealRequestId, body.getSealRequestId().trim())
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .last("LIMIT 1"));
+        TimeLetterDomain existing = timeLetterService.findBySenderAndSealRequestId(
+                userId, body.getSealRequestId().trim());
         if (existing != null && existing.getStatus() != null
                 && existing.getStatus() != TimeLetterStatus.DRAFT.getCode()) {
+            log.debug("time-letter seal idempotent hit, userId={}, letterId={}", userId, existing.getId());
             int bal = 0;
             return TimeLetterSealResultVO.builder()
                     .id(existing.getId())
@@ -161,10 +181,12 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
                 timeLetterService.updateById(d);
             }
         } catch (DuplicateKeyException e) {
+            log.info("time-letter seal rejected: same-day duplicate, userId={}", userId);
             throw new BusinessException(appMessages.get("app.timeLetter.error.sameDayDuplicate"));
         }
 
-
+        log.info("time-letter sealed, userId={}, letterId={}, deliveryDate={}",
+                userId, d.getId(), d.getDeliveryDate());
         return TimeLetterSealResultVO.builder()
                 .id(d.getId())
                 .status(d.getStatus())
@@ -175,74 +197,58 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
                 .build();
     }
 
+    /**
+     * 取消待投递时光信（须在 cancelDeadline 内）。
+     * <p>前置：本人 PENDING 且未过取消窗；副作用：状态改为 CANCELLED。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void cancel(long userId, long letterId) {
         TimeLetterDomain d = loadOwnedPending(userId, letterId);
         LocalDateTime now = LocalDateTime.now();
         if (d.getCancelDeadlineAt() == null || now.isAfter(d.getCancelDeadlineAt())) {
+            log.info("time-letter cancel rejected: window expired, userId={}, letterId={}", userId, letterId);
             throw new BusinessException(appMessages.get("app.timeLetter.error.cancelWindowExpired"));
         }
-        boolean ok = timeLetterService.update(new LambdaUpdateWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::getId, letterId)
-                .eq(TimeLetterDomain::getSenderId, userId)
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .eq(TimeLetterDomain::getStatus, TimeLetterStatus.PENDING.getCode())
-                .set(TimeLetterDomain::getStatus, TimeLetterStatus.CANCELLED.getCode())
-                .set(TimeLetterDomain::getCancelledAt, now)
-                .set(TimeLetterDomain::getUpdatedAt, now)
-                .set(TimeLetterDomain::getUpdatedBy, userId));
-        if (!ok) {
+        if (!timeLetterService.cancelPending(letterId, userId, now)) {
+            log.info("time-letter cancel rejected: state changed, userId={}, letterId={}", userId, letterId);
             throw new BusinessException(appMessages.get("app.timeLetter.error.stateChanged"));
         }
+        log.info("time-letter cancelled, userId={}, letterId={}", userId, letterId);
     }
 
+    /**
+     * 发件箱分页（可筛星标）。
+     */
     @Override
     public PageData<TimeLetterListItemVO> outboxPage(long userId, TimeLetterPageInDto body) {
         PageQuery pq = AppPageHelper.normalize(body == null ? null : body.getPage());
-        LambdaQueryWrapper<TimeLetterDomain> qw = new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::getSenderId, userId)
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .ne(TimeLetterDomain::getStatus, TimeLetterStatus.DRAFT.getCode());
-        if (body != null && Boolean.TRUE.equals(body.getStarredOnly())) {
-            qw.eq(TimeLetterDomain::getStarFlag, true);
-        }
-        qw.orderByDesc(TimeLetterDomain::getCreatedAt);
-        return pageList(userId, pq, qw, true);
+        boolean starredOnly = body != null && Boolean.TRUE.equals(body.getStarredOnly());
+        return pageList(userId, pq, timeLetterService.pageOutbox(userId, starredOnly, pq), true);
     }
 
+    /**
+     * 收件箱分页（已送达/已读等对收件人可见状态）。
+     */
     @Override
     public PageData<TimeLetterListItemVO> inboxPage(long userId, TimeLetterPageInDto body) {
         PageQuery pq = AppPageHelper.normalize(body == null ? null : body.getPage());
-        LambdaQueryWrapper<TimeLetterDomain> qw = new LambdaQueryWrapper<TimeLetterDomain>()
-                .and(w -> w.eq(TimeLetterDomain::getRecipientId, userId)
-                        .or(o -> o.isNull(TimeLetterDomain::getRecipientId)
-                                .eq(TimeLetterDomain::getSenderId, userId)))
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .in(TimeLetterDomain::getStatus,
-                        TimeLetterStatus.DELIVERED.getCode(),
-                        TimeLetterStatus.READ.getCode())
-                .orderByDesc(TimeLetterDomain::getDeliveredAt);
-        return pageList(userId, pq, qw, false);
+        return pageList(userId, pq, timeLetterService.pageInbox(userId, pq), false);
     }
 
+    /**
+     * 纪念册分页（已读且可星标的时光信）。
+     */
     @Override
     public PageData<TimeLetterListItemVO> memorialPage(long userId, TimeLetterPageInDto body) {
         PageQuery pq = AppPageHelper.normalize(body == null ? null : body.getPage());
-        LambdaQueryWrapper<TimeLetterDomain> qw = new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .eq(TimeLetterDomain::getStatus, TimeLetterStatus.READ.getCode())
-                .and(w -> w.eq(TimeLetterDomain::getSenderId, userId)
-                        .or().eq(TimeLetterDomain::getRecipientId, userId)
-                        .or(o -> o.isNull(TimeLetterDomain::getRecipientId)
-                                .eq(TimeLetterDomain::getSenderId, userId)));
-        if (body != null && Boolean.TRUE.equals(body.getStarredOnly())) {
-            qw.eq(TimeLetterDomain::getStarFlag, true);
-        }
-        qw.orderByDesc(TimeLetterDomain::getReadAt);
-        return pageList(userId, pq, qw, null);
+        boolean starredOnly = body != null && Boolean.TRUE.equals(body.getStarredOnly());
+        return pageList(userId, pq, timeLetterService.pageMemorial(userId, starredOnly, pq), null);
     }
 
+    /**
+     * 详情：发/收件人可访问；正文按状态与角色决定是否返回。
+     */
     @Override
     public TimeLetterDetailVO getDetail(long userId, long letterId) {
         TimeLetterDomain d = loadAccessible(userId, letterId);
@@ -250,6 +256,10 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
         return toDetail(d, userId, showBody);
     }
 
+    /**
+     * 收件人拆开已送达时光信并标记已读。
+     * <p>前置：当前用户为收件人且状态 DELIVERED；副作用：写 readAt/READ。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TimeLetterDetailVO open(long userId, long letterId) {
@@ -261,21 +271,18 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
             throw new BusinessException(appMessages.get("app.timeLetter.error.notDelivered"));
         }
         LocalDateTime now = LocalDateTime.now();
-        boolean ok = timeLetterService.update(new LambdaUpdateWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::getId, letterId)
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .eq(TimeLetterDomain::getStatus, TimeLetterStatus.DELIVERED.getCode())
-                .set(TimeLetterDomain::getStatus, TimeLetterStatus.READ.getCode())
-                .set(TimeLetterDomain::getReadAt, now)
-                .set(TimeLetterDomain::getUpdatedAt, now)
-                .set(TimeLetterDomain::getUpdatedBy, userId));
-        if (!ok) {
+        if (!timeLetterService.markRead(letterId, userId, now)) {
             throw new BusinessException(appMessages.get("app.timeLetter.error.stateChanged"));
         }
+        log.info("time-letter opened, userId={}, letterId={}", userId, letterId);
         d = timeLetterService.getById(letterId);
         return toDetail(d, userId, true);
     }
 
+    /**
+     * 切换已读时光信星标（纪念册）。
+     * <p>前置：状态为 READ；副作用：翻转 starFlag。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void toggleStar(long userId, long letterId) {
@@ -284,43 +291,21 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
             throw new BusinessException(appMessages.get("app.timeLetter.error.starReadOnly"));
         }
         boolean next = !Boolean.TRUE.equals(d.getStarFlag());
-        timeLetterService.update(new LambdaUpdateWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::getId, letterId)
-                .set(TimeLetterDomain::getStarFlag, next)
-                .set(TimeLetterDomain::getUpdatedAt, LocalDateTime.now())
-                .set(TimeLetterDomain::getUpdatedBy, userId));
+        timeLetterService.updateStarFlag(letterId, userId, next);
     }
 
+    /**
+     * 时光信角标统计：在途/未读/纪念册/今日送达。
+     */
     @Override
     public TimeLetterStatsVO stats(long userId) {
-        long inFlight = timeLetterService.count(new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::getSenderId, userId)
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .eq(TimeLetterDomain::getStatus, TimeLetterStatus.PENDING.getCode()));
-        long unread = timeLetterService.count(new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .eq(TimeLetterDomain::getStatus, TimeLetterStatus.DELIVERED.getCode())
-                .and(w -> w.eq(TimeLetterDomain::getRecipientId, userId)
-                        .or(o -> o.isNull(TimeLetterDomain::getRecipientId)
-                                .eq(TimeLetterDomain::getSenderId, userId))));
-        long memorial = timeLetterService.count(new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .eq(TimeLetterDomain::getStatus, TimeLetterStatus.READ.getCode())
-                .and(w -> w.eq(TimeLetterDomain::getSenderId, userId)
-                        .or().eq(TimeLetterDomain::getRecipientId, userId)
-                        .or(o -> o.isNull(TimeLetterDomain::getRecipientId)
-                                .eq(TimeLetterDomain::getSenderId, userId))));
+        long inFlight = timeLetterService.countInFlightBySender(userId);
+        long unread = timeLetterService.countUnreadDeliveredForUser(userId);
+        long memorial = timeLetterService.countMemorialForUser(userId);
         LocalDate today = LocalDate.now();
         LocalDateTime todayStart = today.atStartOfDay();
         LocalDateTime tomorrowStart = today.plusDays(1).atStartOfDay();
-        long todayDelivered = timeLetterService.count(new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .eq(TimeLetterDomain::getStatus, TimeLetterStatus.DELIVERED.getCode())
-                .and(w -> w.eq(TimeLetterDomain::getRecipientId, userId)
-                        .or(o -> o.isNull(TimeLetterDomain::getRecipientId)
-                                .eq(TimeLetterDomain::getSenderId, userId)))
-                .ge(TimeLetterDomain::getDeliveredAt, todayStart)
-                .lt(TimeLetterDomain::getDeliveredAt, tomorrowStart));
+        long todayDelivered = timeLetterService.countTodayDeliveredForUser(userId, todayStart, tomorrowStart);
         return TimeLetterStatsVO.builder()
                 .inFlightCount((int) inFlight)
                 .deliveredUnreadCount((int) unread)
@@ -329,6 +314,9 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
                 .build();
     }
 
+    /**
+     * 预览投递日是否合法及距投递天数（不写库）。
+     */
     @Override
     public TimeLetterPreviewDeliveryVO previewDelivery(long userId, TimeLetterPreviewDeliveryInDto body) {
         if (body == null || body.getDeliveryDate() == null) {
@@ -356,15 +344,12 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
         }
     }
 
+    /**
+     * 最近封存过的收件人（最多 3 个，状态正常）。
+     */
     @Override
     public List<TimeLetterRecentRecipientVO> recentRecipients(long userId) {
-        List<TimeLetterDomain> rows = timeLetterService.list(new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::getSenderId, userId)
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .isNotNull(TimeLetterDomain::getRecipientId)
-                .ne(TimeLetterDomain::getStatus, TimeLetterStatus.DRAFT.getCode())
-                .orderByDesc(TimeLetterDomain::getSealedAt)
-                .last("LIMIT 30"));
+        List<TimeLetterDomain> rows = timeLetterService.listRecentSealedWithRecipient(userId, 30);
         Set<Long> seen = new LinkedHashSet<>();
         List<TimeLetterRecentRecipientVO> out = new ArrayList<>();
         for (TimeLetterDomain r : rows) {
@@ -389,8 +374,7 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
     }
 
     private PageData<TimeLetterListItemVO> pageList(
-            long userId, PageQuery pq, LambdaQueryWrapper<TimeLetterDomain> qw, Boolean outbox) {
-        Page<TimeLetterDomain> p = timeLetterService.page(AppPageHelper.mpPage(pq), qw);
+            long userId, PageQuery pq, Page<TimeLetterDomain> p, Boolean outbox) {
         List<TimeLetterListItemVO> list = p.getRecords().stream()
                 .map(d -> toListItem(d, userId, outbox))
                 .collect(Collectors.toList());
@@ -399,34 +383,32 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
 
     private void assertSealLimits(long userId, Long recipientId, LocalDate deliveryDate) {
         LocalDateTime dayStart = LocalDate.now().atStartOfDay();
-        long todayCount = timeLetterService.count(new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::getSenderId, userId)
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .ge(TimeLetterDomain::getSealedAt, dayStart)
-                .ne(TimeLetterDomain::getStatus, TimeLetterStatus.DRAFT.getCode())
-                .ne(TimeLetterDomain::getStatus, TimeLetterStatus.CANCELLED.getCode()));
+        long todayCount = timeLetterService.countSealedTodayBySender(userId, dayStart);
         if (todayCount >= properties.getDailyCreateLimit()) {
+            log.info("time-letter seal rejected: daily limit, userId={}, todayCount={}", userId, todayCount);
             throw new BusinessException(appMessages.get("app.timeLetter.error.dailyLimit"));
         }
-        long inFlight = timeLetterService.count(new LambdaQueryWrapper<TimeLetterDomain>()
-                .eq(TimeLetterDomain::getSenderId, userId)
-                .eq(TimeLetterDomain::isDelFlag, false)
-                .eq(TimeLetterDomain::getStatus, TimeLetterStatus.PENDING.getCode()));
+        long inFlight = timeLetterService.countInFlightBySender(userId);
         if (inFlight >= properties.getInFlightLimit()) {
+            log.info("time-letter seal rejected: in-flight limit, userId={}, inFlight={}", userId, inFlight);
             throw new BusinessException(appMessages.get("app.timeLetter.error.inFlightLimit"));
         }
-        if (recipientId != null) {
-            LocalDateTime since30 = LocalDateTime.now().minusDays(30);
-            long toRecipient = timeLetterService.count(new LambdaQueryWrapper<TimeLetterDomain>()
-                    .eq(TimeLetterDomain::getSenderId, userId)
-                    .eq(TimeLetterDomain::getRecipientId, recipientId)
-                    .eq(TimeLetterDomain::isDelFlag, false)
-                    .ge(TimeLetterDomain::getSealedAt, since30)
-                    .ne(TimeLetterDomain::getStatus, TimeLetterStatus.DRAFT.getCode())
-                    .ne(TimeLetterDomain::getStatus, TimeLetterStatus.CANCELLED.getCode()));
-            if (toRecipient >= properties.getRecipient30dLimit()) {
-                throw new BusinessException(appMessages.get("app.timeLetter.error.recipient30dLimit"));
-            }
+        assertRecipient30dLimit(userId, recipientId);
+    }
+
+    /**
+     * 校验对同一收件人近 30 天封存次数上限；无收件人时跳过。
+     */
+    private void assertRecipient30dLimit(long userId, Long recipientId) {
+        if (recipientId == null) {
+            return;
+        }
+        LocalDateTime since30 = LocalDateTime.now().minusDays(30);
+        long toRecipient = timeLetterService.countSealedToRecipientSince(userId, recipientId, since30);
+        if (toRecipient >= properties.getRecipient30dLimit()) {
+            log.info("time-letter seal rejected: recipient 30d limit, userId={}, recipientId={}, count={}",
+                    userId, recipientId, toRecipient);
+            throw new BusinessException(appMessages.get("app.timeLetter.error.recipient30dLimit"));
         }
     }
 
@@ -462,9 +444,7 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
 
     private String normalizeBody(String raw, boolean required) {
         if (!StringUtils.hasText(raw)) {
-            if (required) {
-                throw new BusinessException(appMessages.get("app.timeLetter.error.bodyEmpty"));
-            }
+            assertBodyPresentIfRequired(required);
             return "";
         }
         String content = raw.trim();
@@ -475,6 +455,16 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
             throw new BusinessException(appMessages.get("app.timeLetter.error.bodyTooLong"));
         }
         return content;
+    }
+
+    /**
+     * 正文必填时，空内容直接抛业务异常。
+     */
+    private void assertBodyPresentIfRequired(boolean required) {
+        if (!required) {
+            return;
+        }
+        throw new BusinessException(appMessages.get("app.timeLetter.error.bodyEmpty"));
     }
 
     private void validateDeliveryDate(LocalDate deliveryDate, String deliveryTz) {
@@ -536,13 +526,14 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
         if (Objects.equals(d.getSenderId(), userId)) {
             return d;
         }
-        if (isRecipient(userId, d)) {
-            if (d.getStatus() != null && d.getStatus() == TimeLetterStatus.PENDING.getCode()) {
-                throw new BusinessException(appMessages.get("app.timeLetter.error.notDelivered"));
-            }
-            return d;
+        if (!isRecipient(userId, d)) {
+            throw new BusinessException(appMessages.get("app.timeLetter.error.noPermission"));
         }
-        throw new BusinessException(appMessages.get("app.timeLetter.error.noPermission"));
+        // 收件人不可查看仍在途（PENDING）的时光信
+        if (d.getStatus() != null && d.getStatus() == TimeLetterStatus.PENDING.getCode()) {
+            throw new BusinessException(appMessages.get("app.timeLetter.error.notDelivered"));
+        }
+        return d;
     }
 
     private static boolean isRecipient(long userId, TimeLetterDomain d) {
@@ -615,22 +606,13 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
 
 
     private TimeLetterListItemVO toListItem(TimeLetterDomain d, long userId, Boolean outbox) {
-        Long peerId;
-        if (Boolean.TRUE.equals(outbox)) {
-            peerId = d.getRecipientId() != null ? d.getRecipientId() : userId;
-        } else if (Boolean.FALSE.equals(outbox)) {
-            peerId = d.getSenderId();
-        } else {
-            peerId = Objects.equals(d.getSenderId(), userId)
-                    ? (d.getRecipientId() != null ? d.getRecipientId() : userId)
-                    : d.getSenderId();
-        }
+        Long peerId = resolvePeerUserId(d, userId, outbox);
         UserDTO peer = peerId != null ? userService.findById(peerId) : null;
         String body = d.getBody() != null ? d.getBody() : "";
         boolean hideBody = Objects.equals(d.getSenderId(), userId)
                 && d.getStatus() != null
                 && d.getStatus() == TimeLetterStatus.PENDING.getCode();
-        String preview = hideBody ? "" : (body.length() > 120 ? body.substring(0, 120) + "…" : body);
+        String preview = resolvePreviewBody(hideBody, body, 120);
         ZoneId zone = resolveZoneQuiet(d.getDeliveryTz());
         int daysUntil = d.getDeliveryDate() != null
                 ? (int) ChronoUnit.DAYS.between(ZonedDateTime.now(zone).toLocalDate(), d.getDeliveryDate())
@@ -662,6 +644,46 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
                 .daysUntilDelivery(Math.max(0, daysUntil))
                 .canCancel(canCancel)
                 .build();
+    }
+
+    /**
+     * 按列表视角解析对端用户 ID：发件箱看收件人，收件箱看发件人，纪念册按当前用户角色取对端。
+     */
+    private static Long resolvePeerUserId(TimeLetterDomain d, long userId, Boolean outbox) {
+        if (Boolean.TRUE.equals(outbox)) {
+            return resolveSelfOrRecipientPeerId(d, userId);
+        }
+        if (Boolean.FALSE.equals(outbox)) {
+            return d.getSenderId();
+        }
+        return resolveMemorialPeerUserId(d, userId);
+    }
+
+    /**
+     * 纪念册：当前用户是发件人时取收件人（或自投递时取自己），否则取发件人。
+     */
+    private static Long resolveMemorialPeerUserId(TimeLetterDomain d, long userId) {
+        if (!Objects.equals(d.getSenderId(), userId)) {
+            return d.getSenderId();
+        }
+        return resolveSelfOrRecipientPeerId(d, userId);
+    }
+
+    /**
+     * 有收件人则返回收件人，否则视为自投递返回当前用户。
+     */
+    private static Long resolveSelfOrRecipientPeerId(TimeLetterDomain d, long userId) {
+        if (d.getRecipientId() != null) {
+            return d.getRecipientId();
+        }
+        return userId;
+    }
+
+    /**
+     * 生成列表预览正文；寄出方待投递时隐藏正文，超长截断并追加省略号。
+     */
+    private static String resolvePreviewBody(boolean hideBody, String body, int maxLen) {
+        return cn.nine.pros.post.biz.support.TextPreviewSupport.previewOrHidden(hideBody, body, maxLen);
     }
 
     private TimeLetterDetailVO toDetail(TimeLetterDomain d, long userId, boolean showBody) {
@@ -713,11 +735,7 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
     }
 
     private String signAvatar(long viewerId, UserDTO u) {
-        String ref = UserAvatarAuditSupport.publicStoredRef(u);
-        if (!StringUtils.hasText(ref)) {
-            return null;
-        }
-        return ossDisplayUrlService.signAvatarForViewer(viewerId, ref);
+        return ossDisplayUrlService.signAvatarRefOrNull(viewerId, UserAvatarAuditSupport.publicStoredRef(u));
     }
 
     private static String trimOrNull(String s) {

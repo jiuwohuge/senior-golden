@@ -19,4 +19,11 @@ public interface AnnouncementService extends IService<AnnouncementDomain> {
 
     void delByIds(List<Integer> ids);
 
+    /** 对客户端可见的最新版本公告。 */
+    AnnouncementDomain findLatestVisibleForApp(int versionCode, java.time.LocalDateTime now);
+
+
+    com.baomidou.mybatisplus.extension.plugins.pagination.Page<AnnouncementDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery);
+
 }

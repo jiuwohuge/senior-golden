@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.base.impl;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.nine.pros.post.biz.mapper.UserBlacklistMapper;
 import cn.nine.pros.post.biz.model.domain.UserBlacklistDomain;
@@ -54,6 +55,40 @@ public class UserBlacklistServiceImpl extends ServiceImpl<UserBlacklistMapper, U
         userBlacklistDomain.setUpdatedAt(LocalDateTime.now());
         update(userBlacklistDomain, new LambdaQueryWrapper<UserBlacklistDomain>()
                 .in(UserBlacklistDomain::getId, ids));
+    }
+
+    @Override
+    public UserBlacklistDomain findByPair(long userId, long blockedUserId) {
+        return getOne(new LambdaQueryWrapper<UserBlacklistDomain>()
+                .eq(UserBlacklistDomain::getUserId, userId)
+                .eq(UserBlacklistDomain::getBlockedUserId, blockedUserId));
+    }
+
+    @Override
+    public List<UserBlacklistDomain> listActiveByUserId(long userId) {
+        return list(new LambdaQueryWrapper<UserBlacklistDomain>()
+                .eq(UserBlacklistDomain::getUserId, userId)
+                .eq(UserBlacklistDomain::isDelFlag, false)
+                .orderByDesc(UserBlacklistDomain::getCreatedAt));
+    }
+
+    @Override
+    public boolean softUnblock(long userId, long blockedUserId) {
+        return update(null, new LambdaUpdateWrapper<UserBlacklistDomain>()
+                .eq(UserBlacklistDomain::getUserId, userId)
+                .eq(UserBlacklistDomain::getBlockedUserId, blockedUserId)
+                .eq(UserBlacklistDomain::isDelFlag, false)
+                .set(UserBlacklistDomain::isDelFlag, true)
+                .set(UserBlacklistDomain::getUpdatedAt, LocalDateTime.now())
+                .set(UserBlacklistDomain::getUpdatedBy, userId));
+    }
+
+    @Override
+    public boolean existsActiveBlock(long blockerUserId, long blockedUserId) {
+        return count(new LambdaQueryWrapper<UserBlacklistDomain>()
+                .eq(UserBlacklistDomain::getUserId, blockerUserId)
+                .eq(UserBlacklistDomain::getBlockedUserId, blockedUserId)
+                .eq(UserBlacklistDomain::isDelFlag, false)) > 0;
     }
 
 }

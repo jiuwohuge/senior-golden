@@ -19,4 +19,14 @@ public interface ReportService extends IService<ReportDomain> {
 
     void delByIds(List<Long> ids);
 
+    long countPendingByReporterTarget(long reporterUserId, String targetType, long targetId);
+
+    long countPending();
+
+
+    com.baomidou.mybatisplus.extension.plugins.pagination.Page<ReportDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery, Integer status, String targetType);
+
+    boolean handleReport(long id, int status, String handleNote, Long handlerUserId);
+
 }

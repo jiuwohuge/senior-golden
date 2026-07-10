@@ -69,7 +69,7 @@ class ShopPage extends ConsumerWidget {
                           _bullet(context, '每日可领取或累积一定额度邮票（见个人中心邮票徽章）。'),
                           _bullet(
                             context,
-                            '挂号信、平邮加速、提前拆信等会消耗邮票；会员可按规则减免或享受直达邮路。',
+                            '挂号信等能力可能消耗邮票；投递速度由距离与关系公式决定，不再提供邮票加速。',
                           ),
                           _bullet(context, '后续将支持应用内购买邮票包、活动赠票及第三方合规支付渠道。'),
                         ],
@@ -95,7 +95,7 @@ class ShopPage extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            '会员权益由服务端配置（如挂号信减免、平邮加速等），'
+                            '会员权益由服务端配置（如挂号信减免等），'
                             '支付与签约流程接入后将在此页或独立收银台完成。',
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(

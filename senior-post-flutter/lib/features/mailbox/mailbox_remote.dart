@@ -30,16 +30,22 @@ class MailboxRemoteRepository {
   }
 
   Future<MailboxLetter> sendLetter({
-    required String toUserId,
+    String? toUserId,
     required String content,
     required LetterType type,
     String? parentLetterId,
+    int? mode,
   }) async {
     final body = <String, dynamic>{
-      'toUserId': int.parse(toUserId),
       'content': content,
       'letterType': type == LetterType.registered ? 1 : 2,
     };
+    if (toUserId != null && toUserId.isNotEmpty) {
+      body['toUserId'] = int.parse(toUserId);
+    }
+    if (mode != null) {
+      body['mode'] = mode;
+    }
     if (parentLetterId != null && parentLetterId.isNotEmpty) {
       body['parentLetterId'] = int.parse(parentLetterId);
     }
@@ -193,13 +199,21 @@ MailboxLetter _voToMailboxLetter(Map<String, dynamic> m) {
   final expectedArrival = _parseDate(m['expectedArrivalTime']);
   final actualArrival = _parseDate(m['actualArrivalTime']);
   final st = switch (status) {
+    0 => LetterStatus.pending,
     1 => LetterStatus.delivering,
     3 => LetterStatus.registered,
+    4 => LetterStatus.matched,
     _ => LetterStatus.delivered,
   };
-  final deliveryAt = st == LetterStatus.delivering
+  final deliveryAt = st == LetterStatus.delivering || st == LetterStatus.pending
       ? expectedArrival
       : (actualArrival ?? expectedArrival);
+  final modeCode = (m['mode'] as num?)?.toInt() ?? 2;
+  final mode = switch (modeCode) {
+    1 => LetterMode.postOffice,
+    3 => LetterMode.selfTime,
+    _ => LetterMode.direct,
+  };
 
   return MailboxLetter(
     id: letterId,
@@ -219,6 +233,8 @@ MailboxLetter _voToMailboxLetter(Map<String, dynamic> m) {
     contentHidden: contentHidden,
     expectedArrivalAt: expectedArrival,
     actualArrivalAt: actualArrival,
+    mode: mode,
+    auditStatus: (m['auditStatus'] as num?)?.toInt() ?? 1,
   );
 }
 

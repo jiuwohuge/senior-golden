@@ -24,4 +24,8 @@ public interface SensitiveWordService extends IService<SensitiveWordDomain> {
      */
     void assertPlainTextAllowed(String text);
 
+
+    com.baomidou.mybatisplus.extension.plugins.pagination.Page<cn.nine.pros.post.biz.model.domain.SensitiveWordDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery, String keyword, String langCode);
+
 }

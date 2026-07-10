@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.base.impl;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
+import cn.nine.pros.post.biz.support.PageQueryNormalize;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.nine.pros.post.biz.i18n.AppMessages;
@@ -120,6 +121,22 @@ public class SensitiveWordServiceImpl extends ServiceImpl<SensitiveWordMapper, S
             cachedActiveWordsAt = System.currentTimeMillis();
             return snap;
         }
+    }
+
+
+    @Override
+    public com.baomidou.mybatisplus.extension.plugins.pagination.Page<SensitiveWordDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery, String keyword, String langCode) {
+        LambdaQueryWrapper<SensitiveWordDomain> qw = new LambdaQueryWrapper<SensitiveWordDomain>()
+                .eq(SensitiveWordDomain::isDelFlag, false)
+                .orderByDesc(SensitiveWordDomain::getCreatedAt);
+        if (keyword != null && !keyword.isBlank()) {
+            qw.like(SensitiveWordDomain::getWord, keyword.trim());
+        }
+        if (langCode != null && !langCode.isBlank()) {
+            qw.eq(SensitiveWordDomain::getLangCode, langCode.trim());
+        }
+        return page(PageQueryNormalize.mpPage(pageQuery, PageQueryNormalize.ADMIN_MAX_SIZE), qw);
     }
 
 }

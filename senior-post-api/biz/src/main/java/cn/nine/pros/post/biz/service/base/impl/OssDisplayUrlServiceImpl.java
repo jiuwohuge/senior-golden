@@ -46,16 +46,21 @@ public class OssDisplayUrlServiceImpl implements OssDisplayUrlService {
     }
 
     @Override
+    public String signAvatarRefOrNull(long viewerUserId, String avatarStoredRef) {
+        if (!StringUtils.hasText(avatarStoredRef)) {
+            return null;
+        }
+        return signAvatarForViewer(viewerUserId, avatarStoredRef.trim());
+    }
+
+    @Override
     public Map<String, String> signForStaffBatch(Set<String> storedRefs) {
         Map<String, String> out = new LinkedHashMap<>();
-        if (storedRefs == null || storedRefs.isEmpty() || !ossConfigured()) {
-            if (storedRefs != null) {
-                for (String s : storedRefs) {
-                    if (StringUtils.hasText(s)) {
-                        out.put(s.trim(), s.trim());
-                    }
-                }
-            }
+        if (storedRefs == null || storedRefs.isEmpty()) {
+            return out;
+        }
+        if (!ossConfigured()) {
+            putIdentityRefs(out, storedRefs);
             return out;
         }
         Map<String, String> storedToKey = new LinkedHashMap<>();
@@ -94,12 +99,7 @@ public class OssDisplayUrlServiceImpl implements OssDisplayUrlService {
             return out;
         }
         if (!ossConfigured()) {
-            for (String raw : storedDistinct) {
-                if (StringUtils.hasText(raw)) {
-                    String t = raw.trim();
-                    out.put(t, t);
-                }
-            }
+            putIdentityRefs(out, storedDistinct);
             return out;
         }
         Map<String, String> storedToKey = new LinkedHashMap<>();
@@ -130,6 +130,17 @@ public class OssDisplayUrlServiceImpl implements OssDisplayUrlService {
             out.put(e.getKey(), url != null ? url : e.getKey());
         }
         return out;
+    }
+
+    /** OSS 未配置时原样回传 storedRef。 */
+    private static void putIdentityRefs(Map<String, String> out, Set<String> storedRefs) {
+        for (String s : storedRefs) {
+            if (!StringUtils.hasText(s)) {
+                continue;
+            }
+            String t = s.trim();
+            out.put(t, t);
+        }
     }
 
 

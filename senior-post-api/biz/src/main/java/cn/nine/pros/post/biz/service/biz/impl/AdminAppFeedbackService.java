@@ -2,12 +2,12 @@ package cn.nine.pros.post.biz.service.biz.impl;
 
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
+import cn.nine.pros.post.biz.controller.admin.AdminPageHelper;
 import cn.nine.pros.post.biz.model.domain.AppFeedbackDomain;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.admin.AppFeedbackAdminQueryInDto;
 import cn.nine.pros.post.client.model.out.AppFeedbackAdminItemVO;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 管理端 App 反馈列表查询。
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminAppFeedbackService {
@@ -22,38 +25,14 @@ public class AdminAppFeedbackService {
     private final cn.nine.pros.post.biz.service.base.AppFeedbackService appFeedbackService;
     private final UserService userService;
 
+    /**
+     * 分页查询 App 反馈并附带用户昵称。
+     */
     public PageData<AppFeedbackAdminItemVO> paging(AppFeedbackAdminQueryInDto body) {
-        PageQuery pq = normalizePage(body == null ? null : body.getPage());
-        LambdaQueryWrapper<AppFeedbackDomain> qw = new LambdaQueryWrapper<AppFeedbackDomain>()
-                .eq(AppFeedbackDomain::isDelFlag, false)
-                .orderByDesc(AppFeedbackDomain::getCreatedAt);
-        Page<AppFeedbackDomain> p = appFeedbackService.page(mpPage(pq), qw);
+        PageQuery pq = AdminPageHelper.normalize(body == null ? null : body.getPage());
+        Page<AppFeedbackDomain> p = appFeedbackService.pageForAdmin(pq);
         List<AppFeedbackAdminItemVO> list = p.getRecords().stream().map(this::toVo).collect(Collectors.toList());
-        return pageData(pq, p, list);
-    }
-
-    private static PageQuery normalizePage(PageQuery page) {
-        if (page == null) {
-            page = new PageQuery();
-            page.setPage(1L);
-            page.setSize(20L);
-            return page;
-        }
-        if (page.getPage() == null || page.getPage() < 1) {
-            page.setPage(1L);
-        }
-        if (page.getSize() == null || page.getSize() < 1 || page.getSize() > 200) {
-            page.setSize(20L);
-        }
-        return page;
-    }
-
-    private static <T> Page<T> mpPage(PageQuery pageQuery) {
-        return new Page<>(pageQuery.getPage(), pageQuery.getSize());
-    }
-
-    private static <T> PageData<T> pageData(PageQuery pageQuery, Page<?> page, List<T> records) {
-        return PageData.of(page.getTotal(), pageQuery.getPage(), pageQuery.getSize(), records);
+        return AdminPageHelper.pageData(pq, p, list);
     }
 
     private AppFeedbackAdminItemVO toVo(AppFeedbackDomain row) {

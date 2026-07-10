@@ -9,7 +9,6 @@ import cn.nine.pros.post.client.model.out.AppBootstrapVO;
 import cn.nine.pros.post.client.model.out.AppCountryVO;
 import cn.nine.pros.post.client.model.out.AppVipProductConfigVO;
 import cn.nine.pros.post.client.model.out.InterestTagOptionVO;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -50,13 +49,7 @@ public class AppBootstrapService {
     }
 
     public AppBootstrapVO init(String langCode) {
-        Integer minAge = loadMinAge();
-        List<AppCountryVO> countries = countryService.list(
-                        new LambdaQueryWrapper<CountryDomain>()
-                                .eq(CountryDomain::isDelFlag, false)
-                                .orderByAsc(CountryDomain::getSortOrder)
-                                .orderByAsc(CountryDomain::getId))
-                .stream()
+        List<AppCountryVO> countries = countryService.listActiveOrdered().stream()
                 .map(country -> AppCountryVO.builder()
                         .code(country.getCountryCode())
                         .nameEn(country.getCountryNameEn())
@@ -65,19 +58,16 @@ public class AppBootstrapService {
                 .toList();
         List<InterestTagOptionVO> interestOpts = appDirectoryService.listInterestTagOptions(langCode);
         return AppBootstrapVO.builder()
-                .minRegisterAge(minAge)
+                .minRegisterAge(configService.getInt(REGISTER_MIN_AGE_KEY, DEFAULT_MIN_AGE))
                 .countries(countries)
                 .interestTagOptions(interestOpts)
                 .vipProduct(loadVipProductConfig())
-                .dailyLetterQuota(loadDailyLetterQuota())
+                .dailyLetterQuota(configService.getInt(LETTER_DAILY_QUOTA_KEY, DEFAULT_DAILY_LETTER_QUOTA))
                 .build();
     }
 
     private AppVipProductConfigVO loadVipProductConfig() {
-        List<ConfigDomain> rows = configService.list(
-                new LambdaQueryWrapper<ConfigDomain>()
-                        .eq(ConfigDomain::isDelFlag, false)
-                        .in(ConfigDomain::getConfigKey, VIP_PRODUCT_KEYS));
+        List<ConfigDomain> rows = configService.listActiveByKeys(VIP_PRODUCT_KEYS);
         Map<String, String> map = new HashMap<>();
         for (ConfigDomain row : rows) {
             if (row.getConfigKey() != null && row.getConfigValue() != null) {
@@ -120,38 +110,6 @@ public class AppBootstrapService {
             return Integer.parseInt(raw.trim());
         } catch (NumberFormatException e) {
             return dft;
-        }
-    }
-
-    private Integer loadMinAge() {
-        ConfigDomain cfg = configService.getOne(
-                new LambdaQueryWrapper<ConfigDomain>()
-                        .eq(ConfigDomain::isDelFlag, false)
-                        .eq(ConfigDomain::getConfigKey, REGISTER_MIN_AGE_KEY)
-                        .last("limit 1"));
-        if (cfg == null || cfg.getConfigValue() == null || cfg.getConfigValue().isBlank()) {
-            return DEFAULT_MIN_AGE;
-        }
-        try {
-            return Integer.parseInt(cfg.getConfigValue().trim());
-        } catch (NumberFormatException ignore) {
-            return DEFAULT_MIN_AGE;
-        }
-    }
-
-    private Integer loadDailyLetterQuota() {
-        ConfigDomain cfg = configService.getOne(
-                new LambdaQueryWrapper<ConfigDomain>()
-                        .eq(ConfigDomain::isDelFlag, false)
-                        .eq(ConfigDomain::getConfigKey, LETTER_DAILY_QUOTA_KEY)
-                        .last("limit 1"));
-        if (cfg == null || cfg.getConfigValue() == null || cfg.getConfigValue().isBlank()) {
-            return DEFAULT_DAILY_LETTER_QUOTA;
-        }
-        try {
-            return Integer.parseInt(cfg.getConfigValue().trim());
-        } catch (NumberFormatException ignore) {
-            return DEFAULT_DAILY_LETTER_QUOTA;
         }
     }
 

@@ -39,8 +39,6 @@ import cn.nine.pros.post.client.model.input.AppRegisterInDto;
 import cn.nine.pros.post.client.model.input.AppResetPasswordInDto;
 import cn.nine.pros.post.client.model.out.AppAuthResultVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -58,6 +56,10 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * App 认证与资料：注册/登录/Google/密码重置/注销申请/资料补丁。
+ * <p>写路径成功打 INFO；鉴权拒绝与风控拦截打 INFO/WARN（不记录密码、Token、邮箱全文）。
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -86,6 +88,10 @@ public class AppAuthService {
     private final GeoIpService geoIpService;
     private final EmailVerifyService emailVerifyService;
 
+    /**
+     * 邮箱注册：校验年龄/兴趣标签后建用户与邮箱身份，并完成首次登录发 Token。
+     * <p>前置：邮箱未占用、年龄≥45、兴趣标签合法；副作用：写 user/identity/tags/device/login。
+     */
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO register(AppRegisterInDto body) {
         assertGenderValid(body.getGender());
@@ -124,12 +130,7 @@ public class AppAuthService {
         user.setRegisterIp(registerIp);
         applyGeoToUser(user, geoIpService.resolve(registerIp), true);
         userService.save(user);
-        if (StringUtils.hasText(body.getAvatarUrl())) {
-            LambdaUpdateWrapper<UserDomain> avUw =
-                    new LambdaUpdateWrapper<UserDomain>().eq(UserDomain::getId, user.getId());
-            applyAvatarPatchToWrapper(avUw, user.getId(), body.getAvatarUrl());
-            userService.update(avUw);
-        }
+        applyRegisterAvatarIfPresent(user.getId(), body.getAvatarUrl());
 
         userIdentityService.createEmailIdentity(
                 user.getId(), email, passwordEncoder.encode(body.getPassword()), user.getId());
@@ -142,6 +143,10 @@ public class AppAuthService {
         return finishAuth(user.getId(), true, LoginRiskEvaluator.RISK_NONE, false);
     }
 
+    /**
+     * 邮箱密码登录：校验凭证与账号状态后进入风控门并发 Token（或要求二次验证）。
+     * <p>前置：设备头体一致；副作用：写 login 流水、可能更新设备/地理/语言。
+     */
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO login(AppLoginInDto body) {
         String email = body.getEmail().trim().toLowerCase();
@@ -150,30 +155,36 @@ public class AppAuthService {
             deviceUuid = assertDeviceUuidMatchesHeaderOrBody(body.getDeviceUuid());
         } catch (BadRequestException e) {
             recordLogin(null, body.getDeviceUuid(), LOGIN_FAIL, "device_mismatch", LoginRiskEvaluator.RISK_NONE);
+            log.info("login rejected: device header/body mismatch");
             throw e;
         }
         UserIdentityDomain ident = userIdentityService.findActiveEmailByUid(email);
         if (ident == null || !StringUtils.hasText(ident.getPasswordHash())) {
             recordLogin(null, deviceUuid, LOGIN_FAIL, "bad_credential", LoginRiskEvaluator.RISK_NONE);
+            log.info("login rejected: bad credential (identity missing)");
             throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         if (!passwordEncoder.matches(body.getPassword(), ident.getPasswordHash())) {
             recordLogin(ident.getUserId(), deviceUuid, LOGIN_FAIL, "bad_credential", LoginRiskEvaluator.RISK_NONE);
+            log.info("login rejected: bad credential, userId={}", ident.getUserId());
             throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         UserDTO dto = userService.findById(ident.getUserId());
         if (dto == null) {
             recordLogin(ident.getUserId(), deviceUuid, LOGIN_FAIL, "user_missing", LoginRiskEvaluator.RISK_NONE);
+            log.info("login rejected: user missing, userId={}", ident.getUserId());
             throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         finalizeAccountDeletionIfCooldownElapsed(dto.getId());
         dto = userService.findById(dto.getId());
         if (dto == null) {
             recordLogin(ident.getUserId(), deviceUuid, LOGIN_FAIL, "user_missing", LoginRiskEvaluator.RISK_NONE);
+            log.info("login rejected: user missing after deletion finalize, userId={}", ident.getUserId());
             throw new BadRequestException(appMessages.get("app.error.login.badCredential"));
         }
         if (dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
             recordLogin(dto.getId(), deviceUuid, LOGIN_FAIL, "unavailable", LoginRiskEvaluator.RISK_NONE);
+            log.info("login rejected: account unavailable, userId={}", dto.getId());
             throw new BadRequestException(appMessages.get("app.error.account.unavailable"));
         }
 
@@ -182,6 +193,7 @@ public class AppAuthService {
 
     /**
      * 中风险登录二次验证通过后发放 Token。
+     * <p>前置：邮箱验证码有效、账号可用；副作用：同成功登录写路径。
      */
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO confirmLoginChallenge(AppLoginChallengeConfirmInDto body) {
@@ -204,32 +216,18 @@ public class AppAuthService {
         GeoIpLookup geo = geoIpService.resolve(ip);
         applyGeoUpdateIfEmpty(dto.getId(), geo);
 
-        List<LoginDomain> prev = loginService.list(
-                new LambdaQueryWrapper<LoginDomain>()
-                        .eq(LoginDomain::getUserId, dto.getId())
-                        .eq(LoginDomain::getLoginResult, LOGIN_SUCCESS)
-                        .orderByDesc(LoginDomain::getId)
-                        .last("LIMIT 5"));
+        List<LoginDomain> prev = loginService.listRecentSuccessfulByUserId(dto.getId(), 5);
         UserDomain freshDomain = userService.getById(dto.getId());
-        Double curLat = geo.latitude() != null ? geo.latitude()
-                : (freshDomain != null ? freshDomain.getLatitude() : null);
-        Double curLng = geo.longitude() != null ? geo.longitude()
-                : (freshDomain != null ? freshDomain.getLongitude() : null);
         Double prevLat = freshDomain != null ? freshDomain.getLatitude() : null;
         Double prevLng = freshDomain != null ? freshDomain.getLongitude() : null;
+        Double curLat = preferGeoOrStored(geo.latitude(), prevLat);
+        Double curLng = preferGeoOrStored(geo.longitude(), prevLng);
 
-        LoginRiskEvaluator.RiskResult risk = skipRiskGate
-                ? new LoginRiskEvaluator.RiskResult(LoginRiskEvaluator.RISK_NONE, 0)
-                : LoginRiskEvaluator.evaluate(
-                        geo.countryCode(), deviceUuid, curLat, curLng, prev, prevLat, prevLng);
+        LoginRiskEvaluator.RiskResult risk = resolveLoginRisk(
+                skipRiskGate, geo, deviceUuid, curLat, curLng, prev, prevLat, prevLng);
 
         if (risk.level() == LoginRiskEvaluator.RISK_HIGH) {
-            LocalDateTime now = LocalDateTime.now();
-            userService.update(new LambdaUpdateWrapper<UserDomain>()
-                    .eq(UserDomain::getId, dto.getId())
-                    .set(UserDomain::getStatus, 2)
-                    .set(UserDomain::getUpdatedAt, now)
-                    .set(UserDomain::getUpdatedBy, dto.getId()));
+            userService.updateStatus(dto.getId(), 2);
             recordLogin(dto.getId(), deviceUuid, LOGIN_FAIL, "risk_high", risk.level(), geo.countryCode());
             log.warn("high risk login banned userId={}, triggers={}", dto.getId(), risk.triggerCount());
             throw new BadRequestException(appMessages.get("app.error.login.riskHigh"));
@@ -249,17 +247,9 @@ public class AppAuthService {
                     .build();
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>()
-                .eq(UserDomain::getId, dto.getId())
-                .set(UserDomain::getLastLoginAt, now)
-                .set(UserDomain::getDeletionRequestedAt, null)
-                .set(UserDomain::getUpdatedAt, now)
-                .set(UserDomain::getUpdatedBy, dto.getId());
-        if (!StringUtils.hasText(dto.getLanguage())) {
-            uw.set(UserDomain::getLanguage, resolveClientLanguageTag());
-        }
-        userService.update(uw);
+        userService.markLoginSuccess(
+                dto.getId(),
+                StringUtils.hasText(dto.getLanguage()) ? null : resolveClientLanguageTag());
 
         touchDevice(dto.getId(), deviceUuid, deviceType);
         recordLogin(dto.getId(), deviceUuid, LOGIN_SUCCESS, null, risk.level(), geo.countryCode());
@@ -270,31 +260,25 @@ public class AppAuthService {
         return finishAuth(dto.getId(), complete, risk.level(), false);
     }
 
+    /**
+     * 注册前校验邮箱是否可用（已占用则抛错）。
+     */
     public void validateRegisterEmail(String rawEmail) {
         String email = rawEmail.trim().toLowerCase();
         if (userIdentityService.findActiveEmailByUid(email) != null) {
+            log.info("register email rejected: already taken");
             throw new BadRequestException(appMessages.get("app.error.register.emailTaken"));
         }
     }
 
+    /**
+     * Google 登录：校验 idToken 后解析/创建用户并走统一登录成功路径。
+     * <p>前置：idToken 有效、账号可用；副作用：可能新建壳用户/挂 OAuth 身份，并写登录流水。
+     */
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO loginWithGoogle(AppGoogleLoginInDto body) {
         VerifiedGoogleIdentity google = googleIdTokenVerifierService.verify(body.getIdToken());
-        UserIdentityDomain existing = userIdentityService.findActiveByProviderUid(AuthProvider.GOOGLE, google.sub());
-        long userId;
-        if (existing != null) {
-            userId = existing.getUserId();
-        } else if (StringUtils.hasText(google.email())) {
-            UserIdentityDomain emailIdent = userIdentityService.findActiveEmailByUid(google.email());
-            if (emailIdent != null) {
-                userId = emailIdent.getUserId();
-                userIdentityService.createOAuthIdentity(userId, AuthProvider.GOOGLE, google.sub(), userId);
-            } else {
-                userId = createGoogleShellUser(google);
-            }
-        } else {
-            userId = createGoogleShellUser(google);
-        }
+        long userId = resolveOrCreateGoogleUserId(google);
 
         finalizeAccountDeletionIfCooldownElapsed(userId);
         UserDTO dto = userService.findById(userId);
@@ -305,6 +289,10 @@ public class AppAuthService {
         return completeSuccessfulLogin(dto, deviceUuid, normalizeDeviceType(body.getDeviceType()));
     }
 
+    /**
+     * Google 新用户补全资料（性别/年龄/昵称/兴趣等）后发完整 Token。
+     * <p>前置：已登录会话、年龄≥45、兴趣标签合法；副作用：更新 user 与 tags。
+     */
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO completeGoogleProfile(AppGoogleCompleteInDto body) {
         Long uid = MyRequestContextHolder.userId();
@@ -318,39 +306,53 @@ public class AppAuthService {
         }
         assertInterestTagIdsValidForReplace(body.getInterestTagIds());
 
-        LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>()
-                .eq(UserDomain::getId, uid)
-                .set(UserDomain::getGender, body.getGender())
-                .set(UserDomain::getBirthYear, body.getBirthYear())
-                .set(UserDomain::getNickname, body.getNickname().trim())
-                .set(UserDomain::getCountryCode,
-                        body.getCountryCode() != null && !body.getCountryCode().isBlank()
-                                ? body.getCountryCode().trim()
-                                : null)
-                .set(UserDomain::getUpdatedAt, LocalDateTime.now())
-                .set(UserDomain::getUpdatedBy, uid);
-        if (body.getAvatarUrl() != null) {
-            applyAvatarPatchToWrapper(uw, uid, body.getAvatarUrl());
+        UserDomain onboarding = userService.getById(uid);
+        if (onboarding == null) {
+            throw new BadRequestException(appMessages.get("app.error.user.notFound"));
         }
-        userService.update(uw);
+        onboarding.setGender(body.getGender());
+        onboarding.setBirthYear(body.getBirthYear());
+        onboarding.setNickname(body.getNickname().trim());
+        onboarding.setCountryCode(normalizeOptionalCountryCode(body.getCountryCode()));
+        if (body.getAvatarUrl() != null) {
+            applyAvatarPatchToDomain(onboarding, uid, body.getAvatarUrl());
+        }
+        onboarding.setUpdatedAt(LocalDateTime.now());
+        onboarding.setUpdatedBy(uid);
+        userService.updateById(onboarding);
         userTagService.replaceUserTags(uid, uid, new ArrayList<>(new LinkedHashSet<>(body.getInterestTagIds())));
 
+        log.info("google profile completed, userId={}", uid);
         return finishAuth(uid, true, LoginRiskEvaluator.RISK_NONE, false);
     }
 
+    /**
+     * 忘记密码：向邮箱发重置码（OAuth-only 账号拒绝）。
+     * <p>副作用：委托 PasswordResetService 写重置令牌/发信。
+     */
     public void forgotPassword(AppForgotPasswordInDto body) {
         String email = body.getEmail().trim().toLowerCase();
         UserIdentityDomain ident = userIdentityService.findActiveEmailByUid(email);
         if (ident != null && userIdentityService.hasOAuthOnly(ident.getUserId())) {
+            log.info("forgot-password rejected: oauth-only, userId={}", ident.getUserId());
             throw new BadRequestException(appMessages.get("app.error.password.oauthOnly"));
         }
         passwordResetService.requestForgotPassword(body.getEmail());
+        log.info("forgot-password requested");
     }
 
+    /**
+     * 用验证码完成密码重置。
+     * <p>副作用：更新密码哈希并失效重置令牌。
+     */
     public void resetPassword(AppResetPasswordInDto body) {
         passwordResetService.completeReset(body.getEmail(), body.getCode(), body.getNewPassword());
+        log.info("password reset completed");
     }
 
+    /**
+     * 当前登录用户公开资料；未登录返回 null，已删号抛错。
+     */
     public AppPublicUserVO me() {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
@@ -367,6 +369,10 @@ public class AppAuthService {
         return toPublic(dto, dto.getId(), true);
     }
 
+    /**
+     * 申请注销账号：进入冷静期，到期后由登录路径 finalize。
+     * <p>前置：已登录且状态正常；副作用：写 deletionRequestedAt。
+     */
     @Transactional(rollbackFor = Exception.class)
     public void requestAccountDeletion() {
         Long uid = MyRequestContextHolder.userId();
@@ -380,15 +386,14 @@ public class AppAuthService {
         if (dto.getStatus() == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
             throw new BadRequestException(appMessages.get("app.error.account.deleteNotAllowed"));
         }
-        LocalDateTime now = LocalDateTime.now();
-        userService.update(new LambdaUpdateWrapper<UserDomain>()
-                .eq(UserDomain::getId, uid)
-                .eq(UserDomain::isDelFlag, false)
-                .set(UserDomain::getDeletionRequestedAt, now)
-                .set(UserDomain::getUpdatedAt, now)
-                .set(UserDomain::getUpdatedBy, uid));
+        userService.requestDeletion(uid);
+        log.info("account deletion requested, userId={}", uid);
     }
 
+    /**
+     * 补丁更新当前用户资料（性别/昵称/国家/简介/头像/兴趣）。
+     * <p>前置：已登录且至少一项可改字段；副作用：更新 user 和/或 tags。
+     */
     @Transactional(rollbackFor = Exception.class)
     public AppPublicUserVO updateProfile(AppAuthProfilePatchInDto body) {
         Long uid = MyRequestContextHolder.userId();
@@ -401,36 +406,34 @@ public class AppAuthService {
         }
         boolean changed = false;
         boolean userRowChanged = false;
-        LambdaUpdateWrapper<UserDomain> uw =
-                new LambdaUpdateWrapper<UserDomain>().eq(UserDomain::getId, uid);
+        UserDomain row = userService.getById(uid);
+        if (row == null) {
+            throw new BadRequestException(appMessages.get("app.error.user.notFound"));
+        }
         if (body.getGender() != null) {
             assertGenderValid(body.getGender());
-            uw.set(UserDomain::getGender, body.getGender());
+            row.setGender(body.getGender());
             changed = true;
             userRowChanged = true;
         }
         if (body.getNickname() != null) {
-            String n = body.getNickname().trim();
-            if (n.isEmpty()) {
-                throw new BadRequestException(appMessages.get("app.error.profile.nicknameRequired"));
-            }
-            uw.set(UserDomain::getNickname, n);
+            applyNicknamePatch(row, body.getNickname());
             changed = true;
             userRowChanged = true;
         }
         if (body.getCountryCode() != null) {
             String c = body.getCountryCode().trim();
-            uw.set(UserDomain::getCountryCode, c.isEmpty() ? null : c);
+            row.setCountryCode(c.isEmpty() ? null : c);
             changed = true;
             userRowChanged = true;
         }
         if (body.getBio() != null) {
-            uw.set(UserDomain::getBio, body.getBio().trim());
+            row.setBio(body.getBio().trim());
             changed = true;
             userRowChanged = true;
         }
         if (body.getAvatarUrl() != null) {
-            applyAvatarPatchToWrapper(uw, uid, body.getAvatarUrl());
+            applyAvatarPatchToDomain(row, uid, body.getAvatarUrl());
             changed = true;
             userRowChanged = true;
         }
@@ -444,19 +447,41 @@ public class AppAuthService {
             throw new BadRequestException(appMessages.get("app.error.profile.nothingToUpdate"));
         }
         if (userRowChanged) {
-            LocalDateTime now = LocalDateTime.now();
-            uw.set(UserDomain::getUpdatedAt, now).set(UserDomain::getUpdatedBy, uid);
-            userService.update(uw);
+            row.setUpdatedAt(LocalDateTime.now());
+            row.setUpdatedBy(uid);
+            userService.updateById(row);
         }
+        log.info("profile updated, userId={}", uid);
         return toPublic(userService.findById(uid), uid, true);
     }
 
-    private long createGoogleShellUser(VerifiedGoogleIdentity google) {
-        String nick = "User";
-        if (StringUtils.hasText(google.email())) {
-            int at = google.email().indexOf('@');
-            nick = at > 0 ? google.email().substring(0, at) : google.email();
+    /**
+     * 解析或创建 Google 登录对应用户：已有 Google 身份 → 邮箱关联并挂 Google → 新建壳用户。
+     */
+    private long resolveOrCreateGoogleUserId(VerifiedGoogleIdentity google) {
+        UserIdentityDomain existing = userIdentityService.findActiveByProviderUid(AuthProvider.GOOGLE, google.sub());
+        if (existing != null) {
+            return existing.getUserId();
         }
+        if (!StringUtils.hasText(google.email())) {
+            return createGoogleShellUser(google);
+        }
+        return linkGoogleToEmailOrCreateShell(google);
+    }
+
+    /** 用 Google 邮箱关联已有账号并写入 OAuth 身份；无邮箱身份则新建壳用户。 */
+    private long linkGoogleToEmailOrCreateShell(VerifiedGoogleIdentity google) {
+        UserIdentityDomain emailIdent = userIdentityService.findActiveEmailByUid(google.email());
+        if (emailIdent == null) {
+            return createGoogleShellUser(google);
+        }
+        long userId = emailIdent.getUserId();
+        userIdentityService.createOAuthIdentity(userId, AuthProvider.GOOGLE, google.sub(), userId);
+        return userId;
+    }
+
+    private long createGoogleShellUser(VerifiedGoogleIdentity google) {
+        String nick = resolveGoogleNickname(google);
         LocalDateTime now = LocalDateTime.now();
         UserDomain user = new UserDomain();
         user.setGender(UserGender.UNSPECIFIED);
@@ -497,6 +522,75 @@ public class AppAuthService {
                 .build();
     }
 
+    /** 注册成功后若请求带头像 URL，则写入并标记待审。 */
+    private void applyRegisterAvatarIfPresent(long userId, String avatarUrl) {
+        if (!StringUtils.hasText(avatarUrl)) {
+            return;
+        }
+        UserDomain avatarRow = userService.getById(userId);
+        if (avatarRow == null) {
+            return;
+        }
+        applyAvatarPatchToDomain(avatarRow, userId, avatarUrl);
+        avatarRow.setUpdatedAt(LocalDateTime.now());
+        avatarRow.setUpdatedBy(userId);
+        userService.updateById(avatarRow);
+    }
+
+    /** 优先使用 GeoIP 坐标，缺失时回退到用户已存坐标。 */
+    private static Double preferGeoOrStored(Double geoValue, Double storedValue) {
+        if (geoValue != null) {
+            return geoValue;
+        }
+        return storedValue;
+    }
+
+    /** 二次验证跳过风控门时返回无风险；否则按历史登录与坐标评估。 */
+    private static LoginRiskEvaluator.RiskResult resolveLoginRisk(
+            boolean skipRiskGate,
+            GeoIpLookup geo,
+            String deviceUuid,
+            Double curLat,
+            Double curLng,
+            List<LoginDomain> prev,
+            Double prevLat,
+            Double prevLng) {
+        if (skipRiskGate) {
+            return new LoginRiskEvaluator.RiskResult(LoginRiskEvaluator.RISK_NONE, 0);
+        }
+        return LoginRiskEvaluator.evaluate(
+                geo.countryCode(), deviceUuid, curLat, curLng, prev, prevLat, prevLng);
+    }
+
+    /** 空白国家码归一为 null，否则 trim。 */
+    private static String normalizeOptionalCountryCode(String countryCode) {
+        if (countryCode == null || countryCode.isBlank()) {
+            return null;
+        }
+        return countryCode.trim();
+    }
+
+    /** 资料补丁：昵称非空校验后写入。 */
+    private void applyNicknamePatch(UserDomain row, String nickname) {
+        String n = nickname.trim();
+        if (n.isEmpty()) {
+            throw new BadRequestException(appMessages.get("app.error.profile.nicknameRequired"));
+        }
+        row.setNickname(n);
+    }
+
+    /** 从 Google 邮箱本地部分推导默认昵称，无邮箱则为 User。 */
+    private static String resolveGoogleNickname(VerifiedGoogleIdentity google) {
+        if (!StringUtils.hasText(google.email())) {
+            return "User";
+        }
+        int at = google.email().indexOf('@');
+        if (at > 0) {
+            return google.email().substring(0, at);
+        }
+        return google.email();
+    }
+
     private void recordLogin(Long userId, String deviceUuid, int result, String failReason, int riskLevel) {
         recordLogin(userId, deviceUuid, result, failReason, riskLevel, null);
     }
@@ -532,17 +626,23 @@ public class AppAuthService {
         }
         try {
             Object headers = ctx.getClass().getMethod("getHeaders").invoke(ctx);
-            if (headers instanceof java.util.Map<?, ?> map) {
-                Object ua = map.get("User-Agent");
-                if (ua == null) {
-                    ua = map.get("user-agent");
-                }
-                return ua != null ? ua.toString() : null;
-            }
+            return extractUserAgentFromHeaders(headers);
         } catch (ReflectiveOperationException ignored) {
             // framework may not expose headers map
         }
         return null;
+    }
+
+    /** 从请求头 Map 中读取 User-Agent（兼容大小写键名）。 */
+    private static String extractUserAgentFromHeaders(Object headers) {
+        if (!(headers instanceof java.util.Map<?, ?> map)) {
+            return null;
+        }
+        Object ua = map.get("User-Agent");
+        if (ua == null) {
+            ua = map.get("user-agent");
+        }
+        return ua != null ? ua.toString() : null;
     }
 
     private static String resolveClientLanguageTag() {
@@ -577,27 +677,27 @@ public class AppAuthService {
         if (u == null) {
             return;
         }
-        LambdaUpdateWrapper<UserDomain> uw = new LambdaUpdateWrapper<UserDomain>().eq(UserDomain::getId, userId);
         boolean changed = false;
         if (!StringUtils.hasText(u.getCountryCode()) && geo.hasCountry()) {
-            uw.set(UserDomain::getCountryCode, geo.countryCode());
+            u.setCountryCode(geo.countryCode());
             changed = true;
         }
         if (!StringUtils.hasText(u.getCity()) && StringUtils.hasText(geo.city())) {
-            uw.set(UserDomain::getCity, geo.city());
+            u.setCity(geo.city());
             changed = true;
         }
         if (u.getLatitude() == null && geo.latitude() != null) {
-            uw.set(UserDomain::getLatitude, geo.latitude());
+            u.setLatitude(geo.latitude());
             changed = true;
         }
         if (u.getLongitude() == null && geo.longitude() != null) {
-            uw.set(UserDomain::getLongitude, geo.longitude());
+            u.setLongitude(geo.longitude());
             changed = true;
         }
         if (changed) {
-            uw.set(UserDomain::getUpdatedAt, LocalDateTime.now()).set(UserDomain::getUpdatedBy, userId);
-            userService.update(uw);
+            u.setUpdatedAt(LocalDateTime.now());
+            u.setUpdatedBy(userId);
+            userService.updateById(u);
         }
     }
 
@@ -616,23 +716,21 @@ public class AppAuthService {
         LocalDateTime now = LocalDateTime.now();
         friendshipService.deactivateAllFriendshipsForUser(userId);
         userIdentityService.releaseAllForUser(userId, now);
-        userService.update(new LambdaUpdateWrapper<UserDomain>()
-                .eq(UserDomain::getId, userId)
-                .eq(UserDomain::isDelFlag, false)
-                .set(UserDomain::getStatus, 3)
-                .set(UserDomain::getDeletionRequestedAt, null)
-                .set(UserDomain::getUpdatedAt, now)
-                .set(UserDomain::getUpdatedBy, userId));
+        userService.finalizeDeletion(userId);
     }
 
     private String assertDeviceUuidMatchesHeaderOrBody(String bodyDeviceUuid) {
         String uuid = bodyDeviceUuid.trim();
         RequestContext ctx = MyRequestContextHolder.getContext();
-        if (ctx != null) {
-            String headerEq = ctx.getEquipmentId();
-            if (StringUtils.hasText(headerEq) && !headerEq.trim().equals(uuid)) {
-                throw new BadRequestException(appMessages.get("app.error.device.headerBodyMismatch"));
-            }
+        if (ctx == null) {
+            return uuid;
+        }
+        String headerEq = ctx.getEquipmentId();
+        if (!StringUtils.hasText(headerEq)) {
+            return uuid;
+        }
+        if (!headerEq.trim().equals(uuid)) {
+            throw new BadRequestException(appMessages.get("app.error.device.headerBodyMismatch"));
         }
         return uuid;
     }
@@ -656,11 +754,7 @@ public class AppAuthService {
 
     private void touchDevice(long userId, String deviceUuid, String deviceType) {
         String uuid = deviceUuid.trim();
-        UserDeviceDomain existing = userDeviceService.getOne(
-                new LambdaQueryWrapper<UserDeviceDomain>()
-                        .eq(UserDeviceDomain::getUserId, userId)
-                        .eq(UserDeviceDomain::getDeviceUuid, uuid)
-                        .eq(UserDeviceDomain::isDelFlag, false));
+        UserDeviceDomain existing = userDeviceService.findActiveByUserIdAndDeviceUuid(userId, uuid);
         LocalDateTime now = LocalDateTime.now();
         if (existing != null) {
             existing.setLastLoginAt(now);
@@ -731,11 +825,11 @@ public class AppAuthService {
         }
     }
 
-    private void applyAvatarPatchToWrapper(LambdaUpdateWrapper<UserDomain> uw, long uid, String rawAvatar) {
+    private void applyAvatarPatchToDomain(UserDomain row, long uid, String rawAvatar) {
         String raw = rawAvatar.trim();
         if (raw.isEmpty()) {
-            uw.set(UserDomain::getAvatarUrl, null);
-            uw.set(UserDomain::getAvatarAuditStatus, UserAvatarAuditSupport.PENDING);
+            row.setAvatarUrl(null);
+            row.setAvatarAuditStatus(UserAvatarAuditSupport.PENDING);
             return;
         }
         String normalized =
@@ -745,8 +839,8 @@ public class AppAuthService {
         if (!"avatar".equals(p.sceneLower()) || p.ownerUserId() != uid) {
             throw new BadRequestException(appMessages.get("app.error.profile.avatarInvalid"));
         }
-        uw.set(UserDomain::getAvatarUrl, normalized);
-        uw.set(UserDomain::getAvatarAuditStatus, UserAvatarAuditSupport.PENDING);
+        row.setAvatarUrl(normalized);
+        row.setAvatarAuditStatus(UserAvatarAuditSupport.PENDING);
     }
 
     private static Integer convertStatus(Object status) {

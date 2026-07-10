@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.base.impl;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
+import cn.nine.pros.post.biz.support.PageQueryNormalize;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.nine.pros.post.biz.mapper.LoginMapper;
@@ -54,6 +55,31 @@ public class LoginServiceImpl extends ServiceImpl<LoginMapper, LoginDomain>
         loginDomain.setUpdatedAt(LocalDateTime.now());
         update(loginDomain, new LambdaQueryWrapper<LoginDomain>()
                 .in(LoginDomain::getId, ids));
+    }
+
+    @Override
+    public List<LoginDomain> listRecentSuccessfulByUserId(long userId, int limit) {
+        return list(new LambdaQueryWrapper<LoginDomain>()
+                .eq(LoginDomain::getUserId, userId)
+                .eq(LoginDomain::getLoginResult, 1)
+                .orderByDesc(LoginDomain::getId)
+                .last("LIMIT " + Math.max(1, limit)));
+    }
+
+
+    @Override
+    public com.baomidou.mybatisplus.extension.plugins.pagination.Page<LoginDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery, Long userId, Integer loginResult) {
+        LambdaQueryWrapper<LoginDomain> qw = new LambdaQueryWrapper<LoginDomain>()
+                .eq(LoginDomain::isDelFlag, false)
+                .orderByDesc(LoginDomain::getCreatedAt);
+        if (userId != null) {
+            qw.eq(LoginDomain::getUserId, userId);
+        }
+        if (loginResult != null) {
+            qw.eq(LoginDomain::getLoginResult, loginResult);
+        }
+        return page(PageQueryNormalize.mpPage(pageQuery, PageQueryNormalize.ADMIN_MAX_SIZE), qw);
     }
 
 }

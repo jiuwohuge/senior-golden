@@ -109,6 +109,15 @@ public class UserIdentityServiceImpl extends ServiceImpl<UserIdentityMapper, Use
                 || AuthProvider.APPLE.equals(r.getProvider()));
     }
 
+    @Override
+    public void updatePasswordHash(long identityId, String passwordHash, long auditUserId, LocalDateTime at) {
+        update(new LambdaUpdateWrapper<UserIdentityDomain>()
+                .eq(UserIdentityDomain::getId, identityId)
+                .set(UserIdentityDomain::getPasswordHash, passwordHash)
+                .set(UserIdentityDomain::getUpdatedAt, at)
+                .set(UserIdentityDomain::getUpdatedBy, auditUserId));
+    }
+
     private static String normalizeUid(String provider, String providerUid) {
         if (AuthProvider.EMAIL.equalsIgnoreCase(provider)) {
             return providerUid.trim().toLowerCase();

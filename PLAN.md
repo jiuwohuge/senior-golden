@@ -168,10 +168,10 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 - [x] 新接口均走分层规范(§1.1)
 
 ### M2 — 信件 + 投递 + 邮局首页 + 读信页（约 3~4 周）
-- [ ] 信件：`mode`/`audit_status`/`parent_letter_id`/分模式状态机(§4.3)
-- [ ] 写信分流(POST_OFFICE/时光信 §11.5)、回信(§4.7)、读信页(§12.6)
-- [ ] 投递：延迟公式扩展(§6.1)；邮局首页(§11)
-- [ ] 时光信对齐 `SELF_TIME`
+- [x] 信件：`mode`/`audit_status`/`parent_letter_id`/分模式状态机(§4.3)
+- [x] 写信分流(POST_OFFICE/时光信 §11.5)、回信(§4.7)、读信页(§12.6)
+- [x] 投递：延迟公式扩展(§6.1)；邮局首页(§11)
+- [x] 时光信对齐 `SELF_TIME`
 
 ### M3 — 匹配 + 行为 + 审核 + POST_OFFICE 闭环（约 3~4 周）
 - [ ] 行为事件采集(§14)；匹配 v1 规则版(§7)

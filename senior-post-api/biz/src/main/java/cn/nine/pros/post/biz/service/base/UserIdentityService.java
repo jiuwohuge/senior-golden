@@ -23,4 +23,7 @@ public interface UserIdentityService extends IService<UserIdentityDomain> {
     void releaseAllForUser(long userId, LocalDateTime at);
 
     boolean hasOAuthOnly(long userId);
+
+    /** 更新邮箱 identity 密码哈希。 */
+    void updatePasswordHash(long identityId, String passwordHash, long auditUserId, LocalDateTime at);
 }

@@ -993,8 +993,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterMailboxSealedPreview => '信件密封递送中';
 
   @override
-  String get letterContentHiddenHint =>
-      '平邮运输中，正文已密封。自然送达后将自动展示，或使用 1 枚邮票提前拆信（VIP 免扣）。';
+  String get letterContentHiddenHint => '信件仍在途中，正文将在送达后展示。';
 
   @override
   String get letterEarlyOpenCta => '提前拆信（1 枚邮票）';
@@ -1007,6 +1006,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get letterDetailTitle => '信件详情';
+
+  @override
+  String get letterModePostOffice => '邮局匹配';
+
+  @override
+  String get letterModeDirect => '指定投递';
+
+  @override
+  String get letterModeSelfTime => '时光信（SELF_TIME）';
+
+  @override
+  String letterModeLine(String mode) {
+    return '模式：$mode';
+  }
+
+  @override
+  String get letterAuditPending => '待审核';
+
+  @override
+  String get letterAuditApproved => '已通过';
+
+  @override
+  String get letterAuditRejected => '已拒绝';
+
+  @override
+  String letterAuditLine(String status) {
+    return '审核：$status';
+  }
+
+  @override
+  String get letterEtaLabel => '预计送达';
+
+  @override
+  String get letterDeliveredLabel => '已送达';
+
+  @override
+  String get letterPeerPostOfficePool => '邮局匹配池';
+
+  @override
+  String get letterPeerUnknown => '未知收件人';
 
   @override
   String get letterAcceptContact => '接受邮政好友';
@@ -1205,7 +1244,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mailboxTabConnections => '笔友';
 
   @override
-  String get mailboxTabTimeLetter => '时光';
+  String get mailboxTabTimeLetter => '时光信';
 
   @override
   String get timeLetterComposeTitle => '时光邮局';
@@ -1400,22 +1439,34 @@ class AppLocalizationsZh extends AppLocalizations {
   String get composeStepFooter => '基础写信不会被付费拦住。';
 
   @override
-  String get composeChooseSelf => '写给自己';
+  String get composeChooseSelf => '写给自己（时光信）';
 
   @override
-  String get composeChooseSelfSub => '时光信，寄给未来的自己';
+  String get composeChooseSelfSub => 'SELF_TIME — 到约定日期再开启';
 
   @override
   String get composeChoosePenPal => '写给笔友';
 
   @override
-  String get composeChoosePenPalSub => '认真来信，慢慢认识';
+  String get composeChoosePenPalSub => 'DIRECT — 寄给认识的人';
 
   @override
   String get composeChooseTopic => '写给主题信箱';
 
   @override
   String get composeChooseTopicSub => '从今日话题开始表达';
+
+  @override
+  String get composeChoosePostOffice => '寄往邮局';
+
+  @override
+  String get composeChoosePostOfficeSub => 'POST_OFFICE — 不选收件人，等待匹配';
+
+  @override
+  String get composeBodySubtitlePostOffice => '放心写吧——邮局会帮你找到读者。';
+
+  @override
+  String get composePostOfficeSendHint => '这封信将进入邮局匹配池';
 
   @override
   String get composePickDestinationRequired => '请先选择写信对象';
@@ -1488,7 +1539,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get composeStepMailTitle => '选择投递方式';
 
   @override
-  String get composeStepMailSubtitle => '平邮免费；挂号信需要邮票（VIP 免费）。';
+  String get composeStepMailSubtitle => '平邮与挂号均按延迟公式投递；挂号信可用邮票标记（VIP 免费）。';
 
   @override
   String get composeStepSealTitle => '封缄寄出';

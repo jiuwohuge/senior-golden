@@ -62,14 +62,7 @@ public class UserTagServiceImpl extends ServiceImpl<UserTagMapper, UserTagDomain
 
     @Override
     public void replaceUserTags(long actorUserId, long userId, List<Integer> distinctTagIds) {
-        Set<Integer> unique = new LinkedHashSet<>();
-        if (distinctTagIds != null) {
-            for (Integer id : distinctTagIds) {
-                if (id != null) {
-                    unique.add(id);
-                }
-            }
-        }
+        Set<Integer> unique = collectDistinctTagIds(distinctTagIds);
 
         List<UserTagDomain> existingRows = list(new LambdaQueryWrapper<UserTagDomain>()
                 .eq(UserTagDomain::getUserId, userId));
@@ -82,35 +75,68 @@ public class UserTagServiceImpl extends ServiceImpl<UserTagMapper, UserTagDomain
 
         LocalDateTime now = LocalDateTime.now();
         for (UserTagDomain row : existingRows) {
-            Integer tagId = row.getTagId();
-            if (tagId == null || !Boolean.FALSE.equals(row.isDelFlag())) {
-                continue;
-            }
-            if (!unique.contains(tagId)) {
-                row.setDelFlag(true);
-                row.setUpdatedAt(now);
-                row.setUpdatedBy(actorUserId);
-                updateById(row);
-            }
+            softDeleteIfRemoved(row, unique, actorUserId, now);
         }
 
         for (Integer tagId : unique) {
-            UserTagDomain existing = byTagId.get(tagId);
-            if (existing != null) {
-                if (Boolean.TRUE.equals(existing.isDelFlag())) {
-                    existing.setDelFlag(false);
-                    existing.setUpdatedAt(now);
-                    existing.setUpdatedBy(actorUserId);
-                    updateById(existing);
-                }
-                continue;
+            upsertActiveTag(byTagId.get(tagId), tagId, userId, actorUserId, now);
+        }
+    }
+
+    private static Set<Integer> collectDistinctTagIds(List<Integer> distinctTagIds) {
+        Set<Integer> unique = new LinkedHashSet<>();
+        if (distinctTagIds == null) {
+            return unique;
+        }
+        for (Integer id : distinctTagIds) {
+            if (id != null) {
+                unique.add(id);
             }
+        }
+        return unique;
+    }
+
+    private void softDeleteIfRemoved(UserTagDomain row, Set<Integer> unique, long actorUserId, LocalDateTime now) {
+        Integer tagId = row.getTagId();
+        if (tagId == null || !Boolean.FALSE.equals(row.isDelFlag())) {
+            return;
+        }
+        if (unique.contains(tagId)) {
+            return;
+        }
+        row.setDelFlag(true);
+        row.setUpdatedAt(now);
+        row.setUpdatedBy(actorUserId);
+        updateById(row);
+    }
+
+    private void upsertActiveTag(UserTagDomain existing, Integer tagId, long userId, long actorUserId, LocalDateTime now) {
+        if (existing == null) {
             UserTagDomain insertRow = new UserTagDomain();
             insertRow.setUserId(userId);
             insertRow.setTagId(tagId);
             insertRow.initAudit(actorUserId);
             save(insertRow);
+            return;
         }
+        if (!Boolean.TRUE.equals(existing.isDelFlag())) {
+            return;
+        }
+        existing.setDelFlag(false);
+        existing.setUpdatedAt(now);
+        existing.setUpdatedBy(actorUserId);
+        updateById(existing);
+    }
+
+
+    @Override
+    public List<Integer> listTagIdsByUserId(long userId) {
+        return list(new LambdaQueryWrapper<UserTagDomain>()
+                        .eq(UserTagDomain::getUserId, userId)
+                        .eq(UserTagDomain::isDelFlag, false))
+                .stream()
+                .map(UserTagDomain::getTagId)
+                .toList();
     }
 
 }

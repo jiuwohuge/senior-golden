@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.controller.app;
 
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
+import cn.nine.pros.post.biz.support.PageQueryNormalize;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
@@ -12,21 +13,14 @@ public final class AppPageHelper {
     public static PageQuery normalize(PageQuery page) {
         if (page == null) {
             page = new PageQuery();
-            page.setPage(1L);
-            page.setSize(20L);
-            return page;
         }
-        if (page.getPage() == null || page.getPage() < 1) {
-            page.setPage(1L);
-        }
-        if (page.getSize() == null || page.getSize() < 1 || page.getSize() > 100) {
-            page.setSize(20L);
-        }
+        page.setPage(PageQueryNormalize.pageIndex(page));
+        page.setSize(PageQueryNormalize.pageSize(page, PageQueryNormalize.APP_MAX_SIZE));
         return page;
     }
 
     public static <T> Page<T> mpPage(PageQuery pageQuery) {
-        return new Page<>(pageQuery.getPage(), pageQuery.getSize());
+        return PageQueryNormalize.mpPage(pageQuery, PageQueryNormalize.APP_MAX_SIZE);
     }
 
     public static <T> PageData<T> pageData(PageQuery pageQuery, Page<?> page, List<T> records) {

@@ -56,22 +56,26 @@ public class OssObjectKeyResolver {
             // continue
         }
         if (t.toLowerCase(Locale.ROOT).startsWith("http://") || t.toLowerCase(Locale.ROOT).startsWith("https://")) {
-            try {
-                if (!isTrustedHost(extractHost(t))) {
-                    return Optional.empty();
-                }
-                URI uri = URI.create(t);
-                String path = uri.getPath();
-                if (path == null || path.isEmpty()) {
-                    return Optional.empty();
-                }
-                String noLeading = path.startsWith("/") ? path.substring(1) : path;
-                return Optional.of(OssReadableKeyValidator.normalizeAndValidate(prefix, noLeading, appMessages));
-            } catch (BadRequestException | IllegalArgumentException ignored) {
-                return Optional.empty();
-            }
+            return tryFromTrustedHttpUrl(t, prefix);
         }
         return Optional.empty();
+    }
+
+    private Optional<String> tryFromTrustedHttpUrl(String t, String prefix) {
+        try {
+            if (!isTrustedHost(extractHost(t))) {
+                return Optional.empty();
+            }
+            URI uri = URI.create(t);
+            String path = uri.getPath();
+            if (path == null || path.isEmpty()) {
+                return Optional.empty();
+            }
+            String noLeading = path.startsWith("/") ? path.substring(1) : path;
+            return Optional.of(OssReadableKeyValidator.normalizeAndValidate(prefix, noLeading, appMessages));
+        } catch (BadRequestException | IllegalArgumentException ignored) {
+            return Optional.empty();
+        }
     }
 
     private String fromTrustedHttpUrl(String raw, String prefix) {
@@ -100,13 +104,8 @@ public class OssObjectKeyResolver {
         if (StringUtils.hasText(epHost) && StringUtils.hasText(bucket) && h.equals(bucket + "." + epHost)) {
             return true;
         }
-        if (StringUtils.hasText(ossProperties.getPublicReadBaseUrl())) {
-            String pub = extractHost(ossProperties.getPublicReadBaseUrl());
-            if (StringUtils.hasText(pub) && h.equals(pub)) {
-                return true;
-            }
-        }
-        return false;
+        String pub = extractHost(ossProperties.getPublicReadBaseUrl());
+        return StringUtils.hasText(pub) && h.equals(pub);
     }
 
     private static String extractHost(String endpointOrUrl) {

@@ -1985,7 +1985,7 @@ abstract class AppLocalizations {
   /// No description provided for @letterContentHiddenHint.
   ///
   /// In en, this message translates to:
-  /// **'This letter is still on its way. The message is hidden until it arrives, or you can open it early with one stamp (VIP free).'**
+  /// **'This letter is still on its way. The message stays sealed until it arrives.'**
   String get letterContentHiddenHint;
 
   /// No description provided for @letterEarlyOpenCta.
@@ -2011,6 +2011,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Letter'**
   String get letterDetailTitle;
+
+  /// No description provided for @letterModePostOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Post office'**
+  String get letterModePostOffice;
+
+  /// No description provided for @letterModeDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct'**
+  String get letterModeDirect;
+
+  /// No description provided for @letterModeSelfTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time letter (SELF_TIME)'**
+  String get letterModeSelfTime;
+
+  /// No description provided for @letterModeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode: {mode}'**
+  String letterModeLine(String mode);
+
+  /// No description provided for @letterAuditPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending review'**
+  String get letterAuditPending;
+
+  /// No description provided for @letterAuditApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get letterAuditApproved;
+
+  /// No description provided for @letterAuditRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get letterAuditRejected;
+
+  /// No description provided for @letterAuditLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit: {status}'**
+  String letterAuditLine(String status);
+
+  /// No description provided for @letterEtaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated arrival'**
+  String get letterEtaLabel;
+
+  /// No description provided for @letterDeliveredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get letterDeliveredLabel;
+
+  /// No description provided for @letterPeerPostOfficePool.
+  ///
+  /// In en, this message translates to:
+  /// **'Post office pool'**
+  String get letterPeerPostOfficePool;
+
+  /// No description provided for @letterPeerUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown recipient'**
+  String get letterPeerUnknown;
 
   /// No description provided for @letterAcceptContact.
   ///
@@ -2387,7 +2459,7 @@ abstract class AppLocalizations {
   /// No description provided for @mailboxTabTimeLetter.
   ///
   /// In en, this message translates to:
-  /// **'Time'**
+  /// **'Time letter'**
   String get mailboxTabTimeLetter;
 
   /// No description provided for @timeLetterComposeTitle.
@@ -2747,13 +2819,13 @@ abstract class AppLocalizations {
   /// No description provided for @composeChooseSelf.
   ///
   /// In en, this message translates to:
-  /// **'To myself'**
+  /// **'To myself (time letter)'**
   String get composeChooseSelf;
 
   /// No description provided for @composeChooseSelfSub.
   ///
   /// In en, this message translates to:
-  /// **'A time letter for your future self'**
+  /// **'SELF_TIME — open on a future date'**
   String get composeChooseSelfSub;
 
   /// No description provided for @composeChoosePenPal.
@@ -2765,7 +2837,7 @@ abstract class AppLocalizations {
   /// No description provided for @composeChoosePenPalSub.
   ///
   /// In en, this message translates to:
-  /// **'A thoughtful letter, slowly getting to know each other'**
+  /// **'DIRECT — send to someone you know'**
   String get composeChoosePenPalSub;
 
   /// No description provided for @composeChooseTopic.
@@ -2779,6 +2851,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start from today\'s gentle prompt'**
   String get composeChooseTopicSub;
+
+  /// No description provided for @composeChoosePostOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'To the post office'**
+  String get composeChoosePostOffice;
+
+  /// No description provided for @composeChoosePostOfficeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'POST_OFFICE — no recipient; wait for a match'**
+  String get composeChoosePostOfficeSub;
+
+  /// No description provided for @composeBodySubtitlePostOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Write freely — the post office will find a reader.'**
+  String get composeBodySubtitlePostOffice;
+
+  /// No description provided for @composePostOfficeSendHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This letter goes into the post office pool'**
+  String get composePostOfficeSendHint;
 
   /// No description provided for @composePickDestinationRequired.
   ///
@@ -2915,7 +3011,7 @@ abstract class AppLocalizations {
   /// No description provided for @composeStepMailSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Standard post is free. Registered mail uses a stamp (free for VIP).'**
+  /// **'Standard and registered mail both use delayed delivery. Registered may use a stamp for the filing mark (free for VIP).'**
   String get composeStepMailSubtitle;
 
   /// No description provided for @composeStepSealTitle.

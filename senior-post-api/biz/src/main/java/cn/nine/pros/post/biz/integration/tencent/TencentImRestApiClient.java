@@ -166,9 +166,7 @@ public class TencentImRestApiClient {
                 if (resp.statusCode() < 200 || resp.statusCode() >= 300) {
                     log.warn("Tencent IM REST HTTP {} host={} path={} bodySnippet={}",
                             resp.statusCode(), host, path, snippet(resp.body()));
-                    if (i + 1 < attempts) {
-                        sleepBackoff(i);
-                    }
+                    sleepBackoffIfMoreAttempts(i, attempts);
                     continue;
                 }
                 JsonNode root = objectMapper.readTree(resp.body());
@@ -217,6 +215,13 @@ public class TencentImRestApiClient {
             return "adminapisgp.im.qcloud.com";
         }
         return host.trim().replaceFirst("^https?://", "").replaceAll("/+$", "");
+    }
+
+    private static void sleepBackoffIfMoreAttempts(int attemptIndex, int attempts) {
+        if (attemptIndex + 1 >= attempts) {
+            return;
+        }
+        sleepBackoff(attemptIndex);
     }
 
     private static void sleepBackoff(int attemptIndex) {

@@ -56,4 +56,13 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDomain>
                 .in(TagDomain::getId, ids));
     }
 
+    @Override
+    public List<TagDomain> listActiveByLang(String langCode) {
+        return list(new LambdaQueryWrapper<TagDomain>()
+                .eq(TagDomain::isDelFlag, false)
+                .eq(TagDomain::getLangCode, langCode)
+                .orderByAsc(TagDomain::getSortOrder)
+                .orderByAsc(TagDomain::getId));
+    }
+
 }

@@ -199,9 +199,7 @@ public class DatabaseCodeMapping {
             ctx.put("client", "");
             ctx.put("biz", "");
             ctx.put("model", "");
-            if (templateInfo.getSourcePath().equals("service/DTO.java.vm")) {
-                templateInfo.setSupperPackageName("model.model.db");
-            }
+            applyStandaloneDtoPackage(templateInfo);
         }
         /********************其他附加信息*******************/
         Map<String, String> templatePackageMap =
@@ -307,5 +305,11 @@ public class DatabaseCodeMapping {
         return result;
     }
 
+    private static void applyStandaloneDtoPackage(TemplateInfo templateInfo) {
+        if (!templateInfo.getSourcePath().equals("service/DTO.java.vm")) {
+            return;
+        }
+        templateInfo.setSupperPackageName("model.model.db");
+    }
 
 }
