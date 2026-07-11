@@ -18,4 +18,7 @@ public class AdminCommerceProductQueryInDto extends AbstractDTO {
 
     @Schema(description = "商品类型过滤")
     private String productType;
+
+    @Schema(description = "状态过滤")
+    private Integer status;
 }

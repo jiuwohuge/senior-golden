@@ -1,15 +1,18 @@
 package cn.nine.pros.post.biz.service.base.impl;
 
 import cn.nine.commons.basic.context.MyRequestContextHolder;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.nine.pros.post.biz.mapper.AdminOperationMapper;
 import cn.nine.pros.post.biz.model.domain.AdminOperationDomain;
 import cn.nine.pros.post.biz.model.mapstruct.AdminOperationMapstruct;
 import cn.nine.pros.post.biz.service.base.AdminOperationService;
+import cn.nine.pros.post.biz.support.PageQueryNormalize;
 import cn.nine.pros.post.client.model.db.AdminOperationDTO;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,6 +57,38 @@ public class AdminOperationServiceImpl extends ServiceImpl<AdminOperationMapper,
         adminOperationDomain.setUpdatedAt(LocalDateTime.now());
         update(adminOperationDomain, new LambdaQueryWrapper<AdminOperationDomain>()
                 .in(AdminOperationDomain::getId, ids));
+    }
+
+    @Override
+    public void record(long adminId, String actionType, String targetType, Long targetId, String details, String ip) {
+        AdminOperationDomain row = new AdminOperationDomain();
+        row.initAudit(adminId);
+        row.setAdminId(adminId);
+        row.setActionType(actionType);
+        row.setTargetType(targetType);
+        row.setTargetId(targetId);
+        row.setDetails(details);
+        row.setIpAddress(ip);
+        save(row);
+    }
+
+    @Override
+    public Page<AdminOperationDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery,
+            Long adminId, String actionType, String targetType) {
+        LambdaQueryWrapper<AdminOperationDomain> qw = new LambdaQueryWrapper<AdminOperationDomain>()
+                .eq(AdminOperationDomain::isDelFlag, false)
+                .orderByDesc(AdminOperationDomain::getCreatedAt);
+        if (adminId != null) {
+            qw.eq(AdminOperationDomain::getAdminId, adminId);
+        }
+        if (StringUtils.hasText(actionType)) {
+            qw.eq(AdminOperationDomain::getActionType, actionType.trim());
+        }
+        if (StringUtils.hasText(targetType)) {
+            qw.eq(AdminOperationDomain::getTargetType, targetType.trim());
+        }
+        return page(PageQueryNormalize.mpPage(pageQuery, PageQueryNormalize.ADMIN_MAX_SIZE), qw);
     }
 
 }

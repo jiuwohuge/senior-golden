@@ -61,10 +61,18 @@ public interface UserService extends IService<UserDomain> {
 
     com.baomidou.mybatisplus.extension.plugins.pagination.Page<UserDomain> pageForAdmin(
             cn.nine.commons.data.page.PageQuery pageQuery,
-            String email, String nickname, Integer status, Integer avatarAuditStatus);
+            String email, String nickname, Integer status, Integer avatarAuditStatus,
+            Integer gender, String countryCode, Integer minBirthYear, Integer maxBirthYear,
+            Boolean isVip,
+            java.time.LocalDateTime createdFrom, java.time.LocalDateTime createdTo,
+            java.time.LocalDateTime lastLoginFrom, java.time.LocalDateTime lastLoginTo,
+            String sortField, String sortOrder);
 
     /** 管理端更新 status（含 audit）。 */
     void adminUpdateStatus(long userId, int status, Long auditUserId);
+
+    /** 管理端批量更新 status。 */
+    void adminBatchUpdateStatus(java.util.Collection<Long> userIds, int status, Long auditUserId);
 
     /** 管理端局部更新资料/头像。 */
     void adminUpdateProfile(long userId, Integer status, Integer birthYear, String nickname,
@@ -82,5 +90,8 @@ public interface UserService extends IService<UserDomain> {
      * 匹配候选：正常 App 用户（非后台），排除指定用户，按 id 倒序限量。
      */
     List<UserDomain> listActiveAppUsersExcluding(long excludeUserId, int limit);
+
+    /** 注册时间落在 [start, end) 的未删除用户数。 */
+    long countCreatedBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
 
 }

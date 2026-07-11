@@ -248,10 +248,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
     @Override
     public com.baomidou.mybatisplus.extension.plugins.pagination.Page<UserDomain> pageForAdmin(
             cn.nine.commons.data.page.PageQuery pageQuery,
-            String email, String nickname, Integer status, Integer avatarAuditStatus) {
+            String email, String nickname, Integer status, Integer avatarAuditStatus,
+            Integer gender, String countryCode, Integer minBirthYear, Integer maxBirthYear,
+            Boolean isVip,
+            LocalDateTime createdFrom, LocalDateTime createdTo,
+            LocalDateTime lastLoginFrom, LocalDateTime lastLoginTo,
+            String sortField, String sortOrder) {
         LambdaQueryWrapper<UserDomain> qw = new LambdaQueryWrapper<UserDomain>()
-                .eq(UserDomain::isDelFlag, false)
-                .orderByDesc(UserDomain::getCreatedAt);
+                .eq(UserDomain::isDelFlag, false);
         if (email != null && !email.isBlank()) {
             String emailLike = "%" + email.trim().toLowerCase() + "%";
             qw.apply(
@@ -269,7 +273,61 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
         if (avatarAuditStatus != null) {
             qw.eq(UserDomain::getAvatarAuditStatus, avatarAuditStatus);
         }
+        if (gender != null) {
+            qw.eq(UserDomain::getGender, gender);
+        }
+        if (countryCode != null && !countryCode.isBlank()) {
+            qw.eq(UserDomain::getCountryCode, countryCode.trim());
+        }
+        if (minBirthYear != null) {
+            qw.ge(UserDomain::getBirthYear, minBirthYear);
+        }
+        if (maxBirthYear != null) {
+            qw.le(UserDomain::getBirthYear, maxBirthYear);
+        }
+        if (isVip != null) {
+            qw.eq(UserDomain::getIsVip, isVip);
+        }
+        if (createdFrom != null) {
+            qw.ge(UserDomain::getCreatedAt, createdFrom);
+        }
+        if (createdTo != null) {
+            qw.le(UserDomain::getCreatedAt, createdTo);
+        }
+        if (lastLoginFrom != null) {
+            qw.ge(UserDomain::getLastLoginAt, lastLoginFrom);
+        }
+        if (lastLoginTo != null) {
+            qw.le(UserDomain::getLastLoginAt, lastLoginTo);
+        }
+        applyAdminSort(qw, sortField, sortOrder);
         return page(PageQueryNormalize.mpPage(pageQuery, PageQueryNormalize.ADMIN_MAX_SIZE), qw);
+    }
+
+    private static void applyAdminSort(LambdaQueryWrapper<UserDomain> qw, String sortField, String sortOrder) {
+        boolean asc = sortOrder != null && "asc".equalsIgnoreCase(sortOrder.trim());
+        String field = sortField == null ? "" : sortField.trim();
+        if ("lastLoginAt".equalsIgnoreCase(field)) {
+            if (asc) {
+                qw.orderByAsc(UserDomain::getLastLoginAt);
+            } else {
+                qw.orderByDesc(UserDomain::getLastLoginAt);
+            }
+            return;
+        }
+        if ("id".equalsIgnoreCase(field)) {
+            if (asc) {
+                qw.orderByAsc(UserDomain::getId);
+            } else {
+                qw.orderByDesc(UserDomain::getId);
+            }
+            return;
+        }
+        if (asc) {
+            qw.orderByAsc(UserDomain::getCreatedAt);
+        } else {
+            qw.orderByDesc(UserDomain::getCreatedAt);
+        }
     }
 
     @Override
@@ -277,6 +335,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
         LocalDateTime now = LocalDateTime.now();
         update(new LambdaUpdateWrapper<UserDomain>()
                 .eq(UserDomain::getId, userId)
+                .set(UserDomain::getStatus, status)
+                .set(UserDomain::getUpdatedBy, auditUserId)
+                .set(UserDomain::getUpdatedAt, now));
+    }
+
+    @Override
+    public void adminBatchUpdateStatus(java.util.Collection<Long> userIds, int status, Long auditUserId) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        update(new LambdaUpdateWrapper<UserDomain>()
+                .in(UserDomain::getId, userIds)
+                .eq(UserDomain::isDelFlag, false)
                 .set(UserDomain::getStatus, status)
                 .set(UserDomain::getUpdatedBy, auditUserId)
                 .set(UserDomain::getUpdatedAt, now));
@@ -339,6 +411,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
                 .ne(UserDomain::getId, excludeUserId)
                 .orderByDesc(UserDomain::getId)
                 .last("LIMIT " + Math.max(1, limit)));
+    }
+
+    @Override
+    public long countCreatedBetween(LocalDateTime start, LocalDateTime end) {
+        LambdaQueryWrapper<UserDomain> qw = new LambdaQueryWrapper<UserDomain>()
+                .eq(UserDomain::isDelFlag, false);
+        if (start != null) {
+            qw.ge(UserDomain::getCreatedAt, start);
+        }
+        if (end != null) {
+            qw.lt(UserDomain::getCreatedAt, end);
+        }
+        return count(qw);
     }
 
     private void enrichAuthFields(UserDTO dto) {

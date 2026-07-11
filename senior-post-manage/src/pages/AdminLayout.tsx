@@ -14,8 +14,12 @@ import LetterConfig from './config/LetterConfig'
 import CommerceProductList from './config/CommerceProductList'
 import ModerationConfig from './config/ModerationConfig'
 import TimeLetterList from './content/TimeLetterList'
+import LetterList from './content/LetterList'
 import ActionLogList from './log/ActionLogList'
 import LoginLogList from './log/LoginLogList'
+import AdminOperationLogList from './log/AdminOperationLogList'
+import OutboxList from './mail/OutboxList'
+import PenpalList from './relation/PenpalList'
 import ReportList from './report/List'
 import UserList from './user/List'
 import FeedbackList from './user/FeedbackList'
@@ -65,8 +69,23 @@ export default function AdminLayout() {
         key: 'grp-content',
         label: '内容审核',
         children: [
+          { key: '/content/letter', label: <Link to="/content/letter">普通信件</Link> },
           { key: '/content/time-letter', label: <Link to="/content/time-letter">时光信</Link> },
           { key: '/report', label: <Link to="/report">举报处理</Link> },
+        ],
+      },
+      {
+        key: 'grp-relation',
+        label: '关系运营',
+        children: [
+          { key: '/relation/penpal', label: <Link to="/relation/penpal">笔友关系</Link> },
+        ],
+      },
+      {
+        key: 'grp-mail',
+        label: '系统邮件',
+        children: [
+          { key: '/mail/outbox', label: <Link to="/mail/outbox">出站邮件</Link> },
         ],
       },
       {
@@ -91,6 +110,7 @@ export default function AdminLayout() {
         children: [
           { key: '/log/action', label: <Link to="/log/action">行为日志</Link> },
           { key: '/log/login', label: <Link to="/log/login">登录日志</Link> },
+          { key: '/log/admin-operation', label: <Link to="/log/admin-operation">管理员操作</Link> },
         ],
       },
     ],
@@ -115,7 +135,10 @@ export default function AdminLayout() {
     return matches[0] ?? '/'
   })()
 
-  const defaultOpenKeys = useMemo(() => ['grp-user', 'grp-content', 'grp-config', 'grp-log'], [])
+  const defaultOpenKeys = useMemo(
+    () => ['grp-user', 'grp-content', 'grp-relation', 'grp-mail', 'grp-config', 'grp-log'],
+    [],
+  )
 
   return (
     <Layout style={{ minHeight: '100%' }}>
@@ -193,7 +216,10 @@ export default function AdminLayout() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/user" element={<UserList />} />
             <Route path="/user/feedback" element={<FeedbackList />} />
+            <Route path="/content/letter" element={<LetterList />} />
             <Route path="/content/time-letter" element={<TimeLetterList />} />
+            <Route path="/relation/penpal" element={<PenpalList />} />
+            <Route path="/mail/outbox" element={<OutboxList />} />
             <Route path="/report" element={<ReportList />} />
             <Route path="/config/list" element={<ConfigList />} />
             <Route path="/config/country" element={<CountryList />} />
@@ -207,6 +233,7 @@ export default function AdminLayout() {
             <Route path="/config/moderation" element={<ModerationConfig />} />
             <Route path="/log/action" element={<ActionLogList />} />
             <Route path="/log/login" element={<LoginLogList />} />
+            <Route path="/log/admin-operation" element={<AdminOperationLogList />} />
           </Routes>
         </Content>
       </Layout>

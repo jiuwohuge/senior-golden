@@ -19,10 +19,32 @@ export const api = {
   approveUserAvatar: (id: number) => request.post(`/webapi/user/${id}/avatar/approve`),
   rejectUserAvatar: (id: number) => request.post(`/webapi/user/${id}/avatar/reject`),
   userStatus: (id: number, status: number) => request.post(`/webapi/user/${id}/status?status=${status}`),
+  userBatchStatus: (ids: number[], status: number) =>
+    request.post('/webapi/user/batch-status', { ids, status }),
   userVipDebug: (id: number, body: { isVip: boolean; vipExpireAt?: string | null; clearVipExpireAt?: boolean }) =>
     request.post(`/webapi/user/${id}/vip-debug`, body),
   userDevices: (userId: number) => request.get(`/webapi/user/${userId}/devices`),
   blockDevice: (body: { deviceUuid: string; reason?: string }) => request.post('/webapi/user/device/block', body),
+
+  letterAuditPaging: (params: any) => request.post('/webapi/letter-audit/paging', params),
+  letterAuditApprove: (id: number) => request.post(`/webapi/letter-audit/${id}/approve`),
+  letterAuditReject: (id: number) => request.post(`/webapi/letter-audit/${id}/reject`),
+  letterAuditBatchApprove: (ids: number[]) =>
+    request.post('/webapi/letter-audit/batch-approve', { ids }),
+  letterAuditBatchReject: (ids: number[]) =>
+    request.post('/webapi/letter-audit/batch-reject', { ids }),
+
+  mailOutboxPaging: (params: any) => request.post('/webapi/mail-outbox/paging', params),
+  mailOutboxDetail: (id: number) => request.get(`/webapi/mail-outbox/${id}`),
+  mailOutboxRetry: (id: number) => request.post(`/webapi/mail-outbox/${id}/retry`),
+
+  penpalPaging: (params: any) => request.post('/webapi/relation/penpal/paging', params),
+  penpalDissolve: (id: number) => request.post(`/webapi/relation/penpal/${id}/dissolve`),
+
+  adminOperationLogs: (params: any) => request.post('/webapi/log/admin-operation/paging', params),
+
+  commerceBatchStatus: (ids: number[], status: number) =>
+    request.post('/webapi/commerce/products/batch-status', { ids, status }),
 
   /** 私有桶看图：列表/详情已服务端换签；此接口供扩展场景批量换签 */
   ossGetSign: (body: { objectKeys: string[] }) => request.post('/webapi/oss/get-sign', body),

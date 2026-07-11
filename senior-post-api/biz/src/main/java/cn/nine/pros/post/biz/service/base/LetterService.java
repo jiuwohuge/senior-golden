@@ -92,9 +92,12 @@ public interface LetterService extends IService<LetterDomain> {
     /** 超时未审的 PENDING_REVIEW 列表（用于自动放行）。 */
     List<LetterDomain> listPendingReviewBefore(LocalDateTime createdBefore, int limit);
 
-    /** 管理端按审核状态分页。 */
+    /** 管理端按审核状态/业务状态/收发用户/关键词分页。 */
     com.baomidou.mybatisplus.extension.plugins.pagination.Page<LetterDomain> pageForAdminAudit(
-            cn.nine.commons.data.page.PageQuery pageQuery, Integer auditStatus, Integer mode);
+            cn.nine.commons.data.page.PageQuery pageQuery,
+            Integer auditStatus, Integer mode, Integer status,
+            Long fromUserId, Long toUserId, String keyword,
+            java.time.LocalDateTime createdFrom, java.time.LocalDateTime createdTo);
 
     /** 用户发出的信件总数（保护池）。 */
     long countLettersSentByUser(long userId);
@@ -123,5 +126,14 @@ public interface LetterService extends IService<LetterDomain> {
     /** 已送达信件导出：用户参与且可选笔友/日期范围。 */
     List<LetterDomain> listDeliveredForExport(
             long userId, Long peerUserId, LocalDateTime from, LocalDateTime to, int limit);
+
+    /** 创建时间落在 [start, end) 的未删除信件数。 */
+    long countCreatedBetween(LocalDateTime start, LocalDateTime end);
+
+    /** 在途信件数（MATCHED + DELIVERING）。 */
+    long countInTransit();
+
+    /** 待审信件数。 */
+    long countPendingAudit();
 
 }

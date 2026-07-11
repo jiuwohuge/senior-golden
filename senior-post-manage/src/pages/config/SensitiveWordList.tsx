@@ -1,23 +1,33 @@
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Form, Input, Modal, Popconfirm, Space, Table, message } from 'antd'
-import { useEffect, useState } from 'react'
+import { Button, Form, Input, Modal, Popconfirm, Table, message } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
 import { api } from '../../services/api'
 
 export default function SensitiveWordList() {
   const [rows, setRows] = useState<any[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
   const [loading, setLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true)
-    api.sensitiveWords({ page: { page: 1, size: 50 } })
-      .then((d: any) => setRows(d.records || []))
+    api
+      .sensitiveWords({ page: { page, size: pageSize } })
+      .then((d: any) => {
+        setRows(d.records || [])
+        setTotal(d.total ?? 0)
+      })
       .catch((e: any) => message.error(e.message))
       .finally(() => setLoading(false))
-  }
-  useEffect(() => { void load() }, [])
+  }, [page, pageSize])
+
+  useEffect(() => {
+    void load()
+  }, [load])
 
   const handleOk = async () => {
     try {
@@ -48,6 +58,17 @@ export default function SensitiveWordList() {
         loading={loading}
         dataSource={rows}
         size="middle"
+        pagination={{
+          current: page,
+          pageSize,
+          total,
+          showSizeChanger: true,
+          showTotal: (t) => `共 ${t} 条`,
+          onChange: (p, ps) => {
+            setPage(p)
+            setPageSize(ps)
+          },
+        }}
         columns={[
           { title: '敏感词', dataIndex: 'word' },
           { title: '语言', dataIndex: 'langCode', width: 120 },

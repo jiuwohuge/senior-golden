@@ -4,6 +4,7 @@ import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.biz.service.biz.admin.AdminLetterAuditBizService;
 import cn.nine.pros.post.client.api.admin.AdminLetterAuditApi;
 import cn.nine.pros.post.client.model.db.LetterDTO;
+import cn.nine.pros.post.client.model.input.admin.AdminIdListInDto;
 import cn.nine.pros.post.client.model.input.admin.LetterAuditQueryInDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,5 +28,15 @@ public class AdminLetterAuditController implements AdminLetterAuditApi {
     @Override
     public void reject(Long id) {
         adminLetterAuditBizService.reject(id);
+    }
+
+    @Override
+    public void batchApprove(AdminIdListInDto body) {
+        adminLetterAuditBizService.batchApprove(body);
+    }
+
+    @Override
+    public void batchReject(AdminIdListInDto body) {
+        adminLetterAuditBizService.batchReject(body);
     }
 }

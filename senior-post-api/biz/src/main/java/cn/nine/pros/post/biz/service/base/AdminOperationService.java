@@ -19,4 +19,16 @@ public interface AdminOperationService extends IService<AdminOperationDomain> {
 
     void delByIds(List<Long> ids);
 
+    /**
+     * 写入一条管理员操作日志。
+     */
+    void record(long adminId, String actionType, String targetType, Long targetId, String details, String ip);
+
+    /**
+     * 管理端分页查询操作日志。
+     */
+    com.baomidou.mybatisplus.extension.plugins.pagination.Page<AdminOperationDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery,
+            Long adminId, String actionType, String targetType);
+
 }

@@ -4,6 +4,7 @@ import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.db.UserDeviceDTO;
+import cn.nine.pros.post.client.model.input.admin.AdminUserBatchStatusInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserSaveInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserVipDebugInDto;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
@@ -26,6 +27,10 @@ public interface AdminUserApi {
     @Operation(summary = "设置用户状态")
     @PostMapping("/{id}/status")
     void updateStatus(@PathVariable("id") Long id, @RequestParam("status") Integer status);
+
+    @Operation(summary = "批量设置用户状态")
+    @PostMapping("/batch-status")
+    void batchStatus(@RequestBody @Valid AdminUserBatchStatusInDto body);
 
     @Operation(summary = "编辑用户")
     @PostMapping("/save")

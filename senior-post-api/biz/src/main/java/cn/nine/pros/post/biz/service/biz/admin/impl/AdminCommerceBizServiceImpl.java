@@ -11,8 +11,10 @@ import cn.nine.pros.post.biz.service.base.CommerceProductService;
 import cn.nine.pros.post.biz.service.base.UserEntitlementService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.biz.admin.AdminCommerceBizService;
+import cn.nine.pros.post.biz.service.biz.admin.support.AdminOperationRecorder;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.admin.AdminCommerceGrantInDto;
+import cn.nine.pros.post.client.model.input.admin.AdminCommerceProductBatchStatusInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminCommerceProductQueryInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminCommerceProductSaveInDto;
 import cn.nine.pros.post.client.model.out.CommerceEntitlementVO;
@@ -36,11 +38,13 @@ public class AdminCommerceBizServiceImpl implements AdminCommerceBizService {
     private final CommerceProductService commerceProductService;
     private final UserEntitlementService userEntitlementService;
     private final UserService userService;
+    private final AdminOperationRecorder adminOperationRecorder;
 
     @Override
     public PageData<CommerceProductVO> pagingProducts(AdminCommerceProductQueryInDto body) {
         PageQuery pageQuery = AdminPageHelper.normalize(body.getPage());
-        Page<CommerceProductDomain> page = commerceProductService.pageForAdmin(pageQuery, body.getProductType());
+        Page<CommerceProductDomain> page = commerceProductService.pageForAdmin(
+                pageQuery, body.getProductType(), body.getStatus());
         List<CommerceProductVO> records = page.getRecords().stream()
                 .map(p -> CommerceProductVO.builder()
                         .id(p.getId())
@@ -69,6 +73,8 @@ public class AdminCommerceBizServiceImpl implements AdminCommerceBizService {
         row.setSortOrder(body.getSortOrder());
         row.setStatus(body.getStatus());
         CommerceProductDomain saved = commerceProductService.upsertFromAdmin(row, MyRequestContextHolder.userId());
+        adminOperationRecorder.record("commerce.product_save", "commerce_product", saved.getId(),
+                "code=" + saved.getProductCode());
         log.info("commerce product saved, productId={}, code={}", saved.getId(), saved.getProductCode());
         return CommerceProductVO.builder()
                 .id(saved.getId())
@@ -80,6 +86,17 @@ public class AdminCommerceBizServiceImpl implements AdminCommerceBizService {
                 .sortOrder(saved.getSortOrder())
                 .status(saved.getStatus())
                 .build();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchProductStatus(AdminCommerceProductBatchStatusInDto body) {
+        commerceProductService.batchUpdateStatus(body.getIds(), body.getStatus(), MyRequestContextHolder.userId());
+        for (Long id : body.getIds()) {
+            adminOperationRecorder.record("commerce.product_batch_status", "commerce_product", id,
+                    "status=" + body.getStatus());
+        }
+        log.info("commerce product batch status, count={}, status={}", body.getIds().size(), body.getStatus());
     }
 
     @Override

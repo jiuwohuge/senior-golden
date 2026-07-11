@@ -4,8 +4,10 @@ import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.biz.service.biz.admin.AdminLogBizService;
 import cn.nine.pros.post.client.api.admin.AdminLogApi;
 import cn.nine.pros.post.client.model.db.ActionDTO;
+import cn.nine.pros.post.client.model.db.AdminOperationDTO;
 import cn.nine.pros.post.client.model.db.LoginDTO;
 import cn.nine.pros.post.client.model.input.admin.ActionLogQueryInDto;
+import cn.nine.pros.post.client.model.input.admin.AdminOperationQueryInDto;
 import cn.nine.pros.post.client.model.input.admin.LoginLogQueryInDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,5 +26,10 @@ public class AdminLogController implements AdminLogApi {
     @Override
     public PageData<LoginDTO> pagingLogins(LoginLogQueryInDto body) {
         return adminLogBizService.pagingLogins(body);
+    }
+
+    @Override
+    public PageData<AdminOperationDTO> pagingAdminOperations(AdminOperationQueryInDto body) {
+        return adminLogBizService.pagingAdminOperations(body);
     }
 }

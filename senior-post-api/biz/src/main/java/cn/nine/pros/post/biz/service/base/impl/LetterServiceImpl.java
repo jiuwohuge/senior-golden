@@ -285,7 +285,10 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
 
     @Override
     public com.baomidou.mybatisplus.extension.plugins.pagination.Page<LetterDomain> pageForAdminAudit(
-            cn.nine.commons.data.page.PageQuery pageQuery, Integer auditStatus, Integer mode) {
+            cn.nine.commons.data.page.PageQuery pageQuery,
+            Integer auditStatus, Integer mode, Integer status,
+            Long fromUserId, Long toUserId, String keyword,
+            LocalDateTime createdFrom, LocalDateTime createdTo) {
         long page = pageQuery.getPage() == null || pageQuery.getPage() < 1 ? 1L : pageQuery.getPage();
         long size = pageQuery.getSize() == null || pageQuery.getSize() < 1 ? 20L : pageQuery.getSize();
         LambdaQueryWrapper<LetterDomain> qw = new LambdaQueryWrapper<LetterDomain>()
@@ -296,6 +299,24 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
         }
         if (mode != null) {
             qw.eq(LetterDomain::getMode, mode);
+        }
+        if (status != null) {
+            qw.eq(LetterDomain::getStatus, status);
+        }
+        if (fromUserId != null) {
+            qw.eq(LetterDomain::getFromUserId, fromUserId);
+        }
+        if (toUserId != null) {
+            qw.eq(LetterDomain::getToUserId, toUserId);
+        }
+        if (keyword != null && !keyword.isBlank()) {
+            qw.like(LetterDomain::getContent, keyword.trim());
+        }
+        if (createdFrom != null) {
+            qw.ge(LetterDomain::getCreatedAt, createdFrom);
+        }
+        if (createdTo != null) {
+            qw.le(LetterDomain::getCreatedAt, createdTo);
         }
         return page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(page, size), qw);
     }
@@ -422,6 +443,35 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
             qw.le(LetterDomain::getCreatedAt, to);
         }
         return list(qw);
+    }
+
+    @Override
+    public long countCreatedBetween(LocalDateTime start, LocalDateTime end) {
+        LambdaQueryWrapper<LetterDomain> qw = new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false);
+        if (start != null) {
+            qw.ge(LetterDomain::getCreatedAt, start);
+        }
+        if (end != null) {
+            qw.lt(LetterDomain::getCreatedAt, end);
+        }
+        return count(qw);
+    }
+
+    @Override
+    public long countInTransit() {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .in(LetterDomain::getStatus,
+                        LetterBizStatus.DELIVERING.getCode(),
+                        LetterBizStatus.MATCHED.getCode()));
+    }
+
+    @Override
+    public long countPendingAudit() {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getAuditStatus, LetterAuditStatus.PENDING_REVIEW.getCode()));
     }
 
     private static LambdaQueryWrapper<LetterDomain> exchangeWrapper(long userIdA, long userIdB) {

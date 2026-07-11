@@ -14,7 +14,10 @@ public interface CommerceProductService extends IService<CommerceProductDomain> 
     List<CommerceProductDomain> listAllActive();
 
     com.baomidou.mybatisplus.extension.plugins.pagination.Page<CommerceProductDomain> pageForAdmin(
-            cn.nine.commons.data.page.PageQuery pageQuery, String productType);
+            cn.nine.commons.data.page.PageQuery pageQuery, String productType, Integer status);
 
     CommerceProductDomain upsertFromAdmin(CommerceProductDomain row, Long actorId);
+
+    /** 批量更新商品状态。 */
+    void batchUpdateStatus(java.util.Collection<Long> ids, int status, Long actorId);
 }

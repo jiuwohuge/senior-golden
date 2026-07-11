@@ -6,8 +6,11 @@ import cn.nine.pros.post.biz.model.domain.MailOutboxDomain;
 import cn.nine.pros.post.biz.service.base.MailOutboxService;
 import cn.nine.pros.post.biz.service.biz.PasswordResetMailNotifier;
 import cn.nine.pros.post.biz.service.biz.mail.MailOutboxTypes;
+import cn.nine.pros.post.biz.support.PageQueryNormalize;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -105,5 +108,64 @@ public class MailOutboxServiceImpl extends ServiceImpl<MailOutboxMapper, MailOut
             row.setUpdatedAt(now);
             updateById(row);
         }
+    }
+
+    @Override
+    public Page<MailOutboxDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery,
+            String toEmail, String mailType, String status,
+            LocalDateTime createdFrom, LocalDateTime createdTo, String keyword) {
+        LambdaQueryWrapper<MailOutboxDomain> qw = new LambdaQueryWrapper<MailOutboxDomain>()
+                .orderByDesc(MailOutboxDomain::getCreatedAt);
+        if (StringUtils.hasText(toEmail)) {
+            qw.like(MailOutboxDomain::getToEmail, toEmail.trim());
+        }
+        if (StringUtils.hasText(mailType)) {
+            qw.eq(MailOutboxDomain::getMailType, mailType.trim());
+        }
+        if (StringUtils.hasText(status)) {
+            qw.eq(MailOutboxDomain::getStatus, status.trim());
+        }
+        if (createdFrom != null) {
+            qw.ge(MailOutboxDomain::getCreatedAt, createdFrom);
+        }
+        if (createdTo != null) {
+            qw.le(MailOutboxDomain::getCreatedAt, createdTo);
+        }
+        if (StringUtils.hasText(keyword)) {
+            String kw = keyword.trim();
+            qw.and(w -> w.like(MailOutboxDomain::getToEmail, kw)
+                    .or()
+                    .like(MailOutboxDomain::getPayloadJson, kw));
+        }
+        return page(PageQueryNormalize.mpPage(pageQuery, PageQueryNormalize.ADMIN_MAX_SIZE), qw);
+    }
+
+    @Override
+    public MailOutboxDomain findById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        return getById(id);
+    }
+
+    @Override
+    public boolean retryFailed(long id) {
+        LocalDateTime now = LocalDateTime.now();
+        return update(new LambdaUpdateWrapper<MailOutboxDomain>()
+                .eq(MailOutboxDomain::getId, id)
+                .set(MailOutboxDomain::getStatus, "pending")
+                .set(MailOutboxDomain::getLastError, null)
+                .set(MailOutboxDomain::getNextRetryAt, now)
+                .set(MailOutboxDomain::getUpdatedAt, now));
+    }
+
+    @Override
+    public long countByStatus(String status) {
+        if (!StringUtils.hasText(status)) {
+            return 0;
+        }
+        return count(new LambdaQueryWrapper<MailOutboxDomain>()
+                .eq(MailOutboxDomain::getStatus, status.trim()));
     }
 }

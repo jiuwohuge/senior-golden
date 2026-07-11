@@ -8,9 +8,11 @@ import cn.nine.pros.post.biz.controller.admin.AdminPageHelper;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.model.mapstruct.LetterMapstruct;
 import cn.nine.pros.post.biz.service.base.LetterService;
+import cn.nine.pros.post.biz.service.biz.admin.support.AdminOperationRecorder;
 import cn.nine.pros.post.biz.service.push.PushNotificationService;
 import cn.nine.pros.post.client.common.enums.LetterBizStatus;
 import cn.nine.pros.post.client.model.db.LetterDTO;
+import cn.nine.pros.post.client.model.input.admin.AdminIdListInDto;
 import cn.nine.pros.post.client.model.input.admin.LetterAuditQueryInDto;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
@@ -34,14 +36,18 @@ public class AdminLetterAuditBizService {
     private final LetterService letterService;
     private final LetterMapstruct letterMapstruct;
     private final PushNotificationService pushNotificationService;
+    private final AdminOperationRecorder adminOperationRecorder;
 
     /**
-     * 按审核状态/模式分页。
+     * 按审核状态/业务状态/收发用户/关键词分页。
      */
     public PageData<LetterDTO> paging(LetterAuditQueryInDto body) {
         PageQuery pageQuery = AdminPageHelper.normalize(body.getPage());
         Page<LetterDomain> p = letterService.pageForAdminAudit(
-                pageQuery, body.getAuditStatus(), body.getMode());
+                pageQuery,
+                body.getAuditStatus(), body.getMode(), body.getStatus(),
+                body.getFromUserId(), body.getToUserId(), body.getKeyword(),
+                body.getCreatedFrom(), body.getCreatedTo());
         List<LetterDTO> list = p.getRecords().stream().map(letterMapstruct::toDTO).collect(Collectors.toList());
         return AdminPageHelper.pageData(pageQuery, p, list);
     }
@@ -58,6 +64,7 @@ public class AdminLetterAuditBizService {
         if (!letterService.approveAudit(id, now, MyRequestContextHolder.userId())) {
             throw new BusinessException("letter not found or already rejected");
         }
+        adminOperationRecorder.record("letter.approve", "letter", id, null);
         log.info("letter audit approved, letterId={}, adminId={}", id, MyRequestContextHolder.userId());
     }
 
@@ -79,9 +86,32 @@ public class AdminLetterAuditBizService {
                 || Objects.equals(row.getStatus(), LetterBizStatus.MATCHED.getCode())) {
             letterService.abortDeliveryRejected(id, now);
         }
+        adminOperationRecorder.record("letter.reject", "letter", id, null);
         log.info("letter audit rejected, letterId={}, adminId={}", id, MyRequestContextHolder.userId());
         if (row.getFromUserId() != null) {
             pushNotificationService.notifyAuditRejected(row.getFromUserId(), id);
         }
+    }
+
+    /**
+     * 批量审核通过。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void batchApprove(AdminIdListInDto body) {
+        for (Long id : body.getIds()) {
+            approve(id);
+        }
+        log.info("letter batch approve, count={}", body.getIds().size());
+    }
+
+    /**
+     * 批量审核拒绝。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void batchReject(AdminIdListInDto body) {
+        for (Long id : body.getIds()) {
+            reject(id);
+        }
+        log.info("letter batch reject, count={}", body.getIds().size());
     }
 }

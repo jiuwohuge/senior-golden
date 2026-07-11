@@ -5,12 +5,14 @@ import cn.nine.pros.post.biz.model.domain.CommerceProductDomain;
 import cn.nine.pros.post.biz.service.base.CommerceProductService;
 import cn.nine.pros.post.biz.support.PageQueryNormalize;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -58,7 +60,7 @@ public class CommerceProductServiceImpl extends ServiceImpl<CommerceProductMappe
 
     @Override
     public Page<CommerceProductDomain> pageForAdmin(
-            cn.nine.commons.data.page.PageQuery pageQuery, String productType) {
+            cn.nine.commons.data.page.PageQuery pageQuery, String productType, Integer status) {
         LambdaQueryWrapper<CommerceProductDomain> qw = new LambdaQueryWrapper<CommerceProductDomain>()
                 .eq(CommerceProductDomain::isDelFlag, false)
                 .orderByAsc(CommerceProductDomain::getProductType)
@@ -66,6 +68,9 @@ public class CommerceProductServiceImpl extends ServiceImpl<CommerceProductMappe
                 .orderByAsc(CommerceProductDomain::getId);
         if (StringUtils.hasText(productType)) {
             qw.eq(CommerceProductDomain::getProductType, productType.trim());
+        }
+        if (status != null) {
+            qw.eq(CommerceProductDomain::getStatus, status);
         }
         return page(PageQueryNormalize.mpPage(pageQuery, PageQueryNormalize.ADMIN_MAX_SIZE), qw);
     }
@@ -95,5 +100,19 @@ public class CommerceProductServiceImpl extends ServiceImpl<CommerceProductMappe
         row.setUpdatedBy(auditUserId);
         updateById(row);
         return row;
+    }
+
+    @Override
+    public void batchUpdateStatus(Collection<Long> ids, int status, Long actorId) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        update(new LambdaUpdateWrapper<CommerceProductDomain>()
+                .in(CommerceProductDomain::getId, ids)
+                .eq(CommerceProductDomain::isDelFlag, false)
+                .set(CommerceProductDomain::getStatus, status)
+                .set(CommerceProductDomain::getUpdatedBy, actorId)
+                .set(CommerceProductDomain::getUpdatedAt, now));
     }
 }

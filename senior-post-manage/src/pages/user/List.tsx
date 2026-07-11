@@ -1,9 +1,12 @@
 import {
   Avatar,
   Button,
+  Col,
+  DatePicker,
   Form,
   Image,
   Input,
+  InputNumber,
   Modal,
   Popconfirm,
   Select,
@@ -17,11 +20,19 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { DeleteOutlined, LoadingOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons'
+import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import AdminProTable from '../../components/admin/AdminProTable'
+import EnumSelect, {
+  AVATAR_AUDIT_OPTIONS,
+  GENDER_OPTIONS,
+  USER_STATUS_OPTIONS,
+} from '../../components/admin/EnumSelect'
 import { api } from '../../services/api'
 import { signObjectKeysForPreview, uploadAdminUserAvatar } from '../../services/ossUpload'
 
 const { Text } = Typography
+const { RangePicker } = DatePicker
 
 type UserRow = {
   id: number
@@ -31,10 +42,13 @@ type UserRow = {
   avatarAuditStatus?: number
   staffRole?: number
   status?: number
+  gender?: number
   isVip?: boolean
   birthYear?: number
   countryCode?: string
   bio?: string
+  createdAt?: string
+  lastLoginAt?: string
 }
 
 const AVATAR_AUDIT_LABEL: Record<number, { label: string; color: string }> = {
@@ -47,28 +61,47 @@ function isStaff(row: UserRow) {
   return row.staffRole != null && row.staffRole !== 0
 }
 
+function rangeToIso(range: unknown): { from?: string; to?: string } {
+  if (!Array.isArray(range) || range.length !== 2 || !range[0] || !range[1]) return {}
+  return {
+    from: dayjs(range[0]).startOf('day').format('YYYY-MM-DDTHH:mm:ss'),
+    to: dayjs(range[1]).endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
+  }
+}
+
 async function signAvatarKeys(rows: UserRow[]): Promise<Record<number, string>> {
   const withKey = rows.filter((r) => r.avatarUrl?.trim())
   if (!withKey.length) return {}
   const keys = withKey.map((r) => r.avatarUrl!.trim())
-  const res: any = await api.ossGetSign({ objectKeys: keys })
-  const items: { objectKey?: string; signedUrl?: string }[] = res?.items ?? []
-  const byKey = new Map<string, string>()
-  for (const it of items) {
-    if (it.objectKey && it.signedUrl) byKey.set(it.objectKey, it.signedUrl)
+  try {
+    const res: any = await api.ossGetSign({ objectKeys: keys })
+    const items: { objectKey?: string; signedUrl?: string }[] = res?.items ?? []
+    const byKey = new Map<string, string>()
+    for (const it of items) {
+      if (it.objectKey && it.signedUrl) byKey.set(it.objectKey, it.signedUrl)
+    }
+    const out: Record<number, string> = {}
+    for (const r of withKey) {
+      const url = byKey.get(r.avatarUrl!.trim())
+      if (url) out[r.id] = url
+    }
+    return out
+  } catch (e: any) {
+    console.warn('ossGetSign failed', e?.message)
+    return {}
   }
-  const out: Record<number, string> = {}
-  for (const r of withKey) {
-    const url = byKey.get(r.avatarUrl!.trim())
-    if (url) out[r.id] = url
-  }
-  return out
 }
 
+/** 用户运营列表：多维筛选、分页、批量封禁/解封、资料编辑与头像审核。 */
 export default function UserList() {
   const [rows, setRows] = useState<UserRow[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  const [loading, setLoading] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<number[]>([])
   const [signedAvatars, setSignedAvatars] = useState<Record<number, string>>({})
-  const [avatarAuditFilter, setAvatarAuditFilter] = useState<number | undefined>(undefined)
+  const [countryOptions, setCountryOptions] = useState<{ value: string; label: string }[]>([])
   const [userModalOpen, setUserModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<UserRow | null>(null)
   const [editAvatarPreview, setEditAvatarPreview] = useState<string | null>(null)
@@ -80,26 +113,69 @@ export default function UserList() {
   const [devicesLoading, setDevicesLoading] = useState(false)
   const [manualUuid, setManualUuid] = useState('')
   const [manualReason, setManualReason] = useState('')
+  const [filterForm] = Form.useForm()
   const [userForm] = Form.useForm()
 
-  const load = useCallback(async () => {
-    try {
-      const d: any = await api.users({
-        page: { page: 1, size: 50 },
-        avatarAuditStatus: avatarAuditFilter,
+  useEffect(() => {
+    api
+      .countries({ page: { page: 1, size: 500 } })
+      .then((d: any) => {
+        const list = d.records || []
+        setCountryOptions(
+          list.map((c: any) => ({
+            value: c.countryCode,
+            label: `${c.countryNameZh || c.countryNameEn || c.countryCode} (${c.countryCode})`,
+          })),
+        )
       })
-      const list: UserRow[] = d.records || []
-      setRows(list)
-      const signed = await signAvatarKeys(list)
-      setSignedAvatars(signed)
-    } catch (e: any) {
-      message.error(e.message)
-    }
-  }, [avatarAuditFilter])
+      .catch((e: any) => console.warn('load countries failed', e?.message))
+  }, [])
+
+  const load = useCallback(
+    async (p = page, ps = pageSize) => {
+      setLoading(true)
+      try {
+        const f = filterForm.getFieldsValue()
+        const created = rangeToIso(f.createdRange)
+        const lastLogin = rangeToIso(f.lastLoginRange)
+        const d: any = await api.users({
+          page: { page: p, size: ps },
+          email: f.email?.trim() || undefined,
+          nickname: f.nickname?.trim() || undefined,
+          status: f.status,
+          gender: f.gender,
+          countryCode: f.countryCode || undefined,
+          minBirthYear: f.minBirthYear,
+          maxBirthYear: f.maxBirthYear,
+          isVip: f.isVip,
+          avatarAuditStatus: f.avatarAuditStatus,
+          createdFrom: created.from,
+          createdTo: created.to,
+          lastLoginFrom: lastLogin.from,
+          lastLoginTo: lastLogin.to,
+        })
+        const list: UserRow[] = d.records || []
+        setRows(list)
+        setTotal(Number(d.total) || 0)
+        setPage(Number(d.page) || p)
+        setPageSize(Number(d.size) || ps)
+        setSelectedIds([])
+        const signed = await signAvatarKeys(list)
+        setSignedAvatars(signed)
+      } catch (e: any) {
+        console.error('users paging failed', e?.message)
+        message.error(e.message || '加载失败')
+      } finally {
+        setLoading(false)
+      }
+    },
+    [filterForm, page, pageSize],
+  )
 
   useEffect(() => {
-    void load()
-  }, [load])
+    void load(1, pageSize)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const openDeviceModal = (user: UserRow) => {
     setDeviceUser(user)
@@ -135,6 +211,7 @@ export default function UserList() {
           .finally(() => setDevicesLoading(false))
       }
     } catch (e: any) {
+      console.error('blockDevice failed', e?.message)
       message.error(e.message)
     }
   }
@@ -157,6 +234,7 @@ export default function UserList() {
       setEditAvatarPreview(preview)
       message.success('头像已上传至 OSS，点击保存写入用户资料')
     } catch (e: any) {
+      console.error('avatar upload failed', e?.message)
       message.error(e.message || '头像上传失败')
     } finally {
       setAvatarUploading(false)
@@ -176,10 +254,11 @@ export default function UserList() {
       email: user.email,
       nickname: user.nickname ?? '',
       birthYear: user.birthYear ?? undefined,
-      countryCode: user.countryCode ?? '',
+      countryCode: user.countryCode ?? undefined,
       bio: user.bio ?? '',
       status: Number(user.status ?? 1),
       avatarUrl: user.avatarUrl ?? '',
+      isVip: !!user.isVip,
     })
     setUserModalOpen(true)
   }
@@ -188,6 +267,7 @@ export default function UserList() {
     try {
       const v = await userForm.validateFields()
       setSavingUser(true)
+      // AdminUserSaveInDto 无 gender 字段，编辑侧不提交性别
       const body: {
         id: number
         nickname?: string
@@ -224,9 +304,25 @@ export default function UserList() {
       void load()
     } catch (e: any) {
       if (e?.errorFields) return
+      console.error('saveUser failed', e?.message)
       message.error(e.message || '保存失败')
     } finally {
       setSavingUser(false)
+    }
+  }
+
+  const batchStatus = async (status: number) => {
+    if (!selectedIds.length) {
+      message.warning('请先勾选用户')
+      return
+    }
+    try {
+      await api.userBatchStatus(selectedIds, status)
+      message.success(status === 2 ? '已批量封禁' : '已批量解封')
+      void load()
+    } catch (e: any) {
+      console.error('userBatchStatus failed', e?.message)
+      message.error(e.message || '批量操作失败')
     }
   }
 
@@ -257,8 +353,25 @@ export default function UserList() {
           )
         },
       },
-      { title: 'Email', dataIndex: 'email', ellipsis: true },
-      { title: 'Nickname', dataIndex: 'nickname', width: 120 },
+      { title: '邮箱', dataIndex: 'email', ellipsis: true },
+      { title: '昵称', dataIndex: 'nickname', width: 120 },
+      { title: '国家', dataIndex: 'countryCode', width: 72 },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        width: 80,
+        render: (v: number) => {
+          const opt = USER_STATUS_OPTIONS.find((o) => o.value === v)
+          const color = v === 1 ? 'green' : v === 2 ? 'red' : 'default'
+          return <Tag color={color}>{opt?.label ?? v}</Tag>
+        },
+      },
+      {
+        title: 'VIP',
+        dataIndex: 'isVip',
+        width: 56,
+        render: (v: boolean | undefined) => (v ? <Tag color="gold">VIP</Tag> : null),
+      },
       {
         title: '管理后台',
         dataIndex: 'staffRole',
@@ -266,17 +379,10 @@ export default function UserList() {
         render: (v: number | null | undefined) =>
           v != null && v !== 0 ? <Tag color="blue">管理员</Tag> : <Text type="secondary">否</Text>,
       },
-      { title: 'Status', dataIndex: 'status', width: 72 },
-      {
-        title: 'VIP',
-        dataIndex: 'isVip',
-        width: 56,
-        render: (v: boolean | undefined) => (v ? <Tag color="purple">VIP</Tag> : null),
-      },
       {
         title: '操作',
         fixed: 'right',
-        width: 280,
+        width: 300,
         render: (_, r) => {
           const hasAvatar = !!r.avatarUrl?.trim()
           const audit = r.avatarAuditStatus ?? (hasAvatar ? 1 : 0)
@@ -291,9 +397,13 @@ export default function UserList() {
                   type="primary"
                   disabled={!hasAvatar || audit === 1}
                   onClick={async () => {
-                    await api.approveUserAvatar(r.id)
-                    message.success('头像已通过')
-                    void load()
+                    try {
+                      await api.approveUserAvatar(r.id)
+                      message.success('头像已通过')
+                      void load()
+                    } catch (e: any) {
+                      message.error(e.message)
+                    }
                   }}
                 >
                   头像通过
@@ -305,9 +415,13 @@ export default function UserList() {
                   danger
                   disabled={!hasAvatar || audit === 2}
                   onClick={async () => {
-                    await api.rejectUserAvatar(r.id)
-                    message.success('头像已驳回')
-                    void load()
+                    try {
+                      await api.rejectUserAvatar(r.id)
+                      message.success('头像已驳回')
+                      void load()
+                    } catch (e: any) {
+                      message.error(e.message)
+                    }
                   }}
                 >
                   头像驳回
@@ -327,9 +441,13 @@ export default function UserList() {
                   title="确认删除该用户？"
                   description="删除后该账号将被软删除，不可登录。"
                   onConfirm={async () => {
-                    await api.deleteUser(r.id)
-                    message.success('用户已删除')
-                    void load()
+                    try {
+                      await api.deleteUser(r.id)
+                      message.success('用户已删除')
+                      void load()
+                    } catch (e: any) {
+                      message.error(e.message)
+                    }
                   }}
                   okButtonProps={{ danger: true }}
                 >
@@ -343,35 +461,109 @@ export default function UserList() {
         },
       },
     ],
-    [signedAvatars],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [signedAvatars, load],
+  )
+
+  const filterItems = (
+    <>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="email" label="邮箱">
+          <Input allowClear placeholder="模糊搜索" />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="nickname" label="昵称">
+          <Input allowClear placeholder="模糊搜索" />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="status" label="状态">
+          <EnumSelect options={USER_STATUS_OPTIONS} placeholder="全部" />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="gender" label="性别">
+          <EnumSelect options={GENDER_OPTIONS} placeholder="全部" />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="countryCode" label="国家">
+          <EnumSelect options={countryOptions} placeholder="全部" />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="minBirthYear" label="出生年起">
+          <InputNumber style={{ width: '100%' }} placeholder="如 1950" />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="maxBirthYear" label="出生年止">
+          <InputNumber style={{ width: '100%' }} placeholder="如 1990" />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="isVip" label="VIP">
+          <Select
+            allowClear
+            placeholder="全部"
+            options={[
+              { value: true, label: '是' },
+              { value: false, label: '否' },
+            ]}
+          />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="avatarAuditStatus" label="头像审核">
+          <EnumSelect options={AVATAR_AUDIT_OPTIONS} placeholder="全部" />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="createdRange" label="注册时间">
+          <RangePicker style={{ width: '100%' }} />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12} md={8} lg={6}>
+        <Form.Item name="lastLoginRange" label="最后登录">
+          <RangePicker style={{ width: '100%' }} />
+        </Form.Item>
+      </Col>
+    </>
   )
 
   return (
-    <div style={{ padding: 16 }}>
-      <Space style={{ marginBottom: 14 }} wrap>
-        <Text strong style={{ color: '#3d4f3a' }}>
-          头像审核
-        </Text>
-        <Select
-          style={{ width: 160 }}
-          value={avatarAuditFilter === undefined ? 'all' : String(avatarAuditFilter)}
-          options={[
-            { value: 'all', label: '全部' },
-            { value: '0', label: '待审核' },
-            { value: '1', label: '已通过' },
-            { value: '2', label: '已驳回' },
-          ]}
-          onChange={(v) => setAvatarAuditFilter(v === 'all' ? undefined : Number(v))}
-        />
-        <Button onClick={() => void load()}>刷新</Button>
-      </Space>
-
-      <Table<UserRow>
-        rowKey="id"
-        dataSource={rows}
+    <div>
+      <div className="page-header">
+        <h2 className="page-title">用户列表</h2>
+      </div>
+      <AdminProTable<UserRow>
+        filterForm={filterForm}
+        filterItems={filterItems}
+        onSearch={() => void load(1, pageSize)}
+        toolbar={
+          <Space wrap>
+            <Button danger disabled={!selectedIds.length} onClick={() => void batchStatus(2)}>
+              批量封禁
+            </Button>
+            <Button disabled={!selectedIds.length} onClick={() => void batchStatus(1)}>
+              批量解封
+            </Button>
+            <Button onClick={() => void load()}>刷新</Button>
+          </Space>
+        }
         columns={columns}
-        scroll={{ x: 1100 }}
-        pagination={false}
+        dataSource={rows}
+        loading={loading}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={(p, ps) => void load(p, ps)}
+        rowSelection={{
+          selectedRowKeys: selectedIds,
+          onChange: (keys) => setSelectedIds(keys.map(Number)),
+        }}
+        scrollX={1200}
       />
 
       <Modal
@@ -511,30 +703,59 @@ export default function UserList() {
               </Space>
             </div>
           </Form.Item>
-          <Form.Item
-            label="昵称"
-            name="nickname"
-            rules={[{ required: true, message: '请输入昵称' }]}
-          >
+          <Form.Item label="昵称" name="nickname" rules={[{ required: true, message: '请输入昵称' }]}>
             <Input maxLength={32} />
           </Form.Item>
           <Form.Item label="出生年份" name="birthYear">
-            <Input type="number" placeholder="例如 1980" />
+            <InputNumber style={{ width: '100%' }} placeholder="例如 1980" />
           </Form.Item>
-          <Form.Item label="国家代码" name="countryCode">
-            <Input maxLength={2} placeholder="CN / US / JP" />
+          <Form.Item label="国家" name="countryCode">
+            <EnumSelect options={countryOptions} placeholder="选择国家" />
           </Form.Item>
           <Form.Item label="个人简介" name="bio">
             <Input.TextArea maxLength={300} rows={3} />
           </Form.Item>
           <Form.Item label="状态" name="status">
-            <Select
-              options={[
-                { label: '正常', value: 1 },
-                { label: '封禁', value: 2 },
-                { label: '注销', value: 3 },
-              ]}
-            />
+            <EnumSelect options={USER_STATUS_OPTIONS} allowClear={false} />
+          </Form.Item>
+          <Form.Item label="VIP 调试">
+            <Space wrap>
+              <Button
+                size="small"
+                type="primary"
+                onClick={async () => {
+                  if (!editingUser) return
+                  try {
+                    await api.userVipDebug(editingUser.id, {
+                      isVip: true,
+                      vipExpireAt: dayjs().add(30, 'day').toISOString(),
+                    })
+                    message.success('已开通 VIP（30 天）')
+                    void load()
+                  } catch (e: any) {
+                    message.error(e.message)
+                  }
+                }}
+              >
+                开通 VIP 30 天
+              </Button>
+              <Button
+                size="small"
+                danger
+                onClick={async () => {
+                  if (!editingUser) return
+                  try {
+                    await api.userVipDebug(editingUser.id, { isVip: false, clearVipExpireAt: true })
+                    message.success('已清除 VIP')
+                    void load()
+                  } catch (e: any) {
+                    message.error(e.message)
+                  }
+                }}
+              >
+                清除 VIP
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
       </Modal>

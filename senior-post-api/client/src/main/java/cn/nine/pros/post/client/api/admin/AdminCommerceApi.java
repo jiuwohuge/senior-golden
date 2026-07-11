@@ -3,6 +3,7 @@ package cn.nine.pros.post.client.api.admin;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.input.admin.AdminCommerceGrantInDto;
+import cn.nine.pros.post.client.model.input.admin.AdminCommerceProductBatchStatusInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminCommerceProductQueryInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminCommerceProductSaveInDto;
 import cn.nine.pros.post.client.model.out.CommerceEntitlementVO;
@@ -25,6 +26,10 @@ public interface AdminCommerceApi {
     @Operation(summary = "保存商品")
     @PostMapping("/products/save")
     CommerceProductVO saveProduct(@RequestBody @Valid AdminCommerceProductSaveInDto body);
+
+    @Operation(summary = "商品批量改状态")
+    @PostMapping("/products/batch-status")
+    void batchProductStatus(@RequestBody @Valid AdminCommerceProductBatchStatusInDto body);
 
     @Operation(summary = "手动发放权益")
     @PostMapping("/grant")

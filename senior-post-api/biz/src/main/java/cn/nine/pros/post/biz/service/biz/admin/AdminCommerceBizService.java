@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.biz.admin;
 
 import cn.nine.commons.data.page.PageData;
 import cn.nine.pros.post.client.model.input.admin.AdminCommerceGrantInDto;
+import cn.nine.pros.post.client.model.input.admin.AdminCommerceProductBatchStatusInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminCommerceProductQueryInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminCommerceProductSaveInDto;
 import cn.nine.pros.post.client.model.out.CommerceEntitlementVO;
@@ -12,6 +13,8 @@ public interface AdminCommerceBizService {
     PageData<CommerceProductVO> pagingProducts(AdminCommerceProductQueryInDto body);
 
     CommerceProductVO saveProduct(AdminCommerceProductSaveInDto body);
+
+    void batchProductStatus(AdminCommerceProductBatchStatusInDto body);
 
     CommerceEntitlementVO grant(AdminCommerceGrantInDto body);
 }

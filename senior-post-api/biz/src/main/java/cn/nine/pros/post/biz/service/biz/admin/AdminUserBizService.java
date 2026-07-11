@@ -13,17 +13,21 @@ import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.base.UserIdentityService;
 import cn.nine.pros.post.biz.service.base.UserService;
+import cn.nine.pros.post.biz.service.biz.admin.support.AdminOperationRecorder;
 import cn.nine.pros.post.biz.service.biz.support.OssReadableKeyValidator;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.db.UserDeviceDTO;
+import cn.nine.pros.post.client.model.input.admin.AdminUserBatchStatusInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserSaveInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserVipDebugInDto;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
 import cn.nine.pros.post.client.model.input.admin.UserQueryInDto;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +36,7 @@ import java.util.stream.Collectors;
 /**
  * 管理端用户运营：分页、状态、资料、头像审核、VIP 调试与设备封禁。
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminUserBizService {
@@ -51,14 +56,21 @@ public class AdminUserBizService {
     private final UserDeviceMapstruct userDeviceMapstruct;
     private final AppMessages appMessages;
     private final OssProperties ossProperties;
+    private final AdminOperationRecorder adminOperationRecorder;
 
     /**
-     * 按邮箱/昵称/状态/头像审核状态分页查询用户。
+     * 多维筛选 + 排序分页查询用户。
      */
     public PageData<UserDTO> paging(UserQueryInDto body) {
         PageQuery pageQuery = AdminPageHelper.normalize(body.getPage());
         Page<UserDomain> p = userService.pageForAdmin(
-                pageQuery, body.getEmail(), body.getNickname(), body.getStatus(), body.getAvatarAuditStatus());
+                pageQuery,
+                body.getEmail(), body.getNickname(), body.getStatus(), body.getAvatarAuditStatus(),
+                body.getGender(), body.getCountryCode(), body.getMinBirthYear(), body.getMaxBirthYear(),
+                body.getIsVip(),
+                body.getCreatedFrom(), body.getCreatedTo(),
+                body.getLastLoginFrom(), body.getLastLoginTo(),
+                body.getSortField(), body.getSortOrder());
         List<UserDTO> list = p.getRecords().stream()
                 .map(u -> userService.findById(u.getId()))
                 .filter(dto -> dto != null)
@@ -77,6 +89,31 @@ public class AdminUserBizService {
             userIdentityService.releaseAllForUser(id, LocalDateTime.now());
         }
         userService.adminUpdateStatus(id, status, auditUserId());
+        adminOperationRecorder.record("user.status", "user", id, "status=" + status);
+        log.info("admin update user status, userId={}, status={}", id, status);
+    }
+
+    /**
+     * 批量更新用户状态。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void batchStatus(AdminUserBatchStatusInDto body) {
+        Integer status = body.getStatus();
+        if (status == null || (status != 1 && status != 2 && status != 3)) {
+            throw new BadRequestException(appMessages.get("admin.error.user.badStatus"));
+        }
+        List<Long> ids = body.getIds();
+        if (status == 3) {
+            LocalDateTime now = LocalDateTime.now();
+            for (Long id : ids) {
+                userIdentityService.releaseAllForUser(id, now);
+            }
+        }
+        userService.adminBatchUpdateStatus(ids, status, auditUserId());
+        for (Long id : ids) {
+            adminOperationRecorder.record("user.batch_status", "user", id, "status=" + status);
+        }
+        log.info("admin batch update user status, count={}, status={}", ids.size(), status);
     }
 
     /**
@@ -118,6 +155,8 @@ public class AdminUserBizService {
         }
         userService.adminUpdateProfile(
                 id, status, birthYear, nickname, countryCode, bio, avatarUrl, avatarAuditStatus, auditUserId());
+        adminOperationRecorder.record("user.save", "user", id, null);
+        log.info("admin save user, userId={}", id);
     }
 
     private record AvatarUpdateFields(String url, Integer auditStatus) {
@@ -151,6 +190,8 @@ public class AdminUserBizService {
             throw new BadRequestException(appMessages.get("admin.error.user.cannotDeleteStaff"));
         }
         userService.delByIds(List.of(id));
+        adminOperationRecorder.record("user.delete", "user", id, null);
+        log.info("admin delete user, userId={}", id);
     }
 
     /**
@@ -158,6 +199,7 @@ public class AdminUserBizService {
      */
     public void approveAvatar(Long id) {
         updateAvatarAudit(id, UserAvatarAuditSupport.APPROVED);
+        adminOperationRecorder.record("user.avatar_approve", "user", id, null);
     }
 
     /**
@@ -165,6 +207,7 @@ public class AdminUserBizService {
      */
     public void rejectAvatar(Long id) {
         updateAvatarAudit(id, UserAvatarAuditSupport.REJECTED);
+        adminOperationRecorder.record("user.avatar_reject", "user", id, null);
     }
 
     private void updateAvatarAudit(Long id, int targetStatus) {
@@ -183,6 +226,7 @@ public class AdminUserBizService {
             return;
         }
         userService.adminUpdateAvatarAudit(id, targetStatus, auditUserId());
+        log.info("admin avatar audit, userId={}, status={}", id, targetStatus);
     }
 
     /**

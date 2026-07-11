@@ -1,23 +1,33 @@
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Form, Input, Modal, Popconfirm, Space, Table, message } from 'antd'
-import { useEffect, useState } from 'react'
+import { Button, Form, Input, Modal, Popconfirm, Table, message } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
 import { api } from '../../services/api'
 
 export default function ConfigList() {
   const [rows, setRows] = useState<any[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
   const [loading, setLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true)
-    api.configs({ page: { page: 1, size: 500 } })
-      .then((d: any) => setRows(d.records || []))
+    api
+      .configs({ page: { page, size: pageSize } })
+      .then((d: any) => {
+        setRows(d.records || [])
+        setTotal(d.total ?? 0)
+      })
       .catch((e: any) => message.error(e.message))
       .finally(() => setLoading(false))
-  }
-  useEffect(() => { load() }, [])
+  }, [page, pageSize])
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   const handleOk = async () => {
     try {
@@ -39,7 +49,14 @@ export default function ConfigList() {
     <>
       <div className="page-header">
         <h2 className="page-title">参数配置</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setModalOpen(true) }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            form.resetFields()
+            setModalOpen(true)
+          }}
+        >
           新增配置
         </Button>
       </div>
@@ -48,6 +65,17 @@ export default function ConfigList() {
         loading={loading}
         dataSource={rows}
         size="middle"
+        pagination={{
+          current: page,
+          pageSize,
+          total,
+          showSizeChanger: true,
+          showTotal: (t) => `共 ${t} 条`,
+          onChange: (p, ps) => {
+            setPage(p)
+            setPageSize(ps)
+          },
+        }}
         columns={[
           { title: 'ID', dataIndex: 'id', width: 72 },
           { title: 'Key', dataIndex: 'configKey' },
@@ -57,8 +85,16 @@ export default function ConfigList() {
             title: '操作',
             width: 100,
             render: (_, r) => (
-              <Popconfirm title="确认删除？" onConfirm={async () => { await api.deleteConfig(r.id); load() }}>
-                <Button danger size="small">删除</Button>
+              <Popconfirm
+                title="确认删除？"
+                onConfirm={async () => {
+                  await api.deleteConfig(r.id)
+                  load()
+                }}
+              >
+                <Button danger size="small">
+                  删除
+                </Button>
               </Popconfirm>
             ),
           },
@@ -68,7 +104,10 @@ export default function ConfigList() {
         title="新增配置"
         open={modalOpen}
         onOk={handleOk}
-        onCancel={() => { setModalOpen(false); form.resetFields() }}
+        onCancel={() => {
+          setModalOpen(false)
+          form.resetFields()
+        }}
         confirmLoading={saving}
         destroyOnClose
         width={480}

@@ -5,6 +5,7 @@ import cn.nine.pros.post.biz.service.biz.admin.AdminUserBizService;
 import cn.nine.pros.post.client.api.admin.AdminUserApi;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.db.UserDeviceDTO;
+import cn.nine.pros.post.client.model.input.admin.AdminUserBatchStatusInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserSaveInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserVipDebugInDto;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
@@ -28,6 +29,11 @@ public class AdminUserController implements AdminUserApi {
     @Override
     public void updateStatus(Long id, Integer status) {
         adminUserBizService.updateStatus(id, status);
+    }
+
+    @Override
+    public void batchStatus(AdminUserBatchStatusInDto body) {
+        adminUserBizService.batchStatus(body);
     }
 
     @Override

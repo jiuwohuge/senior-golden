@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.service.base;
 
 import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface FriendshipService {
@@ -29,4 +30,25 @@ public interface FriendshipService {
      * 笔友申请被同意后创建/激活好友关系。
      */
     FriendshipDomain createPenpalFromRequest(long actorUserId, long requesterId, long targetId, Long sourceLetterId);
+
+    /** 按主键查询。 */
+    FriendshipDomain getById(Long id);
+
+    /**
+     * 管理端笔友分页（默认仅活跃 status=1）。
+     */
+    com.baomidou.mybatisplus.extension.plugins.pagination.Page<FriendshipDomain> pageForAdmin(
+            cn.nine.commons.data.page.PageQuery pageQuery,
+            Long userId, Long peerId,
+            LocalDateTime createdFrom, LocalDateTime createdTo);
+
+    /**
+     * 按 ID 解除笔友（status=0）；同步腾讯 IM。
+     *
+     * @return 是否更新成功
+     */
+    boolean deactivateById(long id, Long actorUserId);
+
+    /** 活跃笔友对数。 */
+    long countActive();
 }

@@ -196,6 +196,15 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 - [x] 段落写信控件 + ≥2 免费皮肤/模板；读信页皮肤渲染；首页写信分流(§11.5)
 - [ ] 延期不进本里程碑：§5.2 时间轴整页、§5.3 事件流表、§4.6 图片附件、Apple 登录
 
+### M7 — 管理后台运营能力补齐
+- [x] 统一列表规范（AdminProTable / EnumSelect）；枚举禁止手输
+- [x] 用户多维筛选 + 分页排序批量 + 国家下拉
+- [x] 普通信件运营/审核页 + 状态追踪详情
+- [x] 系统邮件出站追踪（paging/详情/失败重试）
+- [x] 笔友关系运营 + 商业商品列表规范强化
+- [x] 管理员操作日志接线 + 看板指标增强（含近 7 日）
+- [x] **明确不做**：任何导入/导出（CSV/Excel）
+
 ---
 
 ## 4. [改动预测]（M0 首批；每次 ≤3 文件、断点式交付）
@@ -248,6 +257,7 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 | **2026-07-10** | **开发期不做 Flyway migration 整理**（只增量追加）；**上线前统一整理一次** |
 | **2026-07-10** | **本地启停 API/Manage 统一走根目录 docker-compose**；每次重建 API 前必须 `mvn clean package`（`scripts/dev-up.ps1`） |
 | **2026-07-10** | **M6**：平邮/挂号从产品面废弃；每日额度改为「领取仪式」（未领取不可发）；时间轴/事件流/图片附件/Apple 登录延期 |
+| **2026-07-10** | **M7**：管理后台运营补齐（用户/信件/笔友/商业 + 双轨邮件追踪 + 操作日志 + 看板）；**不做任何导入/导出** |
 | 继承自 3.0 | JWT 单端在线；OSS 直传；`@Scheduled` 延迟投递；Riverpod；Manage 用 React |
 
 ---
