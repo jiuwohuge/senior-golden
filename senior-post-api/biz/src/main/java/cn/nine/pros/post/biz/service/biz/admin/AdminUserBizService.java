@@ -10,27 +10,38 @@ import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.model.mapstruct.UserDeviceMapstruct;
 import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
+import cn.nine.pros.post.biz.service.base.ConfigService;
+import cn.nine.pros.post.biz.service.base.DailyQuotaClaimService;
+import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.base.UserIdentityService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.biz.admin.support.AdminOperationRecorder;
+import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
 import cn.nine.pros.post.biz.service.biz.support.OssReadableKeyValidator;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.db.UserDeviceDTO;
+import cn.nine.pros.post.client.model.input.admin.AdminIdListInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserBatchStatusInDto;
+import cn.nine.pros.post.client.model.input.admin.AdminUserQuotaAdjustInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserSaveInDto;
 import cn.nine.pros.post.client.model.input.admin.AdminUserVipDebugInDto;
 import cn.nine.pros.post.client.model.input.admin.DeviceBlockInDto;
 import cn.nine.pros.post.client.model.input.admin.UserQueryInDto;
+import cn.nine.pros.post.client.model.out.AdminUserBriefVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -57,9 +68,12 @@ public class AdminUserBizService {
     private final AppMessages appMessages;
     private final OssProperties ossProperties;
     private final AdminOperationRecorder adminOperationRecorder;
+    private final ConfigService configService;
+    private final DailyQuotaClaimService dailyQuotaClaimService;
+    private final LetterService letterService;
 
     /**
-     * 多维筛选 + 排序分页查询用户。
+     * 多维筛选 + 排序分页查询用户；附加当日免费额度快照。
      */
     public PageData<UserDTO> paging(UserQueryInDto body) {
         PageQuery pageQuery = AdminPageHelper.normalize(body.getPage());
@@ -74,8 +88,47 @@ public class AdminUserBizService {
         List<UserDTO> list = p.getRecords().stream()
                 .map(u -> userService.findById(u.getId()))
                 .filter(dto -> dto != null)
+                .peek(this::attachQuotaSnapshot)
                 .collect(Collectors.toList());
         return AdminPageHelper.pageData(pageQuery, p, list);
+    }
+
+    /**
+     * 单用户详情（含当日免费额度），供 /user?edit= 打开编辑弹窗。
+     */
+    public UserDTO detail(Long id) {
+        if (id == null) {
+            throw new BadRequestException(appMessages.get("admin.error.user.badId"));
+        }
+        UserDTO dto = userService.findById(id);
+        if (dto == null) {
+            throw new BadRequestException(appMessages.get("admin.error.user.notFound"));
+        }
+        attachQuotaSnapshot(dto);
+        return dto;
+    }
+
+    /**
+     * 批量用户摘要，供各业务列表渲染「头像+昵称」。
+     */
+    public List<AdminUserBriefVO> briefs(AdminIdListInDto body) {
+        List<Long> ids = distinctIds(body.getIds());
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        List<AdminUserBriefVO> out = new ArrayList<>(ids.size());
+        for (Long id : ids) {
+            UserDTO dto = userService.findById(id);
+            if (dto == null) {
+                continue;
+            }
+            out.add(AdminUserBriefVO.builder()
+                    .id(dto.getId())
+                    .nickname(dto.getNickname())
+                    .avatarUrl(dto.getAvatarUrl())
+                    .build());
+        }
+        return out;
     }
 
     /**
@@ -208,6 +261,93 @@ public class AdminUserBizService {
     public void rejectAvatar(Long id) {
         updateAvatarAudit(id, UserAvatarAuditSupport.REJECTED);
         adminOperationRecorder.record("user.avatar_reject", "user", id, null);
+    }
+
+    /**
+     * 批量通过头像审核；无头像用户跳过。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void batchApproveAvatar(AdminIdListInDto body) {
+        batchAvatarAudit(body, UserAvatarAuditSupport.APPROVED, "user.avatar_batch_approve");
+    }
+
+    /**
+     * 批量驳回头像审核；无头像用户跳过。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void batchRejectAvatar(AdminIdListInDto body) {
+        batchAvatarAudit(body, UserAvatarAuditSupport.REJECTED, "user.avatar_batch_reject");
+    }
+
+    private void batchAvatarAudit(AdminIdListInDto body, int targetStatus, String actionType) {
+        List<Long> ids = distinctIds(body.getIds());
+        int ok = 0;
+        for (Long id : ids) {
+            UserDomain user = userService.getById(id);
+            if (user == null || user.isDelFlag() || !UserAvatarAuditSupport.hasStoredAvatar(user)) {
+                continue;
+            }
+            int current = UserAvatarAuditSupport.statusOf(user);
+            if (current == targetStatus) {
+                continue;
+            }
+            userService.adminUpdateAvatarAudit(id, targetStatus, auditUserId());
+            adminOperationRecorder.record(actionType, "user", id, "status=" + targetStatus);
+            ok++;
+        }
+        log.info("admin batch avatar audit, action={}, requested={}, updated={}", actionType, ids.size(), ok);
+    }
+
+    /**
+     * 调整用户当日免费发信剩余次数：quota_amount = sentToday + remainingQuota。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public UserDTO adjustQuota(Long id, AdminUserQuotaAdjustInDto body) {
+        if (id == null) {
+            throw new BadRequestException(appMessages.get("admin.error.user.badId"));
+        }
+        UserDTO user = userService.findById(id);
+        if (user == null) {
+            throw new BadRequestException(appMessages.get("admin.error.user.notFound"));
+        }
+        Integer remaining = body.getRemainingQuota();
+        if (remaining == null || remaining < 0) {
+            throw new BadRequestException(appMessages.get("admin.error.user.badQuota"));
+        }
+        DailyQuotaSupport.Snapshot before = DailyQuotaSupport.resolve(
+                id, user, configService, dailyQuotaClaimService, letterService);
+        int newCap = before.sentToday() + remaining;
+        dailyQuotaClaimService.upsertQuotaAmount(id, LocalDate.now(), newCap, auditUserId());
+        adminOperationRecorder.record(
+                "user.quota_adjust",
+                "user",
+                id,
+                "remaining=" + remaining + ",cap=" + newCap);
+        log.info("admin adjust daily quota, userId={}, remaining={}, cap={}", id, remaining, newCap);
+        UserDTO refreshed = userService.findById(id);
+        attachQuotaSnapshot(refreshed);
+        return refreshed;
+    }
+
+    private void attachQuotaSnapshot(UserDTO dto) {
+        if (dto == null || dto.getId() == null) {
+            return;
+        }
+        DailyQuotaSupport.Snapshot snap = DailyQuotaSupport.resolve(
+                dto.getId(), dto, configService, dailyQuotaClaimService, letterService);
+        dto.setQuotaClaimedToday(snap.claimed());
+        dto.setSentToday(snap.sentToday());
+        dto.setDailyQuotaCap(snap.cap());
+        dto.setRemainingQuota(snap.remaining());
+    }
+
+    private static List<Long> distinctIds(List<Long> raw) {
+        if (raw == null || raw.isEmpty()) {
+            return List.of();
+        }
+        return new ArrayList<>(new LinkedHashSet<>(raw.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList())));
     }
 
     private void updateAvatarAudit(Long id, int targetStatus) {

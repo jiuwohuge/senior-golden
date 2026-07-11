@@ -4,15 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
-import '../../core/api/api_exception.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal_button.dart';
 import '../../widgets/postal/postal_card_envelope.dart';
-import '../../widgets/postal/postal_snack.dart';
 import '../compose/compose_intent.dart';
-import 'post_office_remote.dart';
+import '../onboarding/first_letter_guide_page.dart';
+import '../post_office/post_office_remote.dart';
+import '../post_office/quota_claim_dialog.dart';
 
 /// 邮局首页：一屏一主张 + 写信主 CTA + 两张摘要卡（§11）。
+///
+/// 未领取今日额度时强制弹窗；领取后若尚未完成首封信则进入引导。
 class PostOfficeHomePage extends ConsumerStatefulWidget {
   const PostOfficeHomePage({super.key});
 
@@ -32,17 +34,14 @@ class _PostOfficeHomePageState extends ConsumerState<PostOfficeHomePage> {
     final firstLetterDone =
         ref.watch(appSessionProvider).user.firstLetterDone == true;
 
-    // 仅首封信完成后弹额度领取；避免挡住引导页 / 造成灰屏。
+    // 未领取则弹窗（不依赖首封信）：发信前必须有额度。
     homeAsync.whenData((h) {
-      final sessionDone =
-          firstLetterDone || h.firstLetterDone;
-      if (sessionDone &&
-          !h.quotaClaimedToday &&
+      if (!h.quotaClaimedToday &&
           !_claimDialogScheduled &&
           !_claimDialogVisible) {
         _claimDialogScheduled = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _showQuotaClaimDialog(h);
+          if (mounted) _offerQuotaClaim(h, firstLetterDone);
         });
       }
     });
@@ -118,11 +117,46 @@ class _PostOfficeHomePageState extends ConsumerState<PostOfficeHomePage> {
     );
   }
 
+  /// 领取额度；新用户领取后进入首封信引导，避免无邮票写首封。
+  Future<void> _offerQuotaClaim(
+    PostOfficeHomeData home,
+    bool firstLetterDone,
+  ) async {
+    if (!mounted || _claimDialogVisible) return;
+    _claimDialogVisible = true;
+    try {
+      final claimed = await showDailyQuotaClaimDialog(
+        context: context,
+        ref: ref,
+        dailyLetterQuota: home.dailyLetterQuota,
+      );
+      if (!mounted) return;
+      if (claimed && !firstLetterDone) {
+        context.go(FirstLetterGuidePage.path);
+      }
+    } finally {
+      if (mounted) {
+        _claimDialogVisible = false;
+      }
+    }
+  }
+
   /// §11.5 首页写信分流：寄给有缘人 / 寄给未来的自己（不含 DIRECT）。
   Future<void> _showWriteDestinationSheet(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
+    final home = ref.read(postOfficeHomeProvider).valueOrNull;
+    // 未领取额度时先弹领取，避免写信中途被服务端拦截。
+    if (home != null && !home.quotaClaimedToday) {
+      await _offerQuotaClaim(
+        home,
+        ref.read(appSessionProvider).user.firstLetterDone == true,
+      );
+      final refreshed = ref.read(postOfficeHomeProvider).valueOrNull;
+      if (refreshed == null || !refreshed.quotaClaimedToday) return;
+    }
+    if (!mounted) return;
     await showModalBottomSheet<void>(
-      context: context,
+      context: this.context,
       backgroundColor: PostalTokens.paperEnvelope,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -233,77 +267,6 @@ class _PostOfficeHomePageState extends ConsumerState<PostOfficeHomePage> {
         );
       },
     );
-  }
-
-  Future<void> _showQuotaClaimDialog(PostOfficeHomeData home) async {
-    if (!mounted || _claimDialogVisible) return;
-    _claimDialogVisible = true;
-    final l10n = AppLocalizations.of(context)!;
-    var claiming = false;
-    try {
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (dlgCtx) {
-          return StatefulBuilder(
-            builder: (ctx, setLocal) {
-              return PopScope(
-                canPop: false,
-                child: AlertDialog(
-                  icon: Icon(
-                    Icons.card_giftcard_outlined,
-                    color: PostalTokens.postboxGreen,
-                    size: 48,
-                  ),
-                  title: Text(l10n.quotaClaimTitle),
-                  content: Text(l10n.quotaClaimMessage(home.dailyLetterQuota)),
-                  actionsAlignment: MainAxisAlignment.center,
-                  actions: [
-                    // expand:false 避免 Dialog actions 零尺寸 hit-test 灰屏。
-                    SizedBox(
-                      width: 260,
-                      child: PostalButton(
-                        label: l10n.quotaClaimButton,
-                        expand: false,
-                        busy: claiming,
-                        onPressed: claiming
-                            ? null
-                            : () async {
-                                setLocal(() => claiming = true);
-                                try {
-                                  if (!mounted) return;
-                                  await ref
-                                      .read(postOfficeRemoteRepositoryProvider)
-                                      .claimDailyQuota();
-                                  if (!mounted) return;
-                                  ref.invalidate(postOfficeHomeProvider);
-                                  if (dlgCtx.mounted) {
-                                    Navigator.of(dlgCtx).pop();
-                                  }
-                                } catch (e) {
-                                  final biz = apiBusinessExceptionFrom(e);
-                                  if (ctx.mounted) {
-                                    PostalSnack.show(
-                                      ctx,
-                                      biz?.message ?? e.toString(),
-                                      tone: PostalSnackTone.error,
-                                    );
-                                  }
-                                  setLocal(() => claiming = false);
-                                }
-                              },
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      );
-    } finally {
-      _claimDialogVisible = false;
-    }
   }
 }
 

@@ -117,4 +117,17 @@ public class UserDTO extends AbstractAuditableDTO {
     @Schema(description = "申请注销时间（冷静期）")
     private java.time.LocalDateTime deletionRequestedAt;
 
+    /** 管理端列表附加：今日是否已领取免费额度（含 VIP 视为已领）。 */
+    @Schema(description = "今日是否已领取免费额度")
+    private Boolean quotaClaimedToday;
+
+    @Schema(description = "今日已发信数（计入额度）")
+    private Integer sentToday;
+
+    @Schema(description = "当日额度上限（claim.quota_amount）")
+    private Integer dailyQuotaCap;
+
+    @Schema(description = "今日剩余免费发信次数")
+    private Integer remainingQuota;
+
 }

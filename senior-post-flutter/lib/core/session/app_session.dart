@@ -142,7 +142,12 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
         latitude: (m['latitude'] as num?)?.toDouble() ?? state.user.latitude,
         longitude: (m['longitude'] as num?)?.toDouble() ?? state.user.longitude,
         writingStyle: m['writingStyle'] as String? ?? state.user.writingStyle,
-        firstLetterDone: m['firstLetterDone'] as bool? ?? state.user.firstLetterDone,
+        // 换账号登录时勿沿用上一会话的首封信标记。
+        firstLetterDone: m.containsKey('firstLetterDone')
+            ? m['firstLetterDone'] as bool?
+            : (idStr != state.user.id
+                ? null
+                : state.user.firstLetterDone),
       ),
     );
   }

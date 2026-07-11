@@ -1,5 +1,6 @@
 import { Button, Space, Table, message } from 'antd'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import UserCell, { useUserBriefs } from '../../components/admin/UserCell'
 import { api } from '../../services/api'
 
 export default function FeedbackList() {
@@ -8,6 +9,8 @@ export default function FeedbackList() {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [size, setSize] = useState(20)
+  const userIds = useMemo(() => rows.map((r) => r.userId), [rows])
+  const { briefs, signed } = useUserBriefs(userIds)
 
   const load = async (p: number, s: number) => {
     setLoading(true)
@@ -55,8 +58,21 @@ export default function FeedbackList() {
         }}
         columns={[
           { title: 'ID', dataIndex: 'id', width: 90 },
-          { title: '用户 ID', dataIndex: 'userId', width: 100 },
-          { title: '昵称', dataIndex: 'nickname', width: 140, ellipsis: true },
+          {
+            title: '用户',
+            width: 180,
+            render: (_, r) => (
+              <UserCell
+                userId={r.userId}
+                brief={{
+                  id: r.userId,
+                  nickname: r.nickname || briefs[r.userId]?.nickname,
+                  avatarUrl: briefs[r.userId]?.avatarUrl,
+                }}
+                signedUrl={signed[r.userId]}
+              />
+            ),
+          },
           { title: '客户端版本', dataIndex: 'clientVersion', width: 120, ellipsis: true },
           { title: '内容', dataIndex: 'content', ellipsis: true },
           { title: '创建时间', dataIndex: 'createdAt', width: 180 },

@@ -1,7 +1,8 @@
 import { Button, Col, Form, InputNumber, Popconfirm, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import AdminProTable from '../../components/admin/AdminProTable'
+import AdminProTable, { FILTER_COL_SHORT } from '../../components/admin/AdminProTable'
+import UserCell, { useUserBriefs } from '../../components/admin/UserCell'
 import { api } from '../../services/api'
 
 type PenpalRow = {
@@ -20,6 +21,8 @@ export default function PenpalList() {
   const [pageSize, setPageSize] = useState(20)
   const [loading, setLoading] = useState(false)
   const [filterForm] = Form.useForm()
+  const userIds = useMemo(() => rows.flatMap((r) => [r.userA, r.userB]), [rows])
+  const { briefs, signed } = useUserBriefs(userIds)
 
   const load = useCallback(
     async (p = page, ps = pageSize) => {
@@ -64,8 +67,26 @@ export default function PenpalList() {
   const columns: ColumnsType<PenpalRow> = useMemo(
     () => [
       { title: '关系 ID', dataIndex: 'id', width: 90 },
-      { title: '用户 A', dataIndex: 'userA', width: 100 },
-      { title: '用户 B', dataIndex: 'userB', width: 100 },
+      {
+        title: '用户 A',
+        width: 160,
+        render: (_, r) =>
+          r.userA ? (
+            <UserCell userId={r.userA} brief={briefs[r.userA]} signedUrl={signed[r.userA]} />
+          ) : (
+            '—'
+          ),
+      },
+      {
+        title: '用户 B',
+        width: 160,
+        render: (_, r) =>
+          r.userB ? (
+            <UserCell userId={r.userB} brief={briefs[r.userB]} signedUrl={signed[r.userB]} />
+          ) : (
+            '—'
+          ),
+      },
       { title: '往来封数', dataIndex: 'letterCount', width: 100 },
       { title: '建立时间', dataIndex: 'createdAt', width: 180 },
       {
@@ -86,19 +107,19 @@ export default function PenpalList() {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [briefs, signed],
   )
 
   const filterItems = (
     <>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="userId" label="用户 ID">
           <InputNumber style={{ width: '100%' }} min={1} placeholder="匹配任一侧" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="peerId" label="对端用户 ID">
-          <InputNumber style={{ width: '100%' }} min={1} placeholder="对端" />
+          <InputNumber style={{ width: '100%' }} min={1} />
         </Form.Item>
       </Col>
     </>
@@ -113,7 +134,6 @@ export default function PenpalList() {
         filterForm={filterForm}
         filterItems={filterItems}
         onSearch={() => void load(1, pageSize)}
-        toolbar={<Button onClick={() => void load()}>刷新</Button>}
         columns={columns}
         dataSource={rows}
         loading={loading}
@@ -121,7 +141,7 @@ export default function PenpalList() {
         page={page}
         pageSize={pageSize}
         onPageChange={(p, ps) => void load(p, ps)}
-        scrollX={800}
+        scrollX={900}
       />
     </div>
   )

@@ -57,10 +57,18 @@ export async function uploadAdminUserAvatar(userId: number, file: File): Promise
   return sign.objectKey.trim()
 }
 
-/** 批量 GET 预签名用于预览。 */
+/** 批量 GET 预签名；返回首个 URL（兼容旧调用）。 */
 export async function signObjectKeysForPreview(objectKeys: string[]): Promise<string | null> {
+  const items = await signObjectKeysBatch(objectKeys)
+  return items[0]?.signedUrl ?? null
+}
+
+export type SignedObjectItem = { objectKey?: string; signedUrl?: string }
+
+/** 批量 GET 预签名，返回全部条目。 */
+export async function signObjectKeysBatch(objectKeys: string[]): Promise<SignedObjectItem[]> {
   const keys = objectKeys.map((k) => k.trim()).filter(Boolean)
-  if (!keys.length) return null
+  if (!keys.length) return []
   const res: any = await request.post('/webapi/oss/get-sign', { objectKeys: keys })
-  return res?.items?.[0]?.signedUrl ?? null
+  return (res?.items ?? []) as SignedObjectItem[]
 }

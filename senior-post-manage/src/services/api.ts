@@ -6,6 +6,7 @@ export const api = {
   dashboard: () => request.get('/webapi/dashboard/summary'),
 
   users: (params: any) => request.post('/webapi/user/paging', params),
+  userDetail: (id: number) => request.get(`/webapi/user/${id}`),
   saveUser: (body: {
     id: number
     nickname?: string
@@ -18,6 +19,13 @@ export const api = {
   deleteUser: (id: number) => request.post(`/webapi/user/${id}/delete`),
   approveUserAvatar: (id: number) => request.post(`/webapi/user/${id}/avatar/approve`),
   rejectUserAvatar: (id: number) => request.post(`/webapi/user/${id}/avatar/reject`),
+  userBatchApproveAvatar: (ids: number[]) =>
+    request.post('/webapi/user/avatar/batch-approve', { ids }),
+  userBatchRejectAvatar: (ids: number[]) =>
+    request.post('/webapi/user/avatar/batch-reject', { ids }),
+  userBriefs: (ids: number[]) => request.post('/webapi/user/briefs', { ids }),
+  userQuotaAdjust: (id: number, remainingQuota: number) =>
+    request.post(`/webapi/user/${id}/quota/adjust`, { remainingQuota }),
   userStatus: (id: number, status: number) => request.post(`/webapi/user/${id}/status?status=${status}`),
   userBatchStatus: (ids: number[], status: number) =>
     request.post('/webapi/user/batch-status', { ids, status }),

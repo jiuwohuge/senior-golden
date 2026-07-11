@@ -11,6 +11,7 @@ import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.biz.AppPostOfficeService;
 import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
+import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.support.TextPreviewSupport;
 import cn.nine.pros.post.client.common.enums.LetterBizStatus;
@@ -27,7 +28,6 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +38,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class AppPostOfficeServiceImpl implements AppPostOfficeService {
 
-    private static final String LETTER_DAILY_QUOTA_KEY = "letter.daily_quota";
-    private static final int DEFAULT_DAILY_LETTER_QUOTA = 5;
     private static final int IN_TRANSIT_TYPE_OUT = 1;
     private static final int IN_TRANSIT_TYPE_IN = 2;
     private static final int IN_TRANSIT_TYPE_UNREAD = 3;
@@ -54,20 +52,9 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
 
     @Override
     public AppPostOfficeHomeVO home(long userId) {
-        LocalDate today = LocalDate.now();
-        LocalDateTime dayStart = today.atStartOfDay();
-        LocalDateTime dayEnd = today.atTime(LocalTime.MAX);
-
-        int quota = configService.getInt(LETTER_DAILY_QUOTA_KEY, DEFAULT_DAILY_LETTER_QUOTA);
-        long sentToday = letterService.countSentQuotaByFromUserBetween(userId, dayStart, dayEnd);
-        boolean claimed = dailyQuotaClaimService.hasClaimed(userId, today);
         UserDTO user = userService.findById(userId);
-        boolean vip = user != null && Boolean.TRUE.equals(user.getIsVip());
-        boolean effectiveClaimed = claimed || vip;
-        int remaining = effectiveClaimed ? Math.max(0, quota - (int) sentToday) : 0;
-        if (vip) {
-            remaining = quota;
-        }
+        DailyQuotaSupport.Snapshot snap = DailyQuotaSupport.resolve(
+                userId, user, configService, dailyQuotaClaimService, letterService);
 
         long outboundInTransit = letterService.countByFromUserAndStatus(
                 userId, LetterBizStatus.DELIVERING.getCode());
@@ -83,10 +70,10 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
         AppPostOfficeHomeVO vo = AppPostOfficeHomeVO.builder()
                 .greeting(appMessages.get("app.postOffice.greeting"))
                 .todayHint(appMessages.get("app.postOffice.todayHint"))
-                .dailyLetterQuota(quota)
-                .sentToday((int) sentToday)
-                .quotaClaimedToday(effectiveClaimed)
-                .remainingQuota(remaining)
+                .dailyLetterQuota(snap.configQuota())
+                .sentToday(snap.sentToday())
+                .quotaClaimedToday(snap.claimed())
+                .remainingQuota(snap.remaining())
                 .firstLetterDone(user != null && Boolean.TRUE.equals(user.getFirstLetterDone()))
                 .relationMessageCount(relationCount)
                 .inTransitCount(inTransit)
@@ -94,8 +81,8 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
                 .inboundInTransit((int) inboundInTransit)
                 .unreadDelivered((int) unreadDelivered)
                 .build();
-        log.debug("post-office home userId={}, claimed={}, sentToday={}, inTransit={}",
-                userId, effectiveClaimed, sentToday, inTransit);
+        log.debug("post-office home userId={}, claimed={}, sentToday={}, remaining={}, inTransit={}",
+                userId, snap.claimed(), snap.sentToday(), snap.remaining(), inTransit);
         return vo;
     }
 
@@ -115,22 +102,21 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
 
     @Override
     public DailyQuotaClaimVO claimDailyQuota(long userId) {
-        int quota = configService.getInt(LETTER_DAILY_QUOTA_KEY, DEFAULT_DAILY_LETTER_QUOTA);
+        int quota = DailyQuotaSupport.configQuota(configService);
         LocalDate today = LocalDate.now();
         DailyQuotaClaimDomain row = dailyQuotaClaimService.claim(userId, today, quota, userId);
         if (row == null) {
             throw new BusinessException(appMessages.get("app.error.letter.quotaClaimFailed"));
         }
-        LocalDateTime dayStart = today.atStartOfDay();
-        LocalDateTime dayEnd = today.atTime(LocalTime.MAX);
-        long sentToday = letterService.countSentQuotaByFromUserBetween(userId, dayStart, dayEnd);
-        int remaining = Math.max(0, quota - (int) sentToday);
-        log.info("daily quota claim ok, userId={}, remaining={}", userId, remaining);
+        UserDTO user = userService.findById(userId);
+        DailyQuotaSupport.Snapshot snap = DailyQuotaSupport.resolve(
+                userId, user, configService, dailyQuotaClaimService, letterService);
+        log.info("daily quota claim ok, userId={}, remaining={}", userId, snap.remaining());
         return DailyQuotaClaimVO.builder()
                 .claimed(true)
-                .dailyLetterQuota(quota)
-                .sentToday((int) sentToday)
-                .remainingQuota(remaining)
+                .dailyLetterQuota(snap.configQuota())
+                .sentToday(snap.sentToday())
+                .remainingQuota(snap.remaining())
                 .build();
     }
 

@@ -345,13 +345,15 @@ class AuthRepository {
         riskLevel: riskLevel,
       );
     }
-    await AuthStorage.writeToken(token);
-    _ref.read(authTokenProvider.notifier).state = token;
-    _ref.invalidate(seniorPostTimFacadeProvider);
+    // 先写入会话再设 Token：Token 会触发 GoRouter redirect，
+    // 若此时 user.id 仍为空会误判进邮局首页，跳过首封信/额度领取。
     final userMap = data['user'] as Map<String, dynamic>?;
     if (userMap != null) {
       _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
     }
+    await AuthStorage.writeToken(token);
+    _ref.read(authTokenProvider.notifier).state = token;
+    _ref.invalidate(seniorPostTimFacadeProvider);
     _ref.read(invalidateAuthDataProvider)();
     final complete = data['profileComplete'] as bool? ?? true;
     return AuthSignInResult(profileComplete: complete, riskLevel: riskLevel);

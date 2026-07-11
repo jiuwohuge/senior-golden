@@ -20,6 +20,13 @@ export default function EnumSelect({ options, allowClear = true, ...rest }: Prop
   )
 }
 
+/** 按 value 取中文标签；未知码回退原文。 */
+export function labelOf(options: EnumOption[], value: string | number | null | undefined): string {
+  if (value === null || value === undefined || value === '') return '—'
+  const hit = options.find((o) => o.value === value || String(o.value) === String(value))
+  return hit?.label ?? String(value)
+}
+
 export const USER_STATUS_OPTIONS: EnumOption[] = [
   { value: 1, label: '正常' },
   { value: 2, label: '封禁' },
@@ -38,9 +45,9 @@ export const AVATAR_AUDIT_OPTIONS: EnumOption[] = [
 ]
 
 export const LETTER_MODE_OPTIONS: EnumOption[] = [
-  { value: 1, label: 'POST_OFFICE' },
-  { value: 2, label: 'DIRECT' },
-  { value: 3, label: 'SELF_TIME' },
+  { value: 1, label: '邮局匹配' },
+  { value: 2, label: '直寄' },
+  { value: 3, label: '时光信' },
 ]
 
 export const LETTER_AUDIT_OPTIONS: EnumOption[] = [
@@ -50,15 +57,15 @@ export const LETTER_AUDIT_OPTIONS: EnumOption[] = [
 ]
 
 export const LETTER_STATUS_OPTIONS: EnumOption[] = [
-  { value: 0, label: 'PENDING' },
-  { value: 1, label: 'DELIVERING' },
-  { value: 2, label: 'DELIVERED' },
-  { value: 3, label: 'REGISTERED' },
-  { value: 4, label: 'MATCHED' },
-  { value: 5, label: 'READ' },
-  { value: 6, label: 'REPLIED' },
-  { value: 7, label: 'ARCHIVED' },
-  { value: 8, label: 'SCHEDULED' },
+  { value: 0, label: '待处理' },
+  { value: 1, label: '投递中' },
+  { value: 2, label: '已送达' },
+  { value: 3, label: '挂号' },
+  { value: 4, label: '已匹配' },
+  { value: 5, label: '已读' },
+  { value: 6, label: '已回复' },
+  { value: 7, label: '已归档' },
+  { value: 8, label: '已预约' },
 ]
 
 export const MAIL_OUTBOX_STATUS_OPTIONS: EnumOption[] = [
@@ -79,4 +86,41 @@ export const PRODUCT_TYPE_OPTIONS: EnumOption[] = [
 export const PRODUCT_STATUS_OPTIONS: EnumOption[] = [
   { value: 1, label: '上架' },
   { value: 0, label: '下架' },
+]
+
+export const REPORT_STATUS_OPTIONS: EnumOption[] = [
+  { value: 0, label: '待处理' },
+  { value: 1, label: '已处理' },
+  { value: 2, label: '已驳回' },
+]
+
+export const REPORT_TARGET_TYPE_OPTIONS: EnumOption[] = [
+  { value: 'user', label: '用户' },
+  { value: 'letter', label: '信件' },
+]
+
+export const ACTION_TYPE_OPTIONS: EnumOption[] = [
+  { value: 'send_letter', label: '发信' },
+  { value: 'open_letter', label: '开信' },
+  { value: 'reply_letter', label: '回信' },
+  { value: 'login', label: '登录' },
+  { value: 'add_penpal_request', label: '申请笔友' },
+  { value: 'accept_penpal', label: '接受笔友' },
+  { value: 'reject_penpal', label: '拒绝笔友' },
+  { value: 'view_recommendation', label: '查看推荐' },
+  { value: 'write_from_recommendation', label: '从推荐写信' },
+  { value: 'mock_purchase', label: '模拟购买' },
+]
+
+export const ACTION_TARGET_TYPE_OPTIONS: EnumOption[] = [
+  { value: 'letter', label: '信件' },
+  { value: 'user', label: '用户' },
+]
+
+export const LOGIN_RESULT_OPTIONS: EnumOption[] = [
+  { value: 'success', label: '成功' },
+  { value: 'fail', label: '失败' },
+  { value: 'failed', label: '失败' },
+  { value: 1, label: '成功' },
+  { value: 0, label: '失败' },
 ]

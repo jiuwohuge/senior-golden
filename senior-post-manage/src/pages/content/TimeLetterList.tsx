@@ -1,6 +1,7 @@
 import { Button, Drawer, Form, Input, Select, Space, Table, Tag, Typography, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import UserCell, { useUserBriefs } from '../../components/admin/UserCell'
 import { api } from '../../services/api'
 
 const { Paragraph, Text } = Typography
@@ -37,6 +38,11 @@ export default function TimeLetterList() {
   const [preview, setPreview] = useState<TimeLetterRow | null>(null)
   const [takedownTarget, setTakedownTarget] = useState<TimeLetterRow | null>(null)
   const [takedownForm] = Form.useForm<{ reason: string }>()
+  const userIds = useMemo(
+    () => rows.flatMap((r) => [r.senderId, r.recipientId]),
+    [rows],
+  )
+  const { briefs, signed } = useUserBriefs(userIds)
 
   const load = useCallback(async () => {
     try {
@@ -58,11 +64,26 @@ export default function TimeLetterList() {
   const columns: ColumnsType<TimeLetterRow> = useMemo(
     () => [
       { title: 'ID', dataIndex: 'id', width: 72 },
-      { title: '发件人', dataIndex: 'senderId', width: 88 },
+      {
+        title: '发件人',
+        width: 160,
+        render: (_, r) => (
+          <UserCell userId={r.senderId} brief={briefs[r.senderId]} signedUrl={signed[r.senderId]} />
+        ),
+      },
       {
         title: '收件人',
-        width: 88,
-        render: (_, r) => (r.recipientId != null ? r.recipientId : <Text type="secondary">自己</Text>),
+        width: 160,
+        render: (_, r) =>
+          r.recipientId != null ? (
+            <UserCell
+              userId={r.recipientId}
+              brief={briefs[r.recipientId]}
+              signedUrl={signed[r.recipientId]}
+            />
+          ) : (
+            <Text type="secondary">自己</Text>
+          ),
       },
       {
         title: '送达日',
@@ -107,47 +128,33 @@ export default function TimeLetterList() {
         ),
       },
     ],
-    [],
+    [briefs, signed],
   )
-
-  const submitTakedown = async () => {
-    if (!takedownTarget) return
-    const { reason } = await takedownForm.validateFields()
-    try {
-      await api.takedownTimeLetter(takedownTarget.id, reason)
-      message.success('已下架')
-      setTakedownTarget(null)
-      takedownForm.resetFields()
-      void load()
-    } catch (e: any) {
-      message.error(e?.message || '下架失败')
-    }
-  }
 
   return (
     <div>
-      <Space style={{ marginBottom: 16 }} wrap>
+      <div className="page-header">
+        <h2 className="page-title">时光信</h2>
         <Select
           allowClear
-          placeholder="状态筛选"
+          placeholder="状态"
           style={{ width: 140 }}
           value={statusFilter}
           onChange={(v) => {
-            setStatusFilter(v)
             setPage(1)
+            setStatusFilter(v)
           }}
           options={Object.entries(statusLabel).map(([k, v]) => ({
             value: Number(k),
             label: v.text,
           }))}
         />
-        <Button onClick={() => void load()}>刷新</Button>
-      </Space>
-      <Table<TimeLetterRow>
+      </div>
+      <Table
         rowKey="id"
-        columns={columns}
         dataSource={rows}
-        scroll={{ x: 960 }}
+        columns={columns}
+        scroll={{ x: 1100 }}
         pagination={{
           current: page,
           pageSize,
@@ -159,48 +166,46 @@ export default function TimeLetterList() {
           },
         }}
       />
-      <Drawer
-        title={`时光信 #${preview?.id}`}
-        open={!!preview}
-        width={520}
-        onClose={() => setPreview(null)}
-      >
-        {preview ? (
+      <Drawer open={!!preview} onClose={() => setPreview(null)} width={480} title="时光信详情">
+        {preview && (
           <>
-            <p>
-              <Text type="secondary">发件人</Text> {preview.senderId}
-            </p>
-            <p>
-              <Text type="secondary">收件人</Text>{' '}
-              {preview.recipientId ?? '自己'}
-            </p>
             <Paragraph>{preview.body}</Paragraph>
-            {preview.failReason ? (
-              <Paragraph type="danger">失败：{preview.failReason}</Paragraph>
-            ) : null}
+            {preview.failReason ? <Text type="danger">失败原因：{preview.failReason}</Text> : null}
             {preview.takedownReason ? (
-              <Paragraph type="warning">下架：{preview.takedownReason}</Paragraph>
+              <Text type="warning">下架原因：{preview.takedownReason}</Text>
             ) : null}
           </>
-        ) : null}
+        )}
       </Drawer>
       <Drawer
-        title="下架时光信"
         open={!!takedownTarget}
-        width={400}
         onClose={() => setTakedownTarget(null)}
+        width={400}
+        title="下架时光信"
         extra={
-          <Button type="primary" danger onClick={() => void submitTakedown()}>
-            确认下架
+          <Button
+            type="primary"
+            danger
+            onClick={async () => {
+              const v = await takedownForm.validateFields()
+              if (!takedownTarget) return
+              try {
+                await api.takedownTimeLetter(takedownTarget.id, v.reason)
+                message.success('已下架')
+                setTakedownTarget(null)
+                takedownForm.resetFields()
+                void load()
+              } catch (e: any) {
+                message.error(e.message)
+              }
+            }}
+          >
+            确认
           </Button>
         }
       >
         <Form form={takedownForm} layout="vertical">
-          <Form.Item
-            name="reason"
-            label="原因"
-            rules={[{ required: true, message: '请填写下架原因' }]}
-          >
+          <Form.Item name="reason" label="原因" rules={[{ required: true, message: '请填写原因' }]}>
             <Input.TextArea rows={4} />
           </Form.Item>
         </Form>

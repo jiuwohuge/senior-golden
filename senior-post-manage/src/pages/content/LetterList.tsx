@@ -1,12 +1,14 @@
 import { Button, Col, Drawer, Form, Input, InputNumber, Space, Tag, Typography, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import AdminProTable from '../../components/admin/AdminProTable'
+import AdminProTable, { FILTER_COL_SHORT, FILTER_COL_TEXT } from '../../components/admin/AdminProTable'
 import EnumSelect, {
   LETTER_AUDIT_OPTIONS,
   LETTER_MODE_OPTIONS,
   LETTER_STATUS_OPTIONS,
+  labelOf,
 } from '../../components/admin/EnumSelect'
+import UserCell, { useUserBriefs } from '../../components/admin/UserCell'
 import { api } from '../../services/api'
 
 const { Paragraph, Text } = Typography
@@ -39,11 +41,6 @@ const STATUS_COLOR: Record<number, string> = {
   8: 'orange',
 }
 
-function labelOf(options: { value: string | number; label: string }[], v: unknown) {
-  const hit = options.find((o) => o.value === v)
-  return hit?.label ?? String(v ?? '—')
-}
-
 /** 普通信件运营：审核、批量操作与正文预览。 */
 export default function LetterList() {
   const [rows, setRows] = useState<LetterRow[]>([])
@@ -54,6 +51,11 @@ export default function LetterList() {
   const [selectedIds, setSelectedIds] = useState<number[]>([])
   const [preview, setPreview] = useState<LetterRow | null>(null)
   const [filterForm] = Form.useForm()
+  const userIds = useMemo(
+    () => rows.flatMap((r) => [r.fromUserId, r.toUserId]),
+    [rows],
+  )
+  const { briefs, signed } = useUserBriefs(userIds)
 
   const load = useCallback(
     async (p = page, ps = pageSize) => {
@@ -144,8 +146,21 @@ export default function LetterList() {
   const columns: ColumnsType<LetterRow> = useMemo(
     () => [
       { title: 'ID', dataIndex: 'id', width: 72 },
-      { title: '发件人', dataIndex: 'fromUserId', width: 90 },
-      { title: '收件人', dataIndex: 'toUserId', width: 90, render: (v) => v ?? '—' },
+      {
+        title: '发件人',
+        dataIndex: 'fromUserId',
+        width: 160,
+        render: (id: number) => (
+          <UserCell userId={id} brief={briefs[id]} signedUrl={signed[id]} />
+        ),
+      },
+      {
+        title: '收件人',
+        dataIndex: 'toUserId',
+        width: 160,
+        render: (id: number) =>
+          id ? <UserCell userId={id} brief={briefs[id]} signedUrl={signed[id]} /> : '—',
+      },
       {
         title: '模式',
         dataIndex: 'mode',
@@ -204,37 +219,37 @@ export default function LetterList() {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [briefs, signed],
   )
 
   const filterItems = (
     <>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="auditStatus" label="审核状态">
           <EnumSelect options={LETTER_AUDIT_OPTIONS} placeholder="全部" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="mode" label="模式">
           <EnumSelect options={LETTER_MODE_OPTIONS} placeholder="全部" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="status" label="信件状态">
           <EnumSelect options={LETTER_STATUS_OPTIONS} placeholder="全部" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
-        <Form.Item name="fromUserId" label="发件人 ID">
+      <Col {...FILTER_COL_SHORT}>
+        <Form.Item name="fromUserId" label="发件人">
           <InputNumber style={{ width: '100%' }} min={1} placeholder="用户 ID" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
-        <Form.Item name="toUserId" label="收件人 ID">
+      <Col {...FILTER_COL_SHORT}>
+        <Form.Item name="toUserId" label="收件人">
           <InputNumber style={{ width: '100%' }} min={1} placeholder="用户 ID" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_TEXT}>
         <Form.Item name="keyword" label="关键词">
           <Input allowClear placeholder="正文模糊搜索" />
         </Form.Item>

@@ -18,22 +18,24 @@ public class DailyQuotaClaimServiceImpl extends ServiceImpl<DailyQuotaClaimMappe
 
     @Override
     public boolean hasClaimed(long userId, LocalDate claimDate) {
-        if (claimDate == null) {
-            return false;
-        }
-        return count(new LambdaQueryWrapper<DailyQuotaClaimDomain>()
-                .eq(DailyQuotaClaimDomain::getUserId, userId)
-                .eq(DailyQuotaClaimDomain::getClaimDate, claimDate)
-                .eq(DailyQuotaClaimDomain::isDelFlag, false)) > 0;
+        return findClaim(userId, claimDate) != null;
     }
 
     @Override
-    public DailyQuotaClaimDomain claim(long userId, LocalDate claimDate, int quotaAmount, long actorId) {
-        DailyQuotaClaimDomain existing = getOne(new LambdaQueryWrapper<DailyQuotaClaimDomain>()
+    public DailyQuotaClaimDomain findClaim(long userId, LocalDate claimDate) {
+        if (claimDate == null) {
+            return null;
+        }
+        return getOne(new LambdaQueryWrapper<DailyQuotaClaimDomain>()
                 .eq(DailyQuotaClaimDomain::getUserId, userId)
                 .eq(DailyQuotaClaimDomain::getClaimDate, claimDate)
                 .eq(DailyQuotaClaimDomain::isDelFlag, false)
                 .last("LIMIT 1"));
+    }
+
+    @Override
+    public DailyQuotaClaimDomain claim(long userId, LocalDate claimDate, int quotaAmount, long actorId) {
+        DailyQuotaClaimDomain existing = findClaim(userId, claimDate);
         if (existing != null) {
             return existing;
         }
@@ -48,11 +50,20 @@ public class DailyQuotaClaimServiceImpl extends ServiceImpl<DailyQuotaClaimMappe
             return row;
         } catch (DuplicateKeyException e) {
             log.info("daily quota claim race, reuse existing, userId={}, date={}", userId, claimDate);
-            return getOne(new LambdaQueryWrapper<DailyQuotaClaimDomain>()
-                    .eq(DailyQuotaClaimDomain::getUserId, userId)
-                    .eq(DailyQuotaClaimDomain::getClaimDate, claimDate)
-                    .eq(DailyQuotaClaimDomain::isDelFlag, false)
-                    .last("LIMIT 1"));
+            return findClaim(userId, claimDate);
         }
+    }
+
+    @Override
+    public DailyQuotaClaimDomain upsertQuotaAmount(long userId, LocalDate claimDate, int quotaAmount, long actorId) {
+        DailyQuotaClaimDomain existing = findClaim(userId, claimDate);
+        if (existing == null) {
+            return claim(userId, claimDate, quotaAmount, actorId);
+        }
+        existing.setQuotaAmount(quotaAmount);
+        existing.updateAudit(actorId);
+        updateById(existing);
+        log.info("daily quota amount updated, userId={}, date={}, amount={}", userId, claimDate, quotaAmount);
+        return existing;
     }
 }

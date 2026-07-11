@@ -21,6 +21,7 @@ import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.SensitiveWordService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.biz.support.DeliveryDelayCalculator;
+import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.common.constant.BehaviorActionTypes;
@@ -47,7 +48,6 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -63,11 +63,9 @@ import java.util.stream.Collectors;
 public class AppMailboxServiceImpl implements AppMailboxService {
 
     private static final int USER_STATUS_NORMAL = 1;
-    private static final String LETTER_DAILY_QUOTA_KEY = "letter.daily_quota";
     private static final String LETTER_MAX_LENGTH_KEY = "letter.max_length";
     private static final int DEFAULT_MAX_LETTER_LENGTH = 5000;
     private static final String AUDIT_AUTO_APPROVE_SEC = "audit.auto_approve_seconds";
-    private static final int DEFAULT_DAILY_LETTER_QUOTA = 5;
 
     private final LetterService letterService;
     private final FriendshipService friendshipService;
@@ -262,23 +260,20 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         return toItem(saved, fromUserId, false);
     }
 
-    /** 非 VIP：须先领取今日额度，且未超发。 */
+    /** 非 VIP：须先领取今日额度，且未超发（上限取 claim.quota_amount）。 */
     private void assertDailyQuota(long fromUserId, UserDTO sender) {
         if (Boolean.TRUE.equals(sender.getIsVip())) {
             return;
         }
-        LocalDate today = LocalDate.now();
-        if (!dailyQuotaClaimService.hasClaimed(fromUserId, today)) {
+        DailyQuotaSupport.Snapshot snap = DailyQuotaSupport.resolve(
+                fromUserId, sender, configService, dailyQuotaClaimService, letterService);
+        if (!snap.claimed()) {
             log.info("letter send rejected: daily quota not claimed, userId={}", fromUserId);
             throw new BusinessException(appMessages.get("app.error.letter.quotaNotClaimed"));
         }
-        int quota = configService.getInt(LETTER_DAILY_QUOTA_KEY, DEFAULT_DAILY_LETTER_QUOTA);
-        LocalDateTime dayStart = today.atStartOfDay();
-        LocalDateTime dayEnd = today.atTime(LocalTime.MAX);
-        long sent = letterService.countSentQuotaByFromUserBetween(fromUserId, dayStart, dayEnd);
-        if (sent >= quota) {
-            log.info("letter send rejected: daily quota exhausted, userId={}, sent={}, quota={}",
-                    fromUserId, sent, quota);
+        if (snap.remaining() <= 0) {
+            log.info("letter send rejected: daily quota exhausted, userId={}, sent={}, cap={}",
+                    fromUserId, snap.sentToday(), snap.cap());
             throw new BusinessException(appMessages.get("app.error.letter.dailyQuotaExhausted"));
         }
     }

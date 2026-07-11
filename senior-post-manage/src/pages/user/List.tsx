@@ -22,11 +22,17 @@ import type { ColumnsType } from 'antd/es/table'
 import { DeleteOutlined, LoadingOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import AdminProTable from '../../components/admin/AdminProTable'
+import { useSearchParams } from 'react-router-dom'
+import AdminProTable, {
+  FILTER_COL_RANGE,
+  FILTER_COL_SHORT,
+  FILTER_COL_TEXT,
+} from '../../components/admin/AdminProTable'
 import EnumSelect, {
   AVATAR_AUDIT_OPTIONS,
   GENDER_OPTIONS,
   USER_STATUS_OPTIONS,
+  labelOf,
 } from '../../components/admin/EnumSelect'
 import { api } from '../../services/api'
 import { signObjectKeysForPreview, uploadAdminUserAvatar } from '../../services/ossUpload'
@@ -46,9 +52,16 @@ type UserRow = {
   isVip?: boolean
   birthYear?: number
   countryCode?: string
+  city?: string
   bio?: string
+  emailVerified?: boolean
+  firstLetterDone?: boolean
   createdAt?: string
   lastLoginAt?: string
+  quotaClaimedToday?: boolean
+  sentToday?: number
+  dailyQuotaCap?: number
+  remainingQuota?: number
 }
 
 const AVATAR_AUDIT_LABEL: Record<number, { label: string; color: string }> = {
@@ -94,6 +107,7 @@ async function signAvatarKeys(rows: UserRow[]): Promise<Record<number, string>> 
 
 /** 用户运营列表：多维筛选、分页、批量封禁/解封、资料编辑与头像审核。 */
 export default function UserList() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [rows, setRows] = useState<UserRow[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -113,8 +127,12 @@ export default function UserList() {
   const [devicesLoading, setDevicesLoading] = useState(false)
   const [manualUuid, setManualUuid] = useState('')
   const [manualReason, setManualReason] = useState('')
+  const [quotaUser, setQuotaUser] = useState<UserRow | null>(null)
+  const [quotaRemaining, setQuotaRemaining] = useState<number>(0)
+  const [quotaSaving, setQuotaSaving] = useState(false)
   const [filterForm] = Form.useForm()
   const [userForm] = Form.useForm()
+  const [moreFilters, setMoreFilters] = useState(false)
 
   useEffect(() => {
     api
@@ -176,6 +194,44 @@ export default function UserList() {
     void load(1, pageSize)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // 其它列表 UserCell 跳转 /user?edit=id → 打开用户编辑弹窗
+  useEffect(() => {
+    const raw = searchParams.get('edit')
+    if (!raw) return
+    const editId = Number(raw)
+    if (!Number.isFinite(editId) || editId <= 0) {
+      clearEditQuery()
+      return
+    }
+    if (userModalOpen && editingUser?.id === editId) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const u = (await api.userDetail(editId)) as unknown as UserRow
+        if (cancelled) return
+        openUserEditModal(u)
+        if (u.avatarUrl?.trim()) {
+          const preview = await signObjectKeysForPreview([u.avatarUrl.trim()])
+          if (!cancelled && preview) setEditAvatarPreview(preview)
+        }
+      } catch (e: any) {
+        message.error(e.message || '打开用户失败')
+        clearEditQuery()
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
+
+  const clearEditQuery = () => {
+    if (!searchParams.has('edit')) return
+    const next = new URLSearchParams(searchParams)
+    next.delete('edit')
+    setSearchParams(next, { replace: true })
+  }
 
   const openDeviceModal = (user: UserRow) => {
     setDeviceUser(user)
@@ -301,6 +357,7 @@ export default function UserList() {
       setEditingUser(null)
       setEditAvatarPreview(null)
       userForm.resetFields()
+      clearEditQuery()
       void load()
     } catch (e: any) {
       if (e?.errorFields) return
@@ -323,6 +380,42 @@ export default function UserList() {
     } catch (e: any) {
       console.error('userBatchStatus failed', e?.message)
       message.error(e.message || '批量操作失败')
+    }
+  }
+
+  const batchAvatar = async (approve: boolean) => {
+    if (!selectedIds.length) {
+      message.warning('请先勾选用户')
+      return
+    }
+    try {
+      if (approve) await api.userBatchApproveAvatar(selectedIds)
+      else await api.userBatchRejectAvatar(selectedIds)
+      message.success(approve ? '已批量通过头像' : '已批量驳回头像')
+      void load()
+    } catch (e: any) {
+      console.error('batch avatar failed', e?.message)
+      message.error(e.message || '批量头像审核失败')
+    }
+  }
+
+  const openQuotaModal = (user: UserRow) => {
+    setQuotaUser(user)
+    setQuotaRemaining(Number(user.remainingQuota ?? 0))
+  }
+
+  const submitQuotaAdjust = async () => {
+    if (!quotaUser) return
+    setQuotaSaving(true)
+    try {
+      await api.userQuotaAdjust(quotaUser.id, Number(quotaRemaining) || 0)
+      message.success('当日额度已调整（次日不累计）')
+      setQuotaUser(null)
+      void load()
+    } catch (e: any) {
+      message.error(e.message || '调整失败')
+    } finally {
+      setQuotaSaving(false)
     }
   }
 
@@ -353,13 +446,62 @@ export default function UserList() {
           )
         },
       },
-      { title: '邮箱', dataIndex: 'email', ellipsis: true },
-      { title: '昵称', dataIndex: 'nickname', width: 120 },
-      { title: '国家', dataIndex: 'countryCode', width: 72 },
+      { title: '邮箱', dataIndex: 'email', ellipsis: true, width: 160 },
+      { title: '昵称', dataIndex: 'nickname', width: 100 },
+      {
+        title: '性别',
+        dataIndex: 'gender',
+        width: 64,
+        render: (v: number) => labelOf(GENDER_OPTIONS, v),
+      },
+      { title: '出生年', dataIndex: 'birthYear', width: 72 },
+      { title: '国家', dataIndex: 'countryCode', width: 64 },
+      { title: '城市', dataIndex: 'city', width: 88, ellipsis: true },
+      {
+        title: '邮箱验证',
+        dataIndex: 'emailVerified',
+        width: 80,
+        render: (v: boolean) => (v ? <Tag color="green">已验证</Tag> : <Text type="secondary">未验证</Text>),
+      },
+      {
+        title: '首封信',
+        dataIndex: 'firstLetterDone',
+        width: 72,
+        render: (v: boolean) => (v ? <Tag color="blue">完成</Tag> : <Tag>未完成</Tag>),
+      },
+      {
+        title: '今日额度',
+        width: 120,
+        render: (_, r) => {
+          if (r.isVip) return <Tag color="gold">VIP</Tag>
+          if (!r.quotaClaimedToday) return <Text type="secondary">未领取</Text>
+          return (
+            <Text>
+              剩 {r.remainingQuota ?? 0}/{r.dailyQuotaCap ?? '—'}
+              <br />
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                已用 {r.sentToday ?? 0}
+              </Text>
+            </Text>
+          )
+        },
+      },
+      {
+        title: '注册时间',
+        dataIndex: 'createdAt',
+        width: 110,
+        render: (v: string) => (v ? dayjs(v).format('YYYY-MM-DD') : '—'),
+      },
+      {
+        title: '最后登录',
+        dataIndex: 'lastLoginAt',
+        width: 110,
+        render: (v: string) => (v ? dayjs(v).format('YYYY-MM-DD') : '—'),
+      },
       {
         title: '状态',
         dataIndex: 'status',
-        width: 80,
+        width: 72,
         render: (v: number) => {
           const opt = USER_STATUS_OPTIONS.find((o) => o.value === v)
           const color = v === 1 ? 'green' : v === 2 ? 'red' : 'default'
@@ -375,14 +517,14 @@ export default function UserList() {
       {
         title: '管理后台',
         dataIndex: 'staffRole',
-        width: 88,
+        width: 80,
         render: (v: number | null | undefined) =>
           v != null && v !== 0 ? <Tag color="blue">管理员</Tag> : <Text type="secondary">否</Text>,
       },
       {
         title: '操作',
         fixed: 'right',
-        width: 300,
+        width: 340,
         render: (_, r) => {
           const hasAvatar = !!r.avatarUrl?.trim()
           const audit = r.avatarAuditStatus ?? (hasAvatar ? 1 : 0)
@@ -390,6 +532,9 @@ export default function UserList() {
             <Space wrap size={[4, 4]}>
               <Button size="small" onClick={() => openUserEditModal(r)}>
                 编辑
+              </Button>
+              <Button size="small" onClick={() => openQuotaModal(r)}>
+                调整额度
               </Button>
               <Tooltip title={!hasAvatar ? '无头像' : audit === 1 ? '已通过' : '通过审核'}>
                 <Button
@@ -467,68 +612,79 @@ export default function UserList() {
 
   const filterItems = (
     <>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_TEXT}>
         <Form.Item name="email" label="邮箱">
           <Input allowClear placeholder="模糊搜索" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_TEXT}>
         <Form.Item name="nickname" label="昵称">
           <Input allowClear placeholder="模糊搜索" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="status" label="状态">
           <EnumSelect options={USER_STATUS_OPTIONS} placeholder="全部" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="gender" label="性别">
           <EnumSelect options={GENDER_OPTIONS} placeholder="全部" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="countryCode" label="国家">
           <EnumSelect options={countryOptions} placeholder="全部" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
-        <Form.Item name="minBirthYear" label="出生年起">
-          <InputNumber style={{ width: '100%' }} placeholder="如 1950" />
+      <Col flex="none">
+        <Form.Item style={{ marginBottom: 0 }}>
+          <Button type="link" size="small" onClick={() => setMoreFilters((v) => !v)} style={{ paddingInline: 4 }}>
+            {moreFilters ? '收起筛选' : '更多筛选'}
+          </Button>
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
-        <Form.Item name="maxBirthYear" label="出生年止">
-          <InputNumber style={{ width: '100%' }} placeholder="如 1990" />
-        </Form.Item>
-      </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
-        <Form.Item name="isVip" label="VIP">
-          <Select
-            allowClear
-            placeholder="全部"
-            options={[
-              { value: true, label: '是' },
-              { value: false, label: '否' },
-            ]}
-          />
-        </Form.Item>
-      </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
-        <Form.Item name="avatarAuditStatus" label="头像审核">
-          <EnumSelect options={AVATAR_AUDIT_OPTIONS} placeholder="全部" />
-        </Form.Item>
-      </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
-        <Form.Item name="createdRange" label="注册时间">
-          <RangePicker style={{ width: '100%' }} />
-        </Form.Item>
-      </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
-        <Form.Item name="lastLoginRange" label="最后登录">
-          <RangePicker style={{ width: '100%' }} />
-        </Form.Item>
-      </Col>
+      {moreFilters && (
+        <>
+          <Col {...FILTER_COL_SHORT}>
+            <Form.Item name="minBirthYear" label="出生年起">
+              <InputNumber style={{ width: '100%' }} placeholder="如 1950" />
+            </Form.Item>
+          </Col>
+          <Col {...FILTER_COL_SHORT}>
+            <Form.Item name="maxBirthYear" label="出生年止">
+              <InputNumber style={{ width: '100%' }} placeholder="如 1990" />
+            </Form.Item>
+          </Col>
+          <Col {...FILTER_COL_SHORT}>
+            <Form.Item name="isVip" label="VIP">
+              <Select
+                allowClear
+                placeholder="全部"
+                options={[
+                  { value: true, label: '是' },
+                  { value: false, label: '否' },
+                ]}
+              />
+            </Form.Item>
+          </Col>
+          <Col {...FILTER_COL_SHORT}>
+            <Form.Item name="avatarAuditStatus" label="头像审核">
+              <EnumSelect options={AVATAR_AUDIT_OPTIONS} placeholder="全部" />
+            </Form.Item>
+          </Col>
+          <Col {...FILTER_COL_RANGE}>
+            <Form.Item name="createdRange" label="注册时间">
+              <RangePicker style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+          <Col {...FILTER_COL_RANGE}>
+            <Form.Item name="lastLoginRange" label="最后登录">
+              <RangePicker style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+        </>
+      )}
     </>
   )
 
@@ -549,6 +705,12 @@ export default function UserList() {
             <Button disabled={!selectedIds.length} onClick={() => void batchStatus(1)}>
               批量解封
             </Button>
+            <Button type="primary" disabled={!selectedIds.length} onClick={() => void batchAvatar(true)}>
+              批量通过头像
+            </Button>
+            <Button danger disabled={!selectedIds.length} onClick={() => void batchAvatar(false)}>
+              批量驳回头像
+            </Button>
             <Button onClick={() => void load()}>刷新</Button>
           </Space>
         }
@@ -563,9 +725,36 @@ export default function UserList() {
           selectedRowKeys: selectedIds,
           onChange: (keys) => setSelectedIds(keys.map(Number)),
         }}
-        scrollX={1200}
+        scrollX={1800}
       />
 
+      <Modal
+        title={quotaUser ? `调整今日免费额度 — #${quotaUser.id}` : '调整额度'}
+        open={!!quotaUser}
+        onCancel={() => setQuotaUser(null)}
+        onOk={() => void submitQuotaAdjust()}
+        confirmLoading={quotaSaving}
+        destroyOnClose
+      >
+        <p style={{ color: '#666', marginBottom: 12 }}>
+          免费额度按日领取，未用完不累计到次日。调整的是「今日剩余次数」；保存后会写入当日领取上限。
+        </p>
+        {quotaUser && (
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <Text>
+              当前：已领 {quotaUser.quotaClaimedToday ? '是' : '否'} / 已用 {quotaUser.sentToday ?? 0} / 上限{' '}
+              {quotaUser.dailyQuotaCap ?? '—'} / 剩余 {quotaUser.remainingQuota ?? 0}
+            </Text>
+            <InputNumber
+              min={0}
+              style={{ width: '100%' }}
+              value={quotaRemaining}
+              onChange={(v) => setQuotaRemaining(Number(v) || 0)}
+              addonBefore="调整后剩余"
+            />
+          </Space>
+        )}
+      </Modal>
       <Modal
         title={deviceUser ? `设备 — 用户 #${deviceUser.id}` : '设备'}
         open={deviceModalOpen}
@@ -632,6 +821,7 @@ export default function UserList() {
           setEditingUser(null)
           setEditAvatarPreview(null)
           userForm.resetFields()
+          clearEditQuery()
         }}
         confirmLoading={savingUser}
         okText="保存"
@@ -645,6 +835,29 @@ export default function UserList() {
           <Form.Item label="邮箱" name="email">
             <Input disabled />
           </Form.Item>
+          {editingUser && (
+            <div style={{ marginBottom: 16, padding: '8px 12px', background: '#faf7f2', borderRadius: 8 }}>
+              <Text type="secondary">今日免费额度：</Text>
+              {editingUser.isVip ? (
+                <Tag color="gold">VIP</Tag>
+              ) : (
+                <Text>
+                  {editingUser.quotaClaimedToday ? '已领取' : '未领取'} · 剩余{' '}
+                  {editingUser.remainingQuota ?? 0} / 上限 {editingUser.dailyQuotaCap ?? '—'} · 已用{' '}
+                  {editingUser.sentToday ?? 0}
+                </Text>
+              )}
+              <Button
+                type="link"
+                size="small"
+                onClick={() => {
+                  openQuotaModal(editingUser)
+                }}
+              >
+                调整
+              </Button>
+            </div>
+          )}
           <Form.Item name="avatarUrl" hidden>
             <Input />
           </Form.Item>
