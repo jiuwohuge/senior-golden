@@ -5,6 +5,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal_button.dart';
 import '../../widgets/postal/postal_card_envelope.dart';
 import '../../widgets/postal/postal_snack.dart';
@@ -21,16 +22,24 @@ class PostOfficeHomePage extends ConsumerStatefulWidget {
 
 class _PostOfficeHomePageState extends ConsumerState<PostOfficeHomePage> {
   bool _claimDialogScheduled = false;
+  bool _claimDialogVisible = false;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final homeAsync = ref.watch(postOfficeHomeProvider);
+    final firstLetterDone =
+        ref.watch(appSessionProvider).user.firstLetterDone == true;
 
-    // 每日额度未领取：不可关闭弹窗。
+    // 仅首封信完成后弹额度领取；避免挡住引导页 / 造成灰屏。
     homeAsync.whenData((h) {
-      if (!h.quotaClaimedToday && !_claimDialogScheduled) {
+      final sessionDone =
+          firstLetterDone || h.firstLetterDone;
+      if (sessionDone &&
+          !h.quotaClaimedToday &&
+          !_claimDialogScheduled &&
+          !_claimDialogVisible) {
         _claimDialogScheduled = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) _showQuotaClaimDialog(h);
@@ -194,7 +203,7 @@ class _PostOfficeHomePageState extends ConsumerState<PostOfficeHomePage> {
                       Icon(
                         Icons.schedule_send_outlined,
                         size: 32,
-                        color: PostalTokens.kraftBrown,
+                        color: PostalTokens.stampVermilion,
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -227,58 +236,74 @@ class _PostOfficeHomePageState extends ConsumerState<PostOfficeHomePage> {
   }
 
   Future<void> _showQuotaClaimDialog(PostOfficeHomeData home) async {
+    if (!mounted || _claimDialogVisible) return;
+    _claimDialogVisible = true;
     final l10n = AppLocalizations.of(context)!;
     var claiming = false;
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dlgCtx) {
-        return StatefulBuilder(
-          builder: (ctx, setLocal) {
-            return PopScope(
-              canPop: false,
-              child: AlertDialog(
-                icon: Icon(
-                  Icons.card_giftcard_outlined,
-                  color: PostalTokens.postboxGreen,
-                  size: 48,
-                ),
-                title: Text(l10n.quotaClaimTitle),
-                content: Text(l10n.quotaClaimMessage(home.dailyLetterQuota)),
-                actions: [
-                  PostalButton(
-                    label: l10n.quotaClaimButton,
-                    busy: claiming,
-                    onPressed: claiming
-                        ? null
-                        : () async {
-                            setLocal(() => claiming = true);
-                            try {
-                              await ref
-                                  .read(postOfficeRemoteRepositoryProvider)
-                                  .claimDailyQuota();
-                              ref.invalidate(postOfficeHomeProvider);
-                              if (dlgCtx.mounted) Navigator.of(dlgCtx).pop();
-                            } catch (e) {
-                              final biz = apiBusinessExceptionFrom(e);
-                              if (ctx.mounted) {
-                                PostalSnack.show(
-                                  ctx,
-                                  biz?.message ?? e.toString(),
-                                  tone: PostalSnackTone.error,
-                                );
-                              }
-                              setLocal(() => claiming = false);
-                            }
-                          },
+    try {
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dlgCtx) {
+          return StatefulBuilder(
+            builder: (ctx, setLocal) {
+              return PopScope(
+                canPop: false,
+                child: AlertDialog(
+                  icon: Icon(
+                    Icons.card_giftcard_outlined,
+                    color: PostalTokens.postboxGreen,
+                    size: 48,
                   ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
+                  title: Text(l10n.quotaClaimTitle),
+                  content: Text(l10n.quotaClaimMessage(home.dailyLetterQuota)),
+                  actionsAlignment: MainAxisAlignment.center,
+                  actions: [
+                    // expand:false 避免 Dialog actions 零尺寸 hit-test 灰屏。
+                    SizedBox(
+                      width: 260,
+                      child: PostalButton(
+                        label: l10n.quotaClaimButton,
+                        expand: false,
+                        busy: claiming,
+                        onPressed: claiming
+                            ? null
+                            : () async {
+                                setLocal(() => claiming = true);
+                                try {
+                                  if (!mounted) return;
+                                  await ref
+                                      .read(postOfficeRemoteRepositoryProvider)
+                                      .claimDailyQuota();
+                                  if (!mounted) return;
+                                  ref.invalidate(postOfficeHomeProvider);
+                                  if (dlgCtx.mounted) {
+                                    Navigator.of(dlgCtx).pop();
+                                  }
+                                } catch (e) {
+                                  final biz = apiBusinessExceptionFrom(e);
+                                  if (ctx.mounted) {
+                                    PostalSnack.show(
+                                      ctx,
+                                      biz?.message ?? e.toString(),
+                                      tone: PostalSnackTone.error,
+                                    );
+                                  }
+                                  setLocal(() => claiming = false);
+                                }
+                              },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      );
+    } finally {
+      _claimDialogVisible = false;
+    }
   }
 }
 

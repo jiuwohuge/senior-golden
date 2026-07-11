@@ -58,6 +58,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   String? _manualCountryCode;
   double? _latitude;
   double? _longitude;
+  /// GPS/注册后由服务端回填的城市（只读展示）。
+  String? _resolvedCity;
   bool _geoTried = false;
 
   @override
@@ -338,6 +340,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           avatarUrl: _avatarObjectKey,
         );
     _accountRegistered = true;
+    if (!mounted) return;
+    final city = ref.read(appSessionProvider).user.city?.trim();
+    if (city != null && city.isNotEmpty) {
+      _resolvedCity = city;
+    }
   }
 
   Future<void> _uploadAvatarIfPossible(
@@ -347,10 +354,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final bytes = _avatarPendingBytes;
     if (bytes == null || _avatarObjectKey != null) return;
     if (!_validateRegistrationFields(l10n)) return;
+    if (!mounted) return;
 
     setState(() => _avatarUploading = true);
     try {
       await _registerIfNeeded(l10n, autoCountryCode);
+      if (!mounted) return;
       final key = await ref
           .read(ossUploadServiceProvider)
           .uploadAvatarImage(
@@ -358,10 +367,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             ext: 'jpg',
             contentType: 'image/jpeg',
           );
+      if (!mounted) return;
       await ref
           .read(authRepositoryProvider)
           .updateProfileOnServer(avatarUrl: key);
-      if (mounted) setState(() => _avatarObjectKey = key);
+      if (!mounted) return;
+      setState(() => _avatarObjectKey = key);
     } on ApiBusinessException catch (e) {
       if (mounted) {
         PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
@@ -374,16 +385,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   Future<void> _submit(AppLocalizations l10n, String? autoCountryCode) async {
     if (!_validateAllForSubmit(l10n)) return;
+    if (!mounted) return;
     setState(() => _busy = true);
     try {
+      // 先完成注册与头像上传，再导航，避免 dispose 后继续用 ref。
       if (!_accountRegistered) {
         await _registerIfNeeded(l10n, autoCountryCode);
+        if (!mounted) return;
         if (_avatarPendingBytes != null && _avatarObjectKey == null) {
           await _uploadAvatarIfPossible(l10n, autoCountryCode);
+          if (!mounted) return;
         }
       }
       if (!mounted) return;
+      final city = ref.read(appSessionProvider).user.city;
+      if (city != null && city.trim().isNotEmpty) {
+        _resolvedCity = city.trim();
+      }
       final done = ref.read(appSessionProvider).user.firstLetterDone == true;
+      if (!mounted) return;
       context.go(
         done ? MainShellRoute.pathPostOffice : FirstLetterGuidePage.path,
       );
@@ -830,11 +850,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               ],
             ),
           ),
+          if (_resolvedCity != null && _resolvedCity!.isNotEmpty)
+            _summaryRow(
+              context,
+              l10n.authRegisterSummaryCity,
+              _resolvedCity!,
+            ),
           if (_latitude != null && _longitude != null)
             _summaryRow(
               context,
               l10n.authRegisterSummaryLocation,
-              l10n.authRegisterLocationCaptured,
+              _resolvedCity != null && _resolvedCity!.isNotEmpty
+                  ? l10n.authRegisterLocationCaptured
+                  : l10n.authRegisterLocationPendingCity,
             ),
           _summaryRow(
             context,

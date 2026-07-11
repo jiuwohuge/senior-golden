@@ -1766,11 +1766,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'The time letter stays sealed until that date.';
 
   @override
-  String get composeStepMailTitle => 'Choose delivery type';
+  String get composeStepMailTitle => 'Choose template & paper';
 
   @override
   String get composeStepMailSubtitle =>
-      'Standard and registered mail both use delayed delivery. Registered may use a stamp for the filing mark (free for VIP).';
+      'Pick a template and paper first, then write the body.';
 
   @override
   String get composeStepSealTitle => 'Seal and send';
@@ -1788,6 +1788,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get composeSendNow => 'Send now';
+
+  @override
+  String get composeStepPreviewTitle => 'Preview letter';
+
+  @override
+  String get composeStepPreviewSubtitle =>
+      'Confirm paper and text before sending.';
 
   @override
   String get composeStepTopicSubmitTitle => 'Submit to topic mailbox';
@@ -2088,7 +2095,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get composeStepMailSubtitleSkins =>
-      'Choose paper and template; delivery speed follows distance and relationship.';
+      'Choose template and paper first, then write.';
 
   @override
   String get commerceProductSkinLinen => 'Linen paper';
@@ -2104,4 +2111,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authRegisterLocationCaptured => 'Captured (optional)';
+
+  @override
+  String get authRegisterSummaryCity => 'City';
+
+  @override
+  String get authRegisterLocationPendingCity =>
+      'Located — city will be filled automatically';
+
+  @override
+  String get profileCity => 'City';
+
+  @override
+  String get profileCityHint => 'Detected from location; shown read-only';
 }

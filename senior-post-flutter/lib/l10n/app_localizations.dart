@@ -3257,13 +3257,13 @@ abstract class AppLocalizations {
   /// No description provided for @composeStepMailTitle.
   ///
   /// In en, this message translates to:
-  /// **'Choose delivery type'**
+  /// **'Choose template & paper'**
   String get composeStepMailTitle;
 
   /// No description provided for @composeStepMailSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Standard and registered mail both use delayed delivery. Registered may use a stamp for the filing mark (free for VIP).'**
+  /// **'Pick a template and paper first, then write the body.'**
   String get composeStepMailSubtitle;
 
   /// No description provided for @composeStepSealTitle.
@@ -3295,6 +3295,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send now'**
   String get composeSendNow;
+
+  /// No description provided for @composeStepPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview letter'**
+  String get composeStepPreviewTitle;
+
+  /// No description provided for @composeStepPreviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm paper and text before sending.'**
+  String get composeStepPreviewSubtitle;
 
   /// No description provided for @composeStepTopicSubmitTitle.
   ///
@@ -3839,7 +3851,7 @@ abstract class AppLocalizations {
   /// No description provided for @composeStepMailSubtitleSkins.
   ///
   /// In en, this message translates to:
-  /// **'Choose paper and template; delivery speed follows distance and relationship.'**
+  /// **'Choose template and paper first, then write.'**
   String get composeStepMailSubtitleSkins;
 
   /// No description provided for @commerceProductSkinLinen.
@@ -3871,6 +3883,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Captured (optional)'**
   String get authRegisterLocationCaptured;
+
+  /// No description provided for @authRegisterSummaryCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get authRegisterSummaryCity;
+
+  /// No description provided for @authRegisterLocationPendingCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Located — city will be filled automatically'**
+  String get authRegisterLocationPendingCity;
+
+  /// No description provided for @profileCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get profileCity;
+
+  /// No description provided for @profileCityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected from location; shown read-only'**
+  String get profileCityHint;
 }
 
 class _AppLocalizationsDelegate

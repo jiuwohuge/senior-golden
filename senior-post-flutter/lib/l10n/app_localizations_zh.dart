@@ -1666,10 +1666,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get composeStepDeliverySubtitle => '时光信会在所选日期才拆阅。';
 
   @override
-  String get composeStepMailTitle => '选择投递方式';
+  String get composeStepMailTitle => '选择模板与信纸';
 
   @override
-  String get composeStepMailSubtitle => '平邮与挂号均按延迟公式投递；挂号信可用邮票标记（VIP 免费）。';
+  String get composeStepMailSubtitle => '先选模板与信纸，再填写正文。';
 
   @override
   String get composeStepSealTitle => '封缄寄出';
@@ -1685,6 +1685,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get composeSendNow => '立即寄出';
+
+  @override
+  String get composeStepPreviewTitle => '预览信件';
+
+  @override
+  String get composeStepPreviewSubtitle => '确认信纸与正文后再寄出。';
 
   @override
   String get composeStepTopicSubmitTitle => '投进主题信箱';
@@ -1970,7 +1976,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get composeTemplateApplied => '已填入正文，可继续修改';
 
   @override
-  String get composeStepMailSubtitleSkins => '选择信纸与模板；投递速度由距离与关系决定。';
+  String get composeStepMailSubtitleSkins => '先选模板与信纸，再填写正文。';
 
   @override
   String get commerceProductSkinLinen => '亚麻信纸';
@@ -1986,4 +1992,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get authRegisterLocationCaptured => '已获取（可选）';
+
+  @override
+  String get authRegisterSummaryCity => '城市';
+
+  @override
+  String get authRegisterLocationPendingCity => '已定位，城市将由系统自动识别';
+
+  @override
+  String get profileCity => '城市';
+
+  @override
+  String get profileCityHint => '由定位自动识别，可在资料中查看';
 }

@@ -15,9 +15,9 @@ class PostOfficeHomeData {
     required this.sentToday,
     required this.relationMessageCount,
     required this.inTransitCount,
-    this.quotaClaimedToday = true,
+    this.quotaClaimedToday = false,
     this.remainingQuotaOverride,
-    this.firstLetterDone = true,
+    this.firstLetterDone = false,
   });
 
   final String greeting;
@@ -99,9 +99,9 @@ class PostOfficeRemoteRepository {
         relationMessageCount:
             (data['relationMessageCount'] as num?)?.toInt() ?? 0,
         inTransitCount: (data['inTransitCount'] as num?)?.toInt() ?? 0,
-        quotaClaimedToday: data['quotaClaimedToday'] as bool? ?? true,
+        quotaClaimedToday: data['quotaClaimedToday'] as bool? ?? false,
         remainingQuotaOverride: (data['remainingQuota'] as num?)?.toInt(),
-        firstLetterDone: data['firstLetterDone'] as bool? ?? true,
+        firstLetterDone: data['firstLetterDone'] as bool? ?? false,
       );
     } on DioException catch (e) {
       debugPrint('post-office home failed: $e');

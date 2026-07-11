@@ -25,9 +25,10 @@ import 'compose_step_scaffold.dart';
 enum _ComposeStep {
   destination,
   pickPenPal,
+  mailOptions,
   body,
   deliveryDate,
-  mailOptions,
+  preview,
   seal,
   send,
 }
@@ -108,15 +109,21 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     if (_needsPenPalPicker) {
       steps.add(_ComposeStep.pickPenPal);
     }
-    steps.add(_ComposeStep.body);
     switch (_kind) {
       case ComposeKind.selfTimeLetter:
       case ComposeKind.penPalTimeLetter:
+        // 模板信纸 → 正文 → 送达 → 预览 → 封缄
+        steps.add(_ComposeStep.mailOptions);
+        steps.add(_ComposeStep.body);
         steps.add(_ComposeStep.deliveryDate);
+        steps.add(_ComposeStep.preview);
         steps.add(_ComposeStep.seal);
       case ComposeKind.penPalMail:
       case ComposeKind.postOffice:
+        // 模板信纸 → 正文 → 预览 → 发送
         steps.add(_ComposeStep.mailOptions);
+        steps.add(_ComposeStep.body);
+        steps.add(_ComposeStep.preview);
         steps.add(_ComposeStep.send);
       case null:
         break;
@@ -175,6 +182,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         }
       case _ComposeStep.deliveryDate:
       case _ComposeStep.mailOptions:
+      case _ComposeStep.preview:
       case _ComposeStep.seal:
       case _ComposeStep.send:
         break;
@@ -362,6 +370,12 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           subtitle: l10n.composeStepMailSubtitleSkins,
           footer: null,
         );
+      case _ComposeStep.preview:
+        return (
+          title: l10n.composeStepPreviewTitle,
+          subtitle: l10n.composeStepPreviewSubtitle,
+          footer: null,
+        );
       case _ComposeStep.seal:
         return (
           title: l10n.composeStepSealTitle,
@@ -521,11 +535,18 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
               _seedParagraphs = paragraphs.isEmpty ? [''] : paragraphs;
               _bodyText = LetterComposeEditor.joinParagraphs(_seedParagraphs);
               _editorEpoch += 1;
-              // 回到正文步预览模板填充效果。
-              final bodyIdx = _steps.indexOf(_ComposeStep.body);
-              if (bodyIdx >= 0) _stepIndex = bodyIdx;
             });
+            // 选模板后进入正文步继续编辑。
+            final bodyIdx = _steps.indexOf(_ComposeStep.body);
+            if (bodyIdx >= 0) {
+              setState(() => _stepIndex = bodyIdx);
+            }
           },
+        );
+      case _ComposeStep.preview:
+        return _LetterPreviewStep(
+          skinId: _selectedSkinId,
+          bodyText: _bodyText,
         );
       case _ComposeStep.seal:
         return Align(
@@ -810,6 +831,65 @@ class _PickPenPalStep extends ConsumerWidget {
           },
         );
       },
+    );
+  }
+}
+
+/// 写信预览：信纸底色 + 分段正文。
+class _LetterPreviewStep extends StatelessWidget {
+  const _LetterPreviewStep({
+    required this.skinId,
+    required this.bodyText,
+  });
+
+  final String? skinId;
+  final String bodyText;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final paragraphs = bodyText
+        .split(RegExp(r'\n\s*\n'))
+        .map((p) => p.trim())
+        .where((p) => p.isNotEmpty)
+        .toList();
+    return ListView(
+      physics: const ClampingScrollPhysics(),
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
+          decoration: BoxDecoration(
+            color: letterSkinBackground(skinId),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: PostalTokens.kraftBrownMuted.withValues(alpha: 0.55),
+            ),
+          ),
+          child: paragraphs.isEmpty
+              ? Text(
+                  '—',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: PostalTokens.inkSecondary,
+                  ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (var i = 0; i < paragraphs.length; i++) ...[
+                      if (i > 0) const SizedBox(height: 16),
+                      Text(
+                        paragraphs[i],
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          height: 1.55,
+                          color: PostalTokens.inkNavy,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+        ),
+      ],
     );
   }
 }

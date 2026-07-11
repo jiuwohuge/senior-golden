@@ -473,6 +473,21 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                       onChanged: (v) => setState(() => _countryCode = v),
                     ),
                     const SizedBox(height: 12),
+                    // 城市由定位/IP 反查写入，只读展示。
+                    InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: l10n.profileCity,
+                        helperText: l10n.profileCityHint,
+                      ),
+                      child: Text(
+                        (ref.watch(appSessionProvider).user.city?.trim().isNotEmpty ==
+                                true)
+                            ? ref.watch(appSessionProvider).user.city!.trim()
+                            : '—',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     PostalTextField(
                       controller: _bio,
                       label: l10n.profileBio,
