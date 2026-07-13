@@ -5,11 +5,13 @@
     <parent>
         <groupId>cn.nine.commons</groupId>
         <artifactId>commons-framework</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <groupId>cn.nine.pros</groupId>
     <artifactId>senior-post-pom</artifactId>
+    <!-- 显式固定产品版本，勿继承 commons-framework 的 1.1-SNAPSHOT，否则子模块 parent 1.0-SNAPSHOT 会对不上 -->
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>

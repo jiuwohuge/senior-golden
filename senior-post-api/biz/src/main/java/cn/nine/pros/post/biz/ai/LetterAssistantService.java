@@ -25,8 +25,15 @@ public class LetterAssistantService {
     private final AppMessages appMessages;
 
     public AppLetterAssistantVO assist(long userId, AppLetterAssistantInDto body) {
-        if (chatModelProvider.getIfAvailable() == null || chatClientProvider.getIfAvailable() == null) {
+        ChatModel chatModel = chatModelProvider.getIfAvailable();
+        ChatClient chatClient = chatClientProvider.getIfAvailable();
+        if (chatModel == null) {
+            log.warn("letter assistant unavailable: ChatModel bean missing (check SPRING_AI_MODEL_CHAT=deepseek)");
             throw new BusinessException(appMessages.get("app.error.letter.assistantUnavailable"));
+        }
+        // ChatClient 可能因装配顺序未单独成 Bean；有 ChatModel 时现场构建
+        if (chatClient == null) {
+            chatClient = ChatClient.builder(chatModel).build();
         }
         String source = body.getSourceText() == null ? "" : body.getSourceText().trim();
         if (!StringUtils.hasText(source)) {
@@ -42,7 +49,7 @@ public class LetterAssistantService {
 
         long start = System.currentTimeMillis();
         try {
-            String suggestion = chatClientProvider.getObject()
+            String suggestion = chatClient
                     .prompt()
                     .system(system)
                     .user(user)

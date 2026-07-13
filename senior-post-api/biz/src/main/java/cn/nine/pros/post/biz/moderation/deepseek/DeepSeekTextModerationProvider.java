@@ -3,22 +3,24 @@ package cn.nine.pros.post.biz.moderation.deepseek;
 import cn.nine.pros.post.biz.moderation.ModerationVerdict;
 import cn.nine.pros.post.biz.moderation.TextModerationProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.Locale;
 
 /**
- * 文本机审：经 Spring AI {@link ChatModel} 调用 LLM，解析 JSON 判定结果。
- * <p>与 {@link NoOpTextModerationProvider} 互斥（有 ChatModel Bean 时启用）。
+ * 文本机审：有 Spring AI {@link ChatModel} 时走 LLM；否则 SKIPPED。
+ * <p>使用 {@link ObjectProvider} 延迟取 Bean，避免用户配置阶段 {@code @ConditionalOnBean(ChatModel)}
+ * 早于 DeepSeek 自动配置求值导致永远走 NoOp。
  */
 @Slf4j
 @Component
-@ConditionalOnBean(ChatModel.class)
+@RequiredArgsConstructor
 public class DeepSeekTextModerationProvider implements TextModerationProvider {
 
     private static final int MAX_CONTENT_LEN = 2000;
@@ -26,22 +28,26 @@ public class DeepSeekTextModerationProvider implements TextModerationProvider {
     private static final String SYSTEM_PROMPT =
             "Respond JSON only: {\"pass\":boolean,\"severity\":\"none|low|high\",\"categories\":[],\"reason\":\"\"}";
 
-    private final ChatClient chatClient;
+    private final ObjectProvider<ChatModel> chatModelProvider;
+    private final ObjectProvider<ChatClient> chatClientProvider;
     private final ObjectMapper objectMapper;
-
-    public DeepSeekTextModerationProvider(ChatClient letterChatClient, ObjectMapper objectMapper) {
-        this.chatClient = letterChatClient;
-        this.objectMapper = objectMapper;
-    }
 
     @Override
     public TextModerationResult auditText(String content) {
+        ChatModel chatModel = chatModelProvider.getIfAvailable();
+        if (chatModel == null) {
+            return TextModerationResult.of(ModerationVerdict.SKIPPED, "", "", "chat model disabled");
+        }
         if (!StringUtils.hasText(content)) {
             return TextModerationResult.of(ModerationVerdict.PASS, "none", "", "");
         }
         String text = content.trim();
         if (text.length() > MAX_CONTENT_LEN) {
             text = text.substring(0, MAX_CONTENT_LEN);
+        }
+        ChatClient chatClient = chatClientProvider.getIfAvailable();
+        if (chatClient == null) {
+            chatClient = ChatClient.builder(chatModel).build();
         }
         long start = System.currentTimeMillis();
         try {
@@ -80,7 +86,6 @@ public class DeepSeekTextModerationProvider implements TextModerationProvider {
         return TextModerationResult.of(verdict, severity, categories, reason);
     }
 
-    /** 模型偶发包 markdown 代码块时剥掉。 */
     private static String stripCodeFence(String raw) {
         if (!raw.startsWith("```")) {
             return raw;
