@@ -28,6 +28,17 @@ spring:
     allow-circular-references: true
   profiles:
     active: local
+  ai:
+    # 无凭证时保持 none，避免空 key 启动失败；本地有 key 时在 application-local 设为 deepseek
+    model:
+      chat: ${SPRING_AI_MODEL_CHAT:none}
+    deepseek:
+      api-key: ${SPRING_AI_DEEPSEEK_API_KEY:}
+      base-url: ${SPRING_AI_DEEPSEEK_BASE_URL:https://api.deepseek.com}
+      chat:
+        options:
+          model: ${SPRING_AI_DEEPSEEK_MODEL:deepseek-v4-flash}
+          temperature: 0.7
   application:
     name: ${info.build.name}-${spring.profiles.active}
   jackson:
@@ -84,9 +95,11 @@ senior-post:
       connection-timeout-ms: 10000
       socket-timeout-ms: 60000
     deepseek:
-      api-key: ${MODERATION_DEEPSEEK_API_KEY:}
-      base-url: ${MODERATION_DEEPSEEK_BASE_URL:https://api.deepseek.com}
-      model: ${MODERATION_DEEPSEEK_MODEL:deepseek-chat}
+      # 文本机审：凭证与模型以 spring.ai.deepseek 为准（SPRING_AI_DEEPSEEK_*）
+      # 有 key 时请同时设置 SPRING_AI_MODEL_CHAT=deepseek
+      api-key: ${SPRING_AI_DEEPSEEK_API_KEY:}
+      base-url: ${SPRING_AI_DEEPSEEK_BASE_URL:https://api.deepseek.com}
+      model: ${SPRING_AI_DEEPSEEK_MODEL:deepseek-v4-flash}
       connect-timeout-ms: 10000
       read-timeout-ms: 60000
   mailbox:

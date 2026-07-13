@@ -1,40 +1,37 @@
 package cn.nine.pros.post.biz.moderation.deepseek;
 
-import cn.nine.pros.post.biz.config.ModerationProperties;
 import cn.nine.pros.post.biz.moderation.ModerationVerdict;
 import cn.nine.pros.post.biz.moderation.TextModerationProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClient;
 
 import java.util.Locale;
 
+/**
+ * 文本机审：经 Spring AI {@link ChatModel} 调用 LLM，解析 JSON 判定结果。
+ * <p>与 {@link NoOpTextModerationProvider} 互斥（有 ChatModel Bean 时启用）。
+ */
 @Slf4j
 @Component
-@ConditionalOnExpression("'${senior-post.moderation.deepseek.api-key:}'.length() > 0")
+@ConditionalOnBean(ChatModel.class)
 public class DeepSeekTextModerationProvider implements TextModerationProvider {
 
     private static final int MAX_CONTENT_LEN = 2000;
 
-    private final RestClient restClient;
-    private final ObjectMapper objectMapper;
-    private final ModerationProperties.Deepseek deepseek;
-    private final String systemPrompt;
+    private static final String SYSTEM_PROMPT =
+            "Respond JSON only: {\"pass\":boolean,\"severity\":\"none|low|high\",\"categories\":[],\"reason\":\"\"}";
 
-    public DeepSeekTextModerationProvider(ModerationProperties moderationProperties, ObjectMapper objectMapper) {
+    private final ChatClient chatClient;
+    private final ObjectMapper objectMapper;
+
+    public DeepSeekTextModerationProvider(ChatClient letterChatClient, ObjectMapper objectMapper) {
+        this.chatClient = letterChatClient;
         this.objectMapper = objectMapper;
-        this.deepseek = moderationProperties.getDeepseek();
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(deepseek.getConnectTimeoutMs());
-        factory.setReadTimeout(deepseek.getReadTimeoutMs());
-        String base = deepseek.getBaseUrl().trim().replaceAll("/+$", "");
-        this.restClient = RestClient.builder().baseUrl(base).requestFactory(factory).build();
-        this.systemPrompt = loadSystemPrompt();
     }
 
     @Override
@@ -46,28 +43,23 @@ public class DeepSeekTextModerationProvider implements TextModerationProvider {
         if (text.length() > MAX_CONTENT_LEN) {
             text = text.substring(0, MAX_CONTENT_LEN);
         }
+        long start = System.currentTimeMillis();
         try {
-            DeepSeekModerationResultDto.ChatCompletionRequest req = buildRequest(text);
-            String body = objectMapper.writeValueAsString(req);
-            String responseJson = restClient
-                    .post()
-                    .uri("/v1/chat/completions")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header("Authorization", "Bearer " + deepseek.getApiKey().trim())
-                    .body(body)
-                    .retrieve()
-                    .body(String.class);
-            DeepSeekModerationResultDto.ChatCompletionResponse completion =
-                    objectMapper.readValue(responseJson, DeepSeekModerationResultDto.ChatCompletionResponse.class);
-            if (completion.getChoices() == null || completion.getChoices().length == 0) {
-                return TextModerationResult.of(ModerationVerdict.ERROR, "", "", "empty choices");
+            String assistant = chatClient.prompt()
+                    .system(SYSTEM_PROMPT)
+                    .user(text)
+                    .call()
+                    .content();
+            if (!StringUtils.hasText(assistant)) {
+                return TextModerationResult.of(ModerationVerdict.ERROR, "", "", "empty assistant");
             }
-            String assistant = completion.getChoices()[0].getMessage().getContent();
+            String json = stripCodeFence(assistant.trim());
             DeepSeekModerationResultDto parsed =
-                    objectMapper.readValue(assistant, DeepSeekModerationResultDto.class);
+                    objectMapper.readValue(json, DeepSeekModerationResultDto.class);
+            log.info("text moderation via Spring AI done, elapsedMs={}", System.currentTimeMillis() - start);
             return mapVerdict(parsed);
         } catch (Exception e) {
-            log.warn("DeepSeek text moderation failed: {}", e.getMessage());
+            log.warn("Spring AI text moderation failed: {}", e.getMessage());
             return TextModerationResult.of(ModerationVerdict.ERROR, "", "", e.getMessage());
         }
     }
@@ -79,30 +71,25 @@ public class DeepSeekTextModerationProvider implements TextModerationProvider {
         if (Boolean.TRUE.equals(parsed.getPass())) {
             return TextModerationResult.of(ModerationVerdict.PASS, "none", "", "");
         }
-        String severity = parsed.getSeverity() == null ? "low" : parsed.getSeverity().trim().toLowerCase(Locale.ROOT);
+        String severity = parsed.getSeverity() == null
+                ? "low"
+                : parsed.getSeverity().trim().toLowerCase(Locale.ROOT);
         String categories = parsed.getCategories() == null ? "" : String.valueOf(parsed.getCategories());
         String reason = parsed.getReason() == null ? "" : parsed.getReason().trim();
         ModerationVerdict verdict = "high".equals(severity) ? ModerationVerdict.REJECT : ModerationVerdict.REVIEW;
         return TextModerationResult.of(verdict, severity, categories, reason);
     }
 
-    private DeepSeekModerationResultDto.ChatCompletionRequest buildRequest(String userText) {
-        DeepSeekModerationResultDto.ChatCompletionRequest req = new DeepSeekModerationResultDto.ChatCompletionRequest();
-        req.setModel(deepseek.getModel());
-        req.setTemperature(0);
-        req.setResponseFormat(new DeepSeekModerationResultDto.ResponseFormat());
-        DeepSeekModerationResultDto.Message system = new DeepSeekModerationResultDto.Message();
-        system.setContent(systemPrompt);
-        DeepSeekModerationResultDto.Message user = new DeepSeekModerationResultDto.Message();
-        user.setContent(userText);
-        req.setMessages(new DeepSeekModerationResultDto.Message[] {system, user});
-        return req;
-    }
-
-    private static final String DEFAULT_SYSTEM_PROMPT =
-            "Respond JSON only: {\"pass\":boolean,\"severity\":\"none|low|high\",\"categories\":[],\"reason\":\"\"}";
-
-    private static String loadSystemPrompt() {
-        return DEFAULT_SYSTEM_PROMPT;
+    /** 模型偶发包 markdown 代码块时剥掉。 */
+    private static String stripCodeFence(String raw) {
+        if (!raw.startsWith("```")) {
+            return raw;
+        }
+        int firstNl = raw.indexOf('\n');
+        int lastFence = raw.lastIndexOf("```");
+        if (firstNl > 0 && lastFence > firstNl) {
+            return raw.substring(firstNl + 1, lastFence).trim();
+        }
+        return raw;
     }
 }

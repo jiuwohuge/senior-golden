@@ -9,32 +9,24 @@ import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/network/router_refresh.dart';
 import '../../core/session/app_session.dart';
-import '../../widgets/letter/letter_compose_editor.dart';
+import '../../widgets/letter/letter_document.dart';
+import '../../widgets/letter/letter_paper.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
+import '../commerce/commerce_remote.dart';
 import '../mailbox/mailbox_providers.dart';
 import '../mailbox/mailbox_remote.dart';
 import '../post_office/post_office_remote.dart';
-import '../commerce/commerce_remote.dart';
 import '../ritual/delivery_sent_overlay.dart';
 import '../shell/main_shell.dart';
 import '../time_letter/time_letter_providers.dart';
 import '../time_letter/time_letter_remote.dart';
 import '../time_letter/time_letter_seal_slider.dart';
+import 'compose_first_preview_gate.dart';
 import 'compose_intent.dart';
-import 'compose_step_scaffold.dart';
+import 'letter_assistant_sheet.dart';
 
-enum _ComposeStep {
-  destination,
-  pickPenPal,
-  mailOptions,
-  body,
-  deliveryDate,
-  preview,
-  seal,
-  send,
-}
-
+/// 单页写信桌：整屏正文 + 信纸设置 + 预览门闩（替代多步向导）。
 class ComposeFlowPage extends ConsumerStatefulWidget {
   const ComposeFlowPage({
     super.key,
@@ -51,49 +43,74 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   late ComposeKind? _kind;
   String? _peerId;
   String? _peerNickname;
-  String? _peerCountryLabel;
 
-  int _stepIndex = 0;
-  String _bodyText = '';
-  int _editorEpoch = 0;
-  List<String> _seedParagraphs = const [''];
+  late final TextEditingController _bodyController;
+  final FocusNode _bodyFocus = FocusNode();
+
+  String? _selectedSkinId = LetterDocument.defaultSkinId;
+  String? _selectedFontId = LetterDocument.defaultFontId;
+  FontSizeTier _fontSizeTier = FontSizeTier.large;
+  String? _selectedTemplateId;
+  String _chipKey = 'free';
+
   DateTime _deliveryDate = DateTime.now().add(const Duration(days: 7));
   String? _daysHint;
-  String? _selectedSkinId;
-  String? _selectedTemplateId;
   bool _busy = false;
-
-  List<_ComposeStep> _steps = const [];
+  bool _previewGateDone = false;
+  bool _sessionPreviewSeen = false;
+  /// 信件助手「替换原文」前的正文快照，用于一次撤销。
+  String? _assistantUndoBody;
 
   @override
   void initState() {
     super.initState();
-    _kind = widget.initialIntent.kind;
+    _kind = widget.initialIntent.kind ?? ComposeKind.postOffice;
     _peerId = widget.initialIntent.peerId;
     _peerNickname = widget.initialIntent.peerNickname;
-    _peerCountryLabel = widget.initialIntent.peerCountryLabel;
     _selectedTemplateId = widget.initialIntent.templateId;
+
+    var initial = '';
     if (widget.initialIntent.initialParagraphs?.isNotEmpty == true) {
-      _seedParagraphs = List<String>.from(
+      initial = LetterDocument.joinParagraphs(
         widget.initialIntent.initialParagraphs!,
       );
-      _bodyText = LetterComposeEditor.joinParagraphs(_seedParagraphs);
     }
-    _rebuildSteps();
-    if (_currentStep == _ComposeStep.deliveryDate ||
-        _currentStep == _ComposeStep.seal) {
+    _bodyController = TextEditingController(text: initial);
+    _bodyController.addListener(() => setState(() {}));
+
+    ComposeFirstPreviewGate.hasCompletedPreview().then((done) {
+      if (mounted) setState(() => _previewGateDone = done);
+    });
+    if (_isTimeLetter) {
       _refreshDaysHint();
     }
   }
 
   @override
   void dispose() {
+    _bodyController.dispose();
+    _bodyFocus.dispose();
     super.dispose();
   }
 
-  _ComposeStep get _currentStep => _steps[_stepIndex];
+  bool get _isTimeLetter =>
+      _kind == ComposeKind.selfTimeLetter ||
+      _kind == ComposeKind.penPalTimeLetter;
 
-  static String _offsetTimezoneId() {
+  bool get _needsPenPal =>
+      (_kind == ComposeKind.penPalMail ||
+          _kind == ComposeKind.penPalTimeLetter) &&
+      (_peerId == null || _peerId!.isEmpty);
+
+  LetterDocument get _document => LetterDocument(
+    body: _bodyController.text,
+    skinId: _selectedSkinId ?? LetterDocument.defaultSkinId,
+    fontId: _selectedFontId ?? LetterDocument.defaultFontId,
+    fontSizeTier: _fontSizeTier,
+    templateId: _selectedTemplateId,
+  );
+
+  String _offsetTimezoneId() {
     final offset = DateTime.now().timeZoneOffset;
     final totalMinutes = offset.inMinutes;
     final sign = totalMinutes >= 0 ? '+' : '-';
@@ -101,101 +118,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     final h = abs ~/ 60;
     final m = abs % 60;
     return '$sign${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
-  }
-
-  void _rebuildSteps() {
-    final steps = <_ComposeStep>[];
-    if (_kind == null) {
-      steps.add(_ComposeStep.destination);
-    }
-    if (_needsPenPalPicker) {
-      steps.add(_ComposeStep.pickPenPal);
-    }
-    switch (_kind) {
-      case ComposeKind.selfTimeLetter:
-      case ComposeKind.penPalTimeLetter:
-        // 模板信纸 → 正文 → 送达 → 预览 → 封缄
-        steps.add(_ComposeStep.mailOptions);
-        steps.add(_ComposeStep.body);
-        steps.add(_ComposeStep.deliveryDate);
-        steps.add(_ComposeStep.preview);
-        steps.add(_ComposeStep.seal);
-      case ComposeKind.penPalMail:
-      case ComposeKind.postOffice:
-        // 模板信纸 → 正文 → 预览 → 发送
-        steps.add(_ComposeStep.mailOptions);
-        steps.add(_ComposeStep.body);
-        steps.add(_ComposeStep.preview);
-        steps.add(_ComposeStep.send);
-      case null:
-        break;
-    }
-    setState(() {
-      _steps = steps;
-      if (_stepIndex >= _steps.length) {
-        _stepIndex = _steps.length - 1;
-      }
-    });
-  }
-
-  bool get _needsPenPalPicker {
-    if (_peerId != null && _peerId!.isNotEmpty) return false;
-    return _kind == ComposeKind.penPalMail ||
-        _kind == ComposeKind.penPalTimeLetter;
-  }
-
-  void _onBack() {
-    if (_stepIndex > 0) {
-      setState(() => _stepIndex -= 1);
-      return;
-    }
-    context.pop();
-  }
-
-  void _onNext() {
-    final l10n = AppLocalizations.of(context)!;
-    switch (_currentStep) {
-      case _ComposeStep.destination:
-        if (_kind == null) {
-          PostalSnack.show(
-            context,
-            l10n.composePickDestinationRequired,
-            tone: PostalSnackTone.warning,
-          );
-          return;
-        }
-      case _ComposeStep.pickPenPal:
-        if (_peerId == null || _peerId!.isEmpty) {
-          PostalSnack.show(
-            context,
-            l10n.composePickPenPalRequired,
-            tone: PostalSnackTone.warning,
-          );
-          return;
-        }
-      case _ComposeStep.body:
-        if (_bodyText.trim().isEmpty) {
-          PostalSnack.show(
-            context,
-            l10n.composeBodyRequired,
-            tone: PostalSnackTone.warning,
-          );
-          return;
-        }
-      case _ComposeStep.deliveryDate:
-      case _ComposeStep.mailOptions:
-      case _ComposeStep.preview:
-      case _ComposeStep.seal:
-      case _ComposeStep.send:
-        break;
-    }
-    if (_stepIndex < _steps.length - 1) {
-      final nextStep = _steps[_stepIndex + 1];
-      setState(() => _stepIndex += 1);
-      if (nextStep == _ComposeStep.deliveryDate) {
-        _refreshDaysHint();
-      }
-    }
   }
 
   Future<void> _refreshDaysHint() async {
@@ -207,22 +129,549 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     } catch (_) {}
   }
 
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _deliveryDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-    );
-    if (picked != null) {
-      setState(() => _deliveryDate = picked);
-      await _refreshDaysHint();
+  String _recipientLabel(AppLocalizations l10n) {
+    switch (_kind) {
+      case ComposeKind.postOffice:
+        return l10n.composeRecipientPostOffice;
+      case ComposeKind.selfTimeLetter:
+        return l10n.composeRecipientSelf;
+      case ComposeKind.penPalMail:
+      case ComposeKind.penPalTimeLetter:
+        return _peerNickname?.isNotEmpty == true
+            ? '${l10n.composeRecipientPenPal} · ${_peerNickname!}'
+            : l10n.composeRecipientPenPal;
+      case null:
+        return l10n.composeRecipientSheetTitle;
     }
+  }
+
+  Future<void> _openRecipientSheet() async {
+    final l10n = AppLocalizations.of(context)!;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: PostalTokens.paperEnvelope,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.composeRecipientSheetTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 16),
+                _RecipientTile(
+                  title: l10n.composeRecipientPostOffice,
+                  selected: _kind == ComposeKind.postOffice,
+                  onTap: () {
+                    setState(() {
+                      _kind = ComposeKind.postOffice;
+                      _peerId = null;
+                      _peerNickname = null;
+                    });
+                    Navigator.pop(ctx);
+                  },
+                ),
+                _RecipientTile(
+                  title: l10n.composeRecipientSelf,
+                  selected: _kind == ComposeKind.selfTimeLetter,
+                  onTap: () {
+                    setState(() {
+                      _kind = ComposeKind.selfTimeLetter;
+                      _peerId = null;
+                      _peerNickname = null;
+                    });
+                    Navigator.pop(ctx);
+                    _refreshDaysHint();
+                  },
+                ),
+                _RecipientTile(
+                  title: l10n.composeRecipientPenPal,
+                  selected:
+                      _kind == ComposeKind.penPalMail ||
+                      _kind == ComposeKind.penPalTimeLetter,
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await _pickPenPal();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickPenPal() async {
+    final l10n = AppLocalizations.of(context)!;
+    late final List<FriendListRow> friends;
+    final cached = ref.read(mailboxFriendsProvider).valueOrNull;
+    if (cached != null) {
+      friends = cached;
+    } else {
+      friends = await ref.read(mailboxFriendsProvider.future);
+    }
+    if (!mounted) return;
+    if (friends.isEmpty) {
+      PostalSnack.show(
+        context,
+        l10n.composePenPalEmptySubtitle,
+        tone: PostalSnackTone.warning,
+      );
+      return;
+    }
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: PostalTokens.paperEnvelope,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(ctx).size.height * 0.55,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    l10n.composeStepPenPalTitle,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: friends.length,
+                    itemBuilder: (_, i) {
+                      final f = friends[i];
+                      final name = f.peer.nickname.isNotEmpty
+                          ? f.peer.nickname
+                          : f.peer.id;
+                      return ListTile(
+                        minVerticalPadding: 16,
+                        title: Text(
+                          name,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _kind = ComposeKind.penPalMail;
+                            _peerId = f.peer.id;
+                            _peerNickname = f.peer.nickname;
+                          });
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _openLetterAssistant() async {
+    final l10n = AppLocalizations.of(context)!;
+    final source = _bodyController.text.trim();
+    if (source.isEmpty) {
+      PostalSnack.show(
+        context,
+        l10n.letterAssistantEmptyBody,
+        tone: PostalSnackTone.warning,
+      );
+      return;
+    }
+    final suggestion = await showLetterAssistantSheet(
+      context: context,
+      ref: ref,
+      sourceText: source,
+    );
+    if (!mounted || suggestion == null) return;
+    setState(() {
+      _assistantUndoBody = _bodyController.text;
+      _bodyController.text = suggestion;
+    });
+    PostalSnack.show(
+      context,
+      l10n.letterAssistantReplaced,
+      tone: PostalSnackTone.success,
+      actionLabel: l10n.letterAssistantUndo,
+      onAction: () {
+        final prev = _assistantUndoBody;
+        if (prev == null) return;
+        setState(() {
+          _bodyController.text = prev;
+          _assistantUndoBody = null;
+        });
+      },
+    );
+  }
+
+  Future<void> _openPaperSheet() async {
+    final l10n = AppLocalizations.of(context)!;
+    final catalog = await ref.read(commerceCatalogProvider.future);
+    if (!mounted) return;
+    final skins = catalog
+        .where(
+          (p) =>
+              p.productType == 'skin' && (p.priceCents <= 0 || p.owned),
+        )
+        .toList();
+    final fonts = catalog
+        .where(
+          (p) =>
+              p.productType == 'font' && (p.priceCents <= 0 || p.owned),
+        )
+        .toList();
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: PostalTokens.paperEnvelope,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setModal) {
+            void apply(VoidCallback fn) {
+              setModal(fn);
+              setState(fn);
+            }
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        l10n.composePaperSettings,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.composeSkinSection,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          for (final s in _skinOptions(skins, l10n))
+                            _SkinSwatch(
+                              label: s.label,
+                              color: LetterPaperTokens.forSkin(s.id).background,
+                              selected: _selectedSkinId == s.id,
+                              onTap: () => apply(() => _selectedSkinId = s.id),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        l10n.composeFontSection,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      for (final f in _fontOptions(fonts, l10n))
+                        _FontOptionTile(
+                          label: f.label,
+                          selected: _selectedFontId == f.id,
+                          onTap: () => apply(() => _selectedFontId = f.id),
+                        ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.composeFontSizeSection,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      SegmentedButton<FontSizeTier>(
+                        segments: [
+                          ButtonSegment(
+                            value: FontSizeTier.large,
+                            label: Text(l10n.composeFontSizeLarge),
+                          ),
+                          ButtonSegment(
+                            value: FontSizeTier.xlarge,
+                            label: Text(l10n.composeFontSizeXlarge),
+                          ),
+                        ],
+                        selected: {_fontSizeTier},
+                        onSelectionChanged: (s) {
+                          apply(() => _fontSizeTier = s.first);
+                        },
+                      ),
+                      if (_isTimeLetter) ...[
+                        const SizedBox(height: 24),
+                        Text(
+                          l10n.composeStepDeliveryTitle,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        PostalButton(
+                          label: DateFormat.yMMMMd().format(_deliveryDate),
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _deliveryDate,
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365 * 2),
+                              ),
+                            );
+                            if (picked != null) {
+                              apply(() => _deliveryDate = picked);
+                              await _refreshDaysHint();
+                            }
+                          },
+                        ),
+                        if (_daysHint != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              l10n.composeStepDeliverySubtitle,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  List<({String id, String label})> _skinOptions(
+    List<CommerceProduct> skins,
+    AppLocalizations l10n,
+  ) {
+    if (skins.isEmpty) {
+      return [
+        (id: 'default', label: l10n.commerceProductSkinDefault),
+        (id: 'vintage', label: l10n.commerceProductSkinVintage),
+        (id: 'linen', label: l10n.commerceProductSkinLinen),
+      ];
+    }
+    return skins
+        .map(
+          (p) => (
+            id: p.skinId ?? p.productCode.replaceFirst('skin.', ''),
+            label: commerceProductTitle(l10n, p.titleKey),
+          ),
+        )
+        .toList();
+  }
+
+  List<({String id, String label})> _fontOptions(
+    List<CommerceProduct> fonts,
+    AppLocalizations l10n,
+  ) {
+    if (fonts.isEmpty) {
+      return [
+        (id: 'default', label: l10n.commerceProductFontDefault),
+      ];
+    }
+    return fonts
+        .map(
+          (p) => (
+            id: p.fontId ?? p.productCode.replaceFirst('font.', ''),
+            label: commerceProductTitle(l10n, p.titleKey),
+          ),
+        )
+        .toList();
+  }
+
+  void _applyChip(String key, AppLocalizations l10n) {
+    setState(() => _chipKey = key);
+    if (key == 'free') return;
+    final prompts = <String, String>{
+      'heart': l10n.topicHometownPrompt,
+      'narrative': l10n.topicRetirementPrompt,
+      'festival': l10n.topicOldPhotoPrompt,
+    };
+    final prompt = prompts[key];
+    if (prompt == null) return;
+    if (_bodyController.text.trim().isEmpty) {
+      _bodyController.text = prompt;
+      PostalSnack.show(context, l10n.composeHintEditablePrompt);
+    }
+  }
+
+  Future<void> _openPreview({required bool forSendGate}) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (_bodyController.text.trim().isEmpty) {
+      PostalSnack.show(
+        context,
+        l10n.composeBodyRequired,
+        tone: PostalSnackTone.warning,
+      );
+      return;
+    }
+    await showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'preview',
+      barrierColor: PostalTokens.inkNavy.withValues(alpha: 0.45),
+      pageBuilder: (ctx, anim, _) {
+        return FadeTransition(
+          opacity: anim,
+          child: Scaffold(
+            backgroundColor: PostalTokens.paperCream,
+            appBar: AppBar(
+              title: Text(l10n.composeSeeAsRecipient),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ),
+            body: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+              children: [
+                LetterPaper(
+                  mode: LetterPaperMode.preview,
+                  document: _document,
+                  minHeight: 360,
+                ),
+                const SizedBox(height: 24),
+                PostalButton(
+                  label: forSendGate
+                      ? l10n.composeContinueAfterPreview
+                      : l10n.dialogConfirm,
+                  onPressed: () async {
+                    setState(() => _sessionPreviewSeen = true);
+                    if (!_previewGateDone) {
+                      await ComposeFirstPreviewGate.markPreviewCompleted();
+                      if (mounted) {
+                        setState(() => _previewGateDone = true);
+                      }
+                    }
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onPrimarySend() async {
+    final l10n = AppLocalizations.of(context)!;
+    if (_bodyController.text.trim().isEmpty) {
+      PostalSnack.show(
+        context,
+        l10n.composeBodyRequired,
+        tone: PostalSnackTone.warning,
+      );
+      return;
+    }
+    if (_needsPenPal) {
+      PostalSnack.show(
+        context,
+        l10n.composePickPenPalRequired,
+        tone: PostalSnackTone.warning,
+      );
+      await _pickPenPal();
+      return;
+    }
+    // 首次写信强制预览一次。
+    if (!_previewGateDone && !_sessionPreviewSeen) {
+      PostalSnack.show(
+        context,
+        l10n.composePreviewRequiredFirst,
+        tone: PostalSnackTone.warning,
+      );
+      await _openPreview(forSendGate: true);
+      if (!_previewGateDone && !_sessionPreviewSeen) return;
+    }
+
+    if (_isTimeLetter) {
+      await _showSealSheet();
+      return;
+    }
+    await _submitPenPalMail();
+  }
+
+  Future<void> _showSealSheet() async {
+    final l10n = AppLocalizations.of(context)!;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: PostalTokens.paperEnvelope,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.composeStepSealTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(l10n.composeSealWhenReady),
+                const SizedBox(height: 12),
+                PostalButton(
+                  label: DateFormat.yMMMMd().format(_deliveryDate),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _deliveryDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(
+                        const Duration(days: 365 * 2),
+                      ),
+                    );
+                    if (picked != null) {
+                      setState(() => _deliveryDate = picked);
+                      await _refreshDaysHint();
+                      if (ctx.mounted) (ctx as Element).markNeedsBuild();
+                    }
+                  },
+                ),
+                const SizedBox(height: 20),
+                TimeLetterSealSlider(
+                  label: l10n.composeStepSealTitle,
+                  enabled: !_busy,
+                  onSealed: () async {
+                    Navigator.pop(ctx);
+                    await _submitTimeLetter();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _submitTimeLetter() async {
     final l10n = AppLocalizations.of(context)!;
-    final body = _bodyText.trim();
+    final body = _bodyController.text.trim();
     if (body.isEmpty) return;
     setState(() => _busy = true);
     try {
@@ -261,6 +710,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       );
       if (mounted) context.pop();
     } catch (e) {
+      debugPrint('compose seal time letter failed: $e');
       final biz = apiBusinessExceptionFrom(e);
       if (mounted) {
         PostalSnack.show(
@@ -276,7 +726,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
 
   Future<void> _submitPenPalMail() async {
     final l10n = AppLocalizations.of(context)!;
-    final body = _bodyText.trim();
+    final body = _bodyController.text.trim();
     if (body.isEmpty) return;
     final isPostOffice = _kind == ComposeKind.postOffice;
     if (!isPostOffice && _peerId == null) return;
@@ -289,10 +739,11 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
             content: body,
             mode: isPostOffice ? 1 : 2,
             skinId: _selectedSkinId,
+            fontId: _selectedFontId,
+            fontSizeTier: _fontSizeTier.apiValue,
             templateId: _selectedTemplateId,
           );
       await ref.read(authRepositoryProvider).refreshSessionFromServer();
-      // 首封信：本地兜底标记，避免 /me 滞后时 redirect 又打回引导页。
       if (widget.initialIntent.fromFirstLetterGuide) {
         ref.read(appSessionProvider.notifier).markFirstLetterDoneLocally();
         ref.read(routerRefreshProvider).value++;
@@ -300,7 +751,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       ref.invalidate(mailboxLettersProvider);
       ref.invalidate(postalInboxLettersProvider);
       ref.invalidate(mailboxArchiveProvider);
-      // 邮局发信消耗今日额度；刷新首页 remainingQuota。
       if (isPostOffice) {
         ref.invalidate(postOfficeHomeProvider);
       }
@@ -310,8 +760,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           : (_peerNickname ?? l10n.topicFriendFallback);
       await showDeliverySentOverlay(context, destinationLabel: dest);
       if (!mounted) return;
-      // 首封信引导是 go 进来的根页，pop 只会回到无返回键的引导页；
-      // 须显式进邮局，并刷新 redirect（firstLetterDone 已变）。
       if (widget.initialIntent.fromFirstLetterGuide) {
         ref.read(routerRefreshProvider).value++;
         context.go(MainShellRoute.pathPostOffice);
@@ -319,6 +767,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         context.pop();
       }
     } catch (e) {
+      debugPrint('compose send letter failed: $e');
       final biz = apiBusinessExceptionFrom(e);
       if (mounted) {
         PostalSnack.show(
@@ -332,579 +781,320 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     }
   }
 
-  bool get _nextEnabled {
-    switch (_currentStep) {
-      case _ComposeStep.destination:
-        return _kind != null;
-      case _ComposeStep.pickPenPal:
-        return _peerId != null && _peerId!.isNotEmpty;
-      case _ComposeStep.body:
-        return _bodyText.trim().isNotEmpty;
-      default:
-        return true;
-    }
-  }
-
-  bool get _isLastInteractiveStep {
-    return _stepIndex == _steps.length - 1 &&
-        (_currentStep == _ComposeStep.seal ||
-            _currentStep == _ComposeStep.send);
-  }
-
-  ({String title, String subtitle, String? footer}) _stepCopy(
-    AppLocalizations l10n,
-  ) {
-    switch (_currentStep) {
-      case _ComposeStep.destination:
-        return (
-          title: l10n.composeStepDestinationTitle,
-          subtitle: l10n.composeStepDestinationSubtitle,
-          footer: l10n.composeStepFooter,
-        );
-      case _ComposeStep.pickPenPal:
-        return (
-          title: l10n.composeStepPenPalTitle,
-          subtitle: l10n.composeStepPenPalSubtitle,
-          footer: null,
-        );
-      case _ComposeStep.body:
-        return (
-          title: l10n.composeStepBodyTitle,
-          subtitle: _bodySubtitle(l10n),
-          footer: l10n.composeBodyFooter,
-        );
-      case _ComposeStep.deliveryDate:
-        return (
-          title: l10n.composeStepDeliveryTitle,
-          subtitle: l10n.composeStepDeliverySubtitle,
-          footer: null,
-        );
-      case _ComposeStep.mailOptions:
-        return (
-          title: l10n.composeStepMailTitle,
-          subtitle: l10n.composeStepMailSubtitleSkins,
-          footer: null,
-        );
-      case _ComposeStep.preview:
-        return (
-          title: l10n.composeStepPreviewTitle,
-          subtitle: l10n.composeStepPreviewSubtitle,
-          footer: null,
-        );
-      case _ComposeStep.seal:
-        return (
-          title: l10n.composeStepSealTitle,
-          subtitle: l10n.composeStepSealSubtitle,
-          footer: null,
-        );
-      case _ComposeStep.send:
-        return (
-          title: l10n.composeStepSendTitle,
-          subtitle: l10n.composeStepSendSubtitle,
-          footer: null,
-        );
-    }
-  }
-
-  String _bodySubtitle(AppLocalizations l10n) {
-    return switch (_kind) {
-      ComposeKind.selfTimeLetter => l10n.composeBodySubtitleSelf,
-      ComposeKind.penPalMail => l10n.composeBodySubtitlePenPal(
-        _peerNickname ?? l10n.topicFriendFallback,
-      ),
-      ComposeKind.penPalTimeLetter => l10n.composeBodySubtitleTimePenPal(
-        _peerNickname ?? l10n.topicFriendFallback,
-      ),
-      ComposeKind.postOffice => l10n.composeBodySubtitlePostOffice,
-      null => l10n.composeStepDestinationSubtitle,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    if (_steps.isEmpty) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-    final copy = _stepCopy(l10n);
-    final showFab = !_isLastInteractiveStep;
 
     return Scaffold(
-      backgroundColor: PostalTokens.paperCream,
+      backgroundColor: const Color(0xFFEDE4D4),
       appBar: AppBar(
-        backgroundColor: PostalTokens.postboxGreen,
-        foregroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        title: Text(l10n.composeTitle),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-          child: ComposeStepScaffold(
-            stepIndex: _stepIndex,
-            stepCount: _steps.length,
-            title: copy.title,
-            subtitle: copy.subtitle,
-            footerHint: copy.footer,
-            onBack: _onBack,
-            onNext: showFab ? _onNext : null,
-            nextEnabled: _nextEnabled,
-            nextBusy: _busy,
-            isLastStep: _stepIndex == _steps.length - 1 && showFab,
-            bottomAction: _buildBottomAction(l10n),
-            child: _buildStepBody(l10n),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget? _buildBottomAction(AppLocalizations l10n) {
-    switch (_currentStep) {
-      case _ComposeStep.seal:
-        return TimeLetterSealSlider(
-          label: l10n.timeLetterSealSlide,
-          enabled: !_busy,
-          onSealed: _submitTimeLetter,
-        );
-      case _ComposeStep.send:
-        return PostalButton(
-          label: l10n.composeSendNow,
-          icon: Icons.send_outlined,
-          onPressed: _busy ? null : _submitPenPalMail,
-          busy: _busy,
-        );
-      default:
-        return null;
-    }
-  }
-
-  Widget _buildStepBody(AppLocalizations l10n) {
-    switch (_currentStep) {
-      case _ComposeStep.destination:
-        return _DestinationStep(
-          kind: _kind,
-          onPick: (kind) {
-            setState(() => _kind = kind);
-            _rebuildSteps();
-          },
-        );
-      case _ComposeStep.pickPenPal:
-        return _PickPenPalStep(
-          selectedId: _peerId,
-          onPick: (friend) {
-            setState(() {
-              _peerId = friend.peer.id;
-              _peerNickname = friend.peer.nickname;
-              _peerCountryLabel = friend.peer.countryName;
-            });
-          },
-        );
-      case _ComposeStep.body:
-        return ListView(
-          physics: const ClampingScrollPhysics(),
-          children: [
-            if (widget.initialIntent.fromFirstLetterGuide) ...[
-              PostalCardEnvelope(
-                padding: const EdgeInsets.all(14),
-                child: Text(
-                  l10n.firstLetterComposeHint,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    height: 1.4,
-                    color: PostalTokens.inkSecondary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-            LetterComposeEditor(
-              key: ValueKey('compose-body-$_editorEpoch'),
-              initialParagraphs: _seedParagraphs,
-              onChanged: (text) => setState(() => _bodyText = text),
-            ),
-          ],
-        );
-      case _ComposeStep.deliveryDate:
-        return ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(l10n.timeLetterDeliveryDate),
-          subtitle: Text(
-            '${DateFormat.yMMMd().format(_deliveryDate)}'
-            '${_daysHint != null ? ' · ${l10n.timeLetterDaysUntil(_daysHint!)}' : ''}',
-          ),
-          trailing: const Icon(Icons.calendar_month_outlined),
-          onTap: _pickDate,
-        );
-      case _ComposeStep.mailOptions:
-        return _MailOptionsStep(
-          selectedSkinId: _selectedSkinId,
-          selectedTemplateId: _selectedTemplateId,
-          busy: _busy,
-          onSkinChanged: (skinId) => setState(() => _selectedSkinId = skinId),
-          onTemplateApplied: (product) {
-            final paragraphs = product.paragraphs;
-            setState(() {
-              _selectedTemplateId =
-                  product.templateId ??
-                  product.productCode.replaceFirst('template.', '');
-              _seedParagraphs = paragraphs.isEmpty ? [''] : paragraphs;
-              _bodyText = LetterComposeEditor.joinParagraphs(_seedParagraphs);
-              _editorEpoch += 1;
-            });
-            // 选模板后进入正文步继续编辑。
-            final bodyIdx = _steps.indexOf(_ComposeStep.body);
-            if (bodyIdx >= 0) {
-              setState(() => _stepIndex = bodyIdx);
-            }
-          },
-        );
-      case _ComposeStep.preview:
-        return _LetterPreviewStep(
-          skinId: _selectedSkinId,
-          bodyText: _bodyText,
-        );
-      case _ComposeStep.seal:
-        return Align(
-          alignment: Alignment.topCenter,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: TextButton(
+          onPressed: () => context.pop(),
           child: Text(
-            _kind == ComposeKind.selfTimeLetter
-                ? l10n.timeLetterComposeToSelf
-                : l10n.timeLetterComposeToFriend(
-                    _peerNickname ?? l10n.topicFriendFallback,
-                  ),
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
+            l10n.composeCancel,
+            style: const TextStyle(fontSize: 17),
           ),
-        );
-      case _ComposeStep.send:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              _kind == ComposeKind.postOffice
-                  ? l10n.composePostOfficeSendHint
-                  : l10n.sendLetterSheetTitle(
-                      _peerNickname ?? l10n.topicFriendFallback,
+        ),
+        leadingWidth: 88,
+        title: InkWell(
+          onTap: _openRecipientSheet,
+          borderRadius: PostalTokens.shapeMd,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    _recipientLabel(l10n),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
+                  ),
+                ),
+                const Icon(Icons.expand_more, size: 22),
+              ],
             ),
-            if (_kind != ComposeKind.postOffice &&
-                _peerCountryLabel != null &&
-                _peerCountryLabel!.trim().isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                _peerCountryLabel!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: PostalTokens.inkSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => _openPreview(forSendGate: false),
+            child: Text(
+              l10n.composeSeeAsRecipient,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 48,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                _TopicChip(
+                  label: l10n.composeChipFreeWrite,
+                  selected: _chipKey == 'free',
+                  onTap: () => _applyChip('free', l10n),
                 ),
-                textAlign: TextAlign.center,
+                _TopicChip(
+                  label: l10n.composeChipHeart,
+                  selected: _chipKey == 'heart',
+                  onTap: () => _applyChip('heart', l10n),
+                ),
+                _TopicChip(
+                  label: l10n.composeChipNarrative,
+                  selected: _chipKey == 'narrative',
+                  onTap: () => _applyChip('narrative', l10n),
+                ),
+                _TopicChip(
+                  label: l10n.composeChipFestival,
+                  selected: _chipKey == 'festival',
+                  onTap: () => _applyChip('festival', l10n),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: LetterPaper(
+                mode: LetterPaperMode.compose,
+                document: _document,
+                controller: _bodyController,
+                focusNode: _bodyFocus,
+                placeholder: l10n.composePlaceholderBody,
+                minHeight: 320,
               ),
-            ],
-          ],
-        );
-    }
-  }
-}
-
-class _MailOptionsStep extends ConsumerWidget {
-  const _MailOptionsStep({
-    required this.selectedSkinId,
-    required this.selectedTemplateId,
-    required this.busy,
-    required this.onSkinChanged,
-    required this.onTemplateApplied,
-  });
-
-  final String? selectedSkinId;
-  final String? selectedTemplateId;
-  final bool busy;
-  final ValueChanged<String?> onSkinChanged;
-  final ValueChanged<CommerceProduct> onTemplateApplied;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final catalogAsync = ref.watch(commerceCatalogProvider);
-    final ownedAsync = ref.watch(ownedSkinEntitlementsProvider);
-    return ListView(
-      physics: const ClampingScrollPhysics(),
-      children: [
-        Text(
-          l10n.composeTemplatePickerTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 8),
-        catalogAsync.when(
-          loading: () => const LinearProgressIndicator(),
-          error: (_, _) => const SizedBox.shrink(),
-          data: (catalog) {
-            // 免费或已拥有的写信模板。
-            final templates = catalog
-                .where(
-                  (p) =>
-                      p.productType == 'template' &&
-                      (p.priceCents <= 0 || p.owned),
-                )
-                .toList();
-            if (templates.isEmpty) {
-              return Text(
-                l10n.composeTemplateEmpty,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PostalTokens.inkTertiary,
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.fromLTRB(
+              12,
+              10,
+              12,
+              10 + MediaQuery.paddingOf(context).bottom,
+            ),
+            decoration: BoxDecoration(
+              color: PostalTokens.paperEnvelope.withValues(alpha: 0.96),
+              border: Border(
+                top: BorderSide(color: PostalTokens.perforationLine),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: PostalButton(
+                    label: l10n.composePaperSettings,
+                    variant: PostalButtonVariant.secondary,
+                    layout: PostalButtonLayout.stacked,
+                    icon: Icons.auto_awesome_mosaic_outlined,
+                    minHeight: 56,
+                    onPressed: _openPaperSheet,
+                  ),
                 ),
-              );
-            }
-            return Column(
-              children: templates.map((t) {
-                final tid =
-                    t.templateId ?? t.productCode.replaceFirst('template.', '');
-                final selected = selectedTemplateId == tid;
-                return RadioListTile<String>(
-                  // ignore: deprecated_member_use
-                  value: tid,
-                  // ignore: deprecated_member_use
-                  groupValue: selectedTemplateId,
-                  // ignore: deprecated_member_use
-                  onChanged: busy
-                      ? null
-                      : (_) => onTemplateApplied(t),
-                  title: Text(commerceProductTitle(l10n, t.titleKey)),
-                  subtitle: selected
-                      ? Text(l10n.composeTemplateApplied)
-                      : null,
-                );
-              }).toList(),
-            );
-          },
-        ),
-        const SizedBox(height: 16),
-        Text(
-          l10n.composeSkinPickerTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 8),
-        catalogAsync.when(
-          loading: () => const SizedBox.shrink(),
-          error: (_, _) => ownedAsync.when(
-            loading: () => const LinearProgressIndicator(),
-            error: (_, _) => const SizedBox.shrink(),
-            data: (skins) => _skinRadios(
-              context,
-              l10n,
-              [
-                (id: 'default', label: l10n.commerceProductSkinDefault),
-                ...skins.map(
-                  (e) => (
-                    id: e.productCode.replaceFirst('skin.', ''),
-                    label: commerceProductTitle(l10n, e.titleKey),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: PostalButton(
+                    label: l10n.letterAssistantTitle,
+                    variant: PostalButtonVariant.secondary,
+                    layout: PostalButtonLayout.stacked,
+                    icon: Icons.edit_note_outlined,
+                    minHeight: 56,
+                    onPressed: _openLetterAssistant,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: PostalButton(
+                    label: _isTimeLetter
+                        ? l10n.composeStepSealTitle
+                        : l10n.composeSendLetterCta,
+                    layout: PostalButtonLayout.stacked,
+                    icon: Icons.send_outlined,
+                    minHeight: 56,
+                    onPressed: _busy ? null : _onPrimarySend,
                   ),
                 ),
               ],
             ),
           ),
-          data: (catalog) {
-            final freeSkins = catalog.where(
-              (p) =>
-                  p.productType == 'skin' && (p.priceCents <= 0 || p.owned),
-            );
-            final options = <({String id, String label})>[
-              (id: 'default', label: l10n.commerceProductSkinDefault),
-            ];
-            final seen = {'default'};
-            for (final p in freeSkins) {
-              final id = p.skinId ?? p.productCode.replaceFirst('skin.', '');
-              if (seen.add(id)) {
-                options.add((
-                  id: id,
-                  label: commerceProductTitle(l10n, p.titleKey),
-                ));
-              }
-            }
-            return _skinRadios(context, l10n, options);
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _skinRadios(
-    BuildContext context,
-    AppLocalizations l10n,
-    List<({String id, String label})> options,
-  ) {
-    final selected = selectedSkinId ?? 'default';
-    return Column(
-      children: options.map((opt) {
-        return RadioListTile<String>(
-          // ignore: deprecated_member_use
-          value: opt.id,
-          // ignore: deprecated_member_use
-          groupValue: selected,
-          // ignore: deprecated_member_use
-          onChanged: busy ? null : (v) => onSkinChanged(v),
-          title: Text(opt.label),
-          secondary: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: letterSkinBackground(opt.id),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: PostalTokens.perforationLine),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _DestinationStep extends StatelessWidget {
-  const _DestinationStep({required this.kind, required this.onPick});
-
-  final ComposeKind? kind;
-  final ValueChanged<ComposeKind> onPick;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return ListView(
-      physics: const ClampingScrollPhysics(),
-      children: [
-        ComposeChoiceTile(
-          label: l10n.composeChooseSelf,
-          subtitle: l10n.composeChooseSelfSub,
-          icon: Icons.schedule_send_outlined,
-          selected: kind == ComposeKind.selfTimeLetter,
-          onTap: () => onPick(ComposeKind.selfTimeLetter),
-        ),
-        const SizedBox(height: 12),
-        ComposeChoiceTile(
-          label: l10n.composeChoosePenPal,
-          subtitle: l10n.composeChoosePenPalSub,
-          icon: Icons.mail_outline_rounded,
-          selected: kind == ComposeKind.penPalMail,
-          onTap: () => onPick(ComposeKind.penPalMail),
-        ),
-        const SizedBox(height: 12),
-        ComposeChoiceTile(
-          label: l10n.composeChoosePostOffice,
-          subtitle: l10n.composeChoosePostOfficeSub,
-          icon: Icons.local_post_office_outlined,
-          selected: kind == ComposeKind.postOffice,
-          onTap: () => onPick(ComposeKind.postOffice),
-        ),
-      ],
-    );
-  }
-}
-
-class _PickPenPalStep extends ConsumerWidget {
-  const _PickPenPalStep({required this.selectedId, required this.onPick});
-
-  final String? selectedId;
-  final ValueChanged<FriendListRow> onPick;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final friendsAsync = ref.watch(mailboxFriendsProvider);
-    return friendsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => PostalEmptyState(
-        title: l10n.composePenPalLoadFailed,
-        subtitle: '$e',
-        tone: PostalEmptyTone.error,
+        ],
       ),
-      data: (friends) {
-        if (friends.isEmpty) {
-          return PostalEmptyState(
-            title: l10n.composePenPalEmptyTitle,
-            subtitle: l10n.composePenPalEmptySubtitle,
-            actionLabel: l10n.composeGoDirectory,
-            onAction: () => context.go('/directory'),
-          );
-        }
-        return ListView.separated(
-          physics: const ClampingScrollPhysics(),
-          itemCount: friends.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
-          itemBuilder: (context, index) {
-            final friend = friends[index];
-            final selected = friend.peer.id == selectedId;
-            return ComposeChoiceTile(
-              label: friend.peer.nickname,
-              subtitle: friend.peer.countryName,
-              icon: Icons.person_outline_rounded,
-              selected: selected,
-              onTap: () => onPick(friend),
-            );
-          },
-        );
-      },
     );
   }
 }
 
-/// 写信预览：信纸底色 + 分段正文。
-class _LetterPreviewStep extends StatelessWidget {
-  const _LetterPreviewStep({
-    required this.skinId,
-    required this.bodyText,
+class _RecipientTile extends StatelessWidget {
+  const _RecipientTile({
+    required this.title,
+    required this.selected,
+    required this.onTap,
   });
 
-  final String? skinId;
-  final String bodyText;
+  final String title;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final paragraphs = bodyText
-        .split(RegExp(r'\n\s*\n'))
-        .map((p) => p.trim())
-        .where((p) => p.isNotEmpty)
-        .toList();
-    return ListView(
-      physics: const ClampingScrollPhysics(),
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
-          decoration: BoxDecoration(
-            color: letterSkinBackground(skinId),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: PostalTokens.kraftBrownMuted.withValues(alpha: 0.55),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: selected
+            ? PostalTokens.postboxGreen.withValues(alpha: 0.12)
+            : PostalTokens.paperCard,
+        borderRadius: PostalTokens.shapeMd,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: PostalTokens.shapeMd,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: PostalTokens.inkNavy,
+                ),
+              ),
             ),
           ),
-          child: paragraphs.isEmpty
-              ? Text(
-                  '—',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: PostalTokens.inkSecondary,
-                  ),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (var i = 0; i < paragraphs.length; i++) ...[
-                      if (i > 0) const SizedBox(height: 16),
-                      Text(
-                        paragraphs[i],
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          height: 1.55,
-                          color: PostalTokens.inkNavy,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
         ),
-      ],
+      ),
+    );
+  }
+}
+
+class _TopicChip extends StatelessWidget {
+  const _TopicChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: FilterChip(
+        selected: selected,
+        label: Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: selected ? PostalTokens.paperCream : PostalTokens.inkNavy,
+          ),
+        ),
+        selectedColor: PostalTokens.postboxGreen,
+        backgroundColor: PostalTokens.paperCard,
+        showCheckmark: false,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        onSelected: (_) => onTap(),
+      ),
+    );
+  }
+}
+
+class _SkinSwatch extends StatelessWidget {
+  const _SkinSwatch({
+    required this.label,
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: PostalTokens.shapeMd,
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: selected
+                    ? PostalTokens.postboxGreen
+                    : PostalTokens.kraftBrown,
+                width: selected ? 3 : 1.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(label, style: const TextStyle(fontSize: 14)),
+        ],
+      ),
+    );
+  }
+}
+
+class _FontOptionTile extends StatelessWidget {
+  const _FontOptionTile({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected
+          ? PostalTokens.postboxGreen.withValues(alpha: 0.1)
+          : Colors.transparent,
+      borderRadius: PostalTokens.shapeMd,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: PostalTokens.shapeMd,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 52),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            child: Row(
+              children: [
+                Icon(
+                  selected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                  color: PostalTokens.postboxGreen,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(label, style: const TextStyle(fontSize: 18)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

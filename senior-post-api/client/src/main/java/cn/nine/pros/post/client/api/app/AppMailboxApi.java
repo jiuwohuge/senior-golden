@@ -1,8 +1,10 @@
 package cn.nine.pros.post.client.api.app;
 
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
+import cn.nine.pros.post.client.model.input.app.AppLetterAssistantInDto;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
+import cn.nine.pros.post.client.model.out.AppLetterAssistantVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
 import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
@@ -68,4 +70,8 @@ public interface AppMailboxApi {
     @Operation(summary = "平邮提前拆信：收件人消耗 1 邮票在运输中阅读正文；VIP 免扣")
     @PostMapping("/letters/{letterId}/early-open")
     MailboxLetterItemVO earlyOpenLetter(@PathVariable("letterId") Long letterId);
+
+    @Operation(summary = "信件助手：整理原文建议稿（不自动覆盖）")
+    @PostMapping("/letters/letter-assistant")
+    AppLetterAssistantVO letterAssistant(@RequestBody @Valid AppLetterAssistantInDto body);
 }

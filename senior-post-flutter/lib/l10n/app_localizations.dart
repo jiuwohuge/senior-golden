@@ -3284,6 +3284,252 @@ abstract class AppLocalizations {
   /// **'Confirm paper and text before sending.'**
   String get composeStepPreviewSubtitle;
 
+  /// No description provided for @composeSeeAsRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get composeSeeAsRecipient;
+
+  /// No description provided for @composePaperSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper'**
+  String get composePaperSettings;
+
+  /// No description provided for @composeFontSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get composeFontSizeLarge;
+
+  /// No description provided for @composeFontSizeXlarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Larger'**
+  String get composeFontSizeXlarge;
+
+  /// No description provided for @composeFontSizeSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get composeFontSizeSection;
+
+  /// No description provided for @composeFontSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Font'**
+  String get composeFontSection;
+
+  /// No description provided for @composeSkinSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper color'**
+  String get composeSkinSection;
+
+  /// No description provided for @composeSendLetterCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get composeSendLetterCta;
+
+  /// No description provided for @composeRemainingQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} left today'**
+  String composeRemainingQuota(int count);
+
+  /// No description provided for @composePreviewRequiredFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please preview once before sending, so you know what the recipient will see.'**
+  String get composePreviewRequiredFirst;
+
+  /// No description provided for @composeContinueAfterPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and continue'**
+  String get composeContinueAfterPreview;
+
+  /// No description provided for @composeChipFreeWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Free write'**
+  String get composeChipFreeWrite;
+
+  /// No description provided for @composeChipHeart.
+  ///
+  /// In en, this message translates to:
+  /// **'Heartfelt'**
+  String get composeChipHeart;
+
+  /// No description provided for @composeChipNarrative.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminisce'**
+  String get composeChipNarrative;
+
+  /// No description provided for @composeChipFestival.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday'**
+  String get composeChipFestival;
+
+  /// No description provided for @composeRecipientSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who to'**
+  String get composeRecipientSheetTitle;
+
+  /// No description provided for @composeRecipientPostOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'A kindred spirit'**
+  String get composeRecipientPostOffice;
+
+  /// No description provided for @composeRecipientPenPal.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen pal'**
+  String get composeRecipientPenPal;
+
+  /// No description provided for @composeRecipientSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Future self'**
+  String get composeRecipientSelf;
+
+  /// No description provided for @letterAssistantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter assistant'**
+  String get letterAssistantTitle;
+
+  /// No description provided for @letterAssistantModeWarmer.
+  ///
+  /// In en, this message translates to:
+  /// **'Warmer'**
+  String get letterAssistantModeWarmer;
+
+  /// No description provided for @letterAssistantModeNatural.
+  ///
+  /// In en, this message translates to:
+  /// **'More natural'**
+  String get letterAssistantModeNatural;
+
+  /// No description provided for @letterAssistantModeExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand the story'**
+  String get letterAssistantModeExpand;
+
+  /// No description provided for @letterAssistantModePolite.
+  ///
+  /// In en, this message translates to:
+  /// **'Check politeness'**
+  String get letterAssistantModePolite;
+
+  /// No description provided for @letterAssistantModeTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get letterAssistantModeTranslate;
+
+  /// No description provided for @letterAssistantModeCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get letterAssistantModeCustom;
+
+  /// No description provided for @letterAssistantCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us how to revise'**
+  String get letterAssistantCustomHint;
+
+  /// No description provided for @letterAssistantGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Polish'**
+  String get letterAssistantGenerate;
+
+  /// No description provided for @letterAssistantYourDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Your draft'**
+  String get letterAssistantYourDraft;
+
+  /// No description provided for @letterAssistantSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant draft'**
+  String get letterAssistantSuggestion;
+
+  /// No description provided for @letterAssistantReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace draft'**
+  String get letterAssistantReplace;
+
+  /// No description provided for @letterAssistantKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep mine'**
+  String get letterAssistantKeep;
+
+  /// No description provided for @letterAssistantRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Revise again'**
+  String get letterAssistantRetry;
+
+  /// No description provided for @letterAssistantUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo replace'**
+  String get letterAssistantUndo;
+
+  /// No description provided for @letterAssistantEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Write something first, then ask the assistant.'**
+  String get letterAssistantEmptyBody;
+
+  /// No description provided for @letterAssistantBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Polishing…'**
+  String get letterAssistantBusy;
+
+  /// No description provided for @letterAssistantReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced with the assistant draft. You can undo.'**
+  String get letterAssistantReplaced;
+
+  /// No description provided for @composePlaceholderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Write what you want to say…'**
+  String get composePlaceholderBody;
+
+  /// No description provided for @composeHintEditablePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'You can edit this prompt freely'**
+  String get composeHintEditablePrompt;
+
+  /// No description provided for @composeSealWhenReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date, then seal'**
+  String get composeSealWhenReady;
+
+  /// No description provided for @composeCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get composeCancel;
+
   /// No description provided for @composeStepTopicSubmitTitle.
   ///
   /// In en, this message translates to:

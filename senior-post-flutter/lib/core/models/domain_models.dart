@@ -397,6 +397,7 @@ class MailboxLetter {
     this.postmarkLabel,
     this.skinId,
     this.fontId,
+    this.fontSizeTier,
     this.favorited = false,
   });
 
@@ -423,6 +424,8 @@ class MailboxLetter {
   final String? postmarkLabel;
   final String? skinId;
   final String? fontId;
+  /// 字号档 API 值：large | xlarge；空则读信侧按 large。
+  final String? fontSizeTier;
   final bool favorited;
 }
 

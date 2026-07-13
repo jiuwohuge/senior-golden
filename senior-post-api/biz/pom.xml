@@ -138,6 +138,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- Spring AI：全站 LLM（审核提示 / 信件助手等）统一 ChatModel -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-deepseek</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

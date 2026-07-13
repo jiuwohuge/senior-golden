@@ -68,4 +68,7 @@ public class MailboxLetterItemVO {
 
     @Schema(description = "字体 ID")
     private String fontId;
+
+    @Schema(description = "字号档：large | xlarge")
+    private String fontSizeTier;
 }

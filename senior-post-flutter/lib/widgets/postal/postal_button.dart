@@ -45,9 +45,8 @@ class PostalButton extends StatelessWidget {
       return minHeight < 64 ? 64 : minHeight;
     }
     if (_stacked) {
-      return minHeight < PostalTokens.minTouchTarget
-          ? PostalTokens.minTouchTarget
-          : minHeight;
+      // icon(24)+gap(4)+label(~17)+内边距 ≈ 53，52 会底溢 1px
+      return minHeight < 56 ? 56 : minHeight;
     }
     return minHeight < PostalTokens.minTouchTarget
         ? PostalTokens.minTouchTarget
@@ -116,21 +115,27 @@ class PostalButton extends StatelessWidget {
     };
     final style = textTheme.labelLarge?.copyWith(
       color: color,
-      fontSize: 15,
-      height: 1.15,
-      letterSpacing: 0.15,
+      fontSize: 14,
+      height: 1.1,
+      letterSpacing: 0.1,
     );
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 24, color: color),
-            const SizedBox(height: 4),
+            Icon(icon, size: 22, color: color),
+            const SizedBox(height: 2),
           ],
-          Text(label, maxLines: 2, textAlign: TextAlign.center, style: style),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: style,
+          ),
         ],
       ),
     );
@@ -205,7 +210,10 @@ class PostalButton extends StatelessWidget {
           shadowColor: Colors.transparent,
           disabledBackgroundColor: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: _shape),
-          padding: EdgeInsets.symmetric(horizontal: _stacked ? 10 : 20),
+          padding: EdgeInsets.symmetric(horizontal: _stacked ? 8 : 20),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
         ),
         child: child,
       ),
@@ -225,6 +233,9 @@ class PostalButton extends StatelessWidget {
         ),
         shape: RoundedRectangleBorder(borderRadius: _shape),
         padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
       ),
       child: child,
     );

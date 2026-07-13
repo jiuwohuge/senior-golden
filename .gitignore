@@ -3,6 +3,8 @@
 .vscode
 logs
 .env
+.env.local
+!.env.example
 # Temp files
 *.log
 out.txt

@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.service.biz.impl;
 
 import cn.nine.commons.basic.exception.unchecked.BusinessException;
+import cn.nine.pros.post.biz.ai.LetterAssistantService;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.moderation.ModerationVerdict;
 import cn.nine.pros.post.biz.moderation.TextModerationProvider;
@@ -31,9 +32,11 @@ import cn.nine.pros.post.client.common.enums.LetterMode;
 import cn.nine.pros.post.client.common.enums.LetterPhysicalType;
 import cn.nine.pros.post.client.common.enums.LetterSendMode;
 import cn.nine.pros.post.client.model.db.UserDTO;
+import cn.nine.pros.post.client.model.input.app.AppLetterAssistantInDto;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.json.LetterContentMeta;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
+import cn.nine.pros.post.client.model.out.AppLetterAssistantVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
 import cn.nine.pros.post.client.model.out.PenpalRequestResultVO;
 import cn.nine.pros.post.client.model.out.RelationSnapshotVO;
@@ -83,6 +86,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private final CountryService countryService;
     private final TextModerationProvider textModerationProvider;
     private final DailyQuotaClaimService dailyQuotaClaimService;
+    private final LetterAssistantService letterAssistantService;
 
     /**
      * 邮政收件箱：本人相关且未读的信件列表（含 POST_OFFICE 入池仅发件人可见）。
@@ -199,6 +203,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         String skinId = normalizeMetaId(body.getSkinId(), "default");
         String fontId = normalizeMetaId(body.getFontId(), "default");
         String templateId = normalizeMetaId(body.getTemplateId(), "default");
+        // 字号档仅存 meta，不校验商城权益（非付费商品）
+        String fontSizeTier = body.getFontSizeTier();
         appCommerceBizService.assertLetterContentEntitlements(fromUserId, skinId, fontId, templateId);
         // M6：产品面废弃平邮/挂号，统一 STANDARD；速度仅 §6.1
         LetterPhysicalType physicalType = LetterPhysicalType.STANDARD;
@@ -221,8 +227,15 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         letter.setMode(mode.getCode());
         letter.setAuditStatus(LetterAuditStatus.PENDING_REVIEW.getCode());
         letter.setLetterType(physicalType.getCode());
-        letter.setContentMetaJson(LetterContentMeta.of(skinId, fontId, templateId));
+        LetterContentMeta contentMeta = LetterContentMeta.of(skinId, fontId, fontSizeTier, templateId);
+        letter.setContentMetaJson(contentMeta);
         letter.setSendMode(LetterSendMode.STANDARD_POST.getCode());
+        log.info(
+                "letter content meta prepared, fromUserId={}, skinId={}, fontId={}, fontSizeTier={}",
+                fromUserId,
+                skinId,
+                fontId,
+                contentMeta.fontSizeTierOrDefault());
 
         if (mode == LetterMode.POST_OFFICE) {
             letter.setStatus(LetterBizStatus.PENDING.getCode());
@@ -476,6 +489,14 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         throw new BusinessException(appMessages.get("app.error.letter.speedUpRetired"));
     }
 
+    /**
+     * 信件助手：委托 Spring AI 整理原文建议稿（不落库、不覆盖正文）。
+     */
+    @Override
+    public AppLetterAssistantVO letterAssistant(long userId, AppLetterAssistantInDto body) {
+        return letterAssistantService.assist(userId, body);
+    }
+
     private static int userStatus(Object status) {
         if (status instanceof Number n) {
             return n.intValue();
@@ -544,6 +565,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         LetterContentMeta meta = l.getContentMetaJson();
         String skinId = meta != null ? meta.skinIdOrDefault() : LetterContentMeta.DEFAULT_ID;
         String fontId = meta != null ? meta.fontIdOrDefault() : LetterContentMeta.DEFAULT_ID;
+        String fontSizeTier =
+                meta != null ? meta.fontSizeTierOrDefault() : LetterContentMeta.FONT_SIZE_LARGE;
         return MailboxLetterItemVO.builder()
                 .letterId(l.getId())
                 .peer(peerVo)
@@ -567,6 +590,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .toCountryName(resolveCountryName(toUser))
                 .skinId(skinId)
                 .fontId(fontId)
+                .fontSizeTier(fontSizeTier)
                 .build();
     }
 

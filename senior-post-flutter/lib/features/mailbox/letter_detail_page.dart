@@ -13,9 +13,11 @@ import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
-import '../../widgets/letter/letter_compose_editor.dart';
+import '../../widgets/letter/letter_document.dart';
+import '../../widgets/letter/letter_paper.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
+import '../compose/letter_assistant_sheet.dart';
 import '../relation/relation_display_label.dart';
 import '../relation/relation_remote.dart';
 import '../ritual/letter_open_ritual_overlay.dart';
@@ -198,8 +200,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                     ),
                     const SizedBox(height: 12),
                     PostalCardEnvelope(
-                      // §12.6 读信页按 skinId 渲染信纸底色。
-                      backgroundColor: letterSkinBackground(letter.skinId),
+                      backgroundColor: PostalTokens.paperEnvelope,
                       header: Row(
                         children: [
                           PostalAvatar(
@@ -269,21 +270,23 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                             )
                           else
                             const SizedBox(height: 10),
-                          if (letter.contentHidden)
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: SizedBox(
-                                height: 140,
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    Text(
-                                      letter.body,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge,
-                                    ),
-                                    BackdropFilter(
+                          LetterPaper(
+                            mode: LetterPaperMode.read,
+                            document: LetterDocument(
+                              body: letter.body,
+                              skinId:
+                                  letter.skinId ?? LetterDocument.defaultSkinId,
+                              fontId:
+                                  letter.fontId ?? LetterDocument.defaultFontId,
+                              fontSizeTier: FontSizeTier.fromApi(
+                                letter.fontSizeTier,
+                              ),
+                            ),
+                            minHeight: 160,
+                            readOnlyOverlay: letter.contentHidden
+                                ? ClipRRect(
+                                    borderRadius: PostalTokens.shapeLg,
+                                    child: BackdropFilter(
                                       filter: ImageFilter.blur(
                                         sigmaX: 14,
                                         sigmaY: 14,
@@ -309,15 +312,9 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          else
-                            Text(
-                              letter.body,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
+                                  )
+                                : null,
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             'Sent at ${DateFormat("MM-dd HH:mm").format(letter.sentAt)}',
@@ -409,6 +406,34 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                         maxLines: 5,
                         minLines: 3,
                         showClearButton: true,
+                      ),
+                      const SizedBox(height: 12),
+                      PostalButton(
+                        label: l10n.letterAssistantTitle,
+                        variant: PostalButtonVariant.secondary,
+                        onPressed: () async {
+                          final source = _reply.text.trim();
+                          if (source.isEmpty) {
+                            PostalSnack.show(
+                              context,
+                              l10n.letterAssistantEmptyBody,
+                              tone: PostalSnackTone.warning,
+                            );
+                            return;
+                          }
+                          final suggestion = await showLetterAssistantSheet(
+                            context: context,
+                            ref: ref,
+                            sourceText: source,
+                          );
+                          if (!context.mounted || suggestion == null) return;
+                          setState(() => _reply.text = suggestion);
+                          PostalSnack.show(
+                            context,
+                            l10n.letterAssistantReplaced,
+                            tone: PostalSnackTone.success,
+                          );
+                        },
                       ),
                       const SizedBox(height: 12),
                       PostalButton(

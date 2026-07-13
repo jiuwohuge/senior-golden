@@ -5,8 +5,10 @@ import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.service.biz.AppMailboxService;
 import cn.nine.pros.post.client.api.app.AppMailboxApi;
+import cn.nine.pros.post.client.model.input.app.AppLetterAssistantInDto;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
+import cn.nine.pros.post.client.model.out.AppLetterAssistantVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
 import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
@@ -87,6 +89,12 @@ public class AppMailboxController implements AppMailboxApi {
     public MailboxLetterItemVO earlyOpenLetter(Long letterId) {
         Long uid = requireUserId();
         return appMailboxService.earlyOpenLetter(uid, letterId);
+    }
+
+    @Override
+    public AppLetterAssistantVO letterAssistant(AppLetterAssistantInDto body) {
+        Long uid = requireUserId();
+        return appMailboxService.letterAssistant(uid, body);
     }
 
     private Long requireUserId() {

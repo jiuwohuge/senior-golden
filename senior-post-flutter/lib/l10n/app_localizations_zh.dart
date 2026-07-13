@@ -1681,6 +1681,131 @@ class AppLocalizationsZh extends AppLocalizations {
   String get composeStepPreviewSubtitle => '确认信纸与正文后再寄出。';
 
   @override
+  String get composeSeeAsRecipient => '预览';
+
+  @override
+  String get composePaperSettings => '信纸';
+
+  @override
+  String get composeFontSizeLarge => '大';
+
+  @override
+  String get composeFontSizeXlarge => '更大';
+
+  @override
+  String get composeFontSizeSection => '字号';
+
+  @override
+  String get composeFontSection => '字体';
+
+  @override
+  String get composeSkinSection => '纸色';
+
+  @override
+  String get composeSendLetterCta => '寄出';
+
+  @override
+  String composeRemainingQuota(int count) {
+    return '剩余 $count 封';
+  }
+
+  @override
+  String get composePreviewRequiredFirst => '寄出前请先预览一次，确认对方看到的样子。';
+
+  @override
+  String get composeContinueAfterPreview => '确认并继续';
+
+  @override
+  String get composeChipFreeWrite => '自由书写';
+
+  @override
+  String get composeChipHeart => '心里话';
+
+  @override
+  String get composeChipNarrative => '叙旧';
+
+  @override
+  String get composeChipFestival => '节日';
+
+  @override
+  String get composeRecipientSheetTitle => '寄给谁';
+
+  @override
+  String get composeRecipientPostOffice => '有缘人';
+
+  @override
+  String get composeRecipientPenPal => '笔友';
+
+  @override
+  String get composeRecipientSelf => '未来的自己';
+
+  @override
+  String get letterAssistantTitle => '信件助手';
+
+  @override
+  String get letterAssistantModeWarmer => '更有感情';
+
+  @override
+  String get letterAssistantModeNatural => '更自然';
+
+  @override
+  String get letterAssistantModeExpand => '扩展故事';
+
+  @override
+  String get letterAssistantModePolite => '检查礼貌';
+
+  @override
+  String get letterAssistantModeTranslate => '翻译';
+
+  @override
+  String get letterAssistantModeCustom => '自定义';
+
+  @override
+  String get letterAssistantCustomHint => '说说你希望怎么改';
+
+  @override
+  String get letterAssistantGenerate => '开始整理';
+
+  @override
+  String get letterAssistantYourDraft => '你写的';
+
+  @override
+  String get letterAssistantSuggestion => '助手整理的';
+
+  @override
+  String get letterAssistantReplace => '替换原文';
+
+  @override
+  String get letterAssistantKeep => '保留原文';
+
+  @override
+  String get letterAssistantRetry => '继续修改';
+
+  @override
+  String get letterAssistantUndo => '撤销替换';
+
+  @override
+  String get letterAssistantEmptyBody => '请先写下一些内容，再请助手帮忙。';
+
+  @override
+  String get letterAssistantBusy => '正在整理…';
+
+  @override
+  String get letterAssistantReplaced => '已替换为助手整理稿，可点撤销还原。';
+
+  @override
+  String get composePlaceholderBody => '写下你想说的话……';
+
+  @override
+  String get composeHintEditablePrompt => '提示可随意修改';
+
+  @override
+  String get composeSealWhenReady => '选好日期后封存';
+
+  @override
+  String get composeCancel => '取消';
+
+  @override
   String get composeStepTopicSubmitTitle => '投进主题信箱';
 
   @override

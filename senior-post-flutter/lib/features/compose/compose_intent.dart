@@ -13,7 +13,7 @@ enum ComposeKind {
   postOffice,
 }
 
-/// Navigation payload for [ComposeFlowPage].
+/// Navigation payload for [ComposeFlowPage]（单页写信桌）.
 class ComposeIntent {
   const ComposeIntent({
     this.kind,

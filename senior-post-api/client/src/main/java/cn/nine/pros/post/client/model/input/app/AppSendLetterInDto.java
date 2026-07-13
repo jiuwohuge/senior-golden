@@ -42,6 +42,9 @@ public class AppSendLetterInDto {
     @Schema(description = "字体 ID，默认 default")
     private String fontId;
 
+    @Schema(description = "字号档：large（默认适老「大」）| xlarge（更大）")
+    private String fontSizeTier;
+
     @Schema(description = "写信模板 ID")
     private String templateId;
 }

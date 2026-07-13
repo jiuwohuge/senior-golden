@@ -47,6 +47,7 @@ class MailboxRemoteRepository {
     int? mode,
     String? skinId,
     String? fontId,
+    String? fontSizeTier,
     String? templateId,
   }) async {
     // M6：产品面废弃平邮/挂号选项，发信固定 STANDARD(2)。
@@ -68,6 +69,9 @@ class MailboxRemoteRepository {
     }
     if (fontId != null && fontId.isNotEmpty) {
       body['fontId'] = fontId;
+    }
+    if (fontSizeTier != null && fontSizeTier.isNotEmpty) {
+      body['fontSizeTier'] = fontSizeTier;
     }
     if (templateId != null && templateId.isNotEmpty) {
       body['templateId'] = templateId;
@@ -97,6 +101,35 @@ class MailboxRemoteRepository {
     );
     final map = _unwrapMapData(r);
     return voToMailboxLetter(map);
+  }
+
+  /// POST `/api/mailbox/letters/letter-assistant`：整理建议稿，不落库。
+  Future<String> letterAssistant({
+    required String sourceText,
+    required String helpMode,
+    String? customInstruction,
+    String? targetLang,
+  }) async {
+    final body = <String, dynamic>{
+      'sourceText': sourceText,
+      'helpMode': helpMode,
+    };
+    if (customInstruction != null && customInstruction.isNotEmpty) {
+      body['customInstruction'] = customInstruction;
+    }
+    if (targetLang != null && targetLang.isNotEmpty) {
+      body['targetLang'] = targetLang;
+    }
+    final r = await _dio.post<dynamic>(
+      '/api/mailbox/letters/letter-assistant',
+      data: body,
+    );
+    final map = _unwrapMapData(r);
+    final suggestion = (map['suggestion'] as String?)?.trim() ?? '';
+    if (suggestion.isEmpty) {
+      throw ApiBusinessException(0, 'Empty assistant suggestion');
+    }
+    return suggestion;
   }
 
   Future<List<FriendListRow>> listMailboxFriends() async {
@@ -285,6 +318,7 @@ MailboxLetter voToMailboxLetter(Map<String, dynamic> m) {
     postmarkLabel: m['postmarkLabel'] as String?,
     skinId: m['skinId'] as String?,
     fontId: m['fontId'] as String?,
+    fontSizeTier: m['fontSizeTier'] as String?,
     favorited: m['favorited'] as bool? ?? false,
   );
 }

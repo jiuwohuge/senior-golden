@@ -1,0 +1,154 @@
+import 'package:flutter/material.dart';
+
+import '../../app/theme/postal_tokens.dart';
+import 'letter_document.dart';
+
+/// 写信 / 预览 / 读信三态共用的信纸渲染器（写读像素级一致）。
+enum LetterPaperMode { compose, preview, read }
+
+/// 一张信纸：纸色 + 字体字号 + 正文；compose 态内嵌可编辑 TextField。
+class LetterPaper extends StatelessWidget {
+  const LetterPaper({
+    super.key,
+    required this.mode,
+    required this.document,
+    this.controller,
+    this.focusNode,
+    this.onBodyChanged,
+    this.placeholder,
+    this.minHeight = 280,
+    this.readOnlyOverlay,
+  });
+
+  final LetterPaperMode mode;
+  final LetterDocument document;
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final ValueChanged<String>? onBodyChanged;
+  final String? placeholder;
+  final double minHeight;
+
+  /// 读信隐藏正文时叠在纸上的遮罩（由调用方提供）。
+  final Widget? readOnlyOverlay;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = LetterPaperTokens.forSkin(document.skinId);
+    final style = letterBodyTextStyle(
+      fontId: document.fontId,
+      tier: document.fontSizeTier,
+      ink: tokens.ink,
+    );
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+      constraints: BoxConstraints(minHeight: minHeight),
+      decoration: BoxDecoration(
+        color: tokens.background,
+        borderRadius: PostalTokens.shapeLg,
+        border: Border.all(color: PostalTokens.kraftBrownMuted, width: 1.2),
+        boxShadow: PostalTokens.shadowCard,
+      ),
+      child: ClipRRect(
+        borderRadius: PostalTokens.shapeLg,
+        child: Stack(
+          children: [
+            // 左侧装订线，强化「真信纸」而非卡片表单。
+            Positioned(
+              left: 18,
+              top: 16,
+              bottom: 16,
+              child: Container(
+                width: 1.5,
+                color: PostalTokens.kraftBrown.withValues(alpha: 0.28),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 22, 20, 22),
+              child: mode == LetterPaperMode.compose
+                  ? _ComposeField(
+                      controller: controller!,
+                      focusNode: focusNode,
+                      style: style,
+                      placeholder: placeholder,
+                      onChanged: onBodyChanged,
+                    )
+                  : _ReadBody(
+                      body: document.body,
+                      style: style,
+                      overlay: readOnlyOverlay,
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ComposeField extends StatelessWidget {
+  const _ComposeField({
+    required this.controller,
+    required this.style,
+    this.focusNode,
+    this.placeholder,
+    this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final FocusNode? focusNode;
+  final TextStyle style;
+  final String? placeholder;
+  final ValueChanged<String>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      onChanged: onChanged,
+      maxLines: null,
+      minLines: 12,
+      keyboardType: TextInputType.multiline,
+      textAlignVertical: TextAlignVertical.top,
+      style: style,
+      cursorColor: PostalTokens.postboxGreen,
+      decoration: InputDecoration(
+        isCollapsed: true,
+        border: InputBorder.none,
+        hintText: placeholder,
+        hintStyle: style.copyWith(
+          color: PostalTokens.inkTertiary.withValues(alpha: 0.85),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReadBody extends StatelessWidget {
+  const _ReadBody({
+    required this.body,
+    required this.style,
+    this.overlay,
+  });
+
+  final String body;
+  final TextStyle style;
+  final Widget? overlay;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Text(
+      body.isEmpty ? ' ' : body,
+      style: style,
+    );
+    if (overlay == null) return text;
+    return Stack(
+      children: [
+        text,
+        Positioned.fill(child: overlay!),
+      ],
+    );
+  }
+}

@@ -2,6 +2,7 @@ package cn.nine.pros.post.biz.moderation;
 
 import cn.nine.pros.post.biz.config.ModerationProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -14,6 +15,7 @@ public class ModerationRuntimeConfigService {
     private static final long CACHE_TTL_MS = 60_000L;
 
     private final ModerationProperties moderationProperties;
+    private final Environment environment;
     private final AtomicReference<Cached> cache = new AtomicReference<>();
 
     public ModerationRuntimeConfig get() {
@@ -33,11 +35,11 @@ public class ModerationRuntimeConfigService {
 
     public ModerationRuntimeConfig loadFromDb() {
         ModerationProperties.Baidu baidu = moderationProperties.getBaidu();
-        ModerationProperties.Deepseek deepseek = moderationProperties.getDeepseek();
         boolean baiduReady = StringUtils.hasText(baidu.getAppId())
                 && StringUtils.hasText(baidu.getApiKey())
                 && StringUtils.hasText(baidu.getApiSecret());
-        boolean deepseekReady = StringUtils.hasText(deepseek.getApiKey());
+        String aiKey = environment.getProperty("spring.ai.deepseek.api-key", "");
+        boolean deepseekReady = StringUtils.hasText(aiKey);
         return new ModerationRuntimeConfig(baiduReady, deepseekReady);
     }
 

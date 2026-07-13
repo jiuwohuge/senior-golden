@@ -27,7 +27,7 @@ public class ModerationProperties {
         private boolean enabled = false;
         private String apiKey = "";
         private String baseUrl = "https://api.deepseek.com";
-        private String model = "deepseek-chat";
+        private String model = "deepseek-v4-flash";
         private int connectTimeoutMs = 10_000;
         private int readTimeoutMs = 60_000;
     }

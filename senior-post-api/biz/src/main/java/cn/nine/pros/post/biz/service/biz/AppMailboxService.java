@@ -1,7 +1,9 @@
 package cn.nine.pros.post.biz.service.biz;
 
+import cn.nine.pros.post.client.model.input.app.AppLetterAssistantInDto;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
+import cn.nine.pros.post.client.model.out.AppLetterAssistantVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
 import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
@@ -41,4 +43,9 @@ public interface AppMailboxService {
      * 收件人对运输中的平邮提前拆信：非 VIP 扣 1 邮票，VIP 免扣；不改变送达状态，仅解锁正文。
      */
     MailboxLetterItemVO earlyOpenLetter(long actorUserId, long letterId);
+
+    /**
+     * 信件助手：整理用户原文为建议稿（Spring AI；不落库、不覆盖）。
+     */
+    AppLetterAssistantVO letterAssistant(long userId, AppLetterAssistantInDto body);
 }

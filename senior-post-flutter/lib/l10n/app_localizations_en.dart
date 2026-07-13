@@ -1783,6 +1783,134 @@ class AppLocalizationsEn extends AppLocalizations {
       'Confirm paper and text before sending.';
 
   @override
+  String get composeSeeAsRecipient => 'Preview';
+
+  @override
+  String get composePaperSettings => 'Paper';
+
+  @override
+  String get composeFontSizeLarge => 'Large';
+
+  @override
+  String get composeFontSizeXlarge => 'Larger';
+
+  @override
+  String get composeFontSizeSection => 'Text size';
+
+  @override
+  String get composeFontSection => 'Font';
+
+  @override
+  String get composeSkinSection => 'Paper color';
+
+  @override
+  String get composeSendLetterCta => 'Send';
+
+  @override
+  String composeRemainingQuota(int count) {
+    return '$count left today';
+  }
+
+  @override
+  String get composePreviewRequiredFirst =>
+      'Please preview once before sending, so you know what the recipient will see.';
+
+  @override
+  String get composeContinueAfterPreview => 'Confirm and continue';
+
+  @override
+  String get composeChipFreeWrite => 'Free write';
+
+  @override
+  String get composeChipHeart => 'Heartfelt';
+
+  @override
+  String get composeChipNarrative => 'Reminisce';
+
+  @override
+  String get composeChipFestival => 'Holiday';
+
+  @override
+  String get composeRecipientSheetTitle => 'Who to';
+
+  @override
+  String get composeRecipientPostOffice => 'A kindred spirit';
+
+  @override
+  String get composeRecipientPenPal => 'Pen pal';
+
+  @override
+  String get composeRecipientSelf => 'Future self';
+
+  @override
+  String get letterAssistantTitle => 'Letter assistant';
+
+  @override
+  String get letterAssistantModeWarmer => 'Warmer';
+
+  @override
+  String get letterAssistantModeNatural => 'More natural';
+
+  @override
+  String get letterAssistantModeExpand => 'Expand the story';
+
+  @override
+  String get letterAssistantModePolite => 'Check politeness';
+
+  @override
+  String get letterAssistantModeTranslate => 'Translate';
+
+  @override
+  String get letterAssistantModeCustom => 'Custom';
+
+  @override
+  String get letterAssistantCustomHint => 'Tell us how to revise';
+
+  @override
+  String get letterAssistantGenerate => 'Polish';
+
+  @override
+  String get letterAssistantYourDraft => 'Your draft';
+
+  @override
+  String get letterAssistantSuggestion => 'Assistant draft';
+
+  @override
+  String get letterAssistantReplace => 'Replace draft';
+
+  @override
+  String get letterAssistantKeep => 'Keep mine';
+
+  @override
+  String get letterAssistantRetry => 'Revise again';
+
+  @override
+  String get letterAssistantUndo => 'Undo replace';
+
+  @override
+  String get letterAssistantEmptyBody =>
+      'Write something first, then ask the assistant.';
+
+  @override
+  String get letterAssistantBusy => 'Polishing…';
+
+  @override
+  String get letterAssistantReplaced =>
+      'Replaced with the assistant draft. You can undo.';
+
+  @override
+  String get composePlaceholderBody => 'Write what you want to say…';
+
+  @override
+  String get composeHintEditablePrompt => 'You can edit this prompt freely';
+
+  @override
+  String get composeSealWhenReady => 'Pick a date, then seal';
+
+  @override
+  String get composeCancel => 'Cancel';
+
+  @override
   String get composeStepTopicSubmitTitle => 'Submit to topic mailbox';
 
   @override

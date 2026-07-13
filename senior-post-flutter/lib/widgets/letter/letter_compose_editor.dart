@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/postal_tokens.dart';
 import '../../l10n/app_localizations.dart';
-import '../postal/postal_text_field.dart';
+import 'letter_document.dart';
+import 'letter_paper.dart';
 
-/// 多段落写信控件：段间空行，提交时用 `\n\n` 拼接正文。
-///
-/// 更换模板时请用新 [Key] 重建本组件（传入新的 [initialParagraphs]）。
+export 'letter_document.dart' show letterSkinBackground, LetterDocument;
+
+/// 兼容旧调用的整屏写信控件（单正文，非多段落框）。
 class LetterComposeEditor extends StatefulWidget {
   const LetterComposeEditor({
     super.key,
@@ -17,20 +17,14 @@ class LetterComposeEditor extends StatefulWidget {
     this.enabled = true,
   });
 
-  /// 已有正文（按 `\n\n` 拆段）；优先于 [initialParagraphs]。
   final String? initialText;
   final List<String>? initialParagraphs;
   final ValueChanged<String> onChanged;
   final String? label;
   final bool enabled;
 
-  /// 将段落列表拼为发信正文。
-  static String joinParagraphs(List<String> paragraphs) {
-    return paragraphs
-        .map((p) => p.trim())
-        .where((p) => p.isNotEmpty)
-        .join('\n\n');
-  }
+  static String joinParagraphs(List<String> paragraphs) =>
+      LetterDocument.joinParagraphs(paragraphs);
 
   static List<String> splitBody(String text) {
     final trimmed = text.trim();
@@ -48,106 +42,66 @@ class LetterComposeEditor extends StatefulWidget {
 }
 
 class _LetterComposeEditorState extends State<LetterComposeEditor> {
-  late List<TextEditingController> _controllers;
+  late final TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
     final seed =
         widget.initialText != null && widget.initialText!.trim().isNotEmpty
-        ? LetterComposeEditor.splitBody(widget.initialText!)
+        ? widget.initialText!
         : (widget.initialParagraphs?.isNotEmpty == true
-              ? List<String>.from(widget.initialParagraphs!)
-              : ['']);
-    _controllers = seed.map((t) => TextEditingController(text: t)).toList();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _emit());
+              ? LetterDocument.joinParagraphs(widget.initialParagraphs!)
+              : '');
+    _controller = TextEditingController(text: seed);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onChanged(_controller.text);
+    });
   }
 
   @override
   void dispose() {
-    for (final c in _controllers) {
-      c.dispose();
-    }
+    _controller.dispose();
     super.dispose();
-  }
-
-  void _emit() {
-    widget.onChanged(
-      LetterComposeEditor.joinParagraphs(
-        _controllers.map((c) => c.text).toList(),
-      ),
-    );
-  }
-
-  void _addParagraph() {
-    setState(() {
-      _controllers.add(TextEditingController());
-    });
-    _emit();
-  }
-
-  void _removeParagraph(int index) {
-    if (_controllers.length <= 1) return;
-    setState(() {
-      _controllers.removeAt(index).dispose();
-    });
-    _emit();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final label = widget.label ?? l10n.composeBodyLabel;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (var i = 0; i < _controllers.length; i++) ...[
-          if (i > 0) const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: PostalTextField(
-                  controller: _controllers[i],
-                  label: i == 0 ? label : l10n.composeParagraphLabel(i + 1),
-                  maxLines: 5,
-                  minLines: 3,
-                  showClearButton: false,
-                  enabled: widget.enabled,
-                  onChanged: (_) => _emit(),
-                ),
-              ),
-              if (_controllers.length > 1)
-                IconButton(
-                  tooltip: l10n.composeRemoveParagraph,
-                  onPressed: widget.enabled ? () => _removeParagraph(i) : null,
-                  icon: Icon(
-                    Icons.remove_circle_outline,
-                    color: PostalTokens.stampVermilion,
-                  ),
-                ),
-            ],
+        if (widget.label != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              widget.label!,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              l10n.composeBodyLabel,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
           ),
-        ],
-        const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: widget.enabled ? _addParagraph : null,
-            icon: const Icon(Icons.add),
-            label: Text(l10n.composeAddParagraph),
+        IgnorePointer(
+          ignoring: !widget.enabled,
+          child: Opacity(
+            opacity: widget.enabled ? 1 : 0.55,
+            child: LetterPaper(
+              mode: LetterPaperMode.compose,
+              document: LetterDocument(body: _controller.text),
+              controller: _controller,
+              placeholder: l10n.composePlaceholderBody,
+              onBodyChanged: widget.onChanged,
+              minHeight: 200,
+            ),
           ),
         ),
       ],
     );
   }
-}
-
-/// 读信页信纸背景色（按 skinId）。
-Color letterSkinBackground(String? skinId) {
-  return switch (skinId) {
-    'vintage' => const Color(0xFFF3E6C8),
-    'linen' => const Color(0xFFF7F1E3),
-    _ => PostalTokens.paperCream,
-  };
 }

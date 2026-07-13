@@ -75,6 +75,16 @@ Token: {{token}}
 
 ### 7) App：发信 / 收件（见业务邮箱 API 与信件状态；按 Knife4j 填写）
 
+### 7b) App：信件助手（需 SPRING_AI_MODEL_CHAT=deepseek + API key）
+POST {{host}}/api/mailbox/letters/letter-assistant
+Content-Type: application/json
+Token: {{token}}
+
+{
+  "sourceText": "今天天气很好，想写封信给你。",
+  "helpMode": "natural"
+}
+
 ### 8) App：邮票流水（验证赠票入账）
 POST {{host}}/api/stamps/ledger/paging
 Content-Type: application/json
