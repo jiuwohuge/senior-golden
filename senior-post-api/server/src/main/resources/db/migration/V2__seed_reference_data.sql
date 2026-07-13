@@ -27,23 +27,45 @@ WHERE u.staff_role <> 0 AND u.del_flag = FALSE
 ORDER BY u.id
 LIMIT 1;
 
--- 兴趣标签（en + zh）
+-- 兴趣标签（17 大类，按展示顺序；en + zh，名称含 emoji）
 INSERT INTO sys_tag (tag_name, lang_code, sort_order, created_at, updated_at, created_by, updated_by, del_flag)
 VALUES
-('Gardening', 'en', 10, NOW(), NOW(), 0, 0, FALSE),
-('Reading', 'en', 20, NOW(), NOW(), 0, 0, FALSE),
-('Classical Music', 'en', 30, NOW(), NOW(), 0, 0, FALSE),
-('Slow Travel', 'en', 60, NOW(), NOW(), 0, 0, FALSE),
-('Language Exchange', 'en', 100, NOW(), NOW(), 0, 0, FALSE),
-('Long Walks', 'en', 140, NOW(), NOW(), 0, 0, FALSE),
-('Family History', 'en', 160, NOW(), NOW(), 0, 0, FALSE),
-('园艺', 'zh', 10, NOW(), NOW(), 0, 0, FALSE),
-('阅读', 'zh', 20, NOW(), NOW(), 0, 0, FALSE),
-('古典音乐', 'zh', 30, NOW(), NOW(), 0, 0, FALSE),
-('慢旅行', 'zh', 60, NOW(), NOW(), 0, 0, FALSE),
-('语言交换', 'zh', 100, NOW(), NOW(), 0, 0, FALSE),
-('健走', 'zh', 140, NOW(), NOW(), 0, 0, FALSE),
-('家族史', 'zh', 160, NOW(), NOW(), 0, 0, FALSE)
+-- en
+('👨‍👩‍👧 Family Life', 'en', 10, NOW(), NOW(), 0, 0, FALSE),
+('🌍 Travel', 'en', 20, NOW(), NOW(), 0, 0, FALSE),
+('🍜 Food', 'en', 30, NOW(), NOW(), 0, 0, FALSE),
+('🌿 Wellness & Health', 'en', 40, NOW(), NOW(), 0, 0, FALSE),
+('📚 Reading', 'en', 50, NOW(), NOW(), 0, 0, FALSE),
+('🎵 Music & Opera', 'en', 60, NOW(), NOW(), 0, 0, FALSE),
+('🎬 Movies & Entertainment', 'en', 70, NOW(), NOW(), 0, 0, FALSE),
+('🏃 Sports & Fitness', 'en', 80, NOW(), NOW(), 0, 0, FALSE),
+('📷 Photography', 'en', 90, NOW(), NOW(), 0, 0, FALSE),
+('💡 Life Tips', 'en', 100, NOW(), NOW(), 0, 0, FALSE),
+('🌸 Flowers, Birds & Pets', 'en', 110, NOW(), NOW(), 0, 0, FALSE),
+('🏛 History & Culture', 'en', 120, NOW(), NOW(), 0, 0, FALSE),
+('🎓 Learning & Growth', 'en', 130, NOW(), NOW(), 0, 0, FALSE),
+('✂️ Handicrafts', 'en', 140, NOW(), NOW(), 0, 0, FALSE),
+('♟ Board Games & Puzzles', 'en', 150, NOW(), NOW(), 0, 0, FALSE),
+('🏺 Collectibles', 'en', 160, NOW(), NOW(), 0, 0, FALSE),
+('❤️ Volunteering', 'en', 170, NOW(), NOW(), 0, 0, FALSE),
+-- zh
+('👨‍👩‍👧 家庭生活', 'zh', 10, NOW(), NOW(), 0, 0, FALSE),
+('🌍 旅行', 'zh', 20, NOW(), NOW(), 0, 0, FALSE),
+('🍜 美食', 'zh', 30, NOW(), NOW(), 0, 0, FALSE),
+('🌿 养生健康', 'zh', 40, NOW(), NOW(), 0, 0, FALSE),
+('📚 阅读', 'zh', 50, NOW(), NOW(), 0, 0, FALSE),
+('🎵 音乐戏曲', 'zh', 60, NOW(), NOW(), 0, 0, FALSE),
+('🎬 影视娱乐', 'zh', 70, NOW(), NOW(), 0, 0, FALSE),
+('🏃 运动健身', 'zh', 80, NOW(), NOW(), 0, 0, FALSE),
+('📷 摄影', 'zh', 90, NOW(), NOW(), 0, 0, FALSE),
+('💡 生活百科', 'zh', 100, NOW(), NOW(), 0, 0, FALSE),
+('🌸 花鸟宠物', 'zh', 110, NOW(), NOW(), 0, 0, FALSE),
+('🏛 历史文化', 'zh', 120, NOW(), NOW(), 0, 0, FALSE),
+('🎓 学习成长', 'zh', 130, NOW(), NOW(), 0, 0, FALSE),
+('✂️ 手工创作', 'zh', 140, NOW(), NOW(), 0, 0, FALSE),
+('♟ 棋牌益智', 'zh', 150, NOW(), NOW(), 0, 0, FALSE),
+('🏺 收藏文玩', 'zh', 160, NOW(), NOW(), 0, 0, FALSE),
+('❤️ 志愿公益', 'zh', 170, NOW(), NOW(), 0, 0, FALSE)
 ON CONFLICT (tag_name, lang_code) DO UPDATE SET
     sort_order = EXCLUDED.sort_order,
     del_flag   = FALSE,

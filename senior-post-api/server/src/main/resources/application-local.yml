@@ -71,7 +71,6 @@ senior-post:
     from: ${SENIOR_POST_MAIL_FROM:}
   moderation:
     pending-retry-minutes: 5
-    retry-fixed-delay-ms: 120000
     baidu:
       app-id: ${MODERATION_BAIDU_APP_ID:}
       api-key: ${MODERATION_BAIDU_API_KEY:}

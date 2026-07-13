@@ -64,9 +64,6 @@ senior-post:
   oauth:
     google:
       client-id: ${GOOGLE_WEB_CLIENT_ID:}
-    password-reset-expire-minutes: 15
-    password-reset-max-requests-per-hour: 5
-    password-reset-min-interval-seconds: 60
   mail:
     # 配置 spring.mail.host 后发送真实邮件；未配置时验证码仅写入服务端日志（WARN）
     from: ${SENIOR_POST_MAIL_FROM:}
