@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -179,7 +177,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-  bool get _showGoogle => !kIsWeb && Platform.isAndroid;
+  /// Google 登录仅 Android 正式渠道；Web 联调隐藏入口。
+  bool get _showGoogle =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
   @override
   Widget build(BuildContext context) {

@@ -60,10 +60,6 @@ services:
       SPRING_DATA_REDIS_PORT: ${SPRING_DATA_REDIS_PORT:-6379}
       SPRING_DATA_REDIS_PASSWORD: ${SPRING_DATA_REDIS_PASSWORD:-}
       JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx512m}
-      TENCENT_IM_SDK_APP_ID: ${TENCENT_IM_SDK_APP_ID:-0}
-      TENCENT_IM_SECRET_KEY: ${TENCENT_IM_SECRET_KEY:-}
-      TENCENT_IM_REST_IDENTIFIER: ${TENCENT_IM_REST_IDENTIFIER:-}
-      TENCENT_IM_REST_HOST: ${TENCENT_IM_REST_HOST:-adminapisgp.im.qcloud.com}
       ALIYUN_OSS_ENDPOINT: ${ALIYUN_OSS_ENDPOINT:-}
       ALIYUN_OSS_ACCESS_KEY_ID: ${ALIYUN_OSS_ACCESS_KEY_ID:-}
       ALIYUN_OSS_ACCESS_KEY_SECRET: ${ALIYUN_OSS_ACCESS_KEY_SECRET:-}
@@ -79,7 +75,6 @@ services:
       GOOGLE_WEB_CLIENT_ID: ${GOOGLE_WEB_CLIENT_ID:-}
       PASSWORD_RESET_PEPPER: ${PASSWORD_RESET_PEPPER:-}
       SENIOR_POST_MAIL_FROM: ${SENIOR_POST_MAIL_FROM:-}
-      TENCENT_IM_FRIENDSHIP_SYNC: ${TENCENT_IM_FRIENDSHIP_SYNC:-true}
     depends_on:
       postgresql:
         condition: service_healthy
@@ -96,7 +91,7 @@ services:
       [
         "sh",
         "-c",
-        "if [ ! -x node_modules/.bin/vite ]; then npm install --include=optional; fi && npm run dev -- --host 0.0.0.0 --port 5174",
+        "if [ ! -x node_modules/.bin/vite ] || [ ! -f node_modules/antd/package.json ] || [ ! -f node_modules/antd/es/index.js ]; then npm install --include=optional; fi && npm run dev -- --host 0.0.0.0 --port 5174",
       ]
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:${NGINX_PORT:-80}}

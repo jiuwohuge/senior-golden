@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import 'package:senior_post_flutter/widgets/postal_decorations.dart';
 
-import '../../app/theme/postal_tokens.dart';
 import '../post_office/post_office_home_page.dart';
 import '../directory/directory_page.dart';
-import '../mailbox/im_unread_providers.dart';
 import '../mailbox/mailbox_page.dart';
 import '../profile/profile_page.dart';
 
@@ -20,16 +17,16 @@ abstract final class MainShellRoute {
 }
 
 /// Main shell for the 4.0 slow-mail post office experience.
-class MainShell extends ConsumerStatefulWidget {
+class MainShell extends StatefulWidget {
   const MainShell({super.key, this.initialIndex = 0});
 
   final int initialIndex;
 
   @override
-  ConsumerState<MainShell> createState() => _MainShellState();
+  State<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends ConsumerState<MainShell> {
+class _MainShellState extends State<MainShell> {
   late int _index;
 
   @override
@@ -54,7 +51,6 @@ class _MainShellState extends ConsumerState<MainShell> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final imUnreadTotal = foldImC2cUnreadTotal(ref.watch(imC2cUnreadProvider));
 
     return Scaffold(
       appBar: AppBar(
@@ -127,14 +123,12 @@ class _MainShellState extends ConsumerState<MainShell> {
               label: l10n.tabDirectory,
             ),
             NavigationDestination(
-              icon: _NavIconWithDot(
-                showDot: imUnreadTotal > 0,
-                icon: Icons.local_post_office_outlined,
+              icon: Icon(
+                Icons.local_post_office_outlined,
                 semanticLabel: l10n.a11yTabMailbox,
               ),
-              selectedIcon: _NavIconWithDot(
-                showDot: imUnreadTotal > 0,
-                icon: Icons.local_post_office,
+              selectedIcon: Icon(
+                Icons.local_post_office,
                 semanticLabel: l10n.a11yTabMailbox,
               ),
               label: l10n.tabMailbox,
@@ -153,48 +147,6 @@ class _MainShellState extends ConsumerState<MainShell> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _NavIconWithDot extends StatelessWidget {
-  const _NavIconWithDot({
-    required this.showDot,
-    required this.icon,
-    required this.semanticLabel,
-  });
-
-  final bool showDot;
-  final IconData icon;
-  final String semanticLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    final ic = Icon(icon, semanticLabel: semanticLabel);
-    if (!showDot) {
-      return ic;
-    }
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        ic,
-        Positioned(
-          right: -1,
-          top: -2,
-          child: Container(
-            width: 11,
-            height: 11,
-            decoration: BoxDecoration(
-              color: PostalTokens.stampVermilion,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Theme.of(context).colorScheme.surface,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

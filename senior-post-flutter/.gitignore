@@ -33,6 +33,10 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Local run timing / scratch outputs (e.g. flutter-run-timed.ps1)
+build_timing_out.txt
+*_timing_out.txt
+
 # Symbolication related
 app.*.symbols
 
@@ -43,3 +47,5 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+# Gradle build outputs under android/ (reports, intermediates) — keep /web source tracked
+/android/build/

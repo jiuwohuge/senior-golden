@@ -717,14 +717,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.0"
-  mime_type:
-    dependency: transitive
-    description:
-      name: mime_type
-      sha256: d652b613e84dac1af28030a9fba82c0999be05b98163f9e18a0849c6e63838bb
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "1.0.1"
   mocktail:
     dependency: "direct dev"
     description:
@@ -1002,14 +994,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.4.0"
-  tencent_cloud_chat_sdk:
-    dependency: "direct main"
-    description:
-      name: tencent_cloud_chat_sdk
-      sha256: "1eac8d9a56bf1698eb7d6481d7f24907487bc68414e12a3c9e1acb8557eb49e4"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "8.8.7373"
   term_glyph:
     dependency: transitive
     description:

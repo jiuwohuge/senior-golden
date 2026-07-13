@@ -734,7 +734,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get directoryFilterCta => 'Filter pen pals';
 
   @override
-  String get directorySafetyTitle => 'Letters before private chat';
+  String get directorySafetyTitle => 'Letters before anything else';
 
   @override
   String get directorySafetyBody =>
@@ -1122,20 +1122,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get letterAcceptContactSuccess =>
       'Pen pal request sent. After they accept, find them under My pen pals.';
-
-  @override
-  String get chatFriendsOnlySnack =>
-      'Only postal friends in Connections can use live chat.';
-
-  @override
-  String get chatEmojiPickerTitle => 'Friendly stamps';
-
-  @override
-  String get chatEmojiPickerSubtitle =>
-      'Tap an emoji to add it to your message.';
-
-  @override
-  String get chatComposerHint => 'Write a message';
 
   @override
   String get postDetailCommentRequired => 'Please enter a comment.';

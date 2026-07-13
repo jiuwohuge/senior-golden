@@ -1,7 +1,7 @@
 import { Button, Col, Drawer, Form, Input, Space, Tag, Typography, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import AdminProTable from '../../components/admin/AdminProTable'
+import AdminProTable, { FILTER_COL_SHORT, FILTER_COL_TEXT } from '../../components/admin/AdminProTable'
 import EnumSelect, { MAIL_OUTBOX_STATUS_OPTIONS } from '../../components/admin/EnumSelect'
 import { api } from '../../services/api'
 
@@ -138,22 +138,22 @@ export default function OutboxList() {
 
   const filterItems = (
     <>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_TEXT}>
         <Form.Item name="toEmail" label="收件邮箱">
           <Input allowClear placeholder="模糊搜索" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="mailType" label="邮件类型">
           <Input allowClear placeholder="如 verify_code" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="status" label="状态">
           <EnumSelect options={MAIL_OUTBOX_STATUS_OPTIONS} placeholder="全部" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_TEXT}>
         <Form.Item name="keyword" label="关键词">
           <Input allowClear placeholder="payload / 邮箱" />
         </Form.Item>

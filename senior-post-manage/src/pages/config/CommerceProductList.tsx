@@ -2,7 +2,7 @@ import { PlusOutlined } from '@ant-design/icons'
 import { Button, Col, Form, Input, InputNumber, Modal, Space, Tag, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import AdminProTable from '../../components/admin/AdminProTable'
+import AdminProTable, { FILTER_COL_SHORT } from '../../components/admin/AdminProTable'
 import EnumSelect, { PRODUCT_STATUS_OPTIONS, PRODUCT_TYPE_OPTIONS } from '../../components/admin/EnumSelect'
 import { api } from '../../services/api'
 
@@ -180,12 +180,12 @@ export default function CommerceProductList() {
 
   const filterItems = (
     <>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="productType" label="商品类型">
           <EnumSelect options={PRODUCT_TYPE_OPTIONS} placeholder="全部" />
         </Form.Item>
       </Col>
-      <Col xs={24} sm={12} md={8} lg={6}>
+      <Col {...FILTER_COL_SHORT}>
         <Form.Item name="status" label="状态">
           <EnumSelect options={PRODUCT_STATUS_OPTIONS} placeholder="全部" />
         </Form.Item>

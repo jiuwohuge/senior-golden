@@ -7,6 +7,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
+import '../../core/network/router_refresh.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/letter/letter_compose_editor.dart';
 import '../../widgets/postal/postal.dart';
@@ -16,6 +17,7 @@ import '../mailbox/mailbox_remote.dart';
 import '../post_office/post_office_remote.dart';
 import '../commerce/commerce_remote.dart';
 import '../ritual/delivery_sent_overlay.dart';
+import '../shell/main_shell.dart';
 import '../time_letter/time_letter_providers.dart';
 import '../time_letter/time_letter_remote.dart';
 import '../time_letter/time_letter_seal_slider.dart';
@@ -290,6 +292,11 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
             templateId: _selectedTemplateId,
           );
       await ref.read(authRepositoryProvider).refreshSessionFromServer();
+      // 首封信：本地兜底标记，避免 /me 滞后时 redirect 又打回引导页。
+      if (widget.initialIntent.fromFirstLetterGuide) {
+        ref.read(appSessionProvider.notifier).markFirstLetterDoneLocally();
+        ref.read(routerRefreshProvider).value++;
+      }
       ref.invalidate(mailboxLettersProvider);
       ref.invalidate(postalInboxLettersProvider);
       ref.invalidate(mailboxArchiveProvider);
@@ -302,7 +309,15 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           ? l10n.composePostOfficeSendHint
           : (_peerNickname ?? l10n.topicFriendFallback);
       await showDeliverySentOverlay(context, destinationLabel: dest);
-      if (mounted) context.pop();
+      if (!mounted) return;
+      // 首封信引导是 go 进来的根页，pop 只会回到无返回键的引导页；
+      // 须显式进邮局，并刷新 redirect（firstLetterDone 已变）。
+      if (widget.initialIntent.fromFirstLetterGuide) {
+        ref.read(routerRefreshProvider).value++;
+        context.go(MainShellRoute.pathPostOffice);
+      } else {
+        context.pop();
+      }
     } catch (e) {
       final biz = apiBusinessExceptionFrom(e);
       if (mounted) {

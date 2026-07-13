@@ -429,14 +429,6 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     }
 
     /**
-     * 判断双方是否为活跃好友。
-     */
-    @Override
-    public boolean isFriendshipActive(long viewerUserId, long peerUserId) {
-        return friendshipService.areActiveFriends(viewerUserId, peerUserId);
-    }
-
-    /**
      * 收件人提前拆信：运输中信件标记早开并立即送达。
      * <p>前置：actor 为收件人、状态 DELIVERING、尚未早开、账号正常。
      * <p>副作用：写 earlyOpen/delivered 状态；事务边界为本方法。

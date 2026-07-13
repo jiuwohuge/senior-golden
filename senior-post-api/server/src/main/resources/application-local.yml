@@ -47,10 +47,9 @@ jh:
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
 
-# 腾讯 IM / 阿里云 OSS / 机审：勿将真实密钥写入本文件并提交公共仓库。
+# 阿里云 OSS / 机审：勿将真实密钥写入本文件并提交公共仓库。
 # Docker Compose 须在 senior-post-api.environment 中透传同名变量（见根目录 docker-compose.yml）。
 # 推荐在仓库根目录 .env 中设置：
-#   TENCENT_IM_SDK_APP_ID、TENCENT_IM_SECRET_KEY、TENCENT_IM_REST_IDENTIFIER
 #   ALIYUN_OSS_ENDPOINT、ALIYUN_OSS_ACCESS_KEY_ID、ALIYUN_OSS_ACCESS_KEY_SECRET、
 #   ALIYUN_OSS_BUCKET、ALIYUN_OSS_PUBLIC_BASE_URL（可选）
 #   MODERATION_BAIDU_APP_ID、MODERATION_BAIDU_API_KEY、MODERATION_BAIDU_API_SECRET

@@ -43,3 +43,42 @@ body {
   border-radius: 8px;
   border: 1px solid #f0f0f0;
 }
+
+/* AdminProTable 筛选区：label 与控件同行、压低垂直占用 */
+.admin-filter-form .ant-form-item {
+  margin-bottom: 0;
+}
+
+.admin-filter-form .ant-form-item-row {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.admin-filter-form .ant-form-item-label {
+  padding: 0 8px 0 0;
+}
+
+.admin-filter-form .ant-form-item-label > label {
+  height: auto;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.admin-filter-form .admin-filter-actions {
+  margin-inline-start: 0;
+}
+
+@media (max-width: 576px) {
+  .admin-filter-form .ant-form-item-row {
+    flex-wrap: wrap;
+  }
+
+  .admin-filter-form .ant-form-item-label {
+    padding: 0 0 4px;
+    max-width: 100%;
+  }
+
+  .admin-filter-form .ant-form-item-control {
+    max-width: 100%;
+  }
+}

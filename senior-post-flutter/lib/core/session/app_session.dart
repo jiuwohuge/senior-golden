@@ -37,6 +37,14 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
     state = AppSessionState(user: _guestUser);
   }
 
+  /// 首封信发送成功后的本地兜底（与后端 markFirstLetterDone 对齐）。
+  void markFirstLetterDoneLocally() {
+    if (state.user.firstLetterDone == true) return;
+    state = state.copyWith(
+      user: state.user.copyWith(firstLetterDone: true),
+    );
+  }
+
   void updateProfile({
     String? nickname,
     String? bio,

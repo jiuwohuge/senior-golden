@@ -86,7 +86,8 @@ class _DebugApiBaseUrlDialogState extends State<_DebugApiBaseUrlDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '默认（模拟器本机）：$kDefaultApiBaseUrl\n'
+              '默认：模拟器 $kAndroidEmulatorApiBaseUrl / Web $kWebLocalApiBaseUrl\n'
+              '当前默认：$kDefaultApiBaseUrl\n'
               '编译期：$kApiBaseUrl',
               style: Theme.of(context).textTheme.bodySmall,
             ),

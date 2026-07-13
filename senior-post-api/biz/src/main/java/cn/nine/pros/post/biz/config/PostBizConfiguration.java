@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableConfigurationProperties({
-        TencentImProperties.class,
         OssProperties.class,
         SeniorPostAuthProperties.class,
         ModerationProperties.class,

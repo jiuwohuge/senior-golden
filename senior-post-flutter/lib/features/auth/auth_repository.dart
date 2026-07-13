@@ -9,8 +9,8 @@ import '../../core/auth/auth_token.dart';
 import '../../core/device/device_ids.dart';
 import '../../core/device/device_install_id.dart';
 import '../../core/network/dio_provider.dart';
+import '../../core/network/router_refresh.dart';
 import '../../core/session/app_session.dart';
-import '../mailbox/tim_facade.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(ref);
@@ -264,7 +264,6 @@ class AuthRepository {
     await AuthStorage.clearToken();
     _ref.read(authTokenProvider.notifier).state = null;
     _ref.read(appSessionProvider.notifier).clear();
-    _ref.invalidate(seniorPostTimFacadeProvider);
   }
 
   Future<void> refreshSessionFromServer() async {
@@ -274,7 +273,15 @@ class AuthRepository {
       final data = unwrapData<Map<String, dynamic>>(res, (raw) {
         return raw! as Map<String, dynamic>;
       });
+      final beforeFirst =
+          _ref.read(appSessionProvider).user.firstLetterDone == true;
       _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(data);
+      final afterFirst =
+          _ref.read(appSessionProvider).user.firstLetterDone == true;
+      // firstLetterDone 变化时驱动 GoRouter redirect（离开强制引导页）。
+      if (beforeFirst != afterFirst) {
+        _ref.read(routerRefreshProvider).value++;
+      }
     } on DioException catch (e) {
       _throwMappedDio(e);
     }
@@ -353,7 +360,6 @@ class AuthRepository {
     }
     await AuthStorage.writeToken(token);
     _ref.read(authTokenProvider.notifier).state = token;
-    _ref.invalidate(seniorPostTimFacadeProvider);
     _ref.read(invalidateAuthDataProvider)();
     final complete = data['profileComplete'] as bool? ?? true;
     return AuthSignInResult(profileComplete: complete, riskLevel: riskLevel);

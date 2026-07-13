@@ -57,13 +57,9 @@ public interface AppMailboxApi {
     @GetMapping("/letters/{letterId}")
     MailboxLetterItemVO getLetter(@PathVariable("letterId") Long letterId);
 
-    @Operation(summary = "邮政好友列表（Connections）：基于 bu_friendship 活跃关系，非 TIM 会话列表")
+    @Operation(summary = "邮政好友列表（Connections）：基于 bu_friendship 活跃关系")
     @GetMapping("/friends")
     List<MailboxFriendItemVO> listFriends();
-
-    @Operation(summary = "是否与指定用户已邮政建联（活跃好友）")
-    @GetMapping("/peers/{peerUserId}/friendship-active")
-    boolean isFriendshipActive(@PathVariable("peerUserId") Long peerUserId);
 
     @Operation(summary = "平邮加速：发件人消耗 1 邮票立即送达；VIP 免扣")
     @PostMapping("/letters/{letterId}/speed-up")

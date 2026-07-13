@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/postal_tokens.dart';
 
-/// 邮戳同心圆 + 弧文，用于品牌头部装饰。
+/// 閭埑鍚屽績鍦?+ 寮ф枃锛岀敤浜庡搧鐗屽ご閮ㄨ楗般€?
 class PostmarkRing extends StatelessWidget {
   const PostmarkRing({
     super.key,
@@ -92,7 +92,7 @@ class _PostmarkRingPainter extends CustomPainter {
       oldDelegate.year != year;
 }
 
-/// 邮票齿边：在矩形外缘绘制半圆切口，需要配合宿主裁剪一起使用。
+/// 閭エ榻胯竟锛氬湪鐭╁舰澶栫紭缁樺埗鍗婂渾鍒囧彛锛岄渶瑕侀厤鍚堝涓昏鍓竴璧蜂娇鐢ㄣ€?
 class StampEdgePainter extends CustomPainter {
   StampEdgePainter({
     this.color = PostalTokens.paperEnvelope,
@@ -151,7 +151,7 @@ class StampEdgePainter extends CustomPainter {
   bool shouldRepaint(covariant StampEdgePainter oldDelegate) => false;
 }
 
-/// 顶部细齿孔分隔条，暗示邮票齿边。
+/// 椤堕儴缁嗛娇瀛斿垎闅旀潯锛屾殫绀洪偖绁ㄩ娇杈广€?
 class PostalPerforationStrip extends StatelessWidget {
   const PostalPerforationStrip({super.key, this.color, this.height = 10});
 
@@ -187,7 +187,7 @@ class _PerforationPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// 平铺纸面纹理（极淡的牛皮纸点状噪声）。
+/// 骞抽摵绾搁潰绾圭悊锛堟瀬娣＄殑鐗涚毊绾哥偣鐘跺櫔澹帮級銆?
 class PaperTextureBackground extends StatelessWidget {
   const PaperTextureBackground({super.key, required this.child, this.color});
 
@@ -232,232 +232,4 @@ class _PaperNoisePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// 聊天页信纸背景：暖色渐变 + 淡邮戳纹样 + 纸面噪点，营造复古信笺氛围。
-class PostalChatBackground extends StatelessWidget {
-  const PostalChatBackground({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFFAF6EE),
-            PostalTokens.paperCream,
-            PostalTokens.paperEnvelope,
-          ],
-          stops: [0.0, 0.42, 1.0],
-        ),
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: const Alignment(0, -0.85),
-                  radius: 1.35,
-                  colors: [
-                    PostalTokens.postboxGreen.withValues(alpha: 0.07),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          IgnorePointer(
-            child: CustomPaint(painter: _ChatStationeryPatternPainter()),
-          ),
-          IgnorePointer(child: CustomPaint(painter: _PaperNoisePainter())),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-class _ChatStationeryPatternPainter extends CustomPainter {
-  static const _motifs = <_StationeryMotif>[
-    _StationeryMotif(0.10, 0.14, 52, _MotifKind.postmark, 0.22),
-    _StationeryMotif(0.78, 0.08, 44, _MotifKind.postmark, 0.18),
-    _StationeryMotif(0.88, 0.32, 38, _MotifKind.stamp, 0.16),
-    _StationeryMotif(0.06, 0.48, 36, _MotifKind.stamp, 0.14),
-    _StationeryMotif(0.72, 0.58, 48, _MotifKind.postmark, 0.15),
-    _StationeryMotif(0.18, 0.72, 40, _MotifKind.envelope, 0.13),
-    _StationeryMotif(0.84, 0.78, 34, _MotifKind.envelope, 0.12),
-    _StationeryMotif(0.42, 0.22, 30, _MotifKind.stamp, 0.11),
-    _StationeryMotif(0.52, 0.88, 46, _MotifKind.postmark, 0.13),
-    _StationeryMotif(0.28, 0.38, 28, _MotifKind.envelope, 0.10),
-  ];
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    _drawLaidPaperWatermark(canvas, size);
-    for (final m in _motifs) {
-      final center = Offset(m.x * size.width, m.y * size.height);
-      switch (m.kind) {
-        case _MotifKind.postmark:
-          _drawPostmark(canvas, center, m.size, m.opacity);
-        case _MotifKind.stamp:
-          _drawStamp(canvas, center, m.size, m.opacity);
-        case _MotifKind.envelope:
-          _drawEnvelope(canvas, center, m.size, m.opacity);
-      }
-    }
-    _drawCornerPerforations(canvas, size);
-  }
-
-  void _drawLaidPaperWatermark(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = PostalTokens.kraftBrown.withValues(alpha: 0.035)
-      ..strokeWidth = 0.8;
-    const gap = 28.0;
-    for (double y = -size.height; y < size.height * 2; y += gap) {
-      canvas.drawLine(
-        Offset(-size.width, y),
-        Offset(size.width * 2, y + size.width * 0.55),
-        paint,
-      );
-    }
-  }
-
-  void _drawPostmark(
-    Canvas canvas,
-    Offset center,
-    double size,
-    double opacity,
-  ) {
-    final color = PostalTokens.postboxGreen.withValues(alpha: opacity);
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-    canvas.drawCircle(center, size * 0.46, paint);
-    canvas.drawCircle(center, size * 0.30, paint);
-    final tickPaint = Paint()
-      ..color = color
-      ..strokeWidth = 1.1
-      ..strokeCap = StrokeCap.round;
-    final innerR = size * 0.32;
-    final outerR = size * 0.42;
-    for (int i = 0; i < 8; i++) {
-      final angle = i * math.pi / 4 + 0.2;
-      final p1 = center + Offset(math.cos(angle), math.sin(angle)) * innerR;
-      final p2 = center + Offset(math.cos(angle), math.sin(angle)) * outerR;
-      canvas.drawLine(p1, p2, tickPaint);
-    }
-  }
-
-  void _drawStamp(Canvas canvas, Offset center, double size, double opacity) {
-    final rect = Rect.fromCenter(
-      center: center,
-      width: size * 0.72,
-      height: size * 0.88,
-    );
-    final fill = Paint()
-      ..color = PostalTokens.stampVermilion.withValues(alpha: opacity * 0.35);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(3)),
-      fill,
-    );
-    final border = Paint()
-      ..color = PostalTokens.stampVermilion.withValues(alpha: opacity)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(3)),
-      border,
-    );
-    final notchPaint = Paint()
-      ..color = PostalTokens.paperCream.withValues(alpha: 0.85);
-    const notchR = 2.2;
-    const gap = 7.0;
-    for (double x = rect.left + gap; x < rect.right; x += gap) {
-      canvas.drawCircle(Offset(x, rect.top), notchR, notchPaint);
-      canvas.drawCircle(Offset(x, rect.bottom), notchR, notchPaint);
-    }
-  }
-
-  void _drawEnvelope(
-    Canvas canvas,
-    Offset center,
-    double size,
-    double opacity,
-  ) {
-    final w = size * 0.9;
-    final h = size * 0.62;
-    final rect = Rect.fromCenter(center: center, width: w, height: h);
-    final fill = Paint()
-      ..color = PostalTokens.postboxGreen.withValues(alpha: opacity * 0.4);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(4)),
-      fill,
-    );
-    final border = Paint()
-      ..color = PostalTokens.postboxGreen.withValues(alpha: opacity)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.1;
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(4)),
-      border,
-    );
-    final flap = Path()
-      ..moveTo(rect.left + 4, rect.top + 4)
-      ..lineTo(center.dx, rect.top + h * 0.42)
-      ..lineTo(rect.right - 4, rect.top + 4);
-    canvas.drawPath(
-      flap,
-      Paint()
-        ..color = PostalTokens.postboxGreen.withValues(alpha: opacity * 0.7)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
-    );
-  }
-
-  void _drawCornerPerforations(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = PostalTokens.perforationLine.withValues(alpha: 0.35);
-    const r = 2.0;
-    const cols = 5;
-    const rowGap = 10.0;
-    const colGap = 12.0;
-    for (int c = 0; c < cols; c++) {
-      canvas.drawCircle(Offset(8 + c * colGap, 6), r, paint);
-      canvas.drawCircle(
-        Offset(size.width - 8 - c * colGap, size.height - 6),
-        r,
-        paint,
-      );
-    }
-    for (int row = 0; row < 4; row++) {
-      canvas.drawCircle(Offset(6, 8 + row * rowGap), 2, paint);
-      canvas.drawCircle(
-        Offset(size.width - 6, size.height - 8 - row * rowGap),
-        2,
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-enum _MotifKind { postmark, stamp, envelope }
-
-class _StationeryMotif {
-  const _StationeryMotif(this.x, this.y, this.size, this.kind, this.opacity);
-
-  final double x;
-  final double y;
-  final double size;
-  final _MotifKind kind;
-  final double opacity;
 }

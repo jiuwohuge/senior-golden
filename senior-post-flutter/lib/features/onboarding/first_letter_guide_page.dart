@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
+import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../compose/compose_intent.dart';
 import '../post_office/post_office_remote.dart';
 import '../post_office/quota_claim_dialog.dart';
+import '../shell/main_shell.dart';
 
 /// §2.8 首封信引导：资料完成后强制进入；写首封前必须先领取今日免费额度。
 class FirstLetterGuidePage extends ConsumerStatefulWidget {
@@ -28,7 +30,14 @@ class _FirstLetterGuidePageState extends ConsumerState<FirstLetterGuidePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _ensureQuotaClaimed());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (ref.read(appSessionProvider).user.firstLetterDone == true) {
+        context.go(MainShellRoute.pathPostOffice);
+        return;
+      }
+      _ensureQuotaClaimed();
+    });
   }
 
   /// 注册后先进本页：未领取则强制弹窗，领取后才可写首封信。
@@ -87,6 +96,27 @@ class _FirstLetterGuidePageState extends ConsumerState<FirstLetterGuidePage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+
+    // 首封已完成（例如从 compose 返回但未 go 走）：离开无返回键的引导页。
+    ref.listen<bool?>(
+      appSessionProvider.select((s) => s.user.firstLetterDone),
+      (prev, next) {
+        if (next == true && mounted) {
+          context.go(MainShellRoute.pathPostOffice);
+        }
+      },
+    );
+    final alreadyDone =
+        ref.watch(appSessionProvider).user.firstLetterDone == true;
+
+    if (alreadyDone) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.go(MainShellRoute.pathPostOffice);
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       backgroundColor: PostalTokens.paperCream,

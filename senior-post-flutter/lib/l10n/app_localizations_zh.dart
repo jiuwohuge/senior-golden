@@ -687,7 +687,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get directoryFilterCta => '筛选笔友';
 
   @override
-  String get directorySafetyTitle => '先通信，再私聊';
+  String get directorySafetyTitle => '先写信，再慢慢认识';
 
   @override
   String get directorySafetyBody => '资料只是开始。涉及金钱、投资、验证码、私下联系方式等内容，请等真正熟悉后再决定。';
@@ -1058,18 +1058,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get letterAcceptContactSuccess => '笔友申请已发送，对方确认后可在笔友页查看。';
-
-  @override
-  String get chatFriendsOnlySnack => '仅「邮政好友 / Connections」中的笔友可使用即时聊天。';
-
-  @override
-  String get chatEmojiPickerTitle => '友好表情';
-
-  @override
-  String get chatEmojiPickerSubtitle => '点选一个表情插入到消息中。';
-
-  @override
-  String get chatComposerHint => '写点什么…';
 
   @override
   String get postDetailCommentRequired => '请输入评论内容。';

@@ -32,8 +32,6 @@ public interface AppMailboxService {
 
     List<MailboxFriendItemVO> listFriends(Long userId);
 
-    boolean isFriendshipActive(long viewerUserId, long peerUserId);
-
     /**
      * 发件人对运输中的平邮加速：非 VIP 扣 1 邮票，VIP 免扣；信件变为已送达。
      */

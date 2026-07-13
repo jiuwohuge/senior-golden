@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 邮政 Tab「Connections」好友列表行：数据来源为 {@code bu_friendship}（活跃建联），
- * <strong>不是</strong> TIM 会话列表。
+ * 邮政 Tab「Connections」好友列表行：数据来源为 {@code bu_friendship}（活跃建联）。
  */
 @Data
 @Builder

@@ -146,9 +146,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
     @Override
     public void markFirstLetterDone(long userId) {
         LocalDateTime now = LocalDateTime.now();
+        // 兼容历史 NULL：仅排除已为 true 的行。
         update(new LambdaUpdateWrapper<UserDomain>()
                 .eq(UserDomain::getId, userId)
-                .eq(UserDomain::getFirstLetterDone, false)
+                .and(w -> w.eq(UserDomain::getFirstLetterDone, false)
+                        .or()
+                        .isNull(UserDomain::getFirstLetterDone))
                 .set(UserDomain::getFirstLetterDone, true)
                 .set(UserDomain::getUpdatedAt, now)
                 .set(UserDomain::getUpdatedBy, userId));

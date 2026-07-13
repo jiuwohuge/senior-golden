@@ -24,7 +24,6 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     private final FriendshipMapper friendshipMapper;
     private final LetterService letterService;
-    private final cn.nine.pros.post.biz.integration.tencent.TencentImFriendshipNotifier tencentImFriendshipNotifier;
     private final AppMessages appMessages;
 
     @Override
@@ -74,7 +73,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .eq(FriendshipDomain::getUserHigh, high)
                 .eq(FriendshipDomain::isDelFlag, false));
         if (existing != null) {
-            return ensureExistingFriendshipActive(existing, actorUserId, letterId, low, high);
+            return ensureExistingFriendshipActive(existing, actorUserId, letterId);
         }
         FriendshipDomain f = new FriendshipDomain();
         f.initAudit(actorUserId);
@@ -84,21 +83,18 @@ public class FriendshipServiceImpl implements FriendshipService {
         f.setSourceLetterId(letterId);
         f.setDelFlag(false);
         friendshipMapper.insert(f);
-        tencentImFriendshipNotifier.afterFriendshipActive(low, high);
         return f;
     }
 
     private FriendshipDomain ensureExistingFriendshipActive(
-            FriendshipDomain existing, Long actorUserId, Long letterId, long low, long high) {
+            FriendshipDomain existing, Long actorUserId, Long letterId) {
         if (existing.getStatus() != null && existing.getStatus() == 1) {
-            tencentImFriendshipNotifier.afterFriendshipActive(low, high);
             return existing;
         }
         existing.setStatus(1);
         existing.setSourceLetterId(letterId);
         existing.updateAudit(actorUserId);
         friendshipMapper.updateById(existing);
-        tencentImFriendshipNotifier.afterFriendshipActive(low, high);
         return existing;
     }
 
@@ -110,11 +106,6 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .eq(FriendshipDomain::isDelFlag, false)
                 .and(w -> w.eq(FriendshipDomain::getUserLow, userId).or().eq(FriendshipDomain::getUserHigh, userId)));
         for (FriendshipDomain f : rows) {
-            long low = f.getUserLow() != null ? f.getUserLow() : 0L;
-            long high = f.getUserHigh() != null ? f.getUserHigh() : 0L;
-            if (low > 0 && high > 0) {
-                tencentImFriendshipNotifier.afterFriendshipRemoved(low, high);
-            }
             f.setStatus(0);
             f.updateAudit(userId);
             friendshipMapper.updateById(f);
@@ -132,7 +123,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .eq(FriendshipDomain::getUserHigh, high)
                 .eq(FriendshipDomain::isDelFlag, false));
         if (existing != null) {
-            return ensureExistingFriendshipActive(existing, actorUserId, sourceLetterId, low, high);
+            return ensureExistingFriendshipActive(existing, actorUserId, sourceLetterId);
         }
         FriendshipDomain f = new FriendshipDomain();
         f.initAudit(actorUserId);
@@ -142,7 +133,6 @@ public class FriendshipServiceImpl implements FriendshipService {
         f.setSourceLetterId(sourceLetterId);
         f.setDelFlag(false);
         friendshipMapper.insert(f);
-        tencentImFriendshipNotifier.afterFriendshipActive(low, high);
         return f;
     }
 
@@ -195,11 +185,6 @@ public class FriendshipServiceImpl implements FriendshipService {
         }
         if (f.getStatus() != null && f.getStatus() == 0) {
             return true;
-        }
-        long low = f.getUserLow() != null ? f.getUserLow() : 0L;
-        long high = f.getUserHigh() != null ? f.getUserHigh() : 0L;
-        if (low > 0 && high > 0) {
-            tencentImFriendshipNotifier.afterFriendshipRemoved(low, high);
         }
         f.setStatus(0);
         f.updateAudit(actorUserId);

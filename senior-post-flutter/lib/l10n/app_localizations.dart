@@ -1403,7 +1403,7 @@ abstract class AppLocalizations {
   /// No description provided for @directorySafetyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Letters before private chat'**
+  /// **'Letters before anything else'**
   String get directorySafetyTitle;
 
   /// No description provided for @directorySafetyBody.
@@ -2107,30 +2107,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pen pal request sent. After they accept, find them under My pen pals.'**
   String get letterAcceptContactSuccess;
-
-  /// No description provided for @chatFriendsOnlySnack.
-  ///
-  /// In en, this message translates to:
-  /// **'Only postal friends in Connections can use live chat.'**
-  String get chatFriendsOnlySnack;
-
-  /// No description provided for @chatEmojiPickerTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Friendly stamps'**
-  String get chatEmojiPickerTitle;
-
-  /// No description provided for @chatEmojiPickerSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap an emoji to add it to your message.'**
-  String get chatEmojiPickerSubtitle;
-
-  /// No description provided for @chatComposerHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Write a message'**
-  String get chatComposerHint;
 
   /// No description provided for @postDetailCommentRequired.
   ///

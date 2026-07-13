@@ -83,11 +83,6 @@ class MailboxRemoteRepository {
     await _dio.post<dynamic>('/api/mailbox/letters/$letterId/accept-postal');
   }
 
-  /// 业务好友已在 Connections，补偿将双方 userId 导入腾讯 IM 并同步 IM 好友（幂等）。
-  Future<void> syncImPeer(String peerUserId) async {
-    await _dio.post<dynamic>('/api/im/peers/${int.parse(peerUserId)}/sync');
-  }
-
   Future<MailboxLetter> speedUp(String letterId) async {
     final r = await _dio.post<dynamic>(
       '/api/mailbox/letters/${int.parse(letterId)}/speed-up',
@@ -108,24 +103,6 @@ class MailboxRemoteRepository {
     final r = await _dio.get<dynamic>('/api/mailbox/friends');
     final rows = _unwrapListData(r);
     return rows.map(_voToFriendRow).toList();
-  }
-
-  Future<bool> isFriendshipActive(String peerUserId) async {
-    final r = await _dio.get<dynamic>(
-      '/api/mailbox/peers/${int.parse(peerUserId)}/friendship-active',
-    );
-    final raw = r.data;
-    if (raw is! Map<String, dynamic>) {
-      throw ApiBusinessException(0, 'Invalid response shape');
-    }
-    final data = raw['data'];
-    if (data is bool) {
-      return data;
-    }
-    if (data is String) {
-      return data.toLowerCase() == 'true';
-    }
-    throw ApiBusinessException(0, 'Invalid friendship response');
   }
 
   Future<void> favoriteLetter(String letterId) async {
@@ -243,7 +220,7 @@ FriendListRow _voToFriendRow(Map<String, dynamic> m) {
     avatarUrl: m['peerAvatarUrl'] as String?,
     isVip: false,
   );
-  final sub = cc.isNotEmpty ? cc : 'Postal friend · tap to chat';
+  final sub = cc.isNotEmpty ? cc : 'Postal friend';
   return FriendListRow(peer: peer, lastMessage: sub, lastTime: connected);
 }
 
@@ -325,13 +302,6 @@ DateTime? _parseDate(Object? v) {
 final mailboxRemoteRepositoryProvider = Provider<MailboxRemoteRepository>(
   (ref) => MailboxRemoteRepository(ref.read(dioProvider)),
 );
-
-final friendshipActiveProvider = FutureProvider.family<bool, String>((
-  ref,
-  peerId,
-) async {
-  return ref.read(mailboxRemoteRepositoryProvider).isFriendshipActive(peerId);
-});
 
 final letterFavoritesProvider = FutureProvider<List<MailboxLetter>>((
   ref,

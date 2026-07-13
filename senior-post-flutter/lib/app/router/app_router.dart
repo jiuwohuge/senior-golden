@@ -15,8 +15,6 @@ import '../../features/auth/register_page.dart';
 import '../../features/auth/forgot_password_page.dart';
 import '../../features/auth/legal_page.dart';
 import '../../features/directory/user_card_page.dart';
-import '../../features/mailbox/chat_page.dart';
-import '../../features/mailbox/im_user_id.dart';
 import '../../features/mailbox/letter_detail_page.dart';
 import '../../features/mailbox/mailbox_archive_page.dart';
 import '../../features/compose/compose_flow_page.dart';
@@ -204,30 +202,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/time-letter/:id/open',
         builder: (context, state) =>
             TimeLetterOpenPage(letterId: state.pathParameters['id']!),
-      ),
-      GoRoute(
-        path: '/chat/:userId',
-        builder: (context, state) {
-          final extra = state.extra;
-          String? displayName;
-          String? peerAvatarUrl;
-          var trustedFriendship = false;
-          if (extra is Map) {
-            displayName =
-                extra['name'] as String? ?? extra['displayName'] as String?;
-            peerAvatarUrl = extra['avatarUrl'] as String?;
-            trustedFriendship = extra['trustedFriendship'] == true;
-          } else if (extra is String) {
-            displayName = extra;
-          }
-          final rawPeerId = state.pathParameters['userId'] ?? '';
-          return ChatPage(
-            peerUserId: normalizeImUserId(rawPeerId) ?? rawPeerId,
-            displayName: displayName,
-            peerAvatarUrl: peerAvatarUrl,
-            trustedFriendship: trustedFriendship,
-          );
-        },
       ),
       GoRoute(
         path: '/profile/edit',

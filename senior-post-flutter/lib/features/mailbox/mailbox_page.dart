@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +9,6 @@ import '../../core/models/domain_models.dart';
 import '../auth/auth_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
-import 'tim_facade.dart';
 import '../time_letter/time_letter_list_tab.dart';
 import '../time_letter/time_letter_providers.dart';
 import '../relation/relation_display_label.dart';
@@ -33,10 +30,6 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
     WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_onTabSelected);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      unawaited(_primeImForUnread());
-    });
   }
 
   void _onTabSelected() {
@@ -72,14 +65,6 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
     await ref.read(timeLetterStatsProvider.future);
   }
 
-  Future<void> _primeImForUnread() async {
-    try {
-      await ref.read(seniorPostTimFacadeProvider).ensureLoggedIn();
-    } catch (_) {
-      // 无好友、IM 未配置等：进聊天页会再尝试。
-    }
-  }
-
   @override
   void dispose() {
     _tabController.removeListener(_onTabSelected);
@@ -97,7 +82,6 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
         ref.invalidate(mailboxArchiveProvider);
         ref.invalidate(mailboxLettersProvider);
         ref.read(authRepositoryProvider).refreshSessionFromServer();
-        ref.read(seniorPostTimFacadeProvider).refreshC2cUnreadIfLoggedIn();
       });
     }
   }

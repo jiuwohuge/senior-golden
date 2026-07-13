@@ -78,12 +78,6 @@ public class AppMailboxController implements AppMailboxApi {
     }
 
     @Override
-    public boolean isFriendshipActive(Long peerUserId) {
-        Long uid = requireUserId();
-        return appMailboxService.isFriendshipActive(uid, peerUserId);
-    }
-
-    @Override
     public MailboxLetterItemVO speedUpLetter(Long letterId) {
         Long uid = requireUserId();
         return appMailboxService.speedUpLetter(uid, letterId);

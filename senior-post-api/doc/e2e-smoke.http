@@ -1,6 +1,6 @@
 ### Senior Post — E2E 冒烟检查清单（HTTP 客户端：VS Code REST Client / IntelliJ）
 ### 替换变量：@host @token @adminToken @postcardId @letterId @peerUserId
-### 前置：PostgreSQL + Redis + Flyway 已迁移；可选：OSS / 腾讯 IM 密钥
+### 前置：PostgreSQL + Redis + Flyway 已迁移；可选：OSS
 
 @host = http://localhost:8080
 @adminToken = REPLACE_WITH_WEBAPI_JWT
@@ -69,12 +69,11 @@ POST {{host}}/webapi/content/postcard/{{postcardId}}/approve
 Token: {{adminToken}}
 
 
-### 6) App：邮政好友列表（Connections = **`bu_friendship`**，非 TIM `getConversationList`）
+### 6) App：邮政好友列表（Connections = bu_friendship）
 GET {{host}}/api/mailbox/friends
 Token: {{token}}
 
-### 7) App：发信 → 收件 Accept → IM 好友同步（FP-A5d-004，需配置 TENCENT_IM_REST_IDENTIFIER）
-###    见业务邮箱 API 与信件状态；此处略去详细 JSON，按 Knife4j 填写
+### 7) App：发信 / 收件（见业务邮箱 API 与信件状态；按 Knife4j 填写）
 
 ### 8) App：邮票流水（验证赠票入账）
 POST {{host}}/api/stamps/ledger/paging

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -10,6 +8,7 @@ import '../../core/device/device_ids.dart';
 import '../../core/network/dio_provider.dart';
 
 /// FCM 推送注册：登录后上报 token；Firebase 未配置时静默跳过。
+/// Web 不注册推送（上线渠道为 Android；浏览器联调跳过）。
 class PushService {
   PushService(this._dio);
 
@@ -47,11 +46,16 @@ class PushService {
 }
 
 String _platformBody() {
-  if (Platform.isIOS) return 'ios';
-  if (Platform.isAndroid) return 'android';
-  final h = platformDeviceHeader().toLowerCase();
-  if (h == 'ios') return 'ios';
-  return 'android';
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.iOS:
+      return 'ios';
+    case TargetPlatform.android:
+      return 'android';
+    default:
+      final h = platformDeviceHeader().toLowerCase();
+      if (h == 'ios') return 'ios';
+      return 'android';
+  }
 }
 
 final pushServiceProvider = Provider<PushService>(
