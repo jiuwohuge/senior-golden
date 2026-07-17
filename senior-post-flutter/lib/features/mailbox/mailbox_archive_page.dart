@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../core/models/letter_peer_label.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
 
@@ -43,14 +44,16 @@ class MailboxArchivePage extends ConsumerWidget {
                 header: Row(
                   children: [
                     PostalAvatar(
-                      name: l.peer.nickname,
+                      name: letterPeerDisplayTitle(l10n: l10n, peer: l.peer),
                       size: 36,
-                      imageUrl: l.peer.avatarUrl,
+                      imageUrl: isUnresolvedLetterPeer(l.peer)
+                          ? null
+                          : l.peer.avatarUrl,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        l.peer.nickname,
+                        letterPeerDisplayTitle(l10n: l10n, peer: l.peer),
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),

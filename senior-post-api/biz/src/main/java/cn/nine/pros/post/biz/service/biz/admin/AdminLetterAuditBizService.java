@@ -114,4 +114,40 @@ public class AdminLetterAuditBizService {
         }
         log.info("letter batch reject, count={}", body.getIds().size());
     }
+
+    /**
+     * 调试：将 MATCHED/DELIVERING 且已有收件人的信件立即置为已送达（跳过预计到达时间）。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void forceDeliver(Long id) {
+        if (id == null) {
+            throw new BusinessException("letter id required");
+        }
+        LetterDomain row = letterService.getById(id);
+        if (row == null || row.isDelFlag()) {
+            throw new BusinessException("letter not found");
+        }
+        if (row.getToUserId() == null) {
+            throw new BusinessException("尚未匹配收件人，无法立即送达");
+        }
+        int status = row.getStatus() instanceof Number n
+                ? n.intValue()
+                : Integer.parseInt(String.valueOf(row.getStatus()));
+        if (status == LetterBizStatus.DELIVERED.getCode()) {
+            throw new BusinessException("信件已送达");
+        }
+        if (status != LetterBizStatus.MATCHED.getCode()
+                && status != LetterBizStatus.DELIVERING.getCode()) {
+            throw new BusinessException("仅「已匹配」或「运输中」的信件可立即送达");
+        }
+        Long adminId = MyRequestContextHolder.userId();
+        LocalDateTime now = LocalDateTime.now();
+        if (!letterService.forceAdminDeliver(id, now, adminId)) {
+            throw new BusinessException("信件状态已变更，请刷新后重试");
+        }
+        adminOperationRecorder.record("letter.force_deliver", "letter", id, null);
+        log.info("letter force-delivered (admin debug), letterId={}, adminId={}, toUserId={}",
+                id, adminId, row.getToUserId());
+        pushNotificationService.notifyLetterDelivered(row.getToUserId(), id);
+    }
 }

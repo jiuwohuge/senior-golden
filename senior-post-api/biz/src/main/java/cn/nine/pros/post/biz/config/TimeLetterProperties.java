@@ -7,7 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "senior-post.time-letter")
 public class TimeLetterProperties {
 
-    private int stampCost = 1;
     private int maxDeliveryYears = 2;
     private int dailyCreateLimit = 5;
     private int recipient30dLimit = 3;

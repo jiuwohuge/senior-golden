@@ -7,6 +7,7 @@ export 'postal_brand_header.dart';
 export 'postal_button.dart';
 export 'postal_card_envelope.dart';
 export 'postal_checkbox_field.dart';
+export 'postal_country_picker.dart';
 export 'postal_country_seal.dart';
 export 'postal_empty_state.dart';
 export 'postal_inline_link.dart';

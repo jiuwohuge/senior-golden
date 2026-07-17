@@ -34,21 +34,7 @@ class VipCenterPage extends ConsumerWidget {
               children: [
                 PostalCardEnvelope(
                   header: PostalSectionTitle(title: title, subtitle: subtitle),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (v.unlimitedStampsBenefit)
-                        Text(l10n.vipCenterUnlimitedRegisteredMail),
-                      if (v.standardDeliveryHours > 0)
-                        Text(
-                          l10n.vipCenterStandardPriorityHours(
-                            v.standardDeliveryHours,
-                          ),
-                        )
-                      else
-                        Text(l10n.vipCenterFreeSpeedUpStandard),
-                    ],
-                  ),
+                  child: const SizedBox.shrink(),
                 ),
                 const SizedBox(height: 14),
                 if (!v.productEnabled)

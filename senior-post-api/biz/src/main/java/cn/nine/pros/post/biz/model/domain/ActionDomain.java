@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 /**
- * 用户行为日志（发布/寄信/加速等） Domain
+ * 用户行为日志（发布/寄信等） Domain
  *
  * @author Administrator
  */

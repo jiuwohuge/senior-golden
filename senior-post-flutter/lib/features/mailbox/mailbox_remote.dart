@@ -87,49 +87,39 @@ class MailboxRemoteRepository {
     await _dio.post<dynamic>('/api/mailbox/letters/$letterId/accept-postal');
   }
 
-  Future<MailboxLetter> speedUp(String letterId) async {
-    final r = await _dio.post<dynamic>(
-      '/api/mailbox/letters/${int.parse(letterId)}/speed-up',
-    );
-    final map = _unwrapMapData(r);
-    return voToMailboxLetter(map);
-  }
-
-  Future<MailboxLetter> earlyOpen(String letterId) async {
-    final r = await _dio.post<dynamic>(
-      '/api/mailbox/letters/${int.parse(letterId)}/early-open',
-    );
-    final map = _unwrapMapData(r);
-    return voToMailboxLetter(map);
-  }
-
-  /// POST `/api/mailbox/letters/letter-assistant`：整理建议稿，不落库。
-  Future<String> letterAssistant({
+  /// POST `/api/mailbox/letters/letter-assistant`：整理建议稿或灵感话题，不落库。
+  Future<LetterAssistantResult> letterAssistant({
     required String sourceText,
     required String helpMode,
-    String? customInstruction,
-    String? targetLang,
   }) async {
-    final body = <String, dynamic>{
-      'sourceText': sourceText,
-      'helpMode': helpMode,
-    };
-    if (customInstruction != null && customInstruction.isNotEmpty) {
-      body['customInstruction'] = customInstruction;
-    }
-    if (targetLang != null && targetLang.isNotEmpty) {
-      body['targetLang'] = targetLang;
-    }
     final r = await _dio.post<dynamic>(
       '/api/mailbox/letters/letter-assistant',
-      data: body,
+      data: <String, dynamic>{
+        'sourceText': sourceText,
+        'helpMode': helpMode,
+      },
     );
     final map = _unwrapMapData(r);
     final suggestion = (map['suggestion'] as String?)?.trim() ?? '';
-    if (suggestion.isEmpty) {
+    final ask = _stringList(map['inspireAsk']);
+    final share = _stringList(map['inspireShare']);
+    if (suggestion.isEmpty && ask.isEmpty && share.isEmpty) {
       throw ApiBusinessException(0, 'Empty assistant suggestion');
     }
-    return suggestion;
+    return LetterAssistantResult(
+      helpMode: (map['helpMode'] as String?)?.trim() ?? helpMode,
+      suggestion: suggestion,
+      inspireAsk: ask,
+      inspireShare: share,
+    );
+  }
+
+  static List<String> _stringList(Object? raw) {
+    if (raw is! List<dynamic>) return const [];
+    return raw
+        .map((e) => e?.toString().trim() ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
   }
 
   Future<List<FriendListRow>> listMailboxFriends() async {
@@ -321,6 +311,24 @@ MailboxLetter voToMailboxLetter(Map<String, dynamic> m) {
     fontSizeTier: m['fontSizeTier'] as String?,
     favorited: m['favorited'] as bool? ?? false,
   );
+}
+
+/// 信件助手 API 结果（润色正文或灵感话题列表）。
+class LetterAssistantResult {
+  const LetterAssistantResult({
+    required this.helpMode,
+    required this.suggestion,
+    this.inspireAsk = const [],
+    this.inspireShare = const [],
+  });
+
+  final String helpMode;
+  final String suggestion;
+  final List<String> inspireAsk;
+  final List<String> inspireShare;
+
+  bool get isInspire =>
+      helpMode == 'inspire' || inspireAsk.isNotEmpty || inspireShare.isNotEmpty;
 }
 
 DateTime? _parseDate(Object? v) {

@@ -14,6 +14,7 @@ import '../../widgets/letter/letter_paper.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../commerce/commerce_remote.dart';
+import '../letter_drafts/letter_drafts_remote.dart';
 import '../mailbox/mailbox_providers.dart';
 import '../mailbox/mailbox_remote.dart';
 import '../post_office/post_office_remote.dart';
@@ -22,6 +23,7 @@ import '../shell/main_shell.dart';
 import '../time_letter/time_letter_providers.dart';
 import '../time_letter/time_letter_remote.dart';
 import '../time_letter/time_letter_seal_slider.dart';
+import 'compose_editor_toolbar.dart';
 import 'compose_first_preview_gate.dart';
 import 'compose_intent.dart';
 import 'letter_assistant_sheet.dart';
@@ -51,15 +53,29 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   String? _selectedFontId = LetterDocument.defaultFontId;
   FontSizeTier _fontSizeTier = FontSizeTier.large;
   String? _selectedTemplateId;
-  String _chipKey = 'free';
 
   DateTime _deliveryDate = DateTime.now().add(const Duration(days: 7));
   String? _daysHint;
   bool _busy = false;
   bool _previewGateDone = false;
   bool _sessionPreviewSeen = false;
-  /// 信件助手「替换原文」前的正文快照，用于一次撤销。
-  String? _assistantUndoBody;
+  static const _kMaxUndoSteps = 30;
+
+  /// 正文逐步撤销栈（助手替换/追加前压入快照）。
+  final List<String> _bodyUndoStack = [];
+  bool _draftBusy = false;
+
+  /// 首封引导写信：隐藏撤销与存草稿。
+  bool get _hideUndoAndDraft => widget.initialIntent.fromFirstLetterGuide;
+
+  /// 从前置入口（用户卡/好友）带 peer 进入：锁定收件人，不可改回邮局/自己。
+  bool get _recipientLocked =>
+      (_kind == ComposeKind.penPalMail ||
+          _kind == ComposeKind.penPalTimeLetter) &&
+      _peerId != null &&
+      _peerId!.isNotEmpty &&
+      widget.initialIntent.peerId != null &&
+      widget.initialIntent.peerId!.isNotEmpty;
 
   @override
   void initState() {
@@ -146,6 +162,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   }
 
   Future<void> _openRecipientSheet() async {
+    if (_recipientLocked) return;
     final l10n = AppLocalizations.of(context)!;
     await showModalBottomSheet<void>(
       context: context,
@@ -192,16 +209,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                     _refreshDaysHint();
                   },
                 ),
-                _RecipientTile(
-                  title: l10n.composeRecipientPenPal,
-                  selected:
-                      _kind == ComposeKind.penPalMail ||
-                      _kind == ComposeKind.penPalTimeLetter,
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    await _pickPenPal();
-                  },
-                ),
               ],
             ),
           ),
@@ -210,87 +217,55 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     );
   }
 
-  Future<void> _pickPenPal() async {
-    final l10n = AppLocalizations.of(context)!;
-    late final List<FriendListRow> friends;
-    final cached = ref.read(mailboxFriendsProvider).valueOrNull;
-    if (cached != null) {
-      friends = cached;
-    } else {
-      friends = await ref.read(mailboxFriendsProvider.future);
-    }
-    if (!mounted) return;
-    if (friends.isEmpty) {
-      PostalSnack.show(
-        context,
-        l10n.composePenPalEmptySubtitle,
-        tone: PostalSnackTone.warning,
-      );
+  void _pushUndoSnapshot(String snapshot) {
+    if (_bodyUndoStack.isNotEmpty && _bodyUndoStack.last == snapshot) {
       return;
     }
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: PostalTokens.paperEnvelope,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: SizedBox(
-            height: MediaQuery.of(ctx).size.height * 0.55,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    l10n.composeStepPenPalTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: friends.length,
-                    itemBuilder: (_, i) {
-                      final f = friends[i];
-                      final name = f.peer.nickname.isNotEmpty
-                          ? f.peer.nickname
-                          : f.peer.id;
-                      return ListTile(
-                        minVerticalPadding: 16,
-                        title: Text(
-                          name,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _kind = ComposeKind.penPalMail;
-                            _peerId = f.peer.id;
-                            _peerNickname = f.peer.nickname;
-                          });
-                          Navigator.pop(ctx);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    _bodyUndoStack.add(snapshot);
+    if (_bodyUndoStack.length > _kMaxUndoSteps) {
+      _bodyUndoStack.removeAt(0);
+    }
+  }
+
+  void _undoLastEdit() {
+    if (_bodyUndoStack.isEmpty) return;
+    final prev = _bodyUndoStack.removeLast();
+    setState(() => _bodyController.text = prev);
+  }
+
+  Future<void> _saveDraft() async {
+    final content = _bodyController.text.trim();
+    if (content.isEmpty) {
+      _bodyFocus.requestFocus();
+      return;
+    }
+    setState(() => _draftBusy = true);
+    try {
+      final isPostOffice = _kind == ComposeKind.postOffice ||
+          _kind == ComposeKind.selfTimeLetter;
+      await ref.read(letterDraftsRemoteProvider).saveDraft(
+            mode: isPostOffice ? 'POST_OFFICE' : 'DIRECT',
+            toUserId: isPostOffice ? null : _peerId,
+            content: content,
+          );
+    } catch (e) {
+      debugPrint('compose save draft failed: $e');
+      if (!mounted) return;
+      final biz = apiBusinessExceptionFrom(e);
+      PostalSnack.show(
+        context,
+        biz?.message ?? e.toString(),
+        tone: PostalSnackTone.error,
+      );
+    } finally {
+      if (mounted) setState(() => _draftBusy = false);
+    }
   }
 
   Future<void> _openLetterAssistant() async {
-    final l10n = AppLocalizations.of(context)!;
     final source = _bodyController.text.trim();
     if (source.isEmpty) {
-      PostalSnack.show(
-        context,
-        l10n.letterAssistantEmptyBody,
-        tone: PostalSnackTone.warning,
-      );
+      _bodyFocus.requestFocus();
       return;
     }
     final suggestion = await showLetterAssistantSheet(
@@ -300,23 +275,9 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     );
     if (!mounted || suggestion == null) return;
     setState(() {
-      _assistantUndoBody = _bodyController.text;
+      _pushUndoSnapshot(_bodyController.text);
       _bodyController.text = suggestion;
     });
-    PostalSnack.show(
-      context,
-      l10n.letterAssistantReplaced,
-      tone: PostalSnackTone.success,
-      actionLabel: l10n.letterAssistantUndo,
-      onAction: () {
-        final prev = _assistantUndoBody;
-        if (prev == null) return;
-        setState(() {
-          _bodyController.text = prev;
-          _assistantUndoBody = null;
-        });
-      },
-    );
   }
 
   Future<void> _openPaperSheet() async {
@@ -499,30 +460,10 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         .toList();
   }
 
-  void _applyChip(String key, AppLocalizations l10n) {
-    setState(() => _chipKey = key);
-    if (key == 'free') return;
-    final prompts = <String, String>{
-      'heart': l10n.topicHometownPrompt,
-      'narrative': l10n.topicRetirementPrompt,
-      'festival': l10n.topicOldPhotoPrompt,
-    };
-    final prompt = prompts[key];
-    if (prompt == null) return;
-    if (_bodyController.text.trim().isEmpty) {
-      _bodyController.text = prompt;
-      PostalSnack.show(context, l10n.composeHintEditablePrompt);
-    }
-  }
-
   Future<void> _openPreview({required bool forSendGate}) async {
     final l10n = AppLocalizations.of(context)!;
     if (_bodyController.text.trim().isEmpty) {
-      PostalSnack.show(
-        context,
-        l10n.composeBodyRequired,
-        tone: PostalSnackTone.warning,
-      );
+      _bodyFocus.requestFocus();
       return;
     }
     await showGeneralDialog<void>(
@@ -575,31 +516,15 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   }
 
   Future<void> _onPrimarySend() async {
-    final l10n = AppLocalizations.of(context)!;
     if (_bodyController.text.trim().isEmpty) {
-      PostalSnack.show(
-        context,
-        l10n.composeBodyRequired,
-        tone: PostalSnackTone.warning,
-      );
+      _bodyFocus.requestFocus();
       return;
     }
     if (_needsPenPal) {
-      PostalSnack.show(
-        context,
-        l10n.composePickPenPalRequired,
-        tone: PostalSnackTone.warning,
-      );
-      await _pickPenPal();
       return;
     }
-    // 首次写信强制预览一次。
+    // 首次写信强制预览一次（无额外 Snack，直接打开预览）。
     if (!_previewGateDone && !_sessionPreviewSeen) {
-      PostalSnack.show(
-        context,
-        l10n.composePreviewRequiredFirst,
-        tone: PostalSnackTone.warning,
-      );
       await _openPreview(forSendGate: true);
       if (!_previewGateDone && !_sessionPreviewSeen) return;
     }
@@ -690,24 +615,12 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       await ref.read(authRepositoryProvider).refreshSessionFromServer();
       invalidateTimeLetterLists(ref);
       if (!mounted) return;
-      await showDialog<void>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          icon: Icon(
-            Icons.mark_email_read_outlined,
-            color: PostalTokens.success,
-            size: 48,
-          ),
-          title: Text(l10n.timeLetterSealSuccessTitle),
-          content: Text(l10n.timeLetterSealSuccessMessage),
-          actions: [
-            FilledButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(l10n.dialogConfirm),
-            ),
-          ],
-        ),
-      );
+      final dest = _kind == ComposeKind.selfTimeLetter
+          ? l10n.composeRecipientSelf
+          : (_peerNickname ?? l10n.topicFriendFallback);
+      ref.invalidate(postOfficeHomeProvider);
+      ref.invalidate(postOfficeInTransitProvider);
+      await showDeliverySentOverlay(context, destinationLabel: dest);
       if (mounted) context.pop();
     } catch (e) {
       debugPrint('compose seal time letter failed: $e');
@@ -737,6 +650,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           .sendLetter(
             toUserId: isPostOffice ? null : _peerId,
             content: body,
+            parentLetterId: widget.initialIntent.parentLetterId,
             mode: isPostOffice ? 1 : 2,
             skinId: _selectedSkinId,
             fontId: _selectedFontId,
@@ -751,9 +665,9 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       ref.invalidate(mailboxLettersProvider);
       ref.invalidate(postalInboxLettersProvider);
       ref.invalidate(mailboxArchiveProvider);
-      if (isPostOffice) {
-        ref.invalidate(postOfficeHomeProvider);
-      }
+      // 首页与在途明细同源，寄出后必须一起刷新，否则点进「信件在途」仍见旧缓存。
+      ref.invalidate(postOfficeHomeProvider);
+      ref.invalidate(postOfficeInTransitProvider);
       if (!mounted) return;
       final dest = _kind == ComposeKind.postOffice
           ? l10n.composePostOfficeSendHint
@@ -798,30 +712,50 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           ),
         ),
         leadingWidth: 88,
-        title: InkWell(
-          onTap: _openRecipientSheet,
-          borderRadius: PostalTokens.shapeMd,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    _recipientLabel(l10n),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+        title: _recipientLocked
+            ? Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Text(
+                  _recipientLabel(l10n),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const Icon(Icons.expand_more, size: 22),
-              ],
-            ),
-          ),
-        ),
+              )
+            : InkWell(
+                onTap: _openRecipientSheet,
+                borderRadius: PostalTokens.shapeMd,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          _recipientLabel(l10n),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                      ),
+                      const Icon(Icons.expand_more, size: 22),
+                    ],
+                  ),
+                ),
+              ),
         actions: [
+          if (!_hideUndoAndDraft)
+            IconButton(
+              tooltip: l10n.composeSaveDraft,
+              onPressed: _draftBusy ? null : _saveDraft,
+              icon: const Icon(Icons.save_outlined),
+            ),
           TextButton(
             onPressed: () => _openPreview(forSendGate: false),
             child: Text(
@@ -833,38 +767,9 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       ),
       body: Column(
         children: [
-          SizedBox(
-            height: 48,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _TopicChip(
-                  label: l10n.composeChipFreeWrite,
-                  selected: _chipKey == 'free',
-                  onTap: () => _applyChip('free', l10n),
-                ),
-                _TopicChip(
-                  label: l10n.composeChipHeart,
-                  selected: _chipKey == 'heart',
-                  onTap: () => _applyChip('heart', l10n),
-                ),
-                _TopicChip(
-                  label: l10n.composeChipNarrative,
-                  selected: _chipKey == 'narrative',
-                  onTap: () => _applyChip('narrative', l10n),
-                ),
-                _TopicChip(
-                  label: l10n.composeChipFestival,
-                  selected: _chipKey == 'festival',
-                  onTap: () => _applyChip('festival', l10n),
-                ),
-              ],
-            ),
-          ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: LetterPaper(
                 mode: LetterPaperMode.compose,
                 document: _document,
@@ -873,6 +778,14 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                 placeholder: l10n.composePlaceholderBody,
                 minHeight: 320,
               ),
+            ),
+          ),
+          ComposeEditorToolbar(
+            canUndo: _bodyUndoStack.isNotEmpty,
+            onUndo: _undoLastEdit,
+            undoTooltip: l10n.letterAssistantUndo,
+            wordCountLabel: l10n.composeEditorWordCount(
+              '${composeBodyWordCount(_bodyController.text)}',
             ),
           ),
           Container(
@@ -971,41 +884,6 @@ class _RecipientTile extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _TopicChip extends StatelessWidget {
-  const _TopicChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: FilterChip(
-        selected: selected,
-        label: Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: selected ? PostalTokens.paperCream : PostalTokens.inkNavy,
-          ),
-        ),
-        selectedColor: PostalTokens.postboxGreen,
-        backgroundColor: PostalTokens.paperCard,
-        showCheckmark: false,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        onSelected: (_) => onTap(),
       ),
     );
   }

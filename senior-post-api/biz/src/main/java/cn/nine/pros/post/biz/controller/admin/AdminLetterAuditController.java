@@ -39,4 +39,9 @@ public class AdminLetterAuditController implements AdminLetterAuditApi {
     public void batchReject(AdminIdListInDto body) {
         adminLetterAuditBizService.batchReject(body);
     }
+
+    @Override
+    public void forceDeliver(Long id) {
+        adminLetterAuditBizService.forceDeliver(id);
+    }
 }

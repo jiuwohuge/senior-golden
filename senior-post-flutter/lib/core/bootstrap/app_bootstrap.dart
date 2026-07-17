@@ -12,16 +12,12 @@ class AppVipProductConfig {
     required this.displayName,
     required this.tagline,
     required this.taglineZh,
-    required this.unlimitedStampsBenefit,
-    required this.standardDeliveryHours,
   });
 
   final bool productEnabled;
   final String displayName;
   final String tagline;
   final String taglineZh;
-  final bool unlimitedStampsBenefit;
-  final int standardDeliveryHours;
 
   factory AppVipProductConfig.fromJson(Map<String, dynamic>? json) {
     if (json == null || json.isEmpty) {
@@ -34,23 +30,18 @@ class AppVipProductConfig {
           : 'VIP',
       tagline: (json['tagline'] as String?)?.trim().isNotEmpty == true
           ? (json['tagline'] as String).trim()
-          : 'Unlimited stamps · Ad-free',
+          : 'Expression upgrades · Ad-free',
       taglineZh: (json['taglineZh'] as String?)?.trim().isNotEmpty == true
           ? (json['taglineZh'] as String).trim()
-          : '无限邮票 · 优先送达 · 无广告干扰',
-      unlimitedStampsBenefit: json['unlimitedStampsBenefit'] as bool? ?? true,
-      standardDeliveryHours:
-          (json['standardDeliveryHours'] as num?)?.toInt() ?? 0,
+          : '专属装扮 · 无广告干扰',
     );
   }
 
   static const AppVipProductConfig defaults = AppVipProductConfig(
     productEnabled: true,
     displayName: 'VIP',
-    tagline: 'Unlimited stamps · Ad-free',
-    taglineZh: '无限邮票 · 优先送达 · 无广告干扰',
-    unlimitedStampsBenefit: true,
-    standardDeliveryHours: 0,
+    tagline: 'Expression upgrades · Ad-free',
+    taglineZh: '专属装扮 · 无广告干扰',
   );
 
   String taglineForLanguage(String languageCode) {

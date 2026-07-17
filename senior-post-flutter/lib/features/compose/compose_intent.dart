@@ -24,6 +24,7 @@ class ComposeIntent {
     this.fromFirstLetterGuide = false,
     this.initialParagraphs,
     this.templateId,
+    this.parentLetterId,
   });
 
   /// When null, the flow starts with a destination picker.
@@ -42,6 +43,9 @@ class ComposeIntent {
   final List<String>? initialParagraphs;
   final String? templateId;
 
+  /// 回信时带上父信 id，用于线程关联。
+  final String? parentLetterId;
+
   ComposeIntent copyWith({
     ComposeKind? kind,
     String? peerId,
@@ -51,6 +55,7 @@ class ComposeIntent {
     bool? fromFirstLetterGuide,
     List<String>? initialParagraphs,
     String? templateId,
+    String? parentLetterId,
   }) {
     return ComposeIntent(
       kind: kind ?? this.kind,
@@ -62,6 +67,7 @@ class ComposeIntent {
           fromFirstLetterGuide ?? this.fromFirstLetterGuide,
       initialParagraphs: initialParagraphs ?? this.initialParagraphs,
       templateId: templateId ?? this.templateId,
+      parentLetterId: parentLetterId ?? this.parentLetterId,
     );
   }
 

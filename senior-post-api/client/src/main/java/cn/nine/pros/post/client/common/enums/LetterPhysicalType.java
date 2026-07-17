@@ -6,28 +6,24 @@ import lombok.RequiredArgsConstructor;
 /**
  * 信件载体类型（DB 列 {@code bu_letter.letter_type}，API 字段 {@code letterType}）。
  * <p>
- * 与 {@link LetterSendMode} 区分：本枚举描述「寄的是挂号信还是平邮」；{@link LetterSendMode} 描述实际走的投递/计费路径
- * （例如 VIP 寄挂号信可能走直发轨 {@code DIRECT_VIP}）。
+ * 现行产品写入固定 {@link #STANDARD}；{@link #REGISTERED} 仅为遗留取值。
+ * 投递时长由慢递规则（距离 + 关系）决定，与本枚举无关。
  * </p>
- * <ul>
- *   <li>{@link #REGISTERED}（1）— 挂号信：业务上通常即时送达（仍可能配合 {@link LetterSendMode} 区分路径）</li>
- *   <li>{@link #STANDARD}（2）— 平邮：慢信，运输中直至预计送达或发件人加速/收件人提前拆信等</li>
- * </ul>
  */
 @Getter
 @RequiredArgsConstructor
 public enum LetterPhysicalType {
 
-    /** 挂号信（即时送达语义，具体路径见 {@link LetterSendMode}） */
+    /** 遗留编码；新发信不使用 */
     REGISTERED(1),
 
-    /** 平邮（慢信，运输中 / 预计送达） */
+    /** 现行唯一写入值（慢递信件） */
     STANDARD(2);
 
     private final int code;
 
     /**
-     * 按库表整型解析；未知或非支持值时返回 {@code null}（调用方应视为非法入参）。
+     * 按库表整型解析；未知值返回 {@code null}。
      */
     public static LetterPhysicalType fromCode(int code) {
         for (LetterPhysicalType v : values()) {

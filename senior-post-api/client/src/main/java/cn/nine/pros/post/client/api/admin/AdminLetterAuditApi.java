@@ -36,4 +36,8 @@ public interface AdminLetterAuditApi {
     @Operation(summary = "批量审核拒绝")
     @PostMapping("/batch-reject")
     void batchReject(@RequestBody @Valid AdminIdListInDto body);
+
+    @Operation(summary = "调试：立即送达（跳过预计到达时间；仅 MATCHED/DELIVERING 且已有收件人）")
+    @PostMapping("/{id}/force-deliver")
+    void forceDeliver(@PathVariable("id") Long id);
 }

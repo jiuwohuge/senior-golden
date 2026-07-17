@@ -31,7 +31,7 @@ abstract final class PostalTokens {
   /// 三级辅助文字（标签、时间戳）
   static const Color inkTertiary = Color(0xFF718096);
 
-  /// 邮戳、挂号等强调色
+  /// 邮戳等强调色
   static const Color stampVermilion = Color(0xFFC43C3C);
 
   /// 邮戳红的浅底，用于背景标签

@@ -174,41 +174,15 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     }
   }
 
-  List<DropdownMenuItem<String>> _countryDropdownItems(
-    List<CountryItem> countries,
-    String languageCode,
-  ) {
-    final firstByNorm = <String, CountryItem>{};
-    for (final c in countries) {
-      if (c.code.isEmpty) continue;
-      final k = c.code.trim().toUpperCase();
-      firstByNorm.putIfAbsent(k, () => c);
-    }
-    final items = firstByNorm.entries
-        .map(
-          (e) => DropdownMenuItem<String>(
-            value: e.key,
-            child: Text(
-              '${e.value.displayName(languageCode)} (${e.key})',
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        )
-        .toList();
+  String _countryDisplayName(List<CountryItem> countries, String languageCode) {
     final cc = _countryCode;
-    if (cc != null && cc.isNotEmpty && !firstByNorm.containsKey(cc)) {
-      items.insert(
-        0,
-        DropdownMenuItem<String>(
-          value: cc,
-          child: Text(
-            '$cc (${languageCode.startsWith('zh') ? '??????????' : 'from profile'})',
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      );
+    if (cc == null || cc.isEmpty) return '—';
+    for (final c in countries) {
+      if (c.code.trim().toUpperCase() == cc) {
+        return c.displayName(languageCode);
+      }
     }
-    return items;
+    return cc;
   }
 
   PreferredSizeWidget _buildAppBar(AppLocalizations l10n) {
@@ -457,23 +431,36 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      // ignore: deprecated_member_use
-                      value: _countryCode == null || _countryCode!.isEmpty
-                          ? null
-                          : _countryCode,
-                      isExpanded: true,
-                      decoration: InputDecoration(
-                        labelText: l10n.profileCountry,
+                    Text(
+                      l10n.profileCountry,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: PostalCountrySelectChip(
+                        countryCode: _countryCode,
+                        countryName: _countryDisplayName(
+                          bootstrap.countries,
+                          locale.languageCode,
+                        ),
+                        enabled: !_saving,
+                        onTap: () async {
+                          final code = await showPostalCountryPickerSheet(
+                            context: context,
+                            l10n: l10n,
+                            countries: bootstrap.countries,
+                            languageCode: locale.languageCode,
+                            selectedCode: _countryCode,
+                          );
+                          if (code != null && mounted) {
+                            setState(() => _countryCode = code);
+                          }
+                        },
                       ),
-                      items: _countryDropdownItems(
-                        bootstrap.countries,
-                        locale.languageCode,
-                      ),
-                      onChanged: (v) => setState(() => _countryCode = v),
                     ),
                     const SizedBox(height: 12),
-                    // 城市由定位/IP 反查写入，只读展示。
+                    // 城市由定位/IP 反查写入，只读展示（非用户可编辑的「地区」字段）。
                     InputDecorator(
                       decoration: InputDecoration(
                         labelText: l10n.profileCity,

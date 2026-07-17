@@ -275,7 +275,7 @@ abstract class AppLocalizations {
   /// No description provided for @authWelcomeHighlightDirectory.
   ///
   /// In en, this message translates to:
-  /// **'Meet pen pals worldwide in the directory'**
+  /// **'Meet pen pals worldwide in the hall'**
   String get authWelcomeHighlightDirectory;
 
   /// No description provided for @authWelcomeHighlightPace.
@@ -305,7 +305,7 @@ abstract class AppLocalizations {
   /// No description provided for @authRegisterWizardEmailSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'We\'ll use it for sign-in and important notices about your post.'**
+  /// **'We\'ll use it for sign-in and important notices about your letters.'**
   String get authRegisterWizardEmailSubtitle;
 
   /// No description provided for @authRegisterWizardPasswordTitle.
@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @authRegisterWizardNameSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'This name appears on postcards, letters, and the directory.'**
+  /// **'This name appears on letters and your pen-pal profile.'**
   String get authRegisterWizardNameSubtitle;
 
   /// No description provided for @authRegisterWizardGenderTitle.
@@ -341,7 +341,7 @@ abstract class AppLocalizations {
   /// No description provided for @authRegisterWizardGenderSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Helps us show you the right people in the directory.'**
+  /// **'Helps us show you the right pen pals.'**
   String get authRegisterWizardGenderSubtitle;
 
   /// No description provided for @authRegisterWizardAgeTitle.
@@ -767,7 +767,7 @@ abstract class AppLocalizations {
   /// No description provided for @authRegisterStepProfileSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'This is how you appear on postcards, letters, and the directory.'**
+  /// **'This is how you appear on letters and your pen-pal profile.'**
   String get authRegisterStepProfileSubtitle;
 
   /// No description provided for @authRegisterStepInterestsTitle.
@@ -827,8 +827,14 @@ abstract class AppLocalizations {
   /// No description provided for @authRegisterSummaryCountry.
   ///
   /// In en, this message translates to:
-  /// **'Country / region'**
+  /// **'Country'**
   String get authRegisterSummaryCountry;
+
+  /// No description provided for @authRegisterCountrySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search countries'**
+  String get authRegisterCountrySearchHint;
 
   /// No description provided for @authRegisterSummaryInterests.
   ///
@@ -953,7 +959,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardBody2.
   ///
   /// In en, this message translates to:
-  /// **'Send postcards and letters at your own pace. No like-count pressure.'**
+  /// **'Exchange slow-mail letters at your own pace. No like-count pressure.'**
   String get onboardBody2;
 
   /// No description provided for @onboardTitle3.
@@ -1490,12 +1496,6 @@ abstract class AppLocalizations {
   /// **'{year} ({age})'**
   String authBirthYearFormat(Object year, Object age);
 
-  /// No description provided for @authCountryAutoLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Region (from app language)'**
-  String get authCountryAutoLabel;
-
   /// No description provided for @authEmailHint.
   ///
   /// In en, this message translates to:
@@ -1657,12 +1657,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Interest tags'**
   String get profileInterestTags;
-
-  /// No description provided for @profileStampsLedger.
-  ///
-  /// In en, this message translates to:
-  /// **'Stamps ledger'**
-  String get profileStampsLedger;
 
   /// No description provided for @profileVipCenter.
   ///
@@ -1874,24 +1868,6 @@ abstract class AppLocalizations {
   /// **'1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.'**
   String get legalPrivacyContent;
 
-  /// No description provided for @vipCenterUnlimitedRegisteredMail.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlimited registered mail for members (server rules apply).'**
-  String get vipCenterUnlimitedRegisteredMail;
-
-  /// No description provided for @vipCenterStandardPriorityHours.
-  ///
-  /// In en, this message translates to:
-  /// **'Standard mail priority: ~{hours}h (configured).'**
-  String vipCenterStandardPriorityHours(Object hours);
-
-  /// No description provided for @vipCenterFreeSpeedUpStandard.
-  ///
-  /// In en, this message translates to:
-  /// **'Free speed-up on standard mail for members (server rules apply).'**
-  String get vipCenterFreeSpeedUpStandard;
-
   /// No description provided for @vipCenterPurchaseDisabled.
   ///
   /// In en, this message translates to:
@@ -1988,18 +1964,6 @@ abstract class AppLocalizations {
   /// **'This letter is still on its way. The message stays sealed until it arrives.'**
   String get letterContentHiddenHint;
 
-  /// No description provided for @letterEarlyOpenCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Open early (1 stamp)'**
-  String get letterEarlyOpenCta;
-
-  /// No description provided for @letterEarlyOpenSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Letter opened — full message is now visible.'**
-  String get letterEarlyOpenSuccess;
-
   /// No description provided for @postDetailTitle.
   ///
   /// In en, this message translates to:
@@ -2015,7 +1979,7 @@ abstract class AppLocalizations {
   /// No description provided for @letterModePostOffice.
   ///
   /// In en, this message translates to:
-  /// **'Post office'**
+  /// **'Kindred delivery'**
   String get letterModePostOffice;
 
   /// No description provided for @letterModeDirect.
@@ -2081,14 +2045,20 @@ abstract class AppLocalizations {
   /// No description provided for @letterPeerPostOfficePool.
   ///
   /// In en, this message translates to:
-  /// **'Post office pool'**
+  /// **'Finding a friend'**
   String get letterPeerPostOfficePool;
 
   /// No description provided for @letterPeerUnknown.
   ///
   /// In en, this message translates to:
-  /// **'Unknown recipient'**
+  /// **'Finding a friend'**
   String get letterPeerUnknown;
+
+  /// No description provided for @letterPeerRecommending.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding a friend'**
+  String get letterPeerRecommending;
 
   /// No description provided for @letterAcceptContact.
   ///
@@ -2101,6 +2071,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request sent'**
   String get letterAcceptContactDone;
+
+  /// No description provided for @letterReplyCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get letterReplyCta;
+
+  /// No description provided for @letterReplyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your reply on the letter desk — it travels by slow mail too.'**
+  String get letterReplyHint;
 
   /// No description provided for @letterAcceptContactSuccess.
   ///
@@ -2342,41 +2324,17 @@ abstract class AppLocalizations {
   /// **'Delete account'**
   String get accountDeleteTitle;
 
-  /// No description provided for @stampsLedgerTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Stamps ledger'**
-  String get stampsLedgerTitle;
-
   /// No description provided for @interestsPickerTitle.
   ///
   /// In en, this message translates to:
   /// **'Interest tags'**
   String get interestsPickerTitle;
 
-  /// No description provided for @sendLetterRegisteredMail.
-  ///
-  /// In en, this message translates to:
-  /// **'Registered Mail'**
-  String get sendLetterRegisteredMail;
-
-  /// No description provided for @sendLetterStandardPost.
-  ///
-  /// In en, this message translates to:
-  /// **'Standard Post'**
-  String get sendLetterStandardPost;
-
   /// No description provided for @sendLetterBodyRequired.
   ///
   /// In en, this message translates to:
   /// **'Please write the letter content.'**
   String get sendLetterBodyRequired;
-
-  /// No description provided for @sendLetterRegisteredStampShort.
-  ///
-  /// In en, this message translates to:
-  /// **'Not enough stamps for registered mail.'**
-  String get sendLetterRegisteredStampShort;
 
   /// No description provided for @sendLetterSentSuccess.
   ///
@@ -2401,24 +2359,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send letter to {name}'**
   String sendLetterSheetTitle(Object name);
-
-  /// No description provided for @sendLetterRegisteredSubVip.
-  ///
-  /// In en, this message translates to:
-  /// **'Free for VIP'**
-  String get sendLetterRegisteredSubVip;
-
-  /// No description provided for @sendLetterRegisteredSubPaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Consumes 1 stamp'**
-  String get sendLetterRegisteredSubPaid;
-
-  /// No description provided for @sendLetterStandardSub.
-  ///
-  /// In en, this message translates to:
-  /// **'Free, delayed delivery'**
-  String get sendLetterStandardSub;
 
   /// No description provided for @sendLetterContentLabel.
   ///
@@ -3350,30 +3290,6 @@ abstract class AppLocalizations {
   /// **'Confirm and continue'**
   String get composeContinueAfterPreview;
 
-  /// No description provided for @composeChipFreeWrite.
-  ///
-  /// In en, this message translates to:
-  /// **'Free write'**
-  String get composeChipFreeWrite;
-
-  /// No description provided for @composeChipHeart.
-  ///
-  /// In en, this message translates to:
-  /// **'Heartfelt'**
-  String get composeChipHeart;
-
-  /// No description provided for @composeChipNarrative.
-  ///
-  /// In en, this message translates to:
-  /// **'Reminisce'**
-  String get composeChipNarrative;
-
-  /// No description provided for @composeChipFestival.
-  ///
-  /// In en, this message translates to:
-  /// **'Holiday'**
-  String get composeChipFestival;
-
   /// No description provided for @composeRecipientSheetTitle.
   ///
   /// In en, this message translates to:
@@ -3404,53 +3320,59 @@ abstract class AppLocalizations {
   /// **'Letter assistant'**
   String get letterAssistantTitle;
 
+  /// No description provided for @letterAssistantClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get letterAssistantClose;
+
+  /// No description provided for @letterAssistantPickModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick how to polish. Your original stays until you replace it.'**
+  String get letterAssistantPickModeHint;
+
   /// No description provided for @letterAssistantModeWarmer.
   ///
   /// In en, this message translates to:
-  /// **'Warmer'**
+  /// **'❤️ Warmer'**
   String get letterAssistantModeWarmer;
 
   /// No description provided for @letterAssistantModeNatural.
   ///
   /// In en, this message translates to:
-  /// **'More natural'**
+  /// **'✨ More natural'**
   String get letterAssistantModeNatural;
 
-  /// No description provided for @letterAssistantModeExpand.
+  /// No description provided for @letterAssistantModeContinue.
   ///
   /// In en, this message translates to:
-  /// **'Expand the story'**
-  String get letterAssistantModeExpand;
+  /// **'📖 Keep chatting'**
+  String get letterAssistantModeContinue;
 
-  /// No description provided for @letterAssistantModePolite.
+  /// No description provided for @letterAssistantModeShorten.
   ///
   /// In en, this message translates to:
-  /// **'Check politeness'**
-  String get letterAssistantModePolite;
+  /// **'✂️ Shorten'**
+  String get letterAssistantModeShorten;
 
-  /// No description provided for @letterAssistantModeTranslate.
+  /// No description provided for @letterAssistantModeInspire.
   ///
   /// In en, this message translates to:
-  /// **'Translate'**
-  String get letterAssistantModeTranslate;
-
-  /// No description provided for @letterAssistantModeCustom.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get letterAssistantModeCustom;
-
-  /// No description provided for @letterAssistantCustomHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Tell us how to revise'**
-  String get letterAssistantCustomHint;
+  /// **'💡 Give me ideas'**
+  String get letterAssistantModeInspire;
 
   /// No description provided for @letterAssistantGenerate.
   ///
   /// In en, this message translates to:
   /// **'Polish'**
   String get letterAssistantGenerate;
+
+  /// No description provided for @letterAssistantInspireGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Get ideas'**
+  String get letterAssistantInspireGenerate;
 
   /// No description provided for @letterAssistantYourDraft.
   ///
@@ -3485,8 +3407,14 @@ abstract class AppLocalizations {
   /// No description provided for @letterAssistantUndo.
   ///
   /// In en, this message translates to:
-  /// **'Undo replace'**
+  /// **'Undo'**
   String get letterAssistantUndo;
+
+  /// No description provided for @letterAssistantUndoBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant changed your draft'**
+  String get letterAssistantUndoBanner;
 
   /// No description provided for @letterAssistantEmptyBody.
   ///
@@ -3497,14 +3425,62 @@ abstract class AppLocalizations {
   /// No description provided for @letterAssistantBusy.
   ///
   /// In en, this message translates to:
-  /// **'Polishing…'**
+  /// **'Working…'**
   String get letterAssistantBusy;
 
   /// No description provided for @letterAssistantReplaced.
   ///
   /// In en, this message translates to:
-  /// **'Replaced with the assistant draft. You can undo.'**
+  /// **'Applied. Tap Undo above to revert.'**
   String get letterAssistantReplaced;
+
+  /// No description provided for @letterAssistantInspireAskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You could ask'**
+  String get letterAssistantInspireAskTitle;
+
+  /// No description provided for @letterAssistantInspireShareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You could share'**
+  String get letterAssistantInspireShareTitle;
+
+  /// No description provided for @letterAssistantInspireAppend.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to letter'**
+  String get letterAssistantInspireAppend;
+
+  /// No description provided for @letterAssistantInspireBridge.
+  ///
+  /// In en, this message translates to:
+  /// **'We could also talk about:'**
+  String get letterAssistantInspireBridge;
+
+  /// No description provided for @letterAssistantInspirePickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick topics to add to your letter'**
+  String get letterAssistantInspirePickHint;
+
+  /// No description provided for @composeSaveDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get composeSaveDraft;
+
+  /// No description provided for @composeDraftSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved'**
+  String get composeDraftSaved;
+
+  /// No description provided for @composeEditorWordCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} chars'**
+  String composeEditorWordCount(Object count);
 
   /// No description provided for @composePlaceholderBody.
   ///
@@ -3575,7 +3551,7 @@ abstract class AppLocalizations {
   /// No description provided for @shopVipBody.
   ///
   /// In en, this message translates to:
-  /// **'VIP benefits are configured on the server (e.g. registered-mail perks). Checkout will appear here when payments are connected.'**
+  /// **'VIP benefits are configured on the server (expression upgrades, ad-free, etc.). Checkout will appear here when payments are connected.'**
   String get shopVipBody;
 
   /// No description provided for @shopCatalogEmptyTitle.

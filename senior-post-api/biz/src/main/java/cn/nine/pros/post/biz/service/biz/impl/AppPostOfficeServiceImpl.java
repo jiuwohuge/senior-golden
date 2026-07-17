@@ -14,7 +14,6 @@ import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
 import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.support.TextPreviewSupport;
-import cn.nine.pros.post.client.common.enums.LetterBizStatus;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.out.AppPostOfficeHomeVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
@@ -56,15 +55,11 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
         DailyQuotaSupport.Snapshot snap = DailyQuotaSupport.resolve(
                 userId, user, configService, dailyQuotaClaimService, letterService);
 
-        long outboundInTransit = letterService.countByFromUserAndStatus(
-                userId, LetterBizStatus.DELIVERING.getCode());
-        long outboundPending = letterService.countByFromUserAndStatus(
-                userId, LetterBizStatus.PENDING.getCode());
-        long inboundInTransit = letterService.countByToUserAndStatus(
-                userId, LetterBizStatus.DELIVERING.getCode());
+        long outboundInTransit = letterService.countOutboundInTransit(userId);
+        long inboundInTransit = letterService.countInboundInTransit(userId);
         long unreadDelivered = letterService.countUnreadDeliveredForToUser(userId);
 
-        int inTransit = (int) (outboundInTransit + outboundPending + inboundInTransit + unreadDelivered);
+        int inTransit = (int) (outboundInTransit + inboundInTransit + unreadDelivered);
         int relationCount = appRelationBizService.countRelationMessages(userId);
 
         AppPostOfficeHomeVO vo = AppPostOfficeHomeVO.builder()
@@ -77,7 +72,7 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
                 .firstLetterDone(user != null && Boolean.TRUE.equals(user.getFirstLetterDone()))
                 .relationMessageCount(relationCount)
                 .inTransitCount(inTransit)
-                .outboundInTransit((int) (outboundInTransit + outboundPending))
+                .outboundInTransit((int) outboundInTransit)
                 .inboundInTransit((int) inboundInTransit)
                 .unreadDelivered((int) unreadDelivered)
                 .build();
@@ -121,37 +116,19 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
     }
 
     private void appendOutbound(long userId, List<PostOfficeInTransitItemVO> out) {
-        List<LetterDomain> sent = letterService.listSentForUser(userId, 100);
-        for (LetterDomain l : sent) {
-            int st = statusInt(l.getStatus());
-            if (st != LetterBizStatus.DELIVERING.getCode()
-                    && st != LetterBizStatus.PENDING.getCode()
-                    && st != LetterBizStatus.MATCHED.getCode()) {
-                continue;
-            }
+        for (LetterDomain l : letterService.listOutboundInTransit(userId, 100)) {
             out.add(buildTransitItem(userId, l, IN_TRANSIT_TYPE_OUT));
         }
     }
 
     private void appendInbound(long userId, List<PostOfficeInTransitItemVO> out) {
-        List<LetterDomain> received = letterService.listReceivedForUser(userId, 100);
-        for (LetterDomain l : received) {
-            if (statusInt(l.getStatus()) != LetterBizStatus.DELIVERING.getCode()) {
-                continue;
-            }
+        for (LetterDomain l : letterService.listInboundDelivering(userId, 100)) {
             out.add(buildTransitItem(userId, l, IN_TRANSIT_TYPE_IN));
         }
     }
 
     private void appendUnread(long userId, List<PostOfficeInTransitItemVO> out) {
-        List<LetterDomain> received = letterService.listReceivedForUser(userId, 100);
-        for (LetterDomain l : received) {
-            if (statusInt(l.getStatus()) != LetterBizStatus.DELIVERED.getCode()) {
-                continue;
-            }
-            if (l.getRecipientReadAt() != null) {
-                continue;
-            }
+        for (LetterDomain l : letterService.listUnreadDelivered(userId, 100)) {
             out.add(buildTransitItem(userId, l, IN_TRANSIT_TYPE_UNREAD));
         }
     }
@@ -194,11 +171,12 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
 
     private AppPublicUserVO toPublic(long viewerUserId, long userId) {
         if (userId <= 0) {
-            return AppPublicUserVO.builder().id(0L).nickname("?").build();
+            // 未配对：不回传 "?"，由客户端展示「推荐中」等本地化文案。
+            return AppPublicUserVO.builder().id(0L).nickname("").build();
         }
         UserDTO dto = userService.findById(userId);
         if (dto == null) {
-            return AppPublicUserVO.builder().id(userId).nickname("?").build();
+            return AppPublicUserVO.builder().id(userId).nickname("").build();
         }
         String avatar = UserAvatarAuditSupport.publicStoredRef(dto);
         if (StringUtils.hasText(avatar)) {
@@ -214,16 +192,6 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
                 .avatarUrl(avatar)
                 .isVip(dto.getIsVip())
                 .build();
-    }
-
-    private static int statusInt(Object status) {
-        if (status instanceof Number n) {
-            return n.intValue();
-        }
-        if (status instanceof String s) {
-            return Integer.parseInt(s);
-        }
-        return 0;
     }
 
     private static LocalDateTime toLocalDateTime(Object raw) {

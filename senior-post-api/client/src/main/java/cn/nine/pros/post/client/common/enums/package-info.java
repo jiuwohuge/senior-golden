@@ -3,8 +3,8 @@
  * <p>
  * 信件相关：
  * <ul>
- *   <li>{@link cn.nine.pros.post.client.common.enums.LetterPhysicalType} — {@code letter_type}（挂号/平邮）</li>
- *   <li>{@link cn.nine.pros.post.client.common.enums.LetterSendMode} — {@code send_mode}（投递路径）</li>
+ *   <li>{@link cn.nine.pros.post.client.common.enums.LetterPhysicalType} — {@code letter_type}（现行写入 STANDARD）</li>
+ *   <li>{@link cn.nine.pros.post.client.common.enums.LetterSendMode} — {@code send_mode}（现行写入 STANDARD_POST）</li>
  *   <li>{@link cn.nine.pros.post.client.common.enums.LetterBizStatus} — {@code status}（运输中/已送达等）</li>
  * </ul>
  */

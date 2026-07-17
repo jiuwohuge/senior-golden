@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/models/domain_models.dart';
+import '../../core/models/letter_peer_label.dart';
 import '../auth/auth_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
@@ -349,15 +350,25 @@ class _LetterTile extends ConsumerWidget {
       },
       header: Row(
         children: [
-          PostalAvatar(
-            name: letter.peer.nickname,
-            size: 40,
-            imageUrl: letter.peer.avatarUrl,
-          ),
+          isUnresolvedLetterPeer(letter.peer)
+              ? _MailboxRecommendingAvatar(size: 40)
+              : PostalAvatar(
+                  name: letterPeerDisplayTitle(
+                    l10n: l10n,
+                    peer: letter.peer,
+                    mode: letter.mode,
+                  ),
+                  size: 40,
+                  imageUrl: letter.peer.avatarUrl,
+                ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              letter.peer.nickname,
+              letterPeerDisplayTitle(
+                l10n: l10n,
+                peer: letter.peer,
+                mode: letter.mode,
+              ),
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
@@ -402,6 +413,38 @@ class _LetterTile extends ConsumerWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 信箱列表：未配对占位头像（信封），避免「?」/「U」。
+class _MailboxRecommendingAvatar extends StatelessWidget {
+  const _MailboxRecommendingAvatar({this.size = 40});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: PostalTokens.kraftBrown, width: 1.4),
+      ),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: PostalTokens.paperEnvelope,
+        ),
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.markunread_mailbox_outlined,
+          size: size * 0.48,
+          color: PostalTokens.postboxGreen,
+        ),
       ),
     );
   }

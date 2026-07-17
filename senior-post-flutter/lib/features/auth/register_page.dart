@@ -10,6 +10,7 @@ import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/bootstrap/app_bootstrap.dart';
 import '../../core/i18n/country_from_locale.dart';
+import '../../core/models/interest_tag_option.dart';
 import '../../core/oss/oss_upload_service.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
@@ -721,6 +722,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 l10n,
                 countryLabel,
                 bootstrap.countries,
+                bootstrap.interestTagOptions,
                 Localizations.localeOf(context).languageCode,
               ),
               const SizedBox(height: 12),
@@ -754,16 +756,60 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     AppLocalizations l10n,
     String countryLabel,
     List<CountryItem> countries,
+    List<InterestTagOption> interestOptions,
     String lang,
   ) {
+    final selectedCountryCode = () {
+      final codes = countries.map((c) => c.code).toSet();
+      final preferred = _manualCountryCode;
+      if (preferred != null && codes.contains(preferred)) {
+        return preferred;
+      }
+      for (final c in countries) {
+        if (c.displayName(lang) == countryLabel || c.code == countryLabel) {
+          return c.code;
+        }
+      }
+      return codes.isEmpty ? null : codes.first;
+    }();
+    final selectedCountryName = () {
+      for (final c in countries) {
+        if (c.code == selectedCountryCode) {
+          return c.displayName(lang);
+        }
+      }
+      return countryLabel.isNotEmpty ? countryLabel : '—';
+    }();
+    final interestNames = interestOptions
+        .where((o) => _interestTagIds.contains(o.id))
+        .map((o) => o.tagName)
+        .toList();
+    final interestSep = lang.toLowerCase().startsWith('zh') ? '、' : ', ';
+    final interestSummary =
+        interestNames.isEmpty ? '—' : interestNames.join(interestSep);
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
       decoration: BoxDecoration(
-        color: PostalTokens.paperEnvelope.withValues(alpha: 0.75),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: PostalTokens.kraftBrownMuted.withValues(alpha: 0.65),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            PostalTokens.paperEnvelope,
+            PostalTokens.paperCream.withValues(alpha: 0.92),
+          ],
         ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: PostalTokens.kraftBrownMuted.withValues(alpha: 0.85),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: PostalTokens.inkNavy.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -793,7 +839,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     '${DateTime.now().year - _birthYear!}',
                   ),
           ),
-          // 国家：locale 启发式失败或需覆盖时，可手动选择。
+          // 国家：紧凑胶囊 + 半屏搜索；无满宽灰底「假下拉」。
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
@@ -810,41 +856,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                 ),
                 Expanded(
-                  child: DropdownButtonFormField<String>(
-                    // ignore: deprecated_member_use
-                    value: () {
-                      final codes = countries.map((c) => c.code).toSet();
-                      final preferred = _manualCountryCode;
-                      if (preferred != null && codes.contains(preferred)) {
-                        return preferred;
-                      }
-                      for (final c in countries) {
-                        if (c.displayName(lang) == countryLabel ||
-                            c.code == countryLabel) {
-                          return c.code;
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: PostalCountrySelectChip(
+                      countryCode: selectedCountryCode,
+                      countryName: selectedCountryName,
+                      enabled: !_busy,
+                      onTap: () async {
+                        final code = await showPostalCountryPickerSheet(
+                          context: context,
+                          l10n: l10n,
+                          countries: countries,
+                          languageCode: lang,
+                          selectedCode: selectedCountryCode,
+                        );
+                        if (code != null && mounted) {
+                          setState(() => _manualCountryCode = code);
                         }
-                      }
-                      return codes.isEmpty ? null : codes.first;
-                    }(),
-                    decoration: InputDecoration(
-                      isDense: true,
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
+                      },
                     ),
-                    items: countries
-                        .map(
-                          (c) => DropdownMenuItem(
-                            value: c.code,
-                            child: Text(c.displayName(lang)),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: _busy
-                        ? null
-                        : (v) => setState(() => _manualCountryCode = v),
                   ),
                 ),
               ],
@@ -867,7 +897,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           _summaryRow(
             context,
             l10n.authRegisterSummaryInterests,
-            '${_interestTagIds.length}',
+            interestSummary,
+            valueMaxLines: 2,
           ),
           _summaryRow(
             context,

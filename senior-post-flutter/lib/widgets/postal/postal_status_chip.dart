@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/postal_tokens.dart';
 
-/// 信件状态标签：挂号 ✅ / 平邮 ✉️ Delivering / Delivered。
+/// 信件状态标签（在途 / 已送达等）。
 class PostalStatusChip extends StatelessWidget {
   const PostalStatusChip({
     super.key,

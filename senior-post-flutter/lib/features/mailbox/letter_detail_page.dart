@@ -12,12 +12,12 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
+import '../../core/models/letter_peer_label.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/letter/letter_document.dart';
 import '../../widgets/letter/letter_paper.dart';
 import '../../widgets/postal/postal.dart';
-import '../auth/auth_repository.dart';
-import '../compose/letter_assistant_sheet.dart';
+import '../compose/compose_intent.dart';
 import '../relation/relation_display_label.dart';
 import '../relation/relation_remote.dart';
 import '../ritual/letter_open_ritual_overlay.dart';
@@ -49,12 +49,10 @@ class LetterDetailPage extends ConsumerStatefulWidget {
 }
 
 class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
-  final _reply = TextEditingController();
   bool _acceptBusy = false;
 
   /// 发起笔友申请成功后立即置灰按钮。
   bool _requestSentLocally = false;
-  bool _replyBusy = false;
   bool _favoriteBusy = false;
   bool _favorited = false;
   bool _showOpenRitual = false;
@@ -69,16 +67,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
   void dispose() {
     ref.invalidate(mailboxReceivedProvider);
     ref.invalidate(mailboxSentProvider);
-    _reply.dispose();
     super.dispose();
-  }
-
-  String _modeLabel(AppLocalizations l10n, LetterMode mode) {
-    return switch (mode) {
-      LetterMode.postOffice => l10n.letterModePostOffice,
-      LetterMode.direct => l10n.letterModeDirect,
-      LetterMode.selfTime => l10n.letterModeSelfTime,
-    };
   }
 
   String _auditLabel(AppLocalizations l10n, int auditStatus) {
@@ -175,11 +164,11 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                     !letter.outgoing &&
                     letter.status == LetterStatus.delivered &&
                     letter.peer.id.isNotEmpty;
-                final peerTitle = letter.peer.nickname.isNotEmpty
-                    ? letter.peer.nickname
-                    : (letter.mode == LetterMode.postOffice
-                          ? l10n.letterPeerPostOfficePool
-                          : l10n.letterPeerUnknown);
+                final peerTitle = letterPeerDisplayTitle(
+                  l10n: l10n,
+                  peer: letter.peer,
+                  mode: letter.mode,
+                );
 
                 return ListView(
                   padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
@@ -203,11 +192,13 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                       backgroundColor: PostalTokens.paperEnvelope,
                       header: Row(
                         children: [
-                          PostalAvatar(
-                            name: peerTitle,
-                            size: 40,
-                            imageUrl: letter.peer.avatarUrl,
-                          ),
+                          isUnresolvedLetterPeer(letter.peer)
+                              ? _RecommendingAvatar(size: 40)
+                              : PostalAvatar(
+                                  name: peerTitle,
+                                  size: 40,
+                                  imageUrl: letter.peer.avatarUrl,
+                                ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -221,17 +212,9 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            l10n.letterModeLine(_modeLabel(l10n, letter.mode)),
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: PostalTokens.inkSecondary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
                           if (letter.auditStatus != 1)
                             Padding(
-                              padding: const EdgeInsets.only(top: 4),
+                              padding: const EdgeInsets.only(bottom: 4),
                               child: Text(
                                 l10n.letterAuditLine(
                                   _auditLabel(l10n, letter.auditStatus),
@@ -244,7 +227,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                             ),
                           if (relationState != null)
                             Padding(
-                              padding: const EdgeInsets.only(top: 4),
+                              padding: const EdgeInsets.only(bottom: 4),
                               child: Text(
                                 relationDisplayLabel(l10n, relationState),
                                 style: Theme.of(context).textTheme.bodySmall
@@ -257,7 +240,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                           if (isRegistered)
                             Padding(
                               padding: const EdgeInsets.only(
-                                top: 10,
+                                top: 6,
                                 bottom: 10,
                               ),
                               child: Text(
@@ -392,131 +375,31 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                       ),
                     ],
                     const SizedBox(height: 16),
+                    // 仅收件人且已送达：入口进写信桌回信；发件人 / 在途一律不展示回信区。
                     if (canReply) ...[
                       Text(
-                        'Reply uses the same rules as sending a new letter.',
+                        l10n.letterReplyHint,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: PostalTokens.inkSecondary,
+                          height: 1.4,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      PostalTextField(
-                        controller: _reply,
-                        label: 'Reply',
-                        maxLines: 5,
-                        minLines: 3,
-                        showClearButton: true,
                       ),
                       const SizedBox(height: 12),
                       PostalButton(
-                        label: l10n.letterAssistantTitle,
-                        variant: PostalButtonVariant.secondary,
-                        onPressed: () async {
-                          final source = _reply.text.trim();
-                          if (source.isEmpty) {
-                            PostalSnack.show(
-                              context,
-                              l10n.letterAssistantEmptyBody,
-                              tone: PostalSnackTone.warning,
-                            );
-                            return;
-                          }
-                          final suggestion = await showLetterAssistantSheet(
-                            context: context,
-                            ref: ref,
-                            sourceText: source,
-                          );
-                          if (!context.mounted || suggestion == null) return;
-                          setState(() => _reply.text = suggestion);
-                          PostalSnack.show(
-                            context,
-                            l10n.letterAssistantReplaced,
-                            tone: PostalSnackTone.success,
+                        label: l10n.letterReplyCta,
+                        icon: Icons.reply_outlined,
+                        onPressed: () {
+                          context.push(
+                            '/compose',
+                            extra: ComposeIntent(
+                              kind: ComposeKind.penPalMail,
+                              peerId: letter.peer.id,
+                              peerNickname: letter.peer.nickname,
+                              parentLetterId: letter.id,
+                            ),
                           );
                         },
                       ),
-                      const SizedBox(height: 12),
-                      PostalButton(
-                        label: 'Send reply',
-                        busy: _replyBusy,
-                        onPressed: _replyBusy
-                            ? null
-                            : () async {
-                                final text = _reply.text.trim();
-                                if (text.isEmpty) {
-                                  PostalSnack.show(
-                                    context,
-                                    'Please write your reply.',
-                                    tone: PostalSnackTone.warning,
-                                  );
-                                  return;
-                                }
-                                setState(() => _replyBusy = true);
-                                try {
-                                  await ref
-                                      .read(mailboxRemoteRepositoryProvider)
-                                      .sendLetter(
-                                        toUserId: letter.peer.id,
-                                        content: text,
-                                        parentLetterId: letter.id,
-                                      );
-                                  if (!context.mounted) return;
-                                  try {
-                                    await ref
-                                        .read(authRepositoryProvider)
-                                        .refreshSessionFromServer();
-                                  } catch (_) {}
-                                  if (!context.mounted) return;
-                                  _reply.clear();
-                                  ref.invalidate(
-                                    letterDetailProvider(widget.letterId),
-                                  );
-                                  ref.invalidate(mailboxLettersProvider);
-                                  ref.invalidate(mailboxArchiveProvider);
-                                  ref.invalidate(mailboxReceivedProvider);
-                                  ref.invalidate(mailboxSentProvider);
-                                  PostalSnack.show(
-                                    context,
-                                    'Reply sent',
-                                    tone: PostalSnackTone.success,
-                                  );
-                                  if (context.canPop()) {
-                                    context.pop();
-                                  }
-                                } catch (e) {
-                                  final msg = _postalApiUserMessage(e);
-                                  if (context.mounted && msg != null) {
-                                    PostalSnack.show(
-                                      context,
-                                      msg,
-                                      tone: PostalSnackTone.error,
-                                    );
-                                  }
-                                } finally {
-                                  if (context.mounted) {
-                                    setState(() => _replyBusy = false);
-                                  }
-                                }
-                              },
-                      ),
-                    ] else ...[
-                      Text(
-                        'Reply is available after the letter is received (not while delivering).',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: PostalTokens.inkSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      PostalTextField(
-                        controller: _reply,
-                        label: 'Reply draft',
-                        maxLines: 5,
-                        minLines: 4,
-                        showClearButton: false,
-                        enabled: false,
-                      ),
-                      const SizedBox(height: 12),
-                      PostalButton(label: 'Send reply', onPressed: null),
                     ],
                   ],
                 );
@@ -552,5 +435,44 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
     } finally {
       if (mounted) setState(() => _favoriteBusy = false);
     }
+  }
+}
+
+/// 未配对收件人头像：信封图标，避免显示「?」字母。
+class _RecommendingAvatar extends StatelessWidget {
+  const _RecommendingAvatar({this.size = 40});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: PostalTokens.kraftBrown, width: 1.4),
+      ),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              PostalTokens.kraftBrownMuted.withValues(alpha: 0.55),
+              PostalTokens.paperEnvelope,
+            ],
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.markunread_mailbox_outlined,
+          size: size * 0.48,
+          color: PostalTokens.postboxGreen,
+        ),
+      ),
+    );
   }
 }

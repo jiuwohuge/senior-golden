@@ -222,7 +222,6 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         letter.setFromUserId(fromUserId);
         letter.setToUserId(toUserId);
         letter.setContent(content);
-        letter.setIsAccelerated(false);
         letter.setParentLetterId(parentLetterId);
         letter.setMode(mode.getCode());
         letter.setAuditStatus(LetterAuditStatus.PENDING_REVIEW.getCode());
@@ -442,54 +441,6 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     }
 
     /**
-     * 收件人提前拆信：运输中信件标记早开并立即送达。
-     * <p>前置：actor 为收件人、状态 DELIVERING、尚未早开、账号正常。
-     * <p>副作用：写 earlyOpen/delivered 状态；事务边界为本方法。
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public MailboxLetterItemVO earlyOpenLetter(long actorUserId, long letterId) {
-        LetterDomain letter = letterService.getById(letterId);
-        if (letter == null || letter.isDelFlag()) {
-            throw new BusinessException(appMessages.get("app.error.letter.notFound"));
-        }
-        if (letter.getToUserId() == null || !Objects.equals(letter.getToUserId(), actorUserId)) {
-            throw new BusinessException(appMessages.get("app.error.letter.earlyOpenRecipientOnly"));
-        }
-        if (toInt(letter.getStatus()) != LetterBizStatus.DELIVERING.getCode()) {
-            throw new BusinessException(appMessages.get("app.error.letter.earlyOpenBadStatus"));
-        }
-        if (letter.getRecipientEarlyOpenAt() != null) {
-            throw new BusinessException(appMessages.get("app.error.letter.earlyOpenAlready"));
-        }
-        UserDTO recipient = userService.findById(actorUserId);
-        if (recipient == null || userStatus(recipient.getStatus()) != USER_STATUS_NORMAL) {
-            throw new BusinessException(appMessages.get("app.error.account.statusAbnormal"));
-        }
-        boolean vip = Boolean.TRUE.equals(recipient.getIsVip());
-        LocalDateTime now = LocalDateTime.now();
-        boolean letterPatched = letterService.markEarlyOpenedAndDelivered(letterId, actorUserId, now);
-        if (!letterPatched) {
-            log.info("letter early-open rejected: state changed, actorUserId={}, letterId={}", actorUserId, letterId);
-            throw new BusinessException(appMessages.get("app.error.letter.stateChanged"));
-        }
-        log.info("letter early-opened, actorUserId={}, letterId={}, vip={}", actorUserId, letterId, vip);
-        LetterDomain saved = letterService.getById(letterId);
-        return toItem(saved, actorUserId, true);
-    }
-
-    /**
-     * 邮票加速已废弃（§16）；保留入口避免旧客户端 404，始终拒绝。
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public MailboxLetterItemVO speedUpLetter(long actorUserId, long letterId) {
-        // 邮票加速已废弃（§16 表达增强付费）；保留接口避免旧客户端 404
-        log.info("letter speed-up rejected: retired, actorUserId={}, letterId={}", actorUserId, letterId);
-        throw new BusinessException(appMessages.get("app.error.letter.speedUpRetired"));
-    }
-
-    /**
      * 信件助手：委托 Spring AI 整理原文建议稿（不落库、不覆盖正文）。
      */
     @Override
@@ -543,9 +494,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         boolean fromMe = Objects.equals(l.getFromUserId(), viewer);
         boolean delivering = toInt(l.getStatus()) == LetterBizStatus.DELIVERING.getCode();
         boolean pending = toInt(l.getStatus()) == LetterBizStatus.PENDING.getCode();
-        boolean openedEarly = l.getRecipientEarlyOpenAt() != null;
         // 运输中对收件人隐藏正文；PENDING 入池发件人可见
-        boolean hideBody = !fromMe && delivering && !openedEarly;
+        boolean hideBody = !fromMe && delivering;
 
         String fullContent = l.getContent() != null ? l.getContent() : "";
         String preview = resolvePreviewBody(hideBody, fullContent, 280);
@@ -680,7 +630,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
 
     private static AppPublicUserVO toPublic(UserDTO dto) {
         if (dto == null) {
-            return AppPublicUserVO.builder().id(0L).nickname("unknown").build();
+            // 未解析到用户：空昵称，避免客户端直出 "unknown"。
+            return AppPublicUserVO.builder().id(0L).nickname("").build();
         }
         return AppPublicUserVO.builder()
                 .id(dto.getId())

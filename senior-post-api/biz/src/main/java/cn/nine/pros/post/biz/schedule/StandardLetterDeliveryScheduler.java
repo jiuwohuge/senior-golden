@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 /**
- * 定时扫描到期平邮并送达。间隔可通过配置调整。
+ * 定时扫描到期在途信并送达。间隔可通过配置调整。
  */
 @Slf4j
 @Component

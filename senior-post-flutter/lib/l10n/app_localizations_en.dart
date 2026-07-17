@@ -110,7 +110,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authWelcomeHighlightDirectory =>
-      'Meet pen pals worldwide in the directory';
+      'Meet pen pals worldwide in the hall';
 
   @override
   String get authWelcomeHighlightPace => 'Designed for adults 45 and over';
@@ -128,7 +128,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authRegisterWizardEmailSubtitle =>
-      'We\'ll use it for sign-in and important notices about your post.';
+      'We\'ll use it for sign-in and important notices about your letters.';
 
   @override
   String get authRegisterWizardPasswordTitle => 'Choose a password';
@@ -142,14 +142,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authRegisterWizardNameSubtitle =>
-      'This name appears on postcards, letters, and the directory.';
+      'This name appears on letters and your pen-pal profile.';
 
   @override
   String get authRegisterWizardGenderTitle => 'How do you identify?';
 
   @override
   String get authRegisterWizardGenderSubtitle =>
-      'Helps us show you the right people in the directory.';
+      'Helps us show you the right pen pals.';
 
   @override
   String get authRegisterWizardAgeTitle => 'How old are you?';
@@ -383,7 +383,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authRegisterStepProfileSubtitle =>
-      'This is how you appear on postcards, letters, and the directory.';
+      'This is how you appear on letters and your pen-pal profile.';
 
   @override
   String get authRegisterStepInterestsTitle => 'Interests';
@@ -415,7 +415,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authRegisterSummaryBirth => 'Year of birth';
 
   @override
-  String get authRegisterSummaryCountry => 'Country / region';
+  String get authRegisterSummaryCountry => 'Country';
+
+  @override
+  String get authRegisterCountrySearchHint => 'Search countries';
 
   @override
   String get authRegisterSummaryInterests => 'Interests';
@@ -483,7 +486,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardBody2 =>
-      'Send postcards and letters at your own pace. No like-count pressure.';
+      'Exchange slow-mail letters at your own pace. No like-count pressure.';
 
   @override
   String get onboardTitle3 => 'Trusted and age-friendly';
@@ -789,9 +792,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get authCountryAutoLabel => 'Region (from app language)';
-
-  @override
   String get authEmailHint => 'name@example.com';
 
   @override
@@ -874,9 +874,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileInterestTags => 'Interest tags';
-
-  @override
-  String get profileStampsLedger => 'Stamps ledger';
 
   @override
   String get profileVipCenter => 'VIP center';
@@ -990,19 +987,6 @@ class AppLocalizationsEn extends AppLocalizations {
       '1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.';
 
   @override
-  String get vipCenterUnlimitedRegisteredMail =>
-      'Unlimited registered mail for members (server rules apply).';
-
-  @override
-  String vipCenterStandardPriorityHours(Object hours) {
-    return 'Standard mail priority: ~${hours}h (configured).';
-  }
-
-  @override
-  String get vipCenterFreeSpeedUpStandard =>
-      'Free speed-up on standard mail for members (server rules apply).';
-
-  @override
   String get vipCenterPurchaseDisabled => 'VIP purchase is currently disabled.';
 
   @override
@@ -1058,20 +1042,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'This letter is still on its way. The message stays sealed until it arrives.';
 
   @override
-  String get letterEarlyOpenCta => 'Open early (1 stamp)';
-
-  @override
-  String get letterEarlyOpenSuccess =>
-      'Letter opened — full message is now visible.';
-
-  @override
   String get postDetailTitle => 'Postcard';
 
   @override
   String get letterDetailTitle => 'Letter';
 
   @override
-  String get letterModePostOffice => 'Post office';
+  String get letterModePostOffice => 'Kindred delivery';
 
   @override
   String get letterModeDirect => 'Direct';
@@ -1108,16 +1085,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letterDeliveredLabel => 'Delivered';
 
   @override
-  String get letterPeerPostOfficePool => 'Post office pool';
+  String get letterPeerPostOfficePool => 'Finding a friend';
 
   @override
-  String get letterPeerUnknown => 'Unknown recipient';
+  String get letterPeerUnknown => 'Finding a friend';
+
+  @override
+  String get letterPeerRecommending => 'Finding a friend';
 
   @override
   String get letterAcceptContact => 'Add pen pal';
 
   @override
   String get letterAcceptContactDone => 'Request sent';
+
+  @override
+  String get letterReplyCta => 'Reply';
+
+  @override
+  String get letterReplyHint =>
+      'Write your reply on the letter desk — it travels by slow mail too.';
 
   @override
   String get letterAcceptContactSuccess =>
@@ -1252,23 +1239,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDeleteTitle => 'Delete account';
 
   @override
-  String get stampsLedgerTitle => 'Stamps ledger';
-
-  @override
   String get interestsPickerTitle => 'Interest tags';
 
   @override
-  String get sendLetterRegisteredMail => 'Registered Mail';
-
-  @override
-  String get sendLetterStandardPost => 'Standard Post';
-
-  @override
   String get sendLetterBodyRequired => 'Please write the letter content.';
-
-  @override
-  String get sendLetterRegisteredStampShort =>
-      'Not enough stamps for registered mail.';
 
   @override
   String get sendLetterSentSuccess => 'Letter sent.';
@@ -1284,15 +1258,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String sendLetterSheetTitle(Object name) {
     return 'Send letter to $name';
   }
-
-  @override
-  String get sendLetterRegisteredSubVip => 'Free for VIP';
-
-  @override
-  String get sendLetterRegisteredSubPaid => 'Consumes 1 stamp';
-
-  @override
-  String get sendLetterStandardSub => 'Free, delayed delivery';
 
   @override
   String get sendLetterContentLabel => 'Letter content';
@@ -1819,18 +1784,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get composeContinueAfterPreview => 'Confirm and continue';
 
   @override
-  String get composeChipFreeWrite => 'Free write';
-
-  @override
-  String get composeChipHeart => 'Heartfelt';
-
-  @override
-  String get composeChipNarrative => 'Reminisce';
-
-  @override
-  String get composeChipFestival => 'Holiday';
-
-  @override
   String get composeRecipientSheetTitle => 'Who to';
 
   @override
@@ -1846,28 +1799,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letterAssistantTitle => 'Letter assistant';
 
   @override
-  String get letterAssistantModeWarmer => 'Warmer';
+  String get letterAssistantClose => 'Close';
 
   @override
-  String get letterAssistantModeNatural => 'More natural';
+  String get letterAssistantPickModeHint =>
+      'Pick how to polish. Your original stays until you replace it.';
 
   @override
-  String get letterAssistantModeExpand => 'Expand the story';
+  String get letterAssistantModeWarmer => '❤️ Warmer';
 
   @override
-  String get letterAssistantModePolite => 'Check politeness';
+  String get letterAssistantModeNatural => '✨ More natural';
 
   @override
-  String get letterAssistantModeTranslate => 'Translate';
+  String get letterAssistantModeContinue => '📖 Keep chatting';
 
   @override
-  String get letterAssistantModeCustom => 'Custom';
+  String get letterAssistantModeShorten => '✂️ Shorten';
 
   @override
-  String get letterAssistantCustomHint => 'Tell us how to revise';
+  String get letterAssistantModeInspire => '💡 Give me ideas';
 
   @override
   String get letterAssistantGenerate => 'Polish';
+
+  @override
+  String get letterAssistantInspireGenerate => 'Get ideas';
 
   @override
   String get letterAssistantYourDraft => 'Your draft';
@@ -1885,18 +1842,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letterAssistantRetry => 'Revise again';
 
   @override
-  String get letterAssistantUndo => 'Undo replace';
+  String get letterAssistantUndo => 'Undo';
+
+  @override
+  String get letterAssistantUndoBanner => 'Assistant changed your draft';
 
   @override
   String get letterAssistantEmptyBody =>
       'Write something first, then ask the assistant.';
 
   @override
-  String get letterAssistantBusy => 'Polishing…';
+  String get letterAssistantBusy => 'Working…';
 
   @override
-  String get letterAssistantReplaced =>
-      'Replaced with the assistant draft. You can undo.';
+  String get letterAssistantReplaced => 'Applied. Tap Undo above to revert.';
+
+  @override
+  String get letterAssistantInspireAskTitle => 'You could ask';
+
+  @override
+  String get letterAssistantInspireShareTitle => 'You could share';
+
+  @override
+  String get letterAssistantInspireAppend => 'Add to letter';
+
+  @override
+  String get letterAssistantInspireBridge => 'We could also talk about:';
+
+  @override
+  String get letterAssistantInspirePickHint =>
+      'Pick topics to add to your letter';
+
+  @override
+  String get composeSaveDraft => 'Save draft';
+
+  @override
+  String get composeDraftSaved => 'Draft saved';
+
+  @override
+  String composeEditorWordCount(Object count) {
+    return '$count chars';
+  }
 
   @override
   String get composePlaceholderBody => 'Write what you want to say…';
@@ -1935,7 +1921,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shopVipBody =>
-      'VIP benefits are configured on the server (e.g. registered-mail perks). Checkout will appear here when payments are connected.';
+      'VIP benefits are configured on the server (expression upgrades, ad-free, etc.). Checkout will appear here when payments are connected.';
 
   @override
   String get shopCatalogEmptyTitle => 'No products yet';

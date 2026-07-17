@@ -119,7 +119,7 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
 
     private static AppPublicUserVO toPublic(UserDTO u) {
         if (u == null) {
-            return AppPublicUserVO.builder().id(0L).nickname("unknown").build();
+            return AppPublicUserVO.builder().id(0L).nickname("").build();
         }
         String cc = u.getCountryCode() == null ? "" : u.getCountryCode();
         return AppPublicUserVO.builder()

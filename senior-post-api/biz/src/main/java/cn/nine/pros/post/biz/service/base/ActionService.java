@@ -7,7 +7,7 @@ import cn.nine.pros.post.client.model.db.ActionDTO;
 import java.util.List;
 
 /**
- * 用户行为日志（发布/寄信/加速等） Service
+ * 用户行为日志（发布/寄信等） Service
  *
  * @author Administrator
  */

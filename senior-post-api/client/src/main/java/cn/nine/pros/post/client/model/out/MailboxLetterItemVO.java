@@ -45,7 +45,7 @@ public class MailboxLetterItemVO {
     @Schema(description = "实际送达时间")
     private LocalDateTime actualArrivalTime;
 
-    @Schema(description = "收件人视角：运输中平邮正文是否隐藏（提前拆信后为 false）")
+    @Schema(description = "收件人视角：运输中正文是否对收件人隐藏")
     private Boolean contentHidden;
 
     @Schema(description = "与对端关系展示态，整型同 RelationDisplayState")

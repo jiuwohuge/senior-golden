@@ -148,19 +148,6 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
                     body: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 10),
-                        Center(
-                          child: Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: PostalTokens.inkTertiary.withValues(
-                                alpha: 0.38,
-                              ),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         Divider(
                           height: 1,

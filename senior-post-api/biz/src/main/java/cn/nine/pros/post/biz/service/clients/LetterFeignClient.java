@@ -4,7 +4,7 @@ import cn.nine.commons.feign.bridge.core.IFeignClient;
 import cn.nine.pros.post.client.model.db.LetterDTO;
 
 /**
- * 信件表（挂号信/平邮） FeignClient
+ * 信件表 FeignClient
  *
  * @author Administrator
  */

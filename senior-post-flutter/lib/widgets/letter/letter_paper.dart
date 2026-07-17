@@ -40,7 +40,8 @@ class LetterPaper extends StatelessWidget {
       ink: tokens.ink,
     );
 
-    return AnimatedContainer(
+    // compose 态填满父级；preview/read 仍按内容 + minHeight 伸展。
+    final paper = AnimatedContainer(
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
       constraints: BoxConstraints(minHeight: minHeight),
@@ -84,6 +85,11 @@ class LetterPaper extends StatelessWidget {
         ),
       ),
     );
+
+    if (mode == LetterPaperMode.compose) {
+      return SizedBox.expand(child: paper);
+    }
+    return paper;
   }
 }
 
@@ -104,22 +110,34 @@ class _ComposeField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      focusNode: focusNode,
-      onChanged: onChanged,
-      maxLines: null,
-      minLines: 12,
-      keyboardType: TextInputType.multiline,
-      textAlignVertical: TextAlignVertical.top,
-      style: style,
-      cursorColor: PostalTokens.postboxGreen,
-      decoration: InputDecoration(
-        isCollapsed: true,
-        border: InputBorder.none,
-        hintText: placeholder,
-        hintStyle: style.copyWith(
-          color: PostalTokens.inkTertiary.withValues(alpha: 0.85),
+    // 显式关掉主题 OutlineInputBorder，避免聚焦绿框只包住 minLines 高度。
+    const none = InputBorder.none;
+    return SizedBox.expand(
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        onChanged: onChanged,
+        expands: true,
+        maxLines: null,
+        minLines: null,
+        keyboardType: TextInputType.multiline,
+        textAlignVertical: TextAlignVertical.top,
+        style: style,
+        cursorColor: PostalTokens.postboxGreen,
+        decoration: InputDecoration(
+          isCollapsed: true,
+          border: none,
+          enabledBorder: none,
+          focusedBorder: none,
+          disabledBorder: none,
+          errorBorder: none,
+          focusedErrorBorder: none,
+          filled: false,
+          contentPadding: EdgeInsets.zero,
+          hintText: placeholder,
+          hintStyle: style.copyWith(
+            color: PostalTokens.inkTertiary.withValues(alpha: 0.85),
+          ),
         ),
       ),
     );

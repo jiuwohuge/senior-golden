@@ -80,18 +80,6 @@ public class AppMailboxController implements AppMailboxApi {
     }
 
     @Override
-    public MailboxLetterItemVO speedUpLetter(Long letterId) {
-        Long uid = requireUserId();
-        return appMailboxService.speedUpLetter(uid, letterId);
-    }
-
-    @Override
-    public MailboxLetterItemVO earlyOpenLetter(Long letterId) {
-        Long uid = requireUserId();
-        return appMailboxService.earlyOpenLetter(uid, letterId);
-    }
-
-    @Override
     public AppLetterAssistantVO letterAssistant(AppLetterAssistantInDto body) {
         Long uid = requireUserId();
         return appMailboxService.letterAssistant(uid, body);

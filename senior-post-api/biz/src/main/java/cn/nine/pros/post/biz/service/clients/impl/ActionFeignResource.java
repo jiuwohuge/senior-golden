@@ -8,7 +8,7 @@ import cn.nine.pros.post.client.model.db.ActionDTO;
 import org.springframework.stereotype.Service;
 
 /**
- * 用户行为日志（发布/寄信/加速等） FeignResource
+ * 用户行为日志（发布/寄信等） FeignResource
  *
  * @author Administrator
  */

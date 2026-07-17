@@ -5,6 +5,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../widgets/postal/postal.dart';
+import '../../core/models/letter_peer_label.dart';
 import 'post_office_remote.dart';
 
 /// §11.4 在途明细：发出未达 / 收到未达 / 未读，含相对 ETA 与进度条。
@@ -44,22 +45,31 @@ class InTransitPage extends ConsumerWidget {
           final outbound = items.where((e) => e.itemType == 1).toList();
           final inbound = items.where((e) => e.itemType == 2).toList();
           final unread = items.where((e) => e.itemType == 3).toList();
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-            children: [
-              _Section(
-                title: l10n.inTransitSectionOutbound,
-                items: outbound,
-              ),
-              _Section(
-                title: l10n.inTransitSectionInbound,
-                items: inbound,
-              ),
-              _Section(
-                title: l10n.inTransitSectionUnread,
-                items: unread,
-              ),
-            ],
+          return RefreshIndicator(
+            color: PostalTokens.postboxGreen,
+            onRefresh: () async {
+              ref.invalidate(postOfficeInTransitProvider);
+              ref.invalidate(postOfficeHomeProvider);
+              await ref.read(postOfficeInTransitProvider.future);
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+              children: [
+                _Section(
+                  title: l10n.inTransitSectionOutbound,
+                  items: outbound,
+                ),
+                _Section(
+                  title: l10n.inTransitSectionInbound,
+                  items: inbound,
+                ),
+                _Section(
+                  title: l10n.inTransitSectionUnread,
+                  items: unread,
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -120,9 +130,7 @@ class _InTransitCard extends StatelessWidget {
     final theme = Theme.of(context);
     final progress = (item.progressRatio ?? 0).clamp(0.0, 1.0);
     final hours = item.etaRelativeHours;
-    final peerName = item.peer.nickname.isNotEmpty
-        ? item.peer.nickname
-        : l10n.letterPeerUnknown;
+    final peerName = letterPeerDisplayTitle(l10n: l10n, peer: item.peer);
 
     return PostalCardEnvelope(
       onTap: item.letterId.isEmpty

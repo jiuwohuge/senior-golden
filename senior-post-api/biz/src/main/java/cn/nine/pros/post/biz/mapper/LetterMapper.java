@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 /**
- * 信件表（挂号信/平邮） Mapper
+ * 信件表 Mapper
  *
  * @author Administrator
  */

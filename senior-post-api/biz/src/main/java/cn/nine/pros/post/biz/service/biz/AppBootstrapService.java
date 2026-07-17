@@ -2,7 +2,6 @@ package cn.nine.pros.post.biz.service.biz;
 
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.model.domain.ConfigDomain;
-import cn.nine.pros.post.biz.model.domain.CountryDomain;
 import cn.nine.pros.post.biz.service.base.ConfigService;
 import cn.nine.pros.post.biz.service.base.CountryService;
 import cn.nine.pros.post.client.model.out.AppBootstrapVO;
@@ -29,8 +28,7 @@ public class AppBootstrapService {
             "vip.product.enabled",
             "vip.product.display_name",
             "vip.product.tagline",
-            "vip.product.tagline_zh",
-            "vip.benefit.standard_delivery_hours");
+            "vip.product.tagline_zh");
 
     private final ConfigService configService;
     private final CountryService countryService;
@@ -84,7 +82,6 @@ public class AppBootstrapService {
                 .taglineZh(firstNonBlank(
                         map.get("vip.product.tagline_zh"),
                         appMessages.get("app.bootstrap.vip.taglineZhDefault")))
-                .standardDeliveryHours(parseInt(map.get("vip.benefit.standard_delivery_hours"), 0))
                 .build();
     }
 
@@ -100,17 +97,6 @@ public class AppBootstrapService {
             return dft;
         }
         return Boolean.parseBoolean(raw.trim());
-    }
-
-    private static int parseInt(String raw, int dft) {
-        if (raw == null || raw.isBlank()) {
-            return dft;
-        }
-        try {
-            return Integer.parseInt(raw.trim());
-        } catch (NumberFormatException e) {
-            return dft;
-        }
     }
 
 }

@@ -92,9 +92,8 @@ VALUES
 ('letter.daily_quota', '5', 'letter', '每日写信+回信额度上限', NOW(), NOW(), 0, 0, FALSE),
 ('vip.product.enabled', 'true', 'vip', '是否开放 VIP 购买/展示入口', NOW(), NOW(), 0, 0, FALSE),
 ('vip.product.display_name', 'Senior Post Plus', 'vip', 'VIP 产品对外名称', NOW(), NOW(), 0, 0, FALSE),
-('vip.product.tagline', 'Priority delivery · Ad-free', 'vip', '副标题/卖点（英文）', NOW(), NOW(), 0, 0, FALSE),
-('vip.product.tagline_zh', '优先送达 · 无广告干扰', 'vip', '副标题/卖点（中文）', NOW(), NOW(), 0, 0, FALSE),
-('vip.benefit.standard_delivery_hours', '0', 'vip', 'VIP 平邮加速策略占位', NOW(), NOW(), 0, 0, FALSE),
+('vip.product.tagline', 'Expression upgrades · Ad-free', 'vip', '副标题/卖点（英文）', NOW(), NOW(), 0, 0, FALSE),
+('vip.product.tagline_zh', '专属装扮 · 无广告干扰', 'vip', '副标题/卖点（中文）', NOW(), NOW(), 0, 0, FALSE),
 ('system.env_label', 'development', 'system', '环境标识', NOW(), NOW(), 0, 0, FALSE),
 ('system.maintenance_mode', 'false', 'system', '全局维护模式', NOW(), NOW(), 0, 0, FALSE)
 ON CONFLICT (config_key) DO UPDATE SET

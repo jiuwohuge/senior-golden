@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
- * 信件表（挂号信/平邮） Mapper
+ * 信件表 Mapper
  *
  * @author Administrator
  */

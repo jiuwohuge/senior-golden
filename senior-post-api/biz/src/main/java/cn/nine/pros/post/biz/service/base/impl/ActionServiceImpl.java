@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 用户行为日志（发布/寄信/加速等） ServiceImpl
+ * 用户行为日志（发布/寄信等） ServiceImpl
  *
  * @author Administrator
  */

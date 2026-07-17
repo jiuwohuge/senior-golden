@@ -9,7 +9,7 @@ import java.util.List;
 
 
 /**
- * 信件表（挂号信/平邮） Service
+ * 信件表 Service
  *
  * @author Administrator
  */
@@ -29,8 +29,14 @@ public interface LetterService extends IService<LetterDomain> {
     /** 发件人指定状态信件数。 */
     long countByFromUserAndStatus(long fromUserId, int status);
 
+    /** 发件人在途（PENDING/MATCHED/DELIVERING），排除审核拒绝。 */
+    long countOutboundInTransit(long fromUserId);
+
     /** 收件人指定状态信件数。 */
     long countByToUserAndStatus(long toUserId, int status);
+
+    /** 收件人运输中（DELIVERING），排除审核拒绝。 */
+    long countInboundInTransit(long toUserId);
 
     /** 收件人已送达且未读（recipient_read_at 为空）。 */
     long countUnreadDeliveredForToUser(long toUserId);
@@ -52,9 +58,9 @@ public interface LetterService extends IService<LetterDomain> {
     boolean markRecipientRead(long letterId, long toUserId, LocalDateTime at);
 
     /**
-     * 提前拆信：运输中 → 已送达并标记 early_open / read；成功返回 true。
+     * 管理端调试：MATCHED/DELIVERING → DELIVERED，跳过预计到达时间。
      */
-    boolean markEarlyOpenedAndDelivered(long letterId, long toUserId, LocalDateTime at);
+    boolean forceAdminDeliver(long letterId, LocalDateTime at, Long adminUserId);
 
     /** 到期待送达的在途信。 */
     List<LetterDomain> listDueDelivering(LocalDateTime now, int limit);
@@ -119,6 +125,15 @@ public interface LetterService extends IService<LetterDomain> {
 
     /** 发件人流水：本人为发件人。 */
     List<LetterDomain> listSentForUser(long userId, int limit);
+
+    /** 发件人在途明细（PENDING/MATCHED/DELIVERING），排除审核拒绝。 */
+    List<LetterDomain> listOutboundInTransit(long fromUserId, int limit);
+
+    /** 收件人运输中明细，排除审核拒绝。 */
+    List<LetterDomain> listInboundDelivering(long toUserId, int limit);
+
+    /** 收件人已送达未读明细，排除审核拒绝。 */
+    List<LetterDomain> listUnreadDelivered(long toUserId, int limit);
 
     /** 与 viewer 有过有效往来的对端用户 ID（去重，按最近更新时间）。 */
     List<Long> listExchangePeerIds(long viewerUserId, int limit);

@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
- * 用户行为日志（发布/寄信/加速等） Mapper
+ * 用户行为日志（发布/寄信等） Mapper
  *
  * @author Administrator
  */

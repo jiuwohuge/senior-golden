@@ -8,7 +8,7 @@ import cn.nine.pros.post.client.model.db.LetterDTO;
 import org.springframework.stereotype.Service;
 
 /**
- * 信件表（挂号信/平邮） FeignResource
+ * 信件表 FeignResource
  *
  * @author Administrator
  */

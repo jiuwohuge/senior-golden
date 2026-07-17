@@ -113,6 +113,18 @@ export default function LetterList() {
     }
   }
 
+  /** 调试：跳过预计到达时间，将匹配成功/运输中信件立即送达。 */
+  const doForceDeliver = async (id: number) => {
+    try {
+      await api.letterAuditForceDeliver(id)
+      message.success('已立即送达')
+      void load()
+    } catch (e: any) {
+      console.error('letterAuditForceDeliver failed', e?.message)
+      message.error(e.message)
+    }
+  }
+
   const batchApprove = async () => {
     if (!selectedIds.length) {
       message.warning('请先勾选信件')
@@ -192,8 +204,10 @@ export default function LetterList() {
       {
         title: '操作',
         fixed: 'right',
-        width: 220,
-        render: (_, r) => (
+        width: 280,
+        render: (_, r) => {
+          const canForceDeliver = r.status === 1 || r.status === 4
+          return (
           <Space wrap size={[4, 4]}>
             <Button size="small" onClick={() => setPreview(r)}>
               详情
@@ -214,8 +228,17 @@ export default function LetterList() {
             >
               拒绝
             </Button>
+            <Button
+              size="small"
+              disabled={!canForceDeliver || !r.toUserId}
+              onClick={() => void doForceDeliver(r.id)}
+              title="调试：跳过运输时间立即送达"
+            >
+              立即送达
+            </Button>
           </Space>
-        ),
+          )
+        },
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -350,6 +373,14 @@ export default function LetterList() {
                 onClick={() => void doReject(preview.id).then(() => setPreview(null))}
               >
                 拒绝
+              </Button>
+              <Button
+                disabled={
+                  !(preview.status === 1 || preview.status === 4) || !preview.toUserId
+                }
+                onClick={() => void doForceDeliver(preview.id).then(() => setPreview(null))}
+              >
+                立即送达
               </Button>
             </Space>
           </>

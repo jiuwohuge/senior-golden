@@ -26,7 +26,7 @@ import java.util.List;
 @RequestMapping(AppServiceDefine.SERVER_PREFIX + "/mailbox")
 public interface AppMailboxApi {
 
-    @Operation(summary = "邮政待办（未与对端建立 IM 建联的信件）")
+    @Operation(summary = "邮政待办（收件箱相关信件）")
     @GetMapping("/postal")
     List<MailboxLetterItemVO> listPostalInbox();
 
@@ -62,14 +62,6 @@ public interface AppMailboxApi {
     @Operation(summary = "邮政好友列表（Connections）：基于 bu_friendship 活跃关系")
     @GetMapping("/friends")
     List<MailboxFriendItemVO> listFriends();
-
-    @Operation(summary = "平邮加速：发件人消耗 1 邮票立即送达；VIP 免扣")
-    @PostMapping("/letters/{letterId}/speed-up")
-    MailboxLetterItemVO speedUpLetter(@PathVariable("letterId") Long letterId);
-
-    @Operation(summary = "平邮提前拆信：收件人消耗 1 邮票在运输中阅读正文；VIP 免扣")
-    @PostMapping("/letters/{letterId}/early-open")
-    MailboxLetterItemVO earlyOpenLetter(@PathVariable("letterId") Long letterId);
 
     @Operation(summary = "信件助手：整理原文建议稿（不自动覆盖）")
     @PostMapping("/letters/letter-assistant")

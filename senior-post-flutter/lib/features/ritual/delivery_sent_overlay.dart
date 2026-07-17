@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../l10n/app_localizations.dart';
 
-/// 寄信成功后的投递动画遮罩（平邮/挂号发出）。
+/// 寄信成功后的投递动画遮罩。
 Future<void> showDeliverySentOverlay(
   BuildContext context, {
   String? destinationLabel,

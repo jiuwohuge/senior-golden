@@ -1,6 +1,6 @@
 # PLAN · 慢邮件邮局系统 4.0（银发慢邮）
 
-> **版本**：4.0 · **分支**：`feature_4.0` · **更新**：2026-07-10 · **维护**：项目 Owner + AI 架构师
+> **版本**：4.0 · **分支**：`feature_4.0` · **更新**：2026-07-14 · **维护**：项目 Owner + AI 架构师
 > **需求真源**：[`doc/4.0需求改版.md`](doc/4.0需求改版.md)（PRD v4.0，§1~§20）
 > **后端框架能力真源**：[`senior-post-api/底层框架能力.md`](senior-post-api/底层框架能力.md)
 > **治理**：旧版 `doc/plan/**`、`doc/requirements/**`、根目录 `findings.md/progress.md/task_plan.md` 已废弃删除；本文件为唯一规划基线。
@@ -38,9 +38,9 @@
 | 数据库 | PostgreSQL | 主事务库 |
 | 缓存 | Redis | 缓存；**延迟投递用 PG + `@Scheduled`**，ZSet 仅列为后续优化（§6.3） |
 | 对象存储 | 阿里云 OSS | `put-sign`/`get-sign` 预签名直传（图片附件） |
-| IM | 腾讯云 Chat | 现有能力，4.0 非核心（慢邮件为主，非即时聊天 §17 原则1） |
-| AI 能力 | DeepSeek(文本) + 百度(图片) | 图片机审复用；**匹配情绪/风格特征在 v2 阶段接入**（§7.3） |
-| 移动端 | Flutter 3.x + Riverpod + go_router + dio | Postal 复古设计系统 + **适老化约束 §12.8** |
+| IM | **已移除** | 腾讯云 Chat / TIM 脚手架已删；4.0 **不以即时聊天为产品能力**（§17.3 原则1/4；PRD §20.1 #9） |
+| AI 能力 | DeepSeek(文本) + 百度(图片) | **信件助手**五模式已接入写信桌（§4.6）；图片机审复用；匹配情绪/风格特征仍可分阶段加强（§7.3） |
+| 移动端 | Flutter 3.x + Riverpod + go_router + dio | Postal 复古设计系统 + **适老化约束 §12.8**；本地可用 Flutter Web 做多账号联调 |
 | 管理后台 | React 18 + Vite + Ant Design 5 | `senior-post-manage`，`/webapi`；承载 §20.2 全部配置项 |
 | 架构 | 单体优先 | `senior-post-api` 单进程 |
 
@@ -102,7 +102,7 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 |----------|------|---------------------|
 | §2 账户 | ✅+🆕 | ✅ `AppAuthController`/`UserIdentityDomain`/`LoginDomain`/`UserDeviceDomain`/`PasswordResetTokenDomain`；🆕 **邮箱验证绑定**(仅邮箱账号 §2.9)、**异常登录风控**(§2.5)；注册去验证码(§2.1)；**分层重构** |
 | §3 用户 | ✅+🆕 | ✅ `UserDomain`/`TagDomain`/`UserTagDomain`/`CountryDomain`；🆕 **自动定位**(§3.3)、**Haversine**(§3.4)、**写作风格标签**(§3.7)；gender 二值(§3.1) |
-| §4 信件 | 🔧 | 🔧 `LetterDomain` 扩展 `mode`/`audit_status`/`parent_letter_id`/`content`(§4)；时光信对齐 `SELF_TIME` |
+| §4 信件 | 🔧+🆕 | 🔧 `LetterDomain` 扩展 `mode`/`audit_status`/`parent_letter_id`/`content`(§4)；时光信对齐 `SELF_TIME`；🆕 **信件助手**（DeepSeek，五模式） |
 | §5 时间与仪式 | 🔧+🆕 | 🔧 时间字段/事件流；🆕 邮戳/投递动画/开信仪式(§5.4) |
 | §6 投递 | 🔧 | 🔧 定时投递服务；延迟公式扩展，速度=距离+关系(§6.1) |
 | §7 匹配 | 🆕 | **全新算法引擎**(§7) |
@@ -124,6 +124,7 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 | 明信片墙 Feed | 后端：`AppPostcardController`、`PostcardDomain`/`PostcardComment*` 及 Mapper/Service；前端：`features/post_wall/**`、`my_postcards_page`；Flyway：明信片相关表（在 `V1__init` 中不再创建） |
 | 邮票货币 | 后端：`AppStampsController`、`StampTransactionDomain`/`StampDailyGrantDomain` 及 Mapper/Service；前端：`speed_up_sheet`、`stamps_ledger_page`、邮票相关路由；Flyway：邮票相关表不再创建 |
 | 脚手架示例 | `ExampleDomain`/`FoodDomain` 及全部 Mapper/Service/Controller/测试 |
+| 腾讯云 IM / Chat | 后端：`AppIm*`、`TencentIm*`、`ImConversation*`/`ImMessage*`；Flutter：`tim_facade`、聊天页、IM unread；依赖与相关表脚手架（已删，不再恢复） |
 
 ---
 
@@ -258,6 +259,11 @@ Controller → Business Service → Base IService (IService / ServiceImpl) → M
 | **2026-07-10** | **本地启停 API/Manage 统一走根目录 docker-compose**；每次重建 API 前必须 `mvn clean package`（`scripts/dev-up.ps1`） |
 | **2026-07-10** | **M6**：平邮/挂号从产品面废弃；每日额度改为「领取仪式」（未领取不可发）；时间轴/事件流/图片附件/Apple 登录延期 |
 | **2026-07-10** | **M7**：管理后台运营补齐（用户/信件/笔友/商业 + 双轨邮件追踪 + 操作日志 + 看板）；**不做任何导入/导出** |
+| **2026-07-13** | **移除 IM 脚手架**（腾讯云 Chat/TIM 后端 + Flutter TIM 依赖与聊天页）；慢邮为唯一社交主交互 |
+| **2026-07-13~14** | **信件助手体验定稿**：五模式 `warmer/natural/continue/shorten/inspire`；灵感追加不替换；全屏不可点外关闭；助手写入可持久撤销；信纸正文铺满去半截绿框 |
+| **2026-07-14** | **写信桌**：收件人仅有缘人/未来的自己；DIRECT 前置锁定；去掉话题芯片；首封隐藏草稿/撤销 |
+| **2026-07-14** | **在途/读信文案**：未配对统一「推荐中」，禁用 `?`/`unknown`/「邮局匹配」直出 |
+| **2026-07-14** | **读信回信**：发件人不展示回信区；收件人送达后仅「回信」按钮进入写信桌（带 `parent_letter_id`） |
 | 继承自 3.0 | JWT 单端在线；OSS 直传；`@Scheduled` 延迟投递；Riverpod；Manage 用 React |
 
 ---

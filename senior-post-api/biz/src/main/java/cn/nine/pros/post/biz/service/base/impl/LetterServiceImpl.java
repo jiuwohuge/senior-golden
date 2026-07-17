@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 信件表（挂号信/平邮）ServiceImpl
+ * 信件表ServiceImpl
  */
 @Service
 public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
@@ -80,6 +80,18 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
     }
 
     @Override
+    public long countOutboundInTransit(long fromUserId) {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getFromUserId, fromUserId)
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .in(LetterDomain::getStatus,
+                        LetterBizStatus.PENDING.getCode(),
+                        LetterBizStatus.MATCHED.getCode(),
+                        LetterBizStatus.DELIVERING.getCode()));
+    }
+
+    @Override
     public long countByToUserAndStatus(long toUserId, int status) {
         return count(new LambdaQueryWrapper<LetterDomain>()
                 .eq(LetterDomain::isDelFlag, false)
@@ -88,11 +100,21 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
     }
 
     @Override
+    public long countInboundInTransit(long toUserId) {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getToUserId, toUserId)
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode()));
+    }
+
+    @Override
     public long countUnreadDeliveredForToUser(long toUserId) {
         return count(new LambdaQueryWrapper<LetterDomain>()
                 .eq(LetterDomain::isDelFlag, false)
                 .eq(LetterDomain::getToUserId, toUserId)
                 .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
                 .isNull(LetterDomain::getRecipientReadAt));
     }
 
@@ -136,19 +158,19 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
     }
 
     @Override
-    public boolean markEarlyOpenedAndDelivered(long letterId, long toUserId, LocalDateTime at) {
+    public boolean forceAdminDeliver(long letterId, LocalDateTime at, Long adminUserId) {
+        Long auditBy = adminUserId != null ? adminUserId : 0L;
         return update(new LambdaUpdateWrapper<LetterDomain>()
                 .eq(LetterDomain::getId, letterId)
                 .eq(LetterDomain::isDelFlag, false)
-                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
-                .eq(LetterDomain::getToUserId, toUserId)
-                .isNull(LetterDomain::getRecipientEarlyOpenAt)
-                .set(LetterDomain::getRecipientEarlyOpenAt, at)
+                .isNotNull(LetterDomain::getToUserId)
+                .in(LetterDomain::getStatus,
+                        LetterBizStatus.MATCHED.getCode(),
+                        LetterBizStatus.DELIVERING.getCode())
                 .set(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
                 .set(LetterDomain::getActualArrivalTime, at)
-                .set(LetterDomain::getRecipientReadAt, at)
                 .set(LetterDomain::getUpdatedAt, at)
-                .set(LetterDomain::getUpdatedBy, toUserId));
+                .set(LetterDomain::getUpdatedBy, auditBy));
     }
 
     @Override
@@ -382,6 +404,43 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
                 .eq(LetterDomain::isDelFlag, false)
                 .eq(LetterDomain::getFromUserId, userId)
                 .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .orderByDesc(LetterDomain::getUpdatedAt)
+                .last("LIMIT " + Math.max(1, limit)));
+    }
+
+    @Override
+    public List<LetterDomain> listOutboundInTransit(long fromUserId, int limit) {
+        return list(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getFromUserId, fromUserId)
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .in(LetterDomain::getStatus,
+                        LetterBizStatus.PENDING.getCode(),
+                        LetterBizStatus.MATCHED.getCode(),
+                        LetterBizStatus.DELIVERING.getCode())
+                .orderByDesc(LetterDomain::getUpdatedAt)
+                .last("LIMIT " + Math.max(1, limit)));
+    }
+
+    @Override
+    public List<LetterDomain> listInboundDelivering(long toUserId, int limit) {
+        return list(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getToUserId, toUserId)
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERING.getCode())
+                .orderByDesc(LetterDomain::getUpdatedAt)
+                .last("LIMIT " + Math.max(1, limit)));
+    }
+
+    @Override
+    public List<LetterDomain> listUnreadDelivered(long toUserId, int limit) {
+        return list(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getToUserId, toUserId)
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .eq(LetterDomain::getStatus, LetterBizStatus.DELIVERED.getCode())
+                .isNull(LetterDomain::getRecipientReadAt)
                 .orderByDesc(LetterDomain::getUpdatedAt)
                 .last("LIMIT " + Math.max(1, limit)));
     }

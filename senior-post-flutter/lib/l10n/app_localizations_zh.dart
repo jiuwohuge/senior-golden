@@ -102,7 +102,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authWelcomeHighlightLetters => '以从容的节奏写信、收信';
 
   @override
-  String get authWelcomeHighlightDirectory => '在名录结识世界各地的笔友';
+  String get authWelcomeHighlightDirectory => '在笔友大厅结识世界各地的笔友';
 
   @override
   String get authWelcomeHighlightPace => '为 45 岁及以上成年人设计';
@@ -119,7 +119,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authRegisterWizardEmailTitle => '您的邮箱是？';
 
   @override
-  String get authRegisterWizardEmailSubtitle => '用于登录及明信片、信件相关的重要通知。';
+  String get authRegisterWizardEmailSubtitle => '用于登录及信件相关的重要通知。';
 
   @override
   String get authRegisterWizardPasswordTitle => '设置密码';
@@ -131,13 +131,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authRegisterWizardNameTitle => '怎么称呼您？';
 
   @override
-  String get authRegisterWizardNameSubtitle => '将显示在明信片、信件与名录中。';
+  String get authRegisterWizardNameSubtitle => '将显示在信件与笔友资料中。';
 
   @override
   String get authRegisterWizardGenderTitle => '您的性别是？';
 
   @override
-  String get authRegisterWizardGenderSubtitle => '便于在名录中为您匹配合适的笔友。';
+  String get authRegisterWizardGenderSubtitle => '便于为您匹配合适的笔友。';
 
   @override
   String get authRegisterWizardAgeTitle => '您的年龄？';
@@ -356,7 +356,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authRegisterStepProfileTitle => '个人资料';
 
   @override
-  String get authRegisterStepProfileSubtitle => '将显示在明信片、信件与名录中。';
+  String get authRegisterStepProfileSubtitle => '将显示在信件与笔友资料中。';
 
   @override
   String get authRegisterStepInterestsTitle => '兴趣标签';
@@ -386,7 +386,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authRegisterSummaryBirth => '出生年份';
 
   @override
-  String get authRegisterSummaryCountry => '国家 / 地区';
+  String get authRegisterSummaryCountry => '国家';
+
+  @override
+  String get authRegisterCountrySearchHint => '搜索国家';
 
   @override
   String get authRegisterSummaryInterests => '兴趣标签';
@@ -449,7 +452,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardTitle2 => '慢慢写信，真实陪伴';
 
   @override
-  String get onboardBody2 => '用明信片与信件交流，不以点赞和颜值驱动关系。';
+  String get onboardBody2 => '用慢邮信件交流，不以点赞和颜值驱动关系。';
 
   @override
   String get onboardTitle3 => '可信赖、适老化';
@@ -738,9 +741,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get authCountryAutoLabel => '地区（随界面语言）';
-
-  @override
   String get authEmailHint => 'name@example.com';
 
   @override
@@ -750,7 +750,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileNickname => '昵称';
 
   @override
-  String get profileCountry => '国家/地区';
+  String get profileCountry => '国家';
 
   @override
   String get profileBio => '个人简介';
@@ -821,9 +821,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get profileInterestTags => '兴趣标签';
-
-  @override
-  String get profileStampsLedger => '邮票流水';
 
   @override
   String get profileVipCenter => 'VIP 中心';
@@ -935,17 +932,6 @@ class AppLocalizationsZh extends AppLocalizations {
       '1）我们会收集账号与设备信息用于安全风控与服务提供。\\n\\n2）我们依据适用隐私法规处理数据，并提供删除/导出路径。\\n\\n3）我们不会出售你的个人数据。\\n\\n4）部分数据处理用于实现核心消息与内容审核能力。\\n\\n5）你可联系支持申请账号删除与相关数据清理。';
 
   @override
-  String get vipCenterUnlimitedRegisteredMail => '会员可无限寄送挂号信（以服务端规则为准）。';
-
-  @override
-  String vipCenterStandardPriorityHours(Object hours) {
-    return '普通邮件优先：约 $hours 小时（配置值）。';
-  }
-
-  @override
-  String get vipCenterFreeSpeedUpStandard => '会员普通邮件可免费加速（以服务端规则为准）。';
-
-  @override
   String get vipCenterPurchaseDisabled => 'VIP 暂不可购买。';
 
   @override
@@ -996,19 +982,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterContentHiddenHint => '信件仍在途中，正文将在送达后展示。';
 
   @override
-  String get letterEarlyOpenCta => '提前拆信（1 枚邮票）';
-
-  @override
-  String get letterEarlyOpenSuccess => '已提前拆信，可阅读全文。';
-
-  @override
   String get postDetailTitle => '明信片';
 
   @override
   String get letterDetailTitle => '信件详情';
 
   @override
-  String get letterModePostOffice => '邮局匹配';
+  String get letterModePostOffice => '有缘人邮路';
 
   @override
   String get letterModeDirect => '指定投递';
@@ -1045,16 +1025,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterDeliveredLabel => '已送达';
 
   @override
-  String get letterPeerPostOfficePool => '邮局匹配池';
+  String get letterPeerPostOfficePool => '推荐中';
 
   @override
-  String get letterPeerUnknown => '未知收件人';
+  String get letterPeerUnknown => '推荐中';
+
+  @override
+  String get letterPeerRecommending => '推荐中';
 
   @override
   String get letterAcceptContact => '添加笔友';
 
   @override
   String get letterAcceptContactDone => '申请已发送';
+
+  @override
+  String get letterReplyCta => '回信';
+
+  @override
+  String get letterReplyHint => '用写信桌认真回一封，寄出后同样慢邮送达。';
 
   @override
   String get letterAcceptContactSuccess => '笔友申请已发送，对方确认后可在笔友页查看。';
@@ -1185,22 +1174,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get accountDeleteTitle => '注销账号';
 
   @override
-  String get stampsLedgerTitle => '邮票流水';
-
-  @override
   String get interestsPickerTitle => '兴趣标签';
 
   @override
-  String get sendLetterRegisteredMail => '挂号信';
-
-  @override
-  String get sendLetterStandardPost => '平邮';
-
-  @override
   String get sendLetterBodyRequired => '请填写信件正文。';
-
-  @override
-  String get sendLetterRegisteredStampShort => '挂号信需要邮票，当前余额不足。';
 
   @override
   String get sendLetterSentSuccess => '信件已寄出。';
@@ -1215,15 +1192,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String sendLetterSheetTitle(Object name) {
     return '寄信给 $name';
   }
-
-  @override
-  String get sendLetterRegisteredSubVip => '会员免费';
-
-  @override
-  String get sendLetterRegisteredSubPaid => '消耗 1 枚邮票';
-
-  @override
-  String get sendLetterStandardSub => '免费，延迟送达';
 
   @override
   String get sendLetterContentLabel => '信件正文';
@@ -1716,18 +1684,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get composeContinueAfterPreview => '确认并继续';
 
   @override
-  String get composeChipFreeWrite => '自由书写';
-
-  @override
-  String get composeChipHeart => '心里话';
-
-  @override
-  String get composeChipNarrative => '叙旧';
-
-  @override
-  String get composeChipFestival => '节日';
-
-  @override
   String get composeRecipientSheetTitle => '寄给谁';
 
   @override
@@ -1743,28 +1699,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterAssistantTitle => '信件助手';
 
   @override
-  String get letterAssistantModeWarmer => '更有感情';
+  String get letterAssistantClose => '关闭';
 
   @override
-  String get letterAssistantModeNatural => '更自然';
+  String get letterAssistantPickModeHint => '选一种整理方式，不会自动改动你的原文。';
 
   @override
-  String get letterAssistantModeExpand => '扩展故事';
+  String get letterAssistantModeWarmer => '❤️ 更有温度';
 
   @override
-  String get letterAssistantModePolite => '检查礼貌';
+  String get letterAssistantModeNatural => '✨ 更自然';
 
   @override
-  String get letterAssistantModeTranslate => '翻译';
+  String get letterAssistantModeContinue => '📖 再聊一点';
 
   @override
-  String get letterAssistantModeCustom => '自定义';
+  String get letterAssistantModeShorten => '✂️ 精简一下';
 
   @override
-  String get letterAssistantCustomHint => '说说你希望怎么改';
+  String get letterAssistantModeInspire => '💡 给我灵感';
 
   @override
   String get letterAssistantGenerate => '开始整理';
+
+  @override
+  String get letterAssistantInspireGenerate => '给我灵感';
 
   @override
   String get letterAssistantYourDraft => '你写的';
@@ -1782,7 +1741,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterAssistantRetry => '继续修改';
 
   @override
-  String get letterAssistantUndo => '撤销替换';
+  String get letterAssistantUndo => '撤销';
+
+  @override
+  String get letterAssistantUndoBanner => '助手已改动正文';
 
   @override
   String get letterAssistantEmptyBody => '请先写下一些内容，再请助手帮忙。';
@@ -1791,7 +1753,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterAssistantBusy => '正在整理…';
 
   @override
-  String get letterAssistantReplaced => '已替换为助手整理稿，可点撤销还原。';
+  String get letterAssistantReplaced => '已应用助手建议。点上方可撤销。';
+
+  @override
+  String get letterAssistantInspireAskTitle => '可以问问对方';
+
+  @override
+  String get letterAssistantInspireShareTitle => '还可以分享';
+
+  @override
+  String get letterAssistantInspireAppend => '加到信里';
+
+  @override
+  String get letterAssistantInspireBridge => '还可以聊聊：';
+
+  @override
+  String get letterAssistantInspirePickHint => '勾选想加进信里的话题';
+
+  @override
+  String get composeSaveDraft => '存草稿';
+
+  @override
+  String get composeDraftSaved => '草稿已保存';
+
+  @override
+  String composeEditorWordCount(Object count) {
+    return '$count 字';
+  }
 
   @override
   String get composePlaceholderBody => '写下你想说的话……';
@@ -1827,7 +1815,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shopVipPromoSubtitle => '开通会员可获得更多邮政能力与装扮权益';
 
   @override
-  String get shopVipBody => '会员权益由服务端配置（如挂号信减免等）。支付与签约流程接入后将在此完成。';
+  String get shopVipBody => '会员权益由服务端配置（专属装扮、无广告等）。支付与签约流程接入后将在此完成。';
 
   @override
   String get shopCatalogEmptyTitle => '暂无商品';

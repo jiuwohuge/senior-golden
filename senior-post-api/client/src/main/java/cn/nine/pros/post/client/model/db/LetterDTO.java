@@ -7,7 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * 信件表（挂号信/平邮） DTO
+ * Letter DTO (bu_letter)
  *
  * @author Administrator
  */
@@ -20,74 +20,46 @@ public class LetterDTO extends AbstractAuditableDTO {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 信件ID
-     */
-    @Schema(description = "信件ID")
+    @Schema(description = "letter id")
     private Long id;
-    /**
-     * 发件人用户ID
-     */
-    @Schema(description = "发件人用户ID")
+
+    @Schema(description = "from user id")
     private Long fromUserId;
-    /**
-     * 收件人用户ID
-     */
-    @Schema(description = "收件人用户ID（POST_OFFICE 可空）")
+
+    @Schema(description = "to user id (nullable for POST_OFFICE pool)")
     private Long toUserId;
-    @Schema(description = "类型：1挂号信 2平邮")
+
+    @Schema(description = "legacy physical type: 1 registered-shape 2 standard")
     private Object letterType;
-    @Schema(description = "状态：0PENDING 1DELIVERING 2DELIVERED 3REGISTERED 4MATCHED")
+
+    @Schema(description = "status: 0PENDING 1DELIVERING 2DELIVERED 3REGISTERED 4MATCHED")
     private Object status;
-    /**
-     * 信件内容
-     */
-    @Schema(description = "信件内容")
+
+    @Schema(description = "letter content")
     private String content;
-    /**
-     * 是否已加速（仅平邮）
-     */
-    @Schema(description = "是否已加速（仅平邮）")
-    private Boolean isAccelerated;
-    /**
-     * 加速时间
-     */
-    @Schema(description = "加速时间")
-    private Object acceleratedAt;
-    /**
-     * 预计送达时间（平邮）
-     */
-    @Schema(description = "预计送达时间（平邮）")
+
+    @Schema(description = "expected arrival time (distance + relationship delay)")
     private Object expectedArrivalTime;
-    /**
-     * 实际送达时间
-     */
-    @Schema(description = "实际送达时间")
+
+    @Schema(description = "actual arrival time")
     private Object actualArrivalTime;
-    /**
-     * 回复的信件ID（自关联）
-     */
-    @Schema(description = "回复的信件ID（自关联）")
+
+    @Schema(description = "parent letter id (reply)")
     private Long parentLetterId;
-    /**
-     * 发送模式：1平邮路径 2挂号路径 3直发/VIP
-     */
-    @Schema(description = "发送模式（运输轨）：1平邮路径 2挂号路径 3直发/VIP")
+
+    @Schema(description = "send mode rail (legacy compatibility)")
     private Integer sendMode;
 
-    @Schema(description = "产品模式：1POST_OFFICE 2DIRECT 3SELF_TIME")
+    @Schema(description = "product mode: 1POST_OFFICE 2DIRECT 3SELF_TIME")
     private Integer mode;
 
-    @Schema(description = "审核状态：0PENDING_REVIEW 1APPROVED 2REJECTED")
+    @Schema(description = "audit status: 0PENDING_REVIEW 1APPROVED 2REJECTED")
     private Integer auditStatus;
 
-    @Schema(description = "POST_OFFICE 匹配成功时间")
+    @Schema(description = "POST_OFFICE matched at")
     private LocalDateTime matchedAt;
 
-    @Schema(description = "收件人提前拆信时间")
-    private LocalDateTime recipientEarlyOpenAt;
-
-    @Schema(description = "收件人首次已读时间")
+    @Schema(description = "recipient first read at")
     private LocalDateTime recipientReadAt;
 
 }

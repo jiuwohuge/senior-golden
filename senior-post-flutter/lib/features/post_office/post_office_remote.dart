@@ -204,7 +204,8 @@ final postOfficeHomeProvider = FutureProvider<PostOfficeHomeData>((ref) async {
   return ref.read(postOfficeRemoteRepositoryProvider).fetchHome();
 });
 
+/// 在途明细：离开页面自动释放，避免寄信后仍展示旧缓存。
 final postOfficeInTransitProvider =
-    FutureProvider<List<PostOfficeInTransitItem>>((ref) async {
+    FutureProvider.autoDispose<List<PostOfficeInTransitItem>>((ref) async {
       return ref.read(postOfficeRemoteRepositoryProvider).fetchInTransit();
     });

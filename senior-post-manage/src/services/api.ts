@@ -37,6 +37,8 @@ export const api = {
   letterAuditPaging: (params: any) => request.post('/webapi/letter-audit/paging', params),
   letterAuditApprove: (id: number) => request.post(`/webapi/letter-audit/${id}/approve`),
   letterAuditReject: (id: number) => request.post(`/webapi/letter-audit/${id}/reject`),
+  letterAuditForceDeliver: (id: number) =>
+    request.post(`/webapi/letter-audit/${id}/force-deliver`),
   letterAuditBatchApprove: (ids: number[]) =>
     request.post('/webapi/letter-audit/batch-approve', { ids }),
   letterAuditBatchReject: (ids: number[]) =>

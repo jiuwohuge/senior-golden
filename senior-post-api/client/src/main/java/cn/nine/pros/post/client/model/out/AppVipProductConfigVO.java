@@ -23,7 +23,4 @@ public class AppVipProductConfigVO {
 
     @Schema(description = "中文卖点（vip.product.tagline_zh）")
     private String taglineZh;
-
-    @Schema(description = "VIP 平邮剩余小时占位（vip.benefit.standard_delivery_hours，0 表示由业务即时策略）")
-    private int standardDeliveryHours;
 }
