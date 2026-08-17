@@ -21,3 +21,16 @@
 - 匹配轻量：语言 + 可回信能力 + 国家/时区 + 写信话题 chips。
 - 话题 chips（信维度）与兴趣标签（人维度）两套语义，底层可加 `sys_tag.tag_type` 区分。
 - chips 定义为“写信动机”，建议 5 个：心事倾诉 / 生活分享 / 兴趣交流 / 人生困惑 / 随便聊聊；兴趣交流可选二级。
+
+## 2026-08-17 全盘可行性审计要点
+
+- 账号模型：后端无静默 guest 登录；注册强校验 `MIN_AGE`、性别、≥3 兴趣标签；绑定不合并访客。需新增 guest 发 token + 绑定升级合并。
+- 系统欢迎信：`LetterDomain` 无系统来源标记；需定义 `from_user_id=0` 或 `source_type`，避免伪装真人。
+- 匹配：`PostOfficeMatchService` 已是 v2，含语言/回信率/入站上限；应扩展而非重写，补 `willing_to_receive_new` + `topic_tag_id`。
+- 话题 chips：`sys_tag` 无 `tag_type`，`bu_letter` 无 `topic_tag_id`，需 Flyway 增量。
+- 首页动态主推：`post-office/home` 无池子状态；建议后端返回 `recommendedAction`，前端只渲染。
+- 每日额度：强制领取 + 服务端拦截；应改静默发放，保留上限防刷。
+- 商店/信纸：`commerceCatalogProvider` 与写信纸耦合；先深藏入口，保留默认信纸 fallback，避免物理删除返工。
+- 三 Tab：`/penpals`、`DirectoryPage` 三 Tab、`MainShell` 四 Tab 需统一改三 Tab 并迁笔友列表到信箱。
+- 推送：`AppDeviceController` 要求登录，guest 需允许注册 push token，否则系统信/到达推送不可达。
+- 首封信引导：`FirstLetterGuidePage` 强制 POST_OFFICE，需改为动态引导。
