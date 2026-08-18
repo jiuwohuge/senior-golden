@@ -1,0 +1,23 @@
+{
+  "name": "Senior Golden (senior-post)",
+  "install": "bash scripts/cloud-agent-install.sh",
+  "start": "bash scripts/cloud-agent-start.sh",
+  "terminals": [
+    {
+      "name": "api",
+      "command": "bash scripts/cloud-agent-api.sh",
+      "description": "Spring Boot backend (senior-post-api) on http://localhost:9011/backend. Falls back to guidance until the private commons-framework is available."
+    },
+    {
+      "name": "manage",
+      "command": "cd senior-post-manage && VITE_API_BASE_URL=http://127.0.0.1:9011/backend npm run dev -- --host 0.0.0.0 --port 5174",
+      "description": "Admin panel (senior-post-manage) Vite dev server on http://localhost:5174/manage/"
+    }
+  ],
+  "ports": [
+    { "name": "backend api", "port": 9011 },
+    { "name": "admin panel", "port": 5174 },
+    { "name": "postgresql", "port": 65432 },
+    { "name": "redis", "port": 6379 }
+  ]
+}
