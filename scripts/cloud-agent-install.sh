@@ -16,20 +16,31 @@ log() { echo "[cloud-install] $*"; }
 
 # Clone jiuwohuge/commons-framework and `mvn install` it into the local ~/.m2 so
 # senior-post-api can resolve its parent POM (cn.nine.commons:commons-framework)
-# and the commons-* modules. Relies on the environment GitHub token (git is
-# configured with url.insteadOf to inject it) having access to that private repo,
-# granted via `repositoryDependencies` in .cursor/environment.json.
+# and the commons-* modules. Authentication uses either:
+#   (A) the COMMONS_FRAMEWORK_TOKEN secret (a GitHub PAT that can read the repo), or
+#   (B) the environment GitHub token injected by `repositoryDependencies` in
+#       .cursor/environment.json when the Cursor GitHub App is authorized for it.
 ensure_commons_framework() {
   if compgen -G "$COMMONS_M2_MARKER/commons-framework-*.pom" >/dev/null 2>&1; then
     log "commons-framework already present in ~/.m2 — skipping."
     return 0
   fi
   local tmp; tmp="$(mktemp -d)"
-  log "Cloning commons-framework from $COMMONS_REPO"
-  if [ -n "$COMMONS_REF" ]; then
-    git clone --depth 1 --branch "$COMMONS_REF" "$COMMONS_REPO" "$tmp/commons-framework" || { rm -rf "$tmp"; return 1; }
+  local clone_url="$COMMONS_REPO"
+  if [ -n "${COMMONS_FRAMEWORK_TOKEN:-}" ]; then
+    # Path (A): authenticate with the PAT stored as a secret (no App authorization needed).
+    clone_url="https://x-access-token:${COMMONS_FRAMEWORK_TOKEN}@${COMMONS_REPO#https://}"
+    log "Cloning commons-framework via COMMONS_FRAMEWORK_TOKEN secret"
   else
-    git clone --depth 1 "$COMMONS_REPO" "$tmp/commons-framework" || { rm -rf "$tmp"; return 1; }
+    # Path (B): rely on the environment GitHub token (git url.insteadOf injects it).
+    log "Cloning commons-framework from $COMMONS_REPO (environment GitHub token)"
+  fi
+  local -a branch_args=()
+  [ -n "$COMMONS_REF" ] && branch_args=(--branch "$COMMONS_REF")
+  # Output redirected so the token embedded in the URL never lands in logs.
+  if ! git clone --depth 1 "${branch_args[@]}" "$clone_url" "$tmp/commons-framework" >/dev/null 2>&1; then
+    log "ERROR: could not clone commons-framework — check repo access or COMMONS_FRAMEWORK_TOKEN."
+    rm -rf "$tmp"; return 1
   fi
   log "Installing commons-framework into ~/.m2 (mvn install)"
   ( cd "$tmp/commons-framework" && JAVA_HOME="$JDK17" PATH="$JDK17/bin:$PATH" \
@@ -96,9 +107,11 @@ else
   senior-post-api depends on the private Maven parent
   `cn.nine.commons:commons-framework` (plus commons-basic/web/security/redis-starter),
   sourced from https://github.com/jiuwohuge/commons-framework.
-  The environment could not clone/install it. Ensure:
-    1) .cursor/environment.json lists the repo under `repositoryDependencies`, and
-    2) the Cursor GitHub App is authorized to access that private repository.
+  The environment could not clone/install it. Use EITHER:
+    (A) Add a secret COMMONS_FRAMEWORK_TOKEN = a GitHub PAT that can read the repo
+        (fine-grained: Contents=Read on commons-framework; or classic: `repo`), OR
+    (B) keep `repositoryDependencies` in .cursor/environment.json AND authorize the
+        Cursor GitHub App to access the private commons-framework repository.
   Then start a fresh agent (or re-run: bash scripts/cloud-agent-install.sh).
   Infrastructure (PostgreSQL/Redis) and the admin panel are unaffected.
 EOF
