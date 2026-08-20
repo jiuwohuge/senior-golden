@@ -77,6 +77,7 @@ export const api = {
   configs: (body?: any) => request.post('/webapi/config/paging', body ?? { page: { page: 1, size: 200 } }),
   saveConfig: (body: any) => request.post('/webapi/config/save', body),
   deleteConfig: (id: number) => request.post(`/webapi/config/${id}/delete`),
+  postOfficePoolStatus: () => request.get('/webapi/post-office/pool-status'),
 
   getModerationConfig: () => request.get('/webapi/config/moderation'),
   saveModerationConfig: () => request.post('/webapi/config/moderation/save', {}),

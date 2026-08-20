@@ -7,19 +7,23 @@ final timeLetterStatsProvider = FutureProvider<TimeLetterStats>((ref) async {
   return ref.read(timeLetterRemoteProvider).stats();
 });
 
-final timeLetterOutboxProvider =
+final timeLetterAllProvider =
     FutureProvider.autoDispose<List<TimeLetterItem>>((ref) async {
-      return ref.read(timeLetterRemoteProvider).listOutbox();
-    });
-
-final timeLetterInboxProvider =
-    FutureProvider.autoDispose<List<TimeLetterItem>>((ref) async {
-      return ref.read(timeLetterRemoteProvider).listInbox();
-    });
-
-final timeLetterMemorialProvider =
-    FutureProvider.autoDispose<List<TimeLetterItem>>((ref) async {
-      return ref.read(timeLetterRemoteProvider).listMemorial();
+      final remote = ref.read(timeLetterRemoteProvider);
+      final outbox = await remote.listOutbox();
+      final inbox = await remote.listInbox();
+      final memorial = await remote.listMemorial();
+      final byId = <String, TimeLetterItem>{};
+      for (final item in [...outbox, ...inbox, ...memorial]) {
+        byId[item.id] = item;
+      }
+      final list = byId.values.toList();
+      list.sort((a, b) {
+        final ak = a.sealedAt ?? a.deliveryDate ?? '';
+        final bk = b.sealedAt ?? b.deliveryDate ?? '';
+        return bk.compareTo(ak);
+      });
+      return list;
     });
 
 final timeLetterRecentRecipientsProvider =
@@ -34,9 +38,7 @@ final timeLetterDetailProvider = FutureProvider.autoDispose
 
 void invalidateTimeLetterLists(WidgetRef ref) {
   ref.invalidate(timeLetterStatsProvider);
-  ref.invalidate(timeLetterOutboxProvider);
-  ref.invalidate(timeLetterInboxProvider);
-  ref.invalidate(timeLetterMemorialProvider);
+  ref.invalidate(timeLetterAllProvider);
 }
 
 Future<void> refreshSessionStampsAfterSeal(

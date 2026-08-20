@@ -59,9 +59,12 @@ public class UserBlacklistServiceImpl extends ServiceImpl<UserBlacklistMapper, U
 
     @Override
     public UserBlacklistDomain findByPair(long userId, long blockedUserId) {
-        return getOne(new LambdaQueryWrapper<UserBlacklistDomain>()
-                .eq(UserBlacklistDomain::getUserId, userId)
-                .eq(UserBlacklistDomain::getBlockedUserId, blockedUserId));
+        return getBaseMapper().selectByPairIncludingDeleted(userId, blockedUserId);
+    }
+
+    @Override
+    public void restore(UserBlacklistDomain row) {
+        getBaseMapper().restoreById(row.getId(), row.getReason(), row.getUpdatedAt(), row.getUpdatedBy());
     }
 
     @Override

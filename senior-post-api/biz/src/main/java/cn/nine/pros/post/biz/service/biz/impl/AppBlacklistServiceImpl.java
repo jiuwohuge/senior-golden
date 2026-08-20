@@ -56,7 +56,7 @@ public class AppBlacklistServiceImpl implements AppBlacklistService {
         row.setReason(r);
         row.setUpdatedAt(now);
         row.setUpdatedBy(actorUserId);
-        userBlacklistService.updateById(row);
+        userBlacklistService.restore(row);
     }
 
     @Override

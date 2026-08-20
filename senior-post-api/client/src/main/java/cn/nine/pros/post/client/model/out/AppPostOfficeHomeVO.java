@@ -51,4 +51,13 @@ public class AppPostOfficeHomeVO {
 
     @Schema(description = "已送达未读")
     private Integer unreadDelivered;
+
+    @Schema(description = "首页主推：TIME_LETTER 或 POST_OFFICE，读后台配置")
+    private String recommendedAction;
+
+    @Schema(description = "当前等待匹配的邮局信数量")
+    private Integer poolWaitCount;
+
+    @Schema(description = "是否视为当前可匹配（不驱动主 CTA）")
+    private Boolean canMatchNow;
 }

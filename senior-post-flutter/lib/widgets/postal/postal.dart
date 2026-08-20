@@ -18,3 +18,4 @@ export 'postal_snack.dart';
 export 'postal_min_touch.dart';
 export 'postal_status_chip.dart';
 export 'postal_text_field.dart';
+export 'postal_verify_code_field.dart';

@@ -11,6 +11,7 @@ import VersionList from './config/VersionList'
 import VipConfig from './config/VipConfig'
 import MatchConfig from './config/MatchConfig'
 import LetterConfig from './config/LetterConfig'
+import HomeLaunchConfig from './config/HomeLaunchConfig'
 import CommerceProductList from './config/CommerceProductList'
 import ModerationConfig from './config/ModerationConfig'
 import TimeLetterList from './content/TimeLetterList'
@@ -100,6 +101,7 @@ export default function AdminLayout() {
           { key: '/config/vip', label: <Link to="/config/vip">VIP 配置</Link> },
           { key: '/config/match', label: <Link to="/config/match">匹配配置</Link> },
           { key: '/config/letter', label: <Link to="/config/letter">信件配置</Link> },
+          { key: '/config/home-launch', label: <Link to="/config/home-launch">首页主推</Link> },
           { key: '/config/commerce', label: <Link to="/config/commerce">商业商品</Link> },
           { key: '/config/moderation', label: <Link to="/config/moderation">内容安全</Link> },
         ],
@@ -229,6 +231,7 @@ export default function AdminLayout() {
             <Route path="/config/vip" element={<VipConfig />} />
             <Route path="/config/match" element={<MatchConfig />} />
             <Route path="/config/letter" element={<LetterConfig />} />
+            <Route path="/config/home-launch" element={<HomeLaunchConfig />} />
             <Route path="/config/commerce" element={<CommerceProductList />} />
             <Route path="/config/moderation" element={<ModerationConfig />} />
             <Route path="/log/action" element={<ActionLogList />} />

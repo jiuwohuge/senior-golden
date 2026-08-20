@@ -45,6 +45,142 @@ class AppLocalizationsEn extends AppLocalizations {
       'Write your first letter and wait for a reply';
 
   @override
+  String get postOfficeWritePostOfficeWaitHint =>
+      'To a kindred spirit (waiting required)';
+
+  @override
+  String get mailboxMyPenpals => 'My pen pals';
+
+  @override
+  String get bindAccountTitle => 'Bind account';
+
+  @override
+  String get bindAccountHint =>
+      'Bind an email or Google account so you can keep your letters if you change phones.';
+
+  @override
+  String get bindAccountSubmit => 'Bind';
+
+  @override
+  String get bindChangeTitle => 'Change binding';
+
+  @override
+  String get bindChangeHint =>
+      'Your letters stay on this account. After you change, sign in with the new email or Google next time.';
+
+  @override
+  String get bindChangeCurrentLabel => 'Current return address';
+
+  @override
+  String get bindAccountSubmitChange => 'Change binding';
+
+  @override
+  String get bindMethodEmail => 'Email';
+
+  @override
+  String get bindMethodGoogle => 'Google';
+
+  @override
+  String get bindGoogleSubmit => 'Bind with Google';
+
+  @override
+  String get bindGoogleSubmitChange => 'Switch to Google';
+
+  @override
+  String get bindGoogleHint =>
+      'Use your Google account. You can sign in on a new phone with the same Google ID.';
+
+  @override
+  String get bindCodeLabel => 'Verification code';
+
+  @override
+  String get bindCodeHint => '6-digit code';
+
+  @override
+  String get bindSendCode => 'Send';
+
+  @override
+  String get bindCodeSent => 'Code sent. Please check your inbox.';
+
+  @override
+  String get bindSuccessTitle => 'You\'re all set';
+
+  @override
+  String get bindSuccessBody =>
+      'Your account is saved. On a new phone, sign in with the same email or Google account to keep your letters.';
+
+  @override
+  String get bindSuccessChangeTitle => 'Binding updated';
+
+  @override
+  String get bindSuccessChangeBody =>
+      'Next time, sign in with the new email or Google. Your letters stay on this account.';
+
+  @override
+  String get bindSuccessOk => 'OK';
+
+  @override
+  String get bindPromptTitle => 'Your letter is on its way';
+
+  @override
+  String get bindPromptBody =>
+      'Bind an account so you don’t lose letters if you switch phones. You can skip for now.';
+
+  @override
+  String get bindPromptLater => 'Later';
+
+  @override
+  String get bindPromptNow => 'Bind now';
+
+  @override
+  String get composeOneSentenceHint => 'Even one sentence is enough';
+
+  @override
+  String get profileBindAccount => 'Bind account';
+
+  @override
+  String get profileReturnAddressLabel => 'Return address';
+
+  @override
+  String get profileReturnAddressBind => 'Bind';
+
+  @override
+  String get profileReturnAddressChange => 'Change';
+
+  @override
+  String get profileReturnAddressEmpty => 'Not set yet';
+
+  @override
+  String get bindRegisteredReadonlyHint =>
+      'This is your sign-in email. It cannot be changed here. Use Forgot password to reset the password.';
+
+  @override
+  String get profileBindAccountUnboundHint =>
+      'Bind so you can keep letters on a new phone';
+
+  @override
+  String get profileBindAccountBoundHint => 'Bound. Tap to change';
+
+  @override
+  String profileBindAccountBoundEmail(String email) {
+    return 'Bound to $email. Tap to change';
+  }
+
+  @override
+  String get profileBindAccountBoundGoogle => 'Bound to Google. Tap to change';
+
+  @override
+  String profileBindAccountBoundGoogleEmail(String email) {
+    return 'Bound to Google ($email). Tap to change';
+  }
+
+  @override
+  String get profileBindStampPosted => 'Posted';
+
+  @override
+  String get authContinueAsGuest => 'Continue without signing in';
+
+  @override
   String get postOfficeWriteLetter => 'Write a letter';
 
   @override
@@ -1456,7 +1592,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timeLetterEmptySubtitle =>
-      'Write to your future self or a postal friend.';
+      'Write a time letter from the post office home.';
 
   @override
   String get timeLetterLoadError => 'Could not load time letters';

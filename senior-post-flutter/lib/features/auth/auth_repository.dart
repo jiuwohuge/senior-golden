@@ -8,6 +8,9 @@ import '../../core/auth/auth_storage.dart';
 import '../../core/auth/auth_token.dart';
 import '../../core/device/device_ids.dart';
 import '../../core/device/device_install_id.dart';
+import '../../core/device/guest_geo.dart';
+import '../../core/i18n/country_from_locale.dart';
+import '../../core/i18n/effective_app_locale_provider.dart';
 import '../../core/network/dio_provider.dart';
 import '../../core/network/router_refresh.dart';
 import '../../core/session/app_session.dart';
@@ -35,6 +38,82 @@ class AuthRepository {
   AuthRepository(this._ref);
 
   final Ref _ref;
+
+  Future<AuthSignInResult> guest() async {
+    final dio = _ref.read(dioProvider);
+    final deviceUuid = await _ensureDeviceUuid();
+    final locale = _ref.read(effectiveAppLocaleProvider);
+    final geo = await readGuestCoordinates();
+    try {
+      final res = await dio.post<Map<String, dynamic>>(
+        '/api/auth/guest',
+        data: <String, dynamic>{
+          'deviceUuid': deviceUuid,
+          'deviceType': _deviceTypeBody(),
+          'language': locale.toLanguageTag(),
+          'countryCode': countryCodeFromLocale(locale),
+          if (geo.latitude != null) 'latitude': geo.latitude,
+          if (geo.longitude != null) 'longitude': geo.longitude,
+        },
+      );
+      return _applyAuthResponse(res);
+    } on DioException catch (e) {
+      debugPrint('auth guest failed: $e');
+      _throwMappedDio(e);
+    }
+  }
+
+  /// POST `/api/auth/bind/email` — 把邮箱挂到当前用户（须先验验证码；已绑定则换绑）。
+  Future<AuthSignInResult> bindEmail({
+    required String email,
+    required String password,
+    required String code,
+  }) async {
+    final dio = _ref.read(dioProvider);
+    try {
+      final res = await dio.post<Map<String, dynamic>>(
+        '/api/auth/bind/email',
+        data: <String, dynamic>{
+          'email': email.trim(),
+          'password': password,
+          'code': code.trim(),
+        },
+      );
+      return _applyAuthResponse(res);
+    } on DioException catch (e) {
+      debugPrint('auth bind email failed: $e');
+      _throwMappedDio(e);
+    }
+  }
+
+  /// POST `/api/auth/bind/email/send-code`
+  Future<void> sendBindEmailCode({required String email}) async {
+    final dio = _ref.read(dioProvider);
+    try {
+      await dio.post<Map<String, dynamic>>(
+        '/api/auth/bind/email/send-code',
+        data: <String, dynamic>{'email': email.trim()},
+      );
+    } on DioException catch (e) {
+      debugPrint('auth bind email send-code failed: $e');
+      _throwMappedDio(e);
+    }
+  }
+
+  /// POST `/api/auth/bind/google` — 把 Google openId 挂到当前用户（已绑定则换绑）。
+  Future<AuthSignInResult> bindGoogle({required String idToken}) async {
+    final dio = _ref.read(dioProvider);
+    try {
+      final res = await dio.post<Map<String, dynamic>>(
+        '/api/auth/bind/google',
+        data: <String, dynamic>{'idToken': idToken},
+      );
+      return _applyAuthResponse(res);
+    } on DioException catch (e) {
+      debugPrint('auth bind google failed: $e');
+      _throwMappedDio(e);
+    }
+  }
 
   Future<AuthSignInResult> login({
     required String email,
@@ -260,10 +339,21 @@ class AuthRepository {
     }
   }
 
-  Future<void> logout() async {
+  /// [reenterAsGuest]：退出后立刻按本机 deviceUuid 静默进入原账号（绑定后也是同一人）。
+  Future<void> logout({bool reenterAsGuest = true}) async {
+    final dio = _ref.read(dioProvider);
+    try {
+      await dio.post<Map<String, dynamic>>('/api/auth/logout');
+    } on DioException catch (e) {
+      debugPrint('auth logout failed: $e');
+    }
     await AuthStorage.clearToken();
     _ref.read(authTokenProvider.notifier).state = null;
     _ref.read(appSessionProvider.notifier).clear();
+    if (!reenterAsGuest) {
+      return;
+    }
+    await guest();
   }
 
   Future<void> refreshSessionFromServer() async {

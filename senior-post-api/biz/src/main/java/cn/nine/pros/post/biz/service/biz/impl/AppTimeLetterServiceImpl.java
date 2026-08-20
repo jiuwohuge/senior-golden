@@ -11,11 +11,15 @@ import cn.nine.pros.post.biz.model.domain.TimeLetterDomain;
 import cn.nine.pros.post.biz.service.biz.AppBlacklistService;
 import cn.nine.pros.post.biz.service.biz.AppTimeLetterService;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
+import cn.nine.pros.post.biz.service.base.ConfigService;
+import cn.nine.pros.post.biz.service.base.DailyQuotaClaimService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
+import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.base.SensitiveWordService;
 import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.biz.service.base.UserService;
+import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
 import cn.nine.pros.post.client.common.enums.TimeLetterRecipientType;
 import cn.nine.pros.post.client.common.enums.TimeLetterStatus;
 import cn.nine.pros.post.client.model.db.UserDTO;
@@ -54,7 +58,7 @@ import java.util.stream.Collectors;
 
 /**
  * App 时光信业务：草稿、封存、取消、收发件箱、纪念册与统计。
- * <p>封存成功打 INFO；日限额/在途/同收件人 30 天限额拒绝打 INFO。
+ * <p>封存成功打 INFO；日发信额度/日限额/在途/同收件人 30 天限额拒绝打 INFO。
  */
 @Slf4j
 @Service
@@ -63,7 +67,7 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
 
     private static final int USER_STATUS_NORMAL = 1;
 
-        private final TimeLetterService timeLetterService;
+    private final TimeLetterService timeLetterService;
     private final UserService userService;
     private final SensitiveWordService sensitiveWordService;
     private final FriendshipService friendshipService;
@@ -71,6 +75,9 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
     private final OssDisplayUrlService ossDisplayUrlService;
     private final TimeLetterProperties properties;
     private final AppMessages appMessages;
+    private final ConfigService configService;
+    private final DailyQuotaClaimService dailyQuotaClaimService;
+    private final LetterService letterService;
 
     /**
      * 保存时光信草稿（新建或更新已有草稿）。
@@ -128,8 +135,8 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
 
     /**
      * 封存时光信：幂等 sealRequestId；过敏感词与额度后进入 PENDING。
-     * <p>前置：发件人正常、好友/自投递合法、投递日合法、未超日/在途/30 天限额。
-     * <p>副作用：写 PENDING 记录与 cancelDeadline；事务边界为本方法。
+     * <p>前置：发件人正常、好友/自投递合法、投递日合法、未超日发信额度/日/在途/30 天限额。
+     * <p>副作用：写 PENDING 记录与 cancelDeadline；计入当日 {@code letter.daily_quota}；事务边界为本方法。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -158,6 +165,7 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
         String content = normalizeBody(body.getBody(), true);
         sensitiveWordService.assertPlainTextAllowed(content);
         validateDeliveryDate(body.getDeliveryDate(), body.getDeliveryTz());
+        assertDailyQuota(userId);
         assertSealLimits(userId, resolved.recipientId, body.getDeliveryDate());
 
         int stampCost = 0;
@@ -381,6 +389,21 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
         return AppPageHelper.pageData(pq, p, list);
     }
 
+    /** 非 VIP：封存时光信与邮局信共用当日发信上限。 */
+    private void assertDailyQuota(long userId) {
+        UserDTO sender = userService.findById(userId);
+        if (sender != null && Boolean.TRUE.equals(sender.getIsVip())) {
+            return;
+        }
+        DailyQuotaSupport.Snapshot snap = DailyQuotaSupport.resolve(
+                userId, sender, configService, dailyQuotaClaimService, letterService, timeLetterService);
+        if (snap.remaining() <= 0) {
+            log.info("time-letter seal rejected: daily quota exhausted, userId={}, sent={}, cap={}",
+                    userId, snap.sentToday(), snap.cap());
+            throw new BusinessException(appMessages.get("app.error.letter.dailyQuotaExhausted"));
+        }
+    }
+
     private void assertSealLimits(long userId, Long recipientId, LocalDate deliveryDate) {
         LocalDateTime dayStart = LocalDate.now().atStartOfDay();
         long todayCount = timeLetterService.countSealedTodayBySender(userId, dayStart);
@@ -473,7 +496,8 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
         }
         ZoneId zone = resolveZone(deliveryTz);
         LocalDate today = ZonedDateTime.now(zone).toLocalDate();
-        if (deliveryDate.isBefore(today)) {
+        if (!deliveryDate.isAfter(today)) {
+            log.info("time-letter seal rejected: deliveryDate not after today, date={}", deliveryDate);
             throw new BusinessException(appMessages.get("app.timeLetter.error.deliveryDatePast"));
         }
         LocalDate max = today.plusYears(properties.getMaxDeliveryYears());

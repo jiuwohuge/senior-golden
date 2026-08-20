@@ -64,8 +64,7 @@ public class UserTagServiceImpl extends ServiceImpl<UserTagMapper, UserTagDomain
     public void replaceUserTags(long actorUserId, long userId, List<Integer> distinctTagIds) {
         Set<Integer> unique = collectDistinctTagIds(distinctTagIds);
 
-        List<UserTagDomain> existingRows = list(new LambdaQueryWrapper<UserTagDomain>()
-                .eq(UserTagDomain::getUserId, userId));
+        List<UserTagDomain> existingRows = getBaseMapper().selectAllByUserIdIncludingDeleted(userId);
         Map<Integer, UserTagDomain> byTagId = new HashMap<>();
         for (UserTagDomain row : existingRows) {
             if (row.getTagId() != null && !byTagId.containsKey(row.getTagId())) {
@@ -125,7 +124,7 @@ public class UserTagServiceImpl extends ServiceImpl<UserTagMapper, UserTagDomain
         existing.setDelFlag(false);
         existing.setUpdatedAt(now);
         existing.setUpdatedBy(actorUserId);
-        updateById(existing);
+        getBaseMapper().restoreById(existing.getId(), now, actorUserId);
     }
 
 

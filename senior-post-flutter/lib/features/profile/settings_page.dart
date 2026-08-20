@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,8 +26,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _notify = true;
   bool _mailBadge = true;
   bool _prefsBusy = false;
-  bool _verifyBusy = false;
-  final _verifyCode = TextEditingController();
 
   @override
   void initState() {
@@ -74,12 +74,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
   }
 
-  @override
-  void dispose() {
-    _verifyCode.dispose();
-    super.dispose();
-  }
-
   Future<void> _pickLanguage() async {
     final l10n = AppLocalizations.of(context)!;
     final current = ref.read(appLocaleProvider);
@@ -125,107 +119,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
   }
 
-  Future<void> _sendVerifyCode() async {
+  Future<void> _openEmailVerifySheet() async {
     final l10n = AppLocalizations.of(context)!;
-    setState(() => _verifyBusy = true);
-    try {
-      await ref.read(authRepositoryProvider).sendEmailVerifyCode();
-      if (!mounted) return;
-      PostalSnack.show(
-        context,
-        l10n.settingsEmailVerifyCodeSent,
-        tone: PostalSnackTone.success,
-      );
-    } on ApiBusinessException catch (e) {
-      if (mounted) {
-        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
-      }
-    } finally {
-      if (mounted) setState(() => _verifyBusy = false);
-    }
-  }
-
-  Future<void> _confirmVerify() async {
-    final l10n = AppLocalizations.of(context)!;
-    final code = _verifyCode.text.trim();
-    if (code.isEmpty) {
-      PostalSnack.show(
-        context,
-        l10n.settingsEmailVerifyCodeRequired,
-        tone: PostalSnackTone.warning,
-      );
-      return;
-    }
-    setState(() => _verifyBusy = true);
-    try {
-      await ref.read(authRepositoryProvider).confirmEmailVerify(code: code);
-      if (!mounted) return;
-      _verifyCode.clear();
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => const _EmailVerifySheet(),
+    );
+    if (ok == true && mounted) {
       PostalSnack.show(
         context,
         l10n.settingsEmailVerifySuccess,
         tone: PostalSnackTone.success,
       );
-    } on ApiBusinessException catch (e) {
-      if (mounted) {
-        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
-      }
-    } finally {
-      if (mounted) setState(() => _verifyBusy = false);
     }
-  }
-
-  Future<void> _openEmailVerifySheet() async {
-    final l10n = AppLocalizations.of(context)!;
-    final user = ref.read(appSessionProvider).user;
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.settingsEmailVerifyTitle,
-                style: Theme.of(ctx).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.settingsEmailVerifyHint(user.email),
-                style: Theme.of(ctx).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _verifyCode,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: l10n.settingsEmailVerifyCodeLabel,
-                ),
-              ),
-              const SizedBox(height: 16),
-              PostalButton(
-                label: l10n.settingsEmailVerifySendCode,
-                variant: PostalButtonVariant.secondary,
-                onPressed: _verifyBusy ? null : _sendVerifyCode,
-              ),
-              const SizedBox(height: 10),
-              PostalButton(
-                label: l10n.settingsEmailVerifyConfirm,
-                onPressed: _verifyBusy ? null : _confirmVerify,
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -305,3 +212,150 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 }
+
+/// 邮箱验证：码在输入框内，发送在右侧；sheet 内 Scaffold 才能看见提示。
+class _EmailVerifySheet extends ConsumerStatefulWidget {
+  const _EmailVerifySheet();
+
+  @override
+  ConsumerState<_EmailVerifySheet> createState() => _EmailVerifySheetState();
+}
+
+class _EmailVerifySheetState extends ConsumerState<_EmailVerifySheet> {
+  final _code = TextEditingController();
+  bool _sending = false;
+  bool _confirming = false;
+  int _cooldown = 0;
+  Timer? _cooldownTimer;
+
+  @override
+  void dispose() {
+    _cooldownTimer?.cancel();
+    _code.dispose();
+    super.dispose();
+  }
+
+  void _startCooldown() {
+    _cooldownTimer?.cancel();
+    setState(() => _cooldown = 60);
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
+      if (_cooldown <= 1) {
+        t.cancel();
+        setState(() => _cooldown = 0);
+        return;
+      }
+      setState(() => _cooldown -= 1);
+    });
+  }
+
+  Future<void> _send() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _sending = true);
+    try {
+      await ref.read(authRepositoryProvider).sendEmailVerifyCode();
+      if (!mounted) return;
+      _startCooldown();
+      PostalSnack.show(
+        context,
+        l10n.settingsEmailVerifyCodeSent,
+        tone: PostalSnackTone.success,
+      );
+    } on ApiBusinessException catch (e) {
+      debugPrint('settings email verify send failed: $e');
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
+    } catch (e) {
+      debugPrint('settings email verify send failed: $e');
+      if (mounted) {
+        PostalSnack.show(context, e.toString(), tone: PostalSnackTone.error);
+      }
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _confirm() async {
+    final l10n = AppLocalizations.of(context)!;
+    final code = _code.text.trim();
+    if (code.isEmpty) {
+      PostalSnack.show(
+        context,
+        l10n.settingsEmailVerifyCodeRequired,
+        tone: PostalSnackTone.warning,
+      );
+      return;
+    }
+    setState(() => _confirming = true);
+    try {
+      await ref.read(authRepositoryProvider).confirmEmailVerify(code: code);
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } on ApiBusinessException catch (e) {
+      debugPrint('settings email verify confirm failed: $e');
+      if (mounted) {
+        PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+      }
+    } catch (e) {
+      debugPrint('settings email verify confirm failed: $e');
+      if (mounted) {
+        PostalSnack.show(context, e.toString(), tone: PostalSnackTone.error);
+      }
+    } finally {
+      if (mounted) setState(() => _confirming = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final email = ref.watch(appSessionProvider).user.email;
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: Material(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.settingsEmailVerifyTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.settingsEmailVerifyHint(email),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              PostalVerifyCodeField(
+                controller: _code,
+                label: l10n.settingsEmailVerifyCodeLabel,
+                sendLabel: l10n.bindSendCode,
+                sending: _sending,
+                cooldownSeconds: _cooldown,
+                enabled: !_confirming,
+                onSend: _send,
+              ),
+              const SizedBox(height: 20),
+              PostalButton(
+                label: l10n.settingsEmailVerifyConfirm,
+                busy: _confirming,
+                onPressed: _confirming ? null : _confirm,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+

@@ -47,7 +47,9 @@ class AccountDeletePage extends ConsumerWidget {
                     'Deletion request submitted. You can log in again within 7 days to cancel.',
                     tone: PostalSnackTone.warning,
                   );
-                  await ref.read(authRepositoryProvider).logout();
+                  await ref
+                      .read(authRepositoryProvider)
+                      .logout(reenterAsGuest: false);
                   if (context.mounted) {
                     context.go(LoginRoutes.login);
                   }

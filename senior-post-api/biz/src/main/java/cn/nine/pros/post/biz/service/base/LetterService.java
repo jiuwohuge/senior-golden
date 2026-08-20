@@ -74,6 +74,9 @@ public interface LetterService extends IService<LetterDomain> {
     /** POST_OFFICE 入池待匹配：mode=POST_OFFICE、status=PENDING、无收件人。 */
     List<LetterDomain> listPostOfficePendingPool(int limit);
 
+    /** 邮局池等待匹配信数量。 */
+    long countWaitingMatch();
+
     /**
      * 原子匹配：仍为 PENDING 且无收件人时写入收件人与 MATCHED。
      * @return 是否更新成功

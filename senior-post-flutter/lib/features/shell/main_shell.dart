@@ -4,11 +4,10 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import 'package:senior_post_flutter/widgets/postal_decorations.dart';
 
 import '../post_office/post_office_home_page.dart';
-import '../directory/directory_page.dart';
 import '../mailbox/mailbox_page.dart';
 import '../profile/profile_page.dart';
 
-/// Main bottom tabs: Post Office / Pen Pals / Mailbox / Me (4.0).
+/// 底部三 Tab：邮局 / 信箱 / 我的。笔友发现已从主导航撤出。
 abstract final class MainShellRoute {
   static const pathPostOffice = '/';
   static const pathPenPals = '/penpals';
@@ -16,7 +15,7 @@ abstract final class MainShellRoute {
   static const pathProfile = '/profile';
 }
 
-/// Main shell for the 4.0 slow-mail post office experience.
+/// 主壳：冷启动只保留写信、信箱与账号。
 class MainShell extends StatefulWidget {
   const MainShell({super.key, this.initialIndex = 0});
 
@@ -32,7 +31,7 @@ class _MainShellState extends State<MainShell> {
   @override
   void initState() {
     super.initState();
-    _index = widget.initialIndex.clamp(0, 3);
+    _index = widget.initialIndex.clamp(0, 2);
   }
 
   void _goBranch(int index) {
@@ -40,8 +39,7 @@ class _MainShellState extends State<MainShell> {
     if (!mounted) return;
     final loc = switch (index) {
       0 => MainShellRoute.pathPostOffice,
-      1 => MainShellRoute.pathPenPals,
-      2 => MainShellRoute.pathMailbox,
+      1 => MainShellRoute.pathMailbox,
       _ => MainShellRoute.pathProfile,
     };
     context.go(loc);
@@ -89,7 +87,6 @@ class _MainShellState extends State<MainShell> {
         index: _index,
         children: const [
           PostOfficeHomePage(key: ValueKey('post-office')),
-          DirectoryPage(key: ValueKey('penpals')),
           MailboxPage(key: ValueKey('mailbox')),
           ProfilePage(key: ValueKey('profile')),
         ],
@@ -110,17 +107,6 @@ class _MainShellState extends State<MainShell> {
                 semanticLabel: l10n.a11yTabPostWall,
               ),
               label: l10n.tabPostWall,
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.diversity_3_outlined,
-                semanticLabel: l10n.a11yTabDirectory,
-              ),
-              selectedIcon: Icon(
-                Icons.diversity_3,
-                semanticLabel: l10n.a11yTabDirectory,
-              ),
-              label: l10n.tabDirectory,
             ),
             NavigationDestination(
               icon: Icon(

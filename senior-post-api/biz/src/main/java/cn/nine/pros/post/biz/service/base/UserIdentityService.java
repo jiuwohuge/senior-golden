@@ -20,6 +20,7 @@ public interface UserIdentityService extends IService<UserIdentityDomain> {
 
     void createOAuthIdentity(long userId, String provider, String providerUid, long auditUserId);
 
+    /** 归档 providerUid 并软删该用户全部未删除 identity。 */
     void releaseAllForUser(long userId, LocalDateTime at);
 
     boolean hasOAuthOnly(long userId);

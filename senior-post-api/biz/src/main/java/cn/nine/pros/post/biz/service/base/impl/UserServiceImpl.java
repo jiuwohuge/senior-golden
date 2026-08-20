@@ -51,6 +51,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
 
     @Override
     public UserDTO findById(Long id) {
+        if (id == null) {
+            return null;
+        }
         UserDomain domain = getById(id);
         if (domain == null) {
             return null;

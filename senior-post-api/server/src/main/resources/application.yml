@@ -49,6 +49,15 @@ spring:
     converters:
       preferred-json-mapper: jackson
 
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      # 所有带 delFlag 的实体：SELECT/UPDATE/DELETE 自动带未删除条件；remove 自动改 del_flag
+      logic-delete-field: delFlag
+      logic-delete-value: true
+      logic-not-delete-value: false
+
 server:
   servlet:
     context-path: ${SERVER_SERVLET_CONTEXT_PATH:/backend}
@@ -118,6 +127,7 @@ senior-post:
 jh:
   config:
     exclude-interceptor-pattern: [
+      "/api/auth/guest",
       "/api/auth/register",
       "/api/auth/register/email-check",
       "/api/auth/login",

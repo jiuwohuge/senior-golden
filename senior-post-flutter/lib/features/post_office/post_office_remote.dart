@@ -18,6 +18,9 @@ class PostOfficeHomeData {
     this.quotaClaimedToday = false,
     this.remainingQuotaOverride,
     this.firstLetterDone = false,
+    this.recommendedAction = 'TIME_LETTER',
+    this.poolWaitCount = 0,
+    this.canMatchNow = false,
   });
 
   final String greeting;
@@ -27,17 +30,25 @@ class PostOfficeHomeData {
   final int relationMessageCount;
   final int inTransitCount;
 
-  /// 今日是否已领取免费额度；未领取时发信会被服务端拦截。
+  /// 今日是否已走静默额度；P0 不再拦截未领取。
   final bool quotaClaimedToday;
 
-  /// 服务端直接给出的剩余额度（未领取时为 0）。
+  /// 服务端直接给出的剩余额度。
   final int? remainingQuotaOverride;
 
   final bool firstLetterDone;
 
+  /// 后台下发的首页主推：TIME_LETTER 或 POST_OFFICE。
+  final String recommendedAction;
+
+  /// 等待匹配的邮局信数量；仅展示，不驱动 CTA。
+  final int poolWaitCount;
+
+  /// 当前是否具备可匹配条件；不驱动 CTA。
+  final bool canMatchNow;
+
   int get remainingQuota {
     if (remainingQuotaOverride != null) return remainingQuotaOverride!;
-    if (!quotaClaimedToday) return 0;
     final left = dailyLetterQuota - sentToday;
     return left < 0 ? 0 : left;
   }
@@ -102,6 +113,10 @@ class PostOfficeRemoteRepository {
         quotaClaimedToday: data['quotaClaimedToday'] as bool? ?? false,
         remainingQuotaOverride: (data['remainingQuota'] as num?)?.toInt(),
         firstLetterDone: data['firstLetterDone'] as bool? ?? false,
+        recommendedAction:
+            (data['recommendedAction'] as String?) ?? 'TIME_LETTER',
+        poolWaitCount: (data['poolWaitCount'] as num?)?.toInt() ?? 0,
+        canMatchNow: data['canMatchNow'] as bool? ?? false,
       );
     } on DioException catch (e) {
       debugPrint('post-office home failed: $e');

@@ -38,6 +38,9 @@ public interface TimeLetterService extends IService<TimeLetterDomain> {
 
     long countSealedTodayBySender(long senderId, LocalDateTime dayStart);
 
+    /** 计入当日发信额度的时光信：已封存且非草稿/已取消。 */
+    long countSealedQuotaBySenderBetween(long senderId, LocalDateTime start, LocalDateTime end);
+
     long countSealedToRecipientSince(long senderId, long recipientId, LocalDateTime since);
 
     /** 用户拥有的非草稿时光信数量。 */

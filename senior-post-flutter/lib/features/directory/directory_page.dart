@@ -92,7 +92,7 @@ class _DirectoryPageState extends ConsumerState<DirectoryPage>
               children: [
                 _RecommendTab(onRefresh: () => _onRefresh(0)),
                 _FindTab(onFilter: _openFilter, onRefresh: () => _onRefresh(1)),
-                _MyPenpalsTab(onRefresh: () => _onRefresh(2)),
+                MyPenpalsList(onRefresh: () => _onRefresh(2)),
               ],
             ),
           ),
@@ -212,8 +212,8 @@ class _FindTab extends ConsumerWidget {
   }
 }
 
-class _MyPenpalsTab extends ConsumerWidget {
-  const _MyPenpalsTab({required this.onRefresh});
+class MyPenpalsList extends ConsumerWidget {
+  const MyPenpalsList({super.key, required this.onRefresh});
 
   final Future<void> Function() onRefresh;
 

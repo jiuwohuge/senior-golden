@@ -14,7 +14,6 @@ import '../../core/models/interest_tag_option.dart';
 import '../../core/oss/oss_upload_service.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
-import '../onboarding/first_letter_guide_page.dart';
 import '../profile/avatar_crop_page.dart';
 import '../shell/main_shell.dart';
 import 'auth_repository.dart';
@@ -73,7 +72,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         _accountRegistered = false;
         _avatarObjectKey = null;
       });
-      ref.read(authRepositoryProvider).logout();
+      ref.read(authRepositoryProvider).logout(reenterAsGuest: false);
     }
 
     void clearEmailAvailability() {
@@ -403,11 +402,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       if (city != null && city.trim().isNotEmpty) {
         _resolvedCity = city.trim();
       }
-      final done = ref.read(appSessionProvider).user.firstLetterDone == true;
       if (!mounted) return;
-      context.go(
-        done ? MainShellRoute.pathPostOffice : FirstLetterGuidePage.path,
-      );
+      context.go(MainShellRoute.pathPostOffice);
     } on ApiBusinessException catch (e) {
       if (mounted) {
         PostalSnack.show(context, e.message, tone: PostalSnackTone.error);

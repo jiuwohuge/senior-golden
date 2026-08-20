@@ -1,7 +1,10 @@
 import 'package:intl/intl.dart';
 
-/// 后端 `LocalDate` JSON 格式（commons-web Jackson 约定）。
-final DateFormat _backendLocalDate = DateFormat('MM-dd-yyyy');
+/// 后端 Jackson `LocalDate`：ISO `yyyy-MM-dd`。
+final DateFormat _backendLocalDate = DateFormat('yyyy-MM-dd');
+
+/// 历史误用格式，仅解析兼容。
+final DateFormat _legacyUsLocalDate = DateFormat('MM-dd-yyyy');
 
 String formatBackendLocalDate(DateTime date) {
   return _backendLocalDate.format(DateTime(date.year, date.month, date.day));
@@ -15,6 +18,11 @@ DateTime? parseBackendLocalDate(Object? raw) {
   try {
     return _backendLocalDate.parseStrict(s);
   } catch (_) {
-    return DateTime.tryParse(s);
+    try {
+      return _legacyUsLocalDate.parseStrict(s);
+    } catch (_) {
+      return DateTime.tryParse(s);
+    }
   }
 }
+

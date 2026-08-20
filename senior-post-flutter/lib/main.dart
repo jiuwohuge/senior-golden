@@ -16,6 +16,8 @@ Future<void> main() async {
 
   final container = ProviderContainer();
   await container.read(apiBaseUrlProvider.notifier).loadFromStorage();
+  final installId = await DeviceInstallId.getOrCreate();
+  container.read(deviceInstallIdStateProvider.notifier).state = installId;
   var token = await AuthStorage.readToken();
   if (token != null && token.isNotEmpty) {
     if (isAuthTokenExpired(token)) {
@@ -31,8 +33,13 @@ Future<void> main() async {
       } catch (_) {}
     }
   }
-  final installId = await DeviceInstallId.getOrCreate();
-  container.read(deviceInstallIdStateProvider.notifier).state = installId;
+  if (token == null || token.isEmpty) {
+    try {
+      await container.read(authRepositoryProvider).guest();
+    } catch (e) {
+      debugPrint('startup guest auth failed: $e');
+    }
+  }
 
   runApp(
     UncontrolledProviderScope(

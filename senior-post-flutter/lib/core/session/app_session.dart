@@ -128,11 +128,19 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
     if (idsRaw is List<dynamic>) {
       interestTagIds = idsRaw.whereType<num>().map((n) => n.toInt()).toList();
     }
+    var bindProvider = state.user.bindProvider;
+    if (m.containsKey('bindProvider')) {
+      bindProvider = m['bindProvider'] as String?;
+    } else if (idStr != state.user.id) {
+      bindProvider = null;
+    }
     state = state.copyWith(
       user: AppUser(
         id: idStr,
         nickname: (m['nickname'] as String?) ?? state.user.nickname,
-        email: (m['email'] as String?) ?? state.user.email,
+        email: m.containsKey('email')
+            ? ((m['email'] as String?) ?? '')
+            : state.user.email,
         countryCode: code,
         countryName: nameEn,
         birthYear: (m['birthYear'] as num?)?.toInt() ?? state.user.birthYear,
@@ -156,6 +164,18 @@ class AppSessionNotifier extends StateNotifier<AppSessionState> {
             : (idStr != state.user.id
                 ? null
                 : state.user.firstLetterDone),
+        bound: m.containsKey('bound')
+            ? m['bound'] as bool? ?? false
+            : ((m['email'] as String?)?.trim().isNotEmpty == true
+                ? true
+                : (idStr != state.user.id ? false : state.user.bound)),
+        bindProvider: bindProvider,
+        signupChannel: m.containsKey('signupChannel')
+            ? m['signupChannel'] as String?
+            : (idStr != state.user.id ? null : state.user.signupChannel),
+        canBind: m.containsKey('canBind')
+            ? m['canBind'] as bool? ?? false
+            : (idStr != state.user.id ? false : state.user.canBind),
       ),
     );
   }

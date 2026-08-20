@@ -84,9 +84,11 @@ public class UserIdentityServiceImpl extends ServiceImpl<UserIdentityMapper, Use
         List<UserIdentityDomain> rows = listActiveByUserId(userId);
         for (UserIdentityDomain row : rows) {
             String archived = archiveUid(row.getProvider(), row.getProviderUid(), at);
+            // 归档 UID 释放唯一约束后，同时打 del_flag，避免仍被 listActive 命中。
             LambdaUpdateWrapper<UserIdentityDomain> uw = new LambdaUpdateWrapper<UserIdentityDomain>()
                     .eq(UserIdentityDomain::getId, row.getId())
                     .set(UserIdentityDomain::getProviderUid, archived)
+                    .set(UserIdentityDomain::isDelFlag, true)
                     .set(UserIdentityDomain::getUpdatedAt, at)
                     .set(UserIdentityDomain::getUpdatedBy, userId);
             update(uw);

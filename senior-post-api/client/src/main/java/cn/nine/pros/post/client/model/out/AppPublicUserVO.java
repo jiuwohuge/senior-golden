@@ -41,6 +41,14 @@ public class AppPublicUserVO {
     private String language;
     @Schema(description = "写作风格：concise|narrative|emotional")
     private String writingStyle;
+    @Schema(description = "是否已绑定登录身份（邮箱/Google）")
+    private Boolean bound;
+    @Schema(description = "登录身份提供方：email | google，未绑定为 null")
+    private String bindProvider;
+    @Schema(description = "开户方式：guest | email | google")
+    private String signupChannel;
+    @Schema(description = "是否允许绑定或更换登录方式（仅 guest 开户）")
+    private Boolean canBind;
     @Schema(description = "邮箱是否已验证绑定")
     private Boolean emailVerified;
     @Schema(description = "是否已完成首封信引导")

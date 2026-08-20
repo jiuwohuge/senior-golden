@@ -12,6 +12,7 @@ import cn.nine.pros.post.biz.model.domain.UserDomain;
 import cn.nine.pros.post.biz.model.domain.UserIdentityDomain;
 import cn.nine.pros.post.biz.service.biz.support.AppAuthProfileSupport;
 import cn.nine.pros.post.biz.service.biz.support.GeoIpLookup;
+import cn.nine.pros.post.biz.service.biz.support.GuestProfileSupport;
 import cn.nine.pros.post.biz.service.biz.support.GoogleIdTokenVerifierService;
 import cn.nine.pros.post.biz.service.biz.support.GoogleIdTokenVerifierService.VerifiedGoogleIdentity;
 import cn.nine.pros.post.biz.service.biz.support.LoginRiskEvaluator;
@@ -29,12 +30,17 @@ import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.base.UserTagService;
 import cn.nine.pros.post.client.common.constant.AuthProvider;
 import cn.nine.pros.post.client.common.constant.BehaviorActionTypes;
+import cn.nine.pros.post.client.common.constant.SignupChannel;
 import cn.nine.pros.post.client.common.constant.UserGender;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
+import cn.nine.pros.post.client.model.input.AppBindEmailInDto;
+import cn.nine.pros.post.client.model.input.AppBindEmailSendCodeInDto;
+import cn.nine.pros.post.client.model.input.AppBindGoogleInDto;
 import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
 import cn.nine.pros.post.client.model.input.AppGoogleCompleteInDto;
 import cn.nine.pros.post.client.model.input.AppGoogleLoginInDto;
+import cn.nine.pros.post.client.model.input.AppGuestInDto;
 import cn.nine.pros.post.client.model.input.AppLoginChallengeConfirmInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
 import cn.nine.pros.post.client.model.input.AppRegisterInDto;
@@ -99,9 +105,11 @@ public class AppAuthService {
     public AppAuthResultVO register(AppRegisterInDto body) {
         assertGenderValid(body.getGender());
         String email = body.getEmail().trim().toLowerCase();
-        if (userIdentityService.findActiveEmailByUid(email) != null) {
+        UserIdentityDomain existingEmail = userIdentityService.findActiveEmailByUid(email);
+        if (liveIdentityOwner(existingEmail) != null) {
             throw new BadRequestException(appMessages.get("app.error.register.emailTaken"));
         }
+        releaseStaleIdentityIfOwnerDeleted(existingEmail);
         int currentYear = Year.now().getValue();
         int age = currentYear - body.getBirthYear();
         if (age < MIN_AGE) {
@@ -122,6 +130,7 @@ public class AppAuthService {
         user.setStaffRole(0);
         user.setEmailVerified(false);
         user.setFirstLetterDone(false);
+        user.setSignupChannel(SignupChannel.EMAIL);
         user.setLanguage(resolveClientLanguageTag());
         user.setDelFlag(false);
         LocalDateTime now = LocalDateTime.now();
@@ -134,6 +143,7 @@ public class AppAuthService {
         user.setRegisterIp(registerIp);
         // GPS 优先：有经纬度则反查国家；否则 IP；再否则保留客户端 countryCode
         applyClientGeoThenIp(user, body.getLatitude(), body.getLongitude(), registerIp);
+        applyCountryIfBlank(user, body.getCountryCode(), user.getLanguage());
         userService.save(user);
         applyRegisterAvatarIfPresent(user.getId(), body.getAvatarUrl());
 
@@ -146,6 +156,328 @@ public class AppAuthService {
         recordLogin(user.getId(), deviceUuid, LOGIN_SUCCESS, null, LoginRiskEvaluator.RISK_NONE);
         log.info("user registered, userId={}", user.getId());
         return finishAuth(user.getId(), true, LoginRiskEvaluator.RISK_NONE, false);
+    }
+
+    /**
+     * 设备静默进入：按 deviceUuid 复用本机已有 user（含曾绑定后退出软删的设备行），否则新建。
+     * TableLogic 会排除已逻辑删除用户，本机将开新访客号。
+     * <p>前置：设备头体一致、设备未被拉黑；副作用：可能写 user/device/login。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public AppAuthResultVO guest(AppGuestInDto body) {
+        String deviceUuid = assertDeviceUuidMatchesHeaderOrBody(body.getDeviceUuid());
+        String deviceType = normalizeDeviceType(body.getDeviceType());
+        rejectIfDeviceBlocked(deviceUuid);
+        Long existingUserId = resolveGuestUserId(deviceUuid);
+        if (existingUserId != null) {
+            return resumeGuestSession(existingUserId, deviceUuid, deviceType, body);
+        }
+        return createGuestUser(deviceUuid, deviceType, body);
+    }
+
+    /** 拉黑设备禁止静默进入。 */
+    private void rejectIfDeviceBlocked(String deviceUuid) {
+        UserDeviceDomain existingDev = userDeviceService.findLatestActiveByDeviceUuid(deviceUuid);
+        if (existingDev == null) {
+            return;
+        }
+        if (!Integer.valueOf(2).equals(convertStatus(existingDev.getStatus()))) {
+            return;
+        }
+        log.info("guest rejected: device blocked");
+        throw new BadRequestException(appMessages.get("app.error.guest.deviceBlocked"));
+    }
+
+    /**
+     * 同一 deviceUuid 只应对应一个长期账号：已绑定优先于后来误开的访客，避免绑定退出后再 guest 开新号。
+     */
+    private Long resolveGuestUserId(String deviceUuid) {
+        List<UserDeviceDomain> rows = userDeviceService.listByDeviceUuidIncludingDeleted(deviceUuid);
+        Long boundUserId = null;
+        LocalDateTime boundAt = null;
+        Long unboundUserId = null;
+        LocalDateTime unboundAt = null;
+        for (UserDeviceDomain row : rows) {
+            if (row.getUserId() == null) {
+                continue;
+            }
+            UserDTO dto = userService.findById(row.getUserId());
+            if (dto == null || !Integer.valueOf(1).equals(convertStatus(dto.getStatus()))) {
+                continue;
+            }
+            LocalDateTime at = row.getUpdatedAt();
+            if (userHasLoginIdentity(dto.getId())) {
+                if (!isNewer(at, boundAt)) {
+                    continue;
+                }
+                boundUserId = dto.getId();
+                boundAt = at;
+                continue;
+            }
+            if (!isNewer(at, unboundAt)) {
+                continue;
+            }
+            unboundUserId = dto.getId();
+            unboundAt = at;
+        }
+        if (boundUserId != null) {
+            return boundUserId;
+        }
+        return unboundUserId;
+    }
+
+    private boolean userHasLoginIdentity(long userId) {
+        List<UserIdentityDomain> identities = userIdentityService.listActiveByUserId(userId);
+        return identities != null && !identities.isEmpty();
+    }
+
+    private static boolean isNewer(LocalDateTime candidate, LocalDateTime currentBest) {
+        if (candidate == null) {
+            return currentBest == null;
+        }
+        if (currentBest == null) {
+            return true;
+        }
+        return candidate.isAfter(currentBest);
+    }
+
+    private AppAuthResultVO resumeGuestSession(
+            long userId, String deviceUuid, String deviceType, AppGuestInDto body) {
+        touchDevice(userId, deviceUuid, deviceType);
+        recordLogin(userId, deviceUuid, LOGIN_SUCCESS, null, LoginRiskEvaluator.RISK_NONE);
+        hydrateIncompleteGuest(userId, body);
+        log.info("guest hit existing user, userId={}", userId);
+        UserInterestAssembler.Payload interests = userInterestAssembler.loadForUser(userId);
+        UserDTO fresh = userService.findById(userId);
+        boolean complete = AppAuthProfileSupport.isProfileComplete(fresh, interests.ids());
+        return finishAuth(userId, complete, LoginRiskEvaluator.RISK_NONE, false);
+    }
+
+    private AppAuthResultVO createGuestUser(String deviceUuid, String deviceType, AppGuestInDto body) {
+        UserDomain user = new UserDomain();
+        user.setGender(0);
+        String lang = StringUtils.hasText(body.getLanguage())
+                ? body.getLanguage().trim()
+                : resolveClientLanguageTag();
+        user.setNickname(GuestProfileSupport.randomNickname(lang));
+        // 库约束已放宽为可空；占位年份会污染匹配年龄，guest 保持未填。
+        user.setBirthYear(null);
+        user.setCountryCode(normalizeOptionalCountryCode(body.getCountryCode()));
+        user.setBio(null);
+        user.setAvatarUrl(null);
+        user.setIsVip(false);
+        user.setStatus(1);
+        user.setStaffRole(0);
+        user.setEmailVerified(false);
+        user.setFirstLetterDone(false);
+        user.setLanguage(lang);
+        user.setSignupChannel(SignupChannel.GUEST);
+        user.setDelFlag(false);
+        LocalDateTime now = LocalDateTime.now();
+        user.setCreatedAt(now);
+        user.setUpdatedAt(now);
+        user.setCreatedBy(0L);
+        user.setUpdatedBy(0L);
+        user.setLastLoginAt(now);
+        String registerIp = MyRequestContextHolder.ipAddress();
+        user.setRegisterIp(registerIp);
+        applyClientGeoThenIp(user, body.getLatitude(), body.getLongitude(), registerIp);
+        applyCountryIfBlank(user, body.getCountryCode(), lang);
+        userService.save(user);
+        touchDevice(user.getId(), deviceUuid, deviceType);
+        recordLogin(user.getId(), deviceUuid, LOGIN_SUCCESS, null, LoginRiskEvaluator.RISK_NONE);
+        log.info("guest user created, userId={}, country={}", user.getId(), user.getCountryCode());
+        return finishAuth(user.getId(), false, LoginRiskEvaluator.RISK_NONE, false);
+    }
+
+    /**
+     * 退出当前会话：只清客户端 Token。设备与 user 的对应保留，
+     * 随后 guest /「先逛逛」仍回到该 deviceUuid 的原账号（绑定后亦然）。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void logout() {
+        Long uid = MyRequestContextHolder.userId();
+        if (uid == null) {
+            return;
+        }
+        log.info("logout session kept for device re-guest, userId={}", uid);
+    }
+
+    /**
+     * 绑定或更换邮箱发码：仅 guest 开户可用；邮箱未被其他用户占用。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void sendBindEmailCode(AppBindEmailSendCodeInDto body) {
+        Long uid = requireLoginUserId();
+        assertGuestCanBind(uid);
+        String email = body.getEmail().trim().toLowerCase();
+        assertEmailNotTakenByOther(uid, email);
+        emailVerifyService.sendBindEmailCode(uid, email);
+    }
+
+    /**
+     * 把邮箱身份挂到当前 guest 用户，不新建 user。已绑定则释放旧身份后换绑。
+     * 邮箱被其他用户占用则拒绝。注册账号不可走此接口。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public AppAuthResultVO bindEmail(AppBindEmailInDto body) {
+        Long uid = requireLoginUserId();
+        assertGuestCanBind(uid);
+        String email = body.getEmail().trim().toLowerCase();
+        assertEmailNotTakenByOther(uid, email);
+        emailVerifyService.consumeBindEmailCode(uid, email, body.getCode());
+        applyEmailBind(uid, email, passwordEncoder.encode(body.getPassword()));
+        userService.markEmailVerified(uid);
+        UserDTO dto = userService.findById(uid);
+        UserInterestAssembler.Payload interests = userInterestAssembler.loadForUser(uid);
+        boolean complete = AppAuthProfileSupport.isProfileComplete(dto, interests.ids());
+        return finishAuth(uid, complete, LoginRiskEvaluator.RISK_NONE, false);
+    }
+
+    /**
+     * 把 Google openId 挂到当前 guest 用户，不新建 user，避免丢掉信件。
+     * 已绑定则释放旧身份后换绑；注册账号不可走此接口。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public AppAuthResultVO bindGoogle(AppBindGoogleInDto body) {
+        Long uid = requireLoginUserId();
+        assertGuestCanBind(uid);
+        VerifiedGoogleIdentity google = googleIdTokenVerifierService.verify(body.getIdToken());
+        assertGoogleNotTakenByOther(uid, google);
+        applyGoogleBind(uid, google);
+        UserDTO dto = userService.findById(uid);
+        UserInterestAssembler.Payload interests = userInterestAssembler.loadForUser(uid);
+        boolean complete = AppAuthProfileSupport.isProfileComplete(dto, interests.ids());
+        return finishAuth(uid, complete, LoginRiskEvaluator.RISK_NONE, false);
+    }
+
+    /** 仅静默访客可绑/换绑；邮箱或 Google 注册账号拒绝。 */
+    private void assertGuestCanBind(long uid) {
+        UserDTO dto = userService.findById(uid);
+        if (dto != null && SignupChannel.isGuest(dto.getSignupChannel())) {
+            return;
+        }
+        log.info("bind rejected: not guest origin, userId={}", uid);
+        throw new BadRequestException(appMessages.get("app.error.bind.registeredNoRebind"));
+    }
+
+    private Long requireLoginUserId() {
+        Long uid = MyRequestContextHolder.userId();
+        if (uid == null) {
+            throw new BadRequestException(appMessages.get("app.error.session.invalid"));
+        }
+        if (userService.findById(uid) == null) {
+            throw new BadRequestException(appMessages.get("app.error.session.invalid"));
+        }
+        return uid;
+    }
+
+    /** 邮箱已被其他<strong>未删除</strong>账号占用时拒绝；本账号持有该邮箱则允许（更新密码或重发码）。 */
+    private void assertEmailNotTakenByOther(long uid, String email) {
+        UserIdentityDomain taken = userIdentityService.findActiveEmailByUid(email);
+        Long ownerId = liveIdentityOwner(taken);
+        if (ownerId == null) {
+            releaseStaleIdentityIfOwnerDeleted(taken);
+            return;
+        }
+        if (Objects.equals(ownerId, uid)) {
+            return;
+        }
+        log.info("bind email rejected: email taken by other, userId={}", uid);
+        throw new BadRequestException(appMessages.get("app.error.bind.emailTaken"));
+    }
+
+    /** Google openId 或附带邮箱被其他<strong>未删除</strong>账号占用时拒绝。 */
+    private void assertGoogleNotTakenByOther(long uid, VerifiedGoogleIdentity google) {
+        UserIdentityDomain existingGoogle = userIdentityService.findActiveByProviderUid(
+                AuthProvider.GOOGLE, google.sub());
+        Long googleOwner = liveIdentityOwner(existingGoogle);
+        if (googleOwner == null) {
+            releaseStaleIdentityIfOwnerDeleted(existingGoogle);
+        } else if (!Objects.equals(googleOwner, uid)) {
+            log.info("bind google rejected: openId taken by other, userId={}", uid);
+            throw new BadRequestException(appMessages.get("app.error.bind.googleTaken"));
+        }
+        if (!StringUtils.hasText(google.email())) {
+            return;
+        }
+        UserIdentityDomain emailIdent = userIdentityService.findActiveEmailByUid(google.email());
+        Long emailOwner = liveIdentityOwner(emailIdent);
+        if (emailOwner == null) {
+            releaseStaleIdentityIfOwnerDeleted(emailIdent);
+            return;
+        }
+        if (Objects.equals(emailOwner, uid)) {
+            return;
+        }
+        log.info("bind google rejected: google email taken by other, userId={}", uid);
+        throw new BadRequestException(appMessages.get("app.error.bind.emailTaken"));
+    }
+
+    /**
+     * 本账号已是该邮箱则只更新密码；否则释放旧身份后新建邮箱身份。
+     */
+    private void applyEmailBind(long uid, String email, String passwordHash) {
+        UserIdentityDomain sameEmail = userIdentityService.findActiveEmailByUid(email);
+        if (sameEmail != null && Objects.equals(sameEmail.getUserId(), uid)) {
+            userIdentityService.updatePasswordHash(
+                    sameEmail.getId(), passwordHash, uid, LocalDateTime.now());
+            log.info("email bind password updated, userId={}", uid);
+            return;
+        }
+        if (hasActiveIdentities(uid)) {
+            userIdentityService.releaseAllForUser(uid, LocalDateTime.now());
+            log.info("identities released for rebind email, userId={}", uid);
+        }
+        userIdentityService.createEmailIdentity(uid, email, passwordHash, uid);
+        log.info("email bound to user, userId={}", uid);
+    }
+
+    /**
+     * 本账号已是该 Google 则幂等返回；否则释放旧身份后挂上 Google（及可选邮箱）。
+     */
+    private void applyGoogleBind(long uid, VerifiedGoogleIdentity google) {
+        UserIdentityDomain existingGoogle = userIdentityService.findActiveByProviderUid(
+                AuthProvider.GOOGLE, google.sub());
+        if (existingGoogle != null && Objects.equals(existingGoogle.getUserId(), uid)) {
+            log.info("google already bound to this user, userId={}", uid);
+            return;
+        }
+        if (hasActiveIdentities(uid)) {
+            userIdentityService.releaseAllForUser(uid, LocalDateTime.now());
+            log.info("identities released for rebind google, userId={}", uid);
+        }
+        userIdentityService.createOAuthIdentity(uid, AuthProvider.GOOGLE, google.sub(), uid);
+        if (!StringUtils.hasText(google.email())) {
+            log.info("google bound to user, userId={}", uid);
+            return;
+        }
+        userIdentityService.createEmailIdentity(uid, google.email(), null, uid);
+        userService.markEmailVerified(uid);
+        log.info("google bound to user, userId={}", uid);
+    }
+
+    private boolean hasActiveIdentities(long uid) {
+        List<UserIdentityDomain> existing = userIdentityService.listActiveByUserId(uid);
+        return existing != null && !existing.isEmpty();
+    }
+
+    /** Google 优先于邮箱，便于客户端展示「已绑定 Google」。 */
+    private static String resolveBindProvider(List<UserIdentityDomain> identities) {
+        if (identities == null || identities.isEmpty()) {
+            return null;
+        }
+        for (UserIdentityDomain row : identities) {
+            if (AuthProvider.GOOGLE.equals(row.getProvider())) {
+                return AuthProvider.GOOGLE;
+            }
+        }
+        for (UserIdentityDomain row : identities) {
+            if (AuthProvider.EMAIL.equals(row.getProvider())) {
+                return AuthProvider.EMAIL;
+            }
+        }
+        return identities.get(0).getProvider();
     }
 
     /**
@@ -270,7 +602,8 @@ public class AppAuthService {
      */
     public void validateRegisterEmail(String rawEmail) {
         String email = rawEmail.trim().toLowerCase();
-        if (userIdentityService.findActiveEmailByUid(email) != null) {
+        UserIdentityDomain ident = userIdentityService.findActiveEmailByUid(email);
+        if (liveIdentityOwner(ident) != null) {
             log.info("register email rejected: already taken");
             throw new BadRequestException(appMessages.get("app.error.register.emailTaken"));
         }
@@ -338,7 +671,9 @@ public class AppAuthService {
     public void forgotPassword(AppForgotPasswordInDto body) {
         String email = body.getEmail().trim().toLowerCase();
         UserIdentityDomain ident = userIdentityService.findActiveEmailByUid(email);
-        if (ident != null && userIdentityService.hasOAuthOnly(ident.getUserId())) {
+        if (ident != null
+                && userService.findById(ident.getUserId()) != null
+                && userIdentityService.hasOAuthOnly(ident.getUserId())) {
             log.info("forgot-password rejected: oauth-only, userId={}", ident.getUserId());
             throw new BadRequestException(appMessages.get("app.error.password.oauthOnly"));
         }
@@ -467,27 +802,52 @@ public class AppAuthService {
 
     /**
      * 解析或创建 Google 登录对应用户：已有 Google 身份 → 邮箱关联并挂 Google → 新建壳用户。
+     * 身份若挂在已逻辑删除用户上，先释放再按新用户处理。
      */
     private long resolveOrCreateGoogleUserId(VerifiedGoogleIdentity google) {
         UserIdentityDomain existing = userIdentityService.findActiveByProviderUid(AuthProvider.GOOGLE, google.sub());
-        if (existing != null) {
-            return existing.getUserId();
+        Long liveUserId = liveIdentityOwner(existing);
+        if (liveUserId != null) {
+            return liveUserId;
         }
+        releaseStaleIdentityIfOwnerDeleted(existing);
         if (!StringUtils.hasText(google.email())) {
             return createGoogleShellUser(google);
         }
         return linkGoogleToEmailOrCreateShell(google);
     }
 
-    /** 用 Google 邮箱关联已有账号并写入 OAuth 身份；无邮箱身份则新建壳用户。 */
+    /** 用 Google 邮箱关联已有<strong>未删除</strong>账号并写入 OAuth 身份；无邮箱身份则新建壳用户。 */
     private long linkGoogleToEmailOrCreateShell(VerifiedGoogleIdentity google) {
         UserIdentityDomain emailIdent = userIdentityService.findActiveEmailByUid(google.email());
-        if (emailIdent == null) {
+        Long liveUserId = liveIdentityOwner(emailIdent);
+        if (liveUserId == null) {
+            releaseStaleIdentityIfOwnerDeleted(emailIdent);
             return createGoogleShellUser(google);
         }
-        long userId = emailIdent.getUserId();
-        userIdentityService.createOAuthIdentity(userId, AuthProvider.GOOGLE, google.sub(), userId);
-        return userId;
+        userIdentityService.createOAuthIdentity(liveUserId, AuthProvider.GOOGLE, google.sub(), liveUserId);
+        return liveUserId;
+    }
+
+    /** identity 指向未删除用户时返回该 userId，否则 null。 */
+    private Long liveIdentityOwner(UserIdentityDomain ident) {
+        if (ident == null || ident.getUserId() == null) {
+            return null;
+        }
+        UserDTO owner = userService.findById(ident.getUserId());
+        if (owner == null) {
+            return null;
+        }
+        return owner.getId();
+    }
+
+    /** 身份还在、用户已逻辑删除：归档并软删 identity，避免邮箱/Google 被僵尸占用。 */
+    private void releaseStaleIdentityIfOwnerDeleted(UserIdentityDomain ident) {
+        if (ident == null || ident.getUserId() == null) {
+            return;
+        }
+        log.info("release stale identity of deleted user, userId={}", ident.getUserId());
+        userIdentityService.releaseAllForUser(ident.getUserId(), LocalDateTime.now());
     }
 
     private long createGoogleShellUser(VerifiedGoogleIdentity google) {
@@ -503,6 +863,7 @@ public class AppAuthService {
         user.setIsVip(false);
         user.setStatus(1);
         user.setStaffRole(0);
+        user.setSignupChannel(SignupChannel.GOOGLE);
         user.setDelFlag(false);
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
@@ -697,6 +1058,54 @@ public class AppAuthService {
         applyGeoToUser(user, geoIpService.resolve(registerIp), true);
     }
 
+    /** GPS/IP 都拿不到国家时，用客户端代码或语言推断，避免资料上国家空白。 */
+    private void applyCountryIfBlank(UserDomain user, String clientCountryCode, String languageTag) {
+        if (user == null || StringUtils.hasText(user.getCountryCode())) {
+            return;
+        }
+        user.setCountryCode(GuestProfileSupport.fallbackCountryCode(clientCountryCode, languageTag));
+    }
+
+    /**
+     * 旧版 guest 可能无昵称/国家：下次静默进入时补齐，不覆盖用户已改资料。
+     */
+    private void hydrateIncompleteGuest(long userId, AppGuestInDto body) {
+        UserDomain user = userService.getById(userId);
+        if (user == null) {
+            return;
+        }
+        boolean changed = false;
+        if (!StringUtils.hasText(user.getNickname())) {
+            String lang = StringUtils.hasText(user.getLanguage())
+                    ? user.getLanguage()
+                    : resolveClientLanguageTag();
+            user.setNickname(GuestProfileSupport.randomNickname(lang));
+            changed = true;
+        }
+        if (!StringUtils.hasText(user.getLanguage()) && StringUtils.hasText(body.getLanguage())) {
+            user.setLanguage(body.getLanguage().trim());
+            changed = true;
+        }
+        Double latBefore = user.getLatitude();
+        Double lngBefore = user.getLongitude();
+        String countryBefore = user.getCountryCode();
+        String registerIp = MyRequestContextHolder.ipAddress();
+        applyClientGeoThenIp(user, body.getLatitude(), body.getLongitude(), registerIp);
+        applyCountryIfBlank(user, body.getCountryCode(), user.getLanguage());
+        if (!Objects.equals(countryBefore, user.getCountryCode())
+                || !Objects.equals(latBefore, user.getLatitude())
+                || !Objects.equals(lngBefore, user.getLongitude())) {
+            changed = true;
+        }
+        if (!changed) {
+            return;
+        }
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedBy(userId);
+        userService.updateById(user);
+        log.info("guest profile hydrated, userId={}, country={}", userId, user.getCountryCode());
+    }
+
     /** 资料补丁：写入坐标并在国家为空时反查。 */
     private void applyProfileGeoPatch(UserDomain row, Double latitude, Double longitude) {
         if (latitude != null) {
@@ -753,7 +1162,7 @@ public class AppAuthService {
 
     private void finalizeAccountDeletionIfCooldownElapsed(Long userId) {
         UserDomain u = userService.getById(userId);
-        if (u == null || Boolean.TRUE.equals(u.isDelFlag())) {
+        if (u == null) {
             return;
         }
         LocalDateTime req = u.getDeletionRequestedAt();
@@ -829,6 +1238,10 @@ public class AppAuthService {
             return null;
         }
         boolean self = viewerUserId != null && Objects.equals(viewerUserId, dto.getId());
+        List<UserIdentityDomain> identities = self
+                ? userIdentityService.listActiveByUserId(dto.getId())
+                : List.of();
+        boolean bound = identities != null && !identities.isEmpty();
         String storedRef = self
                 ? UserAvatarAuditSupport.ownerVisibleStoredRef(dto)
                 : UserAvatarAuditSupport.publicStoredRef(dto);
@@ -848,6 +1261,10 @@ public class AppAuthService {
                 .language(dto.getLanguage())
                 .writingStyle(dto.getWritingStyle())
                 .emailVerified(Boolean.TRUE.equals(dto.getEmailVerified()))
+                .bound(bound)
+                .bindProvider(self ? resolveBindProvider(identities) : null)
+                .signupChannel(self ? SignupChannel.normalize(dto.getSignupChannel()) : null)
+                .canBind(self && SignupChannel.isGuest(dto.getSignupChannel()))
                 .firstLetterDone(Boolean.TRUE.equals(dto.getFirstLetterDone()))
                 .bio(dto.getBio())
                 .avatarUrl(av)

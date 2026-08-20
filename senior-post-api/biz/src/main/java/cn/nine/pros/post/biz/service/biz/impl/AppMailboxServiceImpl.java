@@ -20,6 +20,7 @@ import cn.nine.pros.post.biz.service.base.CountryService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.SensitiveWordService;
+import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.biz.support.DeliveryDelayCalculator;
 import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
@@ -86,6 +87,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private final CountryService countryService;
     private final TextModerationProvider textModerationProvider;
     private final DailyQuotaClaimService dailyQuotaClaimService;
+    private final TimeLetterService timeLetterService;
     private final LetterAssistantService letterAssistantService;
 
     /**
@@ -272,17 +274,13 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         return toItem(saved, fromUserId, false);
     }
 
-    /** 非 VIP：须先领取今日额度，且未超发（上限取 claim.quota_amount）。 */
+    /** 非 VIP：未超当日发信上限（额度静默发放，不再要求先领取）。 */
     private void assertDailyQuota(long fromUserId, UserDTO sender) {
         if (Boolean.TRUE.equals(sender.getIsVip())) {
             return;
         }
         DailyQuotaSupport.Snapshot snap = DailyQuotaSupport.resolve(
-                fromUserId, sender, configService, dailyQuotaClaimService, letterService);
-        if (!snap.claimed()) {
-            log.info("letter send rejected: daily quota not claimed, userId={}", fromUserId);
-            throw new BusinessException(appMessages.get("app.error.letter.quotaNotClaimed"));
-        }
+                fromUserId, sender, configService, dailyQuotaClaimService, letterService, timeLetterService);
         if (snap.remaining() <= 0) {
             log.info("letter send rejected: daily quota exhausted, userId={}, sent={}, cap={}",
                     fromUserId, snap.sentToday(), snap.cap());

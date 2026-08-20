@@ -13,6 +13,7 @@ import 'mailbox_providers.dart';
 import '../time_letter/time_letter_list_tab.dart';
 import '../time_letter/time_letter_providers.dart';
 import '../relation/relation_display_label.dart';
+import '../directory/my_penpals_page.dart';
 
 class MailboxPage extends ConsumerStatefulWidget {
   const MailboxPage({super.key});
@@ -100,6 +101,10 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
             child: Row(
               children: [
                 const Spacer(),
+                TextButton(
+                  onPressed: () => context.push(MyPenpalsPage.path),
+                  child: Text(l10n.mailboxMyPenpals),
+                ),
                 TextButton(
                   onPressed: () => context.push('/mailbox/archive'),
                   child: Text(l10n.mailboxOpenArchive),

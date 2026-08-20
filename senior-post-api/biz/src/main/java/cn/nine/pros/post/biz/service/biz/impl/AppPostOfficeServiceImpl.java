@@ -2,18 +2,21 @@ package cn.nine.pros.post.biz.service.biz.impl;
 
 import cn.nine.commons.basic.exception.unchecked.BusinessException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
+import cn.nine.pros.post.biz.model.domain.ConfigDomain;
 import cn.nine.pros.post.biz.model.domain.DailyQuotaClaimDomain;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
 import cn.nine.pros.post.biz.service.base.ConfigService;
 import cn.nine.pros.post.biz.service.base.DailyQuotaClaimService;
 import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
+import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.biz.AppPostOfficeService;
 import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
 import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.support.TextPreviewSupport;
+import cn.nine.pros.post.client.common.constant.HomeRecommendedAction;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.out.AppPostOfficeHomeVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
@@ -48,12 +51,13 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
     private final UserService userService;
     private final OssDisplayUrlService ossDisplayUrlService;
     private final DailyQuotaClaimService dailyQuotaClaimService;
+    private final TimeLetterService timeLetterService;
 
     @Override
     public AppPostOfficeHomeVO home(long userId) {
         UserDTO user = userService.findById(userId);
         DailyQuotaSupport.Snapshot snap = DailyQuotaSupport.resolve(
-                userId, user, configService, dailyQuotaClaimService, letterService);
+                userId, user, configService, dailyQuotaClaimService, letterService, timeLetterService);
 
         long outboundInTransit = letterService.countOutboundInTransit(userId);
         long inboundInTransit = letterService.countInboundInTransit(userId);
@@ -61,6 +65,11 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
 
         int inTransit = (int) (outboundInTransit + inboundInTransit + unreadDelivered);
         int relationCount = appRelationBizService.countRelationMessages(userId);
+
+        long waitingMatch = letterService.countWaitingMatch();
+        long activeUsers = userService.countActiveAppUsers();
+        boolean canMatchNow = waitingMatch == 0 && activeUsers > 0;
+        String recommendedAction = resolveRecommendedAction();
 
         AppPostOfficeHomeVO vo = AppPostOfficeHomeVO.builder()
                 .greeting(appMessages.get("app.postOffice.greeting"))
@@ -75,10 +84,22 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
                 .outboundInTransit((int) outboundInTransit)
                 .inboundInTransit((int) inboundInTransit)
                 .unreadDelivered((int) unreadDelivered)
+                .recommendedAction(recommendedAction)
+                .poolWaitCount((int) waitingMatch)
+                .canMatchNow(canMatchNow)
                 .build();
-        log.debug("post-office home userId={}, claimed={}, sentToday={}, remaining={}, inTransit={}",
-                userId, snap.claimed(), snap.sentToday(), snap.remaining(), inTransit);
+        log.debug("post-office home userId={}, claimed={}, sentToday={}, remaining={}, inTransit={}, action={}",
+                userId, snap.claimed(), snap.sentToday(), snap.remaining(), inTransit, recommendedAction);
         return vo;
+    }
+
+    /**
+     * 首页主 CTA 只读后台配置，非法值回落时光信。
+     */
+    private String resolveRecommendedAction() {
+        ConfigDomain cfg = configService.findActiveByKey(HomeRecommendedAction.CONFIG_KEY);
+        String raw = cfg == null ? null : cfg.getConfigValue();
+        return HomeRecommendedAction.normalize(raw);
     }
 
     @Override
@@ -105,7 +126,7 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
         }
         UserDTO user = userService.findById(userId);
         DailyQuotaSupport.Snapshot snap = DailyQuotaSupport.resolve(
-                userId, user, configService, dailyQuotaClaimService, letterService);
+                userId, user, configService, dailyQuotaClaimService, letterService, timeLetterService);
         log.info("daily quota claim ok, userId={}, remaining={}", userId, snap.remaining());
         return DailyQuotaClaimVO.builder()
                 .claimed(true)

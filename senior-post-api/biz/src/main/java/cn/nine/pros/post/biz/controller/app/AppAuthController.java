@@ -4,10 +4,14 @@ import cn.nine.pros.post.biz.service.biz.AppAuthService;
 import cn.nine.pros.post.biz.service.biz.EmailVerifyService;
 import cn.nine.pros.post.client.api.app.AppAuthApi;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
+import cn.nine.pros.post.client.model.input.AppBindEmailInDto;
+import cn.nine.pros.post.client.model.input.AppBindEmailSendCodeInDto;
+import cn.nine.pros.post.client.model.input.AppBindGoogleInDto;
 import cn.nine.pros.post.client.model.input.AppEmailVerifyConfirmInDto;
 import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
 import cn.nine.pros.post.client.model.input.AppGoogleCompleteInDto;
 import cn.nine.pros.post.client.model.input.AppGoogleLoginInDto;
+import cn.nine.pros.post.client.model.input.AppGuestInDto;
 import cn.nine.pros.post.client.model.input.AppLoginChallengeConfirmInDto;
 import cn.nine.pros.post.client.model.input.AppLoginChallengeSendInDto;
 import cn.nine.pros.post.client.model.input.AppLoginInDto;
@@ -30,6 +34,31 @@ public class AppAuthController implements AppAuthApi {
     private final AppAuthService appAuthService;
     private final EmailVerifyService emailVerifyService;
     private final AppMessages appMessages;
+
+    @Override
+    public AppAuthResultVO guest(AppGuestInDto body) {
+        return appAuthService.guest(body);
+    }
+
+    @Override
+    public void sendBindEmailCode(AppBindEmailSendCodeInDto body) {
+        appAuthService.sendBindEmailCode(body);
+    }
+
+    @Override
+    public AppAuthResultVO bindEmail(AppBindEmailInDto body) {
+        return appAuthService.bindEmail(body);
+    }
+
+    @Override
+    public AppAuthResultVO bindGoogle(AppBindGoogleInDto body) {
+        return appAuthService.bindGoogle(body);
+    }
+
+    @Override
+    public void logout() {
+        appAuthService.logout();
+    }
 
     @Override
     public AppAuthResultVO register(AppRegisterInDto body) {

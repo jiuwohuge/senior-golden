@@ -28,3 +28,25 @@ String? countryCodeForAppLocale(Locale locale, List<CountryItem> countries) {
   }
   return countries.first.code;
 }
+
+/// 静默 guest：不依赖 bootstrap 国家表，zh→CN、en→US，缺省 CN。
+String countryCodeFromLocale(Locale locale) {
+  final lang = locale.languageCode.toLowerCase();
+  const fromLang = <String, String>{
+    'zh': 'CN',
+    'en': 'US',
+    'ja': 'JP',
+    'ko': 'KR',
+    'fr': 'FR',
+    'de': 'DE',
+    'es': 'ES',
+    'it': 'IT',
+    'pt': 'PT',
+    'ru': 'RU',
+  };
+  final mapped = fromLang[lang];
+  if (mapped != null) return mapped;
+  final cc = locale.countryCode?.toUpperCase();
+  if (cc != null && cc.length == 2) return cc;
+  return 'CN';
+}

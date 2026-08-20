@@ -6,19 +6,27 @@ import 'package:senior_post_flutter/core/time/backend_date_format.dart';
 
 void main() {
   group('formatBackendLocalDate', () {
-    test('formats 2026-01-05 as 01-05-2026', () {
+    test('formats 2026-01-05 as ISO yyyy-MM-dd', () {
       final dt = DateTime(2026, 1, 5);
-      expect(formatBackendLocalDate(dt), '01-05-2026');
+      expect(formatBackendLocalDate(dt), '2026-01-05');
     });
 
-    test('formats 2025-12-31 as 12-31-2025', () {
+    test('formats 2025-12-31 as ISO yyyy-MM-dd', () {
       final dt = DateTime(2025, 12, 31);
-      expect(formatBackendLocalDate(dt), '12-31-2025');
+      expect(formatBackendLocalDate(dt), '2025-12-31');
     });
   });
 
   group('parseBackendLocalDate', () {
-    test('parses valid date string', () {
+    test('parses ISO date string', () {
+      final dt = parseBackendLocalDate('2026-06-15');
+      expect(dt, isNotNull);
+      expect(dt!.year, 2026);
+      expect(dt.month, 6);
+      expect(dt.day, 15);
+    });
+
+    test('parses legacy MM-dd-yyyy', () {
       final dt = parseBackendLocalDate('06-15-2026');
       expect(dt, isNotNull);
       expect(dt!.year, 2026);

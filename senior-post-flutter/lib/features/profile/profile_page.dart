@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
-import '../../app/router/shop_routes.dart';
 import '../../app/theme/postal_tokens.dart';
-import '../../core/auth/auth_token.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
@@ -15,6 +13,7 @@ import '../relation/relation_remote.dart';
 import '../shell/main_shell.dart';
 import 'preferences_remote.dart';
 
+/// 我的：资料与设置。商店/VIP、信件导出入口暂时隐藏，路由仍保留。
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
@@ -75,7 +74,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ],
                 const SizedBox(height: 10),
                 Text(
-                  user.nickname.isEmpty ? '?' : user.nickname,
+                  user.nickname.isEmpty ? l10n.appTitle : user.nickname,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
@@ -101,6 +100,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
           const SizedBox(height: 12),
+          _ReturnAddressMenu(
+            user: user,
+            l10n: l10n,
+            onTap: user.canBind
+                ? () => context.push(LoginRoutes.bindEmail)
+                : null,
+          ),
+          const SizedBox(height: 12),
           _ProfileSectionTitle(title: l10n.profileSectionMyContent),
           PostalCardEnvelope(
             child: Column(
@@ -117,12 +124,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 const Divider(height: 1),
                 _ProfileItem(
-                  icon: Icons.schedule_send_outlined,
-                  title: l10n.profileTimeLetterDrafts,
-                  onTap: () => context.go(MainShellRoute.pathMailbox),
-                ),
-                const Divider(height: 1),
-                _ProfileItem(
                   icon: Icons.drafts_outlined,
                   title: l10n.profileLetterDrafts,
                   onTap: () => context.push('/profile/letter-drafts'),
@@ -131,30 +132,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   icon: Icons.star_outline_rounded,
                   title: l10n.profileLetterFavorites,
                   onTap: () => context.push('/profile/letter-favorites'),
-                ),
-                _ProfileItem(
-                  icon: Icons.download_outlined,
-                  title: l10n.profileLetterExport,
-                  onTap: () => context.push('/profile/letter-export'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          _ProfileSectionTitle(title: l10n.profileSectionShop),
-          PostalCardEnvelope(
-            child: Column(
-              children: [
-                _ProfileItem(
-                  icon: Icons.storefront_outlined,
-                  title: l10n.shopTitleStampsVip,
-                  onTap: () => context.push(ShopRoutes.path),
-                ),
-                const Divider(height: 1),
-                _ProfileItem(
-                  icon: Icons.palette_outlined,
-                  title: l10n.profileMyEntitlements,
-                  onTap: () => context.push('/shop/entitlements'),
                 ),
               ],
             ),
@@ -202,13 +179,128 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             variant: PostalButtonVariant.secondary,
             onPressed: () async {
               await ref.read(authRepositoryProvider).logout();
-              ref.read(authTokenProvider.notifier).state = null;
               if (context.mounted) {
-                context.go(LoginRoutes.login);
+                context.go(MainShellRoute.pathPostOffice);
               }
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 「我的」回邮地址：信封左上角写法。仅 guest 开户显示去绑定 / 更换。
+class _ReturnAddressMenu extends StatelessWidget {
+  const _ReturnAddressMenu({
+    required this.user,
+    required this.l10n,
+    required this.onTap,
+  });
+
+  final AppUser user;
+  final AppLocalizations l10n;
+  final VoidCallback? onTap;
+
+  String get _identity {
+    if (!user.bound) {
+      return l10n.profileReturnAddressEmpty;
+    }
+    final email = user.email.trim();
+    if (user.bindProvider == 'google') {
+      if (email.isEmpty) {
+        return l10n.bindMethodGoogle;
+      }
+      return '${l10n.bindMethodGoogle} · $email';
+    }
+    if (email.isNotEmpty) {
+      return email;
+    }
+    return l10n.profileBindAccount;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bound = user.bound;
+    final canAct = user.canBind;
+    final action = bound
+        ? l10n.profileReturnAddressChange
+        : l10n.profileReturnAddressBind;
+    return Material(
+      color: PostalTokens.paperEnvelope,
+      borderRadius: PostalTokens.shapeMd,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: PostalTokens.shapeMd,
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: PostalTokens.shapeMd,
+            border: Border.all(color: PostalTokens.kraftBrown, width: 1.2),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 64),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 3,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: PostalTokens.kraftBrown,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.profileReturnAddressLabel,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: PostalTokens.kraftBrown,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _identity,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: bound
+                                ? PostalTokens.inkNavy
+                                : PostalTokens.inkSecondary,
+                            fontWeight: FontWeight.w800,
+                            height: 1.25,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (canAct) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      action,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: PostalTokens.postboxGreen,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.chevron_right,
+                      color: PostalTokens.postboxGreen,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

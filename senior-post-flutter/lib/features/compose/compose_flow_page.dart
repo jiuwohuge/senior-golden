@@ -13,6 +13,8 @@ import '../../widgets/letter/letter_document.dart';
 import '../../widgets/letter/letter_paper.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
+import '../auth/bind_email_page.dart';
+import '../auth/login_routes.dart';
 import '../commerce/commerce_remote.dart';
 import '../letter_drafts/letter_drafts_remote.dart';
 import '../mailbox/mailbox_providers.dart';
@@ -68,6 +70,23 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   /// 首封引导写信：隐藏撤销与存草稿。
   bool get _hideUndoAndDraft => widget.initialIntent.fromFirstLetterGuide;
 
+  /// 时光信最早明天送达；默认仍约 +7 天。
+  DateTime get _minDeliveryDate {
+    final n = DateTime.now();
+    return DateTime(n.year, n.month, n.day).add(const Duration(days: 1));
+  }
+
+  Future<DateTime?> _showDeliveryDatePicker() {
+    final min = _minDeliveryDate;
+    final initial = _deliveryDate.isBefore(min) ? min : _deliveryDate;
+    return showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: min,
+      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+    );
+  }
+
   /// 从前置入口（用户卡/好友）带 peer 进入：锁定收件人，不可改回邮局/自己。
   bool get _recipientLocked =>
       (_kind == ComposeKind.penPalMail ||
@@ -80,7 +99,13 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   @override
   void initState() {
     super.initState();
-    _kind = widget.initialIntent.kind ?? ComposeKind.postOffice;
+    _kind = widget.initialIntent.kind ??
+        (ref.read(postOfficeHomeProvider).maybeWhen(
+          data: (h) => h.recommendedAction == 'POST_OFFICE'
+              ? ComposeKind.postOffice
+              : ComposeKind.selfTimeLetter,
+          orElse: () => ComposeKind.selfTimeLetter,
+        ));
     _peerId = widget.initialIntent.peerId;
     _peerNickname = widget.initialIntent.peerNickname;
     _selectedTemplateId = widget.initialIntent.templateId;
@@ -172,6 +197,35 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
+        final timeLetterFirst = ref.read(postOfficeHomeProvider).maybeWhen(
+              data: (h) => h.recommendedAction != 'POST_OFFICE',
+              orElse: () => true,
+            );
+        final selfTile = _RecipientTile(
+          title: l10n.composeRecipientSelf,
+          selected: _kind == ComposeKind.selfTimeLetter,
+          onTap: () {
+            setState(() {
+              _kind = ComposeKind.selfTimeLetter;
+              _peerId = null;
+              _peerNickname = null;
+            });
+            Navigator.pop(ctx);
+            _refreshDaysHint();
+          },
+        );
+        final postOfficeTile = _RecipientTile(
+          title: l10n.composeRecipientPostOffice,
+          selected: _kind == ComposeKind.postOffice,
+          onTap: () {
+            setState(() {
+              _kind = ComposeKind.postOffice;
+              _peerId = null;
+              _peerNickname = null;
+            });
+            Navigator.pop(ctx);
+          },
+        );
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -184,31 +238,10 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 16),
-                _RecipientTile(
-                  title: l10n.composeRecipientPostOffice,
-                  selected: _kind == ComposeKind.postOffice,
-                  onTap: () {
-                    setState(() {
-                      _kind = ComposeKind.postOffice;
-                      _peerId = null;
-                      _peerNickname = null;
-                    });
-                    Navigator.pop(ctx);
-                  },
-                ),
-                _RecipientTile(
-                  title: l10n.composeRecipientSelf,
-                  selected: _kind == ComposeKind.selfTimeLetter,
-                  onTap: () {
-                    setState(() {
-                      _kind = ComposeKind.selfTimeLetter;
-                      _peerId = null;
-                      _peerNickname = null;
-                    });
-                    Navigator.pop(ctx);
-                    _refreshDaysHint();
-                  },
-                ),
+                if (timeLetterFirst) ...[selfTile, postOfficeTile] else ...[
+                  postOfficeTile,
+                  selfTile,
+                ],
               ],
             ),
           ),
@@ -386,14 +419,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                         PostalButton(
                           label: DateFormat.yMMMMd().format(_deliveryDate),
                           onPressed: () async {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: _deliveryDate,
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(
-                                const Duration(days: 365 * 2),
-                              ),
-                            );
+                            final picked = await _showDeliveryDatePicker();
                             if (picked != null) {
                               apply(() => _deliveryDate = picked);
                               await _refreshDaysHint();
@@ -562,14 +588,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                 PostalButton(
                   label: DateFormat.yMMMMd().format(_deliveryDate),
                   onPressed: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: _deliveryDate,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(
-                        const Duration(days: 365 * 2),
-                      ),
-                    );
+                    final picked = await _showDeliveryDatePicker();
                     if (picked != null) {
                       setState(() => _deliveryDate = picked);
                       await _refreshDaysHint();
@@ -621,7 +640,14 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       ref.invalidate(postOfficeHomeProvider);
       ref.invalidate(postOfficeInTransitProvider);
       await showDeliverySentOverlay(context, destinationLabel: dest);
-      if (mounted) context.pop();
+      if (!mounted) return;
+      final goBind = await maybePromptBindAfterSend(context, ref);
+      if (!mounted) return;
+      if (goBind) {
+        context.pushReplacement(LoginRoutes.bindEmail);
+      } else {
+        context.pop();
+      }
     } catch (e) {
       debugPrint('compose seal time letter failed: $e');
       final biz = apiBusinessExceptionFrom(e);
@@ -674,7 +700,11 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           : (_peerNickname ?? l10n.topicFriendFallback);
       await showDeliverySentOverlay(context, destinationLabel: dest);
       if (!mounted) return;
-      if (widget.initialIntent.fromFirstLetterGuide) {
+      final goBind = await maybePromptBindAfterSend(context, ref);
+      if (!mounted) return;
+      if (goBind) {
+        context.pushReplacement(LoginRoutes.bindEmail);
+      } else if (widget.initialIntent.fromFirstLetterGuide) {
         ref.read(routerRefreshProvider).value++;
         context.go(MainShellRoute.pathPostOffice);
       } else {
@@ -775,7 +805,10 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                 document: _document,
                 controller: _bodyController,
                 focusNode: _bodyFocus,
-                placeholder: l10n.composePlaceholderBody,
+                placeholder: ref.watch(appSessionProvider).user.firstLetterDone !=
+                        true
+                    ? l10n.composeOneSentenceHint
+                    : l10n.composePlaceholderBody,
                 minHeight: 320,
               ),
             ),

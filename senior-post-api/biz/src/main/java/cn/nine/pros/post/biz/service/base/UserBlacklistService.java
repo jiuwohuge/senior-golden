@@ -21,6 +21,9 @@ public interface UserBlacklistService extends IService<UserBlacklistDomain> {
 
     UserBlacklistDomain findByPair(long userId, long blockedUserId);
 
+    /** 恢复已软删的拉黑记录（TableLogic 下 updateById 无法写已删行）。 */
+    void restore(UserBlacklistDomain row);
+
     List<UserBlacklistDomain> listActiveByUserId(long userId);
 
     boolean softUnblock(long userId, long blockedUserId);

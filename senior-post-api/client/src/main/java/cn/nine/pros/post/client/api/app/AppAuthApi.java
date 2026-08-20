@@ -2,6 +2,10 @@ package cn.nine.pros.post.client.api.app;
 
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.input.AppAuthProfilePatchInDto;
+import cn.nine.pros.post.client.model.input.AppBindEmailInDto;
+import cn.nine.pros.post.client.model.input.AppBindEmailSendCodeInDto;
+import cn.nine.pros.post.client.model.input.AppBindGoogleInDto;
+import cn.nine.pros.post.client.model.input.AppGuestInDto;
 import cn.nine.pros.post.client.model.input.AppEmailVerifyConfirmInDto;
 import cn.nine.pros.post.client.model.input.AppForgotPasswordInDto;
 import cn.nine.pros.post.client.model.input.AppGoogleCompleteInDto;
@@ -28,6 +32,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Tag(name = "App-认证")
 @RequestMapping(AppServiceDefine.SERVER_PREFIX + "/auth")
 public interface AppAuthApi {
+
+    @Operation(summary = "设备静默访客（无登录墙）")
+    @PostMapping("/guest")
+    AppAuthResultVO guest(@RequestBody @Valid AppGuestInDto body);
+
+    @Operation(summary = "访客绑定或更换邮箱：发送验证码（注册账号不可用）")
+    @PostMapping("/bind/email/send-code")
+    void sendBindEmailCode(@RequestBody @Valid AppBindEmailSendCodeInDto body);
+
+    @Operation(summary = "访客绑定或更换邮箱（不新建用户；注册账号不可用）")
+    @PostMapping("/bind/email")
+    AppAuthResultVO bindEmail(@RequestBody @Valid AppBindEmailInDto body);
+
+    @Operation(summary = "访客绑定或更换 Google（不新建用户；注册账号不可用）")
+    @PostMapping("/bind/google")
+    AppAuthResultVO bindGoogle(@RequestBody @Valid AppBindGoogleInDto body);
+
+    @Operation(summary = "退出登录（清会话；本机 guest 仍回到该设备账号）")
+    @PostMapping("/logout")
+    void logout();
 
     @Operation(summary = "注册")
     @PostMapping("/register")

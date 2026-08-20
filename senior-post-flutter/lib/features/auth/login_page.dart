@@ -7,9 +7,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/auth/google_sign_in_facade.dart';
 import '../../core/config/debug_api_base_url_dialog.dart';
-import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
-import '../onboarding/first_letter_guide_page.dart';
 import '../shell/main_shell.dart';
 import 'auth_consent_provider.dart';
 import 'auth_repository.dart';
@@ -58,11 +56,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
       return;
     }
-    context.go(
-      ref.read(appSessionProvider).user.firstLetterDone == true
-          ? MainShellRoute.pathPostOffice
-          : FirstLetterGuidePage.path,
-    );
+    context.go(MainShellRoute.pathPostOffice);
+  }
+
+  Future<void> _continueAsGuest() async {
+    setState(() => _busy = true);
+    try {
+      await ref.read(authRepositoryProvider).guest();
+      if (!mounted) return;
+      context.go(MainShellRoute.pathPostOffice);
+    } on ApiBusinessException catch (e) {
+      if (!mounted) return;
+      PostalSnack.show(context, e.message, tone: PostalSnackTone.error);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _submit() async {
@@ -301,20 +309,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                               SizedBox(height: compactLayout ? 10 : 14),
-                              PostalTextField(
+                              PostalVerifyCodeField(
                                 controller: _challengeCode,
                                 label: l10n.settingsEmailVerifyCodeLabel,
-                                keyboardType: TextInputType.number,
-                                prefixIcon: Icons.pin_outlined,
-                                textInputAction: TextInputAction.done,
+                                sendLabel: l10n.bindSendCode,
+                                sending: _busy,
+                                enabled: !_busy,
+                                onSend: _sendChallengeCode,
                               ),
                               SizedBox(height: compactLayout ? 10 : 14),
-                              PostalButton(
-                                label: l10n.authLoginChallengeSend,
-                                variant: PostalButtonVariant.secondary,
-                                onPressed: _busy ? null : _sendChallengeCode,
-                              ),
-                              SizedBox(height: compactLayout ? 8 : 10),
                               PostalButton(
                                 label: l10n.authLoginChallengeConfirm,
                                 onPressed: _busy ? null : _confirmChallenge,
@@ -371,6 +374,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   busy: _busy,
                                 ),
                               ),
+                            SizedBox(height: compactLayout ? 10 : 14),
+                            PostalButton(
+                              label: l10n.authContinueAsGuest,
+                              variant: PostalButtonVariant.secondary,
+                              onPressed: _busy ? null : _continueAsGuest,
+                            ),
                           ],
                         ),
                       ),

@@ -222,6 +222,15 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
     }
 
     @Override
+    public long countWaitingMatch() {
+        return count(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::isDelFlag, false)
+                .eq(LetterDomain::getMode, cn.nine.pros.post.client.common.enums.LetterMode.POST_OFFICE.getCode())
+                .eq(LetterDomain::getStatus, LetterBizStatus.PENDING.getCode())
+                .isNull(LetterDomain::getToUserId));
+    }
+
+    @Override
     public boolean tryAssignMatch(long letterId, long toUserId, LocalDateTime matchedAt) {
         return update(new LambdaUpdateWrapper<LetterDomain>()
                 .eq(LetterDomain::getId, letterId)

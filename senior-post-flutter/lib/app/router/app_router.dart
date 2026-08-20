@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_token.dart';
 import '../../core/network/router_refresh.dart';
-import '../../core/session/app_session.dart';
 import '../../features/commerce/my_entitlements_page.dart';
 import '../../features/commerce/shop_page.dart';
 import '../../features/auth/login_page.dart';
@@ -12,8 +11,10 @@ import '../../features/auth/auth_welcome_page.dart';
 import '../../features/auth/onboarding_page.dart';
 import '../../features/auth/social_profile_complete_page.dart';
 import '../../features/auth/register_page.dart';
+import '../../features/auth/bind_email_page.dart';
 import '../../features/auth/forgot_password_page.dart';
 import '../../features/auth/legal_page.dart';
+import '../../features/directory/my_penpals_page.dart';
 import '../../features/directory/user_card_page.dart';
 import '../../features/mailbox/letter_detail_page.dart';
 import '../../features/mailbox/mailbox_archive_page.dart';
@@ -41,7 +42,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: appRootNavigatorKey,
-    initialLocation: LoginRoutes.welcome,
+    initialLocation: MainShellRoute.pathPostOffice,
     refreshListenable: refresh,
     redirect: (context, state) {
       final token = ref.read(authTokenProvider);
@@ -51,42 +52,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         LoginRoutes.onboarding,
         LoginRoutes.login,
         LoginRoutes.register,
+        LoginRoutes.bindEmail,
         LoginRoutes.forgotPassword,
         LoginRoutes.socialComplete,
         LoginRoutes.legalTerms,
         LoginRoutes.legalPrivacy,
       };
       final loggedIn = token != null && token.isNotEmpty;
+      // 无 token 时只允许登录/绑定相关页；主路径应在启动时已 guest。
       if (!loggedIn && !authPaths.contains(loc)) {
-        return LoginRoutes.welcome;
+        return LoginRoutes.login;
       }
-      // WHY: 移动端常见体验是“冷启动自动回到首页”，
-      // 仅保留资料补全页作为登录后仍可停留的例外路径。
-      if (loggedIn &&
-          authPaths.contains(loc) &&
-          loc != LoginRoutes.socialComplete) {
-        final user = ref.read(appSessionProvider).user;
-        // 首封信未完成时先进引导，而不是直接进邮局。
-        if (user.id.isNotEmpty && user.firstLetterDone != true) {
-          return FirstLetterGuidePage.path;
-        }
+      if (loc == MainShellRoute.pathPenPals) {
+        return MainShellRoute.pathMailbox;
+      }
+      if (loc == FirstLetterGuidePage.path) {
         return MainShellRoute.pathPostOffice;
-      }
-      // 已登录且未完成首封信：主壳路径强制进引导（compose / 引导页本身放行）。
-      if (loggedIn) {
-        final user = ref.read(appSessionProvider).user;
-        final needsFirst = user.id.isNotEmpty && user.firstLetterDone != true;
-        final onMainShell =
-            loc == MainShellRoute.pathPostOffice ||
-            loc == MainShellRoute.pathPenPals ||
-            loc == MainShellRoute.pathMailbox ||
-            loc == MainShellRoute.pathProfile;
-        if (needsFirst && onMainShell) {
-          return FirstLetterGuidePage.path;
-        }
-        if (!needsFirst && loc == FirstLetterGuidePage.path) {
-          return MainShellRoute.pathPostOffice;
-        }
       }
       return null;
     },
@@ -110,6 +91,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: LoginRoutes.register,
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: LoginRoutes.bindEmail,
+        builder: (context, state) => const BindEmailPage(),
       ),
       GoRoute(
         path: LoginRoutes.forgotPassword,
@@ -138,11 +123,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: MainShellRoute.pathMailbox,
-        builder: (context, state) => const MainShell(initialIndex: 2),
+        builder: (context, state) => const MainShell(initialIndex: 1),
       ),
       GoRoute(
         path: MainShellRoute.pathProfile,
-        builder: (context, state) => const MainShell(initialIndex: 3),
+        builder: (context, state) => const MainShell(initialIndex: 2),
       ),
       GoRoute(
         path: '/user/:id',
@@ -174,6 +159,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/mailbox/archive',
         builder: (context, state) => const MailboxArchivePage(),
+      ),
+      GoRoute(
+        path: MyPenpalsPage.path,
+        builder: (context, state) => const MyPenpalsPage(),
       ),
       GoRoute(
         path: '/compose',

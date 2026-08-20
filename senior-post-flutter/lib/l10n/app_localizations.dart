@@ -164,6 +164,252 @@ abstract class AppLocalizations {
   /// **'Write your first letter and wait for a reply'**
   String get postOfficeTodayHint;
 
+  /// No description provided for @postOfficeWritePostOfficeWaitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'To a kindred spirit (waiting required)'**
+  String get postOfficeWritePostOfficeWaitHint;
+
+  /// No description provided for @mailboxMyPenpals.
+  ///
+  /// In en, this message translates to:
+  /// **'My pen pals'**
+  String get mailboxMyPenpals;
+
+  /// No description provided for @bindAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind account'**
+  String get bindAccountTitle;
+
+  /// No description provided for @bindAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind an email or Google account so you can keep your letters if you change phones.'**
+  String get bindAccountHint;
+
+  /// No description provided for @bindAccountSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind'**
+  String get bindAccountSubmit;
+
+  /// No description provided for @bindChangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change binding'**
+  String get bindChangeTitle;
+
+  /// No description provided for @bindChangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your letters stay on this account. After you change, sign in with the new email or Google next time.'**
+  String get bindChangeHint;
+
+  /// No description provided for @bindChangeCurrentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current return address'**
+  String get bindChangeCurrentLabel;
+
+  /// No description provided for @bindAccountSubmitChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change binding'**
+  String get bindAccountSubmitChange;
+
+  /// No description provided for @bindMethodEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get bindMethodEmail;
+
+  /// No description provided for @bindMethodGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google'**
+  String get bindMethodGoogle;
+
+  /// No description provided for @bindGoogleSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind with Google'**
+  String get bindGoogleSubmit;
+
+  /// No description provided for @bindGoogleSubmitChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to Google'**
+  String get bindGoogleSubmitChange;
+
+  /// No description provided for @bindGoogleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your Google account. You can sign in on a new phone with the same Google ID.'**
+  String get bindGoogleHint;
+
+  /// No description provided for @bindCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get bindCodeLabel;
+
+  /// No description provided for @bindCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get bindCodeHint;
+
+  /// No description provided for @bindSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get bindSendCode;
+
+  /// No description provided for @bindCodeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent. Please check your inbox.'**
+  String get bindCodeSent;
+
+  /// No description provided for @bindSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set'**
+  String get bindSuccessTitle;
+
+  /// No description provided for @bindSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is saved. On a new phone, sign in with the same email or Google account to keep your letters.'**
+  String get bindSuccessBody;
+
+  /// No description provided for @bindSuccessChangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Binding updated'**
+  String get bindSuccessChangeTitle;
+
+  /// No description provided for @bindSuccessChangeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Next time, sign in with the new email or Google. Your letters stay on this account.'**
+  String get bindSuccessChangeBody;
+
+  /// No description provided for @bindSuccessOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get bindSuccessOk;
+
+  /// No description provided for @bindPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your letter is on its way'**
+  String get bindPromptTitle;
+
+  /// No description provided for @bindPromptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind an account so you don’t lose letters if you switch phones. You can skip for now.'**
+  String get bindPromptBody;
+
+  /// No description provided for @bindPromptLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get bindPromptLater;
+
+  /// No description provided for @bindPromptNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind now'**
+  String get bindPromptNow;
+
+  /// No description provided for @composeOneSentenceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Even one sentence is enough'**
+  String get composeOneSentenceHint;
+
+  /// No description provided for @profileBindAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind account'**
+  String get profileBindAccount;
+
+  /// No description provided for @profileReturnAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Return address'**
+  String get profileReturnAddressLabel;
+
+  /// No description provided for @profileReturnAddressBind.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind'**
+  String get profileReturnAddressBind;
+
+  /// No description provided for @profileReturnAddressChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get profileReturnAddressChange;
+
+  /// No description provided for @profileReturnAddressEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set yet'**
+  String get profileReturnAddressEmpty;
+
+  /// No description provided for @bindRegisteredReadonlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your sign-in email. It cannot be changed here. Use Forgot password to reset the password.'**
+  String get bindRegisteredReadonlyHint;
+
+  /// No description provided for @profileBindAccountUnboundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind so you can keep letters on a new phone'**
+  String get profileBindAccountUnboundHint;
+
+  /// No description provided for @profileBindAccountBoundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bound. Tap to change'**
+  String get profileBindAccountBoundHint;
+
+  /// No description provided for @profileBindAccountBoundEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Bound to {email}. Tap to change'**
+  String profileBindAccountBoundEmail(String email);
+
+  /// No description provided for @profileBindAccountBoundGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bound to Google. Tap to change'**
+  String get profileBindAccountBoundGoogle;
+
+  /// No description provided for @profileBindAccountBoundGoogleEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Bound to Google ({email}). Tap to change'**
+  String profileBindAccountBoundGoogleEmail(String email);
+
+  /// No description provided for @profileBindStampPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted'**
+  String get profileBindStampPosted;
+
+  /// No description provided for @authContinueAsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without signing in'**
+  String get authContinueAsGuest;
+
   /// No description provided for @postOfficeWriteLetter.
   ///
   /// In en, this message translates to:
@@ -2717,7 +2963,7 @@ abstract class AppLocalizations {
   /// No description provided for @timeLetterEmptySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Write to your future self or a postal friend.'**
+  /// **'Write a time letter from the post office home.'**
   String get timeLetterEmptySubtitle;
 
   /// No description provided for @timeLetterLoadError.

@@ -29,6 +29,61 @@
   "a11yTabMailbox": "Mailbox: received, sent and time letters",
   "postOfficeGreeting": "Good morning",
   "postOfficeTodayHint": "Write your first letter and wait for a reply",
+  "postOfficeWritePostOfficeWaitHint": "To a kindred spirit (waiting required)",
+  "mailboxMyPenpals": "My pen pals",
+  "bindAccountTitle": "Bind account",
+  "bindAccountHint": "Bind an email or Google account so you can keep your letters if you change phones.",
+  "bindAccountSubmit": "Bind",
+  "bindChangeTitle": "Change binding",
+  "bindChangeHint": "Your letters stay on this account. After you change, sign in with the new email or Google next time.",
+  "bindChangeCurrentLabel": "Current return address",
+  "bindAccountSubmitChange": "Change binding",
+  "bindMethodEmail": "Email",
+  "bindMethodGoogle": "Google",
+  "bindGoogleSubmit": "Bind with Google",
+  "bindGoogleSubmitChange": "Switch to Google",
+  "bindGoogleHint": "Use your Google account. You can sign in on a new phone with the same Google ID.",
+  "bindCodeLabel": "Verification code",
+  "bindCodeHint": "6-digit code",
+  "bindSendCode": "Send",
+  "bindCodeSent": "Code sent. Please check your inbox.",
+  "bindSuccessTitle": "You're all set",
+  "bindSuccessBody": "Your account is saved. On a new phone, sign in with the same email or Google account to keep your letters.",
+  "bindSuccessChangeTitle": "Binding updated",
+  "bindSuccessChangeBody": "Next time, sign in with the new email or Google. Your letters stay on this account.",
+  "bindSuccessOk": "OK",
+  "bindPromptTitle": "Your letter is on its way",
+  "bindPromptBody": "Bind an account so you don’t lose letters if you switch phones. You can skip for now.",
+  "bindPromptLater": "Later",
+  "bindPromptNow": "Bind now",
+  "composeOneSentenceHint": "Even one sentence is enough",
+  "profileBindAccount": "Bind account",
+  "profileReturnAddressLabel": "Return address",
+  "profileReturnAddressBind": "Bind",
+  "profileReturnAddressChange": "Change",
+  "profileReturnAddressEmpty": "Not set yet",
+  "bindRegisteredReadonlyHint": "This is your sign-in email. It cannot be changed here. Use Forgot password to reset the password.",
+  "profileBindAccountUnboundHint": "Bind so you can keep letters on a new phone",
+  "profileBindAccountBoundHint": "Bound. Tap to change",
+  "profileBindAccountBoundEmail": "Bound to {email}. Tap to change",
+  "@profileBindAccountBoundEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "profileBindAccountBoundGoogle": "Bound to Google. Tap to change",
+  "profileBindAccountBoundGoogleEmail": "Bound to Google ({email}). Tap to change",
+  "@profileBindAccountBoundGoogleEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "profileBindStampPosted": "Posted",
+  "authContinueAsGuest": "Continue without signing in",
   "postOfficeWriteLetter": "Write a letter",
   "postOfficeFreeQuotaHint": "{count} free letters left today",
   "@postOfficeFreeQuotaHint": {
@@ -601,7 +656,7 @@
   "timeLetterTabInbox": "Inbox",
   "timeLetterTabMemorial": "Memorial",
   "timeLetterEmptyTitle": "No time letters yet",
-  "timeLetterEmptySubtitle": "Write to your future self or a postal friend.",
+  "timeLetterEmptySubtitle": "Write a time letter from the post office home.",
   "timeLetterLoadError": "Could not load time letters",
   "timeLetterSealedHidden": "Sealed — content hidden until delivery",
   "timeLetterTapToOpen": "Tap to open when delivered",

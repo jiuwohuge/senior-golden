@@ -13,6 +13,7 @@ public interface UserService extends IService<UserDomain> {
 
     void upsert(UserDTO userDTO);
 
+    /** 按主键查询用户；已逻辑删除（全局 TableLogic）视为不存在，返回 null。 */
     UserDTO findById(Long id);
 
     void delByIds(List<Long> ids);

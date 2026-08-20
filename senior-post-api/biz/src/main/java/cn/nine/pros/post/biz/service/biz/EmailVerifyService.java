@@ -32,6 +32,7 @@ public class EmailVerifyService {
 
     public static final String PURPOSE_EMAIL_VERIFY = "email_verify";
     public static final String PURPOSE_LOGIN_CHALLENGE = "login_challenge";
+    public static final String PURPOSE_BIND_EMAIL = "bind_email";
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -60,6 +61,22 @@ public class EmailVerifyService {
         log.info("email verify code enqueued, userId={}", userId);
     }
 
+    /**
+     * 访客绑定邮箱：向目标邮箱发码（identity 尚未存在）。
+     * 哈希混入邮箱，防止用 A 的验证码绑定 B。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void sendBindEmailCode(long userId, String toEmail) {
+        issueCode(userId, toEmail, PURPOSE_BIND_EMAIL, toEmail);
+        log.info("bind-email code enqueued, userId={}", userId);
+    }
+
+    /** 消费绑定邮箱验证码；邮箱须与发码时一致。 */
+    @Transactional(rollbackFor = Exception.class)
+    public void consumeBindEmailCode(long userId, String toEmail, String rawCode) {
+        consumeCode(userId, rawCode, PURPOSE_BIND_EMAIL, toEmail);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public void confirmEmailVerify(long userId, String rawCode) {
         consumeCode(userId, rawCode, PURPOSE_EMAIL_VERIFY);
@@ -72,7 +89,7 @@ public class EmailVerifyService {
     public void sendLoginChallenge(String rawEmail) {
         String email = rawEmail.trim().toLowerCase();
         UserIdentityDomain ident = userIdentityService.findActiveEmailByUid(email);
-        if (ident == null) {
+        if (ident == null || userService.findById(ident.getUserId()) == null) {
             log.debug("login challenge: unknown email (silent)");
             return;
         }
@@ -87,7 +104,7 @@ public class EmailVerifyService {
     public long confirmLoginChallenge(String rawEmail, String rawCode) {
         String email = rawEmail.trim().toLowerCase();
         UserIdentityDomain ident = userIdentityService.findActiveEmailByUid(email);
-        if (ident == null) {
+        if (ident == null || userService.findById(ident.getUserId()) == null) {
             throw new BadRequestException(appMessages.get("app.error.code.invalid"));
         }
         consumeCode(ident.getUserId(), rawCode, PURPOSE_LOGIN_CHALLENGE);
@@ -103,6 +120,10 @@ public class EmailVerifyService {
     }
 
     private void issueCode(long userId, String toEmail, String purpose) {
+        issueCode(userId, toEmail, purpose, null);
+    }
+
+    private void issueCode(long userId, String toEmail, String purpose, String hashExtra) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hourAgo = now.minusHours(1);
         long recent = passwordResetTokenService.countCreatedSince(userId, purpose, hourAgo);
@@ -111,7 +132,8 @@ public class EmailVerifyService {
         }
         int n = 100_000 + RANDOM.nextInt(900_000);
         String code = String.valueOf(n);
-        String hash = PasswordResetHasher.hexHash(authProperties.getPasswordResetPepper(), userId, code);
+        String hashMaterial = bindHashMaterial(code, hashExtra);
+        String hash = PasswordResetHasher.hexHash(authProperties.getPasswordResetPepper(), userId, hashMaterial);
         PasswordResetTokenDomain row = new PasswordResetTokenDomain();
         row.setUserId(userId);
         row.setCodeHash(hash);
@@ -127,12 +149,18 @@ public class EmailVerifyService {
     }
 
     private void consumeCode(long userId, String rawCode, String purpose) {
+        consumeCode(userId, rawCode, purpose, null);
+    }
+
+    private void consumeCode(long userId, String rawCode, String purpose, String hashExtra) {
         if (!StringUtils.hasText(rawCode)) {
             throw new BadRequestException(appMessages.get("app.error.code.invalid"));
         }
         String code = rawCode.trim();
         LocalDateTime now = LocalDateTime.now();
-        String expectHash = PasswordResetHasher.hexHash(authProperties.getPasswordResetPepper(), userId, code);
+        String hashMaterial = bindHashMaterial(code, hashExtra);
+        String expectHash = PasswordResetHasher.hexHash(
+                authProperties.getPasswordResetPepper(), userId, hashMaterial);
         PasswordResetTokenDomain tok = passwordResetTokenService.findValidByUserPurposeAndHash(
                 userId, purpose, expectHash, now);
         if (tok == null) {
@@ -140,5 +168,13 @@ public class EmailVerifyService {
         }
         tok.setUsedAt(now);
         passwordResetTokenService.updateById(tok);
+    }
+
+    /** 绑定邮箱时把目标邮箱编进哈希，避免串用验证码。 */
+    private static String bindHashMaterial(String code, String hashExtra) {
+        if (!StringUtils.hasText(hashExtra)) {
+            return code;
+        }
+        return code + "\n" + hashExtra.trim().toLowerCase();
     }
 }

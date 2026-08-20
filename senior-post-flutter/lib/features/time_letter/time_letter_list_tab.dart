@@ -5,39 +5,21 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../widgets/postal/postal.dart';
-import '../compose/compose_intent.dart';
+import '../post_office/post_office_remote.dart';
 import 'time_letter_providers.dart';
 import 'time_letter_remote.dart';
 
-class TimeLetterListTab extends ConsumerStatefulWidget {
+/// 信箱「时光信」：只展示列表，写信入口在邮局首页。
+class TimeLetterListTab extends ConsumerWidget {
   const TimeLetterListTab({super.key, required this.onRefresh});
 
   final Future<void> Function() onRefresh;
 
   @override
-  ConsumerState<TimeLetterListTab> createState() => _TimeLetterListTabState();
-}
-
-class _TimeLetterListTabState extends ConsumerState<TimeLetterListTab>
-    with SingleTickerProviderStateMixin {
-  late TabController _inner;
-
-  @override
-  void initState() {
-    super.initState();
-    _inner = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _inner.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final statsAsync = ref.watch(timeLetterStatsProvider);
+    final listAsync = ref.watch(timeLetterAllProvider);
 
     return Column(
       children: [
@@ -70,130 +52,62 @@ class _TimeLetterListTabState extends ConsumerState<TimeLetterListTab>
           loading: () => const SizedBox.shrink(),
           error: (_, __) => const SizedBox.shrink(),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => context.push(
-                    '/compose',
-                    extra: const ComposeIntent(
-                      kind: ComposeKind.selfTimeLetter,
-                    ),
-                  ),
-                  icon: const Icon(Icons.edit_note_outlined),
-                  label: Text(l10n.timeLetterComposeToSelf),
-                ),
-              ),
-            ],
-          ),
-        ),
-        TabBar(
-          controller: _inner,
-          labelColor: PostalTokens.postboxGreen,
-          unselectedLabelColor: PostalTokens.inkTertiary,
-          indicatorColor: PostalTokens.postboxGreen,
-          tabs: [
-            Tab(text: l10n.timeLetterTabOutbox),
-            Tab(text: l10n.timeLetterTabInbox),
-            Tab(text: l10n.timeLetterTabMemorial),
-          ],
-        ),
         Expanded(
-          child: TabBarView(
-            controller: _inner,
-            children: [
-              _LetterList(
-                provider: timeLetterOutboxProvider,
-                onRefresh: widget.onRefresh,
-                isOutbox: true,
+          child: RefreshIndicator(
+            onRefresh: () async {
+              invalidateTimeLetterLists(ref);
+              await onRefresh();
+              await ref.read(timeLetterAllProvider.future);
+            },
+            child: listAsync.when(
+              loading: () => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(
+                    height: 200,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ],
               ),
-              _LetterList(
-                provider: timeLetterInboxProvider,
-                onRefresh: widget.onRefresh,
-                isOutbox: false,
+              error: (e, _) => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  PostalEmptyState(
+                    title: l10n.timeLetterLoadError,
+                    subtitle: '$e',
+                    tone: PostalEmptyTone.error,
+                  ),
+                ],
               ),
-              _LetterList(
-                provider: timeLetterMemorialProvider,
-                onRefresh: widget.onRefresh,
-                isOutbox: null,
-              ),
-            ],
+              data: (items) {
+                if (items.isEmpty) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      PostalEmptyState(
+                        title: l10n.timeLetterEmptyTitle,
+                        subtitle: l10n.timeLetterEmptySubtitle,
+                      ),
+                    ],
+                  );
+                }
+                return ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                  itemCount: items.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (context, i) {
+                    final item = items[i];
+                    final inFlight =
+                        item.daysUntilDelivery != null || item.canCancel;
+                    return _TimeLetterTile(item: item, isOutbox: inFlight);
+                  },
+                );
+              },
+            ),
           ),
         ),
       ],
-    );
-  }
-}
-
-class _LetterList extends ConsumerWidget {
-  const _LetterList({
-    required this.provider,
-    required this.onRefresh,
-    required this.isOutbox,
-  });
-
-  final AutoDisposeFutureProvider<List<TimeLetterItem>> provider;
-  final Future<void> Function() onRefresh;
-  final bool? isOutbox;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final async = ref.watch(provider);
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        ref.invalidate(provider);
-        ref.invalidate(timeLetterStatsProvider);
-        await onRefresh();
-        await ref.read(provider.future);
-      },
-      child: async.when(
-        loading: () => ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: const [
-            SizedBox(
-              height: 200,
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          ],
-        ),
-        error: (e, _) => ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            PostalEmptyState(
-              title: l10n.timeLetterLoadError,
-              subtitle: '$e',
-              tone: PostalEmptyTone.error,
-            ),
-          ],
-        ),
-        data: (items) {
-          if (items.isEmpty) {
-            return ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                PostalEmptyState(
-                  title: l10n.timeLetterEmptyTitle,
-                  subtitle: l10n.timeLetterEmptySubtitle,
-                ),
-              ],
-            );
-          }
-          return ListView.separated(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (context, i) {
-              final item = items[i];
-              return _TimeLetterTile(item: item, isOutbox: isOutbox);
-            },
-          );
-        },
-      ),
     );
   }
 }
@@ -202,17 +116,17 @@ class _TimeLetterTile extends ConsumerWidget {
   const _TimeLetterTile({required this.item, required this.isOutbox});
 
   final TimeLetterItem item;
-  final bool? isOutbox;
+  final bool isOutbox;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final subtitle = item.bodyPreview?.isNotEmpty == true
         ? item.bodyPreview!
-        : (isOutbox == true
+        : (isOutbox
               ? l10n.timeLetterSealedHidden
               : l10n.timeLetterTapToOpen);
-    final trailing = isOutbox == true && item.daysUntilDelivery != null
+    final trailing = isOutbox && item.daysUntilDelivery != null
         ? Text(l10n.timeLetterDaysUntil('${item.daysUntilDelivery}'))
         : null;
 
@@ -248,6 +162,8 @@ class _TimeLetterTile extends ConsumerWidget {
                 if (ok == true) {
                   await ref.read(timeLetterRemoteProvider).cancel(item.id);
                   invalidateTimeLetterLists(ref);
+                  // 取消不计入当日额度，首页剩余次数一并刷新。
+                  ref.invalidate(postOfficeHomeProvider);
                 }
               }
             : null,
@@ -275,7 +191,7 @@ class _TimeLetterTile extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.peerNickname ?? l10n.timeLetterComposeToSelf,
+                      item.peerNickname ?? l10n.composeRecipientSelf,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),

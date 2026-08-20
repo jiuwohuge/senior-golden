@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme/postal_tokens.dart';
 import 'postal_oss_network_image.dart';
 
-/// 复古头像：占位采用首字母 + 邮票框 + 牛皮纸边。
+/// 复古头像：有昵称显示首字，无图无昵称用邮筒图标（避免问号占位）。
 class PostalAvatar extends ConsumerWidget {
   const PostalAvatar({
     super.key,
@@ -22,7 +22,7 @@ class PostalAvatar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef _) {
     final initial = (name == null || name!.trim().isEmpty)
-        ? '?'
+        ? ''
         : name!.trim().characters.first.toUpperCase();
 
     final inner = Container(
@@ -48,10 +48,10 @@ class PostalAvatar extends ConsumerWidget {
                 fit: BoxFit.cover,
                 width: size,
                 height: size,
-                errorBuilder: (_) => _initialText(initial),
+                errorBuilder: (_) => _placeholder(initial),
               ),
             )
-          : _initialText(initial),
+          : _placeholder(initial),
     );
 
     if (!framed) return inner;
@@ -66,7 +66,14 @@ class PostalAvatar extends ConsumerWidget {
     );
   }
 
-  Widget _initialText(String initial) {
+  Widget _placeholder(String initial) {
+    if (initial.isEmpty) {
+      return Icon(
+        Icons.local_post_office_outlined,
+        color: PostalTokens.postboxGreen,
+        size: size * 0.46,
+      );
+    }
     return Text(
       initial,
       style: TextStyle(

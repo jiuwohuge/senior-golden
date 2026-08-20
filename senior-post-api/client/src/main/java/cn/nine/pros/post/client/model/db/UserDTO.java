@@ -68,6 +68,8 @@ public class UserDTO extends AbstractAuditableDTO {
     private Boolean emailVerified;
     @Schema(description = "是否已完成首封信引导")
     private Boolean firstLetterDone;
+    @Schema(description = "开户方式：guest | email | google")
+    private String signupChannel;
     /**
      * 个人简介
      */

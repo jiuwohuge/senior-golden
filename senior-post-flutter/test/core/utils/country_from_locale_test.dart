@@ -38,4 +38,14 @@ void main() {
       expect(countryCodeForAppLocale(const Locale('zh', 'HK'), countries), 'CN');
     });
   });
+
+  group('countryCodeFromLocale', () {
+    test('zh maps to CN without bootstrap list', () {
+      expect(countryCodeFromLocale(const Locale('zh')), 'CN');
+    });
+
+    test('en maps to US', () {
+      expect(countryCodeFromLocale(const Locale('en', 'GB')), 'US');
+    });
+  });
 }

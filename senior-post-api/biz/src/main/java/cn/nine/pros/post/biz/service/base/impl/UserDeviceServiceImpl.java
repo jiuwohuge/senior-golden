@@ -65,6 +65,42 @@ public class UserDeviceServiceImpl extends ServiceImpl<UserDeviceMapper, UserDev
     }
 
     @Override
+    public UserDeviceDomain findLatestActiveByDeviceUuid(String deviceUuid) {
+        if (deviceUuid == null || deviceUuid.isBlank()) {
+            return null;
+        }
+        return getOne(new LambdaQueryWrapper<UserDeviceDomain>()
+                .eq(UserDeviceDomain::getDeviceUuid, deviceUuid.trim())
+                .eq(UserDeviceDomain::isDelFlag, false)
+                .orderByDesc(UserDeviceDomain::getUpdatedAt)
+                .last("LIMIT 1"));
+    }
+
+    @Override
+    public List<UserDeviceDomain> listByDeviceUuidIncludingDeleted(String deviceUuid) {
+        if (deviceUuid == null || deviceUuid.isBlank()) {
+            return List.of();
+        }
+        return getBaseMapper().selectByDeviceUuidIncludingDeleted(deviceUuid.trim());
+    }
+
+    @Override
+    public int deactivateActiveByDeviceUuid(String deviceUuid) {
+        if (deviceUuid == null || deviceUuid.isBlank()) {
+            return 0;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        Long auditUserId = MyRequestContextHolder.userId();
+        boolean ok = update(new com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<UserDeviceDomain>()
+                .eq(UserDeviceDomain::getDeviceUuid, deviceUuid.trim())
+                .eq(UserDeviceDomain::isDelFlag, false)
+                .set(UserDeviceDomain::isDelFlag, true)
+                .set(UserDeviceDomain::getUpdatedAt, now)
+                .set(UserDeviceDomain::getUpdatedBy, auditUserId));
+        return ok ? 1 : 0;
+    }
+
+    @Override
     public java.util.List<UserDeviceDomain> listActiveByUserId(long userId) {
         return list(new LambdaQueryWrapper<UserDeviceDomain>()
                 .eq(UserDeviceDomain::getUserId, userId)

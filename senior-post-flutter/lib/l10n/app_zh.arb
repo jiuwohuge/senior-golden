@@ -17,6 +17,61 @@
   "a11yTabMailbox": "信箱：收到的信、发出的信与时光信",
   "postOfficeGreeting": "早上好",
   "postOfficeTodayHint": "写下第一封信，等待有缘人回信",
+  "postOfficeWritePostOfficeWaitHint": "寄给有缘人（需要等待）",
+  "mailboxMyPenpals": "我的笔友",
+  "bindAccountTitle": "绑定账号",
+  "bindAccountHint": "绑定邮箱或 Google，换手机也能找回信件。",
+  "bindAccountSubmit": "绑定",
+  "bindChangeTitle": "更换绑定",
+  "bindChangeHint": "信件仍在这个账号里。更换后，下次请用新邮箱或 Google 登录。",
+  "bindChangeCurrentLabel": "当前回邮地址",
+  "bindAccountSubmitChange": "更换绑定",
+  "bindMethodEmail": "邮箱",
+  "bindMethodGoogle": "Google",
+  "bindGoogleSubmit": "使用 Google 绑定",
+  "bindGoogleSubmitChange": "改用 Google 绑定",
+  "bindGoogleHint": "用 Google 账号绑定后，换机用同一个 Google 登录即可继续读信写信。",
+  "bindCodeLabel": "验证码",
+  "bindCodeHint": "6 位数字",
+  "bindSendCode": "发送",
+  "bindCodeSent": "验证码已发送，请查收邮箱。",
+  "bindSuccessTitle": "绑定成功",
+  "bindSuccessBody": "温馨提示：账号已妥善保管。换手机时用同一邮箱或 Google 登录，就能继续读信、写信。",
+  "bindSuccessChangeTitle": "已更换绑定",
+  "bindSuccessChangeBody": "下次请用新邮箱或 Google 登录。信件还在这个账号里。",
+  "bindSuccessOk": "好的",
+  "bindPromptTitle": "信已在路上",
+  "bindPromptBody": "建议绑定账号，避免换机丢信。也可以先跳过。",
+  "bindPromptLater": "稍后再说",
+  "bindPromptNow": "去绑定",
+  "composeOneSentenceHint": "一句话也可以",
+  "profileBindAccount": "绑定账号",
+  "profileReturnAddressLabel": "回邮地址",
+  "profileReturnAddressBind": "去绑定",
+  "profileReturnAddressChange": "更换",
+  "profileReturnAddressEmpty": "还没写上",
+  "bindRegisteredReadonlyHint": "这是登录邮箱，不能在这里更换。改密码请用「忘记密码」。",
+  "profileBindAccountUnboundHint": "绑定后换机也能找回信件",
+  "profileBindAccountBoundHint": "已绑定，点此更换",
+  "profileBindAccountBoundEmail": "已绑定 {email}，点此更换",
+  "@profileBindAccountBoundEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "profileBindAccountBoundGoogle": "已绑定 Google，点此更换",
+  "profileBindAccountBoundGoogleEmail": "已绑定 Google（{email}），点此更换",
+  "@profileBindAccountBoundGoogleEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "profileBindStampPosted": "已贴",
+  "authContinueAsGuest": "先逛逛，稍后再登录",
   "postOfficeWriteLetter": "写信",
   "postOfficeFreeQuotaHint": "今日还可免费寄 {count} 封",
   "@postOfficeFreeQuotaHint": {
@@ -589,7 +644,7 @@
   "timeLetterTabInbox": "收件箱",
   "timeLetterTabMemorial": "纪念册",
   "timeLetterEmptyTitle": "还没有时光信",
-  "timeLetterEmptySubtitle": "写给未来的自己，或互关笔友。",
+  "timeLetterEmptySubtitle": "去邮局首页写一封时光信吧。",
   "timeLetterLoadError": "无法加载时光信",
   "timeLetterSealedHidden": "已封缄，送达前不可查看正文",
   "timeLetterTapToOpen": "送达后可拆信阅读",
@@ -882,7 +937,7 @@
   "writeDestinationTitle": "想写给谁？",
   "writeDestinationPostOffice": "寄给有缘人",
   "writeDestinationPostOfficeSub": "投进邮局，等待匹配一位笔友",
-  "writeDestinationSelfTime": "寄给未来的自己",
+  "writeDestinationSelfTime": "写给未来的自己",
   "writeDestinationSelfTimeSub": "时光信，到选定日期再拆阅",
   "composeAddParagraph": "添加段落",
   "composeRemoveParagraph": "删除段落",

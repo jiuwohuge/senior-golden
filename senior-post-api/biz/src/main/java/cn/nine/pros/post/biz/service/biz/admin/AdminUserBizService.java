@@ -13,6 +13,7 @@ import cn.nine.pros.post.biz.model.mapstruct.UserMapstruct;
 import cn.nine.pros.post.biz.service.base.ConfigService;
 import cn.nine.pros.post.biz.service.base.DailyQuotaClaimService;
 import cn.nine.pros.post.biz.service.base.LetterService;
+import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.base.UserIdentityService;
 import cn.nine.pros.post.biz.service.base.UserService;
@@ -71,6 +72,7 @@ public class AdminUserBizService {
     private final ConfigService configService;
     private final DailyQuotaClaimService dailyQuotaClaimService;
     private final LetterService letterService;
+    private final TimeLetterService timeLetterService;
 
     /**
      * 多维筛选 + 排序分页查询用户；附加当日免费额度快照。
@@ -315,7 +317,7 @@ public class AdminUserBizService {
             throw new BadRequestException(appMessages.get("admin.error.user.badQuota"));
         }
         DailyQuotaSupport.Snapshot before = DailyQuotaSupport.resolve(
-                id, user, configService, dailyQuotaClaimService, letterService);
+                id, user, configService, dailyQuotaClaimService, letterService, timeLetterService);
         int newCap = before.sentToday() + remaining;
         dailyQuotaClaimService.upsertQuotaAmount(id, LocalDate.now(), newCap, auditUserId());
         adminOperationRecorder.record(
@@ -334,7 +336,7 @@ public class AdminUserBizService {
             return;
         }
         DailyQuotaSupport.Snapshot snap = DailyQuotaSupport.resolve(
-                dto.getId(), dto, configService, dailyQuotaClaimService, letterService);
+                dto.getId(), dto, configService, dailyQuotaClaimService, letterService, timeLetterService);
         dto.setQuotaClaimedToday(snap.claimed());
         dto.setSentToday(snap.sentToday());
         dto.setDailyQuotaCap(snap.cap());

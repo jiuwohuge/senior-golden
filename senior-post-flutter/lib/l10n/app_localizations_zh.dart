@@ -42,6 +42,133 @@ class AppLocalizationsZh extends AppLocalizations {
   String get postOfficeTodayHint => '写下第一封信，等待有缘人回信';
 
   @override
+  String get postOfficeWritePostOfficeWaitHint => '寄给有缘人（需要等待）';
+
+  @override
+  String get mailboxMyPenpals => '我的笔友';
+
+  @override
+  String get bindAccountTitle => '绑定账号';
+
+  @override
+  String get bindAccountHint => '绑定邮箱或 Google，换手机也能找回信件。';
+
+  @override
+  String get bindAccountSubmit => '绑定';
+
+  @override
+  String get bindChangeTitle => '更换绑定';
+
+  @override
+  String get bindChangeHint => '信件仍在这个账号里。更换后，下次请用新邮箱或 Google 登录。';
+
+  @override
+  String get bindChangeCurrentLabel => '当前回邮地址';
+
+  @override
+  String get bindAccountSubmitChange => '更换绑定';
+
+  @override
+  String get bindMethodEmail => '邮箱';
+
+  @override
+  String get bindMethodGoogle => 'Google';
+
+  @override
+  String get bindGoogleSubmit => '使用 Google 绑定';
+
+  @override
+  String get bindGoogleSubmitChange => '改用 Google 绑定';
+
+  @override
+  String get bindGoogleHint => '用 Google 账号绑定后，换机用同一个 Google 登录即可继续读信写信。';
+
+  @override
+  String get bindCodeLabel => '验证码';
+
+  @override
+  String get bindCodeHint => '6 位数字';
+
+  @override
+  String get bindSendCode => '发送';
+
+  @override
+  String get bindCodeSent => '验证码已发送，请查收邮箱。';
+
+  @override
+  String get bindSuccessTitle => '绑定成功';
+
+  @override
+  String get bindSuccessBody => '温馨提示：账号已妥善保管。换手机时用同一邮箱或 Google 登录，就能继续读信、写信。';
+
+  @override
+  String get bindSuccessChangeTitle => '已更换绑定';
+
+  @override
+  String get bindSuccessChangeBody => '下次请用新邮箱或 Google 登录。信件还在这个账号里。';
+
+  @override
+  String get bindSuccessOk => '好的';
+
+  @override
+  String get bindPromptTitle => '信已在路上';
+
+  @override
+  String get bindPromptBody => '建议绑定账号，避免换机丢信。也可以先跳过。';
+
+  @override
+  String get bindPromptLater => '稍后再说';
+
+  @override
+  String get bindPromptNow => '去绑定';
+
+  @override
+  String get composeOneSentenceHint => '一句话也可以';
+
+  @override
+  String get profileBindAccount => '绑定账号';
+
+  @override
+  String get profileReturnAddressLabel => '回邮地址';
+
+  @override
+  String get profileReturnAddressBind => '去绑定';
+
+  @override
+  String get profileReturnAddressChange => '更换';
+
+  @override
+  String get profileReturnAddressEmpty => '还没写上';
+
+  @override
+  String get bindRegisteredReadonlyHint => '这是登录邮箱，不能在这里更换。改密码请用「忘记密码」。';
+
+  @override
+  String get profileBindAccountUnboundHint => '绑定后换机也能找回信件';
+
+  @override
+  String get profileBindAccountBoundHint => '已绑定，点此更换';
+
+  @override
+  String profileBindAccountBoundEmail(String email) {
+    return '已绑定 $email，点此更换';
+  }
+
+  @override
+  String get profileBindAccountBoundGoogle => '已绑定 Google，点此更换';
+
+  @override
+  String profileBindAccountBoundGoogleEmail(String email) {
+    return '已绑定 Google（$email），点此更换';
+  }
+
+  @override
+  String get profileBindStampPosted => '已贴';
+
+  @override
+  String get authContinueAsGuest => '先逛逛，稍后再登录';
+
+  @override
   String get postOfficeWriteLetter => '写信';
 
   @override
@@ -1379,7 +1506,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get timeLetterEmptyTitle => '还没有时光信';
 
   @override
-  String get timeLetterEmptySubtitle => '写给未来的自己，或互关笔友。';
+  String get timeLetterEmptySubtitle => '去邮局首页写一封时光信吧。';
 
   @override
   String get timeLetterLoadError => '无法加载时光信';
@@ -2051,7 +2178,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get writeDestinationPostOfficeSub => '投进邮局，等待匹配一位笔友';
 
   @override
-  String get writeDestinationSelfTime => '寄给未来的自己';
+  String get writeDestinationSelfTime => '写给未来的自己';
 
   @override
   String get writeDestinationSelfTimeSub => '时光信，到选定日期再拆阅';

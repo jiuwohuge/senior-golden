@@ -184,6 +184,17 @@ public class TimeLetterServiceImpl extends ServiceImpl<TimeLetterMapper, TimeLet
     }
 
     @Override
+    public long countSealedQuotaBySenderBetween(long senderId, LocalDateTime start, LocalDateTime end) {
+        return count(new LambdaQueryWrapper<TimeLetterDomain>()
+                .eq(TimeLetterDomain::getSenderId, senderId)
+                .eq(TimeLetterDomain::isDelFlag, false)
+                .ge(TimeLetterDomain::getSealedAt, start)
+                .le(TimeLetterDomain::getSealedAt, end)
+                .ne(TimeLetterDomain::getStatus, TimeLetterStatus.DRAFT.getCode())
+                .ne(TimeLetterDomain::getStatus, TimeLetterStatus.CANCELLED.getCode()));
+    }
+
+    @Override
     public long countSealedToRecipientSince(long senderId, long recipientId, LocalDateTime since) {
         return count(new LambdaQueryWrapper<TimeLetterDomain>()
                 .eq(TimeLetterDomain::getSenderId, senderId)

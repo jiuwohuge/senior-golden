@@ -22,6 +22,18 @@ public interface UserDeviceService extends IService<UserDeviceDomain> {
     /** 用户 + deviceUuid 未删除设备。 */
     UserDeviceDomain findActiveByUserIdAndDeviceUuid(long userId, String deviceUuid);
 
+    /** 按 deviceUuid 取最近一条未删除设备（静默 guest 幂等）。 */
+    UserDeviceDomain findLatestActiveByDeviceUuid(String deviceUuid);
+
+    /**
+     * 同一 deviceUuid 的全部设备行（含已软删设备，关闭 TableLogic）。
+     * 用于 guest 找回本机账号；对应 user 仍由 {@code UserService.findById} 自动排除已删用户。
+     */
+    List<UserDeviceDomain> listByDeviceUuidIncludingDeleted(String deviceUuid);
+
+    /** 软删该设备全部未删除记录（管理拉黑/解绑设备）。 */
+    int deactivateActiveByDeviceUuid(String deviceUuid);
+
 
     java.util.List<UserDeviceDomain> listActiveByUserId(long userId);
 

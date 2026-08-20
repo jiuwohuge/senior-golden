@@ -4,6 +4,7 @@ import cn.nine.pros.post.biz.model.domain.DailyQuotaClaimDomain;
 import cn.nine.pros.post.biz.service.base.ConfigService;
 import cn.nine.pros.post.biz.service.base.DailyQuotaClaimService;
 import cn.nine.pros.post.biz.service.base.LetterService;
+import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.client.model.db.UserDTO;
 
 import java.time.LocalDate;
@@ -11,7 +12,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
- * 每日免费发信额度：已领取时以 claim.quota_amount 为当日上限（管理员可调），未使用不跨日累计。
+ * 每日免费发信额度：邮局信 + 已封存时光信共用 {@code letter.daily_quota}；
+ * 管理员改过当日 cap 时以 claim.quota_amount 为准，未使用不跨日累计。
  */
 public final class DailyQuotaSupport {
 
@@ -26,7 +28,7 @@ public final class DailyQuotaSupport {
      *
      * @param claimed     是否已领取（或 VIP 视为已领）
      * @param cap         当日上限（claim.quota_amount；未领为 0）
-     * @param sentToday   今日已计入额度的发信数
+     * @param sentToday   今日已计入额度的发信数（标准信 + 已封存时光信）
      * @param remaining   剩余次数
      * @param vip         是否 VIP
      * @param configQuota 全局配置默认额度（展示用）
@@ -52,26 +54,27 @@ public final class DailyQuotaSupport {
             UserDTO user,
             ConfigService configService,
             DailyQuotaClaimService dailyQuotaClaimService,
-            LetterService letterService) {
+            LetterService letterService,
+            TimeLetterService timeLetterService) {
         LocalDate today = LocalDate.now();
         int configQuota = configQuota(configService);
         LocalDateTime dayStart = today.atStartOfDay();
         LocalDateTime dayEnd = today.atTime(LocalTime.MAX);
-        int sentToday = (int) letterService.countSentQuotaByFromUserBetween(userId, dayStart, dayEnd);
+        int lettersToday = (int) letterService.countSentQuotaByFromUserBetween(userId, dayStart, dayEnd);
+        int timeLettersToday = (int) timeLetterService.countSealedQuotaBySenderBetween(
+                userId, dayStart, dayEnd);
+        int sentToday = lettersToday + timeLettersToday;
         boolean vip = user != null && Boolean.TRUE.equals(user.getIsVip());
         DailyQuotaClaimDomain claim = dailyQuotaClaimService.findClaim(userId, today);
-        boolean claimed = claim != null || vip;
-        int cap = 0;
+        // 冷启动：未领取也按配置额度静默发放，不再拦截发信。
+        boolean claimed = true;
+        int cap = configQuota;
         if (claim != null && claim.getQuotaAmount() != null) {
             cap = claim.getQuotaAmount();
-        } else if (vip) {
-            cap = configQuota;
         }
         int remaining;
         if (vip) {
             remaining = configQuota;
-        } else if (claim == null) {
-            remaining = 0;
         } else {
             remaining = Math.max(0, cap - sentToday);
         }

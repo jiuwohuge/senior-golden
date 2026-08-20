@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ import '../../core/api/api_exception.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
+import '../post_office/post_office_remote.dart';
 import 'time_letter_providers.dart';
 import 'time_letter_remote.dart';
 import 'time_letter_seal_slider.dart';
@@ -71,10 +73,13 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
   }
 
   Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final min = DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
+    final initial = _deliveryDate.isBefore(min) ? min : _deliveryDate;
     final picked = await showDatePicker(
       context: context,
-      initialDate: _deliveryDate,
-      firstDate: DateTime.now(),
+      initialDate: initial,
+      firstDate: min,
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
     if (picked != null) {
@@ -109,6 +114,8 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
           );
       await ref.read(authRepositoryProvider).refreshSessionFromServer();
       invalidateTimeLetterLists(ref);
+      // 时光信计入当日发信额度，首页剩余次数需立即刷新。
+      ref.invalidate(postOfficeHomeProvider);
       if (!mounted) return;
       await showDialog<void>(
         context: context,
@@ -130,6 +137,7 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
       );
       if (mounted) context.pop(result.id);
     } catch (e) {
+      debugPrint('time-letter compose seal failed: $e');
       final biz = apiBusinessExceptionFrom(e);
       if (mounted) {
         PostalSnack.show(

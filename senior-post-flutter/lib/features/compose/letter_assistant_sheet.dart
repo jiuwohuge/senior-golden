@@ -26,6 +26,11 @@ extension on LetterAssistantHelpMode {
   bool get isInspire => this == LetterAssistantHelpMode.inspire;
 }
 
+/// P0 只暴露润色 natural 与灵感 inspire，降低写信门槛。
+const _p0AssistantModes = [
+  LetterAssistantHelpMode.natural,
+  LetterAssistantHelpMode.inspire,
+];
 /// 全屏信件助手：润色对照替换，或灵感选题追加。
 /// 返回最终正文（替换/追加后）或 null（保留/关闭）。
 /// 不可点遮罩关闭，须点顶部关闭或「保留原文」。
@@ -201,7 +206,7 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
         Expanded(
           child: ListView(
             children: [
-              for (final m in LetterAssistantHelpMode.values)
+              for (final m in _p0AssistantModes)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Material(

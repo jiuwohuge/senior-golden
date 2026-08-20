@@ -29,6 +29,10 @@ class AppUser {
     this.longitude,
     this.writingStyle,
     this.firstLetterDone,
+    this.bound = false,
+    this.bindProvider,
+    this.signupChannel,
+    this.canBind = false,
   });
 
   final String id;
@@ -78,6 +82,18 @@ class AppUser {
 
   /// 是否已完成 §2.8 首封信引导（null 视为未完成）
   final bool? firstLetterDone;
+
+  /// 是否已绑定邮箱/Google 身份。
+  final bool bound;
+
+  /// 登录身份提供方：`email` | `google`，未绑定为 null。
+  final String? bindProvider;
+
+  /// 开户方式：`guest` | `email` | `google`。
+  final String? signupChannel;
+
+  /// 是否允许绑定或更换登录方式（仅 guest 开户）。
+  final bool canBind;
 
   int get age => DateTime.now().year - birthYear;
 
@@ -142,6 +158,11 @@ class AppUser {
       longitude: (m['longitude'] as num?)?.toDouble(),
       writingStyle: m['writingStyle'] as String?,
       firstLetterDone: m['firstLetterDone'] as bool?,
+      bound: m['bound'] as bool? ??
+          ((m['email'] as String?)?.trim().isNotEmpty == true),
+      bindProvider: m['bindProvider'] as String?,
+      signupChannel: m['signupChannel'] as String?,
+      canBind: m['canBind'] as bool? ?? false,
     );
   }
 
@@ -164,11 +185,16 @@ class AppUser {
     double? longitude,
     String? writingStyle,
     bool? firstLetterDone,
+    bool? bound,
+    String? email,
+    String? bindProvider,
+    String? signupChannel,
+    bool? canBind,
   }) {
     return AppUser(
       id: id,
       nickname: nickname ?? this.nickname,
-      email: email,
+      email: email ?? this.email,
       countryCode: countryCode ?? this.countryCode,
       countryName: countryName ?? this.countryName,
       birthYear: birthYear,
@@ -189,6 +215,10 @@ class AppUser {
       longitude: longitude ?? this.longitude,
       writingStyle: writingStyle ?? this.writingStyle,
       firstLetterDone: firstLetterDone ?? this.firstLetterDone,
+      bound: bound ?? this.bound,
+      bindProvider: bindProvider ?? this.bindProvider,
+      signupChannel: signupChannel ?? this.signupChannel,
+      canBind: canBind ?? this.canBind,
     );
   }
 }
