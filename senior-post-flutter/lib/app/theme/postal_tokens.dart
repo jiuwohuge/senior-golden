@@ -49,6 +49,13 @@ abstract final class PostalTokens {
   /// 齿孔线 / 分割线
   static const Color perforationLine = Color(0xFFD4C4B0);
 
+  /// 写信桌背景。独立为语义色，避免页面散落近似的米褐色。
+  static const Color composeDesk = Color(0xFFEDE4D4);
+
+  /// 账号/内容受限状态与高价值徽章。
+  static const Color blockedRed = Color(0xFFB83A2A);
+  static const Color badgeGold = Color(0xFFC9A227);
+
   // ────────────────────────────────────────────────────────────────
   // Status colors
   // ────────────────────────────────────────────────────────────────

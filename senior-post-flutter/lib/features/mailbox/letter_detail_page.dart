@@ -112,9 +112,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
               if (letter == null) return const SizedBox.shrink();
               final starred = _favorited || letter.favorited;
               return TextButton.icon(
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(48, 48),
-                ),
+                style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
                 onPressed: _favoriteBusy
                     ? null
                     : () => _toggleFavorite(letter, starred),
@@ -138,7 +136,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                   const PostalSkeletonList(itemCount: 1, itemHeight: 260),
               error: (e, _) => PostalEmptyState(
                 title: l10n.letterLoadFailed,
-                subtitle: '$e',
+                subtitle: l10n.commonLoadFailedHint,
                 tone: PostalEmptyTone.error,
               ),
               data: (letter) {

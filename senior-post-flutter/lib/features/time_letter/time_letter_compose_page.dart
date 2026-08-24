@@ -74,7 +74,11 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final min = DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
+    final min = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).add(const Duration(days: 1));
     final initial = _deliveryDate.isBefore(min) ? min : _deliveryDate;
     final picked = await showDatePicker(
       context: context,
@@ -142,7 +146,9 @@ class _TimeLetterComposePageState extends ConsumerState<TimeLetterComposePage> {
       if (mounted) {
         PostalSnack.show(
           context,
-          biz?.message ?? e.toString(),
+          biz?.message.isNotEmpty == true
+              ? biz!.message
+              : l10n.commonActionFailed,
           tone: PostalSnackTone.error,
         );
       }

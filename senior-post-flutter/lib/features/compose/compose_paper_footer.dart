@@ -29,18 +29,20 @@ class ComposePaperFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pad = compact ? 4.0 : 6.0;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final useCompactLabels = compact || textScale > 1.25;
+    final pad = useCompactLabels ? 3.0 : 5.0;
     return Padding(
       padding: EdgeInsets.fromLTRB(8, pad, 8, pad),
       child: Row(
         children: [
-          Flexible(
+          Expanded(
             child: Text(
               wordCountLabel,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: PostalTokens.inkSecondary,
               ),
@@ -51,20 +53,20 @@ class ComposePaperFooter extends StatelessWidget {
             label: undoLabel,
             enabled: canUndo,
             onTap: onUndo,
-            compact: compact,
+            compact: useCompactLabels,
           ),
-          const Spacer(),
+          const SizedBox(width: 4),
           _IconTextTool(
             icon: Icons.auto_awesome_mosaic_outlined,
             label: paperLabel,
             onTap: onPaper,
-            compact: compact,
+            compact: useCompactLabels,
           ),
           _IconTextTool(
             icon: Icons.edit_note_outlined,
             label: assistantLabel,
             onTap: onAssistant,
-            compact: compact,
+            compact: useCompactLabels,
           ),
         ],
       ),
@@ -100,7 +102,7 @@ class _TextTool extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: enabled
                       ? PostalTokens.postboxGreen
@@ -139,7 +141,7 @@ class _IconTextTool extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: 8,
+              horizontal: compact ? 6 : 8,
               vertical: compact ? 2 : 4,
             ),
             child: Column(
@@ -151,7 +153,7 @@ class _IconTextTool extends StatelessWidget {
                   Text(
                     label,
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: PostalTokens.postboxGreen,
                     ),
@@ -160,7 +162,7 @@ class _IconTextTool extends StatelessWidget {
                   Text(
                     label,
                     style: const TextStyle(
-                      fontSize: 11,
+                      fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: PostalTokens.postboxGreen,
                     ),

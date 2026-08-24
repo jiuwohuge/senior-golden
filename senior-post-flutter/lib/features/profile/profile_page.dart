@@ -72,7 +72,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     l10n.profileAvatarRejectedHint,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFFB83A2A),
+                      color: PostalTokens.blockedRed,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -97,7 +97,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     shrinkWrap: true,
                     padding: EdgeInsets.zero,
                   ),
-                  error: (_, _) => const SizedBox.shrink(),
+                  error: (_, _) => _ProfileOverviewRow(
+                    overview: const ProfileOverview(),
+                    l10n: l10n,
+                  ),
                   data: (overview) =>
                       _ProfileOverviewRow(overview: overview, l10n: l10n),
                 ),
@@ -107,7 +110,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           if (user.latitude == null || user.longitude == null) ...[
             const SizedBox(height: 12),
             PostalCardEnvelope(
-              onTap: () => ref.read(locationAccessProvider).ensureAsked(
+              onTap: () => ref
+                  .read(locationAccessProvider)
+                  .ensureAsked(
                     context: context,
                     reason: LocationPromptReason.settings,
                   ),
@@ -453,7 +458,7 @@ class _ProfileAvatarWithAudit extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.black.withValues(alpha: 0.42),
-              border: Border.all(color: const Color(0xFFB83A2A), width: 2),
+              border: Border.all(color: PostalTokens.blockedRed, width: 2),
             ),
             child: const Icon(Icons.block, color: Colors.white, size: 34),
           ),
@@ -463,7 +468,7 @@ class _ProfileAvatarWithAudit extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
               decoration: BoxDecoration(
-                color: const Color(0xFFC9A227),
+                color: PostalTokens.badgeGold,
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
@@ -477,7 +482,7 @@ class _ProfileAvatarWithAudit extends StatelessWidget {
                 l10n.profileAvatarAuditPending,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.3,
                 ),
@@ -490,14 +495,14 @@ class _ProfileAvatarWithAudit extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
               decoration: BoxDecoration(
-                color: const Color(0xFFB83A2A),
+                color: PostalTokens.blockedRed,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 l10n.profileAvatarAuditRejected,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
               ),

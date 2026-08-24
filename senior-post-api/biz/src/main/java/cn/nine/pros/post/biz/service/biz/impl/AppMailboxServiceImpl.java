@@ -26,6 +26,7 @@ import cn.nine.pros.post.biz.service.biz.support.DeliveryDelayCalculator;
 import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
 import cn.nine.pros.post.biz.service.biz.support.LetterTopicSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
+import cn.nine.pros.post.biz.support.TransitProgressSupport;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.common.constant.BehaviorActionTypes;
 import cn.nine.pros.post.client.common.enums.LetterAuditStatus;
@@ -507,6 +508,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         applyPeerAvatarForViewer(peerVo, peer, viewer);
         LocalDateTime expected = toLocalDateTimeField(l.getExpectedArrivalTime());
         LocalDateTime actual = toLocalDateTimeField(l.getActualArrivalTime());
+        Double progressRatio = resolveProgressRatio(toInt(l.getStatus()),
+                toLocalDateTimeField(l.getCreatedAt()), expected);
         Integer mode = l.getMode() != null ? l.getMode() : LetterMode.DIRECT.getCode();
         Integer audit = l.getAuditStatus() != null ? l.getAuditStatus() : LetterAuditStatus.APPROVED.getCode();
         boolean pendingPoolPlaceholder = pending && fromMe && peerId == 0;
@@ -534,6 +537,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 .sentAt(l.getCreatedAt())
                 .updatedAt(l.getUpdatedAt())
                 .expectedArrivalTime(expected)
+                .progressRatio(progressRatio)
                 .actualArrivalTime(actual)
                 .contentHidden(hideBody)
                 .relationDisplayState(relation != null ? relation.getDisplayState() : null)
@@ -629,6 +633,17 @@ public class AppMailboxServiceImpl implements AppMailboxService {
             return ts.toLocalDateTime();
         }
         return null;
+    }
+
+    private static Double resolveProgressRatio(int status, LocalDateTime sent, LocalDateTime expected) {
+        if (status == LetterBizStatus.PENDING.getCode()) {
+            return null;
+        }
+        if (status == LetterBizStatus.DELIVERED.getCode()
+                || status == LetterBizStatus.REGISTERED.getCode()) {
+            return 1.0;
+        }
+        return TransitProgressSupport.ratio(sent, expected, LocalDateTime.now());
     }
 
     private static AppPublicUserVO toPublic(UserDTO dto) {

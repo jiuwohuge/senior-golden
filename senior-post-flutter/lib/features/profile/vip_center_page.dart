@@ -19,11 +19,12 @@ class VipCenterPage extends ConsumerWidget {
       body: SafeArea(
         child: bootstrapAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(l10n.vipCenterLoadFailed(e.toString())),
-            ),
+          error: (_, _) => PostalEmptyState(
+            title: l10n.commonLoadFailed,
+            subtitle: l10n.commonLoadFailedHint,
+            tone: PostalEmptyTone.error,
+            actionLabel: l10n.commonRetry,
+            onAction: () => ref.invalidate(appBootstrapProvider(lang)),
           ),
           data: (bootstrap) {
             final v = bootstrap.vipProduct;

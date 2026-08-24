@@ -43,11 +43,12 @@ public class LetterAssistantService {
         }
         String source = body.getSourceText() == null ? "" : body.getSourceText().trim();
         String mode = normalizeMode(body.getHelpMode());
+        String language = normalizeLanguage(body.getTargetLang());
         // 润色必须有原文；灵感允许空白信纸，给开场话题。
         if (!StringUtils.hasText(source) && !"inspire".equals(mode)) {
             throw new BusinessException(appMessages.get("app.error.letter.contentEmpty"));
         }
-        String system = systemPromptFor(mode);
+        String system = systemPromptFor(mode, language);
         String user = StringUtils.hasText(source)
                 ? "【用户原文】\n" + source
                 : "【用户原文】\n（尚未落笔。请给出适合刚展开信纸、还没想好写什么的中老年慢邮开场话题。）";
@@ -63,11 +64,12 @@ public class LetterAssistantService {
             if (!StringUtils.hasText(raw)) {
                 throw new BusinessException(appMessages.get("app.error.letter.assistantFailed"));
             }
-            AppLetterAssistantVO vo = buildResult(mode, raw.trim());
+            AppLetterAssistantVO vo = buildResult(mode, language, raw.trim());
             log.info(
-                    "letter assistant ok, userId={}, helpMode={}, elapsedMs={}",
+                    "letter assistant ok, userId={}, helpMode={}, language={}, elapsedMs={}",
                     userId,
                     mode,
+                    language,
                     System.currentTimeMillis() - start);
             return vo;
         } catch (BusinessException e) {
@@ -81,12 +83,12 @@ public class LetterAssistantService {
     /**
      * 将模型输出映射为 VO；inspire 优先解析 JSON 话题列表。
      */
-    private AppLetterAssistantVO buildResult(String mode, String raw) {
+    private AppLetterAssistantVO buildResult(String mode, String language, String raw) {
         if ("inspire".equals(mode)) {
             InspireTopics topics = parseInspireTopics(raw);
             return AppLetterAssistantVO.builder()
                     .helpMode(mode)
-                    .suggestion(formatInspireSuggestion(topics))
+                    .suggestion(formatInspireSuggestion(topics, language))
                     .inspireAsk(topics.ask())
                     .inspireShare(topics.share())
                     .build();
@@ -137,10 +139,10 @@ public class LetterAssistantService {
         return out;
     }
 
-    private static String formatInspireSuggestion(InspireTopics topics) {
+    private static String formatInspireSuggestion(InspireTopics topics, String language) {
         StringBuilder sb = new StringBuilder();
         if (!topics.ask().isEmpty()) {
-            sb.append("可以问问对方：\n");
+            sb.append("en".equals(language) ? "You could ask:\n" : "可以问问对方：\n");
             for (String a : topics.ask()) {
                 sb.append("• ").append(a).append('\n');
             }
@@ -149,7 +151,7 @@ public class LetterAssistantService {
             if (!sb.isEmpty()) {
                 sb.append('\n');
             }
-            sb.append("还可以分享：\n");
+            sb.append("en".equals(language) ? "You could share:\n" : "还可以分享：\n");
             for (String s : topics.share()) {
                 sb.append("• ").append(s).append('\n');
             }
@@ -188,10 +190,21 @@ public class LetterAssistantService {
         };
     }
 
-    private static String systemPromptFor(String mode) {
+    private static String normalizeLanguage(String raw) {
+        if (!StringUtils.hasText(raw)) {
+            return "zh";
+        }
+        return raw.trim().toLowerCase().startsWith("en") ? "en" : "zh";
+    }
+
+    private static String systemPromptFor(String mode, String language) {
+        String languageRule = "en".equals(language)
+                ? "所有面向用户的内容必须只使用自然、地道、适合真实书信的英文；即使原文或系统提示为中文，也不得输出中文。"
+                : "所有面向用户的内容必须只使用自然、地道的简体中文。";
         String polishBase =
                 "你是温和的书信助手，帮助中老年用户整理慢邮信件。"
-                        + "保留用户事实，不编造经历；语气真诚、简洁、易读；只输出整理后的信件正文，不要解释。";
+                        + "保留用户事实，不编造经历；语气真诚、简洁、易读；只输出整理后的信件正文，不要解释。"
+                        + languageRule;
         return switch (mode) {
             case "warmer" -> polishBase + "任务：让内容更真诚、更有情感，略增温度，勿夸张煽情。";
             case "continue" ->
@@ -205,7 +218,8 @@ public class LetterAssistantService {
                             + "不要改写信件正文。只输出 JSON，不要 markdown，格式严格为："
                             + "{\"ask\":[\"问对方的短句1\",\"短句2\",\"短句3\"],"
                             + "\"share\":[\"可分享的短句1\",\"短句2\",\"短句3\"]}。"
-                            + "每条不超过30字，贴合中老年慢邮场景，具体、好开口。";
+                            + "每条简短，贴合中老年慢邮场景，具体、好开口。"
+                            + languageRule;
             default -> polishBase + "任务：润色表达，让文字更自然，像真人写信，不像作文或 AI。";
         };
     }

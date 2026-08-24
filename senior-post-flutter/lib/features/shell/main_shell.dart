@@ -48,7 +48,7 @@ class _MainShellState extends State<MainShell> {
   PreferredSizeWidget _appBar(AppLocalizations l10n, ThemeData theme) {
     if (_index == 0) {
       return AppBar(
-        toolbarHeight: 76,
+        toolbarHeight: 68,
         title: PostalPostmarkHeader(
           child: Semantics(
             label: l10n.appTitle,
@@ -69,7 +69,7 @@ class _MainShellState extends State<MainShell> {
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: Colors.white.withValues(alpha: 0.92),
-                    fontSize: 16,
+                    fontSize: 15,
                     height: 1.35,
                     fontWeight: FontWeight.w500,
                   ),
@@ -80,9 +80,7 @@ class _MainShellState extends State<MainShell> {
         ),
       );
     }
-    return AppBar(
-      title: Text(_index == 1 ? l10n.tabMailbox : l10n.tabProfile),
-    );
+    return AppBar(title: Text(_index == 1 ? l10n.tabMailbox : l10n.tabProfile));
   }
 
   @override

@@ -26,7 +26,7 @@ class PostOfficeRelationMessagesPage extends ConsumerWidget {
         loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 96),
         error: (e, _) => PostalEmptyState(
           title: l10n.commonLoadFailed,
-          subtitle: '$e',
+          subtitle: l10n.commonLoadFailedHint,
           tone: PostalEmptyTone.error,
           actionLabel: l10n.commonRetry,
           onAction: () => ref.invalidate(postOfficeRelationMessagesProvider),

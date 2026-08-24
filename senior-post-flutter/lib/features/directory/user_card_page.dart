@@ -276,7 +276,7 @@ class _UserCardPageState extends ConsumerState<UserCardPage> {
         body: SafeArea(
           child: PostalEmptyState(
             title: l10n.userCardErrorTitle,
-            subtitle: '$e',
+            subtitle: l10n.commonLoadFailedHint,
             tone: PostalEmptyTone.error,
           ),
         ),

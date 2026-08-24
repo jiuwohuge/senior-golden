@@ -73,7 +73,7 @@ class ShopPage extends ConsumerWidget {
                       ),
                       error: (e, _) => PostalEmptyState(
                         title: l10n.commonLoadFailed,
-                        subtitle: '$e',
+                        subtitle: l10n.commonLoadFailedHint,
                         tone: PostalEmptyTone.error,
                         actionLabel: l10n.commonRetry,
                         onAction: () => ref.invalidate(commerceCatalogProvider),

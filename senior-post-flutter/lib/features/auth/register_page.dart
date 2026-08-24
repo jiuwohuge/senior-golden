@@ -205,7 +205,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       _emailAvailabilityError = null;
     });
     try {
-      await ref.read(authRepositoryProvider).validateRegisterEmail(email: email);
+      await ref
+          .read(authRepositoryProvider)
+          .validateRegisterEmail(email: email);
       if (!mounted) return true;
       setState(() {
         _emailCheckedValue = email;
@@ -251,7 +253,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (!mounted) return;
     setState(() => _busy = true);
     try {
-      await ref.read(authRepositoryProvider).register(
+      await ref
+          .read(authRepositoryProvider)
+          .register(
             email: _email.text,
             password: _password.text,
             nickname: _nickname.text,
@@ -365,18 +369,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               const SizedBox(height: 16),
               Text(
                 l10n.authRegisterWizardAgeTitle,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               if (age != null) ...[
                 const SizedBox(height: 8),
                 Text(
                   l10n.authRegisterAgePreview('$age'),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: PostalTokens.postboxGreen,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    color: PostalTokens.postboxGreen,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
               const SizedBox(height: 10),
@@ -409,7 +413,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                 '${DateTime.now().year - _birthYear!}',
                               ),
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: PostalTokens.inkNavy,
                             ),
@@ -447,17 +452,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   (String title, String subtitle) _stepCopy(AppLocalizations l10n) {
     return switch (_step) {
       0 => (
-          l10n.authRegisterWizardEmailTitle,
-          l10n.authRegisterWizardEmailSubtitle,
-        ),
+        l10n.authRegisterWizardEmailTitle,
+        l10n.authRegisterWizardEmailSubtitle,
+      ),
       1 => (
-          l10n.authRegisterWizardPasswordTitle,
-          l10n.authRegisterWizardPasswordSubtitle,
-        ),
+        l10n.authRegisterWizardPasswordTitle,
+        l10n.authRegisterWizardPasswordSubtitle,
+      ),
       _ => (
-          l10n.authRegisterWizardNameTitle,
-          l10n.authRegisterWizardNameSubtitle,
-        ),
+        l10n.authRegisterWizardNameTitle,
+        l10n.authRegisterWizardNameSubtitle,
+      ),
     };
   }
 
@@ -472,10 +477,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       body: PaperTextureBackground(
         child: SafeArea(
           child: bootstrapAsync.when(
-            loading: () => const PostalSkeletonList(itemCount: 3, itemHeight: 72),
+            loading: () =>
+                const PostalSkeletonList(itemCount: 3, itemHeight: 72),
             error: (error, _) => PostalEmptyState(
               title: l10n.authBootstrapLoadFailed,
-              subtitle: bootstrapDebugErrorHint(error),
+              subtitle: l10n.commonLoadFailedHint,
               actionLabel: l10n.authRetry,
               onAction: () => ref.invalidate(appBootstrapProvider(lang)),
               tone: PostalEmptyTone.error,

@@ -7,12 +7,16 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/auth/auth_data_refresh.dart';
 import '../../core/device/location_access.dart';
 import '../../core/i18n/app_locale_provider.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../push/push_service.dart';
+import '../post_office/post_office_remote.dart';
+import '../relation/relation_remote.dart';
+import '../startup/release_note_layer.dart';
 import 'preferences_remote.dart';
 
 /// 设置页：通知开关、语言覆盖、邮箱验证绑定、注销入口。
@@ -119,6 +123,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     } else if (choice == 'zh') {
       await notifier.setLocale(const Locale('zh'));
     }
+    // 服务端欢迎语、国家名与关系状态会按 Accept-Language 本地化；
+    // 切换语言后必须丢弃旧缓存，避免英文界面残留中文数据。
+    ref.read(invalidateAuthDataProvider)();
+    ref.invalidate(postOfficeHomeProvider);
+    ref.invalidate(postOfficeRelationMessagesProvider);
+    ref.invalidate(profileOverviewProvider);
+    ref.invalidate(releaseNoteFetchProvider);
   }
 
   Future<void> _openEmailVerifySheet() async {
@@ -155,11 +166,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 children: [
                   if (!_prefsLoaded)
                     const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: LinearProgressIndicator(),
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: PostalSkeletonList(
+                        itemCount: 2,
+                        itemHeight: 54,
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                      ),
                     )
                   else ...[
                     SwitchListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
                       value: _notify,
                       onChanged: _prefsBusy
                           ? null
@@ -170,6 +190,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       title: Text(l10n.settingsPushNotifications),
                     ),
                     SwitchListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
                       value: _mailBadge,
                       onChanged: _prefsBusy
                           ? null
@@ -198,7 +222,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     title: Text(l10n.locationSettingsRowTitle),
                     subtitle: Text(l10n.locationSettingsRowSubtitle),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => ref.read(locationAccessProvider).ensureAsked(
+                    onTap: () => ref
+                        .read(locationAccessProvider)
+                        .ensureAsked(
                           context: context,
                           reason: LocationPromptReason.settings,
                         ),
@@ -220,10 +246,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
             const SizedBox(height: 12),
-            PostalButton(
-              label: l10n.settingsDeleteAccount,
-              variant: PostalButtonVariant.danger,
-              onPressed: () => context.push('/account/delete'),
+            PostalCardEnvelope(
+              padding: EdgeInsets.zero,
+              child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(
+                  Icons.person_off_outlined,
+                  color: PostalTokens.error,
+                ),
+                title: Text(
+                  l10n.settingsDeleteAccount,
+                  style: const TextStyle(
+                    color: PostalTokens.error,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/account/delete'),
+              ),
             ),
           ],
         ),
@@ -291,7 +331,11 @@ class _EmailVerifySheetState extends ConsumerState<_EmailVerifySheet> {
     } catch (e) {
       debugPrint('settings email verify send failed: $e');
       if (mounted) {
-        PostalSnack.show(context, e.toString(), tone: PostalSnackTone.error);
+        PostalSnack.show(
+          context,
+          l10n.commonActionFailed,
+          tone: PostalSnackTone.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -322,7 +366,11 @@ class _EmailVerifySheetState extends ConsumerState<_EmailVerifySheet> {
     } catch (e) {
       debugPrint('settings email verify confirm failed: $e');
       if (mounted) {
-        PostalSnack.show(context, e.toString(), tone: PostalSnackTone.error);
+        PostalSnack.show(
+          context,
+          l10n.commonActionFailed,
+          tone: PostalSnackTone.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _confirming = false);
@@ -376,5 +424,3 @@ class _EmailVerifySheetState extends ConsumerState<_EmailVerifySheet> {
     );
   }
 }
-
-

@@ -57,7 +57,9 @@ class ComposeEditorToolbar extends StatelessWidget {
                           fontSize: 18,
                           color: canUndo
                               ? PostalTokens.postboxGreen
-                              : PostalTokens.inkTertiary.withValues(alpha: 0.55),
+                              : PostalTokens.inkTertiary.withValues(
+                                  alpha: 0.55,
+                                ),
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -66,7 +68,9 @@ class ComposeEditorToolbar extends StatelessWidget {
                         style: theme.textTheme.labelLarge?.copyWith(
                           color: canUndo
                               ? PostalTokens.postboxGreen
-                              : PostalTokens.inkTertiary.withValues(alpha: 0.55),
+                              : PostalTokens.inkTertiary.withValues(
+                                  alpha: 0.55,
+                                ),
                           fontWeight: FontWeight.w700,
                         ),
                       ),

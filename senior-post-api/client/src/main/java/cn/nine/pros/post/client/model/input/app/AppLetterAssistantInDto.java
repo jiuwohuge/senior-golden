@@ -27,6 +27,6 @@ public class AppLetterAssistantInDto {
     private String customInstruction;
 
     @Size(max = 16)
-    @Schema(description = "翻译目标语（已废弃，保留兼容）")
+    @Schema(description = "输出语言：en|zh；未传时默认 zh")
     private String targetLang;
 }

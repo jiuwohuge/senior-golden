@@ -985,7 +985,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsLanguage => '语言';
 
   @override
-  String get settingsLanguageSubtitle => '默认跟随设备；可手动覆盖';
+  String get settingsLanguageSubtitle => '默认使用设备语言';
 
   @override
   String get settingsLanguageEnglish => 'English';
@@ -1343,6 +1343,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get interestsPickerSaved => '兴趣已保存。';
 
   @override
+  String get interestsPickerSave => '保存兴趣';
+
+  @override
+  String interestsPickerSelected(int count) {
+    return '已选择 $count 项';
+  }
+
+  @override
+  String get interestsPickerEmpty => '兴趣选项暂时不可用，请稍后重试。';
+
+  @override
   String get reportReasonRequired => '请填写举报原因';
 
   @override
@@ -1350,6 +1361,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get accountDeleteTitle => '注销账号';
+
+  @override
+  String get accountDeleteSectionTitle => '注销账号前请确认';
+
+  @override
+  String get accountDeleteCoolingOff => '7 天冷静期';
+
+  @override
+  String get accountDeleteBody =>
+      '提交申请后，你有 7 天时间改变决定，只需重新登录即可撤销。冷静期结束后，账号及相关内容将按照我们的政策删除。';
+
+  @override
+  String get accountDeleteSubmit => '申请注销账号';
+
+  @override
+  String get accountDeleteSubmitted => '申请已提交。如改变决定，请在 7 天内重新登录。';
 
   @override
   String get interestsPickerTitle => '兴趣标签';
@@ -1509,6 +1536,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get commonLoadFailed => '加载失败';
+
+  @override
+  String get commonLoadFailedHint => '请检查网络后重试。';
+
+  @override
+  String get commonActionFailed => '操作失败，请稍后重试。';
 
   @override
   String get timeLetterComposeTitle => '时光邮局';
@@ -1886,7 +1919,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterAssistantModeWarmer => '❤️ 更有温度';
 
   @override
-  String get letterAssistantModeNatural => '✨ 更自然';
+  String get letterAssistantModeNatural => '润色表达';
 
   @override
   String get letterAssistantModeContinue => '📖 再聊一点';
@@ -1895,7 +1928,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterAssistantModeShorten => '✂️ 精简一下';
 
   @override
-  String get letterAssistantModeInspire => '💡 给我灵感';
+  String get letterAssistantModeInspire => '给我灵感';
 
   @override
   String get letterAssistantGenerate => '开始整理';
@@ -1925,7 +1958,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterAssistantUndoBanner => '助手已改动正文';
 
   @override
-  String get letterAssistantEmptyBody => '润色需要先写几句。空白信纸请用「给我灵感」。';
+  String get letterAssistantEmptyBody => '请先写几句，或选择「给我灵感」。';
 
   @override
   String get letterAssistantBusy => '正在整理…';

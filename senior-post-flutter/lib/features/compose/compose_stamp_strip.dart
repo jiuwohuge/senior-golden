@@ -16,7 +16,7 @@ String composeStampShortLabel(AppLocalizations l10n, LetterTopicOption topic) {
   };
 }
 
-/// 书桌上的齿孔邮票条：贴在信纸外，单选可揭，窄屏横滑。
+/// 写信主题快捷栏：轻量单选胶囊，窄屏横滑。
 class ComposeStampStrip extends StatelessWidget {
   const ComposeStampStrip({
     super.key,
@@ -37,8 +37,7 @@ class ComposeStampStrip extends StatelessWidget {
   final VoidCallback onExpandCompact;
   final String Function(LetterTopicOption topic)? labelOf;
 
-  String _label(LetterTopicOption topic) =>
-      labelOf?.call(topic) ?? topic.title;
+  String _label(LetterTopicOption topic) => labelOf?.call(topic) ?? topic.title;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +85,7 @@ class ComposeStampStrip extends StatelessWidget {
       );
     }
     return SizedBox(
-      height: 48,
+      height: 52,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -95,7 +94,7 @@ class ComposeStampStrip extends StatelessWidget {
         itemBuilder: (context, index) {
           final topic = topics[index];
           final selected = topic.id == selectedId;
-          return _PerforatedStamp(
+          return _TopicPill(
             title: _label(topic),
             selected: selected,
             onTap: () => onSelected(selected ? null : topic.id),
@@ -106,8 +105,8 @@ class ComposeStampStrip extends StatelessWidget {
   }
 }
 
-class _PerforatedStamp extends StatelessWidget {
-  const _PerforatedStamp({
+class _TopicPill extends StatelessWidget {
+  const _TopicPill({
     required this.title,
     required this.selected,
     required this.onTap,
@@ -119,101 +118,48 @@ class _PerforatedStamp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor =
-        selected ? PostalTokens.stampVermilion : PostalTokens.kraftBrown;
-    final fill = selected
-        ? PostalTokens.stampVermilionMuted
-        : PostalTokens.paperEnvelope.withValues(alpha: 0.92);
     return Material(
-      color: Colors.transparent,
+      color: selected ? PostalTokens.postboxGreen : PostalTokens.paperEnvelope,
+      borderRadius: PostalTokens.shapeSm,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(3),
-        child: CustomPaint(
-          painter: _StampPerforationPainter(
-            borderColor: borderColor,
-            fillColor: fill,
+        borderRadius: PostalTokens.shapeSm,
+        child: AnimatedContainer(
+          duration: PostalTokens.durationFast,
+          constraints: const BoxConstraints(minHeight: 48, minWidth: 52),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: PostalTokens.shapeSm,
+            border: Border.all(
+              color: selected
+                  ? PostalTokens.postboxGreen
+                  : PostalTokens.perforationLine,
+              width: selected ? 1.6 : 1.0,
+            ),
           ),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              child: Center(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 15,
-                    height: 1.1,
-                    fontWeight: FontWeight.w700,
-                    color: selected
-                        ? PostalTokens.stampVermilion
-                        : PostalTokens.inkNavy,
-                  ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (selected) ...[
+                const Icon(Icons.check, size: 17, color: Colors.white),
+                const SizedBox(width: 6),
+              ],
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 16,
+                  height: 1.1,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  color: selected ? Colors.white : PostalTokens.inkNavy,
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
-  }
-}
-
-/// 齿孔小票描边，避免 Material FilterChip 默认样式。
-class _StampPerforationPainter extends CustomPainter {
-  _StampPerforationPainter({
-    required this.borderColor,
-    required this.fillColor,
-  });
-
-  final Color borderColor;
-  final Color fillColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      const Radius.circular(3),
-    );
-    canvas.drawRRect(rect, Paint()..color = fillColor);
-    final border = Paint()
-      ..color = borderColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-    _drawDashedRRect(canvas, rect, border, 2.8, 2.2);
-  }
-
-  void _drawDashedRRect(
-    Canvas canvas,
-    RRect rect,
-    Paint paint,
-    double dash,
-    double gap,
-  ) {
-    final path = Path()..addRRect(rect);
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      var draw = true;
-      while (distance < metric.length) {
-        final next = distance + (draw ? dash : gap);
-        if (draw) {
-          canvas.drawPath(
-            metric.extractPath(distance, next.clamp(0, metric.length)),
-            paint,
-          );
-        }
-        distance = next;
-        draw = !draw;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _StampPerforationPainter oldDelegate) {
-    return oldDelegate.borderColor != borderColor ||
-        oldDelegate.fillColor != fillColor;
   }
 }

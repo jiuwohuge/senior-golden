@@ -32,7 +32,9 @@ class PostalCardEnvelope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = DecoratedBox(
+    // Ink 与 ListTile/SwitchListTile 共用同一个 Material 表面，确保背景、
+    // hover、focus 和点击水波纹都绘制在卡片之上。
+    final content = Ink(
       decoration: BoxDecoration(
         color: backgroundColor ?? PostalTokens.paperEnvelope,
         borderRadius: PostalTokens.shapeMd,
@@ -45,7 +47,7 @@ class PostalCardEnvelope extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: 4,
+              height: 3,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.centerLeft,
@@ -92,16 +94,17 @@ class PostalCardEnvelope extends StatelessWidget {
       ),
     );
 
-    if (onTap == null) return content;
     return Material(
       color: Colors.transparent,
       borderRadius: PostalTokens.shapeMd,
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: PostalTokens.shapeMd,
-        child: content,
-      ),
+      child: onTap == null
+          ? content
+          : InkWell(
+              onTap: onTap,
+              borderRadius: PostalTokens.shapeMd,
+              child: content,
+            ),
     );
   }
 }

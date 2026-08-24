@@ -167,7 +167,7 @@ abstract class AppLocalizations {
   /// No description provided for @postOfficeWritePostOfficeWaitHint.
   ///
   /// In en, this message translates to:
-  /// **'To a kindred spirit (waiting required)'**
+  /// **'Send through the Post Office'**
   String get postOfficeWritePostOfficeWaitHint;
 
   /// No description provided for @mailboxMyPenpals.
@@ -1973,7 +1973,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLanguageSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Follow device by default; override for testing'**
+  /// **'Uses your device language by default'**
   String get settingsLanguageSubtitle;
 
   /// No description provided for @settingsLanguageEnglish.
@@ -2630,6 +2630,24 @@ abstract class AppLocalizations {
   /// **'Interests saved.'**
   String get interestsPickerSaved;
 
+  /// No description provided for @interestsPickerSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save interests'**
+  String get interestsPickerSave;
+
+  /// No description provided for @interestsPickerSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String interestsPickerSelected(int count);
+
+  /// No description provided for @interestsPickerEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest options aren’t available right now. Please try again later.'**
+  String get interestsPickerEmpty;
+
   /// No description provided for @reportReasonRequired.
   ///
   /// In en, this message translates to:
@@ -2647,6 +2665,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete account'**
   String get accountDeleteTitle;
+
+  /// No description provided for @accountDeleteSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you delete your account'**
+  String get accountDeleteSectionTitle;
+
+  /// No description provided for @accountDeleteCoolingOff.
+  ///
+  /// In en, this message translates to:
+  /// **'7-day cooling-off period'**
+  String get accountDeleteCoolingOff;
+
+  /// No description provided for @accountDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'After you submit the request, you have 7 days to change your mind by signing in again. After that, your account and associated content will be deleted according to our policy.'**
+  String get accountDeleteBody;
+
+  /// No description provided for @accountDeleteSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Request account deletion'**
+  String get accountDeleteSubmit;
+
+  /// No description provided for @accountDeleteSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Request submitted. Sign in again within 7 days if you change your mind.'**
+  String get accountDeleteSubmitted;
 
   /// No description provided for @interestsPickerTitle.
   ///
@@ -2953,6 +3001,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to load'**
   String get commonLoadFailed;
+
+  /// No description provided for @commonLoadFailedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get commonLoadFailedHint;
+
+  /// No description provided for @commonActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get commonActionFailed;
 
   /// No description provided for @timeLetterComposeTitle.
   ///
@@ -3665,7 +3725,7 @@ abstract class AppLocalizations {
   /// No description provided for @letterAssistantModeNatural.
   ///
   /// In en, this message translates to:
-  /// **'✨ More natural'**
+  /// **'Polish my draft'**
   String get letterAssistantModeNatural;
 
   /// No description provided for @letterAssistantModeContinue.
@@ -3683,7 +3743,7 @@ abstract class AppLocalizations {
   /// No description provided for @letterAssistantModeInspire.
   ///
   /// In en, this message translates to:
-  /// **'💡 Give me ideas'**
+  /// **'Give me ideas'**
   String get letterAssistantModeInspire;
 
   /// No description provided for @letterAssistantGenerate.
@@ -3743,7 +3803,7 @@ abstract class AppLocalizations {
   /// No description provided for @letterAssistantEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Polishing needs a few lines first. On a blank page, use “Give me ideas”.'**
+  /// **'Write a few lines first, or choose “Give me ideas”.'**
   String get letterAssistantEmptyBody;
 
   /// No description provided for @letterAssistantBusy.
@@ -3803,7 +3863,7 @@ abstract class AppLocalizations {
   /// No description provided for @composeEditorWordCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} chars'**
+  /// **'{count} words'**
   String composeEditorWordCount(Object count);
 
   /// No description provided for @composePlaceholderBody.
@@ -3875,37 +3935,37 @@ abstract class AppLocalizations {
   /// No description provided for @composeFooterAssistant.
   ///
   /// In en, this message translates to:
-  /// **'Help'**
+  /// **'Assist'**
   String get composeFooterAssistant;
 
   /// No description provided for @composeStampShortHeartTalk.
   ///
   /// In en, this message translates to:
-  /// **'Mind'**
+  /// **'Thoughts'**
   String get composeStampShortHeartTalk;
 
   /// No description provided for @composeStampShortLifeShare.
   ///
   /// In en, this message translates to:
-  /// **'Life'**
+  /// **'Life lately'**
   String get composeStampShortLifeShare;
 
   /// No description provided for @composeStampShortInterest.
   ///
   /// In en, this message translates to:
-  /// **'Share'**
+  /// **'Interests'**
   String get composeStampShortInterest;
 
   /// No description provided for @composeStampShortPuzzle.
   ///
   /// In en, this message translates to:
-  /// **'Ask'**
+  /// **'Questions'**
   String get composeStampShortPuzzle;
 
   /// No description provided for @composeStampShortChat.
   ///
   /// In en, this message translates to:
-  /// **'Hi'**
+  /// **'Just chat'**
   String get composeStampShortChat;
 
   /// No description provided for @composeStepTopicSubmitTitle.

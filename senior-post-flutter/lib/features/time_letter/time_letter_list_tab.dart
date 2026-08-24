@@ -74,7 +74,7 @@ class TimeLetterListTab extends ConsumerWidget {
                 children: [
                   PostalEmptyState(
                     title: l10n.timeLetterLoadError,
-                    subtitle: '$e',
+                    subtitle: l10n.commonLoadFailedHint,
                     tone: PostalEmptyTone.error,
                   ),
                 ],
@@ -123,9 +123,7 @@ class _TimeLetterTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final subtitle = item.bodyPreview?.isNotEmpty == true
         ? item.bodyPreview!
-        : (isOutbox
-              ? l10n.timeLetterSealedHidden
-              : l10n.timeLetterTapToOpen);
+        : (isOutbox ? l10n.timeLetterSealedHidden : l10n.timeLetterTapToOpen);
     final trailing = isOutbox && item.daysUntilDelivery != null
         ? Text(l10n.timeLetterDaysUntil('${item.daysUntilDelivery}'))
         : null;

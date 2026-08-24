@@ -49,7 +49,7 @@ abstract final class PostalTheme {
         iconTheme: const IconThemeData(color: Colors.white, size: 26),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        height: 76,
+        height: 70,
         elevation: 3,
         shadowColor: PostalTokens.inkNavy.withValues(alpha: 0.12),
         backgroundColor: PostalTokens.paperCard,
@@ -58,7 +58,7 @@ abstract final class PostalTheme {
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
-            size: 28,
+            size: 26,
             color: selected
                 ? PostalTokens.postboxGreen
                 : PostalTokens.inkSecondary,
@@ -67,7 +67,7 @@ abstract final class PostalTheme {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
-            fontSize: PostalTokens.minBodyFontSize,
+            fontSize: 16,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
             letterSpacing: 0.2,
             color: selected
@@ -243,8 +243,10 @@ abstract final class PostalTheme {
         unselectedLabelColor: PostalTokens.inkSecondary,
         indicatorColor: PostalTokens.stampVermilion,
         indicatorSize: TabBarIndicatorSize.label,
-        labelStyle: textTheme.titleMedium,
+        labelPadding: const EdgeInsets.symmetric(horizontal: PostalTokens.s4),
+        labelStyle: textTheme.titleMedium?.copyWith(fontSize: 17),
         unselectedLabelStyle: textTheme.titleMedium?.copyWith(
+          fontSize: 17,
           fontWeight: FontWeight.w500,
         ),
       ),

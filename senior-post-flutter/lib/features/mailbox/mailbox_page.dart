@@ -181,8 +181,10 @@ class _ReceivedTab extends ConsumerWidget {
         onRefresh: onRefresh,
         child: PostalEmptyState(
           title: AppLocalizations.of(context)!.commonLoadFailed,
-          subtitle: '$e',
+          subtitle: AppLocalizations.of(context)!.commonLoadFailedHint,
           tone: PostalEmptyTone.error,
+          actionLabel: AppLocalizations.of(context)!.commonRetry,
+          onAction: onRefresh,
         ),
       ),
       data: (letters) => _MailboxLettersBody(
@@ -212,8 +214,10 @@ class _SentTab extends ConsumerWidget {
         onRefresh: onRefresh,
         child: PostalEmptyState(
           title: AppLocalizations.of(context)!.commonLoadFailed,
-          subtitle: '$e',
+          subtitle: AppLocalizations.of(context)!.commonLoadFailedHint,
           tone: PostalEmptyTone.error,
+          actionLabel: AppLocalizations.of(context)!.commonRetry,
+          onAction: onRefresh,
         ),
       ),
       data: (letters) => _MailboxLettersBody(

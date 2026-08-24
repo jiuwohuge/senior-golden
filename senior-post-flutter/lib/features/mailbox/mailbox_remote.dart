@@ -52,10 +52,7 @@ class MailboxRemoteRepository {
     int? topicTagId,
   }) async {
     // M6：产品面废弃平邮/挂号选项，发信固定 STANDARD(2)。
-    final body = <String, dynamic>{
-      'content': content,
-      'letterType': 2,
-    };
+    final body = <String, dynamic>{'content': content, 'letterType': 2};
     if (toUserId != null && toUserId.isNotEmpty) {
       body['toUserId'] = int.parse(toUserId);
     }
@@ -96,6 +93,7 @@ class MailboxRemoteRepository {
   Future<LetterAssistantResult> letterAssistant({
     required String sourceText,
     required String helpMode,
+    required String languageCode,
   }) async {
     final r = await _dio.post<dynamic>(
       '/api/mailbox/letters/letter-assistant',
@@ -103,6 +101,7 @@ class MailboxRemoteRepository {
         // 空白信纸的灵感：空串可能被校验丢掉，空格到服务端 trim 后仍按未落笔处理。
         'sourceText': sourceText.trim().isEmpty ? ' ' : sourceText,
         'helpMode': helpMode,
+        'targetLang': languageCode,
       },
     );
     final map = _unwrapMapData(r);
@@ -302,6 +301,7 @@ MailboxLetter voToMailboxLetter(Map<String, dynamic> m) {
     contentHidden: contentHidden,
     expectedArrivalAt: expectedArrival,
     actualArrivalAt: actualArrival,
+    transitProgressRatio: (m['progressRatio'] as num?)?.toDouble(),
     mode: mode,
     auditStatus: (m['auditStatus'] as num?)?.toInt() ?? 1,
     relationDisplayState: RelationDisplayState.fromCode(

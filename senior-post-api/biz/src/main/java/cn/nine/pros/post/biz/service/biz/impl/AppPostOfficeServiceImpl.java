@@ -16,6 +16,7 @@ import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
 import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.support.TextPreviewSupport;
+import cn.nine.pros.post.biz.support.TransitProgressSupport;
 import cn.nine.pros.post.client.common.constant.HomeRecommendedAction;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.out.AppPostOfficeHomeVO;
@@ -169,13 +170,7 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
         if (eta != null && itemType != IN_TRANSIT_TYPE_UNREAD) {
             long minutes = ChronoUnit.MINUTES.between(now, eta);
             etaHours = Math.max(0, minutes) / 60.0;
-            if (sent != null && eta.isAfter(sent)) {
-                long total = ChronoUnit.MINUTES.between(sent, eta);
-                long done = ChronoUnit.MINUTES.between(sent, now);
-                if (total > 0) {
-                    progress = Math.min(1.0, Math.max(0.0, (double) done / (double) total));
-                }
-            }
+            progress = TransitProgressSupport.ratio(sent, eta, now);
         } else if (itemType == IN_TRANSIT_TYPE_UNREAD) {
             progress = 1.0;
             etaHours = 0.0;

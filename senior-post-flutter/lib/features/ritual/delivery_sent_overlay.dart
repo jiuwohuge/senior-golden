@@ -105,63 +105,77 @@ class _DeliverySentOverlayState extends State<_DeliverySentOverlay>
                   ),
                 ),
                 const SizedBox(height: PostalTokens.s20),
-                AnimatedBuilder(
-                  animation: _ctrl,
-                  builder: (context, _) {
-                    final t = _ctrl.value;
-                    final appear = Interval(
-                      0,
-                      0.18,
-                      curve: Curves.easeOutCubic,
-                    ).transform(t);
-                    final stamp = Interval(
-                      0.16,
-                      0.4,
-                      curve: Curves.easeOutBack,
-                    ).transform(t);
-                    final boxIn = Interval(
-                      0.46,
-                      0.62,
-                      curve: Curves.easeOutCubic,
-                    ).transform(t);
-                    final drop = Interval(
-                      0.58,
-                      0.94,
-                      curve: Curves.easeInCubic,
-                    ).transform(t);
-
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final stageWidth = constraints.maxWidth.clamp(240.0, 340.0);
+                    final stageHeight = 268 * stageWidth / 340;
                     return SizedBox(
-                      height: 268,
-                      child: Stack(
-                        alignment: Alignment.topCenter,
-                        clipBehavior: Clip.hardEdge,
-                        children: [
-                          Positioned(
-                            left: 36,
-                            right: 36,
-                            bottom: 0,
-                            child: Transform.translate(
-                              offset: Offset(0, (1 - boxIn) * 18),
-                              child: _PostboxSlot(progress: boxIn),
-                            ),
-                          ),
-                          Transform.translate(
-                            offset: Offset(0, drop * 168),
-                            child: Transform.rotate(
-                              angle: drop * 0.08,
-                              child: Transform.scale(
-                                scale: 0.9 + appear * 0.1,
-                                child: RepaintBoundary(
-                                  child: _LetterPacket(
-                                    destination: dest,
-                                    year: year,
-                                    stamp: stamp,
+                      height: stageHeight,
+                      width: stageWidth,
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: 340,
+                          height: 268,
+                          child: AnimatedBuilder(
+                            animation: _ctrl,
+                            builder: (context, _) {
+                              final t = _ctrl.value;
+                              final appear = Interval(
+                                0,
+                                0.18,
+                                curve: Curves.easeOutCubic,
+                              ).transform(t);
+                              final stamp = Interval(
+                                0.16,
+                                0.4,
+                                curve: Curves.easeOutBack,
+                              ).transform(t);
+                              final boxIn = Interval(
+                                0.46,
+                                0.62,
+                                curve: Curves.easeOutCubic,
+                              ).transform(t);
+                              final drop = Interval(
+                                0.58,
+                                0.94,
+                                curve: Curves.easeInCubic,
+                              ).transform(t);
+
+                              return Stack(
+                                alignment: Alignment.topCenter,
+                                clipBehavior: Clip.hardEdge,
+                                children: [
+                                  Positioned(
+                                    left: 36,
+                                    right: 36,
+                                    bottom: 0,
+                                    child: Transform.translate(
+                                      offset: Offset(0, (1 - boxIn) * 18),
+                                      child: _PostboxSlot(progress: boxIn),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
+                                  Transform.translate(
+                                    offset: Offset(0, drop * 168),
+                                    child: Transform.rotate(
+                                      angle: drop * 0.08,
+                                      child: Transform.scale(
+                                        scale: 0.9 + appear * 0.1,
+                                        child: RepaintBoundary(
+                                          child: _LetterPacket(
+                                            destination: dest,
+                                            year: year,
+                                            stamp: stamp,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
-                        ],
+                        ),
                       ),
                     );
                   },
@@ -197,7 +211,9 @@ class _LetterPacket extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          const Positioned.fill(child: CustomPaint(painter: _EnvelopePainter())),
+          const Positioned.fill(
+            child: CustomPaint(painter: _EnvelopePainter()),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 40, 88, 18),
             child: Align(
@@ -247,7 +263,10 @@ class _EnvelopePainter extends CustomPainter {
       const Radius.circular(10),
     );
     // 实色投影，避免 blur 在模拟器上每帧重算。
-    canvas.drawRRect(body.shift(const Offset(5, 7)), Paint()..color = const Color(0x331A2332));
+    canvas.drawRRect(
+      body.shift(const Offset(5, 7)),
+      Paint()..color = PostalTokens.inkNavy.withValues(alpha: 0.2),
+    );
     canvas.drawRRect(body, Paint()..color = PostalTokens.paperEnvelope);
     canvas.drawRRect(
       body,

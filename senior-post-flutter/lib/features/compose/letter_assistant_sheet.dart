@@ -8,20 +8,14 @@ import '../../widgets/postal/postal.dart';
 import '../mailbox/mailbox_remote.dart';
 
 /// 信件助手帮助模式（API helpMode：continue/shorten/inspire 等）。
-enum LetterAssistantHelpMode {
-  warmer,
-  natural,
-  continueChat,
-  shorten,
-  inspire,
-}
+enum LetterAssistantHelpMode { warmer, natural, continueChat, shorten, inspire }
 
 extension on LetterAssistantHelpMode {
   /// 发给后端的 helpMode 字符串。
   String get apiName => switch (this) {
-        LetterAssistantHelpMode.continueChat => 'continue',
-        _ => name,
-      };
+    LetterAssistantHelpMode.continueChat => 'continue',
+    _ => name,
+  };
 
   bool get isInspire => this == LetterAssistantHelpMode.inspire;
 }
@@ -31,6 +25,76 @@ const _p0AssistantModes = [
   LetterAssistantHelpMode.natural,
   LetterAssistantHelpMode.inspire,
 ];
+
+/// 写信桌上的轻量快捷菜单：先选动作，再进入结果页，避免为了两个选项打开整页。
+Future<LetterAssistantHelpMode?> showLetterAssistantQuickActions(
+  BuildContext context, {
+  required bool hasDraft,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+  return showGeneralDialog<LetterAssistantHelpMode>(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.transparent,
+    transitionDuration: PostalTokens.durationMedium,
+    pageBuilder: (ctx, _, __) => SafeArea(
+      child: Stack(
+        children: [
+          Positioned(
+            right: 16,
+            bottom: 78,
+            width: 240,
+            child: Material(
+              color: PostalTokens.paperEnvelope,
+              elevation: 8,
+              borderRadius: PostalTokens.shapeLg,
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _QuickAssistantAction(
+                    icon: Icons.auto_fix_high_outlined,
+                    label: l10n.letterAssistantModeNatural,
+                    subtitle: hasDraft ? null : l10n.letterAssistantEmptyBody,
+                    onTap: hasDraft
+                        ? () => Navigator.pop(
+                            ctx,
+                            LetterAssistantHelpMode.natural,
+                          )
+                        : null,
+                  ),
+                  const Divider(height: 1),
+                  _QuickAssistantAction(
+                    icon: Icons.lightbulb_outline,
+                    label: l10n.letterAssistantModeInspire,
+                    onTap: () =>
+                        Navigator.pop(ctx, LetterAssistantHelpMode.inspire),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+    transitionBuilder: (ctx, animation, _, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.94, end: 1.0).animate(curved),
+          alignment: Alignment.bottomRight,
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
 /// 全屏信件助手：润色对照替换，或灵感选题追加。
 /// 返回最终正文（替换/追加后）或 null（保留/关闭）。
 /// 不可点遮罩关闭，须点顶部关闭或「保留原文」。
@@ -38,37 +102,33 @@ Future<String?> showLetterAssistantSheet({
   required BuildContext context,
   required WidgetRef ref,
   required String sourceText,
+  LetterAssistantHelpMode? initialMode,
 }) {
-  return showGeneralDialog<String>(
+  return showModalBottomSheet<String>(
     context: context,
-    barrierDismissible: false,
-    barrierLabel: 'letter-assistant',
-    barrierColor: PostalTokens.inkNavy.withValues(alpha: 0.45),
-    transitionDuration: const Duration(milliseconds: 280),
-    pageBuilder: (ctx, anim, secondaryAnim) {
-      return LetterAssistantSheet(
+    isScrollControlled: true,
+    isDismissible: false,
+    enableDrag: false,
+    useSafeArea: true,
+    backgroundColor: PostalTokens.paperCream,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    clipBehavior: Clip.antiAlias,
+    builder: (ctx) => SizedBox(
+      height: MediaQuery.sizeOf(ctx).height * 0.9,
+      child: LetterAssistantSheet(
         sourceText: sourceText,
-        onRequestAssist: (mode) {
-          return ref.read(mailboxRemoteRepositoryProvider).letterAssistant(
-                sourceText: sourceText,
-                helpMode: mode.apiName,
-              );
-        },
-      );
-    },
-    transitionBuilder: (ctx, anim, secondaryAnim, child) {
-      final curved = CurvedAnimation(parent: anim, curve: Curves.easeOutCubic);
-      return FadeTransition(
-        opacity: curved,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 0.04),
-            end: Offset.zero,
-          ).animate(curved),
-          child: child,
-        ),
-      );
-    },
+        initialMode: initialMode,
+        onRequestAssist: (mode) => ref
+            .read(mailboxRemoteRepositoryProvider)
+            .letterAssistant(
+              sourceText: sourceText,
+              helpMode: mode.apiName,
+              languageCode: Localizations.localeOf(context).languageCode,
+            ),
+      ),
+    ),
   );
 }
 
@@ -78,11 +138,13 @@ class LetterAssistantSheet extends StatefulWidget {
     super.key,
     required this.sourceText,
     required this.onRequestAssist,
+    this.initialMode,
   });
 
   final String sourceText;
+  final LetterAssistantHelpMode? initialMode;
   final Future<LetterAssistantResult> Function(LetterAssistantHelpMode mode)
-      onRequestAssist;
+  onRequestAssist;
 
   @override
   State<LetterAssistantSheet> createState() => _LetterAssistantSheetState();
@@ -103,9 +165,14 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
   void initState() {
     super.initState();
     // 空白信纸默认灵感，避免先点到「更自然」再被拦截。
-    _mode = widget.sourceText.trim().isEmpty
-        ? LetterAssistantHelpMode.inspire
-        : LetterAssistantHelpMode.natural;
+    _mode =
+        widget.initialMode ??
+        (widget.sourceText.trim().isEmpty
+            ? LetterAssistantHelpMode.inspire
+            : LetterAssistantHelpMode.natural);
+    if (widget.initialMode != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _generate());
+    }
   }
 
   Future<void> _generate() async {
@@ -119,6 +186,8 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
     }
     setState(() {
       _busy = true;
+      _resultPhase = false;
+      _result = null;
       _inlineMessage = null;
     });
     try {
@@ -138,7 +207,9 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
       if (!mounted) return;
       final biz = apiBusinessExceptionFrom(e);
       setState(() {
-        _inlineMessage = biz?.message ?? e.toString();
+        _inlineMessage = biz?.message.isNotEmpty == true
+            ? biz!.message
+            : l10n.commonActionFailed;
         _inlineIsError = true;
       });
     } finally {
@@ -201,15 +272,47 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
   }
 
   Widget _buildModes(AppLocalizations l10n) {
+    // 写信页已经在快捷浮层选过模式。这里仅展示该动作的生成状态，
+    // 即使请求失败也不退回模式选择，避免让用户重复选择一次。
+    if (widget.initialMode != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_busy)
+              const CircularProgressIndicator()
+            else
+              Icon(Icons.error_outline, size: 40, color: PostalTokens.error),
+            const SizedBox(height: 16),
+            Text(
+              _busy
+                  ? l10n.letterAssistantBusy
+                  : (_inlineMessage ?? l10n.letterAssistantBusy),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: _busy ? PostalTokens.inkNavy : PostalTokens.error,
+              ),
+            ),
+            if (!_busy) ...[
+              const SizedBox(height: 20),
+              PostalButton(
+                label: l10n.letterAssistantRetry,
+                onPressed: _generate,
+              ),
+            ],
+          ],
+        ),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           l10n.letterAssistantPickModeHint,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: PostalTokens.inkSecondary,
-                height: 1.4,
-              ),
+            color: PostalTokens.inkSecondary,
+            height: 1.4,
+          ),
         ),
         const SizedBox(height: 14),
         Expanded(
@@ -237,8 +340,9 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
                           borderRadius: PostalTokens.shapeMd,
                           border: Border.all(
                             color: _mode == m
-                                ? PostalTokens.postboxGreen
-                                    .withValues(alpha: 0.45)
+                                ? PostalTokens.postboxGreen.withValues(
+                                    alpha: 0.45,
+                                  )
                                 : PostalTokens.perforationLine,
                           ),
                         ),
@@ -246,8 +350,9 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
                           _modeLabel(l10n, m),
                           style: TextStyle(
                             fontSize: 19,
-                            fontWeight:
-                                _mode == m ? FontWeight.w700 : FontWeight.w500,
+                            fontWeight: _mode == m
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                             color: PostalTokens.inkNavy,
                           ),
                         ),
@@ -264,11 +369,11 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
             child: Text(
               _inlineMessage!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: _inlineIsError
-                        ? PostalTokens.error
-                        : PostalTokens.inkSecondary,
-                    height: 1.35,
-                  ),
+                color: _inlineIsError
+                    ? PostalTokens.error
+                    : PostalTokens.inkSecondary,
+                height: 1.35,
+              ),
             ),
           ),
         ],
@@ -276,8 +381,8 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
           label: _busy
               ? l10n.letterAssistantBusy
               : (_mode.isInspire
-                  ? l10n.letterAssistantInspireGenerate
-                  : l10n.letterAssistantGenerate),
+                    ? l10n.letterAssistantInspireGenerate
+                    : l10n.letterAssistantGenerate),
           busy: _busy,
           onPressed: _busy ? null : _generate,
         ),
@@ -305,18 +410,18 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
             children: [
               Text(
                 l10n.letterAssistantYourDraft,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
               _DraftBlock(text: widget.sourceText),
               const SizedBox(height: 22),
               Text(
                 l10n.letterAssistantSuggestion,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
               _DraftBlock(text: suggestion, emphasize: true),
@@ -344,10 +449,7 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
               child: PostalButton(
                 label: l10n.letterAssistantRetry,
                 variant: PostalButtonVariant.secondary,
-                onPressed: () => setState(() {
-                  _resultPhase = false;
-                  _result = null;
-                }),
+                onPressed: _generate,
               ),
             ),
           ],
@@ -362,9 +464,9 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
       children: [
         Text(
           l10n.letterAssistantInspirePickHint,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: PostalTokens.inkSecondary,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: PostalTokens.inkSecondary),
         ),
         const SizedBox(height: 12),
         Expanded(
@@ -374,8 +476,8 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
                 Text(
                   l10n.letterAssistantInspireAskTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 for (final t in result.inspireAsk)
@@ -396,8 +498,8 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
                 Text(
                   l10n.letterAssistantInspireShareTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 for (final t in result.inspireShare)
@@ -438,16 +540,83 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
               child: PostalButton(
                 label: l10n.letterAssistantRetry,
                 variant: PostalButtonVariant.secondary,
-                onPressed: () => setState(() {
-                  _resultPhase = false;
-                  _result = null;
-                  _pickedTopics.clear();
-                }),
+                onPressed: _generate,
               ),
             ),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _QuickAssistantAction extends StatelessWidget {
+  const _QuickAssistantAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String label;
+  final String? subtitle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    return InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 64),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                color: enabled
+                    ? PostalTokens.postboxGreen
+                    : PostalTokens.inkTertiary,
+                size: 24,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: enabled
+                            ? PostalTokens.inkNavy
+                            : PostalTokens.inkTertiary,
+                      ),
+                    ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (enabled)
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: PostalTokens.inkTertiary,
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -476,9 +645,9 @@ class _AssistantAppBar extends StatelessWidget {
               child: Text(
                 title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: PostalTokens.inkNavy,
-                    ),
+                  fontWeight: FontWeight.w800,
+                  color: PostalTokens.inkNavy,
+                ),
               ),
             ),
           ),
@@ -515,10 +684,7 @@ class _TopicCheckTile extends StatelessWidget {
     return CheckboxListTile(
       value: selected,
       onChanged: (v) => onChanged(v ?? false),
-      title: Text(
-        label,
-        style: const TextStyle(fontSize: 17, height: 1.35),
-      ),
+      title: Text(label, style: const TextStyle(fontSize: 17, height: 1.35)),
       controlAffinity: ListTileControlAffinity.leading,
       contentPadding: EdgeInsets.zero,
       activeColor: PostalTokens.postboxGreen,

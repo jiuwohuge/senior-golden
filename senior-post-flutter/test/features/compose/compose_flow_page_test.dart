@@ -1,4 +1,4 @@
-﻿/// Widget tests for the compose desk (letter-on-a-desk skeleton).
+/// Widget tests for the compose desk (letter-on-a-desk skeleton).
 library;
 
 import 'package:flutter/material.dart';
@@ -9,6 +9,7 @@ import 'package:senior_post_flutter/core/models/letter_topic_option.dart';
 import 'package:senior_post_flutter/features/compose/compose_flow_page.dart';
 import 'package:senior_post_flutter/features/compose/compose_intent.dart';
 import 'package:senior_post_flutter/features/compose/compose_stamp_strip.dart';
+import 'package:senior_post_flutter/features/compose/letter_assistant_sheet.dart';
 import 'package:senior_post_flutter/features/post_office/post_office_remote.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
@@ -111,7 +112,7 @@ void main() {
 
     expect(find.text('Drop in the post office'), findsOneWidget);
     expect(find.text('To future me'), findsNothing);
-    expect(find.text('Mind'), findsOneWidget);
+    expect(find.text('Thoughts'), findsOneWidget);
   });
 
   testWidgets('self time letter primary is seal and send', (tester) async {
@@ -193,7 +194,7 @@ void main() {
     expect(find.text('No stamp yet'), findsOneWidget);
   });
 
-  testWidgets('empty body still opens letter assistant', (tester) async {
+  testWidgets('help opens quick assistant actions', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: _composeOverrides(),
@@ -207,8 +208,30 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    await tester.tap(find.text('Help'));
+    await tester.tap(find.text('Assist'));
     await tester.pumpAndSettle();
-    expect(find.text('Letter assistant'), findsWidgets);
+    expect(find.text('Polish my draft'), findsOneWidget);
+    expect(find.text('Give me ideas'), findsOneWidget);
+    expect(find.text('Letter assistant'), findsNothing);
+  });
+
+  testWidgets('chosen assistant mode never falls back to mode picker', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _TestApp(
+        child: LetterAssistantSheet(
+          sourceText: 'A short draft',
+          initialMode: LetterAssistantHelpMode.natural,
+          onRequestAssist: (_) async => throw Exception('offline'),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Polish my draft'), findsNothing);
+    expect(find.text('Give me ideas'), findsNothing);
+    expect(find.text('Revise again'), findsOneWidget);
   });
 }

@@ -43,10 +43,11 @@ class InTransitPage extends ConsumerWidget {
       body: ScrollConfiguration(
         behavior: const _NoBarScrollBehavior(),
         child: async.when(
-          loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 120),
+          loading: () =>
+              const PostalSkeletonList(itemCount: 4, itemHeight: 120),
           error: (e, _) => PostalEmptyState(
             title: l10n.inTransitLoadFailed,
-            subtitle: '$e',
+            subtitle: l10n.commonLoadFailedHint,
             tone: PostalEmptyTone.error,
             actionLabel: l10n.authRetry,
             onAction: () => ref.invalidate(postOfficeInTransitProvider),
@@ -76,14 +77,8 @@ class InTransitPage extends ConsumerWidget {
                     title: l10n.inTransitSectionOutbound,
                     items: outbound,
                   ),
-                  _Section(
-                    title: l10n.inTransitSectionInbound,
-                    items: inbound,
-                  ),
-                  _Section(
-                    title: l10n.inTransitSectionUnread,
-                    items: unread,
-                  ),
+                  _Section(title: l10n.inTransitSectionInbound, items: inbound),
+                  _Section(title: l10n.inTransitSectionUnread, items: unread),
                 ],
               ),
             );
@@ -212,4 +207,3 @@ class _InTransitCard extends StatelessWidget {
     );
   }
 }
-

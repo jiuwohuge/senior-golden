@@ -417,6 +417,7 @@ class MailboxLetter {
     this.contentHidden = false,
     this.expectedArrivalAt,
     this.actualArrivalAt,
+    this.transitProgressRatio,
     this.mode = LetterMode.direct,
     this.auditStatus = 1,
     this.relationDisplayState,
@@ -444,6 +445,8 @@ class MailboxLetter {
   final bool contentHidden;
   final DateTime? expectedArrivalAt;
   final DateTime? actualArrivalAt;
+  /// 服务端统一计算的运输进度（0.0～1.0）。
+  final double? transitProgressRatio;
   final LetterMode mode;
   final int auditStatus;
   final RelationDisplayState? relationDisplayState;

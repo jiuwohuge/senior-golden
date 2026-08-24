@@ -6,6 +6,7 @@ MailboxLetter _letter({
   required LetterStatus status,
   required DateTime sentAt,
   DateTime? expectedArrivalAt,
+  double? transitProgressRatio,
 }) {
   return MailboxLetter(
     id: '1',
@@ -25,6 +26,7 @@ MailboxLetter _letter({
     status: status,
     sentAt: sentAt,
     expectedArrivalAt: expectedArrivalAt,
+    transitProgressRatio: transitProgressRatio,
   );
 }
 
@@ -41,8 +43,21 @@ void main() {
     );
   });
 
-  test('delivering uses sent-to-eta ratio', () {
-    final mid = DateTime(2026, 8, 6, 12);
+  test('delivering uses server-authoritative ratio', () {
+    expect(
+      letterTransitProgress(
+        _letter(
+          status: LetterStatus.delivering,
+          sentAt: sent,
+          expectedArrivalAt: eta,
+          transitProgressRatio: 0.5,
+        ),
+      ),
+      closeTo(0.5, 0.001),
+    );
+  });
+
+  test('delivering does not derive progress when server ratio is absent', () {
     expect(
       letterTransitProgress(
         _letter(
@@ -50,9 +65,8 @@ void main() {
           sentAt: sent,
           expectedArrivalAt: eta,
         ),
-        now: mid,
       ),
-      closeTo(0.5, 0.001),
+      isNull,
     );
   });
 

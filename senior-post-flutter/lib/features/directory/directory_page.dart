@@ -116,12 +116,14 @@ class _RecommendTab extends ConsumerWidget {
       onRefresh: onRefresh,
       child: async.when(
         loading: () => const PostalSkeletonList(itemCount: 3, itemHeight: 176),
-        error: (e, _) => ListView(
+        error: (_, _) => ListView(
           children: [
             PostalEmptyState(
               title: l10n.directoryLoadFailed,
-              subtitle: '$e',
+              subtitle: l10n.commonLoadFailedHint,
               tone: PostalEmptyTone.error,
+              actionLabel: l10n.commonRetry,
+              onAction: onRefresh,
             ),
           ],
         ),
@@ -181,10 +183,12 @@ class _FindTab extends ConsumerWidget {
               padding: EdgeInsets.zero,
               shrinkWrap: true,
             ),
-            error: (e, _) => PostalEmptyState(
+            error: (_, _) => PostalEmptyState(
               title: l10n.directoryLoadFailed,
-              subtitle: '$e',
+              subtitle: l10n.commonLoadFailedHint,
               tone: PostalEmptyTone.error,
+              actionLabel: l10n.commonRetry,
+              onAction: onRefresh,
             ),
             data: (users) {
               final filtered = selfId.isEmpty
@@ -225,9 +229,15 @@ class MyPenpalsList extends ConsumerWidget {
       onRefresh: onRefresh,
       child: async.when(
         loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 88),
-        error: (e, _) => ListView(
+        error: (_, _) => ListView(
           children: [
-            PostalEmptyState(title: l10n.directoryLoadFailed, subtitle: '$e'),
+            PostalEmptyState(
+              title: l10n.directoryLoadFailed,
+              subtitle: l10n.commonLoadFailedHint,
+              tone: PostalEmptyTone.error,
+              actionLabel: l10n.commonRetry,
+              onAction: onRefresh,
+            ),
           ],
         ),
         data: (rows) {

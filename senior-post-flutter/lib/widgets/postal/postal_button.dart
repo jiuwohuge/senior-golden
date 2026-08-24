@@ -73,21 +73,24 @@ class PostalButton extends StatelessWidget {
       PostalButtonVariant.danger => _danger(child),
     };
 
-    final fixedHeight = SizedBox(height: _effectiveMinHeight, child: shell);
+    final flexibleHeight = ConstrainedBox(
+      constraints: BoxConstraints(minHeight: _effectiveMinHeight),
+      child: shell,
+    );
 
     // 避免 `SizedBox(width: double.infinity)`：与部分父级（如 Row / Flexible）合并约束时会得到
     // 非法的无限宽度。有界时用 LayoutBuilder 的 maxWidth 铺满；无界或非 expand 用 IntrinsicWidth。
     if (!expand) {
-      return IntrinsicWidth(child: fixedHeight);
+      return IntrinsicWidth(child: flexibleHeight);
     }
 
     return LayoutBuilder(
       builder: (context, c) {
         final w = c.maxWidth;
         if (w.isFinite && w > 0) {
-          return SizedBox(width: w, height: _effectiveMinHeight, child: shell);
+          return SizedBox(width: w, child: flexibleHeight);
         }
-        return IntrinsicWidth(child: fixedHeight);
+        return IntrinsicWidth(child: flexibleHeight);
       },
     );
   }
@@ -115,7 +118,7 @@ class PostalButton extends StatelessWidget {
     };
     final style = textTheme.labelLarge?.copyWith(
       color: color,
-      fontSize: 14,
+      fontSize: 15,
       height: 1.1,
       letterSpacing: 0.1,
     );
@@ -129,13 +132,7 @@ class PostalButton extends StatelessWidget {
             Icon(icon, size: 22, color: color),
             const SizedBox(height: 2),
           ],
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: style,
-          ),
+          Text(label, maxLines: 2, textAlign: TextAlign.center, style: style),
         ],
       ),
     );

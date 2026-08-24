@@ -77,7 +77,7 @@ class _TimeLetterOpenPageState extends ConsumerState<TimeLetterOpenPage>
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => PostalEmptyState(
           title: l10n.timeLetterLoadError,
-          subtitle: '$e',
+          subtitle: l10n.commonLoadFailedHint,
           tone: PostalEmptyTone.error,
         ),
         data: (detail) {

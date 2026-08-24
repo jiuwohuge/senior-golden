@@ -23,7 +23,7 @@ class MyEntitlementsPage extends ConsumerWidget {
           loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 72),
           error: (e, _) => PostalEmptyState(
             title: l10n.commonLoadFailed,
-            subtitle: '$e',
+            subtitle: l10n.commonLoadFailedHint,
             tone: PostalEmptyTone.error,
           ),
           data: (items) {

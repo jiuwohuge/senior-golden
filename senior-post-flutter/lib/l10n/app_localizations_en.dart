@@ -46,7 +46,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get postOfficeWritePostOfficeWaitHint =>
-      'To a kindred spirit (waiting required)';
+      'Send through the Post Office';
 
   @override
   String get mailboxMyPenpals => 'My pen pals';
@@ -1047,8 +1047,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguage => 'Language';
 
   @override
-  String get settingsLanguageSubtitle =>
-      'Follow device by default; override for testing';
+  String get settingsLanguageSubtitle => 'Uses your device language by default';
 
   @override
   String get settingsLanguageEnglish => 'English';
@@ -1419,6 +1418,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interestsPickerSaved => 'Interests saved.';
 
   @override
+  String get interestsPickerSave => 'Save interests';
+
+  @override
+  String interestsPickerSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get interestsPickerEmpty =>
+      'Interest options aren’t available right now. Please try again later.';
+
+  @override
   String get reportReasonRequired => 'Please enter a report reason.';
 
   @override
@@ -1426,6 +1437,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountDeleteTitle => 'Delete account';
+
+  @override
+  String get accountDeleteSectionTitle => 'Before you delete your account';
+
+  @override
+  String get accountDeleteCoolingOff => '7-day cooling-off period';
+
+  @override
+  String get accountDeleteBody =>
+      'After you submit the request, you have 7 days to change your mind by signing in again. After that, your account and associated content will be deleted according to our policy.';
+
+  @override
+  String get accountDeleteSubmit => 'Request account deletion';
+
+  @override
+  String get accountDeleteSubmitted =>
+      'Request submitted. Sign in again within 7 days if you change your mind.';
 
   @override
   String get interestsPickerTitle => 'Interest tags';
@@ -1594,6 +1622,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonLoadFailed => 'Unable to load';
+
+  @override
+  String get commonLoadFailedHint => 'Check your connection and try again.';
+
+  @override
+  String get commonActionFailed => 'Something went wrong. Please try again.';
 
   @override
   String get timeLetterComposeTitle => 'Time Post Office';
@@ -1998,7 +2032,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letterAssistantModeWarmer => '❤️ Warmer';
 
   @override
-  String get letterAssistantModeNatural => '✨ More natural';
+  String get letterAssistantModeNatural => 'Polish my draft';
 
   @override
   String get letterAssistantModeContinue => '📖 Keep chatting';
@@ -2007,7 +2041,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letterAssistantModeShorten => '✂️ Shorten';
 
   @override
-  String get letterAssistantModeInspire => '💡 Give me ideas';
+  String get letterAssistantModeInspire => 'Give me ideas';
 
   @override
   String get letterAssistantGenerate => 'Polish';
@@ -2038,7 +2072,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get letterAssistantEmptyBody =>
-      'Polishing needs a few lines first. On a blank page, use “Give me ideas”.';
+      'Write a few lines first, or choose “Give me ideas”.';
 
   @override
   String get letterAssistantBusy => 'Working…';
@@ -2070,7 +2104,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String composeEditorWordCount(Object count) {
-    return '$count chars';
+    return '$count words';
   }
 
   @override
@@ -2109,22 +2143,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get composeDraftLeaveFailed => 'Draft wasn\'t saved this time';
 
   @override
-  String get composeFooterAssistant => 'Help';
+  String get composeFooterAssistant => 'Assist';
 
   @override
-  String get composeStampShortHeartTalk => 'Mind';
+  String get composeStampShortHeartTalk => 'Thoughts';
 
   @override
-  String get composeStampShortLifeShare => 'Life';
+  String get composeStampShortLifeShare => 'Life lately';
 
   @override
-  String get composeStampShortInterest => 'Share';
+  String get composeStampShortInterest => 'Interests';
 
   @override
-  String get composeStampShortPuzzle => 'Ask';
+  String get composeStampShortPuzzle => 'Questions';
 
   @override
-  String get composeStampShortChat => 'Hi';
+  String get composeStampShortChat => 'Just chat';
 
   @override
   String get composeStepTopicSubmitTitle => 'Submit to topic mailbox';

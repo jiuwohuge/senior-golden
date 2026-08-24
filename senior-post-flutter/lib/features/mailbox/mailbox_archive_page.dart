@@ -21,7 +21,7 @@ class MailboxArchivePage extends ConsumerWidget {
         loading: () => const PostalSkeletonList(itemCount: 6, itemHeight: 96),
         error: (e, _) => PostalEmptyState(
           title: l10n.commonLoadFailed,
-          subtitle: '$e',
+          subtitle: l10n.commonLoadFailedHint,
           tone: PostalEmptyTone.error,
           actionLabel: l10n.commonRetry,
           onAction: () => ref.invalidate(mailboxArchiveProvider),
@@ -58,7 +58,9 @@ class MailboxArchivePage extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      l.outgoing ? l10n.mailboxTabSent : l10n.mailboxTabReceived,
+                      l.outgoing
+                          ? l10n.mailboxTabSent
+                          : l10n.mailboxTabReceived,
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ],

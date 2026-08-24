@@ -262,7 +262,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, _) => PostalEmptyState(
                   title: l10n.authBootstrapLoadFailed,
-                  subtitle: bootstrapDebugErrorHint(err),
+                  subtitle: l10n.commonLoadFailedHint,
                   actionLabel: l10n.authRetry,
                   onAction: () =>
                       ref.invalidate(appBootstrapProvider(locale.languageCode)),
@@ -467,7 +467,12 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                         helperText: l10n.profileCityHint,
                       ),
                       child: Text(
-                        (ref.watch(appSessionProvider).user.city?.trim().isNotEmpty ==
+                        (ref
+                                    .watch(appSessionProvider)
+                                    .user
+                                    .city
+                                    ?.trim()
+                                    .isNotEmpty ==
                                 true)
                             ? ref.watch(appSessionProvider).user.city!.trim()
                             : '—',

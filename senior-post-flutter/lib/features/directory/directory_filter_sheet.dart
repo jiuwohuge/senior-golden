@@ -146,10 +146,23 @@ class _DirectoryFilterSheetState extends ConsumerState<DirectoryFilterSheet> {
         child: SafeArea(
           child: bootstrapAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (_, _) => PostalEmptyState(
+              title: l10n.commonLoadFailed,
+              subtitle: l10n.commonLoadFailedHint,
+              tone: PostalEmptyTone.error,
+              actionLabel: l10n.commonRetry,
+              onAction: () => ref.invalidate(appBootstrapProvider(lang)),
+            ),
             data: (bootstrap) => tagsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('$e')),
+              error: (_, _) => PostalEmptyState(
+                title: l10n.commonLoadFailed,
+                subtitle: l10n.commonLoadFailedHint,
+                tone: PostalEmptyTone.error,
+                actionLabel: l10n.commonRetry,
+                onAction: () =>
+                    ref.invalidate(directoryFilterTagOptionsProvider(lang)),
+              ),
               data: (tagOptions) => Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

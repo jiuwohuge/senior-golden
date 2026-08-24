@@ -41,7 +41,9 @@ class _LocationBootstrapPageState extends ConsumerState<LocationBootstrapPage> {
     _started = true;
     try {
       if (mounted) {
-        await ref.read(locationAccessProvider).ensureAsked(
+        await ref
+            .read(locationAccessProvider)
+            .ensureAsked(
               context: context,
               reason: LocationPromptReason.bootstrap,
             );
@@ -68,9 +70,7 @@ class _LocationBootstrapPageState extends ConsumerState<LocationBootstrapPage> {
       return;
     }
     final loggedIn = (ref.read(authTokenProvider) ?? '').isNotEmpty;
-    context.go(
-      loggedIn ? MainShellRoute.pathPostOffice : LoginRoutes.login,
-    );
+    context.go(loggedIn ? MainShellRoute.pathPostOffice : LoginRoutes.login);
   }
 
   @override

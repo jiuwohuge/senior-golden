@@ -79,6 +79,7 @@ class PostOfficeHomePage extends ConsumerWidget {
           label: timeLetterPrimary
               ? l10n.postOfficeWritePostOfficeWaitHint
               : l10n.writeDestinationSelfTime,
+          icon: Icons.forward_to_inbox_outlined,
           variant: PostalButtonVariant.secondary,
           onPressed: () => _openCompose(
             context,

@@ -96,10 +96,7 @@ class _SendLetterSheetState extends ConsumerState<SendLetterSheet> {
     try {
       await ref
           .read(mailboxRemoteRepositoryProvider)
-          .sendLetter(
-            toUserId: widget.peerId,
-            content: _body.trim(),
-          );
+          .sendLetter(toUserId: widget.peerId, content: _body.trim());
       await ref.read(authRepositoryProvider).refreshSessionFromServer();
       if (!sheetContext.mounted) return;
       ref.invalidate(mailboxLettersProvider);

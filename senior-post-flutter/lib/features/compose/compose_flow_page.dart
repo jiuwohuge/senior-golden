@@ -105,13 +105,16 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   @override
   void initState() {
     super.initState();
-    _kind = widget.initialIntent.kind ??
-        (ref.read(postOfficeHomeProvider).maybeWhen(
-          data: (h) => h.recommendedAction == 'POST_OFFICE'
-              ? ComposeKind.postOffice
-              : ComposeKind.selfTimeLetter,
-          orElse: () => ComposeKind.selfTimeLetter,
-        ));
+    _kind =
+        widget.initialIntent.kind ??
+        (ref
+            .read(postOfficeHomeProvider)
+            .maybeWhen(
+              data: (h) => h.recommendedAction == 'POST_OFFICE'
+                  ? ComposeKind.postOffice
+                  : ComposeKind.selfTimeLetter,
+              orElse: () => ComposeKind.selfTimeLetter,
+            ));
     _peerId = widget.initialIntent.peerId;
     _peerNickname = widget.initialIntent.peerNickname;
     _selectedTemplateId = widget.initialIntent.templateId;
@@ -214,7 +217,9 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
-        final timeLetterFirst = ref.read(postOfficeHomeProvider).maybeWhen(
+        final timeLetterFirst = ref
+            .read(postOfficeHomeProvider)
+            .maybeWhen(
               data: (h) => h.recommendedAction != 'POST_OFFICE',
               orElse: () => true,
             );
@@ -254,7 +259,10 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 16),
-                if (timeLetterFirst) ...[selfTile, postOfficeTile] else ...[
+                if (timeLetterFirst) ...[
+                  selfTile,
+                  postOfficeTile,
+                ] else ...[
                   postOfficeTile,
                   selfTile,
                 ],
@@ -291,9 +299,12 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     if (_draftBusy) return false;
     setState(() => _draftBusy = true);
     try {
-      final isPostOffice = _kind == ComposeKind.postOffice ||
+      final isPostOffice =
+          _kind == ComposeKind.postOffice ||
           _kind == ComposeKind.selfTimeLetter;
-      final saved = await ref.read(letterDraftsRemoteProvider).saveDraft(
+      final saved = await ref
+          .read(letterDraftsRemoteProvider)
+          .saveDraft(
             id: _draftId,
             mode: isPostOffice ? 'POST_OFFICE' : 'DIRECT',
             toUserId: isPostOffice ? null : _peerId,
@@ -340,12 +351,17 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   }
 
   Future<void> _openLetterAssistant() async {
-    // 空白信纸也可以要灵感；润色仍在助手页内拦截。
     final source = _bodyController.text;
+    final mode = await showLetterAssistantQuickActions(
+      context,
+      hasDraft: source.trim().isNotEmpty,
+    );
+    if (!mounted || mode == null) return;
     final suggestion = await showLetterAssistantSheet(
       context: context,
       ref: ref,
       sourceText: source,
+      initialMode: mode,
     );
     if (!mounted || suggestion == null) return;
     setState(() {
@@ -356,19 +372,26 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
 
   Future<void> _openPaperSheet() async {
     final l10n = AppLocalizations.of(context)!;
-    final catalog = await ref.read(commerceCatalogProvider.future);
+    List<CommerceProduct> catalog;
+    try {
+      catalog = await ref.read(commerceCatalogProvider.future);
+    } catch (e) {
+      debugPrint('compose paper catalog failed: $e');
+      if (mounted) {
+        PostalSnack.show(
+          context,
+          l10n.commonActionFailed,
+          tone: PostalSnackTone.error,
+        );
+      }
+      return;
+    }
     if (!mounted) return;
     final skins = catalog
-        .where(
-          (p) =>
-              p.productType == 'skin' && (p.priceCents <= 0 || p.owned),
-        )
+        .where((p) => p.productType == 'skin' && (p.priceCents <= 0 || p.owned))
         .toList();
     final fonts = catalog
-        .where(
-          (p) =>
-              p.productType == 'font' && (p.priceCents <= 0 || p.owned),
-        )
+        .where((p) => p.productType == 'font' && (p.priceCents <= 0 || p.owned))
         .toList();
 
     await showModalBottomSheet<void>(
@@ -487,9 +510,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     AppLocalizations l10n,
   ) {
     if (fonts.isEmpty) {
-      return [
-        (id: 'default', label: l10n.commerceProductFontDefault),
-      ];
+      return [(id: 'default', label: l10n.commerceProductFontDefault)];
     }
     return fonts
         .map(
@@ -625,10 +646,8 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                 setState(() => _topicTagId = id);
                 Navigator.pop(ctx);
               },
-              labelOf: (t) => composeStampShortLabel(
-                AppLocalizations.of(ctx)!,
-                t,
-              ),
+              labelOf: (t) =>
+                  composeStampShortLabel(AppLocalizations.of(ctx)!, t),
             ),
           ),
         );
@@ -641,8 +660,11 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     final biz = apiBusinessExceptionFrom(e);
-    final msg = biz?.message ?? e.toString();
-    final invalidTopic = msg.contains(l10n.composeTopicInvalid) ||
+    final msg = biz?.message.isNotEmpty == true
+        ? biz!.message
+        : AppLocalizations.of(context)!.commonActionFailed;
+    final invalidTopic =
+        msg.contains(l10n.composeTopicInvalid) ||
         msg.contains('Please pick a topic stamp again') ||
         msg.contains('请重新选一个话题');
     if (invalidTopic) {
@@ -654,11 +676,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       );
       return;
     }
-    PostalSnack.show(
-      context,
-      msg,
-      tone: PostalSnackTone.error,
-    );
+    PostalSnack.show(context, msg, tone: PostalSnackTone.error);
   }
 
   Future<void> _showSealSheet() async {
@@ -713,10 +731,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
 
   /// 仪式动画与会话刷新并行，避免用户先干等网络再看动画。
   Future<void> _playSendRitual(String dest) async {
-    final overlay = showDeliverySentOverlay(
-      context,
-      destinationLabel: dest,
-    );
+    final overlay = showDeliverySentOverlay(context, destinationLabel: dest);
     try {
       await ref.read(authRepositoryProvider).refreshSessionFromServer();
     } catch (e) {
@@ -821,11 +836,16 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     final l10n = AppLocalizations.of(context)!;
     final keyboardUp = MediaQuery.viewInsetsOf(context).bottom > 80;
     final lang = ref.watch(effectiveAppLocaleProvider).languageCode;
-    final topics = ref.watch(appBootstrapProvider(lang)).maybeWhen(
+    final narrowScreen = MediaQuery.sizeOf(context).width < 360;
+    final topics = ref
+        .watch(appBootstrapProvider(lang))
+        .maybeWhen(
           data: (d) => d.letterTopicOptions,
           orElse: () => const <LetterTopicOption>[],
         );
-    final dateShort = DateFormat.MMMd().format(_deliveryDate);
+    final dateShort = narrowScreen
+        ? DateFormat.Md(lang).format(_deliveryDate)
+        : DateFormat.MMMd(lang).format(_deliveryDate);
 
     return PopScope(
       canPop: false,
@@ -834,11 +854,12 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
         await _leaveDesk();
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFEDE4D4),
+        backgroundColor: PostalTokens.composeDesk,
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          titleSpacing: 0,
           leading: TextButton(
             onPressed: _busy ? null : _leaveDesk,
             child: Text(
@@ -846,9 +867,9 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
               style: const TextStyle(fontSize: 17),
             ),
           ),
-          leadingWidth: 88,
+          leadingWidth: lang == 'en' ? 84 : 64,
           title: _ComposeRecipientHeader(
-            prefix: l10n.composeMailToPrefix,
+            prefix: narrowScreen ? '' : l10n.composeMailToPrefix,
             recipient: _recipientLabel(l10n),
             dateLabel: _isTimeLetter ? dateShort : null,
             locked: _recipientLocked,
@@ -882,28 +903,31 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: LetterPaper(
-                  mode: LetterPaperMode.compose,
-                  document: _document,
-                  controller: _bodyController,
-                  focusNode: _bodyFocus,
-                  placeholder:
-                      ref.watch(appSessionProvider).user.firstLetterDone != true
-                          ? l10n.composeOneSentenceHint
-                          : l10n.composePlaceholderBody,
-                  minHeight: 280,
-                  footer: ComposePaperFooter(
-                    wordCountLabel: l10n.composeEditorWordCount(
-                      '${composeBodyWordCount(_bodyController.text)}',
+                child: LayoutBuilder(
+                  builder: (context, constraints) => LetterPaper(
+                    mode: LetterPaperMode.compose,
+                    document: _document,
+                    controller: _bodyController,
+                    focusNode: _bodyFocus,
+                    placeholder:
+                        ref.watch(appSessionProvider).user.firstLetterDone !=
+                            true
+                        ? l10n.composeOneSentenceHint
+                        : l10n.composePlaceholderBody,
+                    minHeight: constraints.maxHeight.clamp(180.0, 280.0),
+                    footer: ComposePaperFooter(
+                      wordCountLabel: l10n.composeEditorWordCount(
+                        '${composeBodyWordCount(_bodyController.text)}',
+                      ),
+                      canUndo: _bodyUndoStack.isNotEmpty,
+                      onUndo: _undoLastEdit,
+                      undoLabel: l10n.letterAssistantUndo,
+                      paperLabel: l10n.composePaperSettings,
+                      assistantLabel: l10n.composeFooterAssistant,
+                      onPaper: _openPaperSheet,
+                      onAssistant: _openLetterAssistant,
+                      compact: keyboardUp || narrowScreen,
                     ),
-                    canUndo: _bodyUndoStack.isNotEmpty,
-                    onUndo: _undoLastEdit,
-                    undoLabel: l10n.letterAssistantUndo,
-                    paperLabel: l10n.composePaperSettings,
-                    assistantLabel: l10n.composeFooterAssistant,
-                    onPaper: _openPaperSheet,
-                    onAssistant: _openLetterAssistant,
-                    compact: keyboardUp,
                   ),
                 ),
               ),
@@ -950,9 +974,9 @@ class _ComposeRecipientHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-        );
+    final style = Theme.of(
+      context,
+    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -967,7 +991,7 @@ class _ComposeRecipientHeader extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      '$prefix · $recipient',
+                      prefix.isEmpty ? recipient : '$prefix · $recipient',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: style,
@@ -1078,7 +1102,7 @@ class _SkinSwatch extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(label, style: const TextStyle(fontSize: 14)),
+          Text(label, style: const TextStyle(fontSize: 15)),
         ],
       ),
     );

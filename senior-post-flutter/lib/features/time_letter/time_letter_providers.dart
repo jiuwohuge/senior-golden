@@ -7,24 +7,25 @@ final timeLetterStatsProvider = FutureProvider<TimeLetterStats>((ref) async {
   return ref.read(timeLetterRemoteProvider).stats();
 });
 
-final timeLetterAllProvider =
-    FutureProvider.autoDispose<List<TimeLetterItem>>((ref) async {
-      final remote = ref.read(timeLetterRemoteProvider);
-      final outbox = await remote.listOutbox();
-      final inbox = await remote.listInbox();
-      final memorial = await remote.listMemorial();
-      final byId = <String, TimeLetterItem>{};
-      for (final item in [...outbox, ...inbox, ...memorial]) {
-        byId[item.id] = item;
-      }
-      final list = byId.values.toList();
-      list.sort((a, b) {
-        final ak = a.sealedAt ?? a.deliveryDate ?? '';
-        final bk = b.sealedAt ?? b.deliveryDate ?? '';
-        return bk.compareTo(ak);
-      });
-      return list;
-    });
+final timeLetterAllProvider = FutureProvider.autoDispose<List<TimeLetterItem>>((
+  ref,
+) async {
+  final remote = ref.read(timeLetterRemoteProvider);
+  final outbox = await remote.listOutbox();
+  final inbox = await remote.listInbox();
+  final memorial = await remote.listMemorial();
+  final byId = <String, TimeLetterItem>{};
+  for (final item in [...outbox, ...inbox, ...memorial]) {
+    byId[item.id] = item;
+  }
+  final list = byId.values.toList();
+  list.sort((a, b) {
+    final ak = a.sealedAt ?? a.deliveryDate ?? '';
+    final bk = b.sealedAt ?? b.deliveryDate ?? '';
+    return bk.compareTo(ak);
+  });
+  return list;
+});
 
 final timeLetterRecentRecipientsProvider =
     FutureProvider.autoDispose<List<TimeLetterRecentRecipient>>((ref) async {

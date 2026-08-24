@@ -20,21 +20,16 @@ class AccountDeletePage extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
           children: [
-            const PostalCardEnvelope(
+            PostalCardEnvelope(
               header: PostalSectionTitle(
-                title: 'GDPR deletion flow',
-                subtitle: '7-day cooling-off period',
+                title: l10n.accountDeleteSectionTitle,
+                subtitle: l10n.accountDeleteCoolingOff,
               ),
-              child: Text(
-                'After submission, your account enters a 7-day cooling-off period.\n\n'
-                'During this period, you can revoke deletion by logging in again.\n\n'
-                'After the cooling-off period, account data and associated content '
-                'will be deleted according to policy.',
-              ),
+              child: Text(l10n.accountDeleteBody),
             ),
             const SizedBox(height: 14),
             PostalButton(
-              label: 'Submit deletion request',
+              label: l10n.accountDeleteSubmit,
               variant: PostalButtonVariant.danger,
               onPressed: () async {
                 try {
@@ -44,7 +39,7 @@ class AccountDeletePage extends ConsumerWidget {
                   if (!context.mounted) return;
                   PostalSnack.show(
                     context,
-                    'Deletion request submitted. You can log in again within 7 days to cancel.',
+                    l10n.accountDeleteSubmitted,
                     tone: PostalSnackTone.warning,
                   );
                   await ref

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/interest_tag_option.dart';
 import '../../core/session/app_session.dart';
@@ -85,49 +86,94 @@ class _InterestsPickerPageState extends ConsumerState<InterestsPickerPage> {
       body: SafeArea(
         child: asyncOpts.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('$e')),
+          error: (_, _) => PostalEmptyState(
+            title: l10n.commonLoadFailed,
+            subtitle: l10n.commonLoadFailedHint,
+            tone: PostalEmptyTone.error,
+            actionLabel: l10n.commonRetry,
+            onAction: () =>
+                ref.invalidate(_pickerInterestOptionsProvider(lang)),
+          ),
           data: (options) {
             if (options.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    'No interest tags from server. Add tags in admin or try another language.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
+              return PostalEmptyState(
+                title: l10n.commonLoadFailed,
+                subtitle: l10n.interestsPickerEmpty,
+                actionLabel: l10n.commonRetry,
+                onAction: () =>
+                    ref.invalidate(_pickerInterestOptionsProvider(lang)),
               );
             }
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: options
-                      .map(
-                        (o) => FilterChip(
-                          label: Text(o.tagName),
-                          selected: _selected.contains(o.id),
-                          onSelected: (v) {
-                            setState(() {
-                              if (v) {
-                                _selected.add(o.id);
-                              } else {
-                                _selected.remove(o.id);
-                              }
-                            });
-                          },
-                        ),
-                      )
-                      .toList(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
+                  child: Text(
+                    l10n.interestsPickerSelected(_selected.length),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: PostalTokens.inkSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 14),
-                PostalButton(
-                  label: 'Save interests',
-                  busy: _saving,
-                  onPressed: _saving ? null : () => _save(context),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                    children: [
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: options.map((o) {
+                          final selected = _selected.contains(o.id);
+                          return FilterChip(
+                            label: Text(o.tagName),
+                            selected: selected,
+                            showCheckmark: true,
+                            color: WidgetStatePropertyAll(
+                              selected
+                                  ? PostalTokens.postboxGreen
+                                  : PostalTokens.paperEnvelope,
+                            ),
+                            checkmarkColor: Colors.white,
+                            labelStyle: TextStyle(
+                              color: selected
+                                  ? Colors.white
+                                  : PostalTokens.inkNavy,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            side: BorderSide(
+                              color: selected
+                                  ? PostalTokens.postboxGreen
+                                  : PostalTokens.perforationLine,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            onSelected: (v) {
+                              setState(() {
+                                if (v) {
+                                  _selected.add(o.id);
+                                } else {
+                                  _selected.remove(o.id);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                  child: PostalButton(
+                    label: l10n.interestsPickerSave,
+                    busy: _saving,
+                    onPressed: _saving ? null : () => _save(context),
+                  ),
                 ),
               ],
             );

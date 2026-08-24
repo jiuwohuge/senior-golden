@@ -92,7 +92,11 @@ class _BindEmailPageState extends ConsumerState<BindEmailPage> {
     } catch (e) {
       debugPrint('bind email send-code failed: $e');
       if (mounted) {
-        PostalSnack.show(context, e.toString(), tone: PostalSnackTone.error);
+        PostalSnack.show(
+          context,
+          l10n.commonActionFailed,
+          tone: PostalSnackTone.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _sendingCode = false);
@@ -104,11 +108,13 @@ class _BindEmailPageState extends ConsumerState<BindEmailPage> {
     final wasBound = ref.read(appSessionProvider).user.bound;
     setState(() => _busy = true);
     try {
-      await ref.read(authRepositoryProvider).bindEmail(
-        email: _email.text,
-        password: _password.text,
-        code: _code.text,
-      );
+      await ref
+          .read(authRepositoryProvider)
+          .bindEmail(
+            email: _email.text,
+            password: _password.text,
+            code: _code.text,
+          );
       if (!mounted) return;
       await _showBoundTipAndLeave(changed: wasBound);
     } on ApiBusinessException catch (e) {
@@ -150,7 +156,11 @@ class _BindEmailPageState extends ConsumerState<BindEmailPage> {
     } catch (e) {
       debugPrint('bind google failed: $e');
       if (mounted) {
-        PostalSnack.show(context, e.toString(), tone: PostalSnackTone.error);
+        PostalSnack.show(
+          context,
+          l10n.commonActionFailed,
+          tone: PostalSnackTone.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -228,9 +238,7 @@ class _BindEmailPageState extends ConsumerState<BindEmailPage> {
                   emailLabel: l10n.bindMethodEmail,
                   googleLabel: l10n.bindMethodGoogle,
                   showGoogle: _showGoogle,
-                  onChanged: _busy
-                      ? null
-                      : (m) => setState(() => _method = m),
+                  onChanged: _busy ? null : (m) => setState(() => _method = m),
                 ),
                 const SizedBox(height: 20),
                 if (_method == _BindMethod.email) ...[

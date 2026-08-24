@@ -42,6 +42,9 @@ public class MailboxLetterItemVO {
     @Schema(description = "预计送达时间（平邮运输中）")
     private LocalDateTime expectedArrivalTime;
 
+    @Schema(description = "运输进度，服务端统一计算，范围 0.0～1.0；等待匹配时为空")
+    private Double progressRatio;
+
     @Schema(description = "实际送达时间")
     private LocalDateTime actualArrivalTime;
 

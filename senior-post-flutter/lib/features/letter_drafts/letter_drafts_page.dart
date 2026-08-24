@@ -26,7 +26,7 @@ class LetterDraftsPage extends ConsumerWidget {
           loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 88),
           error: (e, _) => PostalEmptyState(
             title: l10n.commonLoadFailed,
-            subtitle: '$e',
+            subtitle: l10n.commonLoadFailedHint,
             tone: PostalEmptyTone.error,
             actionLabel: l10n.commonRetry,
             onAction: () => ref.invalidate(letterDraftsProvider),
@@ -74,8 +74,8 @@ class _DraftCardState extends ConsumerState<_DraftCard> {
     final kind = draft.mode == 'DIRECT'
         ? ComposeKind.penPalMail
         : (draft.deliveryDate != null
-            ? ComposeKind.selfTimeLetter
-            : ComposeKind.postOffice);
+              ? ComposeKind.selfTimeLetter
+              : ComposeKind.postOffice);
     context.push(
       '/compose',
       extra: ComposeIntent(
@@ -84,8 +84,9 @@ class _DraftCardState extends ConsumerState<_DraftCard> {
         draftId: draft.id,
         topicTagId: draft.topicTagId,
         deliveryDate: draft.deliveryDate,
-        initialParagraphs:
-            draft.content.trim().isEmpty ? null : [draft.content],
+        initialParagraphs: draft.content.trim().isEmpty
+            ? null
+            : [draft.content],
       ),
     );
   }
