@@ -56,11 +56,25 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, TagDomain>
                 .in(TagDomain::getId, ids));
     }
 
+    /**
+     * 名录/资料兴趣选项：只返回 interest，避免主题邮票混进筛选。
+     */
     @Override
     public List<TagDomain> listActiveByLang(String langCode) {
         return list(new LambdaQueryWrapper<TagDomain>()
                 .eq(TagDomain::isDelFlag, false)
                 .eq(TagDomain::getLangCode, langCode)
+                .eq(TagDomain::getTagKind, "interest")
+                .orderByAsc(TagDomain::getSortOrder)
+                .orderByAsc(TagDomain::getId));
+    }
+
+    @Override
+    public List<TagDomain> listActiveLetterTopicsByLang(String langCode) {
+        return list(new LambdaQueryWrapper<TagDomain>()
+                .eq(TagDomain::isDelFlag, false)
+                .eq(TagDomain::getLangCode, langCode)
+                .eq(TagDomain::getTagKind, "letter_topic")
                 .orderByAsc(TagDomain::getSortOrder)
                 .orderByAsc(TagDomain::getId));
     }

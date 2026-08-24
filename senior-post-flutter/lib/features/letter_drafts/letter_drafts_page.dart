@@ -7,6 +7,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../core/api/api_exception.dart';
 import '../../core/models/domain_models.dart';
 import '../../widgets/postal/postal.dart';
+import '../compose/compose_intent.dart';
 import '../mailbox/mailbox_providers.dart';
 import 'letter_drafts_remote.dart';
 
@@ -66,6 +67,28 @@ class _DraftCard extends ConsumerStatefulWidget {
 
 class _DraftCardState extends ConsumerState<_DraftCard> {
   bool _busy = false;
+
+  void _continueWriting() {
+    final draft = widget.draft;
+    // POST_OFFICE + 送达日 → 时光信；否则邮局信；DIRECT → 指定笔友。
+    final kind = draft.mode == 'DIRECT'
+        ? ComposeKind.penPalMail
+        : (draft.deliveryDate != null
+            ? ComposeKind.selfTimeLetter
+            : ComposeKind.postOffice);
+    context.push(
+      '/compose',
+      extra: ComposeIntent(
+        kind: kind,
+        peerId: draft.toUserId,
+        draftId: draft.id,
+        topicTagId: draft.topicTagId,
+        deliveryDate: draft.deliveryDate,
+        initialParagraphs:
+            draft.content.trim().isEmpty ? null : [draft.content],
+      ),
+    );
+  }
 
   Future<void> _send() async {
     final l10n = AppLocalizations.of(context)!;
@@ -140,11 +163,14 @@ class _DraftCardState extends ConsumerState<_DraftCard> {
             ),
           ],
           const SizedBox(height: 8),
-          Text(
-            preview,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium,
+          InkWell(
+            onTap: _continueWriting,
+            child: Text(
+              preview,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
           const SizedBox(height: 12),
           Row(

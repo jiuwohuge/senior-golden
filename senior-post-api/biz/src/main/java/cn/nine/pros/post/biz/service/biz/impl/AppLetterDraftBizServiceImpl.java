@@ -99,6 +99,7 @@ public class AppLetterDraftBizServiceImpl implements AppLetterDraftBizService {
         send.setSkinId(json.getSkinId());
         send.setFontId(json.getFontId());
         send.setTemplateId(json.getTemplateId());
+        send.setTopicTagId(json.getTopicTagId());
         return send;
     }
 

@@ -33,13 +33,8 @@ Future<void> main() async {
       } catch (_) {}
     }
   }
-  if (token == null || token.isEmpty) {
-    try {
-      await container.read(authRepositoryProvider).guest();
-    } catch (e) {
-      debugPrint('startup guest auth failed: $e');
-    }
-  }
+  // 无 token 时不在 runApp 前 guest：Android 此时还没有 Activity，
+  // 定位授权弹窗出不来，经纬度也就写不进库。启动页 /boot 会先授权再 guest。
 
   runApp(
     UncontrolledProviderScope(

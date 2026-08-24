@@ -50,4 +50,10 @@ public class TimeLetterSealInDto {
     @NotBlank
     @Schema(description = "封缄幂等请求 ID")
     private String sealRequestId;
+
+    /**
+     * 可选写信主题邮票；非空时必须是 tag_kind=letter_topic 的 sys_tag.id。
+     */
+    @Schema(description = "写信主题邮票 sys_tag.id，可空")
+    private Integer topicTagId;
 }

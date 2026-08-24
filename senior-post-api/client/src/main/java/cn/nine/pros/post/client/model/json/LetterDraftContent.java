@@ -37,4 +37,10 @@ public class LetterDraftContent {
 
     @Schema(description = "模板")
     private String templateId;
+
+    @Schema(description = "写信主题邮票 sys_tag.id，可空")
+    private Integer topicTagId;
+
+    @Schema(description = "时光信送达日 ISO-8601 日期，可空")
+    private String deliveryDate;
 }

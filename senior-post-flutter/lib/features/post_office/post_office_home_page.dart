@@ -32,10 +32,6 @@ class PostOfficeHomePage extends ConsumerWidget {
       data: (h) => h.remainingQuota,
       orElse: () => 5,
     );
-    final relationCount = homeAsync.maybeWhen(
-      data: (h) => h.relationMessageCount,
-      orElse: () => 0,
-    );
     final inTransit = homeAsync.maybeWhen(
       data: (h) => h.inTransitCount,
       orElse: () => 0,
@@ -101,12 +97,6 @@ class PostOfficeHomePage extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 28),
-        _SummaryCard(
-          icon: Icons.mail_outline,
-          title: l10n.postOfficeMessagesSummary(relationCount),
-          onTap: () => context.push('/post-office/messages'),
-        ),
-        const SizedBox(height: 12),
         _SummaryCard(
           icon: Icons.local_shipping_outlined,
           title: l10n.postOfficeInTransitSummary(inTransit),

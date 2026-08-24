@@ -23,6 +23,8 @@ class LetterDraftsRemoteRepository {
     String? toUserId,
     required String content,
     LetterType letterType = LetterType.standard,
+    int? topicTagId,
+    String? deliveryDate,
   }) async {
     final r = await _dio.post<dynamic>(
       '/api/letter-drafts/save',
@@ -35,6 +37,9 @@ class LetterDraftsRemoteRepository {
           'content': content,
           // M6：草稿也固定 STANDARD，不再写入挂号。
           'letterType': 2,
+          if (topicTagId != null) 'topicTagId': topicTagId,
+          if (deliveryDate != null && deliveryDate.isNotEmpty)
+            'deliveryDate': deliveryDate,
         },
       },
     );
@@ -58,10 +63,17 @@ LetterDraft _mapDraft(Map<String, dynamic> m) {
   final contentJson = m['contentJson'];
   var content = '';
   var letterType = LetterType.standard;
+  int? topicTagId;
+  DateTime? deliveryDate;
   if (contentJson is Map<String, dynamic>) {
     content = (contentJson['content'] as String?) ?? '';
     final lt = (contentJson['letterType'] as num?)?.toInt() ?? 2;
     letterType = lt == 1 ? LetterType.registered : LetterType.standard;
+    topicTagId = (contentJson['topicTagId'] as num?)?.toInt();
+    final rawDate = contentJson['deliveryDate'] as String?;
+    if (rawDate != null && rawDate.isNotEmpty) {
+      deliveryDate = DateTime.tryParse(rawDate);
+    }
   }
   return LetterDraft(
     id: '${m['id'] ?? ''}',
@@ -69,6 +81,8 @@ LetterDraft _mapDraft(Map<String, dynamic> m) {
     toUserId: m['toUserId']?.toString(),
     content: content,
     letterType: letterType,
+    topicTagId: topicTagId,
+    deliveryDate: deliveryDate,
     updatedAt: _parseDate(m['updatedAt']),
   );
 }

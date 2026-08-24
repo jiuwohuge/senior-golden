@@ -1,0 +1,51 @@
+/**
+ * Route every Gradle Settings/project (including Flutter plugin subprojects and
+ * the included :gradle build) through Aliyun. Official Google Maven TLS-fails
+ * on this network and a leftover google() repository will hang the build.
+ */
+def aliyunGoogle = "https://maven.aliyun.com/repository/google"
+def aliyunCentral = "https://maven.aliyun.com/repository/central"
+def aliyunPublic = "https://maven.aliyun.com/repository/public"
+def aliyunPlugin = "https://maven.aliyun.com/repository/gradle-plugin"
+
+def addMirrors = { RepositoryHandler repos ->
+    repos.maven { url = aliyunGoogle }
+    repos.maven { url = aliyunCentral }
+    repos.maven { url = aliyunPublic }
+    repos.maven { url = aliyunPlugin }
+}
+
+def dropOfficialGoogle = { RepositoryHandler repos ->
+    repos.whenObjectAdded { repo ->
+        if (repo instanceof MavenArtifactRepository) {
+            def host = repo.url?.host ?: ""
+            if (host == "dl.google.com" || host == "maven.google.com") {
+                repos.remove(repo)
+            }
+        }
+    }
+}
+
+settingsEvaluated { settings ->
+    settings.pluginManagement.repositories { RepositoryHandler repos ->
+        repos.clear()
+        addMirrors(repos)
+    }
+    settings.dependencyResolutionManagement.repositories { RepositoryHandler repos ->
+        repos.clear()
+        addMirrors(repos)
+    }
+}
+
+gradle.beforeProject { project ->
+    addMirrors(project.buildscript.repositories)
+    dropOfficialGoogle(project.buildscript.repositories)
+
+    // Flutter's included :gradle build uses FAIL_ON_PROJECT_REPOS; adding project
+    // repositories there fails configuration.
+    def rootPath = project.rootDir.absolutePath.replace("\\", "/")
+    if (!rootPath.endsWith("flutter_tools/gradle")) {
+        addMirrors(project.repositories)
+        dropOfficialGoogle(project.repositories)
+    }
+}

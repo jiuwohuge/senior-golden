@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
 import '../../core/auth/auth_data_refresh.dart';
+import '../../core/auth/auth_launch_pref.dart';
 import '../../core/auth/auth_storage.dart';
 import '../../core/auth/auth_token.dart';
 import '../../core/device/device_ids.dart';
@@ -39,6 +40,7 @@ class AuthRepository {
 
   final Ref _ref;
 
+  /// POST `/api/auth/guest`。坐标来自启动页已弹出的系统授权；未授权则不带 lat/lng。
   Future<AuthSignInResult> guest() async {
     final dio = _ref.read(dioProvider);
     final deviceUuid = await _ensureDeviceUuid();
@@ -199,11 +201,12 @@ class AuthRepository {
     }
   }
 
+  /// POST `/api/auth/register`。性别与兴趣可后补；出生年份仍走 45+ 门槛。
   Future<AuthSignInResult> register({
     required String email,
     required String password,
     required String nickname,
-    required int gender,
+    int? gender,
     required int birthYear,
     String? countryCode,
     double? latitude,
@@ -212,9 +215,6 @@ class AuthRepository {
     List<int> interestTagIds = const [],
     String? avatarUrl,
   }) async {
-    if (interestTagIds.length < 3) {
-      throw ApiBusinessException(400, 'Please select at least 3 interests.');
-    }
     final dio = _ref.read(dioProvider);
     final deviceUuid = await _ensureDeviceUuid();
     try {
@@ -224,14 +224,14 @@ class AuthRepository {
           'email': email.trim(),
           'password': password,
           'nickname': nickname.trim(),
-          'gender': gender,
+          if (gender != null) 'gender': gender,
           'birthYear': birthYear,
           if (countryCode != null && countryCode.isNotEmpty)
             'countryCode': countryCode.trim(),
           if (latitude != null) 'latitude': latitude,
           if (longitude != null) 'longitude': longitude,
           'agreedTerms': agreedTerms,
-          'interestTagIds': interestTagIds,
+          if (interestTagIds.isNotEmpty) 'interestTagIds': interestTagIds,
           if (avatarUrl != null && avatarUrl.isNotEmpty) 'avatarUrl': avatarUrl,
           'deviceUuid': deviceUuid,
           'deviceType': _deviceTypeBody(),
@@ -339,7 +339,7 @@ class AuthRepository {
     }
   }
 
-  /// [reenterAsGuest]：退出后立刻按本机 deviceUuid 静默进入原账号（绑定后也是同一人）。
+  /// [reenterAsGuest] 为 false 时停在登录页，便于换号；为 true 则立刻 guest 回本机账号。
   Future<void> logout({bool reenterAsGuest = true}) async {
     final dio = _ref.read(dioProvider);
     try {
@@ -351,8 +351,11 @@ class AuthRepository {
     _ref.read(authTokenProvider.notifier).state = null;
     _ref.read(appSessionProvider.notifier).clear();
     if (!reenterAsGuest) {
+      await AuthLaunchPref.setSkipSilentGuest(true);
+      _ref.read(routerRefreshProvider).value++;
       return;
     }
+    await AuthLaunchPref.setSkipSilentGuest(false);
     await guest();
   }
 
@@ -363,15 +366,7 @@ class AuthRepository {
       final data = unwrapData<Map<String, dynamic>>(res, (raw) {
         return raw! as Map<String, dynamic>;
       });
-      final beforeFirst =
-          _ref.read(appSessionProvider).user.firstLetterDone == true;
       _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(data);
-      final afterFirst =
-          _ref.read(appSessionProvider).user.firstLetterDone == true;
-      // firstLetterDone 变化时驱动 GoRouter redirect（离开强制引导页）。
-      if (beforeFirst != afterFirst) {
-        _ref.read(routerRefreshProvider).value++;
-      }
     } on DioException catch (e) {
       _throwMappedDio(e);
     }
@@ -388,6 +383,7 @@ class AuthRepository {
     }
   }
 
+  /// PATCH `/api/auth/profile`。坐标在用户授权定位后补报，可只传 lat/lng。
   Future<void> updateProfileOnServer({
     String? nickname,
     String? countryCode,
@@ -395,6 +391,8 @@ class AuthRepository {
     String? avatarUrl,
     List<int>? interestTagIds,
     int? gender,
+    double? latitude,
+    double? longitude,
   }) async {
     final dio = _ref.read(dioProvider);
     try {
@@ -405,6 +403,8 @@ class AuthRepository {
       if (bio != null) body['bio'] = bio.trim();
       if (avatarUrl != null) body['avatarUrl'] = avatarUrl;
       if (interestTagIds != null) body['interestTagIds'] = interestTagIds;
+      if (latitude != null) body['latitude'] = latitude;
+      if (longitude != null) body['longitude'] = longitude;
       if (body.isEmpty) {
         throw StateError('updateProfileOnServer: at least one field required');
       }
@@ -442,13 +442,13 @@ class AuthRepository {
         riskLevel: riskLevel,
       );
     }
-    // 先写入会话再设 Token：Token 会触发 GoRouter redirect，
-    // 若此时 user.id 仍为空会误判进邮局首页，跳过首封信/额度领取。
+    // 先写入会话再设 Token：Token 会触发 GoRouter redirect。
     final userMap = data['user'] as Map<String, dynamic>?;
     if (userMap != null) {
       _ref.read(appSessionProvider.notifier).applyFromPublicUserVo(userMap);
     }
     await AuthStorage.writeToken(token);
+    await AuthLaunchPref.setSkipSilentGuest(false);
     _ref.read(authTokenProvider.notifier).state = token;
     _ref.read(invalidateAuthDataProvider)();
     final complete = data['profileComplete'] as bool? ?? true;

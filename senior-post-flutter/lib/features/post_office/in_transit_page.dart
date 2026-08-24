@@ -8,7 +8,21 @@ import '../../widgets/postal/postal.dart';
 import '../../core/models/letter_peer_label.dart';
 import 'post_office_remote.dart';
 
-/// §11.4 在途明细：发出未达 / 收到未达 / 未读，含相对 ETA 与进度条。
+/// 在途页不画系统滚动条：Material 指示条容易被看成卡片底边的横向滚动条。
+class _NoBarScrollBehavior extends MaterialScrollBehavior {
+  const _NoBarScrollBehavior();
+
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child;
+  }
+}
+
+/// §11.4 在途明细：发出未达 / 收到未达 / 未读，含相对 ETA 与投递轨迹。
 class InTransitPage extends ConsumerWidget {
   const InTransitPage({super.key});
 
@@ -26,52 +40,55 @@ class InTransitPage extends ConsumerWidget {
         foregroundColor: Colors.white,
         title: Text(l10n.inTransitTitle),
       ),
-      body: async.when(
-        loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 120),
-        error: (e, _) => PostalEmptyState(
-          title: l10n.inTransitLoadFailed,
-          subtitle: '$e',
-          tone: PostalEmptyTone.error,
-          actionLabel: l10n.authRetry,
-          onAction: () => ref.invalidate(postOfficeInTransitProvider),
-        ),
-        data: (items) {
-          if (items.isEmpty) {
-            return PostalEmptyState(
-              title: l10n.inTransitEmptyTitle,
-              subtitle: l10n.inTransitEmptySubtitle,
+      body: ScrollConfiguration(
+        behavior: const _NoBarScrollBehavior(),
+        child: async.when(
+          loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 120),
+          error: (e, _) => PostalEmptyState(
+            title: l10n.inTransitLoadFailed,
+            subtitle: '$e',
+            tone: PostalEmptyTone.error,
+            actionLabel: l10n.authRetry,
+            onAction: () => ref.invalidate(postOfficeInTransitProvider),
+          ),
+          data: (items) {
+            if (items.isEmpty) {
+              return PostalEmptyState(
+                title: l10n.inTransitEmptyTitle,
+                subtitle: l10n.inTransitEmptySubtitle,
+              );
+            }
+            final outbound = items.where((e) => e.itemType == 1).toList();
+            final inbound = items.where((e) => e.itemType == 2).toList();
+            final unread = items.where((e) => e.itemType == 3).toList();
+            return RefreshIndicator(
+              color: PostalTokens.postboxGreen,
+              onRefresh: () async {
+                ref.invalidate(postOfficeInTransitProvider);
+                ref.invalidate(postOfficeHomeProvider);
+                await ref.read(postOfficeInTransitProvider.future);
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                children: [
+                  _Section(
+                    title: l10n.inTransitSectionOutbound,
+                    items: outbound,
+                  ),
+                  _Section(
+                    title: l10n.inTransitSectionInbound,
+                    items: inbound,
+                  ),
+                  _Section(
+                    title: l10n.inTransitSectionUnread,
+                    items: unread,
+                  ),
+                ],
+              ),
             );
-          }
-          final outbound = items.where((e) => e.itemType == 1).toList();
-          final inbound = items.where((e) => e.itemType == 2).toList();
-          final unread = items.where((e) => e.itemType == 3).toList();
-          return RefreshIndicator(
-            color: PostalTokens.postboxGreen,
-            onRefresh: () async {
-              ref.invalidate(postOfficeInTransitProvider);
-              ref.invalidate(postOfficeHomeProvider);
-              await ref.read(postOfficeInTransitProvider.future);
-            },
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-              children: [
-                _Section(
-                  title: l10n.inTransitSectionOutbound,
-                  items: outbound,
-                ),
-                _Section(
-                  title: l10n.inTransitSectionInbound,
-                  items: inbound,
-                ),
-                _Section(
-                  title: l10n.inTransitSectionUnread,
-                  items: unread,
-                ),
-              ],
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }
@@ -124,6 +141,9 @@ class _InTransitCard extends StatelessWidget {
 
   final PostOfficeInTransitItem item;
 
+  /// 收到未达：收件人侧正文密封，列表只给占位句。
+  bool get _inboundSealed => item.itemType == 2;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -131,6 +151,9 @@ class _InTransitCard extends StatelessWidget {
     final progress = (item.progressRatio ?? 0).clamp(0.0, 1.0);
     final hours = item.etaRelativeHours;
     final peerName = letterPeerDisplayTitle(l10n: l10n, peer: item.peer);
+    final bodyText = _inboundSealed
+        ? l10n.letterContentHiddenHint
+        : item.preview.trim();
 
     return PostalCardEnvelope(
       onTap: item.letterId.isEmpty
@@ -145,46 +168,48 @@ class _InTransitCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   peerName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-              if (hours != null && hours > 0)
+              if (hours != null && hours > 0) ...[
+                const SizedBox(width: 8),
                 Text(
                   l10n.inTransitEtaHours(hours.round()),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: PostalTokens.postboxGreen,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+              ],
             ],
           ),
-          if (item.preview.trim().isNotEmpty) ...[
-            const SizedBox(height: 6),
+          if (bodyText.isNotEmpty) ...[
+            const SizedBox(height: 8),
             Text(
-              item.preview,
+              bodyText,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: PostalTokens.inkSecondary,
+                color: _inboundSealed
+                    ? PostalTokens.inkTertiary
+                    : PostalTokens.inkSecondary,
+                fontStyle: _inboundSealed ? FontStyle.italic : FontStyle.normal,
               ),
             ),
           ],
           if (item.itemType != 3) ...[
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 8,
-                backgroundColor: PostalTokens.perforationLine,
-                color: PostalTokens.postboxGreen,
-              ),
-            ),
+            const SizedBox(height: 14),
+            PostalDeliveryProgress(progress: progress),
           ],
         ],
       ),
     );
   }
 }
+

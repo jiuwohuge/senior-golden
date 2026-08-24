@@ -41,4 +41,16 @@ public class TagDomain extends AbstractAuditableDomain {
     @Schema(description = "排序顺序")
     private Integer sortOrder;
 
+    /**
+     * 标签分栏：interest=兴趣目录；letter_topic=写信主题邮票。
+     */
+    @Schema(description = "interest | letter_topic")
+    private String tagKind;
+
+    /**
+     * 稳定业务码；兴趣旧行可空。
+     */
+    @Schema(description = "标签业务码")
+    private String tagCode;
+
 }

@@ -24,6 +24,7 @@ import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.biz.support.DeliveryDelayCalculator;
 import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
+import cn.nine.pros.post.biz.service.biz.support.LetterTopicSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.client.common.constant.BehaviorActionTypes;
@@ -89,6 +90,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private final DailyQuotaClaimService dailyQuotaClaimService;
     private final TimeLetterService timeLetterService;
     private final LetterAssistantService letterAssistantService;
+    private final LetterTopicSupport letterTopicSupport;
 
     /**
      * 邮政收件箱：本人相关且未读的信件列表（含 POST_OFFICE 入池仅发件人可见）。
@@ -218,6 +220,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         assertDailyQuota(fromUserId, sender);
 
         UserDTO toUser = loadValidatedRecipient(fromUserId, toUserId);
+        Integer topicTagId = letterTopicSupport.requireLetterTopicIdOrNull(fromUserId, body.getTopicTagId());
 
         LocalDateTime now = LocalDateTime.now();
         LetterDomain letter = new LetterDomain();
@@ -226,6 +229,7 @@ public class AppMailboxServiceImpl implements AppMailboxService {
         letter.setContent(content);
         letter.setParentLetterId(parentLetterId);
         letter.setMode(mode.getCode());
+        letter.setTopicTagId(topicTagId);
         letter.setAuditStatus(LetterAuditStatus.PENDING_REVIEW.getCode());
         letter.setLetterType(physicalType.getCode());
         LetterContentMeta contentMeta = LetterContentMeta.of(skinId, fontId, fontSizeTier, templateId);
@@ -268,7 +272,8 @@ public class AppMailboxServiceImpl implements AppMailboxService {
                 : BehaviorActionTypes.SEND_LETTER;
         actionService.recordEvent(
                 fromUserId, actionType, BehaviorActionTypes.TARGET_LETTER, letter.getId(), null);
-        log.info("letter sent, fromUserId={}, letterId={}, mode={}", fromUserId, letter.getId(), mode.getCode());
+        log.info("letter sent, fromUserId={}, letterId={}, mode={}, topicTagId={}",
+                fromUserId, letter.getId(), mode.getCode(), topicTagId);
 
         LetterDomain saved = letterService.getById(letter.getId());
         return toItem(saved, fromUserId, false);

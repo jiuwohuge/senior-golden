@@ -39,4 +39,10 @@ public class TagDTO extends AbstractAuditableDTO {
     @Schema(description = "排序顺序")
     private Integer sortOrder;
 
+    @Schema(description = "interest | letter_topic")
+    private String tagKind;
+
+    @Schema(description = "标签业务码")
+    private String tagCode;
+
 }

@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
+import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/device/location_access.dart';
 import '../../core/i18n/app_locale_provider.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
@@ -183,6 +185,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     subtitle: Text(l10n.settingsLanguageSubtitle),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _pickLanguage,
+                  ),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    leading: const Icon(
+                      Icons.location_on_outlined,
+                      color: PostalTokens.postboxGreen,
+                    ),
+                    title: Text(l10n.locationSettingsRowTitle),
+                    subtitle: Text(l10n.locationSettingsRowSubtitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => ref.read(locationAccessProvider).ensureAsked(
+                          context: context,
+                          reason: LocationPromptReason.settings,
+                        ),
                   ),
                   if (hasEmail)
                     ListTile(

@@ -153,6 +153,7 @@ public class AppDirectoryServiceImpl implements AppDirectoryService {
         return out;
     }
 
+    /** 兴趣标签（不含写信主题邮票，见 TagService.listActiveByLang）。 */
     private List<InterestTagOptionVO> loadTagOptionsForLang(String lang) {
         return tagService.listActiveByLang(lang).stream()
                 .filter(t -> t.getId() != null && StringUtils.hasText(t.getTagName()))

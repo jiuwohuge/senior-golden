@@ -20,6 +20,7 @@ import cn.nine.pros.post.biz.service.base.SensitiveWordService;
 import cn.nine.pros.post.biz.service.base.TimeLetterService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
+import cn.nine.pros.post.biz.service.biz.support.LetterTopicSupport;
 import cn.nine.pros.post.client.common.enums.TimeLetterRecipientType;
 import cn.nine.pros.post.client.common.enums.TimeLetterStatus;
 import cn.nine.pros.post.client.model.db.UserDTO;
@@ -78,6 +79,7 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
     private final ConfigService configService;
     private final DailyQuotaClaimService dailyQuotaClaimService;
     private final LetterService letterService;
+    private final LetterTopicSupport letterTopicSupport;
 
     /**
      * 保存时光信草稿（新建或更新已有草稿）。
@@ -167,6 +169,7 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
         validateDeliveryDate(body.getDeliveryDate(), body.getDeliveryTz());
         assertDailyQuota(userId);
         assertSealLimits(userId, resolved.recipientId, body.getDeliveryDate());
+        Integer topicTagId = letterTopicSupport.requireLetterTopicIdOrNull(userId, body.getTopicTagId());
 
         int stampCost = 0;
         LocalDateTime now = LocalDateTime.now();
@@ -180,7 +183,7 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
             d.setSenderId(userId);
             d.initAudit(userId);
         }
-        applySealFields(d, resolved, content, body, now, stampCost);
+        applySealFields(d, resolved, content, body, now, stampCost, topicTagId);
         try {
             if (d.getId() == null) {
                 timeLetterService.save(d);
@@ -193,8 +196,8 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
             throw new BusinessException(appMessages.get("app.timeLetter.error.sameDayDuplicate"));
         }
 
-        log.info("time-letter sealed, userId={}, letterId={}, deliveryDate={}",
-                userId, d.getId(), d.getDeliveryDate());
+        log.info("time-letter sealed, userId={}, letterId={}, deliveryDate={}, topicTagId={}",
+                userId, d.getId(), d.getDeliveryDate(), topicTagId);
         return TimeLetterSealResultVO.builder()
                 .id(d.getId())
                 .status(d.getStatus())
@@ -602,7 +605,8 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
             String content,
             TimeLetterSealInDto body,
             LocalDateTime now,
-            int stampCost) {
+            int stampCost,
+            Integer topicTagId) {
         d.setRecipientId(resolved.recipientId);
         d.setRecipientType(resolved.recipientType);
         d.setBody(content);
@@ -614,6 +618,7 @@ public class AppTimeLetterServiceImpl implements AppTimeLetterService {
         d.setDeliveryTz(resolveZone(body.getDeliveryTz()).getId());
         d.setWriterCity(trimOrNull(body.getWriterCity()));
         d.setWriteDurationSec(body.getWriteDurationSec());
+        d.setTopicTagId(topicTagId);
         d.setStatus(TimeLetterStatus.PENDING.getCode());
         d.setSealedAt(now);
         d.setCancelDeadlineAt(now.plusHours(properties.getCancelWindowHours()));

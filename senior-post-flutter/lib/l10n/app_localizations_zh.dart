@@ -968,6 +968,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileLogout => '退出登录';
 
   @override
+  String profileAccountDeletionBanner(String when) {
+    return '已申请删除账号。7 天内再次登录即可取消。生效时间：$when。';
+  }
+
+  @override
   String get settingsTitle => '设置';
 
   @override
@@ -1129,7 +1134,16 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get letterStatusMatched => '已匹配';
+  String get letterStatusMatched => '已匹配 · 在途';
+
+  @override
+  String get letterStatusWaitingMatch => '正在匹配';
+
+  @override
+  String get letterStatusInTransit => '投递中';
+
+  @override
+  String get letterStatusRegistered => '挂号';
 
   @override
   String get letterAuditPending => '待审核';
@@ -1150,6 +1164,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get letterDeliveredLabel => '已送达';
+
+  @override
+  String letterSentAt(String when) {
+    return '寄出 $when';
+  }
+
+  @override
+  String get letterRegisteredHint => '挂号信已交寄，稍后会显示为已送达。';
+
+  @override
+  String get letterLoadFailed => '无法打开这封信';
+
+  @override
+  String get letterNotFound => '找不到这封信';
+
+  @override
+  String get letterExpiredHint => '这封信可能已经过期。';
 
   @override
   String get letterPeerPostOfficePool => '推荐中';
@@ -1260,10 +1291,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mailboxArchiveTitle => '信件归档';
 
   @override
+  String get mailboxArchiveEmptyTitle => '归档里还没有信';
+
+  @override
+  String get mailboxArchiveEmptySubtitle => '寄出和收到的信会出现在这里。';
+
+  @override
   String get mailboxOpenArchive => '归档';
 
   @override
-  String get mailboxPostOnTheWay => '有明信片正在路上';
+  String get mailboxPostOnTheWay => '有信还在路上';
+
+  @override
+  String get mailboxPenpalRequests => '笔友申请';
+
+  @override
+  String mailboxPenpalRequestsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 条待处理',
+      one: '1 条待处理',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get shopTitleStampsVip => '邮票与会员';
@@ -1874,7 +1925,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get letterAssistantUndoBanner => '助手已改动正文';
 
   @override
-  String get letterAssistantEmptyBody => '请先写下一些内容，再请助手帮忙。';
+  String get letterAssistantEmptyBody => '润色需要先写几句。空白信纸请用「给我灵感」。';
 
   @override
   String get letterAssistantBusy => '正在整理…';
@@ -1919,6 +1970,47 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get composeCancel => '取消';
+
+  @override
+  String get composeMailToPrefix => '寄给';
+
+  @override
+  String get composePrimaryDropInPostOffice => '投进邮局';
+
+  @override
+  String get composePrimarySendToPenPal => '寄出这封信';
+
+  @override
+  String get composeStampNone => '未贴邮票';
+
+  @override
+  String composeStampStuck(String title) {
+    return '已贴：$title';
+  }
+
+  @override
+  String get composeTopicInvalid => '请重新选一个话题';
+
+  @override
+  String get composeDraftLeaveFailed => '这次没有存成草稿';
+
+  @override
+  String get composeFooterAssistant => '助手';
+
+  @override
+  String get composeStampShortHeartTalk => '心事';
+
+  @override
+  String get composeStampShortLifeShare => '生活';
+
+  @override
+  String get composeStampShortInterest => '兴趣';
+
+  @override
+  String get composeStampShortPuzzle => '困惑';
+
+  @override
+  String get composeStampShortChat => '聊聊';
 
   @override
   String get composeStepTopicSubmitTitle => '投进主题信箱';
@@ -2232,4 +2324,38 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get profileCityHint => '由定位自动识别，可在资料中查看';
+
+  @override
+  String get locationBootstrapTagline => '信件从您所在的城市出发。';
+
+  @override
+  String get locationBootstrapHint =>
+      '请允许定位，方便按您所在的城市投递和匹配笔友。允许或拒绝都可以，之后仍能继续使用。';
+
+  @override
+  String get locationBootstrapWait => '正在为您开通信箱…';
+
+  @override
+  String get locationSettingsTitle => '请打开定位权限';
+
+  @override
+  String get locationSettingsBody => '系统设置里还未允许定位。打开设置后允许定位，才能按您所在的城市匹配笔友。';
+
+  @override
+  String get locationSettingsOpen => '去设置';
+
+  @override
+  String get locationSettingsLater => '稍后再说';
+
+  @override
+  String get locationProfileBannerTitle => '补充您所在的城市';
+
+  @override
+  String get locationProfileBannerBody => '允许定位后，更容易匹配到附近的笔友。拒绝也可以继续写信。';
+
+  @override
+  String get locationSettingsRowTitle => '定位';
+
+  @override
+  String get locationSettingsRowSubtitle => '用于按城市匹配笔友';
 }

@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 import '../../app/theme/postal_tokens.dart';
+import '../../core/i18n/postal_format.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/models/letter_peer_label.dart';
+import '../../core/models/letter_transit_progress.dart';
 import '../auth/auth_repository.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
 import '../time_letter/time_letter_list_tab.dart';
 import '../time_letter/time_letter_providers.dart';
 import '../relation/relation_display_label.dart';
+import '../relation/relation_remote.dart';
 import '../directory/my_penpals_page.dart';
 
 class MailboxPage extends ConsumerStatefulWidget {
@@ -95,20 +97,16 @@ class _MailboxPageState extends ConsumerState<MailboxPage>
       top: false,
       child: Column(
         children: [
-          const PostalPerforationStrip(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
-            child: Row(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+            child: Column(
               children: [
-                const Spacer(),
-                TextButton(
-                  onPressed: () => context.push(MyPenpalsPage.path),
-                  child: Text(l10n.mailboxMyPenpals),
+                _MailboxNavRow(
+                  icon: Icons.people_outline,
+                  title: l10n.mailboxMyPenpals,
+                  onTap: () => context.push(MyPenpalsPage.path),
                 ),
-                TextButton(
-                  onPressed: () => context.push('/mailbox/archive'),
-                  child: Text(l10n.mailboxOpenArchive),
-                ),
+                const _MailboxPenpalRequestsRow(),
               ],
             ),
           ),
@@ -248,17 +246,29 @@ class _MailboxLettersBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final delivering = showInTransitBanner
-        ? letters
-              .where(
-                (l) =>
-                    l.status == LetterStatus.delivering ||
-                    l.status == LetterStatus.pending ||
-                    l.status == LetterStatus.matched,
-              )
-              .toList()
+        ? letters.where(letterIsInTransit).toList()
+        : const <MailboxLetter>[];
+    final matching = showInTransitBanner
+        ? letters.where(letterIsWaitingForMatch).toList()
         : const <MailboxLetter>[];
     return Column(
       children: [
+        if (matching.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: BoxDecoration(
+              color: PostalTokens.kraftBrown.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.hourglass_top_outlined),
+                const SizedBox(width: 8),
+                Expanded(child: Text(l10n.letterStatusWaitingMatch)),
+              ],
+            ),
+          ),
         if (delivering.isNotEmpty)
           Container(
             margin: const EdgeInsets.fromLTRB(20, 0, 20, 8),
@@ -319,21 +329,24 @@ class _LetterTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    // MATCHED 单独展示；pending/delivering 仍用在途芯片。
     final statusChip = switch (letter.status) {
+      LetterStatus.pending => PostalStatusChip.draft(
+        label: l10n.letterStatusWaitingMatch,
+      ),
       LetterStatus.matched => PostalStatusChip.delivering(
         label: l10n.letterStatusMatched,
       ),
-      LetterStatus.pending ||
-      LetterStatus.delivering => PostalStatusChip.delivering(),
-      LetterStatus.registered => PostalStatusChip.registered(
-        label: 'Registered',
+      LetterStatus.delivering => PostalStatusChip.delivering(
+        label: l10n.letterStatusInTransit,
       ),
-      LetterStatus.delivered =>
-        letter.type == LetterType.registered
-            ? PostalStatusChip.registered(label: 'Registered')
-            : PostalStatusChip.delivered(),
+      LetterStatus.registered => PostalStatusChip.registered(
+        label: l10n.letterStatusRegistered,
+      ),
+      LetterStatus.delivered => PostalStatusChip.delivered(
+        label: l10n.letterDeliveredLabel,
+      ),
     };
+    final progress = letterTransitProgress(letter);
     // auditStatus: 0 待审 / 1 通过 / 2 拒绝 — 非通过时在列表露出标签。
     final auditLabel = switch (letter.auditStatus) {
       0 => l10n.letterAuditPending,
@@ -413,12 +426,93 @@ class _LetterTile extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: 8),
+          if (progress != null) ...[
+            PostalDeliveryProgress(progress: progress),
+            const SizedBox(height: 8),
+          ],
           Text(
-            DateFormat('MM-dd HH:mm').format(letter.sentAt),
+            PostalFormat.dateTime(context, letter.sentAt),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MailboxNavRow extends StatelessWidget {
+  const _MailboxNavRow({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return PostalCardEnvelope(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Icon(icon, size: 28, color: PostalTokens.postboxGreen),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: PostalTokens.inkSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, size: 28),
+        ],
+      ),
+    );
+  }
+}
+
+class _MailboxPenpalRequestsRow extends ConsumerWidget {
+  const _MailboxPenpalRequestsRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final async = ref.watch(postOfficeRelationMessagesProvider);
+    return async.maybeWhen(
+      data: (rows) {
+        if (rows.isEmpty) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: _MailboxNavRow(
+            icon: Icons.mark_email_unread_outlined,
+            title: l10n.mailboxPenpalRequests,
+            subtitle: l10n.mailboxPenpalRequestsCount(rows.length),
+            onTap: () => context.push('/post-office/messages'),
+          ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }

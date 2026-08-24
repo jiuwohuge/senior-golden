@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/interest_tag_option.dart';
+import '../models/letter_topic_option.dart';
 import '../network/dio_provider.dart';
 
 /// 与后端 `AppBootstrapVO` / `AppCountryVO` / `AppVipProductConfigVO` 对齐。
@@ -57,6 +58,7 @@ class AppBootstrapData {
     required this.minRegisterAge,
     required this.countries,
     this.interestTagOptions = const [],
+    this.letterTopicOptions = const [],
     this.vipProduct = AppVipProductConfig.defaults,
     this.dailyLetterQuota = 5,
   });
@@ -64,12 +66,14 @@ class AppBootstrapData {
   final int minRegisterAge;
   final List<CountryItem> countries;
   final List<InterestTagOption> interestTagOptions;
+  final List<LetterTopicOption> letterTopicOptions;
   final AppVipProductConfig vipProduct;
   final int dailyLetterQuota;
 
   factory AppBootstrapData.fromJson(Map<String, dynamic> json) {
     final countriesRaw = json['countries'] as List<dynamic>? ?? const [];
     final tagsRaw = json['interestTagOptions'] as List<dynamic>? ?? const [];
+    final topicsRaw = json['letterTopicOptions'] as List<dynamic>? ?? const [];
     final vipRaw = json['vipProduct'];
     return AppBootstrapData(
       minRegisterAge: (json['minRegisterAge'] as num?)?.toInt() ?? 45,
@@ -82,6 +86,11 @@ class AppBootstrapData {
           .whereType<Map<String, dynamic>>()
           .map(InterestTagOption.fromJson)
           .where((e) => e.id > 0 && e.tagName.isNotEmpty)
+          .toList(),
+      letterTopicOptions: topicsRaw
+          .whereType<Map<String, dynamic>>()
+          .map(LetterTopicOption.fromJson)
+          .where((e) => e.id > 0 && e.title.isNotEmpty)
           .toList(),
       vipProduct: vipRaw is Map<String, dynamic>
           ? AppVipProductConfig.fromJson(vipRaw)

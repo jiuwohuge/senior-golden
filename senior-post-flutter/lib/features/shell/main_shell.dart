@@ -15,7 +15,7 @@ abstract final class MainShellRoute {
   static const pathProfile = '/profile';
 }
 
-/// 主壳：冷启动只保留写信、信箱与账号。
+/// 主壳：邮局保留邮戳顶栏；信箱 / 我的用短标题，把高度还给信件列表。
 class MainShell extends StatefulWidget {
   const MainShell({super.key, this.initialIndex = 0});
 
@@ -45,13 +45,9 @@ class _MainShellState extends State<MainShell> {
     context.go(loc);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
+  PreferredSizeWidget _appBar(AppLocalizations l10n, ThemeData theme) {
+    if (_index == 0) {
+      return AppBar(
         toolbarHeight: 76,
         title: PostalPostmarkHeader(
           child: Semantics(
@@ -82,7 +78,20 @@ class _MainShellState extends State<MainShell> {
             ),
           ),
         ),
-      ),
+      );
+    }
+    return AppBar(
+      title: Text(_index == 1 ? l10n.tabMailbox : l10n.tabProfile),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: _appBar(l10n, theme),
       body: IndexedStack(
         index: _index,
         children: const [

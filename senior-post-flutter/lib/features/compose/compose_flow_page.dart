@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,8 +8,10 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/bootstrap/app_bootstrap.dart';
+import '../../core/i18n/effective_app_locale_provider.dart';
 import '../../core/models/domain_models.dart';
-import '../../core/network/router_refresh.dart';
+import '../../core/models/letter_topic_option.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/letter/letter_document.dart';
 import '../../widgets/letter/letter_paper.dart';
@@ -21,16 +25,17 @@ import '../mailbox/mailbox_providers.dart';
 import '../mailbox/mailbox_remote.dart';
 import '../post_office/post_office_remote.dart';
 import '../ritual/delivery_sent_overlay.dart';
-import '../shell/main_shell.dart';
 import '../time_letter/time_letter_providers.dart';
 import '../time_letter/time_letter_remote.dart';
 import '../time_letter/time_letter_seal_slider.dart';
 import 'compose_editor_toolbar.dart';
 import 'compose_first_preview_gate.dart';
 import 'compose_intent.dart';
+import 'compose_paper_footer.dart';
+import 'compose_stamp_strip.dart';
 import 'letter_assistant_sheet.dart';
 
-/// 单页写信桌：整屏正文 + 信纸设置 + 预览门闩（替代多步向导）。
+/// 单页写信桌：书桌上的一封信；主行动只有通栏寄出。
 class ComposeFlowPage extends ConsumerStatefulWidget {
   const ComposeFlowPage({
     super.key,
@@ -57,18 +62,19 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   String? _selectedTemplateId;
 
   DateTime _deliveryDate = DateTime.now().add(const Duration(days: 7));
-  String? _daysHint;
   bool _busy = false;
   bool _previewGateDone = false;
   bool _sessionPreviewSeen = false;
   static const _kMaxUndoSteps = 30;
+  static const _kSilentDraftDebounce = Duration(seconds: 8);
 
   /// 正文逐步撤销栈（助手替换/追加前压入快照）。
   final List<String> _bodyUndoStack = [];
   bool _draftBusy = false;
-
-  /// 首封引导写信：隐藏撤销与存草稿。
-  bool get _hideUndoAndDraft => widget.initialIntent.fromFirstLetterGuide;
+  String? _draftId;
+  int? _topicTagId;
+  Timer? _silentDraftTimer;
+  bool _leaving = false;
 
   /// 时光信最早明天送达；默认仍约 +7 天。
   DateTime get _minDeliveryDate {
@@ -109,6 +115,11 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     _peerId = widget.initialIntent.peerId;
     _peerNickname = widget.initialIntent.peerNickname;
     _selectedTemplateId = widget.initialIntent.templateId;
+    _draftId = widget.initialIntent.draftId;
+    _topicTagId = widget.initialIntent.topicTagId;
+    if (widget.initialIntent.deliveryDate != null) {
+      _deliveryDate = widget.initialIntent.deliveryDate!;
+    }
 
     var initial = '';
     if (widget.initialIntent.initialParagraphs?.isNotEmpty == true) {
@@ -117,21 +128,36 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       );
     }
     _bodyController = TextEditingController(text: initial);
-    _bodyController.addListener(() => setState(() {}));
+    _bodyController.addListener(_onBodyChanged);
 
     ComposeFirstPreviewGate.hasCompletedPreview().then((done) {
       if (mounted) setState(() => _previewGateDone = done);
     });
-    if (_isTimeLetter) {
-      _refreshDaysHint();
-    }
   }
 
   @override
   void dispose() {
+    _silentDraftTimer?.cancel();
+    _bodyController.removeListener(_onBodyChanged);
     _bodyController.dispose();
     _bodyFocus.dispose();
     super.dispose();
+  }
+
+  void _onBodyChanged() {
+    if (!mounted) return;
+    setState(() {});
+    _scheduleSilentDraft();
+  }
+
+  /// 停笔 8 秒静默存草稿；首封引导不存；失败保持沉默。
+  void _scheduleSilentDraft() {
+    _silentDraftTimer?.cancel();
+    if (_leaving || _busy) return;
+    if (_bodyController.text.trim().isEmpty) return;
+    _silentDraftTimer = Timer(_kSilentDraftDebounce, () {
+      unawaited(_persistDraft(showFailure: false));
+    });
   }
 
   bool get _isTimeLetter =>
@@ -159,15 +185,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     final h = abs ~/ 60;
     final m = abs % 60;
     return '$sign${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
-  }
-
-  Future<void> _refreshDaysHint() async {
-    try {
-      final days = await ref
-          .read(timeLetterRemoteProvider)
-          .previewDaysUntil(_deliveryDate, _offsetTimezoneId());
-      if (mounted) setState(() => _daysHint = '$days');
-    } catch (_) {}
   }
 
   String _recipientLabel(AppLocalizations l10n) {
@@ -211,7 +228,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
               _peerNickname = null;
             });
             Navigator.pop(ctx);
-            _refreshDaysHint();
           },
         );
         final postOfficeTile = _RecipientTile(
@@ -266,41 +282,66 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     setState(() => _bodyController.text = prev);
   }
 
-  Future<void> _saveDraft() async {
+  /// 写入 `/api/letter-drafts`。离开失败才 Snack；静默失败下次再试。
+  Future<bool> _persistDraft({required bool showFailure}) async {
     final content = _bodyController.text.trim();
     if (content.isEmpty) {
-      _bodyFocus.requestFocus();
-      return;
+      return true;
     }
+    if (_draftBusy) return false;
     setState(() => _draftBusy = true);
     try {
       final isPostOffice = _kind == ComposeKind.postOffice ||
           _kind == ComposeKind.selfTimeLetter;
-      await ref.read(letterDraftsRemoteProvider).saveDraft(
+      final saved = await ref.read(letterDraftsRemoteProvider).saveDraft(
+            id: _draftId,
             mode: isPostOffice ? 'POST_OFFICE' : 'DIRECT',
             toUserId: isPostOffice ? null : _peerId,
             content: content,
+            topicTagId: _topicTagId,
+            deliveryDate: _isTimeLetter
+                ? DateFormat('yyyy-MM-dd').format(_deliveryDate)
+                : null,
           );
+      _draftId = saved.id.isEmpty ? _draftId : saved.id;
+      return true;
     } catch (e) {
       debugPrint('compose save draft failed: $e');
-      if (!mounted) return;
-      final biz = apiBusinessExceptionFrom(e);
-      PostalSnack.show(
-        context,
-        biz?.message ?? e.toString(),
-        tone: PostalSnackTone.error,
-      );
+      if (!mounted) return false;
+      if (showFailure) {
+        final biz = apiBusinessExceptionFrom(e);
+        PostalSnack.show(
+          context,
+          biz?.message ?? AppLocalizations.of(context)!.composeDraftLeaveFailed,
+          tone: PostalSnackTone.error,
+        );
+      }
+      return false;
     } finally {
       if (mounted) setState(() => _draftBusy = false);
     }
   }
 
-  Future<void> _openLetterAssistant() async {
-    final source = _bodyController.text.trim();
-    if (source.isEmpty) {
-      _bodyFocus.requestFocus();
-      return;
+  Future<void> _leaveDesk() async {
+    if (_leaving) return;
+    _leaving = true;
+    _silentDraftTimer?.cancel();
+    if (_bodyController.text.trim().isNotEmpty) {
+      final ok = await _persistDraft(showFailure: true);
+      if (!ok && mounted) {
+        PostalSnack.show(
+          context,
+          AppLocalizations.of(context)!.composeDraftLeaveFailed,
+          tone: PostalSnackTone.error,
+        );
+      }
     }
+    if (mounted) context.pop();
+  }
+
+  Future<void> _openLetterAssistant() async {
+    // 空白信纸也可以要灵感；润色仍在助手页内拦截。
+    final source = _bodyController.text;
     final suggestion = await showLetterAssistantSheet(
       context: context,
       ref: ref,
@@ -409,32 +450,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                           apply(() => _fontSizeTier = s.first);
                         },
                       ),
-                      if (_isTimeLetter) ...[
-                        const SizedBox(height: 24),
-                        Text(
-                          l10n.composeStepDeliveryTitle,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        PostalButton(
-                          label: DateFormat.yMMMMd().format(_deliveryDate),
-                          onPressed: () async {
-                            final picked = await _showDeliveryDatePicker();
-                            if (picked != null) {
-                              apply(() => _deliveryDate = picked);
-                              await _refreshDaysHint();
-                            }
-                          },
-                        ),
-                        if (_daysHint != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              l10n.composeStepDeliverySubtitle,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                      ],
                     ],
                   ),
                 ),
@@ -562,6 +577,90 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     await _submitPenPalMail();
   }
 
+  String _primaryLabel(AppLocalizations l10n) {
+    if (_isTimeLetter) {
+      return l10n.composeStepSealTitle;
+    }
+    if (_recipientLocked) {
+      return l10n.composePrimarySendToPenPal;
+    }
+    return l10n.composePrimaryDropInPostOffice;
+  }
+
+  String _compactStampLabel(
+    AppLocalizations l10n,
+    List<LetterTopicOption> topics,
+  ) {
+    if (_topicTagId == null) {
+      return l10n.composeStampNone;
+    }
+    for (final topic in topics) {
+      if (topic.id == _topicTagId) {
+        return l10n.composeStampStuck(composeStampShortLabel(l10n, topic));
+      }
+    }
+    return l10n.composeStampNone;
+  }
+
+  Future<void> _showStampPicker(List<LetterTopicOption> topics) async {
+    if (topics.isEmpty) return;
+    _bodyFocus.unfocus();
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: PostalTokens.paperEnvelope,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
+            child: ComposeStampStrip(
+              topics: topics,
+              selectedId: _topicTagId,
+              compact: false,
+              compactLabel: '',
+              onExpandCompact: () {},
+              onSelected: (id) {
+                setState(() => _topicTagId = id);
+                Navigator.pop(ctx);
+              },
+              labelOf: (t) => composeStampShortLabel(
+                AppLocalizations.of(ctx)!,
+                t,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 非法话题 id：揭票并提示重选；其它发信失败留在写信桌。
+  void _handleSendFailure(Object e) {
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    final biz = apiBusinessExceptionFrom(e);
+    final msg = biz?.message ?? e.toString();
+    final invalidTopic = msg.contains(l10n.composeTopicInvalid) ||
+        msg.contains('Please pick a topic stamp again') ||
+        msg.contains('请重新选一个话题');
+    if (invalidTopic) {
+      setState(() => _topicTagId = null);
+      PostalSnack.show(
+        context,
+        l10n.composeTopicInvalid,
+        tone: PostalSnackTone.error,
+      );
+      return;
+    }
+    PostalSnack.show(
+      context,
+      msg,
+      tone: PostalSnackTone.error,
+    );
+  }
+
   Future<void> _showSealSheet() async {
     final l10n = AppLocalizations.of(context)!;
     await showModalBottomSheet<void>(
@@ -591,7 +690,6 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
                     final picked = await _showDeliveryDatePicker();
                     if (picked != null) {
                       setState(() => _deliveryDate = picked);
-                      await _refreshDaysHint();
                       if (ctx.mounted) (ctx as Element).markNeedsBuild();
                     }
                   },
@@ -613,6 +711,20 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
     );
   }
 
+  /// 仪式动画与会话刷新并行，避免用户先干等网络再看动画。
+  Future<void> _playSendRitual(String dest) async {
+    final overlay = showDeliverySentOverlay(
+      context,
+      destinationLabel: dest,
+    );
+    try {
+      await ref.read(authRepositoryProvider).refreshSessionFromServer();
+    } catch (e) {
+      debugPrint('refresh session after send failed: $e');
+    }
+    await overlay;
+  }
+
   Future<void> _submitTimeLetter() async {
     final l10n = AppLocalizations.of(context)!;
     final body = _bodyController.text.trim();
@@ -630,8 +742,8 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
             deliveryDate: _deliveryDate,
             deliveryTz: _offsetTimezoneId(),
             sealRequestId: sealId,
+            topicTagId: _topicTagId,
           );
-      await ref.read(authRepositoryProvider).refreshSessionFromServer();
       invalidateTimeLetterLists(ref);
       if (!mounted) return;
       final dest = _kind == ComposeKind.selfTimeLetter
@@ -639,7 +751,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
           : (_peerNickname ?? l10n.topicFriendFallback);
       ref.invalidate(postOfficeHomeProvider);
       ref.invalidate(postOfficeInTransitProvider);
-      await showDeliverySentOverlay(context, destinationLabel: dest);
+      await _playSendRitual(dest);
       if (!mounted) return;
       final goBind = await maybePromptBindAfterSend(context, ref);
       if (!mounted) return;
@@ -650,14 +762,7 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       }
     } catch (e) {
       debugPrint('compose seal time letter failed: $e');
-      final biz = apiBusinessExceptionFrom(e);
-      if (mounted) {
-        PostalSnack.show(
-          context,
-          biz?.message ?? e.toString(),
-          tone: PostalSnackTone.error,
-        );
-      }
+      _handleSendFailure(e);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -682,12 +787,8 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
             fontId: _selectedFontId,
             fontSizeTier: _fontSizeTier.apiValue,
             templateId: _selectedTemplateId,
+            topicTagId: _topicTagId,
           );
-      await ref.read(authRepositoryProvider).refreshSessionFromServer();
-      if (widget.initialIntent.fromFirstLetterGuide) {
-        ref.read(appSessionProvider.notifier).markFirstLetterDoneLocally();
-        ref.read(routerRefreshProvider).value++;
-      }
       ref.invalidate(mailboxLettersProvider);
       ref.invalidate(postalInboxLettersProvider);
       ref.invalidate(mailboxArchiveProvider);
@@ -698,28 +799,18 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
       final dest = _kind == ComposeKind.postOffice
           ? l10n.composePostOfficeSendHint
           : (_peerNickname ?? l10n.topicFriendFallback);
-      await showDeliverySentOverlay(context, destinationLabel: dest);
+      await _playSendRitual(dest);
       if (!mounted) return;
       final goBind = await maybePromptBindAfterSend(context, ref);
       if (!mounted) return;
       if (goBind) {
         context.pushReplacement(LoginRoutes.bindEmail);
-      } else if (widget.initialIntent.fromFirstLetterGuide) {
-        ref.read(routerRefreshProvider).value++;
-        context.go(MainShellRoute.pathPostOffice);
       } else {
         context.pop();
       }
     } catch (e) {
       debugPrint('compose send letter failed: $e');
-      final biz = apiBusinessExceptionFrom(e);
-      if (mounted) {
-        PostalSnack.show(
-          context,
-          biz?.message ?? e.toString(),
-          tone: PostalSnackTone.error,
-        );
-      }
+      _handleSendFailure(e);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -728,153 +819,183 @@ class _ComposeFlowPageState extends ConsumerState<ComposeFlowPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final keyboardUp = MediaQuery.viewInsetsOf(context).bottom > 80;
+    final lang = ref.watch(effectiveAppLocaleProvider).languageCode;
+    final topics = ref.watch(appBootstrapProvider(lang)).maybeWhen(
+          data: (d) => d.letterTopicOptions,
+          orElse: () => const <LetterTopicOption>[],
+        );
+    final dateShort = DateFormat.MMMd().format(_deliveryDate);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFEDE4D4),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: TextButton(
-          onPressed: () => context.pop(),
-          child: Text(
-            l10n.composeCancel,
-            style: const TextStyle(fontSize: 17),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        await _leaveDesk();
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFEDE4D4),
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: TextButton(
+            onPressed: _busy ? null : _leaveDesk,
+            child: Text(
+              l10n.composeCancel,
+              style: const TextStyle(fontSize: 17),
+            ),
+          ),
+          leadingWidth: 88,
+          title: _ComposeRecipientHeader(
+            prefix: l10n.composeMailToPrefix,
+            recipient: _recipientLabel(l10n),
+            dateLabel: _isTimeLetter ? dateShort : null,
+            locked: _recipientLocked,
+            onRecipientTap: _recipientLocked ? null : _openRecipientSheet,
+            onDateTap: _isTimeLetter
+                ? () async {
+                    final picked = await _showDeliveryDatePicker();
+                    if (picked != null) {
+                      setState(() => _deliveryDate = picked);
+                    }
+                  }
+                : null,
+          ),
+          centerTitle: true,
+        ),
+        body: Column(
+          children: [
+            if (topics.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+                child: ComposeStampStrip(
+                  topics: topics,
+                  selectedId: _topicTagId,
+                  compact: keyboardUp,
+                  compactLabel: _compactStampLabel(l10n, topics),
+                  onExpandCompact: () => _showStampPicker(topics),
+                  onSelected: (id) => setState(() => _topicTagId = id),
+                  labelOf: (t) => composeStampShortLabel(l10n, t),
+                ),
+              ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: LetterPaper(
+                  mode: LetterPaperMode.compose,
+                  document: _document,
+                  controller: _bodyController,
+                  focusNode: _bodyFocus,
+                  placeholder:
+                      ref.watch(appSessionProvider).user.firstLetterDone != true
+                          ? l10n.composeOneSentenceHint
+                          : l10n.composePlaceholderBody,
+                  minHeight: 280,
+                  footer: ComposePaperFooter(
+                    wordCountLabel: l10n.composeEditorWordCount(
+                      '${composeBodyWordCount(_bodyController.text)}',
+                    ),
+                    canUndo: _bodyUndoStack.isNotEmpty,
+                    onUndo: _undoLastEdit,
+                    undoLabel: l10n.letterAssistantUndo,
+                    paperLabel: l10n.composePaperSettings,
+                    assistantLabel: l10n.composeFooterAssistant,
+                    onPaper: _openPaperSheet,
+                    onAssistant: _openLetterAssistant,
+                    compact: keyboardUp,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                0,
+                16,
+                10 + MediaQuery.paddingOf(context).bottom,
+              ),
+              child: PostalButton(
+                key: const ValueKey('compose-primary-send'),
+                label: _primaryLabel(l10n),
+                minHeight: 56,
+                busy: _busy,
+                onPressed: _busy ? null : _onPrimarySend,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 顶栏：寄给 · 收件人（可点）· 时光信日期（可点）。
+class _ComposeRecipientHeader extends StatelessWidget {
+  const _ComposeRecipientHeader({
+    required this.prefix,
+    required this.recipient,
+    required this.locked,
+    this.dateLabel,
+    this.onRecipientTap,
+    this.onDateTap,
+  });
+
+  final String prefix;
+  final String recipient;
+  final bool locked;
+  final String? dateLabel;
+  final VoidCallback? onRecipientTap;
+  final VoidCallback? onDateTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: InkWell(
+            onTap: onRecipientTap,
+            borderRadius: PostalTokens.shapeSm,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      '$prefix · $recipient',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: style,
+                    ),
+                  ),
+                  if (onRecipientTap != null)
+                    const Icon(Icons.expand_more, size: 22),
+                ],
+              ),
+            ),
           ),
         ),
-        leadingWidth: 88,
-        title: _recipientLocked
-            ? Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: Text(
-                  _recipientLabel(l10n),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              )
-            : InkWell(
-                onTap: _openRecipientSheet,
-                borderRadius: PostalTokens.shapeMd,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          _recipientLabel(l10n),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                        ),
-                      ),
-                      const Icon(Icons.expand_more, size: 22),
-                    ],
-                  ),
-                ),
-              ),
-        actions: [
-          if (!_hideUndoAndDraft)
-            IconButton(
-              tooltip: l10n.composeSaveDraft,
-              onPressed: _draftBusy ? null : _saveDraft,
-              icon: const Icon(Icons.save_outlined),
-            ),
-          TextButton(
-            onPressed: () => _openPreview(forSendGate: false),
-            child: Text(
-              l10n.composeSeeAsRecipient,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
+        if (dateLabel != null)
+          InkWell(
+            onTap: onDateTap,
+            borderRadius: PostalTokens.shapeSm,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: LetterPaper(
-                mode: LetterPaperMode.compose,
-                document: _document,
-                controller: _bodyController,
-                focusNode: _bodyFocus,
-                placeholder: ref.watch(appSessionProvider).user.firstLetterDone !=
-                        true
-                    ? l10n.composeOneSentenceHint
-                    : l10n.composePlaceholderBody,
-                minHeight: 320,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('· $dateLabel', style: style),
+                  const Icon(Icons.expand_more, size: 22),
+                ],
               ),
             ),
           ),
-          ComposeEditorToolbar(
-            canUndo: _bodyUndoStack.isNotEmpty,
-            onUndo: _undoLastEdit,
-            undoTooltip: l10n.letterAssistantUndo,
-            wordCountLabel: l10n.composeEditorWordCount(
-              '${composeBodyWordCount(_bodyController.text)}',
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.fromLTRB(
-              12,
-              10,
-              12,
-              10 + MediaQuery.paddingOf(context).bottom,
-            ),
-            decoration: BoxDecoration(
-              color: PostalTokens.paperEnvelope.withValues(alpha: 0.96),
-              border: Border(
-                top: BorderSide(color: PostalTokens.perforationLine),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: PostalButton(
-                    label: l10n.composePaperSettings,
-                    variant: PostalButtonVariant.secondary,
-                    layout: PostalButtonLayout.stacked,
-                    icon: Icons.auto_awesome_mosaic_outlined,
-                    minHeight: 56,
-                    onPressed: _openPaperSheet,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: PostalButton(
-                    label: l10n.letterAssistantTitle,
-                    variant: PostalButtonVariant.secondary,
-                    layout: PostalButtonLayout.stacked,
-                    icon: Icons.edit_note_outlined,
-                    minHeight: 56,
-                    onPressed: _openLetterAssistant,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: PostalButton(
-                    label: _isTimeLetter
-                        ? l10n.composeStepSealTitle
-                        : l10n.composeSendLetterCta,
-                    layout: PostalButtonLayout.stacked,
-                    icon: Icons.send_outlined,
-                    minHeight: 56,
-                    onPressed: _busy ? null : _onPrimarySend,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

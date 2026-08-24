@@ -78,20 +78,6 @@ class PostOfficeInTransitItem {
   final String preview;
 }
 
-class DailyQuotaClaimResult {
-  const DailyQuotaClaimResult({
-    required this.claimed,
-    required this.dailyLetterQuota,
-    required this.sentToday,
-    required this.remainingQuota,
-  });
-
-  final bool claimed;
-  final int dailyLetterQuota;
-  final int sentToday;
-  final int remainingQuota;
-}
-
 class PostOfficeRemoteRepository {
   PostOfficeRemoteRepository(this._dio);
 
@@ -120,27 +106,6 @@ class PostOfficeRemoteRepository {
       );
     } on DioException catch (e) {
       debugPrint('post-office home failed: $e');
-      final err = e.error;
-      if (err is ApiBusinessException) rethrow;
-      throw ApiBusinessException(0, e.message ?? 'Network error');
-    }
-  }
-
-  /// POST `/api/post-office/quota/daily-claim`（幂等）
-  Future<DailyQuotaClaimResult> claimDailyQuota() async {
-    try {
-      final r = await _dio.post<Map<String, dynamic>>(
-        '/api/post-office/quota/daily-claim',
-      );
-      final data = _unwrapMap(r);
-      return DailyQuotaClaimResult(
-        claimed: data['claimed'] as bool? ?? true,
-        dailyLetterQuota: (data['dailyLetterQuota'] as num?)?.toInt() ?? 5,
-        sentToday: (data['sentToday'] as num?)?.toInt() ?? 0,
-        remainingQuota: (data['remainingQuota'] as num?)?.toInt() ?? 0,
-      );
-    } on DioException catch (e) {
-      debugPrint('post-office daily-claim failed: $e');
       final err = e.error;
       if (err is ApiBusinessException) rethrow;
       throw ApiBusinessException(0, e.message ?? 'Network error');

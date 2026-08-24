@@ -1,7 +1,9 @@
 allprojects {
     repositories {
-        google()
-        mavenCentral()
+        // 仅走国内镜像，避免 google() 触发 dl.google.com TLS 卡住。
+        maven("https://maven.aliyun.com/repository/google")
+        maven("https://maven.aliyun.com/repository/central")
+        maven("https://maven.aliyun.com/repository/public")
     }
 }
 

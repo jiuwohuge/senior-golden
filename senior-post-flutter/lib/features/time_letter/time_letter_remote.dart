@@ -175,6 +175,7 @@ class TimeLetterRemoteRepository {
     required String sealRequestId,
     String? contentTag,
     String? emotionTag,
+    int? topicTagId,
   }) async {
     final r = await _dio.post<dynamic>(
       '/api/time-letter/seal',
@@ -187,6 +188,7 @@ class TimeLetterRemoteRepository {
         'sealRequestId': sealRequestId,
         if (contentTag != null) 'contentTag': contentTag,
         if (emotionTag != null) 'emotionTag': emotionTag,
+        if (topicTagId != null) 'topicTagId': topicTagId,
       },
     );
     final m = _unwrapMap(r);

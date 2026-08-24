@@ -23,7 +23,7 @@ class PostOfficeRelationMessagesPage extends ConsumerWidget {
         foregroundColor: Colors.white,
       ),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const PostalSkeletonList(itemCount: 4, itemHeight: 96),
         error: (e, _) => PostalEmptyState(
           title: l10n.commonLoadFailed,
           subtitle: '$e',

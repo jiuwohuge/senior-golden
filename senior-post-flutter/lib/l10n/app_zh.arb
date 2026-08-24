@@ -406,6 +406,12 @@
   "profileUserAgreement": "用户协议",
   "profilePrivacyPolicy": "隐私政策",
   "profileLogout": "退出登录",
+  "profileAccountDeletionBanner": "已申请删除账号。7 天内再次登录即可取消。生效时间：{when}。",
+  "@profileAccountDeletionBanner": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
   "settingsTitle": "设置",
   "settingsPushNotifications": "推送通知",
   "settingsUnreadBadges": "显示未读角标",
@@ -474,7 +480,10 @@
       "mode": { "type": "String" }
     }
   },
-  "letterStatusMatched": "已匹配",
+  "letterStatusMatched": "已匹配 · 在途",
+  "letterStatusWaitingMatch": "正在匹配",
+  "letterStatusInTransit": "投递中",
+  "letterStatusRegistered": "挂号",
   "letterAuditPending": "待审核",
   "letterAuditApproved": "已通过",
   "letterAuditRejected": "已拒绝",
@@ -486,6 +495,16 @@
   },
   "letterEtaLabel": "预计送达",
   "letterDeliveredLabel": "已送达",
+  "letterSentAt": "寄出 {when}",
+  "@letterSentAt": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
+  "letterRegisteredHint": "挂号信已交寄，稍后会显示为已送达。",
+  "letterLoadFailed": "无法打开这封信",
+  "letterNotFound": "找不到这封信",
+  "letterExpiredHint": "这封信可能已经过期。",
   "letterPeerPostOfficePool": "推荐中",
   "letterPeerUnknown": "推荐中",
   "letterPeerRecommending": "推荐中",
@@ -535,8 +554,17 @@
     }
   },
   "mailboxArchiveTitle": "信件归档",
+  "mailboxArchiveEmptyTitle": "归档里还没有信",
+  "mailboxArchiveEmptySubtitle": "寄出和收到的信会出现在这里。",
   "mailboxOpenArchive": "归档",
-  "mailboxPostOnTheWay": "有明信片正在路上",
+  "mailboxPostOnTheWay": "有信还在路上",
+  "mailboxPenpalRequests": "笔友申请",
+  "mailboxPenpalRequestsCount": "{count, plural, one{1 条待处理} other{{count} 条待处理}}",
+  "@mailboxPenpalRequestsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "shopTitleStampsVip": "邮票与会员",
   "shopPlaceholderOrders": "订单与记录（占位）",
   "shopPlaceholderBuy": "购买（占位）",
@@ -806,7 +834,7 @@
   "letterAssistantRetry": "继续修改",
   "letterAssistantUndo": "撤销",
   "letterAssistantUndoBanner": "助手已改动正文",
-  "letterAssistantEmptyBody": "请先写下一些内容，再请助手帮忙。",
+  "letterAssistantEmptyBody": "润色需要先写几句。空白信纸请用「给我灵感」。",
   "letterAssistantBusy": "正在整理…",
   "letterAssistantReplaced": "已应用助手建议。点上方可撤销。",
   "letterAssistantInspireAskTitle": "可以问问对方",
@@ -826,6 +854,26 @@
   "composeHintEditablePrompt": "提示可随意修改",
   "composeSealWhenReady": "选好日期后封存",
   "composeCancel": "取消",
+  "composeMailToPrefix": "寄给",
+  "composePrimaryDropInPostOffice": "投进邮局",
+  "composePrimarySendToPenPal": "寄出这封信",
+  "composeStampNone": "未贴邮票",
+  "composeStampStuck": "已贴：{title}",
+  "@composeStampStuck": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "composeTopicInvalid": "请重新选一个话题",
+  "composeDraftLeaveFailed": "这次没有存成草稿",
+  "composeFooterAssistant": "助手",
+  "composeStampShortHeartTalk": "心事",
+  "composeStampShortLifeShare": "生活",
+  "composeStampShortInterest": "兴趣",
+  "composeStampShortPuzzle": "困惑",
+  "composeStampShortChat": "聊聊",
   "composeStepTopicSubmitTitle": "投进主题信箱",
   "composeStepTopicSubmitSubtitle": "确认后投稿进入审核，通过后其他用户可见。",
   "composeTopicSubmit": "投进主题信箱",
@@ -961,5 +1009,16 @@
   "authRegisterSummaryCity": "城市",
   "authRegisterLocationPendingCity": "已定位，城市将由系统自动识别",
   "profileCity": "城市",
-  "profileCityHint": "由定位自动识别，可在资料中查看"
+  "profileCityHint": "由定位自动识别，可在资料中查看",
+  "locationBootstrapTagline": "信件从您所在的城市出发。",
+  "locationBootstrapHint": "请允许定位，方便按您所在的城市投递和匹配笔友。允许或拒绝都可以，之后仍能继续使用。",
+  "locationBootstrapWait": "正在为您开通信箱…",
+  "locationSettingsTitle": "请打开定位权限",
+  "locationSettingsBody": "系统设置里还未允许定位。打开设置后允许定位，才能按您所在的城市匹配笔友。",
+  "locationSettingsOpen": "去设置",
+  "locationSettingsLater": "稍后再说",
+  "locationProfileBannerTitle": "补充您所在的城市",
+  "locationProfileBannerBody": "允许定位后，更容易匹配到附近的笔友。拒绝也可以继续写信。",
+  "locationSettingsRowTitle": "定位",
+  "locationSettingsRowSubtitle": "用于按城市匹配笔友"
 }

@@ -42,12 +42,15 @@ public class LetterAssistantService {
             chatClient = ChatClient.builder(chatModel).build();
         }
         String source = body.getSourceText() == null ? "" : body.getSourceText().trim();
-        if (!StringUtils.hasText(source)) {
+        String mode = normalizeMode(body.getHelpMode());
+        // 润色必须有原文；灵感允许空白信纸，给开场话题。
+        if (!StringUtils.hasText(source) && !"inspire".equals(mode)) {
             throw new BusinessException(appMessages.get("app.error.letter.contentEmpty"));
         }
-        String mode = normalizeMode(body.getHelpMode());
         String system = systemPromptFor(mode);
-        String user = "【用户原文】\n" + source;
+        String user = StringUtils.hasText(source)
+                ? "【用户原文】\n" + source
+                : "【用户原文】\n（尚未落笔。请给出适合刚展开信纸、还没想好写什么的中老年慢邮开场话题。）";
 
         long start = System.currentTimeMillis();
         try {
@@ -197,7 +200,8 @@ public class LetterAssistantService {
                             + "不要写成完整新故事，也不要复述原文；输出应为整封可寄的完整信（含原文要点并续写）。";
             case "shorten" -> polishBase + "任务：删掉废话与重复，保留重点与温度，明显更短。";
             case "inspire" ->
-                    "你是慢邮件的聊天教练。根据用户信件内容，推荐可继续聊的话题。"
+                    "你是慢邮件的聊天教练。根据用户信件内容推荐可继续聊的话题；"
+                            + "若原文标明尚未落笔，则给适合开场的通用话题，不要假设用户的具体经历。"
                             + "不要改写信件正文。只输出 JSON，不要 markdown，格式严格为："
                             + "{\"ask\":[\"问对方的短句1\",\"短句2\",\"短句3\"],"
                             + "\"share\":[\"可分享的短句1\",\"短句2\",\"短句3\"]}。"

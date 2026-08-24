@@ -72,6 +72,8 @@ senior-post:
       client-id: ${GOOGLE_WEB_CLIENT_ID:}
   auth:
     password-reset-pepper: ${PASSWORD_RESET_PEPPER:senior-post-local-pepper}
+    # TODO(dev): 临时万能验证码，上线前必须删掉或留空
+    debug-master-code: "666666"
   mail:
     from: ${SENIOR_POST_MAIL_FROM:}
   moderation:

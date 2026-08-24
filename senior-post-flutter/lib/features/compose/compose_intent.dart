@@ -21,10 +21,12 @@ class ComposeIntent {
     this.peerNickname,
     this.peerCountryLabel,
     this.topicKey,
-    this.fromFirstLetterGuide = false,
     this.initialParagraphs,
     this.templateId,
     this.parentLetterId,
+    this.draftId,
+    this.topicTagId,
+    this.deliveryDate,
   });
 
   /// When null, the flow starts with a destination picker.
@@ -36,9 +38,6 @@ class ComposeIntent {
   /// Legacy topic key (unused for POST_OFFICE).
   final String? topicKey;
 
-  /// 来自首封信引导：正文步展示模板提示。
-  final bool fromFirstLetterGuide;
-
   /// 预填段落（模板）。
   final List<String>? initialParagraphs;
   final String? templateId;
@@ -46,16 +45,27 @@ class ComposeIntent {
   /// 回信时带上父信 id，用于线程关联。
   final String? parentLetterId;
 
+  /// 从草稿列表继续写时带回已有草稿 id，静默保存会覆盖同一条。
+  final String? draftId;
+
+  /// 草稿还原的主题邮票 sys_tag.id。
+  final int? topicTagId;
+
+  /// 时光信草稿还原的送达日。
+  final DateTime? deliveryDate;
+
   ComposeIntent copyWith({
     ComposeKind? kind,
     String? peerId,
     String? peerNickname,
     String? peerCountryLabel,
     String? topicKey,
-    bool? fromFirstLetterGuide,
     List<String>? initialParagraphs,
     String? templateId,
     String? parentLetterId,
+    String? draftId,
+    int? topicTagId,
+    DateTime? deliveryDate,
   }) {
     return ComposeIntent(
       kind: kind ?? this.kind,
@@ -63,11 +73,12 @@ class ComposeIntent {
       peerNickname: peerNickname ?? this.peerNickname,
       peerCountryLabel: peerCountryLabel ?? this.peerCountryLabel,
       topicKey: topicKey ?? this.topicKey,
-      fromFirstLetterGuide:
-          fromFirstLetterGuide ?? this.fromFirstLetterGuide,
       initialParagraphs: initialParagraphs ?? this.initialParagraphs,
       templateId: templateId ?? this.templateId,
       parentLetterId: parentLetterId ?? this.parentLetterId,
+      draftId: draftId ?? this.draftId,
+      topicTagId: topicTagId ?? this.topicTagId,
+      deliveryDate: deliveryDate ?? this.deliveryDate,
     );
   }
 

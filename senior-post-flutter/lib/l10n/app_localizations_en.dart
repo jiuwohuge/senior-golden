@@ -1030,6 +1030,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileLogout => 'Log out';
 
   @override
+  String profileAccountDeletionBanner(String when) {
+    return 'Account deletion requested. Sign in again within 7 days to cancel. Takes effect $when.';
+  }
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override
@@ -1198,7 +1203,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get letterStatusMatched => 'Matched';
+  String get letterStatusMatched => 'Matched · in transit';
+
+  @override
+  String get letterStatusWaitingMatch => 'Waiting for a match';
+
+  @override
+  String get letterStatusInTransit => 'In transit';
+
+  @override
+  String get letterStatusRegistered => 'Registered mail';
 
   @override
   String get letterAuditPending => 'Pending review';
@@ -1219,6 +1233,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get letterDeliveredLabel => 'Delivered';
+
+  @override
+  String letterSentAt(String when) {
+    return 'Sent $when';
+  }
+
+  @override
+  String get letterRegisteredHint =>
+      'Registered mail is filed. It will show as delivered shortly.';
+
+  @override
+  String get letterLoadFailed => 'Unable to load this letter';
+
+  @override
+  String get letterNotFound => 'Letter not found';
+
+  @override
+  String get letterExpiredHint => 'This letter may have expired.';
 
   @override
   String get letterPeerPostOfficePool => 'Finding a friend';
@@ -1332,10 +1364,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mailboxArchiveTitle => 'Letter archive';
 
   @override
+  String get mailboxArchiveEmptyTitle => 'No letters in the archive';
+
+  @override
+  String get mailboxArchiveEmptySubtitle =>
+      'Sent and received letters will appear here.';
+
+  @override
   String get mailboxOpenArchive => 'Archive';
 
   @override
-  String get mailboxPostOnTheWay => 'A post is on the way';
+  String get mailboxPostOnTheWay => 'A letter is on the way';
+
+  @override
+  String get mailboxPenpalRequests => 'Pen-pal requests';
+
+  @override
+  String mailboxPenpalRequestsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count waiting',
+      one: '1 waiting',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get shopTitleStampsVip => 'Stamps & membership';
@@ -1985,7 +2038,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get letterAssistantEmptyBody =>
-      'Write something first, then ask the assistant.';
+      'Polishing needs a few lines first. On a blank page, use “Give me ideas”.';
 
   @override
   String get letterAssistantBusy => 'Working…';
@@ -2031,6 +2084,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get composeCancel => 'Cancel';
+
+  @override
+  String get composeMailToPrefix => 'To';
+
+  @override
+  String get composePrimaryDropInPostOffice => 'Drop in the post office';
+
+  @override
+  String get composePrimarySendToPenPal => 'Send this letter';
+
+  @override
+  String get composeStampNone => 'No stamp yet';
+
+  @override
+  String composeStampStuck(String title) {
+    return 'Stamped: $title';
+  }
+
+  @override
+  String get composeTopicInvalid => 'Please pick a topic stamp again';
+
+  @override
+  String get composeDraftLeaveFailed => 'Draft wasn\'t saved this time';
+
+  @override
+  String get composeFooterAssistant => 'Help';
+
+  @override
+  String get composeStampShortHeartTalk => 'Mind';
+
+  @override
+  String get composeStampShortLifeShare => 'Life';
+
+  @override
+  String get composeStampShortInterest => 'Share';
+
+  @override
+  String get composeStampShortPuzzle => 'Ask';
+
+  @override
+  String get composeStampShortChat => 'Hi';
 
   @override
   String get composeStepTopicSubmitTitle => 'Submit to topic mailbox';
@@ -2360,4 +2454,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileCityHint => 'Detected from location; shown read-only';
+
+  @override
+  String get locationBootstrapTagline => 'Letters travel from your city.';
+
+  @override
+  String get locationBootstrapHint =>
+      'Please allow location so we can post your letters from the right city. You may allow or deny — either way you can continue.';
+
+  @override
+  String get locationBootstrapWait => 'Preparing your mailbox…';
+
+  @override
+  String get locationSettingsTitle => 'Turn on location';
+
+  @override
+  String get locationSettingsBody =>
+      'Location is off in system settings. Open settings to allow it, so we can match pen pals near your city.';
+
+  @override
+  String get locationSettingsOpen => 'Open settings';
+
+  @override
+  String get locationSettingsLater => 'Not now';
+
+  @override
+  String get locationProfileBannerTitle => 'Add your city';
+
+  @override
+  String get locationProfileBannerBody =>
+      'Allow location to match pen pals from your area. You can deny and still write letters.';
+
+  @override
+  String get locationSettingsRowTitle => 'Location';
+
+  @override
+  String get locationSettingsRowSubtitle => 'Used to match pen pals by city';
 }

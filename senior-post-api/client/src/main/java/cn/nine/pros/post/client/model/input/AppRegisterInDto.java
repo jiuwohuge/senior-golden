@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * App 邮箱注册入参；须提交至少 3 个有效兴趣标签 ID（与 {@code sys_tag} 一致）。
+ * App 邮箱注册入参。兴趣标签与性别可后补；出生年份仍用于 45+ 年龄门槛。
  */
 @Data
 @Schema(description = "App 注册请求")
@@ -28,10 +28,9 @@ public class AppRegisterInDto {
     @Schema(description = "昵称")
     private String nickname;
 
-    @NotNull
     @Min(1)
     @Max(3)
-    @Schema(description = "性别：1男 2女 3其他")
+    @Schema(description = "性别：1男 2女 3其他；可空，稍后在资料中补")
     private Integer gender;
 
     @NotNull
@@ -67,8 +66,7 @@ public class AppRegisterInDto {
     @Schema(description = "设备类型：android / ios 等")
     private String deviceType;
 
-    @NotNull
-    @Size(min = 3, max = 30)
-    @Schema(description = "兴趣标签 ID（至少 3 个，写入 bu_user_tag）")
+    @Size(max = 30)
+    @Schema(description = "兴趣标签 ID，可空；写入 bu_user_tag")
     private List<@NotNull Integer> interestTagIds;
 }

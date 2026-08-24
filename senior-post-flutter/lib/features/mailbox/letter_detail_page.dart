@@ -6,13 +6,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/i18n/postal_format.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/models/letter_peer_label.dart';
+import '../../core/models/letter_transit_progress.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/letter/letter_document.dart';
 import '../../widgets/letter/letter_paper.dart';
@@ -80,19 +81,21 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
 
   Widget _statusChip(AppLocalizations l10n, MailboxLetter letter) {
     return switch (letter.status) {
-      // MATCHED：邮局已配对，仍属在途语义，单独标签便于用户辨认。
+      LetterStatus.pending => PostalStatusChip.draft(
+        label: l10n.letterStatusWaitingMatch,
+      ),
       LetterStatus.matched => PostalStatusChip.delivering(
         label: l10n.letterStatusMatched,
       ),
-      LetterStatus.pending ||
-      LetterStatus.delivering => PostalStatusChip.delivering(),
-      LetterStatus.registered => PostalStatusChip.registered(
-        label: 'Registered',
+      LetterStatus.delivering => PostalStatusChip.delivering(
+        label: l10n.letterStatusInTransit,
       ),
-      LetterStatus.delivered =>
-        letter.type == LetterType.registered
-            ? PostalStatusChip.registered(label: 'Registered')
-            : PostalStatusChip.delivered(),
+      LetterStatus.registered => PostalStatusChip.registered(
+        label: l10n.letterStatusRegistered,
+      ),
+      LetterStatus.delivered => PostalStatusChip.delivered(
+        label: l10n.letterDeliveredLabel,
+      ),
     };
   }
 
@@ -108,13 +111,18 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
             data: (letter) {
               if (letter == null) return const SizedBox.shrink();
               final starred = _favorited || letter.favorited;
-              return IconButton(
-                tooltip: starred ? l10n.letterUnfavorite : l10n.letterFavorite,
+              return TextButton.icon(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                ),
                 onPressed: _favoriteBusy
                     ? null
                     : () => _toggleFavorite(letter, starred),
                 icon: Icon(
                   starred ? Icons.star_rounded : Icons.star_outline_rounded,
+                ),
+                label: Text(
+                  starred ? l10n.letterUnfavorite : l10n.letterFavorite,
                 ),
               );
             },
@@ -129,15 +137,15 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
               loading: () =>
                   const PostalSkeletonList(itemCount: 1, itemHeight: 260),
               error: (e, _) => PostalEmptyState(
-                title: 'Unable to load letter',
+                title: l10n.letterLoadFailed,
                 subtitle: '$e',
                 tone: PostalEmptyTone.error,
               ),
               data: (letter) {
                 if (letter == null) {
-                  return const PostalEmptyState(
-                    title: 'Letter not found',
-                    subtitle: 'This letter may have expired.',
+                  return PostalEmptyState(
+                    title: l10n.letterNotFound,
+                    subtitle: l10n.letterExpiredHint,
                   );
                 }
                 if (!_favorited && letter.favorited) {
@@ -149,6 +157,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                     letter.status == LetterStatus.matched;
                 final isRegistered = letter.status == LetterStatus.registered;
                 final eta = letter.expectedArrivalAt ?? letter.deliveryAt;
+                final transitProgress = letterTransitProgress(letter);
                 final relationState = letter.relationDisplayState;
                 final isPenpal = relationState == RelationDisplayState.penpal;
                 final requestPending =
@@ -244,7 +253,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                 bottom: 10,
                               ),
                               child: Text(
-                                'Registered mail: filing complete. It will show as delivered in a moment.',
+                                l10n.letterRegisteredHint,
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: PostalTokens.inkSecondary,
@@ -299,8 +308,14 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                 : null,
                           ),
                           const SizedBox(height: 12),
+                          if (transitProgress != null) ...[
+                            PostalDeliveryProgress(progress: transitProgress),
+                            const SizedBox(height: 12),
+                          ],
                           Text(
-                            'Sent at ${DateFormat("MM-dd HH:mm").format(letter.sentAt)}',
+                            l10n.letterSentAt(
+                              PostalFormat.dateTime(context, letter.sentAt),
+                            ),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           if (eta != null)
@@ -309,7 +324,7 @@ class _LetterDetailPageState extends ConsumerState<LetterDetailPage> {
                                   ? l10n.letterEtaLabel
                                   : isRegistered
                                   ? l10n.letterEtaLabel
-                                  : l10n.letterDeliveredLabel} ${DateFormat("MM-dd HH:mm").format(eta)}',
+                                  : l10n.letterDeliveredLabel} ${PostalFormat.dateTime(context, eta)}',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                         ],

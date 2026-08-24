@@ -89,7 +89,7 @@ class LetterAssistantSheet extends StatefulWidget {
 }
 
 class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
-  LetterAssistantHelpMode _mode = LetterAssistantHelpMode.natural;
+  late LetterAssistantHelpMode _mode;
   LetterAssistantResult? _result;
   bool _busy = false;
   String? _inlineMessage;
@@ -99,9 +99,18 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
   bool _resultPhase = false;
   final Set<String> _pickedTopics = {};
 
+  @override
+  void initState() {
+    super.initState();
+    // 空白信纸默认灵感，避免先点到「更自然」再被拦截。
+    _mode = widget.sourceText.trim().isEmpty
+        ? LetterAssistantHelpMode.inspire
+        : LetterAssistantHelpMode.natural;
+  }
+
   Future<void> _generate() async {
     final l10n = AppLocalizations.of(context)!;
-    if (widget.sourceText.trim().isEmpty) {
+    if (widget.sourceText.trim().isEmpty && !_mode.isInspire) {
       setState(() {
         _inlineMessage = l10n.letterAssistantEmptyBody;
         _inlineIsError = false;

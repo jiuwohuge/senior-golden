@@ -4,13 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
+import '../../core/device/location_access.dart';
+import '../../core/i18n/postal_format.dart';
 import '../../core/models/domain_models.dart';
 import '../../core/session/app_session.dart';
 import '../../widgets/postal/postal.dart';
 import '../auth/auth_repository.dart';
 import '../auth/login_routes.dart';
 import '../relation/relation_remote.dart';
-import '../shell/main_shell.dart';
 import 'preferences_remote.dart';
 
 /// 我的：资料与设置。商店/VIP、信件导出入口暂时隐藏，路由仍保留。
@@ -49,8 +50,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Text(
-                  'Account deletion requested. Log in again within 7 days to cancel. '
-                  'Effective: ${user.deletionEffectiveAt ?? user.deletionRequestedAt!}',
+                  l10n.profileAccountDeletionBanner(
+                    PostalFormat.dateTime(
+                      context,
+                      user.deletionEffectiveAt ?? user.deletionRequestedAt!,
+                    ),
+                  ),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
@@ -99,6 +104,46 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ],
             ),
           ),
+          if (user.latitude == null || user.longitude == null) ...[
+            const SizedBox(height: 12),
+            PostalCardEnvelope(
+              onTap: () => ref.read(locationAccessProvider).ensureAsked(
+                    context: context,
+                    reason: LocationPromptReason.settings,
+                  ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 28,
+                    color: PostalTokens.postboxGreen,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.locationProfileBannerTitle,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.locationProfileBannerBody,
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                color: PostalTokens.inkSecondary,
+                                height: 1.4,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           _ReturnAddressMenu(
             user: user,
@@ -129,9 +174,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   onTap: () => context.push('/profile/letter-drafts'),
                 ),
                 _ProfileItem(
-                  icon: Icons.star_outline_rounded,
-                  title: l10n.profileLetterFavorites,
-                  onTap: () => context.push('/profile/letter-favorites'),
+                  icon: Icons.inventory_2_outlined,
+                  title: l10n.mailboxArchiveTitle,
+                  onTap: () => context.push('/mailbox/archive'),
                 ),
               ],
             ),
@@ -178,9 +223,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             label: l10n.profileLogout,
             variant: PostalButtonVariant.secondary,
             onPressed: () async {
-              await ref.read(authRepositoryProvider).logout();
+              await ref
+                  .read(authRepositoryProvider)
+                  .logout(reenterAsGuest: false);
               if (context.mounted) {
-                context.go(MainShellRoute.pathPostOffice);
+                context.go(LoginRoutes.login);
               }
             },
           ),

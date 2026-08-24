@@ -49,6 +49,7 @@ class MailboxRemoteRepository {
     String? fontId,
     String? fontSizeTier,
     String? templateId,
+    int? topicTagId,
   }) async {
     // M6：产品面废弃平邮/挂号选项，发信固定 STANDARD(2)。
     final body = <String, dynamic>{
@@ -76,6 +77,10 @@ class MailboxRemoteRepository {
     if (templateId != null && templateId.isNotEmpty) {
       body['templateId'] = templateId;
     }
+    // 未贴邮票不传该键，避免服务端把 0/空串当非法 id。
+    if (topicTagId != null) {
+      body['topicTagId'] = topicTagId;
+    }
     // 保留 type 参数以兼容旧调用方；值不再影响请求体。
     assert(type == LetterType.standard || type == LetterType.registered);
     final r = await _dio.post<dynamic>('/api/mailbox/letters/send', data: body);
@@ -95,7 +100,8 @@ class MailboxRemoteRepository {
     final r = await _dio.post<dynamic>(
       '/api/mailbox/letters/letter-assistant',
       data: <String, dynamic>{
-        'sourceText': sourceText,
+        // 空白信纸的灵感：空串可能被校验丢掉，空格到服务端 trim 后仍按未落笔处理。
+        'sourceText': sourceText.trim().isEmpty ? ' ' : sourceText,
         'helpMode': helpMode,
       },
     );

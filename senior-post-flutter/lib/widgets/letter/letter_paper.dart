@@ -18,6 +18,8 @@ class LetterPaper extends StatelessWidget {
     this.placeholder,
     this.minHeight = 280,
     this.readOnlyOverlay,
+    this.header,
+    this.footer,
   });
 
   final LetterPaperMode mode;
@@ -30,6 +32,12 @@ class LetterPaper extends StatelessWidget {
 
   /// 读信隐藏正文时叠在纸上的遮罩（由调用方提供）。
   final Widget? readOnlyOverlay;
+
+  /// 写信桌：邮票条贴在信纸上沿。
+  final Widget? header;
+
+  /// 写信桌：字数/撤销/信纸/助手贴在纸脚。
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -66,14 +74,30 @@ class LetterPaper extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(32, 22, 20, 22),
+              padding: EdgeInsets.fromLTRB(
+                32,
+                mode == LetterPaperMode.compose ? 8 : 22,
+                20,
+                mode == LetterPaperMode.compose ? 8 : 22,
+              ),
               child: mode == LetterPaperMode.compose
-                  ? _ComposeField(
-                      controller: controller!,
-                      focusNode: focusNode,
-                      style: style,
-                      placeholder: placeholder,
-                      onChanged: onBodyChanged,
+                  ? Column(
+                      children: [
+                        if (header != null) header!,
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 4, bottom: 4),
+                            child: _ComposeField(
+                              controller: controller!,
+                              focusNode: focusNode,
+                              style: style,
+                              placeholder: placeholder,
+                              onChanged: onBodyChanged,
+                            ),
+                          ),
+                        ),
+                        if (footer != null) footer!,
+                      ],
                     )
                   : _ReadBody(
                       body: document.body,

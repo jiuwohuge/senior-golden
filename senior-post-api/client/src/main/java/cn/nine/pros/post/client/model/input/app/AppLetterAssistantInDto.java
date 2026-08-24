@@ -12,9 +12,8 @@ import lombok.Data;
 @Schema(description = "信件助手请求")
 public class AppLetterAssistantInDto {
 
-    @NotBlank
     @Size(max = 8000)
-    @Schema(description = "用户原文", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "用户原文；inspire 可空（尚未落笔时给开场灵感）")
     private String sourceText;
 
     @NotBlank

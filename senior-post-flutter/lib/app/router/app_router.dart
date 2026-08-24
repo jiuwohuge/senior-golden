@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_token.dart';
+import '../../core/device/location_bootstrap.dart';
 import '../../core/network/router_refresh.dart';
 import '../../features/commerce/my_entitlements_page.dart';
 import '../../features/commerce/shop_page.dart';
@@ -24,7 +25,6 @@ import '../../features/time_letter/time_letter_open_page.dart';
 import '../../features/letter_drafts/letter_drafts_page.dart';
 import '../../features/letter_export/letter_export_page.dart';
 import '../../features/letter_favorites/letter_favorites_page.dart';
-import '../../features/onboarding/first_letter_guide_page.dart';
 import '../../features/post_office/in_transit_page.dart';
 import '../../features/post_office/post_office_relation_messages_page.dart';
 import '../../features/profile/account_delete_page.dart';
@@ -33,6 +33,7 @@ import '../../features/profile/feedback_page.dart';
 import '../../features/profile/interests_picker_page.dart';
 import '../../features/profile/profile_edit_page.dart';
 import '../../features/profile/settings_page.dart';
+import '../../features/startup/location_bootstrap_page.dart';
 import '../../features/shell/main_shell.dart';
 import 'app_navigator_key.dart';
 import 'shop_routes.dart';
@@ -42,11 +43,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: appRootNavigatorKey,
-    initialLocation: MainShellRoute.pathPostOffice,
+    initialLocation: LocationBootstrapPage.path,
     refreshListenable: refresh,
     redirect: (context, state) {
       final token = ref.read(authTokenProvider);
       final loc = state.matchedLocation;
+      final bootDone = ref.read(locationBootstrapDoneProvider);
+      // 定位授权必须先于 guest / 主页，否则 Android 系统弹窗没有 Activity。
+      if (!bootDone) {
+        return loc == LocationBootstrapPage.path
+            ? null
+            : LocationBootstrapPage.path;
+      }
+      if (loc == LocationBootstrapPage.path) {
+        final loggedIn = token != null && token.isNotEmpty;
+        return loggedIn ? MainShellRoute.pathPostOffice : LoginRoutes.login;
+      }
       final authPaths = {
         LoginRoutes.welcome,
         LoginRoutes.onboarding,
@@ -66,12 +78,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (loc == MainShellRoute.pathPenPals) {
         return MainShellRoute.pathMailbox;
       }
-      if (loc == FirstLetterGuidePage.path) {
-        return MainShellRoute.pathPostOffice;
-      }
       return null;
     },
     routes: [
+      GoRoute(
+        path: LocationBootstrapPage.path,
+        builder: (context, state) => const LocationBootstrapPage(),
+      ),
       GoRoute(
         path: LoginRoutes.welcome,
         builder: (context, state) => const AuthWelcomePage(),
@@ -108,10 +121,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: LoginRoutes.legalPrivacy,
         builder: (context, state) =>
             const LegalPage(type: LegalPageType.privacy),
-      ),
-      GoRoute(
-        path: FirstLetterGuidePage.path,
-        builder: (context, state) => const FirstLetterGuidePage(),
       ),
       GoRoute(
         path: MainShellRoute.pathPostOffice,

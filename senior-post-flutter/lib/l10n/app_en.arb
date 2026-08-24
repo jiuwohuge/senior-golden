@@ -418,6 +418,12 @@
   "profileUserAgreement": "User Agreement",
   "profilePrivacyPolicy": "Privacy Policy",
   "profileLogout": "Log out",
+  "profileAccountDeletionBanner": "Account deletion requested. Sign in again within 7 days to cancel. Takes effect {when}.",
+  "@profileAccountDeletionBanner": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
   "settingsTitle": "Settings",
   "settingsPushNotifications": "Push notifications",
   "settingsUnreadBadges": "Show unread badges",
@@ -486,7 +492,10 @@
       "mode": { "type": "String" }
     }
   },
-  "letterStatusMatched": "Matched",
+  "letterStatusMatched": "Matched · in transit",
+  "letterStatusWaitingMatch": "Waiting for a match",
+  "letterStatusInTransit": "In transit",
+  "letterStatusRegistered": "Registered mail",
   "letterAuditPending": "Pending review",
   "letterAuditApproved": "Approved",
   "letterAuditRejected": "Rejected",
@@ -498,6 +507,16 @@
   },
   "letterEtaLabel": "Estimated arrival",
   "letterDeliveredLabel": "Delivered",
+  "letterSentAt": "Sent {when}",
+  "@letterSentAt": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
+  "letterRegisteredHint": "Registered mail is filed. It will show as delivered shortly.",
+  "letterLoadFailed": "Unable to load this letter",
+  "letterNotFound": "Letter not found",
+  "letterExpiredHint": "This letter may have expired.",
   "letterPeerPostOfficePool": "Finding a friend",
   "letterPeerUnknown": "Finding a friend",
   "letterPeerRecommending": "Finding a friend",
@@ -547,8 +566,17 @@
     }
   },
   "mailboxArchiveTitle": "Letter archive",
+  "mailboxArchiveEmptyTitle": "No letters in the archive",
+  "mailboxArchiveEmptySubtitle": "Sent and received letters will appear here.",
   "mailboxOpenArchive": "Archive",
-  "mailboxPostOnTheWay": "A post is on the way",
+  "mailboxPostOnTheWay": "A letter is on the way",
+  "mailboxPenpalRequests": "Pen-pal requests",
+  "mailboxPenpalRequestsCount": "{count, plural, one{1 waiting} other{{count} waiting}}",
+  "@mailboxPenpalRequestsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "shopTitleStampsVip": "Stamps & membership",
   "shopPlaceholderOrders": "Orders & history (placeholder)",
   "shopPlaceholderBuy": "Buy (placeholder)",
@@ -818,7 +846,7 @@
   "letterAssistantRetry": "Revise again",
   "letterAssistantUndo": "Undo",
   "letterAssistantUndoBanner": "Assistant changed your draft",
-  "letterAssistantEmptyBody": "Write something first, then ask the assistant.",
+  "letterAssistantEmptyBody": "Polishing needs a few lines first. On a blank page, use “Give me ideas”.",
   "letterAssistantBusy": "Working…",
   "letterAssistantReplaced": "Applied. Tap Undo above to revert.",
   "letterAssistantInspireAskTitle": "You could ask",
@@ -838,6 +866,26 @@
   "composeHintEditablePrompt": "You can edit this prompt freely",
   "composeSealWhenReady": "Pick a date, then seal",
   "composeCancel": "Cancel",
+  "composeMailToPrefix": "To",
+  "composePrimaryDropInPostOffice": "Drop in the post office",
+  "composePrimarySendToPenPal": "Send this letter",
+  "composeStampNone": "No stamp yet",
+  "composeStampStuck": "Stamped: {title}",
+  "@composeStampStuck": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "composeTopicInvalid": "Please pick a topic stamp again",
+  "composeDraftLeaveFailed": "Draft wasn't saved this time",
+  "composeFooterAssistant": "Help",
+  "composeStampShortHeartTalk": "Mind",
+  "composeStampShortLifeShare": "Life",
+  "composeStampShortInterest": "Share",
+  "composeStampShortPuzzle": "Ask",
+  "composeStampShortChat": "Hi",
   "composeStepTopicSubmitTitle": "Submit to topic mailbox",
   "composeStepTopicSubmitSubtitle": "After review, approved submissions become visible to others.",
   "composeTopicSubmit": "Submit to topic",
@@ -973,5 +1021,16 @@
   "authRegisterSummaryCity": "City",
   "authRegisterLocationPendingCity": "Located — city will be filled automatically",
   "profileCity": "City",
-  "profileCityHint": "Detected from location; shown read-only"
+  "profileCityHint": "Detected from location; shown read-only",
+  "locationBootstrapTagline": "Letters travel from your city.",
+  "locationBootstrapHint": "Please allow location so we can post your letters from the right city. You may allow or deny — either way you can continue.",
+  "locationBootstrapWait": "Preparing your mailbox…",
+  "locationSettingsTitle": "Turn on location",
+  "locationSettingsBody": "Location is off in system settings. Open settings to allow it, so we can match pen pals near your city.",
+  "locationSettingsOpen": "Open settings",
+  "locationSettingsLater": "Not now",
+  "locationProfileBannerTitle": "Add your city",
+  "locationProfileBannerBody": "Allow location to match pen pals from your area. You can deny and still write letters.",
+  "locationSettingsRowTitle": "Location",
+  "locationSettingsRowSubtitle": "Used to match pen pals by city"
 }

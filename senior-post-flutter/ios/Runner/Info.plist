@@ -55,7 +55,7 @@
 		<key>NSCameraUsageDescription</key>
 		<string>用于拍摄明信片配图（可选）。</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>用于在注册时可选获取位置，以便更准确地匹配国家与笔友。</string>
+		<string>用于获取您所在的城市，以便投递信件并匹配附近笔友。允许或拒绝都可以继续使用。</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

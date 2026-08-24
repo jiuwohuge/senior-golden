@@ -158,7 +158,9 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
         long peerId = Objects.equals(l.getFromUserId(), viewerUserId)
                 ? (l.getToUserId() != null ? l.getToUserId() : 0L)
                 : (l.getFromUserId() != null ? l.getFromUserId() : 0L);
-        String preview = TextPreviewSupport.previewOrHidden(false, l.getContent(), 120);
+        // 收到未达：收件人不可见正文（与信箱 hideBody = !fromMe && delivering 对齐）
+        boolean hideBody = itemType == IN_TRANSIT_TYPE_IN;
+        String preview = TextPreviewSupport.previewOrHidden(hideBody, l.getContent(), 120);
         LocalDateTime sent = toLocalDateTime(l.getCreatedAt());
         LocalDateTime eta = toLocalDateTime(l.getExpectedArrivalTime());
         LocalDateTime now = LocalDateTime.now();

@@ -56,4 +56,7 @@ public class TimeLetterDomain extends AbstractAuditableDomain {
     private String sealRequestId;
     private String failReason;
     private String takedownReason;
+
+    /** 写信主题邮票，可空；本轮匹配不读此列。 */
+    private Integer topicTagId;
 }

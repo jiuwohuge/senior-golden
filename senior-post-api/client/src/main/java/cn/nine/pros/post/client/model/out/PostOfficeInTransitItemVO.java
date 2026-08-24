@@ -35,6 +35,6 @@ public class PostOfficeInTransitItemVO {
     @Schema(description = "在途进度 0~1")
     private Double progressRatio;
 
-    @Schema(description = "摘要预览")
+    @Schema(description = "摘要预览；收到未达时为空（正文密封）")
     private String preview;
 }

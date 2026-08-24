@@ -5,6 +5,7 @@ import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../core/auth/auth_data_refresh.dart';
 import '../core/auth/auth_token.dart';
+import '../core/device/location_resume_sync.dart';
 import '../core/i18n/app_locale_provider.dart';
 import '../core/i18n/locale_resolution.dart';
 import '../core/network/router_refresh.dart';
@@ -62,8 +63,10 @@ class SeniorPostApp extends ConsumerWidget {
               maxScaleFactor: 2.0,
             ),
           ),
-          child: Stack(
-            children: [if (child != null) child, const ReleaseNoteLayer()],
+          child: LocationResumeSync(
+            child: Stack(
+              children: [if (child != null) child, const ReleaseNoteLayer()],
+            ),
           ),
         );
       },

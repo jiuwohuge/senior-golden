@@ -1940,6 +1940,12 @@ abstract class AppLocalizations {
   /// **'Log out'**
   String get profileLogout;
 
+  /// No description provided for @profileAccountDeletionBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deletion requested. Sign in again within 7 days to cancel. Takes effect {when}.'**
+  String profileAccountDeletionBanner(String when);
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:
@@ -2249,8 +2255,26 @@ abstract class AppLocalizations {
   /// No description provided for @letterStatusMatched.
   ///
   /// In en, this message translates to:
-  /// **'Matched'**
+  /// **'Matched · in transit'**
   String get letterStatusMatched;
+
+  /// No description provided for @letterStatusWaitingMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a match'**
+  String get letterStatusWaitingMatch;
+
+  /// No description provided for @letterStatusInTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'In transit'**
+  String get letterStatusInTransit;
+
+  /// No description provided for @letterStatusRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered mail'**
+  String get letterStatusRegistered;
 
   /// No description provided for @letterAuditPending.
   ///
@@ -2287,6 +2311,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delivered'**
   String get letterDeliveredLabel;
+
+  /// No description provided for @letterSentAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent {when}'**
+  String letterSentAt(String when);
+
+  /// No description provided for @letterRegisteredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered mail is filed. It will show as delivered shortly.'**
+  String get letterRegisteredHint;
+
+  /// No description provided for @letterLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load this letter'**
+  String get letterLoadFailed;
+
+  /// No description provided for @letterNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter not found'**
+  String get letterNotFound;
+
+  /// No description provided for @letterExpiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This letter may have expired.'**
+  String get letterExpiredHint;
 
   /// No description provided for @letterPeerPostOfficePool.
   ///
@@ -2492,6 +2546,18 @@ abstract class AppLocalizations {
   /// **'Letter archive'**
   String get mailboxArchiveTitle;
 
+  /// No description provided for @mailboxArchiveEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No letters in the archive'**
+  String get mailboxArchiveEmptyTitle;
+
+  /// No description provided for @mailboxArchiveEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent and received letters will appear here.'**
+  String get mailboxArchiveEmptySubtitle;
+
   /// No description provided for @mailboxOpenArchive.
   ///
   /// In en, this message translates to:
@@ -2501,8 +2567,20 @@ abstract class AppLocalizations {
   /// No description provided for @mailboxPostOnTheWay.
   ///
   /// In en, this message translates to:
-  /// **'A post is on the way'**
+  /// **'A letter is on the way'**
   String get mailboxPostOnTheWay;
+
+  /// No description provided for @mailboxPenpalRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen-pal requests'**
+  String get mailboxPenpalRequests;
+
+  /// No description provided for @mailboxPenpalRequestsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 waiting} other{{count} waiting}}'**
+  String mailboxPenpalRequestsCount(int count);
 
   /// No description provided for @shopTitleStampsVip.
   ///
@@ -3665,7 +3743,7 @@ abstract class AppLocalizations {
   /// No description provided for @letterAssistantEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Write something first, then ask the assistant.'**
+  /// **'Polishing needs a few lines first. On a blank page, use “Give me ideas”.'**
   String get letterAssistantEmptyBody;
 
   /// No description provided for @letterAssistantBusy.
@@ -3751,6 +3829,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get composeCancel;
+
+  /// No description provided for @composeMailToPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get composeMailToPrefix;
+
+  /// No description provided for @composePrimaryDropInPostOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop in the post office'**
+  String get composePrimaryDropInPostOffice;
+
+  /// No description provided for @composePrimarySendToPenPal.
+  ///
+  /// In en, this message translates to:
+  /// **'Send this letter'**
+  String get composePrimarySendToPenPal;
+
+  /// No description provided for @composeStampNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No stamp yet'**
+  String get composeStampNone;
+
+  /// No description provided for @composeStampStuck.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamped: {title}'**
+  String composeStampStuck(String title);
+
+  /// No description provided for @composeTopicInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please pick a topic stamp again'**
+  String get composeTopicInvalid;
+
+  /// No description provided for @composeDraftLeaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft wasn\'t saved this time'**
+  String get composeDraftLeaveFailed;
+
+  /// No description provided for @composeFooterAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get composeFooterAssistant;
+
+  /// No description provided for @composeStampShortHeartTalk.
+  ///
+  /// In en, this message translates to:
+  /// **'Mind'**
+  String get composeStampShortHeartTalk;
+
+  /// No description provided for @composeStampShortLifeShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Life'**
+  String get composeStampShortLifeShare;
+
+  /// No description provided for @composeStampShortInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get composeStampShortInterest;
+
+  /// No description provided for @composeStampShortPuzzle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask'**
+  String get composeStampShortPuzzle;
+
+  /// No description provided for @composeStampShortChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi'**
+  String get composeStampShortChat;
 
   /// No description provided for @composeStepTopicSubmitTitle.
   ///
@@ -4351,6 +4507,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Detected from location; shown read-only'**
   String get profileCityHint;
+
+  /// No description provided for @locationBootstrapTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters travel from your city.'**
+  String get locationBootstrapTagline;
+
+  /// No description provided for @locationBootstrapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please allow location so we can post your letters from the right city. You may allow or deny — either way you can continue.'**
+  String get locationBootstrapHint;
+
+  /// No description provided for @locationBootstrapWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your mailbox…'**
+  String get locationBootstrapWait;
+
+  /// No description provided for @locationSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location'**
+  String get locationSettingsTitle;
+
+  /// No description provided for @locationSettingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is off in system settings. Open settings to allow it, so we can match pen pals near your city.'**
+  String get locationSettingsBody;
+
+  /// No description provided for @locationSettingsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get locationSettingsOpen;
+
+  /// No description provided for @locationSettingsLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get locationSettingsLater;
+
+  /// No description provided for @locationProfileBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your city'**
+  String get locationProfileBannerTitle;
+
+  /// No description provided for @locationProfileBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location to match pen pals from your area. You can deny and still write letters.'**
+  String get locationProfileBannerBody;
+
+  /// No description provided for @locationSettingsRowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get locationSettingsRowTitle;
+
+  /// No description provided for @locationSettingsRowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Used to match pen pals by city'**
+  String get locationSettingsRowSubtitle;
 }
 
 class _AppLocalizationsDelegate

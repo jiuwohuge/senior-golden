@@ -157,6 +157,11 @@ public class EmailVerifyService {
             throw new BadRequestException(appMessages.get("app.error.code.invalid"));
         }
         String code = rawCode.trim();
+        // 本地调试：666666 跳过哈希，无需真实邮件。生产 debug-master-code 必须为空。
+        if (authProperties.matchesDebugMasterCode(code)) {
+            log.warn("email verify debug master code accepted, userId={}, purpose={}", userId, purpose);
+            return;
+        }
         LocalDateTime now = LocalDateTime.now();
         String hashMaterial = bindHashMaterial(code, hashExtra);
         String expectHash = PasswordResetHasher.hexHash(

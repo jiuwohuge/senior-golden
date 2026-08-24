@@ -528,6 +528,8 @@ class LetterDraft {
     this.toUserId,
     this.content = '',
     this.letterType = LetterType.standard,
+    this.topicTagId,
+    this.deliveryDate,
     this.updatedAt,
   });
 
@@ -536,6 +538,8 @@ class LetterDraft {
   final String? toUserId;
   final String content;
   final LetterType letterType;
+  final int? topicTagId;
+  final DateTime? deliveryDate;
   final DateTime? updatedAt;
 }
 

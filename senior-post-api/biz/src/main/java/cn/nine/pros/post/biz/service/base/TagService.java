@@ -19,6 +19,14 @@ public interface TagService extends IService<TagDomain> {
 
     void delByIds(List<Integer> ids);
 
+    /**
+     * 兴趣标签（tag_kind=interest），不含写信主题邮票。
+     */
     List<TagDomain> listActiveByLang(String langCode);
+
+    /**
+     * 写信主题邮票（tag_kind=letter_topic），按 sort_order。
+     */
+    List<TagDomain> listActiveLetterTopicsByLang(String langCode);
 
 }

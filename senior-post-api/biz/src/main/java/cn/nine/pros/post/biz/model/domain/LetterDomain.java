@@ -76,4 +76,10 @@ public class LetterDomain extends AbstractAuditableDomain {
     @TableField(value = "content_meta_json", typeHandler = PostgresJsonbTypeHandler.class)
     private LetterContentMeta contentMetaJson;
 
+    /**
+     * 写信主题邮票，可空；本轮匹配不读此列。
+     */
+    @Schema(description = "写信主题邮票 sys_tag.id")
+    private Integer topicTagId;
+
 }

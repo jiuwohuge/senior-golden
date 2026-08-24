@@ -98,12 +98,14 @@ public class AppAuthService {
     private final ActionService actionService;
 
     /**
-     * 邮箱注册：校验年龄/兴趣标签后建用户与邮箱身份，并完成首次登录发 Token。
-     * <p>前置：邮箱未占用、年龄≥45、兴趣标签合法；副作用：写 user/identity/tags/device/login。
+     * 邮箱注册：校验年龄后建用户与邮箱身份，并完成首次登录发 Token。
+     * <p>前置：邮箱未占用、年龄≥45；性别与兴趣标签可后补。副作用：写 user/identity/device/login，可选 tags。
      */
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO register(AppRegisterInDto body) {
-        assertGenderValid(body.getGender());
+        if (body.getGender() != null) {
+            assertGenderValid(body.getGender());
+        }
         String email = body.getEmail().trim().toLowerCase();
         UserIdentityDomain existingEmail = userIdentityService.findActiveEmailByUid(email);
         if (liveIdentityOwner(existingEmail) != null) {
@@ -116,7 +118,9 @@ public class AppAuthService {
             throw new BadRequestException(appMessages.get("app.error.register.minAge", MIN_AGE));
         }
         List<Integer> regTagIds = body.getInterestTagIds();
-        assertInterestTagIdsValidForReplace(regTagIds);
+        if (regTagIds != null && !regTagIds.isEmpty()) {
+            assertInterestTagIdsValidForReplace(regTagIds);
+        }
 
         UserDomain user = new UserDomain();
         user.setGender(body.getGender());
@@ -150,7 +154,9 @@ public class AppAuthService {
         userIdentityService.createEmailIdentity(
                 user.getId(), email, passwordEncoder.encode(body.getPassword()), user.getId());
 
-        userTagService.replaceUserTags(user.getId(), user.getId(), new ArrayList<>(new LinkedHashSet<>(regTagIds)));
+        if (regTagIds != null && !regTagIds.isEmpty()) {
+            userTagService.replaceUserTags(user.getId(), user.getId(), new ArrayList<>(new LinkedHashSet<>(regTagIds)));
+        }
         String deviceUuid = assertDeviceUuidMatchesHeaderOrBody(body.getDeviceUuid());
         touchDevice(user.getId(), deviceUuid, normalizeDeviceType(body.getDeviceType()));
         recordLogin(user.getId(), deviceUuid, LOGIN_SUCCESS, null, LoginRiskEvaluator.RISK_NONE);

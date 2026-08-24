@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../core/i18n/postal_format.dart';
 import '../../core/models/letter_peer_label.dart';
 import '../../widgets/postal/postal.dart';
 import 'mailbox_providers.dart';
@@ -20,7 +20,7 @@ class MailboxArchivePage extends ConsumerWidget {
       body: async.when(
         loading: () => const PostalSkeletonList(itemCount: 6, itemHeight: 96),
         error: (e, _) => PostalEmptyState(
-          title: 'Unable to load archive',
+          title: l10n.commonLoadFailed,
           subtitle: '$e',
           tone: PostalEmptyTone.error,
           actionLabel: l10n.commonRetry,
@@ -28,9 +28,9 @@ class MailboxArchivePage extends ConsumerWidget {
         ),
         data: (letters) {
           if (letters.isEmpty) {
-            return const PostalEmptyState(
-              title: 'No letters yet',
-              subtitle: 'Sent and received letters will appear here.',
+            return PostalEmptyState(
+              title: l10n.mailboxArchiveEmptyTitle,
+              subtitle: l10n.mailboxArchiveEmptySubtitle,
             );
           }
           return ListView.separated(
@@ -58,7 +58,7 @@ class MailboxArchivePage extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      l.outgoing ? 'Sent' : 'Received',
+                      l.outgoing ? l10n.mailboxTabSent : l10n.mailboxTabReceived,
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ],
@@ -73,7 +73,7 @@ class MailboxArchivePage extends ConsumerWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      DateFormat('yyyy-MM-dd HH:mm').format(l.sentAt),
+                      PostalFormat.dateTime(context, l.sentAt),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],

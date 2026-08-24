@@ -17,4 +17,21 @@ public class SeniorPostAuthProperties {
     private int passwordResetMaxRequestsPerHour = 5;
 
     private int passwordResetMinIntervalSeconds = 60;
+
+    /**
+     * 临时调试万能验证码。非空时该明文跳过哈希校验。
+     * 生产必须留空；仅 application-local 配置 666666。
+     */
+    private String debugMasterCode = "";
+
+    /** 是否命中本地调试万能码（trim 后全等）。 */
+    public boolean matchesDebugMasterCode(String rawCode) {
+        if (debugMasterCode == null || debugMasterCode.isBlank()) {
+            return false;
+        }
+        if (rawCode == null || rawCode.isBlank()) {
+            return false;
+        }
+        return debugMasterCode.equals(rawCode.trim());
+    }
 }
