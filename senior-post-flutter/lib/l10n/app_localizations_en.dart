@@ -1116,15 +1116,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDeleteAccount => 'Delete account';
 
   @override
-  String get legalEffectiveDate => 'Effective date: 2026-05-01';
+  String get legalOpenDocument => 'Open document';
 
   @override
-  String get legalTermsContent =>
-      '1) This app provides interest-based social communication for adults aged 45+ only.\\n\\n2) The product does not provide dating or matchmaking services.\\n\\n3) You are responsible for the legality of your content and must not publish prohibited content.\\n\\n4) We may suspend accounts for abuse, harassment, spam, fraud, or policy violations.\\n\\n5) We provide moderation and reporting mechanisms to maintain a safe communication environment.';
+  String get legalUrlNotConfigured =>
+      'This document link has not been configured yet.';
 
   @override
-  String get legalPrivacyContent =>
-      '1) We collect account and device information required for security and fraud prevention.\\n\\n2) We process your data under applicable privacy laws and provide deletion/export pathways.\\n\\n3) We never sell personal data.\\n\\n4) Some data processing is required to deliver core messaging and moderation services.\\n\\n5) You can contact support to request account deletion and related data removal.';
+  String get legalOpenFailed =>
+      'Couldn\'t open this document. Please try again.';
 
   @override
   String get vipCenterPurchaseDisabled => 'VIP purchase is currently disabled.';

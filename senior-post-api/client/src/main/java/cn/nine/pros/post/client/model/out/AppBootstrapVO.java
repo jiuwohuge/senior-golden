@@ -30,4 +30,10 @@ public class AppBootstrapVO {
     @Schema(description = "每日可创建时光信配额（sys_config letter.daily_quota，默认 5）")
     @JsonProperty("dailyLetterQuota")
     private Integer dailyLetterQuota;
+
+    @Schema(description = "用户协议 URL；页面多语言由目标网站自行处理，未配置时为空")
+    private String termsUrl;
+
+    @Schema(description = "隐私政策 URL；页面多语言由目标网站自行处理，未配置时为空")
+    private String privacyUrl;
 }

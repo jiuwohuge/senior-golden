@@ -28,6 +28,10 @@ public class AppBootstrapService {
     private static final String LETTER_DAILY_QUOTA_KEY = "letter.daily_quota";
     private static final int DEFAULT_DAILY_LETTER_QUOTA = 5;
 
+    private static final String TERMS_URL_KEY = "legal.terms_url";
+    private static final String PRIVACY_URL_KEY = "legal.privacy_url";
+    private static final Set<String> LEGAL_URL_KEYS = Set.of(TERMS_URL_KEY, PRIVACY_URL_KEY);
+
     private static final Set<String> VIP_PRODUCT_KEYS = Set.of(
             "vip.product.enabled",
             "vip.product.display_name",
@@ -66,6 +70,7 @@ public class AppBootstrapService {
                         .build())
                 .toList();
         List<InterestTagOptionVO> interestOpts = appDirectoryService.listInterestTagOptions(langCode);
+        Map<String, String> legalUrls = loadLegalUrls();
         return AppBootstrapVO.builder()
                 .minRegisterAge(configService.getInt(REGISTER_MIN_AGE_KEY, DEFAULT_MIN_AGE))
                 .countries(countries)
@@ -73,7 +78,27 @@ public class AppBootstrapService {
                 .letterTopicOptions(loadLetterTopicOptions(langCode))
                 .vipProduct(loadVipProductConfig())
                 .dailyLetterQuota(configService.getInt(LETTER_DAILY_QUOTA_KEY, DEFAULT_DAILY_LETTER_QUOTA))
+                .termsUrl(safeHttpUrl(legalUrls.get(TERMS_URL_KEY)))
+                .privacyUrl(safeHttpUrl(legalUrls.get(PRIVACY_URL_KEY)))
                 .build();
+    }
+
+    private Map<String, String> loadLegalUrls() {
+        Map<String, String> map = new HashMap<>();
+        for (ConfigDomain row : configService.listActiveByKeys(LEGAL_URL_KEYS)) {
+            if (StringUtils.hasText(row.getConfigKey()) && StringUtils.hasText(row.getConfigValue())) {
+                map.put(row.getConfigKey(), row.getConfigValue().trim());
+            }
+        }
+        return map;
+    }
+
+    private static String safeHttpUrl(String raw) {
+        if (!StringUtils.hasText(raw)) {
+            return "";
+        }
+        String value = raw.trim();
+        return value.startsWith("https://") || value.startsWith("http://") ? value : "";
     }
 
     /**

@@ -61,6 +61,8 @@ class AppBootstrapData {
     this.letterTopicOptions = const [],
     this.vipProduct = AppVipProductConfig.defaults,
     this.dailyLetterQuota = 5,
+    this.termsUrl = '',
+    this.privacyUrl = '',
   });
 
   final int minRegisterAge;
@@ -69,6 +71,8 @@ class AppBootstrapData {
   final List<LetterTopicOption> letterTopicOptions;
   final AppVipProductConfig vipProduct;
   final int dailyLetterQuota;
+  final String termsUrl;
+  final String privacyUrl;
 
   factory AppBootstrapData.fromJson(Map<String, dynamic> json) {
     final countriesRaw = json['countries'] as List<dynamic>? ?? const [];
@@ -78,6 +82,8 @@ class AppBootstrapData {
     return AppBootstrapData(
       minRegisterAge: (json['minRegisterAge'] as num?)?.toInt() ?? 45,
       dailyLetterQuota: (json['dailyLetterQuota'] as num?)?.toInt() ?? 5,
+      termsUrl: (json['termsUrl'] as String?)?.trim() ?? '',
+      privacyUrl: (json['privacyUrl'] as String?)?.trim() ?? '',
       countries: countriesRaw
           .whereType<Map<String, dynamic>>()
           .map(CountryItem.fromJson)

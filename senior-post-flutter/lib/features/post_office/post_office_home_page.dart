@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
 import '../../app/theme/postal_tokens.dart';
+import '../../widgets/postal/postal_delivery_progress.dart';
 import '../../widgets/postal/postal_button.dart';
 import '../../widgets/postal/postal_card_envelope.dart';
 import '../compose/compose_intent.dart';
@@ -18,6 +19,7 @@ class PostOfficeHomePage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final homeAsync = ref.watch(postOfficeHomeProvider);
+    final transitAsync = ref.watch(postOfficeInTransitProvider);
 
     final greeting = homeAsync.maybeWhen(
       data: (h) => h.greeting.isNotEmpty ? h.greeting : l10n.postOfficeGreeting,
@@ -36,6 +38,20 @@ class PostOfficeHomePage extends ConsumerWidget {
       data: (h) => h.inTransitCount,
       orElse: () => 0,
     );
+    final relationMessages = homeAsync.maybeWhen(
+      data: (h) => h.relationMessageCount,
+      orElse: () => 0,
+    );
+    final transitItems = transitAsync.maybeWhen(
+      data: (items) => items,
+      orElse: () => const <PostOfficeInTransitItem>[],
+    );
+    final activeTransitItems = transitItems
+        .where((item) => item.itemType != 3)
+        .toList();
+    final activeTransit = activeTransitItems.isEmpty
+        ? null
+        : activeTransitItems.first;
     final timeLetterPrimary = homeAsync.maybeWhen(
       data: (h) => h.recommendedAction != 'POST_OFFICE',
       orElse: () => true,
@@ -58,6 +74,22 @@ class PostOfficeHomePage extends ConsumerWidget {
             color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
           ),
         ),
+        const SizedBox(height: 24),
+        _TransitCard(
+          count: inTransit,
+          item: activeTransit,
+          loading: transitAsync.isLoading,
+          onTap: () => context.push('/post-office/in-transit'),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          l10n.topicTodayTopic,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 10),
+        _TodaySummary(remaining: remaining, relationMessages: relationMessages),
         const SizedBox(height: 28),
         PostalButton(
           label: timeLetterPrimary
@@ -88,21 +120,6 @@ class PostOfficeHomePage extends ConsumerWidget {
                 : ComposeKind.selfTimeLetter,
           ),
         ),
-        const SizedBox(height: 12),
-        Center(
-          child: Text(
-            l10n.postOfficeFreeQuotaHint(remaining),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: PostalTokens.inkTertiary,
-            ),
-          ),
-        ),
-        const SizedBox(height: 28),
-        _SummaryCard(
-          icon: Icons.local_shipping_outlined,
-          title: l10n.postOfficeInTransitSummary(inTransit),
-          onTap: () => context.push('/post-office/in-transit'),
-        ),
       ],
     );
   }
@@ -112,41 +129,143 @@ class PostOfficeHomePage extends ConsumerWidget {
   }
 }
 
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({
-    required this.icon,
-    required this.title,
+class _TransitCard extends StatelessWidget {
+  const _TransitCard({
+    required this.count,
+    required this.item,
+    required this.loading,
     required this.onTap,
   });
 
-  final IconData icon;
-  final String title;
+  final int count;
+  final PostOfficeInTransitItem? item;
+  final bool loading;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final progress = item?.progressRatio?.clamp(0.0, 1.0);
+    final etaHours = item?.etaRelativeHours;
 
     return PostalCardEnvelope(
       onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: PostalTokens.postboxGreen.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.local_shipping_outlined,
+                  color: PostalTokens.postboxGreen,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.postOfficeInTransitSummary(count),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      count == 0
+                          ? l10n.inTransitEmptySubtitle
+                          : etaHours != null && etaHours > 0
+                          ? l10n.inTransitEtaHours(etaHours.round())
+                          : l10n.inTransitTitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: PostalTokens.inkTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 28,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+              ),
+            ],
+          ),
+          if (loading) ...[
+            const SizedBox(height: 16),
+            const LinearProgressIndicator(minHeight: 3),
+          ] else if (progress != null) ...[
+            const SizedBox(height: 16),
+            PostalDeliveryProgress(progress: progress),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TodaySummary extends StatelessWidget {
+  const _TodaySummary({
+    required this.remaining,
+    required this.relationMessages,
+  });
+
+  final int remaining;
+  final int relationMessages;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: PostalTokens.paperEnvelope.withValues(alpha: 0.62),
+        borderRadius: PostalTokens.shapeMd,
+        border: Border.all(color: PostalTokens.perforationLine),
+      ),
+      child: Column(
+        children: [
+          _TodayRow(
+            icon: Icons.mark_email_unread_outlined,
+            label: l10n.postOfficeMessagesSummary(relationMessages),
+          ),
+          const Divider(height: 1, color: PostalTokens.perforationLine),
+          _TodayRow(
+            icon: Icons.local_post_office_outlined,
+            label: l10n.postOfficeFreeQuotaHint(remaining),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TodayRow extends StatelessWidget {
+  const _TodayRow({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 13),
       child: Row(
         children: [
-          Icon(icon, size: 28, semanticLabel: title),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Icon(
-            Icons.chevron_right,
-            size: 28,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
-          ),
+          Icon(icon, size: 21, color: PostalTokens.postboxGreen),
+          const SizedBox(width: 12),
+          Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
         ],
       ),
     );

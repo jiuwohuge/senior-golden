@@ -1053,15 +1053,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsDeleteAccount => '注销账号';
 
   @override
-  String get legalEffectiveDate => '生效日期：2026-05-01';
+  String get legalOpenDocument => '打开文档';
 
   @override
-  String get legalTermsContent =>
-      '1）本应用面向 45+ 成年用户提供兴趣陪伴社交服务。\\n\\n2）本产品不提供婚恋与匹配服务。\\n\\n3）你需对发布内容负责，不得发布违法违规内容。\\n\\n4）对于骚扰、刷屏、欺诈等行为，平台可限制或封禁账号。\\n\\n5）平台提供举报和审核机制以维护安全交流环境。';
+  String get legalUrlNotConfigured => '该文档链接尚未配置。';
 
   @override
-  String get legalPrivacyContent =>
-      '1）我们会收集账号与设备信息用于安全风控与服务提供。\\n\\n2）我们依据适用隐私法规处理数据，并提供删除/导出路径。\\n\\n3）我们不会出售你的个人数据。\\n\\n4）部分数据处理用于实现核心消息与内容审核能力。\\n\\n5）你可联系支持申请账号删除与相关数据清理。';
+  String get legalOpenFailed => '无法打开该文档，请重试。';
 
   @override
   String get vipCenterPurchaseDisabled => 'VIP 暂不可购买。';
