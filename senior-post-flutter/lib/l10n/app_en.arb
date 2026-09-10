@@ -412,7 +412,7 @@
   "profileEditCancel": "Close",
   "profileEditProfile": "Edit profile",
   "profileInterestTags": "Interest tags",
-  "profileVipCenter": "VIP center",
+  "profileVipCenter": "Plus membership",
   "profileSettings": "Settings",
   "profileAbout": "About",
   "profileUserAgreement": "User Agreement",
@@ -468,6 +468,74 @@
       "error": {}
     }
   },
+  "commonCancel": "Cancel",
+  "vipPlusHeadline": "Senior Post Plus",
+  "vipPlusTagline": "More AI letter help each week, and time to edit or recall a letter still on the way.",
+  "vipStateNone": "Not subscribed",
+  "vipStateTrial": "Free trial",
+  "vipStateActive": "Active",
+  "vipStateExpired": "Expired",
+  "vipCurrentState": "Status: {state}",
+  "@vipCurrentState": {
+    "placeholders": {
+      "state": { "type": "String" }
+    }
+  },
+  "vipExpiryLine": "Valid until {when}",
+  "@vipExpiryLine": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
+  "vipAiQuotaRemaining": "AI can help write {count} more times this week",
+  "@vipAiQuotaRemaining": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "vipBuyYearly": "Yearly plan (recommended · trial)",
+  "vipBuyYearlyPriced": "Yearly · {price}",
+  "@vipBuyYearlyPriced": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "vipBuyMonthly": "Monthly plan",
+  "vipBuyMonthlyPriced": "Monthly · {price}",
+  "@vipBuyMonthlyPriced": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "vipYearlyPreferredHint": "Yearly includes a trial when available on Google Play.",
+  "vipRestorePurchases": "Restore purchases",
+  "vipPurchaseSuccess": "Membership updated",
+  "vipPurchaseFailed": "Purchase did not finish. Please try again.",
+  "vipRestoreDone": "Purchases restored",
+  "vipStoreUnavailable": "Store purchases are not available on this device.",
+  "vipProductNotFound": "Plan not found in the store. Please try again later.",
+  "vipTestHarnessTitle": "Test switches (Web / debug)",
+  "vipTestHarnessHint": "Calls the cloud test-override API so you can check Plus gates without Google Play.",
+  "vipTestTrial": "Test: trial",
+  "vipTestActive": "Test: active",
+  "vipTestExpired": "Test: expired",
+  "vipTestNone": "Test: none",
+  "vipTestOverrideApplied": "Test membership applied",
+  "letterAssistantPaywallTitle": "Need Plus membership",
+  "letterAssistantQuotaExhaustedBody": "You have used this week’s AI help. Open Plus to get more writing help.",
+  "letterAssistantVipRequiredBody": "This AI help needs Plus membership. Open Plus to continue.",
+  "letterAssistantPaywallCta": "Open Plus",
+  "inTransitEditAction": "Edit letter",
+  "inTransitWithdrawAction": "Recall",
+  "inTransitEditTitle": "Edit letter on the way",
+  "inTransitEditHint": "Write the new letter text",
+  "inTransitEditSave": "Save",
+  "inTransitEditDone": "Letter updated",
+  "inTransitWithdrawTitle": "Recall this letter?",
+  "inTransitWithdrawConfirm": "The letter will return to your drafts so you can edit and send again.",
+  "inTransitWithdrawDone": "Recalled. A draft was saved for you.",
+  "inTransitRecallUpgrade": "Upgrade Plus to edit or recall",
+  "inTransitRecallWindowClosed": "Edit / recall window has closed",
   "profileMyPostcards": "My postcards",
   "myPostcardsEmptyTitle": "No postcards yet",
   "myPostcardsEmptySubtitle": "Write one from the Post Wall tab — it will appear here with review status.",

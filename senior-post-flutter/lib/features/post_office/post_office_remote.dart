@@ -65,6 +65,10 @@ class PostOfficeInTransitItem {
     this.etaRelativeHours,
     this.progressRatio,
     this.preview = '',
+    this.canRecallEdit = false,
+    this.recallExpiresAt,
+    this.recallNeedsUpgrade = false,
+    this.withinRecallWindow = false,
   });
 
   /// 1=发出未达 2=收到未达 3=未读已送达
@@ -76,6 +80,16 @@ class PostOfficeInTransitItem {
   final double? etaRelativeHours;
   final double? progressRatio;
   final String preview;
+
+  /// 是否可在途撤回/改信（仅 outbound 有意义）。
+  final bool canRecallEdit;
+  final DateTime? recallExpiresAt;
+
+  /// 窗口内但未订阅 → 提示升级 Plus。
+  final bool recallNeedsUpgrade;
+
+  /// 是否仍在撤回窗口内。
+  final bool withinRecallWindow;
 }
 
 class PostOfficeRemoteRepository {
@@ -141,6 +155,10 @@ PostOfficeInTransitItem _mapInTransit(Map<String, dynamic> m) {
     etaRelativeHours: (m['etaRelativeHours'] as num?)?.toDouble(),
     progressRatio: (m['progressRatio'] as num?)?.toDouble(),
     preview: (m['preview'] as String?) ?? '',
+    canRecallEdit: m['canRecallEdit'] as bool? ?? false,
+    recallExpiresAt: _parseDate(m['recallExpiresAt']),
+    recallNeedsUpgrade: m['recallNeedsUpgrade'] as bool? ?? false,
+    withinRecallWindow: m['withinRecallWindow'] as bool? ?? false,
   );
 }
 

@@ -14,7 +14,7 @@ import '../auth/login_routes.dart';
 import '../relation/relation_remote.dart';
 import 'preferences_remote.dart';
 
-/// 我的：资料与设置。商店/VIP、信件导出入口暂时隐藏，路由仍保留。
+/// 我的：资料与设置。商店/信件导出入口暂时隐藏；Plus 会员入口可见。
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
@@ -184,6 +184,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   onTap: () => context.push('/mailbox/archive'),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ProfileSectionTitle(title: l10n.profileSectionShop),
+          PostalCardEnvelope(
+            child: _ProfileItem(
+              icon: Icons.workspace_premium_outlined,
+              title: l10n.profileVipCenter,
+              onTap: () => context.push('/profile/vip'),
             ),
           ),
           const SizedBox(height: 12),

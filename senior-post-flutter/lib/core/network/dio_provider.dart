@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/router/app_navigator_key.dart';
 import '../../app/router/shop_routes.dart';
+import '../../app/router/vip_routes.dart';
 import '../../widgets/postal/postal_snack.dart';
 import '../api/api_exception.dart';
 import '../api/biz_error_codes.dart';
@@ -117,7 +118,11 @@ final dioProvider = Provider<Dio>((ref) {
               return;
             }
             if (!success) {
-              if (BizErrorCodes.shouldOpenCommerceHub(code)) {
+              if (BizErrorCodes.shouldOpenPaywall(code)) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  VipRoutes.pushFromRoot(message: message);
+                });
+              } else if (BizErrorCodes.shouldOpenCommerceHub(code)) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   ShopRoutes.pushFromRoot(bizCode: code, message: message);
                 });

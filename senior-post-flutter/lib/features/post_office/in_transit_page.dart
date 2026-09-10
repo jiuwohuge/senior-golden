@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
+import '../../app/router/vip_routes.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../widgets/postal/postal.dart';
 import '../../core/models/letter_peer_label.dart';
+import '../mailbox/mailbox_remote.dart';
 import 'post_office_remote.dart';
 
 /// 在途页不画系统滚动条：Material 指示条容易被看成卡片底边的横向滚动条。
@@ -23,6 +25,7 @@ class _NoBarScrollBehavior extends MaterialScrollBehavior {
 }
 
 /// §11.4 在途明细：发出未达 / 收到未达 / 未读，含相对 ETA 与投递轨迹。
+/// outbound 在撤回窗口内可改信/撤回（Plus），或提示升级。
 class InTransitPage extends ConsumerWidget {
   const InTransitPage({super.key});
 
@@ -131,7 +134,7 @@ class _Section extends StatelessWidget {
   }
 }
 
-class _InTransitCard extends StatelessWidget {
+class _InTransitCard extends ConsumerWidget {
   const _InTransitCard({required this.item});
 
   final PostOfficeInTransitItem item;
@@ -139,8 +142,132 @@ class _InTransitCard extends StatelessWidget {
   /// 收到未达：收件人侧正文密封，列表只给占位句。
   bool get _inboundSealed => item.itemType == 2;
 
+  /// 发出未达才展示撤回/改信相关操作。
+  bool get _isOutbound => item.itemType == 1;
+
+  Future<void> _editLetter(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    // preview 仅 120 字摘要；改信必须拉全文，避免截断写回
+    String seed = item.preview;
+    try {
+      final full = await ref
+          .read(mailboxRemoteRepositoryProvider)
+          .getLetter(item.letterId);
+      final body = full?.body.trim() ?? '';
+      if (body.isNotEmpty) {
+        seed = body;
+      }
+    } catch (e, st) {
+      debugPrint('in-transit edit load letter failed: $e\n$st');
+    }
+    if (!context.mounted) return;
+    final controller = TextEditingController(text: seed);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: PostalTokens.paperEnvelope,
+        title: Text(l10n.inTransitEditTitle),
+        content: TextField(
+          controller: controller,
+          maxLines: 8,
+          style: const TextStyle(fontSize: 18, height: 1.4),
+          decoration: InputDecoration(
+            hintText: l10n.inTransitEditHint,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.inTransitEditSave),
+          ),
+        ],
+      ),
+    );
+    final text = controller.text.trim();
+    controller.dispose();
+    if (ok != true || text.isEmpty) return;
+    try {
+      await ref.read(mailboxRemoteRepositoryProvider).inTransitEdit(
+            letterId: item.letterId,
+            content: text,
+          );
+      ref.invalidate(postOfficeInTransitProvider);
+      ref.invalidate(postOfficeHomeProvider);
+      if (context.mounted) {
+        PostalSnack.show(
+          context,
+          l10n.inTransitEditDone,
+          tone: PostalSnackTone.success,
+        );
+      }
+    } catch (e, st) {
+      debugPrint('in-transit edit failed: $e\n$st');
+      if (context.mounted) {
+        PostalSnack.show(
+          context,
+          l10n.commonActionFailed,
+          tone: PostalSnackTone.error,
+        );
+      }
+    }
+  }
+
+  Future<void> _withdrawLetter(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: PostalTokens.paperEnvelope,
+        title: Text(l10n.inTransitWithdrawTitle),
+        content: Text(
+          l10n.inTransitWithdrawConfirm,
+          style: const TextStyle(fontSize: 17, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.inTransitWithdrawAction),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ref
+          .read(mailboxRemoteRepositoryProvider)
+          .inTransitWithdraw(item.letterId);
+      ref.invalidate(postOfficeInTransitProvider);
+      ref.invalidate(postOfficeHomeProvider);
+      if (context.mounted) {
+        PostalSnack.show(
+          context,
+          l10n.inTransitWithdrawDone,
+          tone: PostalSnackTone.success,
+        );
+      }
+    } catch (e, st) {
+      debugPrint('in-transit withdraw failed: $e\n$st');
+      if (context.mounted) {
+        PostalSnack.show(
+          context,
+          l10n.commonActionFailed,
+          tone: PostalSnackTone.error,
+        );
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final progress = (item.progressRatio ?? 0).clamp(0.0, 1.0);
@@ -201,6 +328,43 @@ class _InTransitCard extends StatelessWidget {
           if (item.itemType != 3) ...[
             const SizedBox(height: 14),
             PostalDeliveryProgress(progress: progress),
+          ],
+          if (_isOutbound) ...[
+            const SizedBox(height: 12),
+            if (item.canRecallEdit) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: PostalButton(
+                      label: l10n.inTransitEditAction,
+                      variant: PostalButtonVariant.secondary,
+                      onPressed: () => _editLetter(context, ref),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: PostalButton(
+                      label: l10n.inTransitWithdrawAction,
+                      variant: PostalButtonVariant.secondary,
+                      onPressed: () => _withdrawLetter(context, ref),
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (item.recallNeedsUpgrade) ...[
+              PostalButton(
+                label: l10n.inTransitRecallUpgrade,
+                variant: PostalButtonVariant.primary,
+                onPressed: () => context.push(VipRoutes.path),
+              ),
+            ] else if (!item.withinRecallWindow) ...[
+              Text(
+                l10n.inTransitRecallWindowClosed,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: PostalTokens.inkTertiary,
+                ),
+              ),
+            ],
           ],
         ],
       ),

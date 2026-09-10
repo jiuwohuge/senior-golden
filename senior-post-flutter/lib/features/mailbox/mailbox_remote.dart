@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_exception.dart';
@@ -117,6 +118,40 @@ class MailboxRemoteRepository {
       inspireAsk: ask,
       inspireShare: share,
     );
+  }
+
+  /// POST `/api/mailbox/letters/{id}/in-transit-edit` — Plus 窗口内改 outbound 正文。
+  Future<MailboxLetter> inTransitEdit({
+    required String letterId,
+    required String content,
+  }) async {
+    try {
+      final r = await _dio.post<dynamic>(
+        '/api/mailbox/letters/$letterId/in-transit-edit',
+        data: <String, dynamic>{'content': content},
+      );
+      return voToMailboxLetter(_unwrapMapData(r));
+    } catch (e, st) {
+      debugPrint('mailbox inTransitEdit failed: $e\n$st');
+      rethrow;
+    }
+  }
+
+  /// POST `/api/mailbox/letters/{id}/in-transit-withdraw` — 撤回至草稿。
+  Future<InTransitWithdrawResult> inTransitWithdraw(String letterId) async {
+    try {
+      final r = await _dio.post<dynamic>(
+        '/api/mailbox/letters/$letterId/in-transit-withdraw',
+      );
+      final map = _unwrapMapData(r);
+      return InTransitWithdrawResult(
+        draftId: '${map['draftId'] ?? ''}',
+        letterId: '${map['letterId'] ?? letterId}',
+      );
+    } catch (e, st) {
+      debugPrint('mailbox inTransitWithdraw failed: $e\n$st');
+      rethrow;
+    }
   }
 
   static List<String> _stringList(Object? raw) {
@@ -335,6 +370,17 @@ class LetterAssistantResult {
 
   bool get isInspire =>
       helpMode == 'inspire' || inspireAsk.isNotEmpty || inspireShare.isNotEmpty;
+}
+
+/// 在途撤回结果：正文落入草稿。
+class InTransitWithdrawResult {
+  const InTransitWithdrawResult({
+    required this.draftId,
+    required this.letterId,
+  });
+
+  final String draftId;
+  final String letterId;
 }
 
 DateTime? _parseDate(Object? v) {

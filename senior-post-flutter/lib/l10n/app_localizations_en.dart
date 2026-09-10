@@ -1012,7 +1012,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileInterestTags => 'Interest tags';
 
   @override
-  String get profileVipCenter => 'VIP center';
+  String get profileVipCenter => 'Plus membership';
 
   @override
   String get profileSettings => 'Settings';
@@ -1137,6 +1137,153 @@ class AppLocalizationsEn extends AppLocalizations {
   String vipCenterLoadFailed(Object error) {
     return 'Failed to load VIP info: $error';
   }
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get vipPlusHeadline => 'Senior Post Plus';
+
+  @override
+  String get vipPlusTagline =>
+      'More AI letter help each week, and time to edit or recall a letter still on the way.';
+
+  @override
+  String get vipStateNone => 'Not subscribed';
+
+  @override
+  String get vipStateTrial => 'Free trial';
+
+  @override
+  String get vipStateActive => 'Active';
+
+  @override
+  String get vipStateExpired => 'Expired';
+
+  @override
+  String vipCurrentState(String state) {
+    return 'Status: $state';
+  }
+
+  @override
+  String vipExpiryLine(String when) {
+    return 'Valid until $when';
+  }
+
+  @override
+  String vipAiQuotaRemaining(int count) {
+    return 'AI can help write $count more times this week';
+  }
+
+  @override
+  String get vipBuyYearly => 'Yearly plan (recommended · trial)';
+
+  @override
+  String vipBuyYearlyPriced(String price) {
+    return 'Yearly · $price';
+  }
+
+  @override
+  String get vipBuyMonthly => 'Monthly plan';
+
+  @override
+  String vipBuyMonthlyPriced(String price) {
+    return 'Monthly · $price';
+  }
+
+  @override
+  String get vipYearlyPreferredHint =>
+      'Yearly includes a trial when available on Google Play.';
+
+  @override
+  String get vipRestorePurchases => 'Restore purchases';
+
+  @override
+  String get vipPurchaseSuccess => 'Membership updated';
+
+  @override
+  String get vipPurchaseFailed => 'Purchase did not finish. Please try again.';
+
+  @override
+  String get vipRestoreDone => 'Purchases restored';
+
+  @override
+  String get vipStoreUnavailable =>
+      'Store purchases are not available on this device.';
+
+  @override
+  String get vipProductNotFound =>
+      'Plan not found in the store. Please try again later.';
+
+  @override
+  String get vipTestHarnessTitle => 'Test switches (Web / debug)';
+
+  @override
+  String get vipTestHarnessHint =>
+      'Calls the cloud test-override API so you can check Plus gates without Google Play.';
+
+  @override
+  String get vipTestTrial => 'Test: trial';
+
+  @override
+  String get vipTestActive => 'Test: active';
+
+  @override
+  String get vipTestExpired => 'Test: expired';
+
+  @override
+  String get vipTestNone => 'Test: none';
+
+  @override
+  String get vipTestOverrideApplied => 'Test membership applied';
+
+  @override
+  String get letterAssistantPaywallTitle => 'Need Plus membership';
+
+  @override
+  String get letterAssistantQuotaExhaustedBody =>
+      'You have used this week’s AI help. Open Plus to get more writing help.';
+
+  @override
+  String get letterAssistantVipRequiredBody =>
+      'This AI help needs Plus membership. Open Plus to continue.';
+
+  @override
+  String get letterAssistantPaywallCta => 'Open Plus';
+
+  @override
+  String get inTransitEditAction => 'Edit letter';
+
+  @override
+  String get inTransitWithdrawAction => 'Recall';
+
+  @override
+  String get inTransitEditTitle => 'Edit letter on the way';
+
+  @override
+  String get inTransitEditHint => 'Write the new letter text';
+
+  @override
+  String get inTransitEditSave => 'Save';
+
+  @override
+  String get inTransitEditDone => 'Letter updated';
+
+  @override
+  String get inTransitWithdrawTitle => 'Recall this letter?';
+
+  @override
+  String get inTransitWithdrawConfirm =>
+      'The letter will return to your drafts so you can edit and send again.';
+
+  @override
+  String get inTransitWithdrawDone => 'Recalled. A draft was saved for you.';
+
+  @override
+  String get inTransitRecallUpgrade => 'Upgrade Plus to edit or recall';
+
+  @override
+  String get inTransitRecallWindowClosed => 'Edit / recall window has closed';
 
   @override
   String get profileMyPostcards => 'My postcards';

@@ -950,7 +950,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileInterestTags => '兴趣标签';
 
   @override
-  String get profileVipCenter => 'VIP 中心';
+  String get profileVipCenter => 'Plus 会员';
 
   @override
   String get profileSettings => '设置';
@@ -1071,6 +1071,147 @@ class AppLocalizationsZh extends AppLocalizations {
   String vipCenterLoadFailed(Object error) {
     return '加载 VIP 信息失败：$error';
   }
+
+  @override
+  String get commonCancel => '取消';
+
+  @override
+  String get vipPlusHeadline => '银发邮局 Plus';
+
+  @override
+  String get vipPlusTagline => '每周更多 AI 帮写次数，还能在信件在途时改信或撤回。';
+
+  @override
+  String get vipStateNone => '未开通';
+
+  @override
+  String get vipStateTrial => '试用中';
+
+  @override
+  String get vipStateActive => '已开通';
+
+  @override
+  String get vipStateExpired => '已过期';
+
+  @override
+  String vipCurrentState(String state) {
+    return '当前状态：$state';
+  }
+
+  @override
+  String vipExpiryLine(String when) {
+    return '有效期至 $when';
+  }
+
+  @override
+  String vipAiQuotaRemaining(int count) {
+    return '本周 AI 还可帮写 $count 次';
+  }
+
+  @override
+  String get vipBuyYearly => '年费（推荐 · 可试用）';
+
+  @override
+  String vipBuyYearlyPriced(String price) {
+    return '年费 · $price';
+  }
+
+  @override
+  String get vipBuyMonthly => '月费';
+
+  @override
+  String vipBuyMonthlyPriced(String price) {
+    return '月费 · $price';
+  }
+
+  @override
+  String get vipYearlyPreferredHint => '年费在 Google Play 可用时通常含试用。';
+
+  @override
+  String get vipRestorePurchases => '恢复购买';
+
+  @override
+  String get vipPurchaseSuccess => '会员已更新';
+
+  @override
+  String get vipPurchaseFailed => '购买未完成，请再试一次。';
+
+  @override
+  String get vipRestoreDone => '已恢复购买';
+
+  @override
+  String get vipStoreUnavailable => '当前设备无法使用商店购买。';
+
+  @override
+  String get vipProductNotFound => '商店里暂时找不到该套餐，请稍后再试。';
+
+  @override
+  String get vipTestHarnessTitle => '测试开关（网页 / 调试）';
+
+  @override
+  String get vipTestHarnessHint =>
+      '调用云端 test-override，方便在没有 Play 商店时测试 Plus 门禁。';
+
+  @override
+  String get vipTestTrial => '测试：试用';
+
+  @override
+  String get vipTestActive => '测试：开通';
+
+  @override
+  String get vipTestExpired => '测试：过期';
+
+  @override
+  String get vipTestNone => '测试：关闭';
+
+  @override
+  String get vipTestOverrideApplied => '测试会员已生效';
+
+  @override
+  String get letterAssistantPaywallTitle => '需要开通 Plus';
+
+  @override
+  String get letterAssistantQuotaExhaustedBody =>
+      '本周 AI 帮写次数已用完。开通 Plus 可获得更多帮写。';
+
+  @override
+  String get letterAssistantVipRequiredBody => '这项 AI 帮写需要 Plus 会员。请开通后再试。';
+
+  @override
+  String get letterAssistantPaywallCta => '去开通 Plus';
+
+  @override
+  String get inTransitEditAction => '改信';
+
+  @override
+  String get inTransitWithdrawAction => '撤回';
+
+  @override
+  String get inTransitEditTitle => '修改在途信件';
+
+  @override
+  String get inTransitEditHint => '请输入新的信件正文';
+
+  @override
+  String get inTransitEditSave => '保存';
+
+  @override
+  String get inTransitEditDone => '信件已更新';
+
+  @override
+  String get inTransitWithdrawTitle => '撤回这封信？';
+
+  @override
+  String get inTransitWithdrawConfirm => '信件会回到草稿箱，您可以改完再寄出。';
+
+  @override
+  String get inTransitWithdrawDone => '已撤回，草稿已为您保存。';
+
+  @override
+  String get inTransitRecallUpgrade => '开通 Plus 可改信 / 撤回';
+
+  @override
+  String get inTransitRecallWindowClosed => '改信 / 撤回时间已过';
 
   @override
   String get profileMyPostcards => '我的明信片';

@@ -1907,7 +1907,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileVipCenter.
   ///
   /// In en, this message translates to:
-  /// **'VIP center'**
+  /// **'Plus membership'**
   String get profileVipCenter;
 
   /// No description provided for @profileSettings.
@@ -2137,6 +2137,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load VIP info: {error}'**
   String vipCenterLoadFailed(Object error);
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @vipPlusHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Senior Post Plus'**
+  String get vipPlusHeadline;
+
+  /// No description provided for @vipPlusTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'More AI letter help each week, and time to edit or recall a letter still on the way.'**
+  String get vipPlusTagline;
+
+  /// No description provided for @vipStateNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not subscribed'**
+  String get vipStateNone;
+
+  /// No description provided for @vipStateTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Free trial'**
+  String get vipStateTrial;
+
+  /// No description provided for @vipStateActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get vipStateActive;
+
+  /// No description provided for @vipStateExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get vipStateExpired;
+
+  /// No description provided for @vipCurrentState.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {state}'**
+  String vipCurrentState(String state);
+
+  /// No description provided for @vipExpiryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {when}'**
+  String vipExpiryLine(String when);
+
+  /// No description provided for @vipAiQuotaRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'AI can help write {count} more times this week'**
+  String vipAiQuotaRemaining(int count);
+
+  /// No description provided for @vipBuyYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly plan (recommended · trial)'**
+  String get vipBuyYearly;
+
+  /// No description provided for @vipBuyYearlyPriced.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly · {price}'**
+  String vipBuyYearlyPriced(String price);
+
+  /// No description provided for @vipBuyMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly plan'**
+  String get vipBuyMonthly;
+
+  /// No description provided for @vipBuyMonthlyPriced.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly · {price}'**
+  String vipBuyMonthlyPriced(String price);
+
+  /// No description provided for @vipYearlyPreferredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly includes a trial when available on Google Play.'**
+  String get vipYearlyPreferredHint;
+
+  /// No description provided for @vipRestorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get vipRestorePurchases;
+
+  /// No description provided for @vipPurchaseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership updated'**
+  String get vipPurchaseSuccess;
+
+  /// No description provided for @vipPurchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase did not finish. Please try again.'**
+  String get vipPurchaseFailed;
+
+  /// No description provided for @vipRestoreDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored'**
+  String get vipRestoreDone;
+
+  /// No description provided for @vipStoreUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Store purchases are not available on this device.'**
+  String get vipStoreUnavailable;
+
+  /// No description provided for @vipProductNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan not found in the store. Please try again later.'**
+  String get vipProductNotFound;
+
+  /// No description provided for @vipTestHarnessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Test switches (Web / debug)'**
+  String get vipTestHarnessTitle;
+
+  /// No description provided for @vipTestHarnessHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls the cloud test-override API so you can check Plus gates without Google Play.'**
+  String get vipTestHarnessHint;
+
+  /// No description provided for @vipTestTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Test: trial'**
+  String get vipTestTrial;
+
+  /// No description provided for @vipTestActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Test: active'**
+  String get vipTestActive;
+
+  /// No description provided for @vipTestExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Test: expired'**
+  String get vipTestExpired;
+
+  /// No description provided for @vipTestNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Test: none'**
+  String get vipTestNone;
+
+  /// No description provided for @vipTestOverrideApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Test membership applied'**
+  String get vipTestOverrideApplied;
+
+  /// No description provided for @letterAssistantPaywallTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Need Plus membership'**
+  String get letterAssistantPaywallTitle;
+
+  /// No description provided for @letterAssistantQuotaExhaustedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have used this week’s AI help. Open Plus to get more writing help.'**
+  String get letterAssistantQuotaExhaustedBody;
+
+  /// No description provided for @letterAssistantVipRequiredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This AI help needs Plus membership. Open Plus to continue.'**
+  String get letterAssistantVipRequiredBody;
+
+  /// No description provided for @letterAssistantPaywallCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Plus'**
+  String get letterAssistantPaywallCta;
+
+  /// No description provided for @inTransitEditAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit letter'**
+  String get inTransitEditAction;
+
+  /// No description provided for @inTransitWithdrawAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Recall'**
+  String get inTransitWithdrawAction;
+
+  /// No description provided for @inTransitEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit letter on the way'**
+  String get inTransitEditTitle;
+
+  /// No description provided for @inTransitEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the new letter text'**
+  String get inTransitEditHint;
+
+  /// No description provided for @inTransitEditSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get inTransitEditSave;
+
+  /// No description provided for @inTransitEditDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter updated'**
+  String get inTransitEditDone;
+
+  /// No description provided for @inTransitWithdrawTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recall this letter?'**
+  String get inTransitWithdrawTitle;
+
+  /// No description provided for @inTransitWithdrawConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'The letter will return to your drafts so you can edit and send again.'**
+  String get inTransitWithdrawConfirm;
+
+  /// No description provided for @inTransitWithdrawDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Recalled. A draft was saved for you.'**
+  String get inTransitWithdrawDone;
+
+  /// No description provided for @inTransitRecallUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Plus to edit or recall'**
+  String get inTransitRecallUpgrade;
+
+  /// No description provided for @inTransitRecallWindowClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit / recall window has closed'**
+  String get inTransitRecallWindowClosed;
 
   /// No description provided for @profileMyPostcards.
   ///

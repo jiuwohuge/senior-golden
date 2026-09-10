@@ -400,7 +400,7 @@
   "profileEditCancel": "关闭",
   "profileEditProfile": "编辑资料",
   "profileInterestTags": "兴趣标签",
-  "profileVipCenter": "VIP 中心",
+  "profileVipCenter": "Plus 会员",
   "profileSettings": "设置",
   "profileAbout": "关于",
   "profileUserAgreement": "用户协议",
@@ -456,6 +456,74 @@
       "error": {}
     }
   },
+  "commonCancel": "取消",
+  "vipPlusHeadline": "银发邮局 Plus",
+  "vipPlusTagline": "每周更多 AI 帮写次数，还能在信件在途时改信或撤回。",
+  "vipStateNone": "未开通",
+  "vipStateTrial": "试用中",
+  "vipStateActive": "已开通",
+  "vipStateExpired": "已过期",
+  "vipCurrentState": "当前状态：{state}",
+  "@vipCurrentState": {
+    "placeholders": {
+      "state": { "type": "String" }
+    }
+  },
+  "vipExpiryLine": "有效期至 {when}",
+  "@vipExpiryLine": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
+  "vipAiQuotaRemaining": "本周 AI 还可帮写 {count} 次",
+  "@vipAiQuotaRemaining": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "vipBuyYearly": "年费（推荐 · 可试用）",
+  "vipBuyYearlyPriced": "年费 · {price}",
+  "@vipBuyYearlyPriced": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "vipBuyMonthly": "月费",
+  "vipBuyMonthlyPriced": "月费 · {price}",
+  "@vipBuyMonthlyPriced": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "vipYearlyPreferredHint": "年费在 Google Play 可用时通常含试用。",
+  "vipRestorePurchases": "恢复购买",
+  "vipPurchaseSuccess": "会员已更新",
+  "vipPurchaseFailed": "购买未完成，请再试一次。",
+  "vipRestoreDone": "已恢复购买",
+  "vipStoreUnavailable": "当前设备无法使用商店购买。",
+  "vipProductNotFound": "商店里暂时找不到该套餐，请稍后再试。",
+  "vipTestHarnessTitle": "测试开关（网页 / 调试）",
+  "vipTestHarnessHint": "调用云端 test-override，方便在没有 Play 商店时测试 Plus 门禁。",
+  "vipTestTrial": "测试：试用",
+  "vipTestActive": "测试：开通",
+  "vipTestExpired": "测试：过期",
+  "vipTestNone": "测试：关闭",
+  "vipTestOverrideApplied": "测试会员已生效",
+  "letterAssistantPaywallTitle": "需要开通 Plus",
+  "letterAssistantQuotaExhaustedBody": "本周 AI 帮写次数已用完。开通 Plus 可获得更多帮写。",
+  "letterAssistantVipRequiredBody": "这项 AI 帮写需要 Plus 会员。请开通后再试。",
+  "letterAssistantPaywallCta": "去开通 Plus",
+  "inTransitEditAction": "改信",
+  "inTransitWithdrawAction": "撤回",
+  "inTransitEditTitle": "修改在途信件",
+  "inTransitEditHint": "请输入新的信件正文",
+  "inTransitEditSave": "保存",
+  "inTransitEditDone": "信件已更新",
+  "inTransitWithdrawTitle": "撤回这封信？",
+  "inTransitWithdrawConfirm": "信件会回到草稿箱，您可以改完再寄出。",
+  "inTransitWithdrawDone": "已撤回，草稿已为您保存。",
+  "inTransitRecallUpgrade": "开通 Plus 可改信 / 撤回",
+  "inTransitRecallWindowClosed": "改信 / 撤回时间已过",
   "profileMyPostcards": "我的明信片",
   "myPostcardsEmptyTitle": "还没有明信片",
   "myPostcardsEmptySubtitle": "在「明信片墙」发布内容后，将在此显示审核进度。",

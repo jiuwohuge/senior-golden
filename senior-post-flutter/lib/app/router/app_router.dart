@@ -33,10 +33,12 @@ import '../../features/profile/feedback_page.dart';
 import '../../features/profile/interests_picker_page.dart';
 import '../../features/profile/profile_edit_page.dart';
 import '../../features/profile/settings_page.dart';
+import '../../features/profile/vip_center_page.dart';
 import '../../features/startup/location_bootstrap_page.dart';
 import '../../features/shell/main_shell.dart';
 import 'app_navigator_key.dart';
 import 'shop_routes.dart';
+import 'vip_routes.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refresh = ref.read(routerRefreshProvider);
@@ -208,6 +210,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile/interests',
         builder: (context, state) => const InterestsPickerPage(),
+      ),
+      GoRoute(
+        path: VipRoutes.path,
+        builder: (context, state) {
+          final hint = state.uri.queryParameters['hint'];
+          return VipCenterPage(hint: hint);
+        },
       ),
       GoRoute(
         path: ShopRoutes.path,

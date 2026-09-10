@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:senior_post_flutter/l10n/app_localizations.dart';
 
+import '../../app/router/app_navigator_key.dart';
+import '../../app/router/vip_routes.dart';
 import '../../app/theme/postal_tokens.dart';
 import '../../core/api/api_exception.dart';
+import '../../core/api/biz_error_codes.dart';
 import '../../widgets/postal/postal.dart';
 import '../mailbox/mailbox_remote.dart';
 
@@ -206,6 +209,25 @@ class _LetterAssistantSheetState extends State<LetterAssistantSheet> {
       debugPrint('letter assistant failed: $e');
       if (!mounted) return;
       final biz = apiBusinessExceptionFrom(e);
+      // AI 额度用尽或需要 Plus：关助手；Dio 付费墙路由会打开 VipCenter。
+      if (biz != null && BizErrorCodes.shouldOpenPaywall(biz.code)) {
+        final message = biz.code == BizErrorCodes.aiQuotaExhausted
+            ? l10n.letterAssistantQuotaExhaustedBody
+            : l10n.letterAssistantVipRequiredBody;
+        Navigator.pop(context);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final ctx = appRootNavigatorKey.currentContext;
+          if (ctx == null || !ctx.mounted) return;
+          PostalSnack.show(
+            ctx,
+            message,
+            tone: PostalSnackTone.warning,
+            actionLabel: l10n.letterAssistantPaywallCta,
+            onAction: VipRoutes.pushFromRoot,
+          );
+        });
+        return;
+      }
       setState(() {
         _inlineMessage = biz?.message.isNotEmpty == true
             ? biz!.message
