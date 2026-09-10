@@ -14,6 +14,7 @@ import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.biz.AppPostOfficeService;
 import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
 import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
+import cn.nine.pros.post.biz.service.biz.support.PlusEntitlementSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.support.TextPreviewSupport;
 import cn.nine.pros.post.biz.support.TransitProgressSupport;
@@ -53,6 +54,7 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
     private final OssDisplayUrlService ossDisplayUrlService;
     private final DailyQuotaClaimService dailyQuotaClaimService;
     private final TimeLetterService timeLetterService;
+    private final PlusEntitlementSupport plusEntitlementSupport;
 
     @Override
     public AppPostOfficeHomeVO home(long userId) {
@@ -111,7 +113,9 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
     @Override
     public List<PostOfficeInTransitItemVO> listInTransit(long userId) {
         List<PostOfficeInTransitItemVO> out = new ArrayList<>();
-        appendOutbound(userId, out);
+        boolean entitled = plusEntitlementSupport.resolve(userId).isEntitled();
+        int windowMin = plusEntitlementSupport.recallWindowMinutes();
+        appendOutbound(userId, out, entitled, windowMin);
         appendInbound(userId, out);
         appendUnread(userId, out);
         return out;
@@ -137,25 +141,27 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
                 .build();
     }
 
-    private void appendOutbound(long userId, List<PostOfficeInTransitItemVO> out) {
+    private void appendOutbound(long userId, List<PostOfficeInTransitItemVO> out,
+                                boolean entitled, int windowMin) {
         for (LetterDomain l : letterService.listOutboundInTransit(userId, 100)) {
-            out.add(buildTransitItem(userId, l, IN_TRANSIT_TYPE_OUT));
+            out.add(buildTransitItem(userId, l, IN_TRANSIT_TYPE_OUT, entitled, windowMin));
         }
     }
 
     private void appendInbound(long userId, List<PostOfficeInTransitItemVO> out) {
         for (LetterDomain l : letterService.listInboundDelivering(userId, 100)) {
-            out.add(buildTransitItem(userId, l, IN_TRANSIT_TYPE_IN));
+            out.add(buildTransitItem(userId, l, IN_TRANSIT_TYPE_IN, false, 0));
         }
     }
 
     private void appendUnread(long userId, List<PostOfficeInTransitItemVO> out) {
         for (LetterDomain l : letterService.listUnreadDelivered(userId, 100)) {
-            out.add(buildTransitItem(userId, l, IN_TRANSIT_TYPE_UNREAD));
+            out.add(buildTransitItem(userId, l, IN_TRANSIT_TYPE_UNREAD, false, 0));
         }
     }
 
-    private PostOfficeInTransitItemVO buildTransitItem(long viewerUserId, LetterDomain l, int itemType) {
+    private PostOfficeInTransitItemVO buildTransitItem(
+            long viewerUserId, LetterDomain l, int itemType, boolean entitled, int windowMin) {
         long peerId = Objects.equals(l.getFromUserId(), viewerUserId)
                 ? (l.getToUserId() != null ? l.getToUserId() : 0L)
                 : (l.getFromUserId() != null ? l.getFromUserId() : 0L);
@@ -175,7 +181,7 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
             progress = 1.0;
             etaHours = 0.0;
         }
-        return PostOfficeInTransitItemVO.builder()
+        PostOfficeInTransitItemVO.PostOfficeInTransitItemVOBuilder builder = PostOfficeInTransitItemVO.builder()
                 .itemType(itemType)
                 .letterId(l.getId())
                 .peer(toPublic(viewerUserId, peerId))
@@ -183,8 +189,37 @@ public class AppPostOfficeServiceImpl implements AppPostOfficeService {
                 .expectedArrivalTime(eta)
                 .etaRelativeHours(etaHours)
                 .progressRatio(progress)
-                .preview(preview)
-                .build();
+                .preview(preview);
+        // 仅 outbound 填充在途撤回/改信提示字段
+        if (itemType == IN_TRANSIT_TYPE_OUT) {
+            applyOutboundRecallHints(builder, sent, now, entitled, windowMin);
+        }
+        return builder.build();
+    }
+
+    /**
+     * outbound：根据时间窗与 Plus 权益填充 canRecallEdit / recallNeedsUpgrade 等。
+     */
+    private void applyOutboundRecallHints(
+            PostOfficeInTransitItemVO.PostOfficeInTransitItemVOBuilder builder,
+            LocalDateTime sent,
+            LocalDateTime now,
+            boolean entitled,
+            int windowMin) {
+        if (sent == null) {
+            builder.withinRecallWindow(false)
+                    .canRecallEdit(false)
+                    .recallNeedsUpgrade(false);
+            return;
+        }
+        LocalDateTime expiresAt = sent.plusMinutes(Math.max(1, windowMin));
+        boolean within = !now.isAfter(expiresAt);
+        builder.recallExpiresAt(expiresAt).withinRecallWindow(within);
+        if (!within) {
+            builder.canRecallEdit(false).recallNeedsUpgrade(false);
+            return;
+        }
+        builder.canRecallEdit(entitled).recallNeedsUpgrade(!entitled);
     }
 
     private AppPublicUserVO toPublic(long viewerUserId, long userId) {

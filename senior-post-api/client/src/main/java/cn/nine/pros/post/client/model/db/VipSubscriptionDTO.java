@@ -49,4 +49,25 @@ public class VipSubscriptionDTO extends AbstractAuditableDTO {
     @Schema(description = "状态：1有效 2过期 3取消")
     private Object status;
 
+    @Schema(description = "商品 ID：plus_monthly | plus_yearly")
+    private String productId;
+
+    @Schema(description = "Play purchaseToken")
+    private String purchaseToken;
+
+    @Schema(description = "Play orderId")
+    private String orderId;
+
+    @Schema(description = "应用包名")
+    private String packageName;
+
+    @Schema(description = "是否试用期")
+    private Boolean isTrial;
+
+    @Schema(description = "来源：play | test_override | admin | unknown")
+    private String source;
+
+    @Schema(description = "Play acknowledge 时间")
+    private java.time.LocalDateTime acknowledgedAt;
+
 }

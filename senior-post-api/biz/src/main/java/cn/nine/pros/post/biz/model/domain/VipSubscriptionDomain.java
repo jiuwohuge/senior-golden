@@ -51,4 +51,31 @@ public class VipSubscriptionDomain extends AbstractAuditableDomain {
     @Schema(description = "状态：1有效 2过期 3取消")
     private Object status;
 
+    /**
+     * Play / Plus 商品 ID：plus_monthly | plus_yearly
+     */
+    @Schema(description = "商品 ID：plus_monthly | plus_yearly")
+    private String productId;
+
+    @Schema(description = "Play purchaseToken")
+    private String purchaseToken;
+
+    @Schema(description = "Play orderId")
+    private String orderId;
+
+    @Schema(description = "应用包名")
+    private String packageName;
+
+    @Schema(description = "是否试用期（status=1 且 is_trial=true → state=trial）")
+    private Boolean isTrial;
+
+    /**
+     * 来源：play | test_override | admin | unknown
+     */
+    @Schema(description = "来源：play | test_override | admin | unknown")
+    private String source;
+
+    @Schema(description = "Play acknowledge 时间")
+    private java.time.LocalDateTime acknowledgedAt;
+
 }

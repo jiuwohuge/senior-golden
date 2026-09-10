@@ -542,6 +542,69 @@ public class LetterServiceImpl extends ServiceImpl<LetterMapper, LetterDomain>
                 .eq(LetterDomain::getAuditStatus, LetterAuditStatus.PENDING_REVIEW.getCode()));
     }
 
+    @Override
+    public LetterDomain findOwnedOutboundInTransit(long letterId, long fromUserId) {
+        return getOne(new LambdaQueryWrapper<LetterDomain>()
+                .eq(LetterDomain::getId, letterId)
+                .eq(LetterDomain::getFromUserId, fromUserId)
+                .eq(LetterDomain::isDelFlag, false)
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .in(LetterDomain::getStatus,
+                        LetterBizStatus.PENDING.getCode(),
+                        LetterBizStatus.MATCHED.getCode(),
+                        LetterBizStatus.DELIVERING.getCode())
+                .last("LIMIT 1"));
+    }
+
+    @Override
+    public boolean updateOwnedOutboundInTransitContent(
+            long letterId, long fromUserId, String content, long actorId) {
+        LetterDomain letter = findOwnedOutboundInTransit(letterId, fromUserId);
+        if (letter == null) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        // UPDATE 必须再次约束在途状态，避免 find 与 update 之间送达后仍改写正文
+        LambdaUpdateWrapper<LetterDomain> uw = new LambdaUpdateWrapper<LetterDomain>()
+                .eq(LetterDomain::getId, letterId)
+                .eq(LetterDomain::getFromUserId, fromUserId)
+                .eq(LetterDomain::isDelFlag, false)
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .in(LetterDomain::getStatus,
+                        LetterBizStatus.PENDING.getCode(),
+                        LetterBizStatus.MATCHED.getCode(),
+                        LetterBizStatus.DELIVERING.getCode())
+                .set(LetterDomain::getContent, content)
+                .set(LetterDomain::getUpdatedAt, now)
+                .set(LetterDomain::getUpdatedBy, actorId);
+        // 已通过审核的正文变更需重新审核
+        if (letter.getAuditStatus() != null
+                && letter.getAuditStatus() == LetterAuditStatus.APPROVED.getCode()) {
+            uw.set(LetterDomain::getAuditStatus, LetterAuditStatus.PENDING_REVIEW.getCode());
+        }
+        return update(uw);
+    }
+
+    @Override
+    public boolean softDeleteOwnedOutboundInTransit(long letterId, long fromUserId, long actorId) {
+        if (findOwnedOutboundInTransit(letterId, fromUserId) == null) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        return update(new LambdaUpdateWrapper<LetterDomain>()
+                .eq(LetterDomain::getId, letterId)
+                .eq(LetterDomain::getFromUserId, fromUserId)
+                .eq(LetterDomain::isDelFlag, false)
+                .ne(LetterDomain::getAuditStatus, LetterAuditStatus.REJECTED.getCode())
+                .in(LetterDomain::getStatus,
+                        LetterBizStatus.PENDING.getCode(),
+                        LetterBizStatus.MATCHED.getCode(),
+                        LetterBizStatus.DELIVERING.getCode())
+                .set(LetterDomain::isDelFlag, true)
+                .set(LetterDomain::getUpdatedAt, now)
+                .set(LetterDomain::getUpdatedBy, actorId));
+    }
+
     private static LambdaQueryWrapper<LetterDomain> exchangeWrapper(long userIdA, long userIdB) {
         return new LambdaQueryWrapper<LetterDomain>()
                 .eq(LetterDomain::isDelFlag, false)

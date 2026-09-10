@@ -2,22 +2,26 @@ package cn.nine.pros.post.biz.service.biz.impl;
 
 import cn.nine.commons.basic.exception.unchecked.BusinessException;
 import cn.nine.pros.post.biz.ai.LetterAssistantService;
+import cn.nine.pros.post.biz.error.PostAppErrorCodes;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.moderation.ModerationVerdict;
 import cn.nine.pros.post.biz.moderation.TextModerationProvider;
 import cn.nine.pros.post.biz.model.domain.CountryDomain;
 import cn.nine.pros.post.biz.model.domain.FriendshipDomain;
 import cn.nine.pros.post.biz.model.domain.LetterDomain;
+import cn.nine.pros.post.biz.model.domain.LetterDraftDomain;
 import cn.nine.pros.post.biz.service.biz.AppBlacklistService;
 import cn.nine.pros.post.biz.service.biz.AppCommerceBizService;
 import cn.nine.pros.post.biz.service.biz.AppMailboxService;
 import cn.nine.pros.post.biz.service.biz.AppRelationBizService;
 import cn.nine.pros.post.biz.service.biz.WritingStyleService;
 import cn.nine.pros.post.biz.service.base.ActionService;
+import cn.nine.pros.post.biz.service.base.AiAssistUsageService;
 import cn.nine.pros.post.biz.service.base.DailyQuotaClaimService;
 import cn.nine.pros.post.biz.service.base.ConfigService;
 import cn.nine.pros.post.biz.service.base.CountryService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
+import cn.nine.pros.post.biz.service.base.LetterDraftService;
 import cn.nine.pros.post.biz.service.base.LetterService;
 import cn.nine.pros.post.biz.service.base.SensitiveWordService;
 import cn.nine.pros.post.biz.service.base.TimeLetterService;
@@ -25,6 +29,7 @@ import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
 import cn.nine.pros.post.biz.service.biz.support.DeliveryDelayCalculator;
 import cn.nine.pros.post.biz.service.biz.support.DailyQuotaSupport;
 import cn.nine.pros.post.biz.service.biz.support.LetterTopicSupport;
+import cn.nine.pros.post.biz.service.biz.support.PlusEntitlementSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.support.TransitProgressSupport;
 import cn.nine.pros.post.biz.service.base.UserService;
@@ -37,10 +42,13 @@ import cn.nine.pros.post.client.common.enums.LetterSendMode;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import cn.nine.pros.post.client.model.input.app.AppLetterAssistantInDto;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
+import cn.nine.pros.post.client.model.input.app.InTransitLetterEditInDto;
 import cn.nine.pros.post.client.model.json.LetterContentMeta;
+import cn.nine.pros.post.client.model.json.LetterDraftContent;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
 import cn.nine.pros.post.client.model.out.AppLetterAssistantVO;
 import cn.nine.pros.post.client.model.out.AppPublicUserVO;
+import cn.nine.pros.post.client.model.out.InTransitWithdrawResultVO;
 import cn.nine.pros.post.client.model.out.PenpalRequestResultVO;
 import cn.nine.pros.post.client.model.out.RelationSnapshotVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
@@ -52,8 +60,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -92,6 +102,9 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     private final TimeLetterService timeLetterService;
     private final LetterAssistantService letterAssistantService;
     private final LetterTopicSupport letterTopicSupport;
+    private final PlusEntitlementSupport plusEntitlementSupport;
+    private final AiAssistUsageService aiAssistUsageService;
+    private final LetterDraftService letterDraftService;
 
     /**
      * 邮政收件箱：本人相关且未读的信件列表（含 POST_OFFICE 入池仅发件人可见）。
@@ -445,11 +458,142 @@ public class AppMailboxServiceImpl implements AppMailboxService {
     }
 
     /**
-     * 信件助手：委托 Spring AI 整理原文建议稿（不落库、不覆盖正文）。
+     * 信件助手：先按 Plus 权益解析周配额，成功调用后再计次。
      */
     @Override
     public AppLetterAssistantVO letterAssistant(long userId, AppLetterAssistantInDto body) {
-        return letterAssistantService.assist(userId, body);
+        PlusEntitlementSupport.Snapshot snap = plusEntitlementSupport.resolve(userId);
+        int limit = plusEntitlementSupport.aiQuotaLimit(snap.isEntitled());
+        LocalDate weekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        int used = aiAssistUsageService.getUseCount(userId, weekStart);
+        if (used >= limit) {
+            log.info("letter assistant rejected: ai quota exhausted, userId={}, used={}, limit={}, entitled={}",
+                    userId, used, limit, snap.isEntitled());
+            throw new BusinessException(
+                    PostAppErrorCodes.AI_QUOTA_EXHAUSTED,
+                    appMessages.get("app.error.ai.quotaExhausted"));
+        }
+        AppLetterAssistantVO vo = letterAssistantService.assist(userId, body);
+        int newUsed = aiAssistUsageService.incrementUse(userId, weekStart, userId);
+        int remaining = Math.max(0, limit - newUsed);
+        vo.setQuotaLimit(limit);
+        vo.setQuotaRemaining(remaining);
+        log.info("letter assistant quota applied, userId={}, used={}, remaining={}, limit={}",
+                userId, newUsed, remaining, limit);
+        return vo;
+    }
+
+    /**
+     * 在途改信：本人 outbound + 窗口内 + entitled。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MailboxLetterItemVO inTransitEdit(long userId, long letterId, InTransitLetterEditInDto body) {
+        if (body == null || !StringUtils.hasText(body.getContent())) {
+            throw new BusinessException(appMessages.get("app.error.letter.recallContentEmpty"));
+        }
+        LetterDomain letter = requireRecallEligibleLetter(userId, letterId);
+        String content = body.getContent().trim();
+        boolean ok = letterService.updateOwnedOutboundInTransitContent(letterId, userId, content, userId);
+        if (!ok) {
+            throw new BusinessException(appMessages.get("app.error.letter.recallNotInTransit"));
+        }
+        log.info("in-transit edit ok, userId={}, letterId={}", userId, letterId);
+        return getLetter(userId, letterId);
+    }
+
+    /**
+     * 在途撤回：正文落入草稿后软删信件。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public InTransitWithdrawResultVO inTransitWithdraw(long userId, long letterId) {
+        LetterDomain letter = requireRecallEligibleLetter(userId, letterId);
+        LetterDraftDomain draft = new LetterDraftDomain();
+        draft.setUserId(userId);
+        draft.setMode(modeToDraftString(letter.getMode()));
+        draft.setToUserId(letter.getToUserId());
+        LetterDraftContent json = LetterDraftContent.builder()
+                .content(letter.getContent())
+                .letterType(toInteger(letter.getLetterType()))
+                .parentLetterId(letter.getParentLetterId())
+                .topicTagId(letter.getTopicTagId())
+                .build();
+        if (letter.getContentMetaJson() != null) {
+            LetterContentMeta meta = letter.getContentMetaJson();
+            json.setSkinId(meta.getSkinId());
+            json.setFontId(meta.getFontId());
+            json.setTemplateId(meta.getTemplateId());
+        }
+        draft.setContentJson(json);
+        LetterDraftDomain saved = letterDraftService.saveOwned(draft, userId);
+        if (saved == null) {
+            throw new BusinessException(appMessages.get("app.error.draft.invalid"));
+        }
+        boolean deleted = letterService.softDeleteOwnedOutboundInTransit(letterId, userId, userId);
+        if (!deleted) {
+            throw new BusinessException(appMessages.get("app.error.letter.recallNotInTransit"));
+        }
+        log.info("in-transit withdraw ok, userId={}, letterId={}, draftId={}", userId, letterId, saved.getId());
+        return InTransitWithdrawResultVO.builder()
+                .draftId(saved.getId())
+                .letterId(letterId)
+                .build();
+    }
+
+    /**
+     * 在途撤回/改信门闸：归属 + 在途 + 时间窗 + Plus entitled。
+     */
+    private LetterDomain requireRecallEligibleLetter(long userId, long letterId) {
+        LetterDomain letter = letterService.findOwnedOutboundInTransit(letterId, userId);
+        if (letter == null) {
+            throw recallOwnershipOrTransitException(userId, letterId);
+        }
+        LocalDateTime created = PlusEntitlementSupport.toLocalDateTime(letter.getCreatedAt());
+        if (created == null) {
+            throw new BusinessException(appMessages.get("app.error.letter.recallWindowExpired"));
+        }
+        LocalDateTime expiresAt = created.plusMinutes(plusEntitlementSupport.recallWindowMinutes());
+        if (LocalDateTime.now().isAfter(expiresAt)) {
+            throw new BusinessException(appMessages.get("app.error.letter.recallWindowExpired"));
+        }
+        PlusEntitlementSupport.Snapshot snap = plusEntitlementSupport.resolve(userId);
+        if (!snap.isEntitled()) {
+            log.info("in-transit recall rejected: vip required, userId={}, letterId={}", userId, letterId);
+            throw new BusinessException(
+                    PostAppErrorCodes.VIP_REQUIRED,
+                    appMessages.get("app.error.letter.recallVipRequired"));
+        }
+        return letter;
+    }
+
+    private BusinessException recallOwnershipOrTransitException(long userId, long letterId) {
+        LetterDomain any = letterService.getById(letterId);
+        if (any == null || any.isDelFlag()) {
+            return new BusinessException(appMessages.get("app.error.letter.notFound"));
+        }
+        if (!Objects.equals(any.getFromUserId(), userId)) {
+            return new BusinessException(appMessages.get("app.error.letter.recallNotOwner"));
+        }
+        return new BusinessException(appMessages.get("app.error.letter.recallNotInTransit"));
+    }
+
+    private static String modeToDraftString(Integer modeCode) {
+        LetterMode mode = LetterMode.fromCode(modeCode);
+        if (mode == LetterMode.POST_OFFICE) {
+            return "POST_OFFICE";
+        }
+        return "DIRECT";
+    }
+
+    private static Integer toInteger(Object raw) {
+        if (raw instanceof Number n) {
+            return n.intValue();
+        }
+        if (raw instanceof String s && StringUtils.hasText(s)) {
+            return Integer.parseInt(s.trim());
+        }
+        return null;
     }
 
     private static int userStatus(Object status) {

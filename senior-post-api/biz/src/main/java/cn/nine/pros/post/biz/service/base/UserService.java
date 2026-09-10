@@ -88,6 +88,11 @@ public interface UserService extends IService<UserDomain> {
                              boolean clearVipExpireAt, Long auditUserId);
 
     /**
+     * 同步 App 侧 VIP 标记（Play verify / test-override / 过期清权益）。
+     */
+    void syncVipEntitlement(long userId, boolean isVip, java.time.LocalDateTime vipExpireAt, Long actorId);
+
+    /**
      * 匹配候选：正常 App 用户（非后台），排除指定用户，按 id 倒序限量。
      */
     List<UserDomain> listActiveAppUsersExcluding(long excludeUserId, int limit);

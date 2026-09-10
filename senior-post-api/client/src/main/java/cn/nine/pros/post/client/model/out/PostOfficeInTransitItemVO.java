@@ -37,4 +37,16 @@ public class PostOfficeInTransitItemVO {
 
     @Schema(description = "摘要预览；收到未达时为空（正文密封）")
     private String preview;
+
+    @Schema(description = "是否可在途撤回/改信（仅 outbound 有意义）")
+    private Boolean canRecallEdit;
+
+    @Schema(description = "在途撤回/改信窗口截止时间")
+    private LocalDateTime recallExpiresAt;
+
+    @Schema(description = "在窗口内但未订阅时为 true（提示升级）")
+    private Boolean recallNeedsUpgrade;
+
+    @Schema(description = "是否仍在撤回窗口内")
+    private Boolean withinRecallWindow;
 }

@@ -154,4 +154,23 @@ public interface LetterService extends IService<LetterDomain> {
     /** 待审信件数。 */
     long countPendingAudit();
 
+    /**
+     * 本人发出且仍在途（PENDING/MATCHED/DELIVERING、未审核拒绝）的信件；否则 null。
+     */
+    LetterDomain findOwnedOutboundInTransit(long letterId, long fromUserId);
+
+    /**
+     * 在途改信：更新正文；若原审核已通过则重置为 PENDING_REVIEW。
+     *
+     * @return 是否更新成功
+     */
+    boolean updateOwnedOutboundInTransitContent(long letterId, long fromUserId, String content, long actorId);
+
+    /**
+     * 在途撤回：软删本人发出且仍在途的信件。
+     *
+     * @return 是否删除成功
+     */
+    boolean softDeleteOwnedOutboundInTransit(long letterId, long fromUserId, long actorId);
+
 }

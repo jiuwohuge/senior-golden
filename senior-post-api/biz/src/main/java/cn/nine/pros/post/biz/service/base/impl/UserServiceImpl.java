@@ -14,12 +14,14 @@ import cn.nine.pros.post.biz.support.PageQueryNormalize;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
         implements UserService {
@@ -406,6 +408,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDomain>
             uw.set(UserDomain::getVipExpireAt, vipExpireAt);
         }
         update(uw);
+    }
+
+    @Override
+    public void syncVipEntitlement(long userId, boolean isVip, LocalDateTime vipExpireAt, Long actorId) {
+        LocalDateTime now = LocalDateTime.now();
+        update(new LambdaUpdateWrapper<UserDomain>()
+                .eq(UserDomain::getId, userId)
+                .set(UserDomain::getIsVip, isVip)
+                .set(UserDomain::getVipExpireAt, vipExpireAt)
+                .set(UserDomain::getUpdatedAt, now)
+                .set(UserDomain::getUpdatedBy, actorId));
+        log.info("user vip entitlement synced, userId={}, isVip={}, vipExpireAt={}", userId, isVip, vipExpireAt);
     }
 
     @Override

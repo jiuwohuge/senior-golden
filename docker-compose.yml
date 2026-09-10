@@ -78,6 +78,10 @@ services:
       GOOGLE_WEB_CLIENT_ID: ${GOOGLE_WEB_CLIENT_ID:-}
       PASSWORD_RESET_PEPPER: ${PASSWORD_RESET_PEPPER:-}
       SENIOR_POST_MAIL_FROM: ${SENIOR_POST_MAIL_FROM:-}
+      # 本地/Compose 默认开启 Web 订阅闸测；生产务必 BILLING_TEST_OVERRIDE=false
+      BILLING_TEST_OVERRIDE: ${BILLING_TEST_OVERRIDE:-true}
+      PLAY_PACKAGE_NAME: ${PLAY_PACKAGE_NAME:-cn.nine.pros.seniorpost}
+      PLAY_PUBLIC_KEY: ${PLAY_PUBLIC_KEY:-}
     depends_on:
       postgresql:
         condition: service_healthy

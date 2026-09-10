@@ -13,4 +13,9 @@ public final class PostAppErrorCodes {
      * 需要会员身份方可使用（预留；具体接口在抛出时赋值文案）。
      */
     public static final int VIP_REQUIRED = 400302;
+
+    /**
+     * AI 信件助手周配额已用尽。
+     */
+    public static final int AI_QUOTA_EXHAUSTED = 400303;
 }

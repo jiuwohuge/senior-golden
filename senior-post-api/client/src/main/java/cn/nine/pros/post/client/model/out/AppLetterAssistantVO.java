@@ -26,4 +26,10 @@ public class AppLetterAssistantVO {
 
     @Schema(description = "灵感：可主动分享的话题（仅 inspire）")
     private List<String> inspireShare;
+
+    @Schema(description = "本周 AI 配额上限（可选）")
+    private Integer quotaLimit;
+
+    @Schema(description = "本周 AI 剩余次数（可选）")
+    private Integer quotaRemaining;
 }

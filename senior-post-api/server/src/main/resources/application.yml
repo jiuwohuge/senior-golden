@@ -124,6 +124,14 @@ senior-post:
     cancel-window-hours: 24
     delivery-batch-size: 200
     delivery-fixed-delay-ms: 60000
+  plus:
+    ai-free-weekly-quota: 3
+    ai-subscriber-weekly-quota: 100
+    in-transit-recall-window-minutes: 20
+    play-package-name: ${PLAY_PACKAGE_NAME:cn.nine.pros.seniorpost}
+    # 占位；为空时 verify 仅结构化校验。生产须接 Play Developer API，勿提交真实密钥。
+    play-public-key: ${PLAY_PUBLIC_KEY:}
+    test-override-enabled: ${BILLING_TEST_OVERRIDE:false}
 
 jh:
   config:

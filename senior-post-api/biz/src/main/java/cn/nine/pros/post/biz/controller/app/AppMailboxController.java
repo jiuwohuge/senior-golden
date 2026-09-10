@@ -7,8 +7,10 @@ import cn.nine.pros.post.biz.service.biz.AppMailboxService;
 import cn.nine.pros.post.client.api.app.AppMailboxApi;
 import cn.nine.pros.post.client.model.input.app.AppLetterAssistantInDto;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
+import cn.nine.pros.post.client.model.input.app.InTransitLetterEditInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
 import cn.nine.pros.post.client.model.out.AppLetterAssistantVO;
+import cn.nine.pros.post.client.model.out.InTransitWithdrawResultVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
 import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
@@ -83,6 +85,18 @@ public class AppMailboxController implements AppMailboxApi {
     public AppLetterAssistantVO letterAssistant(AppLetterAssistantInDto body) {
         Long uid = requireUserId();
         return appMailboxService.letterAssistant(uid, body);
+    }
+
+    @Override
+    public MailboxLetterItemVO inTransitEdit(Long letterId, InTransitLetterEditInDto body) {
+        Long uid = requireUserId();
+        return appMailboxService.inTransitEdit(uid, letterId, body);
+    }
+
+    @Override
+    public InTransitWithdrawResultVO inTransitWithdraw(Long letterId) {
+        Long uid = requireUserId();
+        return appMailboxService.inTransitWithdraw(uid, letterId);
     }
 
     private Long requireUserId() {

@@ -3,8 +3,10 @@ package cn.nine.pros.post.client.api.app;
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
 import cn.nine.pros.post.client.model.input.app.AppLetterAssistantInDto;
 import cn.nine.pros.post.client.model.input.app.AppSendLetterInDto;
+import cn.nine.pros.post.client.model.input.app.InTransitLetterEditInDto;
 import cn.nine.pros.post.client.model.out.AcceptPostalContactResultVO;
 import cn.nine.pros.post.client.model.out.AppLetterAssistantVO;
+import cn.nine.pros.post.client.model.out.InTransitWithdrawResultVO;
 import cn.nine.pros.post.client.model.out.LetterSyncResultVO;
 import cn.nine.pros.post.client.model.out.MailboxFriendItemVO;
 import cn.nine.pros.post.client.model.out.MailboxLetterItemVO;
@@ -66,4 +68,14 @@ public interface AppMailboxApi {
     @Operation(summary = "信件助手：整理原文建议稿（不自动覆盖）")
     @PostMapping("/letters/letter-assistant")
     AppLetterAssistantVO letterAssistant(@RequestBody @Valid AppLetterAssistantInDto body);
+
+    @Operation(summary = "在途改信（Plus：窗口内修改 outbound 正文）")
+    @PostMapping("/letters/{letterId}/in-transit-edit")
+    MailboxLetterItemVO inTransitEdit(
+            @PathVariable("letterId") Long letterId,
+            @RequestBody @Valid InTransitLetterEditInDto body);
+
+    @Operation(summary = "在途撤回至草稿（Plus：窗口内软删信件并新建草稿）")
+    @PostMapping("/letters/{letterId}/in-transit-withdraw")
+    InTransitWithdrawResultVO inTransitWithdraw(@PathVariable("letterId") Long letterId);
 }
