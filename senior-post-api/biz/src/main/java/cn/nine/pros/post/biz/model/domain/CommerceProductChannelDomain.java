@@ -1,7 +1,9 @@
 package cn.nine.pros.post.biz.model.domain;
 
 import cn.nine.commons.data.domain.AbstractAuditableDomain;
+import cn.nine.pros.post.biz.support.mybatis.PostgresJsonbTypeHandler;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,7 +21,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@TableName("bu_commerce_product_channel")
+@TableName(value = "bu_commerce_product_channel", autoResultMap = true)
 public class CommerceProductChannelDomain extends AbstractAuditableDomain {
 
     private static final long serialVersionUID = 1L;
@@ -51,6 +53,7 @@ public class CommerceProductChannelDomain extends AbstractAuditableDomain {
     /** 1=启用 */
     private Integer status;
 
-    @Schema(description = "渠道扩展 JSON 原文")
-    private String providerConfigJson;
+    @Schema(description = "渠道扩展 JSON")
+    @TableField(value = "provider_config_json", typeHandler = PostgresJsonbTypeHandler.class)
+    private Object providerConfigJson;
 }

@@ -108,4 +108,26 @@ export const api = {
     request.post('/webapi/commerce/products/paging', body ?? { page: { page: 1, size: 200 } }),
   saveCommerceProduct: (body: any) => request.post('/webapi/commerce/products/save', body),
   grantCommerce: (body: { userId: number; productId: number }) => request.post('/webapi/commerce/grant', body),
+
+  /** 购买记录分页（只读） */
+  commercePurchasesPaging: (body?: any) =>
+    request.post('/webapi/commerce/purchases/paging', body ?? { page: { page: 1, size: 20 } }),
+  /** @deprecated 使用 commercePurchasesPaging */
+  commercePurchases: (body?: any) =>
+    request.post('/webapi/commerce/purchases/paging', body ?? { page: { page: 1, size: 20 } }),
+  /** 购买详情 */
+  commercePurchaseDetail: (body: { purchaseId?: number; purchaseNo?: string } | number) =>
+    request.post(
+      '/webapi/commerce/purchases/detail',
+      typeof body === 'number' ? { purchaseId: body } : body,
+    ),
+  /** 购买关联 webhook（脱敏） */
+  commercePurchaseWebhookEvents: (body: { purchaseId?: number; purchaseNo?: string }) =>
+    request.post('/webapi/commerce/purchases/webhook-events', body),
+  /** 强制同步（不退款） */
+  commercePurchaseForceSync: (body: { purchaseId?: number; purchaseNo?: string } | number) =>
+    request.post(
+      '/webapi/commerce/purchases/force-sync',
+      typeof body === 'number' ? { purchaseId: body } : body,
+    ),
 }

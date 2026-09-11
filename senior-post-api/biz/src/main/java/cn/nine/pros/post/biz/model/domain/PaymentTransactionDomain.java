@@ -1,7 +1,9 @@
 package cn.nine.pros.post.biz.model.domain;
 
 import cn.nine.commons.data.domain.AbstractAuditableDomain;
+import cn.nine.pros.post.biz.support.mybatis.PostgresJsonbTypeHandler;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,7 +23,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@TableName("bu_payment_transaction")
+@TableName(value = "bu_payment_transaction", autoResultMap = true)
 public class PaymentTransactionDomain extends AbstractAuditableDomain {
 
     private static final long serialVersionUID = 1L;
@@ -47,6 +49,7 @@ public class PaymentTransactionDomain extends AbstractAuditableDomain {
 
     private LocalDateTime occurredAt;
 
-    @Schema(description = "原始快照 JSON 原文")
-    private String rawSnapshotJson;
+    @Schema(description = "原始快照 JSON")
+    @TableField(value = "raw_snapshot_json", typeHandler = PostgresJsonbTypeHandler.class)
+    private Object rawSnapshotJson;
 }

@@ -10,6 +10,9 @@ public interface PaymentSubscriptionService extends IService<PaymentSubscription
 
     PaymentSubscriptionDomain findByTokenHash(String purchaseTokenHash);
 
+    /** 按购买主单 ID 查找关联订阅。 */
+    PaymentSubscriptionDomain findByPurchaseId(Long purchaseId);
+
     /** 用户最新一条未删除订阅（按 updated_at / period_end 倒序）。 */
     PaymentSubscriptionDomain findLatestForUser(long userId);
 

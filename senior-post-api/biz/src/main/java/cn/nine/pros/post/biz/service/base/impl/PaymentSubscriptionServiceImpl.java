@@ -30,6 +30,18 @@ public class PaymentSubscriptionServiceImpl
     }
 
     @Override
+    public PaymentSubscriptionDomain findByPurchaseId(Long purchaseId) {
+        if (purchaseId == null) {
+            return null;
+        }
+        return getOne(new LambdaQueryWrapper<PaymentSubscriptionDomain>()
+                .eq(PaymentSubscriptionDomain::getPurchaseId, purchaseId)
+                .eq(PaymentSubscriptionDomain::isDelFlag, false)
+                .orderByDesc(PaymentSubscriptionDomain::getUpdatedAt)
+                .last("LIMIT 1"));
+    }
+
+    @Override
     public PaymentSubscriptionDomain findLatestForUser(long userId) {
         return getOne(new LambdaQueryWrapper<PaymentSubscriptionDomain>()
                 .eq(PaymentSubscriptionDomain::getUserId, userId)

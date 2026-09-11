@@ -11,6 +11,9 @@ public interface CommerceProductService extends IService<CommerceProductDomain> 
 
     CommerceProductDomain findByCode(String code);
 
+    /** 按商品编码查找（含下架，供管理端筛选）。 */
+    CommerceProductDomain findByCodeAnyStatus(String code);
+
     /** 按权益码查找上架商品（如 entitlement_code=plus）。 */
     CommerceProductDomain findByEntitlementCode(String entitlementCode);
 

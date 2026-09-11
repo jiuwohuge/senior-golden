@@ -10,6 +10,9 @@ public interface UserEntitlementService extends IService<UserEntitlementDomain> 
 
     List<UserEntitlementDomain> listActiveForUser(Long userId);
 
+    /** 用户全部未删除权益（含已过期/撤销，供管理端详情）。 */
+    List<UserEntitlementDomain> listByUserId(Long userId);
+
     boolean hasEntitlement(Long userId, Long productId);
 
     boolean hasEntitlementByCode(Long userId, String productCode);

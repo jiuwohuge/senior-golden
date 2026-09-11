@@ -3,9 +3,12 @@ package cn.nine.pros.post.client.model.input.admin;
 import cn.nine.commons.data.dto.AbstractDTO;
 import cn.nine.pros.post.client.model.json.CommerceProductMetadata;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -23,6 +26,9 @@ public class AdminCommerceProductSaveInDto extends AbstractDTO {
     @Schema(description = "商品类型")
     private String productType;
 
+    @Schema(description = "权益编码，如 plus")
+    private String entitlementCode;
+
     @NotBlank
     @Schema(description = "标题 i18n key")
     private String titleKey;
@@ -38,4 +44,8 @@ public class AdminCommerceProductSaveInDto extends AbstractDTO {
 
     @Schema(description = "状态 1=上架")
     private Integer status;
+
+    @Valid
+    @Schema(description = "渠道映射列表")
+    private List<AdminCommerceProductChannelInDto> channels;
 }

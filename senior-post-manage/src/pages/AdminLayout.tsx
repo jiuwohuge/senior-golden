@@ -13,6 +13,7 @@ import MatchConfig from './config/MatchConfig'
 import LetterConfig from './config/LetterConfig'
 import HomeLaunchConfig from './config/HomeLaunchConfig'
 import CommerceProductList from './config/CommerceProductList'
+import CommercePurchaseList from './config/CommercePurchaseList'
 import ModerationConfig from './config/ModerationConfig'
 import TimeLetterList from './content/TimeLetterList'
 import LetterList from './content/LetterList'
@@ -103,6 +104,7 @@ export default function AdminLayout() {
           { key: '/config/letter', label: <Link to="/config/letter">信件配置</Link> },
           { key: '/config/home-launch', label: <Link to="/config/home-launch">首页主推</Link> },
           { key: '/config/commerce', label: <Link to="/config/commerce">商业商品</Link> },
+          { key: '/config/commerce-purchases', label: <Link to="/config/commerce-purchases">购买记录</Link> },
           { key: '/config/moderation', label: <Link to="/config/moderation">内容安全</Link> },
         ],
       },
@@ -233,6 +235,7 @@ export default function AdminLayout() {
             <Route path="/config/letter" element={<LetterConfig />} />
             <Route path="/config/home-launch" element={<HomeLaunchConfig />} />
             <Route path="/config/commerce" element={<CommerceProductList />} />
+            <Route path="/config/commerce-purchases" element={<CommercePurchaseList />} />
             <Route path="/config/moderation" element={<ModerationConfig />} />
             <Route path="/log/action" element={<ActionLogList />} />
             <Route path="/log/login" element={<LoginLogList />} />

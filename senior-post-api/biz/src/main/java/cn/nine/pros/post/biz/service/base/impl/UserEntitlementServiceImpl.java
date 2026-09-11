@@ -47,6 +47,18 @@ public class UserEntitlementServiceImpl extends ServiceImpl<UserEntitlementMappe
     }
 
     @Override
+    public List<UserEntitlementDomain> listByUserId(Long userId) {
+        if (userId == null) {
+            return List.of();
+        }
+        return list(new LambdaQueryWrapper<UserEntitlementDomain>()
+                .eq(UserEntitlementDomain::getUserId, userId)
+                .eq(UserEntitlementDomain::isDelFlag, false)
+                .orderByDesc(UserEntitlementDomain::getUpdatedAt)
+                .orderByDesc(UserEntitlementDomain::getId));
+    }
+
+    @Override
     public boolean hasEntitlement(Long userId, Long productId) {
         if (userId == null || productId == null) {
             return false;

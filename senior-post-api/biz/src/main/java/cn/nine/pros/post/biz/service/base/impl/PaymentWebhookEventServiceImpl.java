@@ -9,7 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 支付 webhook 事件 ServiceImpl。
@@ -19,6 +22,8 @@ import java.time.LocalDateTime;
 public class PaymentWebhookEventServiceImpl
         extends ServiceImpl<PaymentWebhookEventMapper, PaymentWebhookEventDomain>
         implements PaymentWebhookEventService {
+
+    private static final int DEFAULT_LOOKUP_LIMIT = 50;
 
     @Override
     public PaymentWebhookEventDomain findByProviderAndEventId(String provider, String eventIdOrMessageId) {
@@ -57,5 +62,26 @@ public class PaymentWebhookEventServiceImpl
         log.info("webhook event inserted, id={}, provider={}, eventId={}, type={}",
                 row.getId(), row.getProvider(), row.getEventIdOrMessageId(), row.getEventType());
         return row;
+    }
+
+    @Override
+    public List<PaymentWebhookEventDomain> listForPurchaseLookup(
+            String provider, String storeProductId, LocalDateTime from, int limit) {
+        if (!StringUtils.hasText(provider)) {
+            return List.of();
+        }
+        int safeLimit = limit > 0 ? Math.min(limit, 200) : DEFAULT_LOOKUP_LIMIT;
+        QueryWrapper<PaymentWebhookEventDomain> qw = new QueryWrapper<PaymentWebhookEventDomain>()
+                .eq("del_flag", false)
+                .eq("provider", provider.trim())
+                .orderByDesc("received_at")
+                .last("LIMIT " + safeLimit);
+        if (from != null) {
+            qw.ge("received_at", from);
+        }
+        if (StringUtils.hasText(storeProductId)) {
+            qw.apply("payload_json::text ILIKE {0}", "%" + storeProductId.trim() + "%");
+        }
+        return list(qw);
     }
 }

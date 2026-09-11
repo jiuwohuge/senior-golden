@@ -14,4 +14,7 @@ public interface PaymentTransactionService extends IService<PaymentTransactionDo
      * @return 持久化后的行
      */
     PaymentTransactionDomain saveTx(PaymentTransactionDomain row, long actorId);
+
+    /** 某购买主单下未删除流水（按发生时间升序）。 */
+    java.util.List<PaymentTransactionDomain> listByPurchaseId(Long purchaseId);
 }

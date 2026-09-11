@@ -81,6 +81,9 @@ export const PRODUCT_TYPE_OPTIONS: EnumOption[] = [
   { value: 'template', label: '模板' },
   { value: 'export', label: '导出' },
   { value: 'vip_bundle', label: 'VIP 包' },
+  { value: 'subscription', label: '订阅' },
+  { value: 'one_time', label: '一次性' },
+  { value: 'attachment', label: '附件' },
 ]
 
 export const PRODUCT_STATUS_OPTIONS: EnumOption[] = [

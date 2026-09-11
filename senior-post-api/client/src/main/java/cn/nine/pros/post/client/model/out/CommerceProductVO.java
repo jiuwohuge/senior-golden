@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,10 +19,12 @@ public class CommerceProductVO {
     private Long id;
     private String productCode;
     private String productType;
+    private String entitlementCode;
     private String titleKey;
     private Integer priceCents;
     private CommerceProductMetadata metadataJson;
     private Integer sortOrder;
     private Integer status;
     private Boolean owned;
+    private List<CommerceProductChannelVO> channels;
 }

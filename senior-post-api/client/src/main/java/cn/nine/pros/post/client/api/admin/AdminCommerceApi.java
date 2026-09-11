@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Tag(name = "管理后台-商业")
+@Tag(name = "管理后台-商业商品")
 @RequestMapping(AppServiceDefine.WEBAPI_PREFIX + "/commerce")
 public interface AdminCommerceApi {
 
@@ -23,7 +23,7 @@ public interface AdminCommerceApi {
     @PostMapping("/products/paging")
     PageData<CommerceProductVO> pagingProducts(@RequestBody @Valid AdminCommerceProductQueryInDto body);
 
-    @Operation(summary = "保存商品")
+    @Operation(summary = "保存商品（含渠道）")
     @PostMapping("/products/save")
     CommerceProductVO saveProduct(@RequestBody @Valid AdminCommerceProductSaveInDto body);
 

@@ -1,23 +1,48 @@
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Col, Form, Input, InputNumber, Modal, Space, Tag, message } from 'antd'
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { Button, Col, Form, Input, InputNumber, Modal, Select, Space, Tag, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import AdminProTable, { FILTER_COL_SHORT } from '../../components/admin/AdminProTable'
 import EnumSelect, { PRODUCT_STATUS_OPTIONS, PRODUCT_TYPE_OPTIONS } from '../../components/admin/EnumSelect'
 import { api } from '../../services/api'
 
+type ChannelRow = {
+  id?: number
+  provider?: string
+  storeProductId?: string
+  basePlanId?: string
+  offerId?: string
+  appIdOrPackageName?: string
+  environment?: string
+  status?: number
+  providerConfigJson?: unknown
+}
+
 type ProductRow = {
   id: number
   productCode?: string
   productType?: string
+  entitlementCode?: string
   titleKey?: string
   priceCents?: number
   sortOrder?: number
   status?: number
   metadataJson?: unknown
+  channels?: ChannelRow[]
 }
 
-/** 商业商品列表：分页筛选、批量上下架与 CRUD。 */
+const PROVIDER_OPTIONS = [
+  { value: 'google_play', label: 'Google Play' },
+  { value: 'apple_app_store', label: 'Apple' },
+  { value: 'mock', label: 'Mock' },
+]
+
+const ENV_OPTIONS = [
+  { value: 'sandbox', label: 'sandbox' },
+  { value: 'production', label: 'production' },
+]
+
+/** 商业商品列表：分页筛选、渠道字段、批量上下架、CRUD */
 export default function CommerceProductList() {
   const [rows, setRows] = useState<ProductRow[]>([])
   const [total, setTotal] = useState(0)
@@ -66,7 +91,12 @@ export default function CommerceProductList() {
   const openAdd = () => {
     setEditing(null)
     form.resetFields()
-    form.setFieldsValue({ status: 1, sortOrder: 0, priceCents: 0 })
+    form.setFieldsValue({
+      status: 1,
+      sortOrder: 0,
+      priceCents: 0,
+      channels: [],
+    })
     setModalOpen(true)
   }
 
@@ -76,11 +106,21 @@ export default function CommerceProductList() {
       id: r.id,
       productCode: r.productCode,
       productType: r.productType,
+      entitlementCode: r.entitlementCode,
       titleKey: r.titleKey,
       priceCents: r.priceCents,
       metadataJson: r.metadataJson ? JSON.stringify(r.metadataJson, null, 2) : '{}',
       sortOrder: r.sortOrder,
       status: r.status,
+      channels: (r.channels || []).map((c) => ({
+        ...c,
+        providerConfigJson:
+          c.providerConfigJson == null
+            ? ''
+            : typeof c.providerConfigJson === 'string'
+              ? c.providerConfigJson
+              : JSON.stringify(c.providerConfigJson, null, 2),
+      })),
     })
     setModalOpen(true)
   }
@@ -96,7 +136,22 @@ export default function CommerceProductList() {
         message.error('metadata JSON 格式不正确')
         return
       }
-      await api.saveCommerceProduct({ ...v, metadataJson })
+      const channels = (v.channels || []).map((c: any) => {
+        let providerConfigJson: unknown = c.providerConfigJson
+        if (typeof providerConfigJson === 'string') {
+          const s = providerConfigJson.trim()
+          if (!s) providerConfigJson = null
+          else {
+            try {
+              providerConfigJson = JSON.parse(s)
+            } catch {
+              providerConfigJson = s
+            }
+          }
+        }
+        return { ...c, providerConfigJson }
+      })
+      await api.saveCommerceProduct({ ...v, metadataJson, channels })
       setModalOpen(false)
       form.resetFields()
       void load()
@@ -151,8 +206,18 @@ export default function CommerceProductList() {
         width: 110,
         render: (v: string) => PRODUCT_TYPE_OPTIONS.find((o) => o.value === v)?.label ?? v,
       },
+      { title: '权益', dataIndex: 'entitlementCode', width: 90, ellipsis: true },
       { title: '标题 Key', dataIndex: 'titleKey', ellipsis: true },
       { title: '价格(分)', dataIndex: 'priceCents', width: 100 },
+      {
+        title: '渠道',
+        dataIndex: 'channels',
+        width: 220,
+        render: (chs: ChannelRow[] | undefined) => {
+          if (!chs?.length) return '-'
+          return chs.map((c) => `${c.provider}:${c.storeProductId || ''}`).join(' | ')
+        },
+      },
       { title: '排序', dataIndex: 'sortOrder', width: 72 },
       {
         title: '状态',
@@ -235,7 +300,7 @@ export default function CommerceProductList() {
           selectedRowKeys: selectedIds,
           onChange: (keys) => setSelectedIds(keys.map(Number)),
         }}
-        scrollX={1000}
+        scrollX={1200}
       />
 
       <Modal
@@ -248,17 +313,20 @@ export default function CommerceProductList() {
         }}
         confirmLoading={saving}
         destroyOnClose
-        width={560}
+        width={720}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="id" hidden>
             <Input />
           </Form.Item>
           <Form.Item name="productCode" label="商品编码" rules={[{ required: true }]}>
-            <Input placeholder="skin.vintage" />
+            <Input placeholder="plus.monthly / skin.vintage" />
           </Form.Item>
           <Form.Item name="productType" label="类型" rules={[{ required: true }]}>
             <EnumSelect options={PRODUCT_TYPE_OPTIONS} allowClear={false} />
+          </Form.Item>
+          <Form.Item name="entitlementCode" label="权益编码">
+            <Input placeholder="plus" />
           </Form.Item>
           <Form.Item name="titleKey" label="标题 i18n key" rules={[{ required: true }]}>
             <Input />
@@ -273,8 +341,68 @@ export default function CommerceProductList() {
             <EnumSelect options={PRODUCT_STATUS_OPTIONS} allowClear={false} />
           </Form.Item>
           <Form.Item name="metadataJson" label="metadata JSON">
-            <Input.TextArea rows={4} placeholder='{"skinId":"vintage"}' />
+            <Input.TextArea rows={3} placeholder='{"skinId":"vintage"}' />
           </Form.Item>
+
+          <Form.List name="channels">
+            {(fields, { add, remove }) => (
+              <div>
+                <div style={{ marginBottom: 8, fontWeight: 600 }}>渠道配置（Play / Mock）</div>
+                {fields.map((field) => (
+                  <Space key={field.key} align="start" style={{ display: 'flex', marginBottom: 8 }} wrap>
+                    <Form.Item name={[field.name, 'id']} hidden>
+                      <Input />
+                    </Form.Item>
+                    <Form.Item
+                      name={[field.name, 'provider']}
+                      rules={[{ required: true, message: 'provider' }]}
+                      style={{ width: 140 }}
+                    >
+                      <Select options={PROVIDER_OPTIONS} placeholder="provider" />
+                    </Form.Item>
+                    <Form.Item
+                      name={[field.name, 'storeProductId']}
+                      rules={[{ required: true, message: 'store id' }]}
+                      style={{ width: 160 }}
+                    >
+                      <Input placeholder="store_product_id" />
+                    </Form.Item>
+                    <Form.Item name={[field.name, 'basePlanId']} style={{ width: 120 }}>
+                      <Input placeholder="base_plan" />
+                    </Form.Item>
+                    <Form.Item name={[field.name, 'offerId']} style={{ width: 100 }}>
+                      <Input placeholder="offer" />
+                    </Form.Item>
+                    <Form.Item name={[field.name, 'appIdOrPackageName']} style={{ width: 180 }}>
+                      <Input placeholder="package name" />
+                    </Form.Item>
+                    <Form.Item
+                      name={[field.name, 'environment']}
+                      rules={[{ required: true, message: 'env' }]}
+                      style={{ width: 120 }}
+                    >
+                      <Select options={ENV_OPTIONS} placeholder="env" />
+                    </Form.Item>
+                    <Form.Item name={[field.name, 'status']} initialValue={1} style={{ width: 90 }}>
+                      <Select
+                        options={[
+                          { value: 1, label: '启用' },
+                          { value: 0, label: '停用' },
+                        ]}
+                      />
+                    </Form.Item>
+                    <Form.Item name={[field.name, 'providerConfigJson']} style={{ width: 200 }}>
+                      <Input.TextArea rows={1} placeholder="provider_config JSON" />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(field.name)} style={{ marginTop: 8 }} />
+                  </Space>
+                ))}
+                <Button type="dashed" onClick={() => add({ environment: 'sandbox', status: 1 })} block icon={<PlusOutlined />}>
+                  添加渠道
+                </Button>
+              </div>
+            )}
+          </Form.List>
         </Form>
       </Modal>
       <Modal
