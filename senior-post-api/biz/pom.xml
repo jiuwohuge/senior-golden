@@ -152,4 +152,17 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- commons-framework 默认 skipTests=true；biz 需可跑架构护栏测试 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>false</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

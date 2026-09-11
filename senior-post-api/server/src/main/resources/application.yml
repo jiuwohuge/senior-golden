@@ -113,6 +113,37 @@ senior-post:
     # 平邮到期自动送达：定时扫描间隔（毫秒）
     standard-delivery-fixed-delay-ms: 30000
     standard-delivery-batch-size: 200
+  # 统一定时任务（§5）；fixed-delay 嵌套占位符保留旧键兼容
+  scheduler:
+    lock-ttl-ms: 120000
+    mail-outbox:
+      enabled: true
+      fixed-delay-ms: ${senior-post.mail.outbox.poll-delay-ms:10000}
+      batch-size: ${senior-post.mail.outbox.batch-size:20}
+    post-office-match:
+      enabled: true
+      fixed-delay-ms: ${senior-post.match.fixed-delay-ms:20000}
+      batch-size: 200
+    standard-letter-delivery:
+      enabled: true
+      fixed-delay-ms: ${senior-post.mailbox.standard-delivery-fixed-delay-ms:30000}
+      batch-size: ${senior-post.mailbox.standard-delivery-batch-size:200}
+    time-letter-delivery:
+      enabled: true
+      fixed-delay-ms: ${senior-post.time-letter.delivery-fixed-delay-ms:60000}
+      batch-size: ${senior-post.time-letter.delivery-batch-size:200}
+    notification-outbox:
+      enabled: false
+      fixed-delay-ms: 60000
+    billing-event-retry:
+      enabled: false
+      fixed-delay-ms: 60000
+    billing-reconciliation:
+      enabled: false
+      fixed-delay-ms: 60000
+    push-endpoint-cleanup:
+      enabled: false
+      fixed-delay-ms: 60000
   time-letter:
     stamp-cost: 1
     max-delivery-years: 2
