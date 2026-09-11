@@ -9,6 +9,8 @@ import cn.nine.pros.post.biz.billing.model.VerifyPurchaseCommand;
 import cn.nine.pros.post.biz.config.BillingProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.service.biz.support.PlusEntitlementSupport;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
@@ -38,6 +40,8 @@ public class MockBillingProvider implements BillingProvider {
     public static final String SCENARIO_EXPIRE = "EXPIRE";
     public static final String SCENARIO_REFUND = "REFUND";
     public static final String SCENARIO_REVOKE = "REVOKE";
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final BillingProperties billingProperties;
     private final Environment environment;
@@ -104,9 +108,94 @@ public class MockBillingProvider implements BillingProvider {
                 productId, PurchaseTokenPreview.truncate(purchaseToken));
     }
 
+    /**
+     * 解析 mock RTDN JSON：messageId、purchaseToken、notificationType 必填；productId 可选。
+     * <p>notificationType → scenario 映射见 {@link #mapNotificationTypeToScenario(String)}。
+     */
     @Override
     public ParsedNotification parseNotification(String rawPayload) {
-        throw new UnsupportedOperationException("mock parseNotification not implemented");
+        requireMockAllowed();
+        if (!StringUtils.hasText(rawPayload)) {
+            throw new BusinessException(appMessages.get("app.error.billing.invalidRequest"));
+        }
+        JsonNode root;
+        try {
+            root = OBJECT_MAPPER.readTree(rawPayload.trim());
+        } catch (Exception e) {
+            log.debug("mock parseNotification invalid JSON, err={}", e.getMessage());
+            throw new BusinessException(appMessages.get("app.error.billing.invalidRequest"));
+        }
+        String messageId = textField(root, "messageId");
+        String purchaseToken = textField(root, "purchaseToken");
+        String notificationType = textField(root, "notificationType");
+        if (!StringUtils.hasText(messageId) || !StringUtils.hasText(purchaseToken)
+                || !StringUtils.hasText(notificationType)) {
+            throw new BusinessException(appMessages.get("app.error.billing.invalidRequest"));
+        }
+        String productId = textField(root, "productId");
+        String normalizedType = normalizeNotificationType(notificationType);
+        String scenario = mapNotificationTypeToScenario(normalizedType);
+        if (scenario == null) {
+            log.debug("mock parseNotification unknown notificationType={}", normalizedType);
+            throw new BusinessException(appMessages.get("app.error.billing.invalidRequest"));
+        }
+        log.info("mock parseNotification ok, messageId={}, type={}, scenario={}, token={}",
+                messageId.trim(), normalizedType, scenario, PurchaseTokenPreview.truncate(purchaseToken.trim()));
+        return new ParsedNotification(
+                BillingProviders.MOCK,
+                normalizedType,
+                purchaseToken.trim(),
+                StringUtils.hasText(productId) ? productId.trim() : null,
+                rawPayload,
+                messageId.trim(),
+                scenario);
+    }
+
+    /**
+     * RTDN notificationType → mock 场景。
+     * <ul>
+     *   <li>PURCHASED / SUBSCRIPTION_PURCHASED → PURCHASED</li>
+     *   <li>RENEWED / RENEW / SUBSCRIPTION_RENEWED → RENEW</li>
+     *   <li>CANCELED / CANCEL / SUBSCRIPTION_CANCELED → CANCEL</li>
+     *   <li>EXPIRED / EXPIRE / SUBSCRIPTION_EXPIRED → EXPIRE</li>
+     *   <li>REVOKED / REVOKE / SUBSCRIPTION_REVOKED → REVOKE</li>
+     *   <li>ON_HOLD / PENDING / SUBSCRIPTION_ON_HOLD → PENDING</li>
+     *   <li>RECOVERED / SUBSCRIPTION_RECOVERED → RENEW</li>
+     *   <li>REFUND / SUBSCRIPTION_REFUND → REFUND</li>
+     * </ul>
+     */
+    public static String mapNotificationTypeToScenario(String notificationType) {
+        String normalized = normalizeNotificationType(notificationType);
+        return switch (normalized) {
+            case "PURCHASED" -> SCENARIO_PURCHASED;
+            case "RENEWED", "RENEW" -> SCENARIO_RENEW;
+            case "CANCELED", "CANCEL" -> SCENARIO_CANCEL;
+            case "EXPIRED", "EXPIRE" -> SCENARIO_EXPIRE;
+            case "REVOKED", "REVOKE" -> SCENARIO_REVOKE;
+            case "ON_HOLD", "PENDING" -> SCENARIO_PENDING;
+            case "RECOVERED" -> SCENARIO_RENEW;
+            case "REFUND" -> SCENARIO_REFUND;
+            default -> null;
+        };
+    }
+
+    static String normalizeNotificationType(String notificationType) {
+        if (!StringUtils.hasText(notificationType)) {
+            return "";
+        }
+        String upper = notificationType.trim().toUpperCase(Locale.ROOT);
+        if (upper.startsWith("SUBSCRIPTION_")) {
+            return upper.substring("SUBSCRIPTION_".length());
+        }
+        return upper;
+    }
+
+    private static String textField(JsonNode root, String field) {
+        if (root == null || !root.has(field) || root.get(field).isNull()) {
+            return null;
+        }
+        String value = root.get(field).asText(null);
+        return StringUtils.hasText(value) ? value : null;
     }
 
     @Override

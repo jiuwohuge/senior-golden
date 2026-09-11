@@ -1,6 +1,7 @@
 package cn.nine.pros.post.biz.billing;
 
 import cn.nine.commons.basic.exception.unchecked.BusinessException;
+import cn.nine.pros.post.biz.billing.model.ParsedNotification;
 import cn.nine.pros.post.biz.billing.model.VerifiedPurchase;
 import cn.nine.pros.post.biz.billing.model.VerifyPurchaseCommand;
 import cn.nine.pros.post.biz.config.BillingProperties;
@@ -112,6 +113,58 @@ class MockBillingProviderTest {
     void generateTokenFormat() {
         String token = MockBillingProvider.generateToken("plus_yearly", "RENEW");
         assertTrue(token.startsWith("mock:plus_yearly:RENEW:"));
+    }
+
+    @Test
+    void parseNotificationRenewedMapsToRenew() {
+        String token = MockBillingProvider.generateToken(PlusEntitlementSupport.PRODUCT_YEARLY, "PURCHASED");
+        String json = """
+                {"messageId":"msg-1","purchaseToken":"%s","notificationType":"SUBSCRIPTION_RENEWED"}
+                """.formatted(token);
+        ParsedNotification parsed = provider.parseNotification(json);
+
+        assertEquals(BillingProviders.MOCK, parsed.provider());
+        assertEquals("RENEWED", parsed.eventType());
+        assertEquals(MockBillingProvider.SCENARIO_RENEW, parsed.scenario());
+        assertEquals("msg-1", parsed.messageId());
+        assertEquals(token, parsed.purchaseToken());
+    }
+
+    @Test
+    void parseNotificationTypeMappings() {
+        assertEquals(MockBillingProvider.SCENARIO_CANCEL,
+                MockBillingProvider.mapNotificationTypeToScenario("SUBSCRIPTION_CANCELED"));
+        assertEquals(MockBillingProvider.SCENARIO_EXPIRE,
+                MockBillingProvider.mapNotificationTypeToScenario("EXPIRED"));
+        assertEquals(MockBillingProvider.SCENARIO_REVOKE,
+                MockBillingProvider.mapNotificationTypeToScenario("REVOKED"));
+        assertEquals(MockBillingProvider.SCENARIO_REFUND,
+                MockBillingProvider.mapNotificationTypeToScenario("SUBSCRIPTION_REFUND"));
+        assertEquals(MockBillingProvider.SCENARIO_PURCHASED,
+                MockBillingProvider.mapNotificationTypeToScenario("PURCHASED"));
+        assertEquals(MockBillingProvider.SCENARIO_PENDING,
+                MockBillingProvider.mapNotificationTypeToScenario("ON_HOLD"));
+        assertEquals(MockBillingProvider.SCENARIO_RENEW,
+                MockBillingProvider.mapNotificationTypeToScenario("RECOVERED"));
+    }
+
+    @Test
+    void parseNotificationInvalidPayloadThrows() {
+        assertThrows(BusinessException.class, () -> provider.parseNotification("{"));
+        assertThrows(BusinessException.class, () -> provider.parseNotification("""
+                {"messageId":"","purchaseToken":"t","notificationType":"RENEWED"}
+                """));
+        assertThrows(BusinessException.class, () -> provider.parseNotification("""
+                {"messageId":"m","purchaseToken":"t","notificationType":"UNKNOWN_TYPE"}
+                """));
+    }
+
+    @Test
+    void parseNotificationMockDisabledThrows() {
+        billingProperties.setMockEnabled(false);
+        assertThrows(BusinessException.class, () -> provider.parseNotification("""
+                {"messageId":"m","purchaseToken":"t","notificationType":"RENEWED"}
+                """));
     }
 
     @Test

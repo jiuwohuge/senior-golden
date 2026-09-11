@@ -1,19 +1,29 @@
 package cn.nine.pros.post.biz.service.biz.impl;
 
 import cn.nine.commons.basic.exception.unchecked.BusinessException;
+import cn.nine.pros.post.biz.billing.BillingProviderRegistry;
 import cn.nine.pros.post.biz.billing.BillingProviders;
 import cn.nine.pros.post.biz.billing.MockBillingProvider;
+import cn.nine.pros.post.biz.billing.model.ParsedNotification;
+import cn.nine.pros.post.biz.billing.util.PurchaseTokenHasher;
 import cn.nine.pros.post.biz.config.BillingProperties;
 import cn.nine.pros.post.biz.config.PlusBillingProperties;
 import cn.nine.pros.post.biz.i18n.AppMessages;
+import cn.nine.pros.post.biz.model.domain.PaymentPurchaseDomain;
+import cn.nine.pros.post.biz.model.domain.PaymentWebhookEventDomain;
+import cn.nine.pros.post.biz.model.domain.VipSubscriptionDomain;
 import cn.nine.pros.post.biz.service.base.AiAssistUsageService;
+import cn.nine.pros.post.biz.service.base.PaymentPurchaseService;
+import cn.nine.pros.post.biz.service.base.PaymentWebhookEventService;
 import cn.nine.pros.post.biz.service.base.UserService;
 import cn.nine.pros.post.biz.service.base.VipSubscriptionService;
 import cn.nine.pros.post.biz.service.biz.AppBillingBizService;
 import cn.nine.pros.post.biz.service.biz.PurchaseSyncBizService;
 import cn.nine.pros.post.biz.service.biz.SyncPurchaseContext;
 import cn.nine.pros.post.biz.service.biz.support.PlusEntitlementSupport;
+import cn.nine.pros.post.client.model.input.app.BillingMockRtdnInDto;
 import cn.nine.pros.post.client.model.input.app.BillingMockSyncInDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cn.nine.pros.post.client.model.input.app.BillingTestOverrideInDto;
 import cn.nine.pros.post.client.model.input.app.PlayPurchaseVerifyInDto;
 import cn.nine.pros.post.client.model.input.app.PlayRestoreInDto;
@@ -30,8 +40,10 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Plus / Play Billing：订阅状态、购买校验、恢复、mock-sync 与测试覆盖。
@@ -44,6 +56,8 @@ public class AppBillingBizServiceImpl implements AppBillingBizService {
 
     private static final int STATUS_ACTIVE = 1;
     private static final int STATUS_EXPIRED = 2;
+    private static final int WEBHOOK_ERROR_MESSAGE_MAX_LEN = 500;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final PlusEntitlementSupport plusEntitlementSupport;
     private final VipSubscriptionService vipSubscriptionService;
@@ -53,6 +67,9 @@ public class AppBillingBizServiceImpl implements AppBillingBizService {
     private final BillingProperties billingProperties;
     private final Environment environment;
     private final PurchaseSyncBizService purchaseSyncBizService;
+    private final PaymentWebhookEventService paymentWebhookEventService;
+    private final PaymentPurchaseService paymentPurchaseService;
+    private final BillingProviderRegistry billingProviderRegistry;
     private final AppMessages appMessages;
 
     @Override
@@ -131,6 +148,76 @@ public class AppBillingBizServiceImpl implements AppBillingBizService {
         SyncPurchaseContext ctx = new SyncPurchaseContext(
                 productId, plusBillingProperties.getPlayPackageName(), null, true, null, scenario);
         return purchaseSyncBizService.syncPurchase(BillingProviders.MOCK, token, userId, ctx);
+    }
+
+    /**
+     * Mock RTDN 回放：解析通知、幂等写入 webhook 事件、同步购买状态。
+     * <p>QA 须以 purchaseToken 绑定用户身份登录；跨用户回放会被拒绝。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public SubscriptionStatusVO mockReplayRtdn(long userId, BillingMockRtdnInDto body) {
+        if (!billingProperties.isMockAllowed(environment)) {
+            throw new BusinessException(appMessages.get("app.error.billing.mockDisabled"));
+        }
+        if (body == null || !StringUtils.hasText(body.getMessageId())
+                || !StringUtils.hasText(body.getPurchaseToken())
+                || !StringUtils.hasText(body.getNotificationType())) {
+            throw new BusinessException(appMessages.get("app.error.billing.invalidRequest"));
+        }
+        String token = body.getPurchaseToken().trim();
+        log.info("billing mock-rtdn entry, userId={}, messageId={}, notificationType={}, token={}",
+                userId, body.getMessageId().trim(), body.getNotificationType().trim(), truncateToken(token));
+
+        String rawJson = serializeMockRtdnPayload(body);
+        ParsedNotification parsed = billingProviderRegistry.getRequired(BillingProviders.MOCK)
+                .parseNotification(rawJson);
+
+        long boundUserId = resolveBoundUserId(token);
+        // QA 简化：要求当前登录用户即为 token 绑定用户，避免跨账号误操作
+        if (boundUserId != userId) {
+            throw new BusinessException(appMessages.get("app.error.billing.invalidRequest"));
+        }
+
+        PaymentWebhookEventDomain webhookRow = new PaymentWebhookEventDomain();
+        webhookRow.setProvider(BillingProviders.MOCK);
+        webhookRow.setEventIdOrMessageId(parsed.messageId());
+        webhookRow.setEventType(parsed.eventType());
+        webhookRow.setPayloadJson(rawJson);
+        webhookRow.setProcessStatus("received");
+        webhookRow.setReceivedAt(LocalDateTime.now());
+        webhookRow = paymentWebhookEventService.insertIfAbsent(webhookRow, boundUserId);
+        if (webhookRow == null) {
+            throw new BusinessException(appMessages.get("app.error.billing.invalidRequest"));
+        }
+
+        if ("processed".equals(webhookRow.getProcessStatus())) {
+            log.info("billing mock-rtdn idempotent hit, userId={}, messageId={}",
+                    boundUserId, parsed.messageId());
+            return buildStatusVo(boundUserId);
+        }
+
+        String productId = resolveProductIdForRtdn(body, parsed, token);
+        SyncPurchaseContext ctx = new SyncPurchaseContext(
+                productId, plusBillingProperties.getPlayPackageName(), null, true, null, parsed.scenario());
+        try {
+            SubscriptionStatusVO status = purchaseSyncBizService.syncPurchase(
+                    BillingProviders.MOCK, token, boundUserId, ctx);
+            webhookRow.setProcessStatus("processed");
+            webhookRow.setProcessedAt(LocalDateTime.now());
+            webhookRow.setErrorMessage(null);
+            paymentWebhookEventService.updateById(webhookRow);
+            log.info("billing mock-rtdn sync success, userId={}, messageId={}, scenario={}",
+                    boundUserId, parsed.messageId(), parsed.scenario());
+            return status;
+        } catch (RuntimeException ex) {
+            webhookRow.setProcessStatus("failed");
+            webhookRow.setErrorMessage(truncateErrorMessage(ex.getMessage()));
+            paymentWebhookEventService.updateById(webhookRow);
+            log.warn("billing mock-rtdn sync failed, userId={}, messageId={}, err={}",
+                    boundUserId, parsed.messageId(), ex.getMessage());
+            throw ex;
+        }
     }
 
     /**
@@ -253,6 +340,70 @@ public class AppBillingBizServiceImpl implements AppBillingBizService {
         }
         return !PlusEntitlementSupport.SOURCE_PLAY.equals(
                 existing.getSource() == null ? "" : existing.getSource().trim());
+    }
+
+    private long resolveBoundUserId(String purchaseToken) {
+        String tokenHash = PurchaseTokenHasher.hashToken(purchaseToken);
+        PaymentPurchaseDomain purchase = paymentPurchaseService.findByTokenHash(tokenHash);
+        if (purchase != null && purchase.getUserId() != null) {
+            return purchase.getUserId();
+        }
+        VipSubscriptionDomain legacy = vipSubscriptionService.findByPurchaseToken(purchaseToken);
+        if (legacy != null && legacy.getUserId() != null) {
+            return legacy.getUserId();
+        }
+        throw new BusinessException(appMessages.get("app.error.billing.invalidToken"));
+    }
+
+    private String resolveProductIdForRtdn(BillingMockRtdnInDto body, ParsedNotification parsed, String token) {
+        if (StringUtils.hasText(body.getProductId())) {
+            return normalizeProductId(body.getProductId());
+        }
+        if (StringUtils.hasText(parsed.storeProductId())) {
+            return normalizeProductId(parsed.storeProductId());
+        }
+        String fromToken = extractProductIdFromMockToken(token);
+        if (StringUtils.hasText(fromToken)) {
+            return normalizeProductId(fromToken);
+        }
+        return PlusEntitlementSupport.PRODUCT_YEARLY;
+    }
+
+    private static String extractProductIdFromMockToken(String token) {
+        if (!StringUtils.hasText(token) || !token.startsWith(MockBillingProvider.TOKEN_PREFIX)) {
+            return null;
+        }
+        String remainder = token.substring(MockBillingProvider.TOKEN_PREFIX.length());
+        String[] parts = remainder.split(":", 3);
+        if (parts.length < 1 || !StringUtils.hasText(parts[0])) {
+            return null;
+        }
+        return parts[0].trim();
+    }
+
+    private String serializeMockRtdnPayload(BillingMockRtdnInDto body) {
+        try {
+            Map<String, String> payload = new LinkedHashMap<>();
+            payload.put("messageId", body.getMessageId().trim());
+            payload.put("purchaseToken", body.getPurchaseToken().trim());
+            payload.put("notificationType", body.getNotificationType().trim());
+            if (StringUtils.hasText(body.getProductId())) {
+                payload.put("productId", body.getProductId().trim());
+            }
+            return OBJECT_MAPPER.writeValueAsString(payload);
+        } catch (Exception e) {
+            throw new BusinessException(appMessages.get("app.error.billing.invalidRequest"));
+        }
+    }
+
+    private static String truncateErrorMessage(String message) {
+        if (message == null) {
+            return null;
+        }
+        if (message.length() <= WEBHOOK_ERROR_MESSAGE_MAX_LEN) {
+            return message;
+        }
+        return message.substring(0, WEBHOOK_ERROR_MESSAGE_MAX_LEN);
     }
 
     private static String truncateToken(String token) {

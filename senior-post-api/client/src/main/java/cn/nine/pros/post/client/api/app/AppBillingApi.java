@@ -1,6 +1,7 @@
 package cn.nine.pros.post.client.api.app;
 
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
+import cn.nine.pros.post.client.model.input.app.BillingMockRtdnInDto;
 import cn.nine.pros.post.client.model.input.app.BillingMockSyncInDto;
 import cn.nine.pros.post.client.model.input.app.BillingTestOverrideInDto;
 import cn.nine.pros.post.client.model.input.app.PlayPurchaseVerifyInDto;
@@ -37,4 +38,8 @@ public interface AppBillingApi {
     @Operation(summary = "Mock 购买同步（仅 senior-post.billing.mock-enabled 且非 prod）")
     @PostMapping("/mock-sync")
     SubscriptionStatusVO mockSync(@RequestBody @Valid BillingMockSyncInDto body);
+
+    @Operation(summary = "Mock RTDN 回放（仅 senior-post.billing.mock-enabled 且非 prod）")
+    @PostMapping("/mock-rtdn")
+    SubscriptionStatusVO mockReplayRtdn(@RequestBody @Valid BillingMockRtdnInDto body);
 }
