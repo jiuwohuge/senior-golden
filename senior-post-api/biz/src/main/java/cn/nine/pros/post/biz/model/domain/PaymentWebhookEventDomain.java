@@ -1,10 +1,12 @@
 package cn.nine.pros.post.biz.model.domain;
 
 import cn.nine.commons.data.domain.AbstractAuditableDomain;
+import cn.nine.pros.post.biz.support.mybatis.PostgresJsonbTypeHandler;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,14 +16,14 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 
 /**
- * 支付 webhook 幂等事件。
+ * Payment webhook idempotent event.
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@TableName("bu_payment_webhook_event")
+@TableName(value = "bu_payment_webhook_event", autoResultMap = true)
 public class PaymentWebhookEventDomain extends AbstractAuditableDomain {
 
     private static final long serialVersionUID = 1L;
@@ -29,18 +31,23 @@ public class PaymentWebhookEventDomain extends AbstractAuditableDomain {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    @Schema(description = "google_play|apple_app_store|mock")
+    @Schema(description = "google_play / apple_app_store / mock")
     private String provider;
 
-    @Schema(description = "渠道事件/消息 ID")
+    @Schema(description = "external event or message id")
     private String eventIdOrMessageId;
 
     private String eventType;
 
-    @Schema(description = "原始 payload JSON 原文")
+    /**
+     * Raw payload (DB column jsonb). Must use PostgresJsonbTypeHandler
+     * to avoid varchar vs jsonb type mismatch on insert.
+     */
+    @Schema(description = "raw payload JSON")
+    @TableField(value = "payload_json", typeHandler = PostgresJsonbTypeHandler.class)
     private String payloadJson;
 
-    @Schema(description = "received|processed|failed")
+    @Schema(description = "received / processed / failed")
     private String processStatus;
 
     private Integer retryCount;

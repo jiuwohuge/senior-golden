@@ -11,12 +11,13 @@ import java.sql.Types;
 import java.util.Map;
 
 /**
- * PostgreSQL {@code jsonb} 写入适配。
- * <p>{@link JacksonTypeHandler} 默认 {@code setString}，PG 会报
- * {@code column is of type jsonb but expression is of type character varying}。
- * 这里用 {@link Types#OTHER} 让驱动按 jsonb 绑定。
+ * PostgreSQL {@code jsonb} write binder.
+ * <p>{@link JacksonTypeHandler} defaults to {@code setString}; PG then errors with
+ * {@code column is of type jsonb but expression is of type character varying}.
+ * Bind via {@link Types#OTHER}. Plain JSON {@link String} is passed through
+ * (no second encode); objects/maps still go through {@link #toJson(Object)}.
  */
-@MappedTypes({Object.class, Map.class})
+@MappedTypes({Object.class, Map.class, String.class})
 @MappedJdbcTypes(JdbcType.OTHER)
 public class PostgresJsonbTypeHandler extends JacksonTypeHandler {
 
@@ -27,6 +28,10 @@ public class PostgresJsonbTypeHandler extends JacksonTypeHandler {
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, Object parameter, JdbcType jdbcType)
             throws SQLException {
+        if (parameter instanceof String s) {
+            ps.setObject(i, s, Types.OTHER);
+            return;
+        }
         ps.setObject(i, toJson(parameter), Types.OTHER);
     }
 }
