@@ -1,4 +1,4 @@
-package cn.nine.pros.post.biz.model.domain;
+﻿package cn.nine.pros.post.biz.model.domain;
 
 import cn.nine.commons.data.domain.AbstractAuditableDomain;
 import cn.nine.pros.post.biz.support.mybatis.PostgresJsonbTypeHandler;
@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.v3.oas.annotations.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
