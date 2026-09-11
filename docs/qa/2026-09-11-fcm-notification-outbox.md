@@ -1,6 +1,6 @@
 # QA：FCM Notification Outbox（2026-09-11）
 
-**Commit SHA:** *(pending commit — update after push)*
+**Commit SHA:** `a23f017`
 
 ## 范围
 
