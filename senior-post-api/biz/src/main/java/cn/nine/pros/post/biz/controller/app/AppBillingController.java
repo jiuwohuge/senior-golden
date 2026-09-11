@@ -5,6 +5,7 @@ import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
 import cn.nine.pros.post.biz.service.biz.AppBillingBizService;
 import cn.nine.pros.post.client.api.app.AppBillingApi;
+import cn.nine.pros.post.client.model.input.app.BillingMockSyncInDto;
 import cn.nine.pros.post.client.model.input.app.BillingTestOverrideInDto;
 import cn.nine.pros.post.client.model.input.app.PlayPurchaseVerifyInDto;
 import cn.nine.pros.post.client.model.input.app.PlayRestoreInDto;
@@ -37,6 +38,11 @@ public class AppBillingController implements AppBillingApi {
     @Override
     public SubscriptionStatusVO testOverride(BillingTestOverrideInDto body) {
         return appBillingBizService.testOverride(requireUserId(), body);
+    }
+
+    @Override
+    public SubscriptionStatusVO mockSync(BillingMockSyncInDto body) {
+        return appBillingBizService.mockSync(requireUserId(), body);
     }
 
     private Long requireUserId() {

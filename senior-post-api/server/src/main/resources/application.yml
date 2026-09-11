@@ -171,6 +171,9 @@ senior-post:
     # 占位；为空时 verify 仅结构化校验。生产须接 Play Developer API，勿提交真实密钥。
     play-public-key: ${PLAY_PUBLIC_KEY:}
     test-override-enabled: ${BILLING_TEST_OVERRIDE:false}
+  billing:
+    # 非 prod：允许 mock 渠道与 /api/billing/mock-sync；prod/production profile 下强制关闭
+    mock-enabled: ${BILLING_MOCK_ENABLED:false}
 
 jh:
   config:

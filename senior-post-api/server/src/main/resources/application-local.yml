@@ -73,6 +73,8 @@ senior-post:
       android-client-id: ${GOOGLE_ANDROID_CLIENT_ID:}
       ios-client-id: ${GOOGLE_IOS_CLIENT_ID:}
       mock-enabled: true   # local QA; real JWT still works if client-id set
+  billing:
+    mock-enabled: true
   auth:
     password-reset-pepper: ${PASSWORD_RESET_PEPPER:senior-post-local-pepper}
     # TODO(dev): 临时万能验证码，上线前必须删掉或留空

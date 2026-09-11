@@ -1,6 +1,7 @@
 package cn.nine.pros.post.client.api.app;
 
 import cn.nine.pros.post.client.common.constant.AppServiceDefine;
+import cn.nine.pros.post.client.model.input.app.BillingMockSyncInDto;
 import cn.nine.pros.post.client.model.input.app.BillingTestOverrideInDto;
 import cn.nine.pros.post.client.model.input.app.PlayPurchaseVerifyInDto;
 import cn.nine.pros.post.client.model.input.app.PlayRestoreInDto;
@@ -32,4 +33,8 @@ public interface AppBillingApi {
     @Operation(summary = "测试覆盖订阅状态（仅 BILLING_TEST_OVERRIDE=true）")
     @PostMapping("/test-override")
     SubscriptionStatusVO testOverride(@RequestBody @Valid BillingTestOverrideInDto body);
+
+    @Operation(summary = "Mock 购买同步（仅 senior-post.billing.mock-enabled 且非 prod）")
+    @PostMapping("/mock-sync")
+    SubscriptionStatusVO mockSync(@RequestBody @Valid BillingMockSyncInDto body);
 }

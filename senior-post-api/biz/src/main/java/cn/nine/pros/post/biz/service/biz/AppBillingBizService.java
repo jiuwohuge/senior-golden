@@ -1,5 +1,6 @@
 package cn.nine.pros.post.biz.service.biz;
 
+import cn.nine.pros.post.client.model.input.app.BillingMockSyncInDto;
 import cn.nine.pros.post.client.model.input.app.BillingTestOverrideInDto;
 import cn.nine.pros.post.client.model.input.app.PlayPurchaseVerifyInDto;
 import cn.nine.pros.post.client.model.input.app.PlayRestoreInDto;
@@ -17,4 +18,7 @@ public interface AppBillingBizService {
     SubscriptionStatusVO restore(long userId, PlayRestoreInDto body);
 
     SubscriptionStatusVO testOverride(long userId, BillingTestOverrideInDto body);
+
+    /** 本地 mock 同步（需 billing.mock-enabled）。 */
+    SubscriptionStatusVO mockSync(long userId, BillingMockSyncInDto body);
 }

@@ -30,11 +30,17 @@ public class CommerceProductDomain extends AbstractAuditableDomain {
     @Schema(description = "商品编码")
     private String productCode;
 
-    @Schema(description = "商品类型 skin|template|font|attachment|vip_bundle|export")
+    @Schema(description = "商品类型 skin|template|font|attachment|vip_bundle|export|subscription|one_time")
     private String productType;
+
+    @Schema(description = "权益编码，如 plus")
+    private String entitlementCode;
 
     @Schema(description = "标题 i18n key")
     private String titleKey;
+
+    @Schema(description = "描述 i18n key")
+    private String descriptionKey;
 
     @Schema(description = "价格（分）")
     private Integer priceCents;

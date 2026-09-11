@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
         ModerationProperties.class,
         TimeLetterProperties.class,
         PlusBillingProperties.class,
+        BillingProperties.class,
         SchedulerProperties.class
 })
 public class PostBizConfiguration {

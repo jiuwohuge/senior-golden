@@ -45,6 +45,19 @@ public class CommerceProductServiceImpl extends ServiceImpl<CommerceProductMappe
     }
 
     @Override
+    public CommerceProductDomain findByEntitlementCode(String entitlementCode) {
+        if (!StringUtils.hasText(entitlementCode)) {
+            return null;
+        }
+        return getOne(new LambdaQueryWrapper<CommerceProductDomain>()
+                .eq(CommerceProductDomain::getEntitlementCode, entitlementCode.trim())
+                .eq(CommerceProductDomain::getStatus, STATUS_ACTIVE)
+                .eq(CommerceProductDomain::isDelFlag, false)
+                .orderByAsc(CommerceProductDomain::getSortOrder)
+                .last("LIMIT 1"));
+    }
+
+    @Override
     public List<CommerceProductDomain> listAllActive() {
         return list(activeQueryWrapper()
                 .orderByAsc(CommerceProductDomain::getProductType)

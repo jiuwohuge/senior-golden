@@ -34,6 +34,7 @@ public class PlusEntitlementSupport {
     public static final String PRODUCT_YEARLY = "plus_yearly";
 
     public static final String SOURCE_PLAY = "play";
+    public static final String SOURCE_MOCK = "mock";
     public static final String SOURCE_TEST = "test_override";
     public static final String SOURCE_ADMIN = "admin";
     public static final String SOURCE_UNKNOWN = "unknown";

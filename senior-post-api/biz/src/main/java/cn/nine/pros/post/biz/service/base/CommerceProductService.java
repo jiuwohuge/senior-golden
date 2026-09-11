@@ -11,6 +11,9 @@ public interface CommerceProductService extends IService<CommerceProductDomain> 
 
     CommerceProductDomain findByCode(String code);
 
+    /** 按权益码查找上架商品（如 entitlement_code=plus）。 */
+    CommerceProductDomain findByEntitlementCode(String entitlementCode);
+
     List<CommerceProductDomain> listAllActive();
 
     com.baomidou.mybatisplus.extension.plugins.pagination.Page<CommerceProductDomain> pageForAdmin(

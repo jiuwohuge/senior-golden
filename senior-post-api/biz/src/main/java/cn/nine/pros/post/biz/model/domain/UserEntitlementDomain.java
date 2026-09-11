@@ -32,9 +32,27 @@ public class UserEntitlementDomain extends AbstractAuditableDomain {
     @Schema(description = "商品 ID")
     private Long productId;
 
-    @Schema(description = "来源 admin_grant|mock_purchase")
+    @Schema(description = "权益编码，如 plus")
+    private String entitlementCode;
+
+    @Schema(description = "关联购买主单 ID")
+    private Long purchaseId;
+
+    @Schema(description = "关联订阅 ID（bu_subscription）")
+    private Long subscriptionId;
+
+    @Schema(description = "来源 admin_grant|mock_purchase|play|mock")
     private String source;
+
+    @Schema(description = "生效时间")
+    private LocalDateTime effectiveAt;
 
     @Schema(description = "过期时间，null 表示永久")
     private LocalDateTime expiresAt;
+
+    @Schema(description = "撤销时间")
+    private LocalDateTime revokedAt;
+
+    @Schema(description = "active|revoked|expired")
+    private String status;
 }
