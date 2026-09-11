@@ -530,17 +530,17 @@ if ([string]::IsNullOrWhiteSpace($AdminPassword)) {
         if (Assert-BizOk $prodPage "manage products/paging") {
             $prodRecs = @($prodPage.Data.records)
             if ($prodRecs.Count -gt 0) {
-                $pid = $prodRecs[0].id
+                $productId = $prodRecs[0].id
                 $cur = [int]$prodRecs[0].status
                 $target = if ($cur -eq 1) { 0 } else { 1 }
                 $bs1 = Invoke-Api -Method POST -Path "/webapi/commerce/products/batch-status" -Headers $adminHeaders -Body @{
-                    ids = @($pid); status = $target
+                    ids = @($productId); status = $target
                 }
                 $bs2 = Invoke-Api -Method POST -Path "/webapi/commerce/products/batch-status" -Headers $adminHeaders -Body @{
-                    ids = @($pid); status = $cur
+                    ids = @($productId); status = $cur
                 }
                 if (($bs1.Ok -and $bs1.Code -eq 200 -and $bs1.Success) -and ($bs2.Ok -and $bs2.Code -eq 200 -and $bs2.Success)) {
-                    Write-Step "manage products/batch-status" "PASS" "prodId=$pid toggled $cur↔$target restored"
+                    Write-Step "manage products/batch-status" "PASS" "prodId=$productId toggled $cur↔$target restored"
                 } else {
                     Write-Step "manage products/batch-status" "FAIL" "off/on code=$($bs1.Code)/$($bs2.Code) msg=$($bs1.Message)/$($bs2.Message)"
                 }
