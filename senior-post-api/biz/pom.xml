@@ -63,6 +63,12 @@
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
             <version>3.5.16</version>
         </dependency>
+        <!-- MP 3.5.9+ 将分页拦截器拆到独立模块，未引入则 Page#getTotal() 恒为 0 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
+            <version>3.5.16</version>
+        </dependency>
 
         <dependency>
             <groupId>org.mapstruct</groupId>
