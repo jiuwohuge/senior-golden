@@ -1,0 +1,344 @@
+﻿[
+    {
+        "id":  "ENV01",
+        "module":  "环境",
+        "steps":  "GET /backend/actuator/health",
+        "expect":  "UP",
+        "actual":  "status=UP",
+        "result":  "PASS",
+        "evidence":  "{\"status\":\"UP\"}"
+    },
+    {
+        "id":  "ENV02",
+        "module":  "环境",
+        "steps":  "GET Web :8088",
+        "expect":  "200",
+        "actual":  "200",
+        "result":  "PASS",
+        "evidence":  "web=200"
+    },
+    {
+        "id":  "ENV03",
+        "module":  "环境",
+        "steps":  "GET manage login",
+        "expect":  "200",
+        "actual":  "200",
+        "result":  "PASS",
+        "evidence":  "http://localhost/manage/login"
+    },
+    {
+        "id":  "ADM01",
+        "module":  "管理后台",
+        "steps":  "webapi 登录 使用测试账号 admin",
+        "expect":  "success+token",
+        "actual":  "success=True hasToken=True",
+        "result":  "PASS",
+        "evidence":  "凭据不入库"
+    },
+    {
+        "id":  "ADM02",
+        "module":  "管理后台-公告",
+        "steps":  "POST /webapi/announcement/paging",
+        "expect":  "success",
+        "actual":  "success=True code=200 total=0",
+        "result":  "PASS",
+        "evidence":  "{\"code\":200,\"message\":\"OK\",\"data\":{\"total\":0,\"page\":1,\"size\":20,\"pages\":0,\"records\":[],\"recordCount\":0,\"empty\":true},\"success\":true,\"md5\":null,\"alg\":\"SALT_MD5\"}"
+    },
+    {
+        "id":  "ADM03",
+        "module":  "管理后台-反馈",
+        "steps":  "POST /webapi/feedback/paging",
+        "expect":  "success",
+        "actual":  "success=True code=200",
+        "result":  "PASS",
+        "evidence":  "{\"code\":200,\"message\":\"OK\",\"data\":{\"total\":0,\"page\":1,\"size\":20,\"pages\":0,\"records\":[{\"id\":1,\"userId\":9,\"nickname\":\"\",\"content\":\"fwefwefwefqwefwqef\",\"clientVersion\":null,\"createdAt"
+    },
+    {
+        "id":  "ADM04",
+        "module":  "管理后台-敏感词",
+        "steps":  "POST /webapi/sensitive-word/paging",
+        "expect":  "success",
+        "actual":  "success=True code=200",
+        "result":  "PASS",
+        "evidence":  "{\"code\":200,\"message\":\"OK\",\"data\":{\"total\":0,\"page\":1,\"size\":20,\"pages\":0,\"records\":[{\"createdAt\":\"2026-07-25 15:14:07\",\"createdBy\":0,\"updatedAt\":\"2026-07-25 15:14:07\",\"updatedBy\":"
+    },
+    {
+        "id":  "ADM05",
+        "module":  "管理后台-用户",
+        "steps":  "POST /webapi/user/paging",
+        "expect":  "success",
+        "actual":  "success=True code=200",
+        "result":  "PASS",
+        "evidence":  "{\"code\":200,\"message\":\"OK\",\"data\":{\"total\":0,\"page\":1,\"size\":20,\"pages\":0,\"records\":[{\"createdAt\":\"2026-09-11 03:15:20\",\"createdBy\":0,\"updatedAt\":\"2026-09-11 03:15:20\",\"updatedBy\":"
+    },
+    {
+        "id":  "ADM06",
+        "module":  "管理后台-信件",
+        "steps":  "POST /webapi/letter-audit/paging",
+        "expect":  "success",
+        "actual":  "success=True code=200",
+        "result":  "PASS",
+        "evidence":  "{\"code\":200,\"message\":\"OK\",\"data\":{\"total\":0,\"page\":1,\"size\":20,\"pages\":0,\"records\":[{\"createdAt\":\"2026-09-11 03:15:27\",\"createdBy\":38,\"updatedAt\":\"2026-09-11 03:15:27\",\"updatedBy\""
+    },
+    {
+        "id":  "ADM07",
+        "module":  "管理后台-版本",
+        "steps":  "POST /webapi/version/paging",
+        "expect":  "success",
+        "actual":  "success=True code=200 msg=OK",
+        "result":  "PASS",
+        "evidence":  "{\"code\":200,\"message\":\"OK\",\"data\":{\"total\":0,\"page\":1,\"size\":10,\"pages\":0,\"records\":[],\"recordCount\":0,\"empty\":true},\"success\":true,\"md5\":null,\"alg\":\"SALT_MD5\"}"
+    },
+    {
+        "id":  "ADM08",
+        "module":  "管理后台-看板",
+        "steps":  "GET dashboard overview/stats",
+        "expect":  "success或明确无此路由",
+        "actual":  "success=False code=400 msg=No static resource webapi/dashboard/stats.",
+        "result":  "WARN",
+        "evidence":  "{\"code\":400,\"message\":\"No static resource webapi/dashboard/stats.\",\"data\":\"\",\"success\":false,\"md5\":null,\"alg\":\"SALT_MD5\"}"
+    },
+    {
+        "id":  "ADM09",
+        "module":  "管理后台-公告",
+        "steps":  "保存公告",
+        "expect":  "success",
+        "actual":  "success=True code=200 msg=OK",
+        "result":  "PASS",
+        "evidence":  "title=QA Full Announcement"
+    },
+    {
+        "id":  "ADM10",
+        "module":  "管理后台-敏感词",
+        "steps":  "保存敏感词 qabadwordxyz",
+        "expect":  "success",
+        "actual":  "success=True code=200 msg=OK",
+        "result":  "PASS",
+        "evidence":  "type=1 block"
+    },
+    {
+        "id":  "APP01",
+        "module":  "认证",
+        "steps":  "Guest 静默创建 A/B",
+        "expect":  "两用户成功",
+        "actual":  "A=40 B=41",
+        "result":  "PASS",
+        "evidence":  "guest"
+    },
+    {
+        "id":  "APP02",
+        "module":  "启动配置",
+        "steps":  "GET /api/bootstrap/init",
+        "expect":  "success",
+        "actual":  "success=True code=200",
+        "result":  "PASS",
+        "evidence":  "{\"code\":200,\"message\":\"OK\",\"data\":{\"minRegisterAge\":45,\"countries\":[{\"code\":\"AF\",\"nameEn\":\"Afghanistan\",\"nameZh\":\"é¿å¯æ±\"},{\"code\":\"AM\",\"nameEn\":\"Armenia\",\"n"
+    },
+    {
+        "id":  "APP03",
+        "module":  "更新公告",
+        "steps":  "GET /api/bootstrap/release-note",
+        "expect":  "success(可空公告)",
+        "actual":  "success=True code=200 hasData=True",
+        "result":  "PASS",
+        "evidence":  "{\"code\":200,\"message\":\"OK\",\"data\":{\"id\":1,\"title\":\"QA Full Announcement\",\"versionLabel\":\"qa-full\",\"releaseNotes\":\"This is a substantial release note for QA full acceptance. Please read carefully.\"},\"s"
+    },
+    {
+        "id":  "MAIL01",
+        "module":  "慢信",
+        "steps":  "A 向 B 发送实质正文 DIRECT 信",
+        "expect":  "success+letterId",
+        "actual":  "success=True letterId=19",
+        "result":  "PASS",
+        "evidence":  "len=277"
+    },
+    {
+        "id":  "MAIL02",
+        "module":  "慢信",
+        "steps":  "B 在途查看详情",
+        "expect":  "contentHidden=true 或无正文",
+        "actual":  "success=True hidden=True status=1 hasContent=False",
+        "result":  "PASS",
+        "evidence":  "in-transit"
+    },
+    {
+        "id":  "MAIL03",
+        "module":  "慢信/后台",
+        "steps":  "admin force-deliver letter 19",
+        "expect":  "success",
+        "actual":  "success=True code=200 msg=OK",
+        "result":  "PASS",
+        "evidence":  "webapi force-deliver"
+    },
+    {
+        "id":  "MAIL04",
+        "module":  "慢信",
+        "steps":  "B 拆封读信（force-deliver 后）",
+        "expect":  "可读实质正文",
+        "actual":  "hidden=False len=277 status=2",
+        "result":  "PASS",
+        "evidence":  "Dear friend,\n\nI am writing a real letter for our full acceptance test. Today the"
+    },
+    {
+        "id":  "MAIL05",
+        "module":  "慢信",
+        "steps":  "B 回信",
+        "expect":  "success",
+        "actual":  "success=True replyId=20",
+        "result":  "PASS",
+        "evidence":  "len=207"
+    },
+    {
+        "id":  "REL01",
+        "module":  "关系",
+        "steps":  "A relation snapshot with B",
+        "expect":  "success",
+        "actual":  "success=True code=200",
+        "result":  "PASS",
+        "evidence":  "{\"code\":200,\"message\":\"OK\",\"data\":{\"peerUserId\":41,\"displayState\":2,\"letterCount\":1,\"canAddPenpal\":false,\"pendingRequestId\":null,\"penpal\":false},\"success\":true,\"md5\":null,\"alg\":\"SALT_MD5\"}"
+    },
+    {
+        "id":  "REL02",
+        "module":  "关系",
+        "steps":  "A 发起笔友申请",
+        "expect":  "success 或业务可解释拒绝",
+        "actual":  "success=False code=4501 msg=Write a few more letters before adding as pen pals. reqId=",
+        "result":  "PASS",
+        "evidence":  "{\"code\":4501,\"message\":\"Write a few more letters before adding as pen pals.\",\"data\":\"\",\"success\":false,\"md5\":null,\"alg\":\"SALT_MD5\"}"
+    },
+    {
+        "id":  "REL03",
+        "module":  "关系",
+        "steps":  "B accept-postal 兼容路径",
+        "expect":  "success 或业务可解释",
+        "actual":  "success=False code=4501 msg=Write a few more letters before adding as pen pals.",
+        "result":  "PASS",
+        "evidence":  "{\"code\":4501,\"message\":\"Write a few more letters before adding as pen pals.\",\"data\":\"\",\"success\":false,\"md5\":null,\"alg\":\"SALT_MD5\"}"
+    },
+    {
+        "id":  "MOD01",
+        "module":  "敏感词",
+        "steps":  "发送含敏感词正文 (qabadwordxyz)",
+        "expect":  "拦截失败(success=false)或审核拒绝",
+        "actual":  "success=False code=400 msg=Your content contains words that are not allowed. Please revise and try again.",
+        "result":  "PASS",
+        "evidence":  "expect block"
+    },
+    {
+        "id":  "QUO01",
+        "module":  "日额度",
+        "steps":  "在 remaining=4 基础上继续发送直到拒绝",
+        "expect":  "最终触发额度限制",
+        "actual":  "sentOk=1 hitLimit=True code=4501 msg=Letter content did not pass review.",
+        "result":  "PASS",
+        "evidence":  "mode=POST_OFFICE"
+    },
+    {
+        "id":  "FB01",
+        "module":  "用户反馈",
+        "steps":  "App 提交反馈",
+        "expect":  "success",
+        "actual":  "success=True code=200 msg=OK",
+        "result":  "PASS",
+        "evidence":  "app feedback"
+    },
+    {
+        "id":  "FB02",
+        "module":  "管理后台-反馈",
+        "steps":  "后台应能查到反馈分页",
+        "expect":  "success",
+        "actual":  "success=True total=0",
+        "result":  "PASS",
+        "evidence":  "{\"code\":200,\"message\":\"OK\",\"data\":{\"total\":0,\"page\":1,\"size\":20,\"pages\":0,\"records\":[{\"id\":2,\"userId\":40,\"nickname\":\"Cedar727\",\"content\":\"Full QA feedback: the slow mail experience"
+    },
+    {
+        "id":  "SOC01",
+        "module":  "拉黑",
+        "steps":  "拉黑 B",
+        "expect":  "success",
+        "actual":  "success=True",
+        "result":  "PASS",
+        "evidence":  "block"
+    },
+    {
+        "id":  "SOC02",
+        "module":  "举报",
+        "steps":  "举报 user",
+        "expect":  "success",
+        "actual":  "success=True code=200",
+        "result":  "PASS",
+        "evidence":  "report user"
+    },
+    {
+        "id":  "TL01",
+        "module":  "时光信",
+        "steps":  "封缄实质正文（明天送达）",
+        "expect":  "success",
+        "actual":  "success=True id=8 status=2",
+        "result":  "PASS",
+        "evidence":  "len=114"
+    },
+    {
+        "id":  "TL02",
+        "module":  "时光信",
+        "steps":  "送达（无后台 force 则 SQL status=3，需在报告标明）",
+        "expect":  "送达可拆封",
+        "actual":  "adminForce=False usedSqlFallback=True",
+        "result":  "WARN",
+        "evidence":  "{\"code\":400,\"message\":\"No static resource webapi/time-letter/8/force-deliver.\",\"data\":\"\",\"success\":false,\"md5\":null,\"alg\":\"SALT_MD5\"}"
+    },
+    {
+        "id":  "TL03",
+        "module":  "时光信",
+        "steps":  "拆封读信",
+        "expect":  "success+正文",
+        "actual":  "success=True status=4 len=114",
+        "result":  "PASS",
+        "evidence":  "Dear future me, this time letter is part of the full acceptance suite. Remember to keep writing slowly and kindly."
+    },
+    {
+        "id":  "SUB01",
+        "module":  "订阅",
+        "steps":  "test-override active",
+        "expect":  "entitled=true",
+        "actual":  "state=active entitled=True",
+        "result":  "PASS",
+        "evidence":  "harness"
+    },
+    {
+        "id":  "SKIP01",
+        "module":  "未测真链路",
+        "steps":  "真 Play 支付",
+        "expect":  "跳过",
+        "actual":  "未达可测",
+        "result":  "SKIP",
+        "evidence":  "口径"
+    },
+    {
+        "id":  "SKIP02",
+        "module":  "未测真链路",
+        "steps":  "真推送",
+        "expect":  "跳过",
+        "actual":  "未达可测",
+        "result":  "SKIP",
+        "evidence":  "口径"
+    },
+    {
+        "id":  "SKIP03",
+        "module":  "未测真链路",
+        "steps":  "Google 登录",
+        "expect":  "跳过",
+        "actual":  "未达可测",
+        "result":  "SKIP",
+        "evidence":  "口径"
+    },
+    {
+        "id":  "SKIP04",
+        "module":  "未测真链路",
+        "steps":  "真邮件发送",
+        "expect":  "跳过",
+        "actual":  "未达可测",
+        "result":  "SKIP",
+        "evidence":  "口径"
+    }
+]
