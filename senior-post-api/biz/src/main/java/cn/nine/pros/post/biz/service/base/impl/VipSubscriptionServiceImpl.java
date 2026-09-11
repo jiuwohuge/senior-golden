@@ -164,6 +164,7 @@ public class VipSubscriptionServiceImpl extends ServiceImpl<VipSubscriptionMappe
                 .eq(VipSubscriptionDomain::getId, subscriptionId)
                 .eq(VipSubscriptionDomain::isDelFlag, false)
                 .set(VipSubscriptionDomain::getStatus, STATUS_EXPIRED)
+                .set(VipSubscriptionDomain::getEndAt, now.minusMinutes(1))
                 .set(VipSubscriptionDomain::getUpdatedAt, now)
                 .set(VipSubscriptionDomain::getUpdatedBy, actorId));
     }

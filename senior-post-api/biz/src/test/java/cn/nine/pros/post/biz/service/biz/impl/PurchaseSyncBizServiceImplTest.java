@@ -171,7 +171,6 @@ class PurchaseSyncBizServiceImplTest {
             return row;
         });
         when(vipSubscriptionService.findByPurchaseToken(token)).thenReturn(null);
-        when(vipSubscriptionService.findLatestActiveForUser(USER_ID)).thenReturn(null);
 
         syncBiz.syncPurchase(BillingProviders.MOCK, token, USER_ID,
                 SyncPurchaseContext.of(PlusEntitlementSupport.PRODUCT_YEARLY, null, null, null, null));
@@ -183,6 +182,7 @@ class PurchaseSyncBizServiceImplTest {
                 anyLong(), anyString(), anyString(), any(), any(), anyBoolean(),
                 anyString(), any(), any(), any(Integer.class), any(), anyLong());
         verify(vipSubscriptionService, never()).markExpired(anyLong(), anyLong());
+        verify(vipSubscriptionService).expireActiveForUser(USER_ID, USER_ID);
         verify(userEntitlementService).revokeEntitlementByCode(USER_ID, "plus", USER_ID);
         verify(userService).syncVipEntitlement(eq(USER_ID), eq(false), any(), eq(USER_ID));
     }
@@ -212,7 +212,6 @@ class PurchaseSyncBizServiceImplTest {
         existingActive.setStatus(1);
         existingActive.setEndAt(end);
         when(vipSubscriptionService.findByPurchaseToken(token)).thenReturn(existingActive);
-        when(vipSubscriptionService.findLatestActiveForUser(USER_ID)).thenReturn(null);
 
         syncBiz.syncPurchase(BillingProviders.MOCK, token, USER_ID,
                 SyncPurchaseContext.of(PlusEntitlementSupport.PRODUCT_YEARLY, null, null, null, null));
@@ -220,11 +219,46 @@ class PurchaseSyncBizServiceImplTest {
         verify(userEntitlementService, never()).grantEntitlement(
                 anyLong(), anyString(), any(), any(), any(), anyString(), any(), any(), anyLong());
         verify(vipSubscriptionService).markExpired(50L, USER_ID);
+        verify(vipSubscriptionService).expireActiveForUser(USER_ID, USER_ID);
         verify(vipSubscriptionService, never()).upsertSubscription(
                 anyLong(), anyString(), anyString(), any(), any(), anyBoolean(),
                 anyString(), any(), any(), any(Integer.class), any(), anyLong());
+        verify(vipSubscriptionService, never()).findLatestActiveForUser(anyLong());
         verify(userEntitlementService).revokeEntitlementByCode(USER_ID, "plus", USER_ID);
         verify(userService).syncVipEntitlement(eq(USER_ID), eq(false), any(), eq(USER_ID));
+        verify(userService, never()).syncVipEntitlement(eq(USER_ID), eq(true), any(), anyLong());
+    }
+
+    @Test
+    void pendingAfterLeftoverActiveVip_neverRegrants() {
+        String token = "mock:plus_yearly:PENDING:leftover-token-miss";
+        LocalDateTime now = LocalDateTime.now();
+        stubVerify(token, "pending", "pending", now, null, true, false, "PENDING");
+        when(paymentPurchaseService.findByTokenHash(anyString())).thenReturn(null);
+        when(paymentPurchaseService.upsertByTokenHash(any(), eq(USER_ID))).thenAnswer(inv -> {
+            PaymentPurchaseDomain row = inv.getArgument(0);
+            row.setId(1L);
+            return row;
+        });
+        when(paymentSubscriptionService.upsertByTokenHash(any(), eq(USER_ID))).thenAnswer(inv -> {
+            PaymentSubscriptionDomain row = inv.getArgument(0);
+            row.setId(2L);
+            return row;
+        });
+        // token lookup miss — leftover ACTIVE VIP must still be hard-cleared, never re-granted
+        when(vipSubscriptionService.findByPurchaseToken(token)).thenReturn(null);
+
+        syncBiz.syncPurchase(BillingProviders.MOCK, token, USER_ID,
+                SyncPurchaseContext.of(PlusEntitlementSupport.PRODUCT_YEARLY, null, null, null, null));
+
+        verify(userEntitlementService, never()).grantEntitlement(
+                anyLong(), anyString(), any(), any(), any(), anyString(), any(), any(), anyLong());
+        verify(vipSubscriptionService, never()).markExpired(anyLong(), anyLong());
+        verify(vipSubscriptionService).expireActiveForUser(USER_ID, USER_ID);
+        verify(vipSubscriptionService, never()).findLatestActiveForUser(anyLong());
+        verify(userEntitlementService).revokeEntitlementByCode(USER_ID, "plus", USER_ID);
+        verify(userService).syncVipEntitlement(eq(USER_ID), eq(false), any(), eq(USER_ID));
+        verify(userService, never()).syncVipEntitlement(eq(USER_ID), eq(true), any(), anyLong());
     }
 
     @Test

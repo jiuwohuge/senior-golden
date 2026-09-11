@@ -285,17 +285,20 @@ public class PurchaseSyncBizServiceImpl implements PurchaseSyncBizService {
     }
 
     /**
-     * PENDING：不授予权益；若同 token 已有 VIP 镜像则过期；撤销 plus 后按剩余有效订阅恢复或清空 bu_user VIP。
+     * PENDING hard-clear: expire this token VIP, expire all ACTIVE VIP for user,
+     * revoke entitlement by code, syncVipEntitlement(false). Do NOT re-grant from remaining VIP.
      */
     private void handlePendingEntitlementAndVip(
             long userId, String entitlementCode, String rawToken, LocalDateTime now) {
         expireVipForPurchaseToken(userId, rawToken);
+        vipSubscriptionService.expireActiveForUser(userId, userId);
         userEntitlementService.revokeEntitlementByCode(userId, entitlementCode, userId);
-        log.info("entitlement revoked for pending purchase, userId={}, code={}", userId, entitlementCode);
-        syncVipFromRemainingActiveSubscription(userId, entitlementCode, now);
+        LocalDateTime clearedEnd = now.minusMinutes(1);
+        userService.syncVipEntitlement(userId, false, clearedEnd, userId);
+        log.info("entitlement hard-cleared for pending purchase, userId={}, code={}", userId, entitlementCode);
     }
 
-    /** 仅当 purchaseToken 已有 VIP 行时标过期，不为纯 PENDING 用户新建行。 */
+    /** Expire VIP row for purchaseToken if present; do not create a row for bare PENDING. */
     private void expireVipForPurchaseToken(long userId, String rawToken) {
         VipSubscriptionDomain tokenSub = vipSubscriptionService.findByPurchaseToken(rawToken);
         if (tokenSub == null || tokenSub.getId() == null) {
@@ -306,43 +309,6 @@ public class PurchaseSyncBizServiceImpl implements PurchaseSyncBizService {
         vipSubscriptionService.markExpired(tokenSub.getId(), userId);
         log.info("vip mirror expired for pending token, userId={}, subscriptionId={}",
                 userId, tokenSub.getId());
-    }
-
-    /** 撤销 pending token 后，若仍有其它有效 VIP 则恢复权益，否则清空 bu_user VIP。 */
-    private void syncVipFromRemainingActiveSubscription(
-            long userId, String entitlementCode, LocalDateTime now) {
-        VipSubscriptionDomain active = vipSubscriptionService.findLatestActiveForUser(userId);
-        if (active == null) {
-            LocalDateTime clearedEnd = now.minusMinutes(1);
-            userService.syncVipEntitlement(userId, false, clearedEnd, userId);
-            log.info("vip sync cleared after pending, userId={}", userId);
-            return;
-        }
-        LocalDateTime endAt = PlusEntitlementSupport.toLocalDateTime(active.getEndAt());
-        LocalDateTime startAt = PlusEntitlementSupport.toLocalDateTime(active.getStartAt());
-        String source = active.getSource() != null ? active.getSource().trim() : PlusEntitlementSupport.SOURCE_UNKNOWN;
-        Long productDbId = resolveProductDbId(active.getProductId());
-        userEntitlementService.grantEntitlement(
-                userId,
-                entitlementCode,
-                productDbId,
-                null,
-                null,
-                source,
-                startAt != null ? startAt : now,
-                endAt,
-                userId);
-        userService.syncVipEntitlement(userId, true, endAt, userId);
-        log.info("vip sync restored from remaining active subscription, userId={}, subscriptionId={}",
-                userId, active.getId());
-    }
-
-    private Long resolveProductDbId(String storeProductId) {
-        if (!StringUtils.hasText(storeProductId)) {
-            return null;
-        }
-        CommerceProductDomain product = commerceProductService.findByCode(storeProductId.trim());
-        return product != null ? product.getId() : null;
     }
 
     private void mirrorVip(
