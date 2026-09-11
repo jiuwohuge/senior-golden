@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
         TimeLetterProperties.class,
         PlusBillingProperties.class,
         BillingProperties.class,
+        PushProperties.class,
         SchedulerProperties.class
 })
 public class PostBizConfiguration {

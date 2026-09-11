@@ -23,6 +23,7 @@ import cn.nine.pros.post.biz.service.base.ActionService;
 import cn.nine.pros.post.biz.service.base.FriendshipService;
 import cn.nine.pros.post.biz.service.base.LoginService;
 import cn.nine.pros.post.biz.service.base.OssDisplayUrlService;
+import cn.nine.pros.post.biz.service.base.PushEndpointService;
 import cn.nine.pros.post.biz.service.base.TagService;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.base.UserIdentityService;
@@ -81,6 +82,7 @@ public class AppAuthService {
     private final UserService userService;
     private final UserIdentityService userIdentityService;
     private final UserDeviceService userDeviceService;
+    private final PushEndpointService pushEndpointService;
     private final PasswordEncoder passwordEncoder;
     private final AppJwtService appJwtService;
     private final OssDisplayUrlService ossDisplayUrlService;
@@ -299,12 +301,21 @@ public class AppAuthService {
     /**
      * 退出当前会话：只清客户端 Token。设备与 user 的对应保留，
      * 随后 guest /「先逛逛」仍回到该 deviceUuid 的原账号（绑定后亦然）。
+     * <p>同时解绑当前设备的推送端点（enabled=false / invalidate），避免登出后仍收到推送。
      */
     @Transactional(rollbackFor = Exception.class)
     public void logout() {
         Long uid = MyRequestContextHolder.userId();
         if (uid == null) {
             return;
+        }
+        String equipmentId = null;
+        var ctx = MyRequestContextHolder.getContext();
+        if (ctx != null && StringUtils.hasText(ctx.getEquipmentId())) {
+            equipmentId = ctx.getEquipmentId().trim();
+        }
+        if (equipmentId != null) {
+            pushEndpointService.unbindByUserAndDevice(uid, equipmentId);
         }
         log.info("logout session kept for device re-guest, userId={}", uid);
     }

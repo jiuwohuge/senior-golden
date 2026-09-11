@@ -84,6 +84,8 @@ services:
       BILLING_TEST_OVERRIDE: ${BILLING_TEST_OVERRIDE:-true}
       # 非 prod mock 购买同步（/api/billing/mock-sync）；生产务必 false
       BILLING_MOCK_ENABLED: ${BILLING_MOCK_ENABLED:-true}
+      # 非 prod mock 推送入队（/api/push/mock-enqueue）；生产务必 false
+      PUSH_MOCK_ENABLED: ${PUSH_MOCK_ENABLED:-true}
       PLAY_PACKAGE_NAME: ${PLAY_PACKAGE_NAME:-cn.nine.pros.seniorpost}
       PLAY_PUBLIC_KEY: ${PLAY_PUBLIC_KEY:-}
     depends_on:

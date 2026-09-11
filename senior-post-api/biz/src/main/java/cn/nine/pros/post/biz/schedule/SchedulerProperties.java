@@ -18,7 +18,7 @@ public class SchedulerProperties {
     private JobConfig postOfficeMatch = JobConfig.enabled(20_000L, 200);
     private JobConfig standardLetterDelivery = JobConfig.enabled(30_000L, 200);
     private JobConfig timeLetterDelivery = JobConfig.enabled(60_000L, 200);
-    private JobConfig notificationOutbox = JobConfig.disabled(60_000L);
+    private JobConfig notificationOutbox = JobConfig.disabledWithBatch(60_000L, 50);
     private JobConfig billingEventRetry = JobConfig.disabled(60_000L);
     private JobConfig billingReconciliation = JobConfig.disabled(60_000L);
     private JobConfig pushEndpointCleanup = JobConfig.disabled(60_000L);
@@ -53,6 +53,12 @@ public class SchedulerProperties {
             JobConfig c = new JobConfig();
             c.enabled = false;
             c.fixedDelayMs = fixedDelayMs;
+            return c;
+        }
+
+        static JobConfig disabledWithBatch(long fixedDelayMs, int batchSize) {
+            JobConfig c = disabled(fixedDelayMs);
+            c.batchSize = batchSize;
             return c;
         }
     }

@@ -75,6 +75,8 @@ senior-post:
       mock-enabled: true   # local QA; real JWT still works if client-id set
   billing:
     mock-enabled: true
+  push:
+    mock-enabled: true
   auth:
     password-reset-pepper: ${PASSWORD_RESET_PEPPER:senior-post-local-pepper}
     # TODO(dev): 临时万能验证码，上线前必须删掉或留空
@@ -96,3 +98,8 @@ senior-post:
       model: ${SPRING_AI_DEEPSEEK_MODEL:deepseek-v4-flash}
       connect-timeout-ms: 10000
       read-timeout-ms: 60000
+  scheduler:
+    notification-outbox:
+      enabled: true
+      fixed-delay-ms: 60000
+      batch-size: 50

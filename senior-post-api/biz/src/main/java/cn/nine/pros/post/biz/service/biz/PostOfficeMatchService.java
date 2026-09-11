@@ -11,6 +11,8 @@ import cn.nine.pros.post.biz.service.biz.support.DeliveryDelayCalculator;
 import cn.nine.pros.post.biz.service.biz.support.MatchFeatureExtractionService;
 import cn.nine.pros.post.biz.service.biz.support.MatchScoringSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserPreferenceSupport;
+import cn.nine.pros.post.biz.service.push.NotificationEnqueueService;
+import cn.nine.pros.post.biz.service.push.NotificationEventTypes;
 import cn.nine.pros.post.client.common.enums.LetterAuditStatus;
 import cn.nine.pros.post.client.model.db.UserDTO;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,7 @@ public class PostOfficeMatchService {
     private final MatchScoringSupport matchScoringSupport;
     private final MatchFeatureExtractionService matchFeatureExtractionService;
     private final UserPreferenceSupport userPreferenceSupport;
+    private final NotificationEnqueueService notificationEnqueueService;
 
     /**
      * 自动放行超时 PENDING_REVIEW，再 drain 匹配池一批。
@@ -127,6 +130,11 @@ public class PostOfficeMatchService {
         LocalDateTime eta = deliveryDelayCalculator.expectedArrival(now, sender, recipient);
         boolean started = letterService.startDeliveringAfterMatch(fresh.getId(), eta, now);
         if (started) {
+            // 同事务写入在途推送 Outbox；dedupe 防双入队
+            notificationEnqueueService.enqueueLetterEvent(
+                    NotificationEventTypes.LETTER_MATCHED_IN_TRANSIT,
+                    fresh.getId(),
+                    recipientId);
             log.info("POST_OFFICE matched, letterId={}, from={}, to={}, eta={}",
                     fresh.getId(), fresh.getFromUserId(), recipientId, eta);
         }

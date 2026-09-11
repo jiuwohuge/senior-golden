@@ -4,6 +4,7 @@ import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.basic.exception.BadRequestException;
 import cn.nine.commons.basic.exception.unchecked.BusinessException;
 import cn.nine.pros.post.biz.i18n.AppMessages;
+import cn.nine.pros.post.biz.service.base.PushEndpointService;
 import cn.nine.pros.post.biz.service.base.UserDeviceService;
 import cn.nine.pros.post.biz.service.biz.AppDeviceBizService;
 import cn.nine.pros.post.client.model.input.app.DevicePushTokenInDto;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 public class AppDeviceBizServiceImpl implements AppDeviceBizService {
 
     private final UserDeviceService userDeviceService;
+    private final PushEndpointService pushEndpointService;
     private final AppMessages appMessages;
 
     @Override
@@ -33,7 +35,10 @@ public class AppDeviceBizServiceImpl implements AppDeviceBizService {
         }
         String deviceUuid = resolveDeviceUuid();
         boolean enabled = body.getEnabled() == null || Boolean.TRUE.equals(body.getEnabled());
-        userDeviceService.upsertPushToken(userId, deviceUuid, platform, body.getToken().trim(), enabled);
+        String token = body.getToken().trim();
+        userDeviceService.upsertPushToken(userId, deviceUuid, platform, token, enabled);
+        // 同事务 upsert 推送端点，供 Outbox 派发
+        pushEndpointService.upsertEndpoint(userId, deviceUuid, platform, token, enabled);
         log.info("push token registered, userId={}, platform={}, enabled={}", userId, platform, enabled);
     }
 

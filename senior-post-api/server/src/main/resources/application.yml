@@ -143,6 +143,7 @@ senior-post:
     notification-outbox:
       enabled: false
       fixed-delay-ms: 60000
+      batch-size: 50
     billing-event-retry:
       enabled: false
       fixed-delay-ms: 60000
@@ -174,6 +175,10 @@ senior-post:
   billing:
     # 非 prod：允许 mock 渠道与 /api/billing/mock-sync；prod/production profile 下强制关闭
     mock-enabled: ${BILLING_MOCK_ENABLED:false}
+  push:
+    # 非 prod：允许 MockFcmSender 与 /api/push/mock-enqueue；prod/production 强制关闭
+    mock-enabled: ${PUSH_MOCK_ENABLED:false}
+    fcm-credentials-path: ${FCM_CREDENTIALS_PATH:}
 
 jh:
   config:

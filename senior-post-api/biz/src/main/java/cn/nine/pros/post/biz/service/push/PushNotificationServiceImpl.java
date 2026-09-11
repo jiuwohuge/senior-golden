@@ -14,6 +14,9 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 推送通知门面：信件送达走 Outbox；其余事件暂为日志 no-op。
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,12 +33,28 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     private final ConfigService configService;
     private final UserPreferenceService userPreferenceService;
     private final UserDeviceService userDeviceService;
+    private final NotificationEnqueueService notificationEnqueueService;
 
+    /**
+     * 信件送达：同步入队 {@code letter_arrived}（去掉 @Async，与投递事务同路径可调）。
+     * StandardLetterDeliveryService / AdminLetterAuditBizService 共用此入口。
+     */
     @Override
-    @Async
     public void notifyLetterDelivered(long recipientUserId, long letterId) {
-        dispatch(recipientUserId, PREF_LETTER_DELIVERED,
-                "letter_delivered", "New letter arrived", Map.of("letterId", letterId));
+        if (!configService.getBoolean(KEY_PUSH_ENABLED, true)) {
+            log.debug("push letter_arrived skipped (disabled), userId={}, letterId={}",
+                    recipientUserId, letterId);
+            return;
+        }
+        if (!notificationAllowed(recipientUserId, PREF_LETTER_DELIVERED)) {
+            log.debug("push letter_arrived skipped (user pref), userId={}, letterId={}",
+                    recipientUserId, letterId);
+            return;
+        }
+        long outboxId = notificationEnqueueService.enqueueLetterEvent(
+                NotificationEventTypes.LETTER_ARRIVED, letterId, recipientUserId);
+        log.info("push letter_arrived enqueued, outboxId={}, letterId={}, recipient={}",
+                outboxId, letterId, recipientUserId);
     }
 
     @Override
