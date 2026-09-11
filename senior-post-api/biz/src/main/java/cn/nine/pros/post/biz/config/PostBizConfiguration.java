@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties({
         OssProperties.class,
         SeniorPostAuthProperties.class,
+        GoogleOAuthProperties.class,
         ModerationProperties.class,
         TimeLetterProperties.class,
         PlusBillingProperties.class,

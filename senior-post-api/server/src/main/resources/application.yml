@@ -73,7 +73,15 @@ senior-post:
     debug-master-code: ${AUTH_DEBUG_MASTER_CODE:}
   oauth:
     google:
+      # Web OAuth client ID (aud). Env GOOGLE_WEB_CLIENT_ID — never commit secrets.
       client-id: ${GOOGLE_WEB_CLIENT_ID:}
+      # Optional native audiences for multi-aud verify
+      android-client-id: ${GOOGLE_ANDROID_CLIENT_ID:}
+      ios-client-id: ${GOOGLE_IOS_CLIENT_ID:}
+      # Or list form; merged with the three keys above
+      # client-ids: []
+      # Non-prod only: accept mock-google:<sub>[:<email>] when true; ignored if profile is prod/production
+      mock-enabled: false
   mail:
     # 配置 spring.mail.host 后发送真实邮件；未配置时验证码仅写入服务端日志（WARN）
     from: ${SENIOR_POST_MAIL_FROM:}

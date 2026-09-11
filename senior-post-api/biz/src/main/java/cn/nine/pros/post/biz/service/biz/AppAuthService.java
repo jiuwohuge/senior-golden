@@ -13,9 +13,9 @@ import cn.nine.pros.post.biz.model.domain.UserIdentityDomain;
 import cn.nine.pros.post.biz.service.biz.support.AppAuthProfileSupport;
 import cn.nine.pros.post.biz.service.biz.support.GeoIpLookup;
 import cn.nine.pros.post.biz.service.biz.support.GuestProfileSupport;
-import cn.nine.pros.post.biz.service.biz.support.GoogleIdTokenVerifierService;
-import cn.nine.pros.post.biz.service.biz.support.GoogleIdTokenVerifierService.VerifiedGoogleIdentity;
 import cn.nine.pros.post.biz.service.biz.support.LoginRiskEvaluator;
+import cn.nine.pros.post.biz.service.biz.support.oauth.ExternalIdentityVerifier;
+import cn.nine.pros.post.biz.service.biz.support.oauth.VerifiedExternalIdentity;
 import cn.nine.pros.post.biz.service.biz.support.OssReadableKeyValidator;
 import cn.nine.pros.post.biz.service.biz.support.UserAvatarAuditSupport;
 import cn.nine.pros.post.biz.service.biz.support.UserInterestAssembler;
@@ -91,7 +91,7 @@ public class AppAuthService {
     private final UserInterestAssembler userInterestAssembler;
     private final FriendshipService friendshipService;
     private final AppMessages appMessages;
-    private final GoogleIdTokenVerifierService googleIdTokenVerifierService;
+    private final ExternalIdentityVerifier externalIdentityVerifier;
     private final LoginService loginService;
     private final GeoIpService geoIpService;
     private final EmailVerifyService emailVerifyService;
@@ -348,7 +348,7 @@ public class AppAuthService {
     public AppAuthResultVO bindGoogle(AppBindGoogleInDto body) {
         Long uid = requireLoginUserId();
         assertGuestCanBind(uid);
-        VerifiedGoogleIdentity google = googleIdTokenVerifierService.verify(body.getIdToken());
+        VerifiedExternalIdentity google = externalIdentityVerifier.verify(body.getIdToken());
         assertGoogleNotTakenByOther(uid, google);
         applyGoogleBind(uid, google);
         UserDTO dto = userService.findById(uid);
@@ -394,9 +394,9 @@ public class AppAuthService {
     }
 
     /** Google openId 或附带邮箱被其他<strong>未删除</strong>账号占用时拒绝。 */
-    private void assertGoogleNotTakenByOther(long uid, VerifiedGoogleIdentity google) {
+    private void assertGoogleNotTakenByOther(long uid, VerifiedExternalIdentity google) {
         UserIdentityDomain existingGoogle = userIdentityService.findActiveByProviderUid(
-                AuthProvider.GOOGLE, google.sub());
+                AuthProvider.GOOGLE, google.subject());
         Long googleOwner = liveIdentityOwner(existingGoogle);
         if (googleOwner == null) {
             releaseStaleIdentityIfOwnerDeleted(existingGoogle);
@@ -442,9 +442,9 @@ public class AppAuthService {
     /**
      * 本账号已是该 Google 则幂等返回；否则释放旧身份后挂上 Google（及可选邮箱）。
      */
-    private void applyGoogleBind(long uid, VerifiedGoogleIdentity google) {
+    private void applyGoogleBind(long uid, VerifiedExternalIdentity google) {
         UserIdentityDomain existingGoogle = userIdentityService.findActiveByProviderUid(
-                AuthProvider.GOOGLE, google.sub());
+                AuthProvider.GOOGLE, google.subject());
         if (existingGoogle != null && Objects.equals(existingGoogle.getUserId(), uid)) {
             log.info("google already bound to this user, userId={}", uid);
             return;
@@ -453,7 +453,7 @@ public class AppAuthService {
             userIdentityService.releaseAllForUser(uid, LocalDateTime.now());
             log.info("identities released for rebind google, userId={}", uid);
         }
-        userIdentityService.createOAuthIdentity(uid, AuthProvider.GOOGLE, google.sub(), uid);
+        userIdentityService.createOAuthIdentity(uid, AuthProvider.GOOGLE, google.subject(), uid);
         if (!StringUtils.hasText(google.email())) {
             log.info("google bound to user, userId={}", uid);
             return;
@@ -621,7 +621,7 @@ public class AppAuthService {
      */
     @Transactional(rollbackFor = Exception.class)
     public AppAuthResultVO loginWithGoogle(AppGoogleLoginInDto body) {
-        VerifiedGoogleIdentity google = googleIdTokenVerifierService.verify(body.getIdToken());
+        VerifiedExternalIdentity google = externalIdentityVerifier.verify(body.getIdToken());
         long userId = resolveOrCreateGoogleUserId(google);
 
         finalizeAccountDeletionIfCooldownElapsed(userId);
@@ -810,8 +810,9 @@ public class AppAuthService {
      * 解析或创建 Google 登录对应用户：已有 Google 身份 → 邮箱关联并挂 Google → 新建壳用户。
      * 身份若挂在已逻辑删除用户上，先释放再按新用户处理。
      */
-    private long resolveOrCreateGoogleUserId(VerifiedGoogleIdentity google) {
-        UserIdentityDomain existing = userIdentityService.findActiveByProviderUid(AuthProvider.GOOGLE, google.sub());
+    private long resolveOrCreateGoogleUserId(VerifiedExternalIdentity google) {
+        UserIdentityDomain existing = userIdentityService.findActiveByProviderUid(
+                AuthProvider.GOOGLE, google.subject());
         Long liveUserId = liveIdentityOwner(existing);
         if (liveUserId != null) {
             return liveUserId;
@@ -824,14 +825,15 @@ public class AppAuthService {
     }
 
     /** 用 Google 邮箱关联已有<strong>未删除</strong>账号并写入 OAuth 身份；无邮箱身份则新建壳用户。 */
-    private long linkGoogleToEmailOrCreateShell(VerifiedGoogleIdentity google) {
+    private long linkGoogleToEmailOrCreateShell(VerifiedExternalIdentity google) {
         UserIdentityDomain emailIdent = userIdentityService.findActiveEmailByUid(google.email());
         Long liveUserId = liveIdentityOwner(emailIdent);
         if (liveUserId == null) {
             releaseStaleIdentityIfOwnerDeleted(emailIdent);
             return createGoogleShellUser(google);
         }
-        userIdentityService.createOAuthIdentity(liveUserId, AuthProvider.GOOGLE, google.sub(), liveUserId);
+        userIdentityService.createOAuthIdentity(
+                liveUserId, AuthProvider.GOOGLE, google.subject(), liveUserId);
         return liveUserId;
     }
 
@@ -856,7 +858,7 @@ public class AppAuthService {
         userIdentityService.releaseAllForUser(ident.getUserId(), LocalDateTime.now());
     }
 
-    private long createGoogleShellUser(VerifiedGoogleIdentity google) {
+    private long createGoogleShellUser(VerifiedExternalIdentity google) {
         String nick = resolveGoogleNickname(google);
         LocalDateTime now = LocalDateTime.now();
         UserDomain user = new UserDomain();
@@ -878,7 +880,8 @@ public class AppAuthService {
         user.setLastLoginAt(now);
         user.setRegisterIp(MyRequestContextHolder.ipAddress());
         userService.save(user);
-        userIdentityService.createOAuthIdentity(user.getId(), AuthProvider.GOOGLE, google.sub(), user.getId());
+        userIdentityService.createOAuthIdentity(
+                user.getId(), AuthProvider.GOOGLE, google.subject(), user.getId());
         if (StringUtils.hasText(google.email())) {
             userIdentityService.createEmailIdentity(
                     user.getId(), google.email(), null, user.getId());
@@ -961,7 +964,7 @@ public class AppAuthService {
     }
 
     /** 从 Google 邮箱本地部分推导默认昵称，无邮箱则为 User。 */
-    private static String resolveGoogleNickname(VerifiedGoogleIdentity google) {
+    private static String resolveGoogleNickname(VerifiedExternalIdentity google) {
         if (!StringUtils.hasText(google.email())) {
             return "User";
         }
