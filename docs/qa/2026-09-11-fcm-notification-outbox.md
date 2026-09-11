@@ -1,6 +1,6 @@
 # QA：FCM Notification Outbox（2026-09-11）
 
-**Commit SHA:** `a23f017`（功能）；sender  hardening 见后续 commit
+**Commit SHA:** `a23f017`（功能） / HEAD `7bd8886`（mock 仅 mock-allowed）
 
 ## 范围
 
