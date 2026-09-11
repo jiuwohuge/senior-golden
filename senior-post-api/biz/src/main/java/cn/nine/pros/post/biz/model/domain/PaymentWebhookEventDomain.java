@@ -40,12 +40,12 @@ public class PaymentWebhookEventDomain extends AbstractAuditableDomain {
     private String eventType;
 
     /**
-     * Raw payload (DB column jsonb). Must use PostgresJsonbTypeHandler
-     * to avoid varchar vs jsonb type mismatch on insert.
+     * Raw payload (DB column jsonb). Object (Map/String) so read-back does not
+     * fail with String left-arrow Object when JacksonTypeHandler parses a JSON object.
      */
     @Schema(description = "raw payload JSON")
     @TableField(value = "payload_json", typeHandler = PostgresJsonbTypeHandler.class)
-    private String payloadJson;
+    private Object payloadJson;
 
     @Schema(description = "received / processed / failed")
     private String processStatus;

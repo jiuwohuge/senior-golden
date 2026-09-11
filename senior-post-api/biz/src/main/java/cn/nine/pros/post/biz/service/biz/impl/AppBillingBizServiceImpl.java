@@ -169,7 +169,7 @@ public class AppBillingBizServiceImpl implements AppBillingBizService {
         log.info("billing mock-rtdn entry, userId={}, messageId={}, notificationType={}, token={}",
                 userId, body.getMessageId().trim(), body.getNotificationType().trim(), truncateToken(token));
 
-        String rawJson = serializeMockRtdnPayload(body);
+        Object payload = buildMockRtdnPayload(body);
         ParsedNotification parsed = billingProviderRegistry.getRequired(BillingProviders.MOCK)
                 .parseNotification(rawJson);
 
@@ -183,7 +183,7 @@ public class AppBillingBizServiceImpl implements AppBillingBizService {
         webhookRow.setProvider(BillingProviders.MOCK);
         webhookRow.setEventIdOrMessageId(parsed.messageId());
         webhookRow.setEventType(parsed.eventType());
-        webhookRow.setPayloadJson(rawJson);
+        webhookRow.setPayloadJson(payload);
         webhookRow.setProcessStatus("received");
         webhookRow.setReceivedAt(LocalDateTime.now());
         webhookRow = paymentWebhookEventService.insertIfAbsent(webhookRow, boundUserId);
@@ -381,19 +381,15 @@ public class AppBillingBizServiceImpl implements AppBillingBizService {
         return parts[0].trim();
     }
 
-    private String serializeMockRtdnPayload(BillingMockRtdnInDto body) {
-        try {
-            Map<String, String> payload = new LinkedHashMap<>();
-            payload.put("messageId", body.getMessageId().trim());
-            payload.put("purchaseToken", body.getPurchaseToken().trim());
-            payload.put("notificationType", body.getNotificationType().trim());
-            if (StringUtils.hasText(body.getProductId())) {
-                payload.put("productId", body.getProductId().trim());
-            }
-            return OBJECT_MAPPER.writeValueAsString(payload);
-        } catch (Exception e) {
-            throw new BusinessException(appMessages.get("app.error.billing.invalidRequest"));
+    private Object buildMockRtdnPayload(BillingMockRtdnInDto body) {
+        Map<String, String> payload = new LinkedHashMap<>();
+        payload.put("messageId", body.getMessageId().trim());
+        payload.put("purchaseToken", body.getPurchaseToken().trim());
+        payload.put("notificationType", body.getNotificationType().trim());
+        if (StringUtils.hasText(body.getProductId())) {
+            payload.put("productId", body.getProductId().trim());
         }
+        return payload;
     }
 
     private static String truncateErrorMessage(String message) {
