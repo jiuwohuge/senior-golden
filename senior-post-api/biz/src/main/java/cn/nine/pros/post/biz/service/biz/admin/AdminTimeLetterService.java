@@ -1,11 +1,15 @@
 package cn.nine.pros.post.biz.service.biz.admin;
 
 import cn.nine.commons.basic.exception.BadRequestException;
+import cn.nine.commons.basic.context.MyRequestContextHolder;
 import cn.nine.commons.data.page.PageData;
 import cn.nine.commons.data.page.PageQuery;
 import cn.nine.pros.post.biz.controller.admin.AdminPageHelper;
 import cn.nine.pros.post.biz.model.domain.TimeLetterDomain;
 import cn.nine.pros.post.biz.service.base.TimeLetterService;
+import cn.nine.pros.post.biz.service.biz.admin.support.AdminOperationRecorder;
+import cn.nine.pros.post.biz.service.push.PushNotificationService;
+import cn.nine.pros.post.client.common.enums.TimeLetterStatus;
 import cn.nine.pros.post.client.model.db.TimeLetterDTO;
 import cn.nine.pros.post.client.model.input.admin.TimeLetterQueryInDto;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -28,6 +32,8 @@ import java.util.stream.Collectors;
 public class AdminTimeLetterService {
 
     private final TimeLetterService timeLetterService;
+    private final AdminOperationRecorder adminOperationRecorder;
+    private final PushNotificationService pushNotificationService;
 
     /**
      * 按发/收件人与状态分页查询时光信。
@@ -66,6 +72,44 @@ public class AdminTimeLetterService {
             throw new BadRequestException("时光信不存在或已删除");
         }
         log.info("time-letter takedown, letterId={}", id);
+    }
+
+    /**
+     * 调试：将 PENDING 时光信立即置为已送达（跳过预计送达日）。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void forceDeliver(Long id) {
+        if (id == null) {
+            throw new BadRequestException("时光信 id 不能为空");
+        }
+        TimeLetterDomain row = timeLetterService.getById(id);
+        if (row == null || row.isDelFlag()) {
+            throw new BadRequestException("时光信不存在");
+        }
+        // 与信件审核一致：status 可能是 Number 或 String（此处经 Object 再解析以兼容）
+        Object statusRaw = row.getStatus();
+        int status = statusRaw instanceof Number n
+                ? n.intValue()
+                : Integer.parseInt(String.valueOf(statusRaw));
+        // 已送达/已读不可再强制送达
+        if (status == TimeLetterStatus.DELIVERED.getCode() || status == TimeLetterStatus.READ.getCode()) {
+            throw new BadRequestException("时光信已送达");
+        }
+        // 仅待发可跳过预计送达日
+        if (status != TimeLetterStatus.PENDING.getCode()) {
+            throw new BadRequestException("仅「待发」的时光信可立即送达");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if (!timeLetterService.markDelivered(id, now)) {
+            throw new BadRequestException("时光信状态已变更，请刷新后重试");
+        }
+        adminOperationRecorder.record("time_letter.force_deliver", "time_letter", id, null);
+        // 自写信 recipientId 为空时回落到 senderId（与 TimeLetterDeliveryService 一致）
+        Long recipientId = row.getRecipientId() != null ? row.getRecipientId() : row.getSenderId();
+        Long adminId = MyRequestContextHolder.userId();
+        log.info("time-letter force-delivered (admin debug), letterId={}, adminId={}, recipientId={}",
+                id, adminId, recipientId);
+        pushNotificationService.notifyTimeLetterDelivered(recipientId, id);
     }
 
     /**

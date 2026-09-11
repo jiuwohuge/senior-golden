@@ -29,4 +29,8 @@ public interface AdminTimeLetterApi {
     @Operation(summary = "下架时光信")
     @PostMapping("/{id}/takedown")
     void takedown(@PathVariable("id") Long id, @RequestBody @Valid TimeLetterTakedownInDto body);
+
+    @Operation(summary = "调试：立即送达（跳过预计送达日；仅 PENDING）")
+    @PostMapping("/{id}/force-deliver")
+    void forceDeliver(@PathVariable("id") Long id);
 }

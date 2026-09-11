@@ -61,6 +61,18 @@ export default function TimeLetterList() {
     void load()
   }, [load])
 
+  /** 调试：跳过预计送达日，将待发时光信立即送达。 */
+  const doForceDeliver = async (id: number) => {
+    try {
+      await api.timeLetterForceDeliver(id)
+      message.success('已立即送达')
+      void load()
+    } catch (e: any) {
+      console.error('timeLetterForceDeliver failed', e?.message)
+      message.error(e.message)
+    }
+  }
+
   const columns: ColumnsType<TimeLetterRow> = useMemo(
     () => [
       { title: 'ID', dataIndex: 'id', width: 72 },
@@ -112,13 +124,22 @@ export default function TimeLetterList() {
       },
       {
         title: '操作',
-        width: 180,
+        width: 260,
         fixed: 'right',
         render: (_, r) => (
           <Space wrap>
             <Button size="small" onClick={() => setPreview(r)}>
               查看
             </Button>
+            {r.status === 2 ? (
+              <Button
+                size="small"
+                onClick={() => void doForceDeliver(r.id)}
+                title="调试：跳过预计送达日立即送达"
+              >
+                立即送达
+              </Button>
+            ) : null}
             {r.status !== 6 && !r.takedownReason ? (
               <Button size="small" danger onClick={() => setTakedownTarget(r)}>
                 下架
@@ -128,6 +149,7 @@ export default function TimeLetterList() {
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [briefs, signed],
   )
 
@@ -174,6 +196,16 @@ export default function TimeLetterList() {
             {preview.takedownReason ? (
               <Text type="warning">下架原因：{preview.takedownReason}</Text>
             ) : null}
+            <Space style={{ marginTop: 16 }}>
+              {preview.status === 2 ? (
+                <Button
+                  onClick={() => void doForceDeliver(preview.id).then(() => setPreview(null))}
+                  title="调试：跳过预计送达日立即送达"
+                >
+                  立即送达
+                </Button>
+              ) : null}
+            </Space>
           </>
         )}
       </Drawer>

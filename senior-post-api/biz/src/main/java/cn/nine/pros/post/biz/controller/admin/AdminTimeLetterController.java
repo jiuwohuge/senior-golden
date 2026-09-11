@@ -29,4 +29,9 @@ public class AdminTimeLetterController implements AdminTimeLetterApi {
     public void takedown(Long id, TimeLetterTakedownInDto body) {
         adminTimeLetterService.takedown(id, body.getReason());
     }
+
+    @Override
+    public void forceDeliver(Long id) {
+        adminTimeLetterService.forceDeliver(id);
+    }
 }

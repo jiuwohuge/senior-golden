@@ -67,6 +67,8 @@ export const api = {
 
   timeLetters: (params: any) => request.post('/webapi/content/time-letter/paging', params),
   timeLetterDetail: (id: number) => request.get(`/webapi/content/time-letter/${id}`),
+  timeLetterForceDeliver: (id: number) =>
+    request.post(`/webapi/content/time-letter/${id}/force-deliver`),
   takedownTimeLetter: (id: number, reason: string) =>
     request.post(`/webapi/content/time-letter/${id}/takedown`, { reason }),
 
