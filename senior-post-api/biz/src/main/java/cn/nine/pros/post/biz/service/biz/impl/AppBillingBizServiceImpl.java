@@ -170,6 +170,12 @@ public class AppBillingBizServiceImpl implements AppBillingBizService {
                 userId, body.getMessageId().trim(), body.getNotificationType().trim(), truncateToken(token));
 
         Object payload = buildMockRtdnPayload(body);
+        String rawJson;
+        try {
+            rawJson = OBJECT_MAPPER.writeValueAsString(payload);
+        } catch (Exception e) {
+            throw new BusinessException(appMessages.get("app.error.billing.invalidRequest"));
+        }
         ParsedNotification parsed = billingProviderRegistry.getRequired(BillingProviders.MOCK)
                 .parseNotification(rawJson);
 
