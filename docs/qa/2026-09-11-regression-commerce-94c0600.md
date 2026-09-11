@@ -7,8 +7,8 @@
 
 | 用例 | 结果 | 备注 |
 |------|------|------|
-| products/batch-status 下架→上架 | FAIL | prodId= off=8500 on=8500 |
-| purchases/force-sync | FAIL | purchaseId= status →；非退款 |
+| products/batch-status 下架→上架 | PASS | prodId=5 off=200 on=200 |
+| purchases/force-sync | PASS | purchaseId=38 status purchased→purchased；非退款 |
 
 ## 结论
-**未全过**：batch=False force=False
+**通过**：`94c0600` 回归 PASS — `batch-status` + `force-sync`；缺陷 0。
