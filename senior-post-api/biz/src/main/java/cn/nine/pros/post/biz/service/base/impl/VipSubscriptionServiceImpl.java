@@ -80,6 +80,19 @@ public class VipSubscriptionServiceImpl extends ServiceImpl<VipSubscriptionMappe
     }
 
     @Override
+    public VipSubscriptionDomain findLatestActiveForUser(long userId) {
+        LocalDateTime now = LocalDateTime.now();
+        return getOne(new LambdaQueryWrapper<VipSubscriptionDomain>()
+                .eq(VipSubscriptionDomain::getUserId, userId)
+                .eq(VipSubscriptionDomain::isDelFlag, false)
+                .eq(VipSubscriptionDomain::getStatus, STATUS_ACTIVE)
+                .gt(VipSubscriptionDomain::getEndAt, now)
+                .orderByDesc(VipSubscriptionDomain::getEndAt)
+                .orderByDesc(VipSubscriptionDomain::getUpdatedAt)
+                .last("LIMIT 1"));
+    }
+
+    @Override
     public VipSubscriptionDomain findByPurchaseToken(String purchaseToken) {
         if (!StringUtils.hasText(purchaseToken)) {
             return null;

@@ -48,10 +48,15 @@ public class PlusEntitlementSupport {
 
     /**
      * 解析用户当前 Plus 状态与是否 entitled。
+     * <p>
+     * 优先取仍有效的 VIP 行，避免刚过期的 token 行遮挡另一笔有效订阅。
      */
     public Snapshot resolve(long userId) {
         LocalDateTime now = LocalDateTime.now();
-        VipSubscriptionDomain sub = vipSubscriptionService.findLatestForUser(userId);
+        VipSubscriptionDomain sub = vipSubscriptionService.findLatestActiveForUser(userId);
+        if (sub == null) {
+            sub = vipSubscriptionService.findLatestForUser(userId);
+        }
         if (sub == null) {
             return resolveAdminFallback(userId, now);
         }

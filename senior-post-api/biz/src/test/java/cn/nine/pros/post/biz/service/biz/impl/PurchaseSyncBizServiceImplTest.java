@@ -171,6 +171,7 @@ class PurchaseSyncBizServiceImplTest {
             return row;
         });
         when(vipSubscriptionService.findByPurchaseToken(token)).thenReturn(null);
+        when(vipSubscriptionService.findLatestActiveForUser(USER_ID)).thenReturn(null);
 
         syncBiz.syncPurchase(BillingProviders.MOCK, token, USER_ID,
                 SyncPurchaseContext.of(PlusEntitlementSupport.PRODUCT_YEARLY, null, null, null, null));
@@ -181,6 +182,49 @@ class PurchaseSyncBizServiceImplTest {
         verify(vipSubscriptionService, never()).upsertSubscription(
                 anyLong(), anyString(), anyString(), any(), any(), anyBoolean(),
                 anyString(), any(), any(), any(Integer.class), any(), anyLong());
+        verify(vipSubscriptionService, never()).markExpired(anyLong(), anyLong());
+        verify(userEntitlementService).revokeEntitlementByCode(USER_ID, "plus", USER_ID);
+        verify(userService).syncVipEntitlement(eq(USER_ID), eq(false), any(), eq(USER_ID));
+    }
+
+    @Test
+    void purchasedThenPendingSameToken_entitledFalse() {
+        String token = MockBillingProvider.generateToken(PlusEntitlementSupport.PRODUCT_YEARLY, "PURCHASED");
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime end = now.plusDays(365);
+        stubVerify(token, "pending", "pending", now, null, true, false, "PENDING");
+        when(paymentPurchaseService.findByTokenHash(anyString())).thenReturn(null);
+        when(paymentPurchaseService.upsertByTokenHash(any(), eq(USER_ID))).thenAnswer(inv -> {
+            PaymentPurchaseDomain row = inv.getArgument(0);
+            row.setId(1L);
+            return row;
+        });
+        when(paymentSubscriptionService.upsertByTokenHash(any(), eq(USER_ID))).thenAnswer(inv -> {
+            PaymentSubscriptionDomain row = inv.getArgument(0);
+            row.setId(2L);
+            return row;
+        });
+        VipSubscriptionDomain existingActive = new VipSubscriptionDomain();
+        existingActive.setId(50L);
+        existingActive.setUserId(USER_ID);
+        existingActive.setPurchaseToken(token);
+        existingActive.setProductId(PlusEntitlementSupport.PRODUCT_YEARLY);
+        existingActive.setStatus(1);
+        existingActive.setEndAt(end);
+        when(vipSubscriptionService.findByPurchaseToken(token)).thenReturn(existingActive);
+        when(vipSubscriptionService.findLatestActiveForUser(USER_ID)).thenReturn(null);
+
+        syncBiz.syncPurchase(BillingProviders.MOCK, token, USER_ID,
+                SyncPurchaseContext.of(PlusEntitlementSupport.PRODUCT_YEARLY, null, null, null, null));
+
+        verify(userEntitlementService, never()).grantEntitlement(
+                anyLong(), anyString(), any(), any(), any(), anyString(), any(), any(), anyLong());
+        verify(vipSubscriptionService).markExpired(50L, USER_ID);
+        verify(vipSubscriptionService, never()).upsertSubscription(
+                anyLong(), anyString(), anyString(), any(), any(), anyBoolean(),
+                anyString(), any(), any(), any(Integer.class), any(), anyLong());
+        verify(userEntitlementService).revokeEntitlementByCode(USER_ID, "plus", USER_ID);
+        verify(userService).syncVipEntitlement(eq(USER_ID), eq(false), any(), eq(USER_ID));
     }
 
     @Test

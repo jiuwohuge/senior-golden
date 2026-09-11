@@ -25,6 +25,9 @@ public interface VipSubscriptionService extends IService<VipSubscriptionDomain> 
     /** 用户最新一条未删除订阅（按 updated_at / end_at 倒序）。 */
     VipSubscriptionDomain findLatestForUser(long userId);
 
+    /** 用户当前有效订阅：status=1、end_at &gt; now、未删除（按 end_at / updated_at 倒序）。 */
+    VipSubscriptionDomain findLatestActiveForUser(long userId);
+
     /** 按 purchase_token 查找未删除订阅。 */
     VipSubscriptionDomain findByPurchaseToken(String purchaseToken);
 
