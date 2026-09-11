@@ -12,26 +12,23 @@
 | 用例 | 结果 | 备注 |
 |------|------|------|
 | manage 页面 commerce / commerce-purchases | PASS | HTTP 200 |
-| products/paging | PASS | total≥1 |
-| products/save（唯一 storeProductId） | FAIL | id= code=8500 |
-| products/batch-status | FAIL | existId= off=8500 on=8500 |
+| products/paging | PASS | total=10 |
+| products/save（渠道已存在 mock/plus_yearly/sandbox） | FAIL* | 撞 `uk_bu_commerce_product_channel_provider_store_env`（约束预期，非阻塞） |
+| products/batch-status | FAIL | code=400；`log_admin_operation.details` 非法 JSON（Token `status`） |
 | purchases/paging + token 掩码 | PASS | preview 有值；响应无完整 purchaseToken |
-| purchases/detail + timeline | PASS | timeline 有条目 |
-| purchases/webhook-events | PASS | 可列 |
-| purchases/force-sync | FAIL | code=8500；购买状态未变 refund |
+| purchases/detail + timeline | PASS | timelineN=13；token 掩码 |
+| purchases/webhook-events | PASS | n=10 |
+| purchases/force-sync | FAIL | code=400；`log_admin_operation.details` 非法 JSON（Token `provider`）；购买未变 refund |
+
+\* 同 provider+storeProductId+environment 唯一约束符合设计；应用层宜返回业务码而非 DB 原文。
 
 ## 缺陷
 
-### BUG-CM-1 · P1 · `log_admin_operation.details` 非法 JSON
-- **触发**：`products/batch-status`、`purchases/force-sync`
-- **现象**：业务 code=400；Postgres `invalid input syntax for type json`（Token `status` / `provider`）
-- **位置**：`AdminOperationMapper.insert` → `log_admin_operation.details`
-- **影响**：上下架写审计失败；force-sync 审计失败（同步本身可能未完成）
-
-### BUG-CM-2 · 商品 save
-- code=8500
-- msg 摘要见原始响应
-
+### BUG-CM-1 · P1 · `log_admin_operation.details` 写入非 JSON 文本
+- **触发**：`POST /webapi/commerce/products/batch-status`、`POST /webapi/commerce/purchases/force-sync`
+- **现象**：业务 code=400；Postgres `invalid input syntax for type json`
+- **位置**：`AdminOperationMapper.insert` → `details`（jsonb）
+- **影响**：商品上下架审计失败；force-sync 失败（只读购买主路径可读，写操作闭环阻断）
 
 ## 结论
-**未全过**：只读购买主路径 PASS；写路径/审计 **P1**（batch-status / force-sync → log_admin_operation.details）；save=FAIL。
+**未全过**：只读购买（分页/掩码/详情时间线/webhook）PASS；**P1×1** batch-status + force-sync 写 `log_admin_operation.details` 非法 JSON。需开发修复后回归写路径。
