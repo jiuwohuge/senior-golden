@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 管理员操作日志表 ServiceImpl
@@ -67,9 +69,24 @@ public class AdminOperationServiceImpl extends ServiceImpl<AdminOperationMapper,
         row.setActionType(actionType);
         row.setTargetType(targetType);
         row.setTargetId(targetId);
-        row.setDetails(details);
+        row.setDetails(toJsonbDetails(details));
         row.setIpAddress(ip);
         save(row);
+    }
+
+    /** Plain admin notes become {"note":"..."} so jsonb insert never sees illegal JSON text. */
+    private static Object toJsonbDetails(String details) {
+        if (!StringUtils.hasText(details)) {
+            return null;
+        }
+        String trimmed = details.trim();
+        if ((trimmed.startsWith("{") && trimmed.endsWith("}"))
+                || (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+            return trimmed;
+        }
+        Map<String, String> map = new LinkedHashMap<>(1);
+        map.put("note", trimmed);
+        return map;
     }
 
     @Override
