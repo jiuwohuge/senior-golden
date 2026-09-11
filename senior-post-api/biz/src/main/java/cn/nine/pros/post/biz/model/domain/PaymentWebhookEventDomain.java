@@ -1,4 +1,4 @@
-﻿package cn.nine.pros.post.biz.model.domain;
+package cn.nine.pros.post.biz.model.domain;
 
 import cn.nine.commons.data.domain.AbstractAuditableDomain;
 import cn.nine.pros.post.biz.support.mybatis.PostgresJsonbTypeHandler;
