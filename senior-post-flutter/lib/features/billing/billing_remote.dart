@@ -84,7 +84,7 @@ class PlayPurchaseVerifyBody {
   };
 }
 
-/// 与 `/api/billing/*` 对齐：订阅状态、校验购买、恢复、测试覆盖。
+/// 与 `/api/billing/*` 对齐：订阅状态、校验购买、恢复、mock-sync、测试覆盖。
 class BillingRemoteRepository {
   BillingRemoteRepository(this._dio);
 
@@ -148,6 +148,32 @@ class BillingRemoteRepository {
       return _mapStatus(_unwrapMap(r));
     } catch (e, st) {
       debugPrint('billing testOverride failed: $e\n$st');
+      rethrow;
+    }
+  }
+
+  /// POST `/api/billing/mock-sync` — 走服务端 `syncPurchase`（MockBillingProvider）。
+  ///
+  /// [scenario]：`PURCHASED` / `PENDING` / `RENEW` / `CANCEL` / `EXPIRE` /
+  /// `REFUND` / `REVOKE`。需 `billing.mock-enabled` 且非 prod。
+  Future<SubscriptionStatus> mockSync({
+    required String scenario,
+    String? productId,
+    String? purchaseToken,
+  }) async {
+    try {
+      final r = await _dio.post<dynamic>(
+        '/api/billing/mock-sync',
+        data: <String, dynamic>{
+          'scenario': scenario,
+          if (productId != null && productId.isNotEmpty) 'productId': productId,
+          if (purchaseToken != null && purchaseToken.isNotEmpty)
+            'purchaseToken': purchaseToken,
+        },
+      );
+      return _mapStatus(_unwrapMap(r));
+    } catch (e, st) {
+      debugPrint('billing mockSync failed: $e\n$st');
       rethrow;
     }
   }

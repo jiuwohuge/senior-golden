@@ -10,7 +10,7 @@ import '../billing/billing_remote.dart';
 import '../billing/play_billing_service.dart';
 
 /// Plus 付费墙：展示订阅状态、AI 剩余额度，并提供年订/月订/恢复购买。
-/// Web / Debug 另提供 test-override，便于无 Play Store 时测云端门禁。
+/// Web / Debug 另提供 test-override 与 mock-sync，便于无 Play Store 时测门禁/支付机。
 class VipCenterPage extends ConsumerStatefulWidget {
   const VipCenterPage({super.key, this.hint});
 
@@ -25,6 +25,9 @@ class _VipCenterPageState extends ConsumerState<VipCenterPage> {
   bool _busy = false;
   List<ProductDetails> _products = const [];
   String? _localMessage;
+
+  /// 同一次 QA 会话复用，便于 PURCHASED → RENEW/CANCEL 等同 token 推进。
+  String? _mockPurchaseToken;
 
   @override
   void initState() {
@@ -151,6 +154,28 @@ class _VipCenterPageState extends ConsumerState<VipCenterPage> {
         PostalSnack.show(
           context,
           l10n.vipTestOverrideApplied,
+          tone: PostalSnackTone.success,
+        );
+      }
+    });
+  }
+
+  /// Mock 生命周期 → `/api/billing/mock-sync`（默认年订）。
+  Future<void> _mockSync(String scenario) async {
+    final l10n = AppLocalizations.of(context)!;
+    await _runBusy(() async {
+      // 首场景生成稳定 token；后续场景复用，便于 CANCEL/RENEW 等同购买推进。
+      _mockPurchaseToken ??=
+          'mock:${PlusProductIds.yearly}:PURCHASED:${DateTime.now().millisecondsSinceEpoch}';
+      await ref.read(playBillingServiceProvider).applyMockSync(
+            scenario: scenario,
+            productId: PlusProductIds.yearly,
+            purchaseToken: _mockPurchaseToken,
+          );
+      if (mounted) {
+        PostalSnack.show(
+          context,
+          '${l10n.vipTestOverrideApplied} ($scenario)',
           tone: PostalSnackTone.success,
         );
       }
@@ -356,6 +381,36 @@ class _VipCenterPageState extends ConsumerState<VipCenterPage> {
                           label: l10n.vipTestNone,
                           onTap: _busy ? null : () => _testOverride('none'),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Mock sync（lifecycle → syncPurchase）',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: PostalTokens.kraftBrown,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '默认 plus_yearly；走支付落库。需 billing.mock-enabled。'
+                      ' 与上方 test-override（只改镜像）不同。',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: PostalTokens.inkSecondary,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        for (final scenario
+                            in PlayBillingService.mockSyncScenarios)
+                          _TestChip(
+                            label: scenario,
+                            onTap: _busy ? null : () => _mockSync(scenario),
+                          ),
                       ],
                     ),
                   ],

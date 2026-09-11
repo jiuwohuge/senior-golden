@@ -8,19 +8,37 @@ import 'billing_remote.dart';
 
 /// Play Billing / Plus 购买服务。
 ///
-/// **Web 测试（无 Play Store）：**
+/// **Web / Debug QA（无 Play Store）：**
 /// 1. 用 Chrome / Edge 跑 `flutter run -d chrome`，登录账号。
-/// 2. 打开「Plus 会员」页底部「测试开关」区（仅 `kIsWeb || kDebugMode` 可见）。
-/// 3. 点 Trial / Active / Expired / None → 调用 `POST /api/billing/test-override`
-///    （服务端需 `BILLING_TEST_OVERRIDE=true`）。
-/// 4. 页面会刷新订阅状态，可再测 AI 助手额度与在途撤回。
+/// 2. 打开「Plus 会员」页底部测试区（仅 `kIsWeb || kDebugMode` 可见）。
+/// 3. **test-override**（Trial / Active / Expired / None）→ 直接改订阅镜像，
+///    不走支付流水；需 `BILLING_TEST_OVERRIDE=true`。
+/// 4. **mock-sync**（PURCHASED / PENDING / RENEW / CANCEL / EXPIRE / REFUND /
+///    REVOKE）→ `POST /api/billing/mock-sync` → 服务端 `syncPurchase`；
+///    需 `billing.mock-enabled` 且非 prod。测支付落库/权益机优先用 mock-sync。
+/// 5. 页面会刷新订阅状态，可再测 AI 助手额度与在途撤回。
 ///
-/// Android 真机走 Google Play Billing；Web / iOS / 无商店能力时不崩溃，改走测试覆盖。
+/// Android 真机走 Google Play Billing → verify-purchase；Web / iOS / 无商店时
+/// 不崩溃，改走上述测试入口。
 class PlayBillingService {
   PlayBillingService(this._billing);
 
   final BillingRemoteRepository _billing;
   final InAppPurchase _iap = InAppPurchase.instance;
+
+  /// 与 `android/app/build.gradle.kts` `applicationId` 一致；verify-purchase 必传。
+  static const String androidPackageName = 'cn.nine.pros.post.senior_post_flutter';
+
+  /// Mock 生命周期场景（对齐 `MockBillingProvider` / `BillingMockSyncInDto`）。
+  static const List<String> mockSyncScenarios = [
+    'PURCHASED',
+    'PENDING',
+    'RENEW',
+    'CANCEL',
+    'EXPIRE',
+    'REFUND',
+    'REVOKE',
+  ];
 
   StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
   bool _listening = false;
@@ -119,6 +137,7 @@ class PlayBillingService {
   }
 
   /// Web / Debug：覆盖订阅状态，便于测云端门禁（无需 Play Store）。
+  /// 与 [applyMockSync] 不同：不走 `syncPurchase` / 支付表。
   Future<SubscriptionStatus> applyTestOverride({
     required String state,
     String? productId,
@@ -126,6 +145,22 @@ class PlayBillingService {
     return _billing.testOverride(
       state: state,
       productId: productId ?? PlusProductIds.yearly,
+    );
+  }
+
+  /// Web / Debug：mock 购买生命周期，走服务端 `syncPurchase`。
+  ///
+  /// [scenario] 见 [mockSyncScenarios]；默认年订 [PlusProductIds.yearly]。
+  /// 同 [purchaseToken] 可推进 RENEW/CANCEL 等；留空则服务端生成新 token。
+  Future<SubscriptionStatus> applyMockSync({
+    required String scenario,
+    String? productId,
+    String? purchaseToken,
+  }) {
+    return _billing.mockSync(
+      scenario: scenario,
+      productId: productId ?? PlusProductIds.yearly,
+      purchaseToken: purchaseToken,
     );
   }
 
@@ -159,11 +194,13 @@ class PlayBillingService {
       return;
     }
     try {
+      // 方案要求：productId + purchaseToken + packageName 一并交给 verify-purchase。
       final status = await _billing.verifyPurchase(
         PlayPurchaseVerifyBody(
           purchaseToken: purchase.verificationData.serverVerificationData,
           productId: productId,
           orderId: purchase.purchaseID,
+          packageName: androidPackageName,
           acknowledged: false,
           // 年订首次由服务端默认试用；客户端不臆测 isTrial。
         ),
