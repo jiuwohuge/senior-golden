@@ -12,8 +12,9 @@ public class RealFcmSender implements FcmSender {
 
     @Override
     public FcmSendResult send(String token, String title, String body, String dataJson) {
+        // 凭证未接：记 skipped 且 success=true，避免 Outbox 无限重试；勿在 prod 误走 Mock
         log.warn("RealFcmSender not configured; marking skipped");
-        return FcmSendResult.skipped("fcm_not_configured");
+        return new FcmSendResult(true, "skipped", null, "fcm_not_configured", false);
     }
 
     @Override

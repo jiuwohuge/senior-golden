@@ -7,7 +7,7 @@ import java.util.UUID;
 
 /**
  * 非 prod Mock FCM：不调 Google，仅记录投递成功。
- * <p>仅在 {@code PushProperties.isMockAllowed} 或真实 FCM 未配置时由派发层选用。
+ * <p>仅在 {@code PushProperties.isMockAllowed} 为 true 时由派发层选用（prod 永不走 mock）。
  */
 @Slf4j
 @Component

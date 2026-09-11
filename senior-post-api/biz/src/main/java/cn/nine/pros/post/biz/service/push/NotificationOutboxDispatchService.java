@@ -116,8 +116,8 @@ public class NotificationOutboxDispatchService {
     }
 
     private FcmSender resolveSender() {
-        // 非 prod mock 优先；未配置真实凭证时也走 mock（本地/Compose QA）
-        if (pushProperties.isMockAllowed(environment) || !pushProperties.isRealFcmConfigured()) {
+        // mock 仅在 isMockAllowed（非 prod + flag）；否则走 Real（未配凭证时 stub skipped）
+        if (pushProperties.isMockAllowed(environment)) {
             return mockFcmSender;
         }
         return realFcmSender;

@@ -1,10 +1,12 @@
 # QA：FCM Notification Outbox（2026-09-11）
 
-**Commit SHA:** `a23f017`
+**Commit SHA:** `a23f017`（功能）；sender  hardening 见后续 commit
 
 ## 范围
 
 信件推送 Outbox：`letter_matched_in_transit` / `letter_arrived`。**禁止**任何支付/订阅/退款类 FCM。
+
+MockFcmSender **仅**在 `PushProperties.isMockAllowed`（`PUSH_MOCK_ENABLED` + 非 prod）时选用；prod 永不走 mock。
 
 ## Mock 端点
 
